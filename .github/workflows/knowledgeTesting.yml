@@ -32,7 +32,7 @@ env:
 
 defaults:
   run:
-    working-directory: ./knowledge
+    working-directory: .
 
 jobs:
   tests:
