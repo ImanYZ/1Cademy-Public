@@ -73,7 +73,6 @@ build/Release
 **/.next/**
 .next/**
 /out/
-next.config.js
 
 # Cloud Run and Firebase stuff
 service.yaml
