@@ -1,0 +1,55 @@
+name: Knowledge Testing
+on:
+  pull_request:
+    branches:
+      - develop
+
+env:
+  ONECADEMYCRED_TYPE: ${{ secrets.ONECADEMYCRED_TYPE }}
+  ONECADEMYCRED_PROJECT_ID: ${{ secrets.ONECADEMYCRED_PROJECT_ID }}
+  ONECADEMYCRED_PRIVATE_KEY_ID: ${{ secrets.ONECADEMYCRED_PRIVATE_KEY_ID }}
+  ONECADEMYCRED_PRIVATE_KEY: ${{ secrets.ONECADEMYCRED_PRIVATE_KEY }}
+  ONECADEMYCRED_CLIENT_EMAIL: ${{ secrets.ONECADEMYCRED_CLIENT_EMAIL }}
+  ONECADEMYCRED_CLIENT_ID: ${{ secrets.ONECADEMYCRED_CLIENT_ID }}
+  ONECADEMYCRED_AUTH_URI: ${{ secrets.ONECADEMYCRED_AUTH_URI }}
+  ONECADEMYCRED_TOKEN_URI: ${{ secrets.ONECADEMYCRED_TOKEN_URI }}
+  ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL: ${{ secrets.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL }}
+  ONECADEMYCRED_CLIENT_X509_CERT_URL: ${{ secrets.ONECADEMYCRED_CLIENT_X509_CERT_URL }}
+  ONECADEMYCRED_STORAGE_BUCKET: ${{ secrets.ONECADEMYCRED_STORAGE_BUCKET }}
+  ONECADEMYCRED_DATABASE_URL: ${{ secrets.ONECADEMYCRED_DATABASE_URL }}
+  ONECADEMYCRED_TYPESENSE_HOST: ${{ secrets.ONECADEMYCRED_TYPESENSE_HOST }}
+  ONECADEMYCRED_TYPESENSE_PORT: ${{ secrets.ONECADEMYCRED_TYPESENSE_PORT }}
+  ONECADEMYCRED_TYPESENSE_PROTOCOL: ${{ secrets.ONECADEMYCRED_TYPESENSE_PROTOCOL }}
+  ONECADEMYCRED_TYPESENSE_APIKEY: ${{ secrets.ONECADEMYCRED_TYPESENSE_APIKEY }}
+  NEXT_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_API_KEY }}
+  NEXT_PUBLIC_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_AUTH_DOMAIN }}
+  NEXT_PUBLIC_DATA_BASE_URL: ${{ secrets.NEXT_PUBLIC_DATA_BASE_URL }}
+  NEXT_PUBLIC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_PROJECT_ID }}
+  NEXT_PUBLIC_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_STORAGE_BUCKET }}
+  NEXT_PUBLIC_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_MESSAGING_SENDER_ID }}
+  NEXT_PUBLIC_APP_ID: ${{ secrets.NEXT_PUBLIC_APP_ID }}
+  NEXT_PUBLIC_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_MEASUREMENT_ID }}
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  tests:
+    name: Unit tests - jest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm install and build
+        run: |
+          npm install
+          npm run build
+      - name: Unit tests
+        run: npm run test:ci

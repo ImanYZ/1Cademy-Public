@@ -1,0 +1,16 @@
+:root {
+  --navbar-height: 70px;
+  --footer-height: 309px;
+  /* --footer-height: 632px; */
+}
+
+@media (max-width: 900px) {
+  :root {
+    --footer-height: 632px;
+    /* --footer-height: 309px; */
+  }
+}
+
+.home-search-input::placeholder {
+  font-size: 21px;
+}

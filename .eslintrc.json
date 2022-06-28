@@ -1,0 +1,18 @@
+{
+  "extends": ["next/core-web-vitals", "prettier"],
+  "root": true,
+  "rules": {
+    "simple-import-sort/imports": "warn",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
+    "react/no-unescaped-entities": 0
+  },
+  "plugins": ["simple-import-sort", "@typescript-eslint", "testing-library"],
+  "overrides": [
+    {
+      "files": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+      "excludedFiles": ["cypress/**/*.[jt]s?(x)"],
+      "extends": ["plugin:testing-library/react"]
+    }
+  ]
+}
