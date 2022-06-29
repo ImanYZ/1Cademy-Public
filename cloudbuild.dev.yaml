@@ -66,4 +66,4 @@ availableSecrets:
       env: "NEXT_PUBLIC_APP_ID_DEV"
     - versionName: projects/141114383555/secrets/NEXT_PUBLIC_MEASUREMENT_ID_DEV/versions/1
       env: "NEXT_PUBLIC_MEASUREMENT_ID_DEV"
-timeout: 2000
+timeout: 2000s
