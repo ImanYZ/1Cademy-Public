@@ -1,21 +1,21 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, IconButton } from '@mui/material';
-import InputBase, { InputBaseProps } from "@mui/material/InputBase";
+import InputBase from "@mui/material/InputBase";
 import { alpha, styled } from "@mui/material/styles";
-import React, { FC, forwardRef, useState } from 'react'
+import React, { forwardRef, useState } from 'react'
 
 
-type Ref = {
-  viewState: HTMLInputElement;
-};
+// type Ref = {
+//   viewState: HTMLInputElement;
+// };
 
 type SearcherProps = {
   initialSearchText?: string
   darkVersion?: boolean
-  inputBaseProps: InputBaseProps
+  inputBaseProps: React.InputHTMLAttributes<HTMLInputElement>
 }
 
-export const Searcher = forwardRef<HTMLInputElement, SearcherProps>(({
+export const Searcher = forwardRef<HTMLFormElement, SearcherProps>(({
   inputBaseProps,
   initialSearchText = '',
   darkVersion = false
@@ -25,7 +25,7 @@ export const Searcher = forwardRef<HTMLInputElement, SearcherProps>(({
 
   return (
     <Box
-      component="form"
+      ref={ref}
       sx={{
         p: "0px 4px",
         display: "flex",
@@ -48,7 +48,6 @@ export const Searcher = forwardRef<HTMLInputElement, SearcherProps>(({
       }}
     >
       <StyledInputBase
-        ref={ref}
         value={searchText}
         onChange={e => setSearchText(e.target.value)}
         placeholder="Search on 1Cademy"
@@ -56,7 +55,7 @@ export const Searcher = forwardRef<HTMLInputElement, SearcherProps>(({
         sx={{ ml: 1, flex: 1, color: "inherit" }}
       />
       <IconButton type="submit" sx={{ p: "5px", color: "inherit" }} aria-label="search" onClick={handleSearch}>
-        <SearchIcon />
+        <SearchIcon fontSize="small" />
       </IconButton>
     </Box>
   )
@@ -68,7 +67,8 @@ const StyledInputBase = styled(InputBase)
   <{ darkVersion?: boolean }>(({ theme, darkVersion = false }) => ({
     "& .MuiInputBase-input": {
       padding: 0,
-      width: "100%"
+      width: "100%",
+      fontSize: '14px',
     },
     "& .MuiInputBase-input::placeholder": {
       opacity: 1,

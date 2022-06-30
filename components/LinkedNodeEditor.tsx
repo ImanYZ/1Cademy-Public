@@ -1,8 +1,11 @@
-import { Autocomplete, Box, Card, CardHeader, Divider, List, ListItem, TextField, Typography } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import { Autocomplete, Box, Card, CardHeader, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React, { useState } from 'react'
 
+import { getNodePageUrl } from '../lib/utils';
 import { LinkedKnowledgeNode } from '../src/knowledgeTypes';
+import LinkedNodeItem from './LinkedNodeItem';
 import { Searcher } from "./Searcher";
 import TypographyUnderlined from "./TypographyUnderlined";
 
@@ -19,7 +22,8 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
   const renderLinkedNodes = () => {
     return nodesSelected.map((el, idx, src) => (
       <React.Fragment key={idx}>
-        {/* <LinkedNodeItem
+        {idx < src.length && <Divider />}
+        <LinkedNodeItem
           title={el.title || ""}
           linkSrc={getNodePageUrl(el.title || "", el.node)}
           nodeType={el.nodeType}
@@ -27,9 +31,16 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
           nodeContent={el.content}
           label={el.label || ""}
           sx={{ p: "20px" }}
-        /> */}
-        <Typography>{el.title}</Typography>
-        {idx < src.length - 1 && <Divider />}
+          openInNewTab
+          secondaryActions={
+            <>
+              <IconButton sx={{ alignItems: 'center', justifyContent: 'flex-end' }} onClick={() => console.log('close')}>
+                <CloseIcon />
+              </IconButton>
+            </>
+          }
+        />
+
       </React.Fragment>
     ));
   };
@@ -52,14 +63,16 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
       ></CardHeader>
       <Box>
         <List sx={{ p: "0px" }}>
-          <ListItem>
-            {/* <Searcher /> */}
+          <ListItem sx={{ p: '24px 25px' }}>
             <Autocomplete
-              id="free-solo-demo"
+              id="linked-node-searcher"
               freeSolo
-              options={['sdfds', 'sadf', 'wefew']}
-              renderInput={(params) => <Searcher inputBaseProps={params.inputProps} />/*<TextField {...params} label="freeSolo" />*/}
               fullWidth
+              options={['sdfds', 'sadf', 'wefew']}
+              renderInput={(params) => <Searcher
+                ref={params.InputProps.ref}
+                inputBaseProps={params.inputProps}
+              />}
             />
           </ListItem>
           {renderLinkedNodes()}
