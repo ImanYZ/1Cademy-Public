@@ -46,55 +46,67 @@ export const getMetaThemeColor = (mode: "light" | "dark") => {
 };
 
 export const getDesignTokens = (mode: "light" | "dark") =>
-  ({
-    palette: {
-      primary: {
-        main: common.orange,
-        ...(mode === "dark" && {
-          main: grey[500]
-        })
-      },
-      warning: {
-        main: "#ffc071",
-        dark: "#ffb25e"
-      },
-      divider: mode === "dark" ? grey[200] : grey[200],
-      mode,
-      background: {
-        default: "#FAFAFA",
-        paper: common.white
-      },
+({
+  palette: {
+    primary: {
+      main: common.orange,
       ...(mode === "dark" && {
-        background: {
-          default: grey[600],
-          paper: grey[700]
-        }
-      }),
-      common,
-      ...(mode === "light" && {
-        text: {
-          primary: common.black,
-          secondary: grey[700]
-        }
-      }),
-      ...(mode === "dark" && {
-        text: {
-          primary: common.white,
-          secondary: grey[300]
-        }
-      }),
-      grey
+        main: grey[500]
+      })
     },
-    spacing: 5,
-    typography: {
-      fontFamily: [...systemFont].join(","),
-      fontFamilySystem: systemFont.join(","),
-      h3: {},
-      button: {
-        textTransform: "initial"
+    secondary: {
+      main: common.darkGrayBackground,
+      ...(mode === "dark" && {
+        main: grey[500]
+      })
+    },
+    light: {
+      main: common.white,
+      ...(mode === "dark" && {
+        main: grey[500]
+      })
+    },
+    warning: {
+      main: "#ffc071",
+      dark: "#ffb25e"
+    },
+    divider: mode === "dark" ? grey[200] : grey[200],
+    mode,
+    background: {
+      default: "#FAFAFA",
+      paper: common.white
+    },
+    ...(mode === "dark" && {
+      background: {
+        default: grey[600],
+        paper: grey[700]
       }
+    }),
+    common,
+    ...(mode === "light" && {
+      text: {
+        primary: common.black,
+        secondary: grey[700]
+      }
+    }),
+    ...(mode === "dark" && {
+      text: {
+        primary: common.white,
+        secondary: grey[300]
+      }
+    }),
+    grey
+  },
+  spacing: 5,
+  typography: {
+    fontFamily: [...systemFont].join(","),
+    fontFamilySystem: systemFont.join(","),
+    h3: {},
+    button: {
+      textTransform: "initial"
     }
-  } as ThemeOptions);
+  }
+} as ThemeOptions);
 
 export function getThemedComponents(): {
   components: Theme["components"];
