@@ -1,104 +1,47 @@
 import { Box, Container, Divider, Grid, Paper, Stack, useMediaQuery } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
+import { useQuery } from "react-query";
 
 import { LinkedNodeEditor } from "../../components/LinkedNodeEditor";
 import { NodeItemFullEditor } from "../../components/NodeItemFullEditor";
-import { ProposalEditor } from "../../components/ProposalEditor";
-import { ProposalPreview } from "../../components/ProposalPreview";
-import { KnowledgeNode, NodeType } from "../../src/knowledgeTypes";
+import { getNodeData } from "../../lib/knowledgeApi";
 import { PagesNavbar } from "..";
 
 const NodeProposal = () => {
-  const hasMinMediumDeviceWidth = useMediaQuery('(min-width:900px)');
   const router = useRouter();
 
-  const { id } = router.query;
+  const nodeId = router.query.id as string;
 
+  const { data, isLoading } = useQuery(["nodeData", nodeId], () => getNodeData(nodeId));
 
-  const editNode: KnowledgeNode = {
-    id: 'sdf',
-    title: 'node example title',
-    content: 'Science is a systematic effort to build and organize knowledge as testable statements and predictions. Data science, as an interdisciplinary field, involves data and, by extension, statistics, or the systematic study of the organization, properties, and analysis of data and its role in inference, including our confidence in the inference. It uses scientific methods, processes, and algorithms to extract knowledge and infer insights from structured and unstructured data.',
-    nodeType: NodeType.News,
-    aFullname: '',
-    aImgUrl: '',
-    admin: '',
-    changedAt: '2022-02-30T17:11:43.574Z',
-    parents: [
-      {
-        title: 'some parent node',
-        nodeType: NodeType.Question,
-        node: 'node string',
-      },
-      {
-        title: 'other parent nssss sssssc sssss ssssssss ssss ssssssss ssode',
-        nodeType: NodeType.Question,
-        node: 'node string',
-      },
-      {
-        title: 'last parent node',
-        nodeType: NodeType.Question,
-        node: 'node string',
-      },
-    ],
-    children: [
-      {
-        title: 'some children node',
-        nodeType: NodeType.Question,
-        node: 'node string',
-      }
-    ],
-    references: [
-      {
-        // id: 'sdf',
-        title: 'ref 1',
-        // node: 'node',
-        label: 'label 1',
-        // content: 'Science is a systematic effort to build and organize knowledge as testable statements and predictions. Data science, as an interdisciplinary field, involves data and, by extension, statistics, or the systematic study of the organization, properties, and analysis of data and its role in inference, including our confidence in the inference. It uses scientific methods, processes, and algorithms to extract knowledge and infer insights from structured and unstructured data.',
-        nodeType: NodeType.News,
-        // aFullname: '',
-        // aImgUrl: '',
-      }
-    ]
-  }
-
-  const { parents, contributors, references, institutions, tags, children, siblings } = editNode || {};
-  console.log("router", id);
+  console.log('data', data)
 
   return (
     <PagesNavbar title={`1Cademy - New Proposal`} showSearch={false}>
-      {/* <Container sx={{ mt: 15, mb: 10 }}>
-        <Paper>
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            divider={<Divider orientation={hasMinMediumDeviceWidth ? 'vertical' : 'horizontal'} flexItem />}
-          >
-            <ProposalEditor />
-          </Stack>
-        </Paper>
-      </Container> */}
+      {isLoading && <h1>Loading ...</h1>}
       <Box data-testid="node-editor-container" sx={{ p: { xs: 3, md: 10 } }}>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={3}>
-            {parents && <LinkedNodeEditor initialNodes={parents || []} header="Learn Before" />}
+            {
+              isLoading
+                ? <h3>Loading parents ...</h3>
+                : data?.parents && <LinkedNodeEditor initialNodes={data.parents} header="Learn Before" />
+            }
           </Grid>
           <Grid item xs={12} sm={12} md={6}>
-            <NodeItemFullEditor node={editNode} />
-            {/* <NodeItemFull
-            node={node}
-            contributors={
-              <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />
+            {
+              isLoading
+                ? <h3>Loading node ...</h3>
+                : data ? <NodeItemFullEditor node={data} /> : null
             }
-            references={<ReferencesList references={references || []} sx={{ mt: 3 }} />}
-            tags={<TagsList tags={tags || []} sx={{ mt: 3 }} />}
-          />
-          {siblings && siblings.length > 0 && (
-            <LinkedNodes sx={{ mt: 3 }} data={siblings} header="Related"></LinkedNodes>
-          )} */}
           </Grid>
           <Grid item xs={12} sm={12} md={3}>
-            {children && <LinkedNodeEditor initialNodes={children || []} header="Learn After" />}
+            {
+              isLoading
+                ? <h3>Loading children ...</h3>
+                : data?.children && <LinkedNodeEditor initialNodes={data.children} header="Learn After" />
+            }
           </Grid>
         </Grid>
       </Box>

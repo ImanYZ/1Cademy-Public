@@ -19,6 +19,10 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
 
   const [nodesSelected, setNodesSelected] = useState<LinkedKnowledgeNode[]>(initialNodes)
 
+  const onRemoveLinkedNode = (nodeTitle: string) => {
+    setNodesSelected(currentSelectedNodes => currentSelectedNodes.filter(cur => cur.title !== nodeTitle))
+  }
+
   const renderLinkedNodes = () => {
     return nodesSelected.map((el, idx, src) => (
       <React.Fragment key={idx}>
@@ -34,7 +38,7 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
           openInNewTab
           secondaryActions={<IconButton
             sx={{ alignItems: 'center', justifyContent: 'flex-end' }}
-            onClick={() => console.log('close')}
+            onClick={() => onRemoveLinkedNode(el.title || '')}
           >
             <CloseIcon />
           </IconButton>}
@@ -68,6 +72,7 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
               freeSolo
               fullWidth
               options={['sdfds', 'sadf', 'wefew']}
+              onChange={(e, v) => console.log('linked-node', e, v)}
               renderInput={(params) => <Searcher
                 ref={params.InputProps.ref}
                 inputBaseProps={params.inputProps}

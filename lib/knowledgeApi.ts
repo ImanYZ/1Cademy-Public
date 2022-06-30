@@ -3,10 +3,12 @@ import axios from "axios";
 import {
   FeedbackInput,
   FilterValue,
+  KnowledgeNode,
   ResponseAutocompleteFilter,
   ResponseAutocompleteProcessedReferencesFilter,
   ResponseAutocompleteSearch,
   ResponseAutocompleteTags,
+  ResponseNodeData,
   SearchNodesParams,
   SearchNodesResponse,
   StatsSchema
@@ -37,6 +39,7 @@ export const getReferencesAutocomplete = async (
 export const sendFeedback = async (data: FeedbackInput): Promise<any> => {
   await axios.post("/api/feedback", { data });
 };
+
 export const getStats = async () => {
   const response = await axios.get<StatsSchema>("/api/stats");
   return response.data;
@@ -68,4 +71,13 @@ export const getSelectedInstitutions = async (institutions: string) => {
 export const getSearchAutocomplete = async (searchText: string): Promise<ResponseAutocompleteSearch> => {
   const response = await axios.get("/api/searchAutocomplete", { params: { q: searchText } });
   return response.data;
+};
+
+export const getNodeData = async (nodeId: string): Promise<KnowledgeNode> => {
+
+  console.log('nodeId', nodeId)
+  const res = await axios.post("/api/nodeData", { nodeId });
+  if (!res?.data) { throw Error('invalid node') }
+
+  return res.data.results
 };

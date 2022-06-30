@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import slugify from "slugify";
 
-import { SortTypeWindowOption, TimeWindowOption } from "../src/knowledgeTypes";
+import { LinkedKnowledgeNode, SortTypeWindowOption, TimeWindowOption } from "../src/knowledgeTypes";
 
 export const isValidHttpUrl = (possibleUrl?: string) => {
   let url;
@@ -145,3 +145,9 @@ export const loadHomeSearchBackground = () => `
 
 export const toBase64 = (str: string) =>
   typeof window === "undefined" ? Buffer.from(str).toString("base64") : window.btoa(str);
+
+
+export const getReferenceTitle = (el: LinkedKnowledgeNode) => {
+  if (isValidHttpUrl(el.label)) return `${el.title}:  ${el.label}`
+  return el.title || ""
+}

@@ -187,6 +187,11 @@ export type ResponseAutocompleteSearch = {
   errorMessage?: string;
 };
 
+export type ResponseNodeData = {
+  results?: KnowledgeNode;
+  errorMessage?: string;
+};
+
 export enum TimeWindowOption {
   "AnyTime" = "Any Time",
   "ThisWeek" = "This Week",

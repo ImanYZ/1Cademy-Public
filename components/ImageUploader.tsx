@@ -1,7 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import ImageIcon from '@mui/icons-material/Image';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { Box, Button, FormControl, IconButton } from "@mui/material";
+import { Box, Button, FormControl, IconButton, Tooltip } from "@mui/material";
 import React, { FC, useState } from "react";
 
 type props = {
@@ -30,7 +30,7 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
 
   const onResetImage = () => {
     console.log('on reset image')
-    setImageURI(image)
+    setImageURI(defaultImageURI)
   }
 
   return (
@@ -63,7 +63,6 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            // cursor: 'pointer',
             opacity: '0',
             transition: '0.5s',
             ':hover': {
@@ -71,12 +70,16 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
             }
           }}>
             <Box sx={{ position: 'absolute', top: '0px', right: '0px' }}>
-              <IconButton color='light' variant='outlined' sx={{ fontSize: '19px' }} onClick={onResetImage}>
-                <RestartAltIcon />
-              </IconButton>
-              <IconButton color='light' variant='outlined' sx={{ fontSize: '19px' }} onClick={onRemoveImage}>
-                <CloseIcon />
-              </IconButton>
+              <Tooltip title='Restart to default value'>
+                <IconButton color='light' variant='outlined' sx={{ fontSize: '19px' }} onClick={onResetImage}>
+                  <RestartAltIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Remove Image'>
+                <IconButton color='light' variant='outlined' sx={{ fontSize: '19px' }} onClick={onRemoveImage}>
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
             </Box>
             <Button color='light' variant='outlined' sx={{ fontSize: '19px' }}>
               Change Image

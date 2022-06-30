@@ -20,9 +20,10 @@ type Props = {
   sx?: SxProps<Theme>;
   secondaryAction?: ReactNode;
   secondaryActionSx?: SxProps<Theme>;
+  openInNewTab?: boolean
 };
 
-export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, linkSrc, label, sx, secondaryAction = null }) => {
+export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, linkSrc, label, sx, secondaryAction = null, openInNewTab = false }) => {
   return (
     <HtmlTooltip
       title={
@@ -66,11 +67,14 @@ export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, l
           </Box>
         }
       >
-        <LinkNext passHref href={linkSrc}>
-          <ListItemButton component="a" href={linkSrc} sx={{ ...sx }}>
+        {!openInNewTab && <LinkNext passHref href={linkSrc}>
+          <ListItemButton component="a" sx={{ ...sx }}>
             <ListItemText primary={<MarkdownRender text={title || ""} />} disableTypography={true} />
           </ListItemButton>
-        </LinkNext>
+        </LinkNext>}
+        {openInNewTab && <ListItemButton component="a" href={`../${linkSrc}`} rel="noreferrer" target="_blank" sx={{ ...sx, p: '16px' }}>
+          <ListItemText primary={<MarkdownRender text={title} />} disableTypography={true} />
+        </ListItemButton>}
       </ListItem>
     </HtmlTooltip>
   );
