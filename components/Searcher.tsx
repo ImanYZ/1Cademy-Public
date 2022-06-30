@@ -1,16 +1,25 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, IconButton } from '@mui/material';
-import InputBase from "@mui/material/InputBase";
+import InputBase, { InputBaseProps } from "@mui/material/InputBase";
 import { alpha, styled } from "@mui/material/styles";
-import React, { FC, useState } from 'react'
+import React, { FC, forwardRef, useState } from 'react'
+
+
+type Ref = {
+  viewState: HTMLInputElement;
+};
 
 type SearcherProps = {
   initialSearchText?: string
   darkVersion?: boolean
+  inputBaseProps: InputBaseProps
 }
 
-export const Searcher: FC<SearcherProps> = ({ initialSearchText = '', darkVersion = false }) => {
-
+export const Searcher = forwardRef<HTMLInputElement, SearcherProps>(({
+  inputBaseProps,
+  initialSearchText = '',
+  darkVersion = false
+}, ref) => {
   const [searchText, setSearchText] = useState<string>(initialSearchText);
   const handleSearch = () => { console.log('handle search') }
 
@@ -39,10 +48,11 @@ export const Searcher: FC<SearcherProps> = ({ initialSearchText = '', darkVersio
       }}
     >
       <StyledInputBase
+        ref={ref}
         value={searchText}
         onChange={e => setSearchText(e.target.value)}
         placeholder="Search on 1Cademy"
-        inputProps={{ "aria-label": "search node" }}
+        inputProps={{ ...inputBaseProps, "aria-label": "search node" }}
         sx={{ ml: 1, flex: 1, color: "inherit" }}
       />
       <IconButton type="submit" sx={{ p: "5px", color: "inherit" }} aria-label="search" onClick={handleSearch}>
@@ -50,7 +60,9 @@ export const Searcher: FC<SearcherProps> = ({ initialSearchText = '', darkVersio
       </IconButton>
     </Box>
   )
-}
+})
+
+Searcher.displayName = "Searcher";
 
 const StyledInputBase = styled(InputBase)
   <{ darkVersion?: boolean }>(({ theme, darkVersion = false }) => ({

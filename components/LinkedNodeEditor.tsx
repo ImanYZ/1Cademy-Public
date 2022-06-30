@@ -58,7 +58,7 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
               id="free-solo-demo"
               freeSolo
               options={['sdfds', 'sadf', 'wefew']}
-              renderInput={(params) => <Searcher />/*<TextField {...params} label="freeSolo" />*/}
+              renderInput={(params) => <Searcher inputBaseProps={params.inputProps} />/*<TextField {...params} label="freeSolo" />*/}
               fullWidth
             />
           </ListItem>
