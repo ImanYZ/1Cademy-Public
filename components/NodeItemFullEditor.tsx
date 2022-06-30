@@ -2,15 +2,17 @@ import CloseIcon from '@mui/icons-material/Close';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { LoadingButton } from '@mui/lab'
-import { Autocomplete, Box, Button, Card, CardContent, CardHeader, Chip, Divider, FormControl, InputLabel, Link, TextField, Tooltip, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Card, CardContent, CardHeader, Chip, Divider, FormControl, IconButton, InputLabel, Link, TextField, Tooltip, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 // import Link from 'next/link'
 import React, { FC, ReactNode, useState } from 'react'
 
+import { getNodePageUrl, isValidHttpUrl } from '../lib/utils';
 import { KnowledgeNode, NodeType } from '../src/knowledgeTypes'
 import { ImageUploader } from './ImageUploader'
+import { LinkedReference } from './LinkedReference';
 import MarkdownRender from './Markdown/MarkdownRender'
 import { MarkdownHelper } from './MarkdownHelper'
 import NodeTypeIcon from './NodeTypeIcon'
@@ -56,6 +58,12 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
     console.log('[submit proposal]', values)
 
     setSubmitting(true)
+  }
+
+  const getReferenceContent = (el: LinkedKnowledgeNode) => {
+    return isValidHttpUrl(el.label)
+      ? `${el.title}:  ${el.label}`
+      : el.title || ""
   }
 
   return (
@@ -167,6 +175,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
               <Divider sx={{ my: '32px' }} />
 
               <Box sx={{ mb: '32px' }}>
+                {/* tags */}
                 <InputLabel htmlFor="tag-searcher" sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -202,6 +211,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
               </Box>
 
               <Box>
+                {/* references */}
                 <InputLabel htmlFor="references-searcher" sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -224,16 +234,31 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
                   />}
                   sx={{ mb: '16px' }}
                 />
-                {
-                  ["New Tag appears here", "ldsfksdf", "sdjfgioeur"].map((cur, idx) => <Chip
-                    key={idx}
-                    label={cur}
-                    variant="outlined"
-                    onClick={() => console.log('click')}
-                    onDelete={() => console.log('delete')}
-                    deleteIcon={<CloseIcon />}
-                  />)
-                }
+                {node.references &&
+                  node.references.length &&
+                  node.references.map((reference, idx) =>
+                    <React.Fragment key={idx}>
+                      {idx === 0 && <Divider />}
+                      <LinkedReference
+                        title={reference.title || ""}
+                        linkSrc={getNodePageUrl(reference.title || "", reference.node)}
+                        nodeType={reference.nodeType}
+                        nodeImageUrl={reference.nodeImage}
+                        nodeContent={getReferenceContent(reference)}
+                        showListItemIcon={false}
+                        label={reference.label || ""}
+                        sx={{ p: "20px 16px" }}
+                        secondaryActionSx={{ mr: "34px" }}
+                        secondaryAction={<IconButton
+                          sx={{ alignItems: 'center', justifyContent: 'flex-end' }}
+                          onClick={() => console.log('close')}
+                        >
+                          <CloseIcon />
+                        </IconButton>}
+                      />
+                      <Divider />
+                    </React.Fragment>
+                  )}
               </Box>
             </form>
           )}

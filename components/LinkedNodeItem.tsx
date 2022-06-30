@@ -61,9 +61,6 @@ const LinkedNodeItem: FC<Props> = ({
         secondaryAction={
           <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", ...secondaryActionSx }}>
             {secondaryActions}
-            {/* <ListItemIcon>
-              <NodeTypeIcon nodeType={nodeType} sx={{ marginLeft: "auto" }} />
-            </ListItemIcon> */}
             {isValidHttpUrl(label) && (
               <Tooltip title="Open the reference specified section in new tab">
                 <IconButton

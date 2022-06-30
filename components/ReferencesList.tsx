@@ -17,15 +17,12 @@ type ReferencesListProps = {
 
 export const ReferencesList = ({ references, sx }: ReferencesListProps) => {
   const getReferenceContent = (el: LinkedKnowledgeNode) => {
-    if (isValidHttpUrl(el.label)) {
-      return `${el.title}:  ${el.label}`;
-    }
-    return el.title || "";
-  };
-
-  if (!references.length) {
-    return null;
+    return isValidHttpUrl(el.label)
+      ? `${el.title}:  ${el.label}`
+      : el.title || ""
   }
+
+  if (!references.length) return null
 
   return (
     <Box sx={{ ...sx }}>

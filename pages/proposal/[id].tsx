@@ -3,11 +3,11 @@ import { useRouter } from "next/router";
 import React from "react";
 
 import { LinkedNodeEditor } from "../../components/LinkedNodeEditor";
+import { NodeItemFullEditor } from "../../components/NodeItemFullEditor";
 import { ProposalEditor } from "../../components/ProposalEditor";
 import { ProposalPreview } from "../../components/ProposalPreview";
 import { KnowledgeNode, NodeType } from "../../src/knowledgeTypes";
 import { PagesNavbar } from "..";
-import { NodeItemFullEditor } from "../../components/NodeItemFullEditor";
 
 const NodeProposal = () => {
   const hasMinMediumDeviceWidth = useMediaQuery('(min-width:900px)');
@@ -17,6 +17,14 @@ const NodeProposal = () => {
 
 
   const editNode: KnowledgeNode = {
+    id: 'sdf',
+    title: 'node example title',
+    content: 'Science is a systematic effort to build and organize knowledge as testable statements and predictions. Data science, as an interdisciplinary field, involves data and, by extension, statistics, or the systematic study of the organization, properties, and analysis of data and its role in inference, including our confidence in the inference. It uses scientific methods, processes, and algorithms to extract knowledge and infer insights from structured and unstructured data.',
+    nodeType: NodeType.News,
+    aFullname: '',
+    aImgUrl: '',
+    admin: '',
+    changedAt: '2022-02-30T17:11:43.574Z',
     parents: [
       {
         title: 'some parent node',
@@ -41,15 +49,18 @@ const NodeProposal = () => {
         node: 'node string',
       }
     ],
-
-    id: 'sdf',
-    title: 'node example title',
-    content: 'Science is a systematic effort to build and organize knowledge as testable statements and predictions. Data science, as an interdisciplinary field, involves data and, by extension, statistics, or the systematic study of the organization, properties, and analysis of data and its role in inference, including our confidence in the inference. It uses scientific methods, processes, and algorithms to extract knowledge and infer insights from structured and unstructured data.',
-    nodeType: NodeType.News,
-    aFullname: '',
-    aImgUrl: '',
-    admin: '',
-    changedAt: '2022-02-30T17:11:43.574Z'
+    references: [
+      {
+        // id: 'sdf',
+        title: 'ref 1',
+        // node: 'node',
+        label: 'label 1',
+        // content: 'Science is a systematic effort to build and organize knowledge as testable statements and predictions. Data science, as an interdisciplinary field, involves data and, by extension, statistics, or the systematic study of the organization, properties, and analysis of data and its role in inference, including our confidence in the inference. It uses scientific methods, processes, and algorithms to extract knowledge and infer insights from structured and unstructured data.',
+        nodeType: NodeType.News,
+        // aFullname: '',
+        // aImgUrl: '',
+      }
+    ]
   }
 
   const { parents, contributors, references, institutions, tags, children, siblings } = editNode || {};

@@ -32,13 +32,12 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
           label={el.label || ""}
           sx={{ p: "20px" }}
           openInNewTab
-          secondaryActions={
-            <>
-              <IconButton sx={{ alignItems: 'center', justifyContent: 'flex-end' }} onClick={() => console.log('close')}>
-                <CloseIcon />
-              </IconButton>
-            </>
-          }
+          secondaryActions={<IconButton
+            sx={{ alignItems: 'center', justifyContent: 'flex-end' }}
+            onClick={() => console.log('close')}
+          >
+            <CloseIcon />
+          </IconButton>}
         />
 
       </React.Fragment>
