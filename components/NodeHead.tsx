@@ -1,6 +1,7 @@
 import Head from "next/head";
+import { APP_DOMAIN } from "src/1cademyConfig";
 
-import { escapeBreaksQuotes, getNodePageUrl } from "../lib/utils";
+import { escapeBreaksQuotes, getNodePageWithDomain } from "../lib/utils";
 import { KnowledgeNode } from "../src/knowledgeTypes";
 
 type NodeHeadProps = {
@@ -34,7 +35,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
       content + " Keywords: " + title + " " + keywords + (nodeImage ? " \nImage: " + nodeImage : "")
     ),
     "@id": id,
-    url: `https://node.1cademy.us/${getNodePageUrl(title || "", id)}`,
+    url: `${getNodePageWithDomain(title || "", id)}`,
     nodeType: nodeType,
     author: {
       "@type": "Organization",
@@ -45,10 +46,10 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     publisher: {
       "@type": "Organization",
       name: "1Cademy",
-      sameAs: "https://1cademy.us",
+      sameAs: APP_DOMAIN,
       logo: {
         "@type": "ImageObject",
-        url: "https://node.1cademy.us/_next/static/media/DarkModeLogo.528aaaa6.svg"
+        url: `${APP_DOMAIN}_next/static/media/DarkModeLogo.528aaaa6.svg`
       }
     },
     aggregateRating: {
@@ -66,7 +67,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let parent of parents) {
     jsonObj["prerequisites"].push({
       "@type": "parent",
-      link: `https://node.1cademy.us/${getNodePageUrl(parent.title || "", parent.node)}`,
+      link: `${getNodePageWithDomain(parent.title || "", parent.node)}`,
       title: "1Cademy - " + escapeBreaksQuotes(parent.title)
     });
   }
@@ -74,7 +75,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let child of children) {
     jsonObj["followUps"].push({
       "@type": "child",
-      link: `https://1cademy.us/${getNodePageUrl(child.title || "", child.node)}`,
+      link: `${getNodePageWithDomain(child.title || "", child.node)}`,
       title: "1Cademy - " + escapeBreaksQuotes(child.title)
     });
   }
@@ -82,7 +83,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let tag of tags) {
     jsonObj["tags"].push({
       "@type": "tag",
-      link: `https://node.1cademy.us/${getNodePageUrl(tag.title || "", tag.node)}`,
+      link: `${getNodePageWithDomain(tag.title || "", tag.node)}`,
       title: "1Cademy - " + escapeBreaksQuotes(tag.title)
     });
   }
@@ -90,7 +91,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let reference of references) {
     jsonObj["references"].push({
       "@type": "reference",
-      link: `https://node.1cademy.us/${getNodePageUrl(reference.title || "", reference.node)}`,
+      link: `${getNodePageWithDomain(reference.title || "", reference.node)}`,
       title: "1Cademy - " + escapeBreaksQuotes(reference.title),
       label: reference.label
     });
@@ -102,7 +103,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
 
   return (
     <Head>
-      <link rel="canonical" href={`https://node.1cademy.us/${getNodePageUrl(title || "", id)}`} key="canonical" />
+      <link rel="canonical" href={`${getNodePageWithDomain(title || "", id)}`} key="canonical" />
       <meta name="topic" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="subject" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="Classification" content={nodeType} />
