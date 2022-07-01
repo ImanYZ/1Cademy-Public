@@ -7,7 +7,9 @@ import dayjs from 'dayjs'
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { FC, ReactNode, useState } from 'react'
+import { useQuery } from 'react-query';
 
+import { getTagsAutocomplete } from '../lib/knowledgeApi';
 import { getNodePageUrl, getReferenceTitle, isValidHttpUrl } from '../lib/utils';
 import { KnowledgeNode, LinkedKnowledgeNode } from '../src/knowledgeTypes'
 import { ImageUploader } from './ImageUploader'
@@ -39,6 +41,9 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
   const [fileImage, setFileImage] = useState(null)
   const [nodeTags, setNodeTags] = useState(node.tags || [])
   const [nodeReferences, setNodeReferences] = useState<LinkedKnowledgeNode[]>(node.references || [])
+  const [searchText, setSearchText] = useState('')
+  const { data, isLoading } = useQuery(["tags", searchText], () => getTagsAutocomplete(searchText));
+
   const initialValues: ProposalFormValues = {
     title: node.title || '',
     content: node.content || '',
@@ -198,7 +203,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
                   id="tag-searcher"
                   freeSolo
                   fullWidth
-                  options={['t1', 't2', 't3']}
+                  options={data?.results || []}
                   renderInput={(params) => <Searcher
                     ref={params.InputProps.ref}
                     inputBaseProps={params.inputProps}
