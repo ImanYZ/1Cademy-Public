@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Grid, Paper, Stack, useMediaQuery } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
 import { useQuery } from "react-query";
@@ -16,8 +16,6 @@ const NodeProposal = () => {
   const { data, isLoading } = useQuery(["nodeData", nodeId], () => getNodeData(nodeId),
     { enabled: Boolean(nodeId) }
   );
-
-  console.log('data', data)
 
   return (
     <PagesNavbar title={`1Cademy - New Proposal`} showSearch={false}>

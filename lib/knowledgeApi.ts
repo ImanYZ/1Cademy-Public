@@ -5,6 +5,7 @@ import {
   FilterValue,
   KnowledgeNode,
   ResponseAutocompleteFilter,
+  ResponseAutocompleteFullNodes,
   ResponseAutocompleteFullReferences,
   ResponseAutocompleteFullTag,
   ResponseAutocompleteProcessedReferencesFilter,
@@ -91,5 +92,10 @@ export const getFullTagAutocomplete = async (searchText: string): Promise<Respon
 
 export const getFullReferencesAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullReferences> => {
   const response = await axios.get("/api/fullReferencesAutocomplete", { params: { q: searchText } });
+  return response.data
+};
+
+export const getFullNodeAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullNodes> => {
+  const response = await axios.get("/api/fullNodeAutocomplete", { params: { q: searchText } });
   return response.data
 };

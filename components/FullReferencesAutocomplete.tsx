@@ -64,13 +64,9 @@ export const FullReferencesAutocomplete = () => {
         onChange={onChangeMultiple}
         getOptionLabel={(option: string | LinkedKnowledgeNode) => typeof option === 'string' ? option : option.title || ''}
         isOptionEqualToValue={(option, value) => option.node === value.node}
-        renderOption={(props, option) => {
-          return (
-            <li {...props} key={option.node}>
-              {typeof option === 'string' ? option : option.title || ''}
-            </li>
-          );
-        }}
+        renderOption={(props, option) => <li {...props} key={option.node}>
+          {typeof option === 'string' ? option : option.title || ''}
+        </li>}
         renderInput={(params) => <Searcher
           ref={params.InputProps.ref}
           inputBaseProps={params.inputProps}

@@ -140,6 +140,11 @@ export type ResponseAutocompleteNodes = {
   errorMessage?: string;
 };
 
+export type ResponseAutocompleteFullNodes = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
 export type TypesenseNodesSchema = {
   changedAt: string;
   changedAtMillis: number; // typesense

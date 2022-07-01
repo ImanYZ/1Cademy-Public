@@ -2,7 +2,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Autocomplete, Box, Card, CardHeader, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React, { useState } from 'react'
+import { useQuery } from 'react-query';
+import { useDebounce } from 'use-debounce';
 
+import { getFullNodeAutocomplete } from '../lib/knowledgeApi';
 import { getNodePageUrl } from '../lib/utils';
 import { LinkedKnowledgeNode } from '../src/knowledgeTypes';
 import LinkedNodeItem from './LinkedNodeItem';
@@ -17,10 +20,24 @@ type LinkedNodeEditorProps = {
 
 export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorProps) => {
 
+  const [searchText, setSearchText] = useState('')
+  const [searchTextDebounce] = useDebounce(searchText, 250);
+  const { data } = useQuery(["fullLinkedNode", searchTextDebounce], () => getFullNodeAutocomplete(searchTextDebounce), {
+    enabled: Boolean(searchTextDebounce)
+  });
   const [nodesSelected, setNodesSelected] = useState<LinkedKnowledgeNode[]>(initialNodes)
 
   const onRemoveLinkedNode = (nodeTitle: string) => {
     setNodesSelected(currentSelectedNodes => currentSelectedNodes.filter(cur => cur.title !== nodeTitle))
+  }
+
+  const onInputChange = (event: React.SyntheticEvent<Element, Event>, query: string) => {
+    if (!event || !query.trim()) return
+    setSearchText(query)
+  };
+
+  const onChangeMultiple = (e: any, node: any[]) => {
+    setNodesSelected(node.reverse())
   }
 
   const renderLinkedNodes = () => {
@@ -43,7 +60,6 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
             <CloseIcon />
           </IconButton>}
         />
-
       </React.Fragment>
     ));
   };
@@ -71,12 +87,22 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
               id="linked-node-searcher"
               freeSolo
               fullWidth
-              options={['sdfds', 'sadf', 'wefew']}
-              onChange={(e, v) => console.log('linked-node', e, v)}
+              options={data?.results || []}
+              multiple
+              value={nodesSelected}
+              onChange={onChangeMultiple}
+              getOptionLabel={(option: string | LinkedKnowledgeNode) => typeof option === 'string' ? option : option.title || ''}
+              isOptionEqualToValue={(option, value) => option.node === value.node}
+              renderOption={(props, option) => <li {...props} key={option.node}>
+                {typeof option === 'string' ? option : option.title || ''}
+              </li>}
               renderInput={(params) => <Searcher
                 ref={params.InputProps.ref}
                 inputBaseProps={params.inputProps}
+                searchText={searchText}
+                onSearchTextChange={setSearchText}
               />}
+              onInputChange={onInputChange}
             />
           </ListItem>
           {renderLinkedNodes()}

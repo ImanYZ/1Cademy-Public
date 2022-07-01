@@ -18,6 +18,7 @@ import { Searcher } from './Searcher';
  */
 
 export const FullTagAutocomplete = () => {
+
   const [searchText, setSearchText] = useState('')
   const [searchTextDebounce] = useDebounce(searchText, 250);
   const { data } = useQuery(["fullTags", searchTextDebounce], () => getFullTagAutocomplete(searchTextDebounce));
