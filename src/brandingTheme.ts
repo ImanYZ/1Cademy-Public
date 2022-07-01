@@ -89,7 +89,18 @@ export const getDesignTokens = (mode: "light" | "dark") =>
     typography: {
       fontFamily: [...systemFont].join(","),
       fontFamilySystem: systemFont.join(","),
-      h3: {},
+      h1: {
+        fontSize: "50px"
+      },
+      h2: {
+        fontSize: "30px"
+      },
+      h3: {
+        fontSize: "25px"
+      },
+      h4: {
+        fontSize: "23px"
+      },
       button: {
         textTransform: "initial"
       }
