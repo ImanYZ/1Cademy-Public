@@ -2,17 +2,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Box, IconButton } from '@mui/material';
 import InputBase from "@mui/material/InputBase";
 import { alpha, styled } from "@mui/material/styles";
-import React, { forwardRef, MutableRefObject, Ref, useImperativeHandle, useRef, useState } from 'react'
-
-
-// export type SearcherRef = {
-//   reset: () => void,
-//   onSubmit: (searchText: string) => void,
-//   inputPropsRef: Ref<any | null>
-// };
+import React, { forwardRef } from 'react'
 
 type SearcherProps = {
-  // initialSearchText?: string
   darkVersion?: boolean
   inputBaseProps: React.InputHTMLAttributes<HTMLInputElement>,
   searchText: string,
@@ -21,7 +13,6 @@ type SearcherProps = {
 
 export const Searcher = forwardRef<HTMLDivElement, SearcherProps>(({
   inputBaseProps,
-  // initialSearchText = '',
   darkVersion = false,
   searchText,
   onSearchTextChange,

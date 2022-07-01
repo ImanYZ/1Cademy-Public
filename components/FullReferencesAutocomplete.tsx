@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 import { useQuery } from 'react-query';
 import { useDebounce } from 'use-debounce';
 
-import { getFullTagAutocomplete } from '../lib/knowledgeApi';
+import { getFullReferencesAutocomplete, getFullTagAutocomplete } from '../lib/knowledgeApi';
 import { getNodePageUrl, getReferenceTitle } from '../lib/utils';
 import { LinkedKnowledgeNode } from '../src/knowledgeTypes';
 import { LinkedReference } from './LinkedReference';
@@ -21,7 +21,7 @@ import { Searcher } from './Searcher';
 export const FullReferencesAutocomplete = () => {
   const [searchText, setSearchText] = useState('')
   const [searchTextDebounce] = useDebounce(searchText, 250);
-  const { data } = useQuery(["tags", searchTextDebounce], () => getFullTagAutocomplete(searchTextDebounce));
+  const { data } = useQuery(["fullReferences", searchTextDebounce], () => getFullReferencesAutocomplete(searchTextDebounce));
   const [referencesSelected, setReferencesSelected] = useState<LinkedKnowledgeNode[]>([])
 
   const getReferencesSuggestions = (): LinkedKnowledgeNode[] => {
@@ -64,6 +64,13 @@ export const FullReferencesAutocomplete = () => {
         onChange={onChangeMultiple}
         getOptionLabel={(option: string | LinkedKnowledgeNode) => typeof option === 'string' ? option : option.title || ''}
         isOptionEqualToValue={(option, value) => option.node === value.node}
+        renderOption={(props, option) => {
+          return (
+            <li {...props} key={option.node}>
+              {typeof option === 'string' ? option : option.title || ''}
+            </li>
+          );
+        }}
         renderInput={(params) => <Searcher
           ref={params.InputProps.ref}
           inputBaseProps={params.inputProps}

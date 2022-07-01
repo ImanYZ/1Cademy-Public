@@ -199,6 +199,11 @@ export type ResponseAutocompleteFullTag = {
   errorMessage?: string;
 };
 
+export type ResponseAutocompleteFullReferences = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
 export type ResponseNodeData = {
   results?: KnowledgeNode;
   errorMessage?: string;

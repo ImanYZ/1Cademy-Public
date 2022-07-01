@@ -24,12 +24,10 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
   })
 
   const onRemoveImage = () => {
-    console.log('on remove image')
     setImageURI('')
   }
 
   const onResetImage = () => {
-    console.log('on reset image')
     setImageURI(defaultImageURI)
   }
 

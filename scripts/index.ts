@@ -193,6 +193,22 @@ const getFullTags = (
     )
 }
 
+const getFullRefereces = (
+  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
+): LinkedKnowledgeNode[] => {
+  return nodeDocs.docs
+    .map(cur => ({ nodeId: cur.id, ...(cur.data() as NodeFireStore) }))
+    .filter(cur => cur.nodeType === 'Reference')
+    .map((tagData) => ({
+      node: tagData.nodeId,
+      title: tagData.title,
+      content: tagData.content,
+      nodeImage: tagData.nodeImage,
+      nodeType: tagData.nodeType
+    })
+    )
+}
+
 const fillInstitutionsIndex = async (forceReIndex?: boolean) => {
   const data = await getInstitutionsFirestore();
   const fields: CollectionFieldSchema[] = [
@@ -254,9 +270,18 @@ const fillFullTagsIndex = async (
   nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
   forceReIndex?: boolean
 ) => {
-  const data = await getFullTags(nodeDocs)
+  const data = getFullTags(nodeDocs)
   const fields: CollectionFieldSchema[] = [{ name: 'title', type: 'string' }]
   await indexCollection('fullTags', fields, data, forceReIndex)
+}
+
+const fillFullReferencesIndex = async (
+  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
+  forceReIndex?: boolean
+) => {
+  const data = getFullRefereces(nodeDocs)
+  const fields: CollectionFieldSchema[] = [{ name: 'title', type: 'string' }]
+  await indexCollection('fullReferences', fields, data, forceReIndex)
 }
 
 const main = async () => {
@@ -266,6 +291,7 @@ const main = async () => {
   await fillNodesIndex(nodeDocs, true);
   await fillReferencesIndex(nodeDocs, true);
   await fillFullTagsIndex(nodeDocs, true)
+  await fillFullReferencesIndex(nodeDocs, true)
 };
 
 main();
