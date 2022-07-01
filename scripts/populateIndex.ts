@@ -26,13 +26,13 @@ const main = async (
     fields
   };
 
-  // console.log("Populating data index in Typesense");
+  console.log(`--- Populating data index in Typesense for  ${indexName} ---`);
   let reindexNeeded = false;
   try {
     const collection = await client.collections(indexName).retrieve();
-    // console.log(`Found existing schema: ${indexName}`);
+    console.log(`Found existing schema: ${indexName}`);
     if (collection.num_documents !== dataToImport.length || forceReIndex) {
-      // console.log("Deleting existing schema");
+      console.log(`Deleting existing schema:  ${indexName}`);
       reindexNeeded = true;
       await client.collections(indexName).delete();
     }
@@ -44,17 +44,15 @@ const main = async (
     return true;
   }
 
-  // console.log("Creating schema: ");
-  // console.log(JSON.stringify(schema, null, 2));
+  console.log(`Creating schema:  ${indexName}`);
   await client.collections().create(schema);
 
-  // console.log("Adding records: ");
+  console.log("Adding records: ");
 
   // Bulk Import
   try {
     const returnData = await client.collections(indexName).documents().import(dataToImport);
-    // console.log(returnData);
-    // console.log("Done indexing.");
+    console.log(`*** Done indexing:  ${indexName} ***`);
 
     const failedItems = returnData.filter(item => item.success === false);
     if (failedItems.length > 0) {
