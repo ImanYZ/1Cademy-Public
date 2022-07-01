@@ -159,6 +159,26 @@ const getNodeTags = (nodeData: NodeFireStore) => {
   return tags;
 };
 
+const getFullNodeTag = async (nodeData: NodeFireStore) => {
+  const nodeTags = getNodeTags(nodeData);
+  const convertedTags: LinkedKnowledgeNode[] = [];
+  for (let tag of nodeTags) {
+    const tagData = await retrieveNode(tag.node || "");
+    if (!tagData) {
+      continue;
+    }
+    convertedTags.push({
+      node: tag.node,
+      title: tagData.title,
+      content: tagData.content,
+      nodeImage: tagData.nodeImage,
+      nodeType: tagData.nodeType
+    });
+  }
+
+  return convertedTags
+}
+
 // Endpoint retrieving the node data and its direct parents,children and siblings
 // data based on the id requested.
 export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => {
@@ -215,21 +235,22 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     }
   }
   // Retrieve the content of all the tags of the node.
-  const nodeTags = getNodeTags(nodeData);
-  const convertedTags: LinkedKnowledgeNode[] = [];
-  for (let tag of nodeTags) {
-    const tagData = await retrieveNode(tag.node || "");
-    if (!tagData) {
-      continue;
-    }
-    convertedTags.push({
-      node: tag.node,
-      title: tagData.title,
-      content: tagData.content,
-      nodeImage: tagData.nodeImage,
-      nodeType: tagData.nodeType
-    });
-  }
+  const convertedTags: LinkedKnowledgeNode[] = await getFullNodeTag(nodeData)
+  // // // const nodeTags = getNodeTags(nodeData);
+  // // // const convertedTags: LinkedKnowledgeNode[] = [];
+  // // // for (let tag of nodeTags) {
+  // // //   const tagData = await retrieveNode(tag.node || "");
+  // // //   if (!tagData) {
+  // // //     continue;
+  // // //   }
+  // // //   convertedTags.push({
+  // // //     node: tag.node,
+  // // //     title: tagData.title,
+  // // //     content: tagData.content,
+  // // //     nodeImage: tagData.nodeImage,
+  // // //     nodeType: tagData.nodeType
+  // // //   });
+  // // // }
   // Retrieve the content of all the references of the node.
   const nodeReferences = getNodeReferences(nodeData);
   const convertedReferences: LinkedKnowledgeNode[] = [];

@@ -5,6 +5,7 @@ import {
   FilterValue,
   KnowledgeNode,
   ResponseAutocompleteFilter,
+  ResponseAutocompleteFullTag,
   ResponseAutocompleteProcessedReferencesFilter,
   ResponseAutocompleteSearch,
   ResponseAutocompleteTags,
@@ -80,4 +81,9 @@ export const getNodeData = async (nodeId: string): Promise<KnowledgeNode> => {
   if (!res?.data) { throw Error('invalid node') }
 
   return res.data.results
+};
+
+export const getFullTagAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullTag> => {
+  const response = await axios.get("/api/fullTagsAutocomplete", { params: { q: searchText } });
+  return response.data
 };

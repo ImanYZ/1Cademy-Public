@@ -1,7 +1,7 @@
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
 import { db } from "../lib/admin";
-import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "../src/knowledgeTypes";
+import { LinkedKnowledgeNode, NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "../src/knowledgeTypes";
 import { getNodeReferences } from "./helper";
 import indexCollection from "./populateIndex";
 
@@ -70,12 +70,12 @@ const getNodesData = (
     return Object.entries(nodeData.contributors || {})
       .map(
         cur =>
-          ({ ...cur[1], username: cur[0] } as {
-            fullname: string;
-            imageUrl: string;
-            reputation: number;
-            username: string;
-          })
+        ({ ...cur[1], username: cur[0] } as {
+          fullname: string;
+          imageUrl: string;
+          reputation: number;
+          username: string;
+        })
       )
       .sort((a, b) => (b.reputation = a.reputation))
       .map(contributor => ({
@@ -100,7 +100,6 @@ const getNodesData = (
     const institutionsNames = getInstitutionsName(nodeData);
     const tags = getNodeTags(nodeData);
     const references = getNodeReferences(nodeData);
-
     const titlesReferences = references.map(cur => cur.title || "").filter(cur => cur);
     const labelsReferences = references.map(cur => cur.label).filter(cur => cur);
 
@@ -118,17 +117,17 @@ const getNodesData = (
       id: nodeDoc.id,
       institutions,
       institutionsNames,
+      isTag: nodeData.isTag || false,
       labelsReferences,
       nodeImage: nodeData.nodeImage,
       nodeType: nodeData.nodeType,
-      isTag: nodeData.isTag || false,
       tags,
       title: nodeData.title || "",
       titlesReferences,
       updatedAt: nodeData.updatedAt?.toMillis() || 0,
       wrongs: nodeData.wrongs || 0
-    };
-  });
+    }
+  })
 };
 
 const retrieveNode = async (nodeId: string): Promise<NodeFireStore | null> => {
@@ -178,6 +177,22 @@ const getReferencesData = async (nodeDocs: FirebaseFirestore.QuerySnapshot<Fireb
   return { processedReferences };
 };
 
+const getFullTags = (
+  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
+): LinkedKnowledgeNode[] => {
+  return nodeDocs.docs
+    .map(cur => ({ nodeId: cur.id, ...(cur.data() as NodeFireStore) }))
+    .filter(cur => cur.isTag)
+    .map((tagData) => ({
+      node: tagData.nodeId,
+      title: tagData.title,
+      content: tagData.content,
+      nodeImage: tagData.nodeImage,
+      nodeType: tagData.nodeType
+    })
+    )
+}
+
 const fillInstitutionsIndex = async (forceReIndex?: boolean) => {
   const data = await getInstitutionsFirestore();
   const fields: CollectionFieldSchema[] = [
@@ -202,7 +217,7 @@ const fillNodesIndex = async (
   nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
   forceReIndex?: boolean
 ) => {
-  const data = getNodesData(nodeDocs);
+  const data = await getNodesData(nodeDocs);
   const fields: CollectionFieldSchema[] = [
     { name: "changedAtMillis", type: "int64" },
     { name: "content", type: "string" },
@@ -235,12 +250,22 @@ const fillReferencesIndex = async (
   await indexCollection("processedReferences", fieldsProcessedReferences, processedReferences, forceReIndex);
 };
 
+const fillFullTagsIndex = async (
+  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
+  forceReIndex?: boolean
+) => {
+  const data = await getFullTags(nodeDocs)
+  const fields: CollectionFieldSchema[] = [{ name: 'title', type: 'string' }]
+  await indexCollection('fullTags', fields, data, forceReIndex)
+}
+
 const main = async () => {
   await fillUsersIndex(true);
   await fillInstitutionsIndex(true);
   const nodeDocs = await db.collection("nodes").get();
   await fillNodesIndex(nodeDocs, true);
   await fillReferencesIndex(nodeDocs, true);
+  await fillFullTagsIndex(nodeDocs, true)
 };
 
 main();

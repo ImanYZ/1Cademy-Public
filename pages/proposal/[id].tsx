@@ -13,7 +13,9 @@ const NodeProposal = () => {
 
   const nodeId = router.query.id as string;
 
-  const { data, isLoading } = useQuery(["nodeData", nodeId], () => getNodeData(nodeId));
+  const { data, isLoading } = useQuery(["nodeData", nodeId], () => getNodeData(nodeId),
+    { enabled: Boolean(nodeId) }
+  );
 
   console.log('data', data)
 

@@ -1,24 +1,21 @@
 import CloseIcon from '@mui/icons-material/Close';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { LoadingButton } from '@mui/lab'
-import { Autocomplete, Box, Button, Card, CardContent, Divider, FormControl, IconButton, InputLabel, Link, TextField, Tooltip, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Card, CardContent, Divider, IconButton, InputLabel, Link, TextField, Tooltip, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { FC, ReactNode, useState } from 'react'
-import { useQuery } from 'react-query';
 
-import { getTagsAutocomplete } from '../lib/knowledgeApi';
-import { getNodePageUrl, getReferenceTitle, isValidHttpUrl } from '../lib/utils';
+import { getNodePageUrl, isValidHttpUrl } from '../lib/utils';
 import { KnowledgeNode, LinkedKnowledgeNode } from '../src/knowledgeTypes'
+import { FullReferencesAutocomplete } from './FullReferencesAutocomplete';
+import { FullTagAutocomplete } from './FullTagAutocomplete';
 import { ImageUploader } from './ImageUploader'
 import { LinkedReference } from './LinkedReference';
-import { LinkedTag } from './LinkedTag';
 import MarkdownRender from './Markdown/MarkdownRender'
 import { MarkdownHelper } from './MarkdownHelper'
 import NodeTypeIcon from './NodeTypeIcon'
-import QuestionItem from './QuestionItem'
 import { Searcher } from './Searcher';
 
 dayjs.extend(relativeTime);
@@ -37,12 +34,12 @@ type Props = {
   tags?: ReactNode;
 }
 
-export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, tags }) => {
+export const NodeItemFullEditor: FC<Props> = ({ node }) => {
   const [fileImage, setFileImage] = useState(null)
-  const [nodeTags, setNodeTags] = useState(node.tags || [])
+  // const [nodeTags, setNodeTags] = useState(node.tags || [])
   const [nodeReferences, setNodeReferences] = useState<LinkedKnowledgeNode[]>(node.references || [])
-  const [searchText, setSearchText] = useState('')
-  const { data, isLoading } = useQuery(["tags", searchText], () => getTagsAutocomplete(searchText));
+
+  // const [tagsSelected, setTagsSelected] = useState<LinkedKnowledgeNode[]>([])
 
   const initialValues: ProposalFormValues = {
     title: node.title || '',
@@ -65,20 +62,6 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
     console.log('[submit proposal]', values)
 
     setSubmitting(true)
-  }
-
-  const getReferenceContent = (el: LinkedKnowledgeNode) => {
-    return isValidHttpUrl(el.label)
-      ? `${el.title}:  ${el.label}`
-      : el.title || ""
-  }
-
-  const onRemoveTag = (nodeTag: string) => {
-    setNodeTags(currentTags => currentTags.filter(cur => cur.node !== nodeTag))
-  }
-
-  const onRemoveReferences = (referenceNode: string) => {
-    setNodeReferences(currentReferences => currentReferences.filter(cur => cur.node !== referenceNode))
   }
 
   return (
@@ -186,97 +169,10 @@ export const NodeItemFullEditor: FC<Props> = ({ node, contributors, references, 
 
               <Divider sx={{ my: '32px' }} />
 
-              <Box sx={{ mb: '32px' }}>
-                {/* tags */}
-                <InputLabel htmlFor="tag-searcher" sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  mb: '16px',
-                  color: theme => theme.palette.grey[600]
-                }}>
-                  <LocalOfferIcon fontSize='small' sx={{
-                    mr: '10px',
-                    color: theme => theme.palette.grey[400]
-                  }} />Tags
-                </InputLabel>
-                <Autocomplete
-                  id="tag-searcher"
-                  freeSolo
-                  fullWidth
-                  options={data?.results || []}
-                  renderInput={(params) => <Searcher
-                    ref={params.InputProps.ref}
-                    inputBaseProps={params.inputProps}
-                  />}
-                  onChange={(e, v) => console.log('tag', e, v)}
-                  sx={{ mb: '16px' }}
-                />
-                {
-                  nodeTags.map((cur, idx) =>
-                    <LinkedTag
-                      node={cur.node}
-                      key={idx}
-                      nodeImageUrl={cur.nodeImage}
-                      nodeContent={cur.content}
-                      title={getReferenceTitle(cur)}
-                      linkSrc={getNodePageUrl(cur.title || "", cur.node)}
-                      openInNewTab
-                      onDelete={(node: string) => onRemoveTag(node)}
-                    />
-                  )
-                }
-              </Box>
+              <FullTagAutocomplete />
 
-              <Box>
-                {/* references */}
-                <InputLabel htmlFor="references-searcher" sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  mb: '16px',
-                  color: theme => theme.palette.grey[600]
-                }}>
-                  <MenuBookIcon fontSize='small' sx={{
-                    mr: '10px',
-                    color: theme => theme.palette.grey[400]
-                  }} />References
-                </InputLabel>
-                <Autocomplete
-                  id="references-searcher"
-                  freeSolo
-                  fullWidth
-                  onChange={(e, v) => console.log('references', e, v)}
-                  options={['r1', 'r2', 'r3']}
-                  renderInput={(params) => <Searcher
-                    ref={params.InputProps.ref}
-                    inputBaseProps={params.inputProps}
-                  />}
-                  sx={{ mb: '16px' }}
-                />
-                {nodeReferences.map((reference, idx) =>
-                  <React.Fragment key={idx}>
-                    {idx === 0 && <Divider />}
-                    <LinkedReference
-                      title={reference.title || ""}
-                      linkSrc={getNodePageUrl(reference.title || "", reference.node)}
-                      nodeType={reference.nodeType}
-                      nodeImageUrl={reference.nodeImage}
-                      nodeContent={getReferenceContent(reference)}
-                      showListItemIcon={false}
-                      label={reference.label || ""}
-                      sx={{ p: "20px 16px" }}
-                      openInNewTab
-                      secondaryActionSx={{ mr: "34px" }}
-                      secondaryAction={<IconButton
-                        sx={{ alignItems: 'center', justifyContent: 'flex-end' }}
-                        onClick={() => onRemoveReferences(reference.node)}
-                      >
-                        <CloseIcon />
-                      </IconButton>}
-                    />
-                    <Divider />
-                  </React.Fragment>
-                )}
-              </Box>
+              <FullReferencesAutocomplete />
+
             </form>
           )}
         </Formik>

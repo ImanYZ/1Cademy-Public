@@ -126,6 +126,11 @@ export type SimpleNode = {
   institutions: { name: string }[];
 };
 
+export type ResponseAutocompleteFullTags = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
 export type ResponseAutocompleteTags = {
   results?: string[];
   errorMessage?: string;
@@ -148,6 +153,7 @@ export type TypesenseNodesSchema = {
   id: string;
   institutions: { name: string }[];
   institutionsNames: string[]; // typesense
+  isTag: boolean; // typesense
   labelsReferences: string[]; // typesense
   nodeImage?: string;
   nodeType: NodeType; // typesense
@@ -157,7 +163,6 @@ export type TypesenseNodesSchema = {
   updatedAt: number;
   wrongs: number;
   mostHelpful: number; // typesense
-  isTag: boolean; // typesense
 };
 
 export type TypesenseReferencesSchema = {
@@ -166,6 +171,8 @@ export type TypesenseReferencesSchema = {
   title: string;
   label: string;
 };
+
+// tagsNodes: LinkedKnowledgeNode[]
 
 export type ResponseAutocompleteFilter = {
   results?: FilterValue[];
@@ -184,6 +191,11 @@ export type ResponseAutocompleteProcessedReferencesFilter = {
 
 export type ResponseAutocompleteSearch = {
   results?: string[];
+  errorMessage?: string;
+};
+
+export type ResponseAutocompleteFullTag = {
+  results?: LinkedKnowledgeNode[];
   errorMessage?: string;
 };
 
