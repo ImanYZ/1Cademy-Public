@@ -1,4 +1,5 @@
 import { Avatar, Box } from "@mui/material";
+import Image from "next/image";
 import React, { FC } from "react";
 
 type Props = {
@@ -40,7 +41,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           background: theme => theme.palette.common.white
         }}
       >
-        <img src={imageUrl} alt={name} width="33px" height="24px" />
+        <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
       </Box>
     );
   }
@@ -59,13 +60,14 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           color: theme => theme.palette.common.gray
         }}
       >
-        <img
+        <Image
           src={imageUrl}
           alt={name}
           width="46px"
           height="46px"
+          quality={40}
+          objectFit="cover"
           style={{
-            objectFit: "cover",
             borderRadius: "30px"
           }}
         />
@@ -76,7 +78,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
   // render an image without border
   return (
     <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <img src={imageUrl} alt={name} width="33px" height="24px" />
+      <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
     </Box>
   );
 };

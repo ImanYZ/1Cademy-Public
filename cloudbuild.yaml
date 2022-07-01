@@ -26,21 +26,23 @@ steps:
         "NEXT_PUBLIC_MEASUREMENT_ID"
       ]
   # Push the container image to Container Registry
-  # - name: "gcr.io/cloud-builders/docker"
-  #   args: ["push", "gcr.io/visualexp-a7d2c/knowledge"]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/visualexp-a7d2c/knowledge"]
   # Deploy container image to Cloud Run
-  # - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-  #   entrypoint: gcloud
-  #   args:
-  #     [
-  #       "run",
-  #       "deploy",
-  #       "knowledge",
-  #       "--image",
-  #       "gcr.io/visualexp-a7d2c/knowledge",
-  #       "--region",
-  #       "us-central1",
-  #     ]
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "run",
+        "deploy",
+        "knowledge",
+        "--image",
+        "gcr.io/visualexp-a7d2c/knowledge",
+        "--region",
+        "us-central1",
+        "--project",
+        "visualexp-a7d2c"
+      ]
 images:
   - gcr.io/visualexp-a7d2c/knowledge
 availableSecrets:
@@ -65,4 +67,4 @@ availableSecrets:
       env: "NEXT_PUBLIC_APP_ID"
     - versionName: projects/141114383555/secrets/NEXT_PUBLIC_MEASUREMENT_ID/versions/1
       env: "NEXT_PUBLIC_MEASUREMENT_ID"
-timeout: 1500s
+timeout: 2000s

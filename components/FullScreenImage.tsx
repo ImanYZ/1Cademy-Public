@@ -1,17 +1,20 @@
 import CloseIcon from "@mui/icons-material/Close";
 import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import Slide from "@mui/material/Slide";
 import Toolbar from "@mui/material/Toolbar";
 import { TransitionProps } from "@mui/material/transitions";
 import Typography from "@mui/material/Typography";
+import Image from "next/image";
 import React, { FC } from "react";
 
 type Props = {
   onClose: () => void;
   open: boolean;
   src: string;
+  alt: string;
 };
 
 const Transition = React.forwardRef(function Transition(
@@ -23,7 +26,7 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const FullScreenImage: FC<Props> = ({ src, open, onClose }) => {
+const FullScreenImage: FC<Props> = ({ src, open, onClose, alt }) => {
   return (
     <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
       <AppBar sx={{ position: "relative" }}>
@@ -36,7 +39,9 @@ const FullScreenImage: FC<Props> = ({ src, open, onClose }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <img src={src} width="100%" loading="lazy" />
+      <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+        <Image alt={alt} src={src} layout="fill" objectFit="contain" quality={100} />
+      </Box>
     </Dialog>
   );
 };

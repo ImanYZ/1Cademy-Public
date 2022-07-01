@@ -5,6 +5,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import { styled } from "@mui/system";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { FC } from "react";
 
@@ -41,7 +42,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
               mr: { xs: "20px", md: "0px" }
             }}
           >
-            <img src={LogoDarkMode.src} alt="logo" width="52px" />
+            <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
           </Box>
         </LightTooltip>
         <Tabs

@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import NextLink from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { getInstitutionsByName } from "../lib/firestore/institutions";
 import { getNodePageUrl } from "../lib/utils";
@@ -38,9 +38,9 @@ type NodeItemProps = {
 };
 
 export const NodeItem = ({ node }: NodeItemProps) => {
-  const ref = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const [institutionsData, setInstitutionsData] = useState<InstitutionData[]>([]);
+  const [paddingTop, setPaddingTop] = useState("0");
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -88,22 +88,33 @@ export const NodeItem = ({ node }: NodeItemProps) => {
           <CardActionArea sx={{ pt: { xs: 4, lg: 6 }, px: { xs: 5, lg: 10 }, pb: 2 }}>
             <CardHeader sx={{ p: 0, pb: 5 }} title={<MarkdownRender text={node.title || ""} />}></CardHeader>
 
-            <CardContent sx={{ p: 0 }}>
+            <CardContent sx={{ p: 0, height: "100%" }}>
               <Typography variant="body1" fontSize="0.9rem" component="div">
                 <MarkdownRender text={node.content || ""} />
               </Typography>
 
               {node.nodeType === "Question" && <QuestionItem choices={node.choices} />}
+
               {node.nodeImage && (
                 <Box
-                  ref={ref}
-                  component="img"
-                  sx={{ mt: 3 }}
-                  width="100%"
-                  src={node.nodeImage}
-                  alt={node.title}
-                  loading="lazy"
-                />
+                  style={{ paddingTop }}
+                  sx={{
+                    position: "relative"
+                  }}
+                >
+                  <Image
+                    src={node.nodeImage}
+                    alt={node.title}
+                    layout="fill"
+                    objectFit="contain"
+                    priority
+                    onLoad={({ target }) => {
+                      const { naturalWidth, naturalHeight } = target as HTMLImageElement;
+                      setPaddingTop(`calc(100% / (${naturalWidth} / ${naturalHeight})`);
+                    }}
+                    quality={50}
+                  />
+                </Box>
               )}
             </CardContent>
           </CardActionArea>
@@ -167,6 +178,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                               width={50}
                               height={50}
                               objectFit="cover"
+                              quality={40}
                             />
                           </Avatar>
                         </Tooltip>

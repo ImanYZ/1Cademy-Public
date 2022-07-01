@@ -30,7 +30,7 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
           label={el.label || ""}
           sx={{ p: "20px" }}
         />
-        {idx < src.length - 1 && <Divider />}
+        {idx < src.length - 1 && <Divider component="li" />}
       </React.Fragment>
     ));
   };
