@@ -44,7 +44,7 @@ export const InputMarkdown = () => {
     return <Leaf {...props} />;
   }, []);
 
-  console.log("VAL", val);
+  // console.log("VAL", val);
 
   return (
     <Slate editor={editor} value={initialValue} onChange={(value: Descendant[]) => setVal(value)}>
@@ -140,7 +140,7 @@ const Element = props => {
   }
 };
 const Leaf = ({ attributes, children, leaf }) => {
-  console.log({ attributes, children, leaf });
+  // console.log({ attributes, children, leaf });
 
   if (leaf.bold) {
     children = <span {...attributes}>{children}</span>;

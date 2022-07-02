@@ -1,7 +1,7 @@
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { Autocomplete, InputLabel } from '@mui/material'
 import { Box } from '@mui/system'
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import { useQuery } from 'react-query';
 import { useDebounce } from 'use-debounce';
 
@@ -17,15 +17,20 @@ import { Searcher } from './Searcher';
  *  - render de tags selected as Linked Tag (full information)
  */
 
-export const FullTagAutocomplete = () => {
+type FullTagAutocompleteProps = {
+  tagsSelected: LinkedKnowledgeNode[],
+  setTagsSelected: (newTagsSelected: LinkedKnowledgeNode[]) => void
+}
+
+export const FullTagAutocomplete: FC<FullTagAutocompleteProps> = ({ tagsSelected, setTagsSelected }) => {
 
   const [searchText, setSearchText] = useState('')
   const [searchTextDebounce] = useDebounce(searchText, 250);
   const { data } = useQuery(["fullTags", searchTextDebounce], () => getFullTagAutocomplete(searchTextDebounce));
-  const [tagsSelected, setTagsSelected] = useState<LinkedKnowledgeNode[]>([])
 
   const onRemoveTag = (nodeTag: string) => {
-    setTagsSelected(currentTags => currentTags.filter(cur => cur.node !== nodeTag))
+    const newTagsSelected = tagsSelected.filter(cur => cur.node !== nodeTag)
+    setTagsSelected(newTagsSelected)
   }
 
   const getTagsSuggestions = (): LinkedKnowledgeNode[] => {

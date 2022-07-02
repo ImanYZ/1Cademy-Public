@@ -9,6 +9,7 @@ type SearcherProps = {
   inputBaseProps: React.InputHTMLAttributes<HTMLInputElement>,
   searchText: string,
   onSearchTextChange: (searchText: string) => void,
+  onSearch?: () => void
 }
 
 export const Searcher = forwardRef<HTMLDivElement, SearcherProps>(({
@@ -16,9 +17,8 @@ export const Searcher = forwardRef<HTMLDivElement, SearcherProps>(({
   darkVersion = false,
   searchText,
   onSearchTextChange,
+  onSearch = undefined
 }, ref) => {
-
-  const handleSearch = () => { console.log('handle search') }
 
   return (
     <Box
@@ -51,7 +51,10 @@ export const Searcher = forwardRef<HTMLDivElement, SearcherProps>(({
         inputProps={{ ...inputBaseProps, "aria-label": "search node" }}
         sx={{ ml: 1, flex: 1, color: "inherit" }}
       />
-      <IconButton type="submit" sx={{ p: "5px", color: "inherit" }} aria-label="search" onClick={handleSearch}>
+      <IconButton
+        sx={{ p: "5px", color: "inherit" }}
+        aria-label="search"
+        onClick={onSearch}>
         <SearchIcon fontSize="small" />
       </IconButton>
     </Box>

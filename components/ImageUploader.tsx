@@ -34,7 +34,7 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
   return (
     <FormControl fullWidth sx={{ mt: "16px", mb: "8px" }}>
 
-      <Box sx={{ width: '100%', border: 'dashed', position: 'relative' }}>
+      <Box sx={{ width: '100%', position: 'relative' }}>
         {!imageURI && <label htmlFor="contained-button-file">
           <input
             accept="image/*"
@@ -43,10 +43,10 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
             type="file"
             hidden={true}
             onChange={onChangeImage} />
-          {!imageURI && <Button variant="outlined" component="span" color='secondary'>
+          <Button variant="outlined" component="span" color='secondary'>
             <ImageIcon sx={{ mr: "10px" }} />
             Upload image
-          </Button>}
+          </Button>
         </label>}
 
         {imageURI && <>
@@ -79,9 +79,18 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
                 </IconButton>
               </Tooltip>
             </Box>
-            <Button color='light' variant='outlined' sx={{ fontSize: '19px' }}>
-              Change Image
-            </Button>
+            <label htmlFor="button-file">
+              <input
+                accept="image/*"
+                id="button-file"
+                multiple
+                type="file"
+                hidden={true}
+                onChange={onChangeImage} />
+              <Button color='light' variant='outlined' component="span" sx={{ fontSize: '19px' }}>
+                Change Image
+              </Button>
+            </label>
           </Box>
           <img src={imageURI} style={{ width: '100%' }} />
         </>

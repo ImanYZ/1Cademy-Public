@@ -1,26 +1,19 @@
-import CloseIcon from '@mui/icons-material/Close';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { LoadingButton } from '@mui/lab'
-import { Autocomplete, Box, Button, Card, CardContent, Divider, IconButton, InputLabel, Link, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, CardContent, Divider, Link, TextField, Tooltip, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { FC, ReactNode, useState } from 'react'
 
-import { getNodePageUrl, isValidHttpUrl } from '../lib/utils';
-import { KnowledgeNode, LinkedKnowledgeNode } from '../src/knowledgeTypes'
-import { FullReferencesAutocomplete } from './FullReferencesAutocomplete';
-import { FullTagAutocomplete } from './FullTagAutocomplete';
+import { KnowledgeNode } from '../src/knowledgeTypes'
 import { ImageUploader } from './ImageUploader'
-import { LinkedReference } from './LinkedReference';
 import MarkdownRender from './Markdown/MarkdownRender'
 import { MarkdownHelper } from './MarkdownHelper'
 import NodeTypeIcon from './NodeTypeIcon'
-import { Searcher } from './Searcher';
 
 dayjs.extend(relativeTime);
 
-interface ProposalFormValues {
+export interface ProposalFormValues {
   title: string;
   content: string;
   file: any;
@@ -29,17 +22,13 @@ interface ProposalFormValues {
 
 type Props = {
   node: KnowledgeNode;
-  contributors?: ReactNode;
-  references?: ReactNode;
-  tags?: ReactNode;
+  imageUploader: ReactNode;
+  references: ReactNode;
+  tags: ReactNode;
+  onSubmit: (formValues: ProposalFormValues) => Promise<void>;
 }
 
-export const NodeItemFullEditor: FC<Props> = ({ node }) => {
-  const [fileImage, setFileImage] = useState(null)
-  // const [nodeTags, setNodeTags] = useState(node.tags || [])
-  const [nodeReferences, setNodeReferences] = useState<LinkedKnowledgeNode[]>(node.references || [])
-
-  // const [tagsSelected, setTagsSelected] = useState<LinkedKnowledgeNode[]>([])
+export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references, tags, onSubmit }) => {
 
   const initialValues: ProposalFormValues = {
     title: node.title || '',
@@ -51,16 +40,12 @@ export const NodeItemFullEditor: FC<Props> = ({ node }) => {
   const validate = (values: ProposalFormValues) => {
     let errors: FormikErrors<ProposalFormValues> = {}
     if (!values.title) { errors.title = "required" }
-    // if (!values.content) { errors.content = "required" }
-    // if (!values.file) { errors.file = "required" }
-    if (!values.reasons) { errors.reasons = "required" }
 
     return errors
   }
 
-  const onSubmit = async (values: ProposalFormValues, { setSubmitting }: FormikHelpers<ProposalFormValues>) => {
-    console.log('[submit proposal]', values)
-
+  const onSubmitForm = async (values: ProposalFormValues, { setSubmitting }: FormikHelpers<ProposalFormValues>) => {
+    await onSubmit(values)
     setSubmitting(true)
   }
 
@@ -74,7 +59,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node }) => {
           }
         }}
       >
-        <Formik initialValues={initialValues} validate={validate} onSubmit={onSubmit}>
+        <Formik initialValues={initialValues} validate={validate} onSubmit={onSubmitForm}>
           {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <form onSubmit={handleSubmit}>
 
@@ -154,7 +139,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node }) => {
                 </Typography>
               </Box>
 
-              <ImageUploader image={fileImage} setImage={setFileImage} defaultImageURI={node.nodeImage || ''} />
+              {imageUploader}
 
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <NodeTypeIcon nodeType={node.nodeType} />
@@ -168,11 +153,8 @@ export const NodeItemFullEditor: FC<Props> = ({ node }) => {
               </Box>
 
               <Divider sx={{ my: '32px' }} />
-
-              <FullTagAutocomplete />
-
-              <FullReferencesAutocomplete />
-
+              <Box>{tags}</Box>
+              <Box>{references}</Box>
             </form>
           )}
         </Formik>

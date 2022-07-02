@@ -13,22 +13,24 @@ import { Searcher } from "./Searcher";
 import TypographyUnderlined from "./TypographyUnderlined";
 
 type LinkedNodeEditorProps = {
-  initialNodes: LinkedKnowledgeNode[];
   header: string;
+  nodesSelected: LinkedKnowledgeNode[];
+  setNodesSelected: (newNodesSelected: LinkedKnowledgeNode[]) => void;
   sx?: SxProps<Theme>;
 }
 
-export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorProps) => {
+export const LinkedNodeEditor = ({ nodesSelected, setNodesSelected, header, sx }: LinkedNodeEditorProps) => {
 
   const [searchText, setSearchText] = useState('')
   const [searchTextDebounce] = useDebounce(searchText, 250);
   const { data } = useQuery(["fullLinkedNode", searchTextDebounce], () => getFullNodeAutocomplete(searchTextDebounce), {
     enabled: Boolean(searchTextDebounce)
   });
-  const [nodesSelected, setNodesSelected] = useState<LinkedKnowledgeNode[]>(initialNodes)
+  // const [nodesSelected, setNodesSelected] = useState<LinkedKnowledgeNode[]>(initialNodes)
 
   const onRemoveLinkedNode = (nodeTitle: string) => {
-    setNodesSelected(currentSelectedNodes => currentSelectedNodes.filter(cur => cur.title !== nodeTitle))
+    const newLinkedNode = nodesSelected.filter(cur => cur.title !== nodeTitle)
+    setNodesSelected(newLinkedNode)
   }
 
   const onInputChange = (event: React.SyntheticEvent<Element, Event>, query: string) => {
@@ -37,7 +39,7 @@ export const LinkedNodeEditor = ({ initialNodes, header, sx }: LinkedNodeEditorP
   };
 
   const onChangeMultiple = (e: any, node: any[]) => {
-    setNodesSelected(node.reverse())
+    setNodesSelected(node)
   }
 
   const renderLinkedNodes = () => {

@@ -2,11 +2,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { Autocomplete, Divider, IconButton, InputLabel } from '@mui/material'
 import { Box } from '@mui/system'
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import { useQuery } from 'react-query';
 import { useDebounce } from 'use-debounce';
 
-import { getFullReferencesAutocomplete, getFullTagAutocomplete } from '../lib/knowledgeApi';
+import { getFullReferencesAutocomplete } from '../lib/knowledgeApi';
 import { getNodePageUrl, getReferenceTitle } from '../lib/utils';
 import { LinkedKnowledgeNode } from '../src/knowledgeTypes';
 import { LinkedReference } from './LinkedReference';
@@ -18,11 +18,16 @@ import { Searcher } from './Searcher';
  *  - render de references selected as Linked Tag (full information)
  */
 
-export const FullReferencesAutocomplete = () => {
+type FullReferencesAutocompleteProps = {
+  referencesSelected: LinkedKnowledgeNode[],
+  setReferencesSelected: (newReferencesSelected: LinkedKnowledgeNode[]) => void
+}
+
+export const FullReferencesAutocomplete: FC<FullReferencesAutocompleteProps> = ({ referencesSelected, setReferencesSelected }) => {
   const [searchText, setSearchText] = useState('')
   const [searchTextDebounce] = useDebounce(searchText, 250);
   const { data } = useQuery(["fullReferences", searchTextDebounce], () => getFullReferencesAutocomplete(searchTextDebounce));
-  const [referencesSelected, setReferencesSelected] = useState<LinkedKnowledgeNode[]>([])
+  // const [referencesSelected, setReferencesSelected] = useState<LinkedKnowledgeNode[]>([])
 
   const getReferencesSuggestions = (): LinkedKnowledgeNode[] => {
     return data?.results || []
@@ -38,7 +43,8 @@ export const FullReferencesAutocomplete = () => {
   }
 
   const onRemoveReferences = (referenceNode: string) => {
-    setReferencesSelected(currentReferences => currentReferences.filter(cur => cur.node !== referenceNode))
+    const newReferencesSelected = referencesSelected.filter(cur => cur.node !== referenceNode)
+    setReferencesSelected(newReferencesSelected)
   }
 
   return (

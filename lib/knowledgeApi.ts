@@ -78,7 +78,6 @@ export const getSearchAutocomplete = async (searchText: string): Promise<Respons
 
 export const getNodeData = async (nodeId: string): Promise<KnowledgeNode> => {
 
-  console.log('nodeId', nodeId)
   const res = await axios.post("/api/nodeData", { nodeId });
   if (!res?.data) { throw Error('invalid node') }
 
