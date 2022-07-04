@@ -1,4 +1,4 @@
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Skeleton } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
@@ -45,15 +45,36 @@ const NodeProposal = () => {
     })
   }
 
+  const getLinkedNodesFallback = () => <Box>
+    <Skeleton variant="rectangular" width={'100%'} height={80} />
+    <Skeleton variant="rectangular" width={'100%'} height={30} sx={{ my: '20px' }} />
+    <Skeleton variant="rectangular" width={'100%'} height={120} />
+  </Box>
+
+  const getNodeItemFullEditorFallback = () => <Box>
+    <Skeleton variant="rectangular" width={'100%'} height={80} />
+    <Skeleton variant="text" width={'100%'} />
+    <Skeleton variant="text" width={'100px'} sx={{ ml: 'auto' }} />
+    <Box display='flex' sx={{ flexDirection: 'row-reverse' }}>
+      <Skeleton variant="rectangular" width={'200px'} height={36} sx={{ ml: '10px' }} />
+      <Skeleton variant="rectangular" width={'200px'} height={36} sx={{ ml: '10px' }} />
+    </Box>
+    <Skeleton variant="rectangular" width={'100%'} height={40} sx={{ my: '20px' }} />
+    <Skeleton variant="rectangular" width={'200px'} height={40} sx={{ my: '20px' }} />
+    <Skeleton variant="rectangular" width={'100%'} height={56} />
+    <Skeleton variant="rectangular" width={'100%'} height={125} />
+    <Skeleton variant="rectangular" width={'100%'} height={300} />
+  </Box>
+
+
   return (
     <PagesNavbar title={`1Cademy - New Proposal`} showSearch={false}>
-      {isLoading && <h1>Loading ...</h1>}
       <Box data-testid="node-editor-container" sx={{ p: { xs: 3, md: 10 } }}>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={3}>
             {
               isLoading
-                ? <h3>Loading parents ...</h3>
+                ? getLinkedNodesFallback()
                 : data?.parents && <LinkedNodeEditor
                   header="Learn Before"
                   nodesSelected={nodeParentsSelected}
@@ -64,7 +85,7 @@ const NodeProposal = () => {
           <Grid item xs={12} sm={12} md={6}>
             {
               isLoading
-                ? <h3>Loading node ...</h3>
+                ? getNodeItemFullEditorFallback()
                 : data
                   ? <NodeItemFullEditor
                     node={data}
@@ -95,7 +116,7 @@ const NodeProposal = () => {
           <Grid item xs={12} sm={12} md={3}>
             {
               isLoading
-                ? <h3>Loading children ...</h3>
+                ? getLinkedNodesFallback()
                 : data?.children && <LinkedNodeEditor
                   header="Learn After"
                   nodesSelected={nodeChildrenSelected}
