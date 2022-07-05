@@ -282,3 +282,18 @@ export type FeedbackInput = {
 export type Feedback = FeedbackInput & {
   createdAt: string;
 };
+
+export type ProposalInput = {
+  children: any[],
+  content: string,
+  nodeImage: string,
+  parents: any[],
+  referenceIds: any[],
+  referenceLabels: any[],
+  references: any[],
+  tagIds: any[],
+  tags: any[],
+  title: string,
+  node: string,
+  reason: string
+}
