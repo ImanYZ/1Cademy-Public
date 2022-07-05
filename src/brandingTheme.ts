@@ -51,7 +51,7 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       primary: {
         main: common.orange,
         ...(mode === "dark" && {
-          main: grey[500]
+          main: common.orange
         })
       },
       warning: {
