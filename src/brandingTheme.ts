@@ -220,6 +220,14 @@ export function getThemedComponents(): {
             textTransform: "none"
           }
         }
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            marginTop: 0,
+            height: 0
+          }
+        }
       }
     }
   };

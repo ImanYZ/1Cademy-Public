@@ -117,7 +117,7 @@ const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, 
               We’d love to hear your feedback and comments on anything on this website!
             </Typography>
 
-            <Stack component="form" onSubmit={formik.handleSubmit} direction="column" spacing={4} mt={2}>
+            <Stack component="form" onSubmit={formik.handleSubmit} direction="column" spacing={5} mt={2}>
               <TextField
                 label="Email"
                 id="email"
