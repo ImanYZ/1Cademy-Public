@@ -12,7 +12,7 @@ import { FieldArray, Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { FC, ReactNode } from 'react'
 
 import { NODE_TYPE_OPTIONS } from '../src/constants';
-import { KnowledgeNode, NodeType } from '../src/knowledgeTypes'
+import { KnowledgeChoice, KnowledgeNode, NodeType } from '../src/knowledgeTypes'
 import MarkdownRender from './Markdown/MarkdownRender'
 import { MarkdownHelper } from './MarkdownHelper'
 import NodeTypeIcon from './NodeTypeIcon'
@@ -24,7 +24,7 @@ export interface ProposalFormValues {
   content: string;
   reasons: string;
   nodeType: NodeType;
-  questions: { choice: string, feedback: string, correct: boolean }[];
+  questions: KnowledgeChoice[];
 }
 
 type Props = {
@@ -43,7 +43,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
     content: node.content || '',
     reasons: '',
     nodeType: node.nodeType || NodeType.Advertisement,
-    questions: [],
+    questions: node.choices ? [...node.choices] : [],
   }
 
   const validate = (values: ProposalFormValues) => {
