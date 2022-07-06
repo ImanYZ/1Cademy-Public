@@ -1,19 +1,21 @@
-import { Box, Grid, Skeleton } from "@mui/material";
+import { Box, Grid, Skeleton, Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 
 import { FullReferencesAutocomplete } from "../../components/FullReferencesAutocomplete";
+import FullScreenImage from "../../components/FullScreenImage";
 import { FullTagAutocomplete } from "../../components/FullTagAutocomplete";
-import { ImageUploader } from "../../components/ImageUploader";
 import { LinkedNodeEditor } from "../../components/LinkedNodeEditor";
 import { NodeItemFullEditor, ProposalFormValues } from "../../components/NodeItemFullEditor";
 import { getNodeData } from "../../lib/knowledgeApi";
-import { LinkedKnowledgeNode } from "../../src/knowledgeTypes";
+import { buildReferences, buildTags, mapLinkedKnowledgeNodeToLinkedNodeObject, mapLinkedKnowledgeNodeToLinkedNodeTag, mapReferencesNodeToTagsArrays } from "../../lib/utils";
+import { LinkedKnowledgeNode, ProposalInput } from "../../src/knowledgeTypes";
 import { PagesNavbar } from "..";
 
 const NodeProposal = () => {
   const router = useRouter();
+  const [imageFullScreen, setImageFullScreen] = useState(false);
   const nodeId = router.query.id as string;
   const { data, isLoading } = useQuery(
     ["nodeData", nodeId],
@@ -21,11 +23,11 @@ const NodeProposal = () => {
     { enabled: Boolean(nodeId) }
   );
 
+  const handleClickImageFullScreen = () => { setImageFullScreen(true) }
   const [nodeParentsSelected, setNodeParentsSelected] = useState<LinkedKnowledgeNode[]>([])
   const [nodeChildrenSelected, setNodeChildrenSelected] = useState<LinkedKnowledgeNode[]>([])
   const [nodeTagsSelected, setNodeTagsSelected] = useState<LinkedKnowledgeNode[]>([])
   const [nodeReferencesSelected, setNodeReferencesSelected] = useState<LinkedKnowledgeNode[]>([])
-  const [fileImage, setFileImage] = useState(null)
 
   useEffect(() => {
     if (data?.parents) { setNodeParentsSelected(data.parents) }
@@ -34,15 +36,22 @@ const NodeProposal = () => {
     if (data?.references) { setNodeReferencesSelected(data.references) }
   }, [data])
 
+
+
   const onSubmit = async (formValues: ProposalFormValues) => {
-    console.log('on submit from edit page', {
-      nodeParentsSelected,
-      nodeChildrenSelected,
-      nodeTagsSelected,
-      nodeReferencesSelected,
-      formValues,
-      fileImage
-    })
+    console.log('submit', nodeTagsSelected)
+    const data: ProposalInput = {
+      children: mapLinkedKnowledgeNodeToLinkedNodeObject(nodeChildrenSelected),
+      content: formValues.content,
+      node: nodeId,
+      parents: mapLinkedKnowledgeNodeToLinkedNodeObject(nodeParentsSelected),
+      reason: formValues.reasons,
+      ...buildReferences(nodeReferencesSelected),
+      ...buildTags(nodeTagsSelected),
+      title: formValues.title,
+    }
+
+    console.log('data', data)
   }
 
   const getLinkedNodesFallback = () => <Box>
@@ -89,13 +98,21 @@ const NodeProposal = () => {
                 : data
                   ? <NodeItemFullEditor
                     node={data}
-                    imageUploader={(
-                      <ImageUploader
-                        image={fileImage}
-                        setImage={setFileImage}
-                        defaultImageURI={data?.nodeImage || ''}
-                      />)
-                    }
+                    image={data.nodeImage ? (
+                      <Tooltip title="Click to view image in full-screen!">
+                        <Box
+                          onClick={handleClickImageFullScreen}
+                          sx={{
+                            display: "block",
+                            width: "100%",
+                            cursor: "pointer",
+                            mt: 3
+                          }}
+                        >
+                          <img src={data.nodeImage} width="100%" height="100%" loading="lazy" />
+                        </Box>
+                      </Tooltip>
+                    ) : null}
                     tags={(
                       <FullTagAutocomplete
                         tagsSelected={nodeTagsSelected}
@@ -125,6 +142,9 @@ const NodeProposal = () => {
             }
           </Grid>
         </Grid>
+        {data?.nodeImage && (
+          <FullScreenImage src={data.nodeImage} open={imageFullScreen} onClose={() => setImageFullScreen(false)} />
+        )}
       </Box>
     </PagesNavbar>
   );

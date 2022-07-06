@@ -9,6 +9,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const data = req.body.data as ProposalInput;
     const proposal = buildProposal(data)
 
+    const env = process.env.NODE_ENV
+
+    if (env === 'production') {
+
+    }
+
+    if (env === 'development') {
+
+    }
+
     await db.collection("conceptVersions").add({ ...data, createdAt: new Date() });
     res.status(200).end();
   } catch (error) {

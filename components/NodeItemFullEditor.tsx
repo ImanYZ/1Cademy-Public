@@ -4,7 +4,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, CardContent, Divider, FormControl, InputLabel, Link, MenuItem, Select, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, CardContent, Divider, FormControl, IconButton, InputLabel, Link, MenuItem, Select, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors';
 import dayjs from 'dayjs'
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -26,18 +26,18 @@ export interface ProposalFormValues {
   nodeType: NodeType;
   questionTitle: string,
   questionDescription: string,
-  questions: { choice: string, feedback: string }[];
+  questions: { choice: string, feedback: string, correct: boolean }[];
 }
 
 type Props = {
   node: KnowledgeNode;
-  imageUploader: ReactNode;
+  image: ReactNode;
   references: ReactNode;
   tags: ReactNode;
   onSubmit: (formValues: ProposalFormValues) => Promise<void>;
 }
 
-export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references, tags, onSubmit }) => {
+export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, onSubmit }) => {
 
   const initialValues: ProposalFormValues = {
     title: node.title || '',
@@ -46,12 +46,12 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
     nodeType: node.nodeType || NodeType.Advertisement,
     questionTitle: '',
     questionDescription: '',
-    questions: [{ choice: '', feedback: '' }],
+    questions: [],
   }
 
   const validate = (values: ProposalFormValues) => {
     let errors: FormikErrors<ProposalFormValues> = {}
-    const fillDefaultErrorQuestions = () => errors.questions = values.questions.map(_ => ({ choice: '', feedback: '' }))
+    const fillDefaultErrorQuestions = () => errors.questions = values.questions.map(() => ({ choice: '', feedback: '' }))
     if (!values.title) { errors.title = "required" }
     if (values.nodeType === NodeType.Question && !values.questionTitle) { errors.questionTitle = 'required' }
     if (values.questions.length) {
@@ -76,10 +76,16 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
     setTouched({
       title: true,
       questionTitle: true,
-      questions: values.questions.map(_ => ({ choice: true, feedback: true }))
+      questions: values.questions.map(() => ({ choice: true, feedback: true }))
     })
 
     await onSubmit(values)
+  }
+
+  const getToggleCorrectQuestion = (questions: { choice: string; feedback: string; correct: boolean; }[], index: number) => {
+    return questions.map((cur, idx) => idx === index
+      ? { ...cur, correct: !cur.correct }
+      : { ...cur })
   }
 
   return (
@@ -93,7 +99,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
         }}
       >
         <Formik initialValues={initialValues} validate={validate} onSubmit={onSubmitForm}>
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue, isValid }) => {
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => {
 
             return (
               <form onSubmit={handleSubmit}>
@@ -120,7 +126,8 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
                   </Typography>
                   <Box sx={{ pt: "20px", display: "flex", justifyContent: "end", gap: '10px' }}>
                     <Button color='secondary'>Cancel</Button>
-                    <LoadingButton disabled={!isValid} type="submit" color="primary" variant="contained" loading={isSubmitting} >
+                    <Button type='button' onClick={() => console.log(errors)}>errors</Button>
+                    <LoadingButton type="submit" color="primary" variant="contained" loading={isSubmitting} >
                       Propose changes
                     </LoadingButton>
                   </Box>
@@ -141,7 +148,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
                     onChange={(event: SelectChangeEvent) => {
                       const value = event.target.value as string
                       setFieldValue('nodeType', value)
-                      setFieldValue('questions', [])
+                      setFieldValue('questions', value === NodeType.Question ? [{ choice: '', feedback: '', correct: false }] : [])
                     }}
                   >
                     {
@@ -184,7 +191,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
                       fullWidth
                     />
 
-                    <Box sx={{ display: 'flex', color: grey[600] }}>
+                    <Box sx={{ display: 'flex', color: grey[600], my: '32px' }}>
                       <Typography>Add choices to your question</Typography> <HelpIcon sx={{ ml: '10px' }} />
                     </Box>
 
@@ -193,51 +200,65 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
                       {({ remove, push }) => (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {
-                            values.questions.map(({ choice, feedback }, idx) => (
-                              <Box key={idx} sx={{ background: '#fafafa', p: '16px' }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'end', gap: '10px', color: grey[600] }}>
-                                  <CheckIcon color='success' />
-                                  <CloseIcon color='error' />
-                                  <DeleteIcon onClick={() => remove(idx)} />
+                            values.questions.map(({ choice, feedback, correct }, idx) => (
+                              <Box key={idx} sx={{ display: 'flex' }}>
+                                <Box sx={{ pr: '23px' }}>
+                                  <IconButton onClick={() => setFieldValue(
+                                    'questions',
+                                    getToggleCorrectQuestion(values.questions, idx))
+                                  }>
+                                    {
+                                      correct
+                                        ? <CheckIcon color='success' />
+                                        : <CloseIcon color='error' />
+                                    }
+                                  </IconButton>
                                 </Box>
-                                <TextField
-                                  id={`questions.${idx}.choice`}
-                                  name={`questions.${idx}.choice`}
-                                  label={`Choice ${idx + 1} *`}
-                                  value={choice}
-                                  onChange={handleChange}
-                                  onBlur={handleBlur}
-                                  variant="standard"
-                                  margin='normal'
-                                  error={Boolean(
-                                    errors.questions &&
-                                    (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                    (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice &&
-                                    touched.questions &&
-                                    (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                    (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice
-                                  )}
-                                  fullWidth
-                                />
-                                <TextField
-                                  id={`questions.${idx}.feedback`}
-                                  name={`questions.${idx}.feedback`}
-                                  label={`Feedback for choice ${idx + 1} *`}
-                                  value={feedback}
-                                  onChange={handleChange}
-                                  onBlur={handleBlur}
-                                  error={Boolean(
-                                    errors.questions &&
-                                    (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                    (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback &&
-                                    touched.questions &&
-                                    (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                    (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback
-                                  )}
-                                  variant="standard"
-                                  margin='normal'
-                                  fullWidth
-                                />
+                                <Box sx={{ p: '16px', position: 'relative', background: '#fafafa' }}>
+                                  <Box sx={{ display: 'flex', justifyContent: 'end', gap: '10px', position: 'absolute', color: grey[600], right: '0px', top: '0px' }}>
+                                    <IconButton onClick={() => remove(idx)}>
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </Box>
+                                  <TextField
+                                    id={`questions.${idx}.choice`}
+                                    name={`questions.${idx}.choice`}
+                                    label={`Choice ${idx + 1} *`}
+                                    value={choice}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    variant="standard"
+                                    margin='dense'
+                                    error={Boolean(
+                                      errors.questions &&
+                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
+                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice &&
+                                      touched.questions &&
+                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
+                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice
+                                    )}
+                                    fullWidth
+                                  />
+                                  <TextField
+                                    id={`questions.${idx}.feedback`}
+                                    name={`questions.${idx}.feedback`}
+                                    label={`Feedback for choice ${idx + 1} *`}
+                                    value={feedback}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={Boolean(
+                                      errors.questions &&
+                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
+                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback &&
+                                      touched.questions &&
+                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
+                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback
+                                    )}
+                                    variant="standard"
+                                    margin='dense'
+                                    fullWidth
+                                  />
+                                </Box>
                               </Box>
                             ))
                           }
@@ -249,7 +270,6 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
                         </Box>
                       )}
                     </FieldArray>
-
                   </>
                 </Box>}
 
@@ -300,7 +320,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
                   </Typography>
                 </Box>
 
-                {imageUploader}
+                {image}
 
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <NodeTypeIcon nodeType={node.nodeType} />
@@ -321,12 +341,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, imageUploader, references,
           }}
         </Formik>
 
-        {/* {node.nodeType === "Question" && <QuestionItem choices={node.choices} />} */}
-
       </CardContent>
-      {/* {node.nodeImage && (
-        <FullScreenImage src={node.nodeImage} open={imageFullScreen} onClose={() => setImageFullScreen(false)} />
-      )} */}
     </Card >
   )
 }

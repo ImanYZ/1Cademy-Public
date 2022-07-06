@@ -4,6 +4,7 @@ import {
   FeedbackInput,
   FilterValue,
   KnowledgeNode,
+  ProposalInput,
   ResponseAutocompleteFilter,
   ResponseAutocompleteFullNodes,
   ResponseAutocompleteFullReferences,
@@ -77,7 +78,6 @@ export const getSearchAutocomplete = async (searchText: string): Promise<Respons
 };
 
 export const getNodeData = async (nodeId: string): Promise<KnowledgeNode> => {
-
   const res = await axios.post("/api/nodeData", { nodeId });
   if (!res?.data) { throw Error('invalid node') }
 
@@ -98,3 +98,8 @@ export const getFullNodeAutocomplete = async (searchText: string): Promise<Respo
   const response = await axios.get("/api/fullNodeAutocomplete", { params: { q: searchText } });
   return response.data
 };
+
+export const addProposal = async (data: ProposalInput): Promise<T> => {
+  const res = await axios.post("/api/addProposal", { data });
+  return res.data
+}

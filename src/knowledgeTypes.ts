@@ -45,6 +45,28 @@ export type KnowledgeChoice = {
   feedback: string;
 };
 
+export type ReferencesArray = {
+  referenceIds: string[],
+  referenceLabels: string[],
+  references: string[],
+}
+
+export type LinkedNodeObject = {
+  node: string,
+  title: string,
+  label: string
+}
+
+export type TagsArray = {
+  tagIds: string[],
+  tags: string[],
+}
+
+export type LinkedNodeTag = {
+  node: string,
+  title: string,
+}
+
 export type NodeFireStore = {
   aChooseUname?: boolean;
   aFullname?: string;
@@ -283,16 +305,43 @@ export type Feedback = FeedbackInput & {
   createdAt: string;
 };
 
-export type ProposalInput = {
-  children: any[],
+// export type ProposalInput = {
+//   children: any[],
+//   content: string,
+//   parents: any[],
+//   referenceIds: any[],
+//   referenceLabels: any[],
+//   references: any[],
+//   tagIds: any[],
+//   tags: any[],
+//   title: string,
+//   node: string,
+//   reason: string
+// }
+
+export type ProposalInputDevelop = {
+  children: LinkedNodeObject[],
   content: string,
-  nodeImage: string,
-  parents: any[],
-  referenceIds: any[],
-  referenceLabels: any[],
-  references: any[],
-  tagIds: any[],
-  tags: any[],
+  parents: LinkedNodeObject[],
+  referenceIds: string[],
+  referenceLabels: string[],
+  references: string[],
+  tagIds: string[],
+  tags: string[],
+  title: string,
+  node: string,
+  reason: string
+}
+
+export type ProposalInput = {
+  children: LinkedNodeObject[],
+  content: string,
+  parents: LinkedNodeObject[],
+  referenceIds?: string[];
+  referenceLabels?: string[];
+  references?: string[] | { node: string; title?: string; label?: string }[];
+  tagIds?: string[];
+  tags?: string[] | { node: string; title?: string; label?: string }[];
   title: string,
   node: string,
   reason: string
