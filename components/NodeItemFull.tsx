@@ -1,5 +1,6 @@
+import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from "@mui/icons-material/Reply";
-import { Button } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 import { CardContent } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -9,6 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from 'next/router';
 import { FC, ReactNode, useState } from "react";
 
 import { KnowledgeNode } from "../src/knowledgeTypes";
@@ -29,6 +31,7 @@ type Props = {
 };
 
 export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }) => {
+  const router = useRouter();
   const [imageFullScreen, setImageFullScreen] = useState(false);
   const [showShareButtons, setShowShareButtons] = useState(false);
   const handleClickImageFullScreen = () => {
@@ -94,12 +97,15 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
         >
           <Box
             sx={{
-              width: { xs: "100%", sm: "auto" },
+              width: { xs: "100%" },
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between"
+              justifyContent: "space-between",
+              border: 'dashed'
             }}
           >
+            <NodeVotes corrects={node.corrects} wrongs={node.wrongs} />
+
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <NodeTypeIcon nodeType={node.nodeType} />
               {node.changedAt && (
@@ -124,19 +130,10 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
                 {!showShareButtons && <Typography py="2px">Share</Typography>}
               </Button>
               {showShareButtons && <ShareButtons />}
+              <IconButton onClick={() => router.push({ pathname: `/proposal/${node.id}` })}>
+                <EditIcon />
+              </IconButton>
             </Box>
-          </Box>
-          <Box
-            sx={{
-              width: "100%",
-              pt: { xs: "20px", sm: "0px" },
-              display: "flex",
-              flex: 1,
-              justifyContent: "flex-end",
-              alignItems: { xs: "end", sm: "center" }
-            }}
-          >
-            <NodeVotes corrects={node.corrects} wrongs={node.wrongs} />
           </Box>
         </Box>
         <Divider sx={{ my: 8 }} />

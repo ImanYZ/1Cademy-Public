@@ -24,8 +24,6 @@ export interface ProposalFormValues {
   content: string;
   reasons: string;
   nodeType: NodeType;
-  questionTitle: string,
-  questionDescription: string,
   questions: { choice: string, feedback: string, correct: boolean }[];
 }
 
@@ -35,17 +33,16 @@ type Props = {
   references: ReactNode;
   tags: ReactNode;
   onSubmit: (formValues: ProposalFormValues) => Promise<void>;
+  onCancel: () => void
 }
 
-export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, onSubmit }) => {
+export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, onSubmit, onCancel }) => {
 
   const initialValues: ProposalFormValues = {
     title: node.title || '',
     content: node.content || '',
     reasons: '',
     nodeType: node.nodeType || NodeType.Advertisement,
-    questionTitle: '',
-    questionDescription: '',
     questions: [],
   }
 
@@ -53,7 +50,6 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
     let errors: FormikErrors<ProposalFormValues> = {}
     const fillDefaultErrorQuestions = () => errors.questions = values.questions.map(() => ({ choice: '', feedback: '' }))
     if (!values.title) { errors.title = "required" }
-    if (values.nodeType === NodeType.Question && !values.questionTitle) { errors.questionTitle = 'required' }
     if (values.questions.length) {
       values.questions.forEach(({ feedback, choice }, idx) => {
         if (!feedback) {
@@ -75,7 +71,6 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
     setSubmitting(true)
     setTouched({
       title: true,
-      questionTitle: true,
       questions: values.questions.map(() => ({ choice: true, feedback: true }))
     })
 
@@ -125,8 +120,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                     <Link>Log in</Link> to show your name in the contributors’ list and earn points for your helpful proposals
                   </Typography>
                   <Box sx={{ pt: "20px", display: "flex", justifyContent: "end", gap: '10px' }}>
-                    <Button color='secondary'>Cancel</Button>
-                    <Button type='button' onClick={() => console.log(errors)}>errors</Button>
+                    <Button onClick={onCancel} type='button' color='secondary'>Cancel</Button>
                     <LoadingButton type="submit" color="primary" variant="contained" loading={isSubmitting} >
                       Propose changes
                     </LoadingButton>
@@ -166,31 +160,6 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
 
                 {values.nodeType === NodeType.Question && <Box>
                   <>
-                    <TextField
-                      id="questionTitle"
-                      name="questionTitle"
-                      label="Question *"
-                      variant="outlined"
-                      margin="normal"
-                      value={values.questionTitle}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={Boolean(errors.questionTitle) && Boolean(touched.questionTitle)}
-                      fullWidth
-                    />
-                    <TextField
-                      id="questionDescription"
-                      name="questionDescription"
-                      label="Description"
-                      variant="outlined"
-                      margin="normal"
-                      value={values.questionDescription}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={Boolean(errors.questionDescription) && Boolean(touched.questionDescription)}
-                      fullWidth
-                    />
-
                     <Box sx={{ display: 'flex', color: grey[600], my: '32px' }}>
                       <Typography>Add choices to your question</Typography> <HelpIcon sx={{ ml: '10px' }} />
                     </Box>
@@ -263,7 +232,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                             ))
                           }
                           <Box>
-                            <Button color='secondary' onClick={() => push({ choice: '', feedback: '' })}>
+                            <Button color='secondary' onClick={() => push({ choice: '', feedback: '', correct: false })}>
                               <AddIcon sx={{ mr: '10px' }} />Add choice
                             </Button>
                           </Box>

@@ -8,7 +8,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const data = req.body.data as ProposalInput;
     const nodeType = req.body.nodeType as NodeType
-    console.log('-----------------> DATA', nodeType, data)
 
     let proposalNameCollection = ''
     if (nodeType === NodeType.Advertisement) { proposalNameCollection = 'advertisementVersions' }
@@ -26,7 +25,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     if (!proposalNameCollection) { return res.status(400).json({ errorMessage: "Cannot send feedback" }) }
 
-    console.log(' //-> WILL ADD')
     await db.collection(proposalNameCollection).add({ ...buildProposal(data) });
     res.status(200).end();
   } catch (error) {

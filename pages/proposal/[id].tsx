@@ -1,5 +1,6 @@
-import { Box, Grid, Skeleton, Tooltip } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Dialog, DialogActions, DialogTitle, Grid, Link, Skeleton, Snackbar, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/router";
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery } from "react-query";
 
@@ -9,13 +10,15 @@ import { FullTagAutocomplete } from "../../components/FullTagAutocomplete";
 import { LinkedNodeEditor } from "../../components/LinkedNodeEditor";
 import { NodeItemFullEditor, ProposalFormValues } from "../../components/NodeItemFullEditor";
 import { addProposal, getNodeData } from "../../lib/knowledgeApi";
-import { buildReferences, buildTags, mapLinkedKnowledgeNodeToLinkedNodeObject } from "../../lib/utils";
+import { buildReferences, buildTags, getNodePageUrl, mapLinkedKnowledgeNodeToLinkedNodeObject } from "../../lib/utils";
 import { LinkedKnowledgeNode, ProposalInput } from "../../src/knowledgeTypes";
 import { PagesNavbar } from "..";
 
 const NodeProposal = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const [imageFullScreen, setImageFullScreen] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const nodeId = router.query.id as string;
   const { data, isLoading } = useQuery(
     ["nodeData", nodeId],
@@ -29,7 +32,7 @@ const NodeProposal = () => {
   const [nodeTagsSelected, setNodeTagsSelected] = useState<LinkedKnowledgeNode[]>([])
   const [nodeReferencesSelected, setNodeReferencesSelected] = useState<LinkedKnowledgeNode[]>([])
 
-  const { mutate } = useMutation(addProposal, { mutationKey: 'addProposal' })
+  const { isLoading: isSavingProposal, mutateAsync } = useMutation(addProposal, { mutationKey: 'addProposal' })
 
   useEffect(() => {
     if (data?.parents) { setNodeParentsSelected(data.parents) }
@@ -39,7 +42,6 @@ const NodeProposal = () => {
   }, [data])
 
   const onSubmit = async (formValues: ProposalFormValues) => {
-    console.log('submit', nodeTagsSelected)
     const data: ProposalInput = {
       children: mapLinkedKnowledgeNodeToLinkedNodeObject(nodeChildrenSelected),
       content: formValues.content,
@@ -51,8 +53,28 @@ const NodeProposal = () => {
       title: formValues.title,
       choices: formValues.questions.length ? formValues.questions : undefined
     }
-    mutate({ data, nodeType: formValues.nodeType })
-    // console.log('data', data)
+    await mutateAsync({ data, nodeType: formValues.nodeType })
+    router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) })
+    enqueueSnackbar(
+      <Box sx={{ maxWidth: "428px" }}>
+        <Typography fontWeight={700}>
+          'We have received your proposal!'
+        </Typography>
+        <Typography>
+          Our community members will start reviewing your proposal.
+          Want to be invovled in the review process?
+          <Link
+            href="https://1cademy.us/home#JoinUsSection"
+            target="_blank"
+            rel="noreferrer"
+            sx={{ fontWeight: 700, color: 'white', cursor: 'pointer' }}
+          > Apply </Link>
+          to be a 1Cademy Member!
+        </Typography>
+      </Box>
+      , {
+        variant: 'success',
+      })
   }
 
   const getLinkedNodesFallback = () => <Box>
@@ -127,6 +149,7 @@ const NodeProposal = () => {
                       />)
                     }
                     onSubmit={onSubmit}
+                    onCancel={() => setShowConfirmation(true)}
                   />
                   : null
             }
@@ -146,8 +169,32 @@ const NodeProposal = () => {
         {data?.nodeImage && (
           <FullScreenImage src={data.nodeImage} open={imageFullScreen} onClose={() => setImageFullScreen(false)} />
         )}
+
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={isSavingProposal}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+
+        <Dialog
+          open={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          sx={{ width: '444px', m: 'auto' }}
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Are you sure you want to discard the changes?"}
+          </DialogTitle>
+
+          <DialogActions>
+            <Button variant="contained" onClick={() => setShowConfirmation(false)}>Cancel</Button>
+            <Button onClick={() => router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) })} autoFocus>
+              Yes, I'm sure
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
-    </PagesNavbar>
+    </PagesNavbar >
   );
 };
 

@@ -16,6 +16,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 
 import { getDesignTokens, getThemedComponents } from "../src/brandingTheme";
 import { createEmotionCache } from "../src/createEmotionCache";
+import { SnackbarProvider } from "notistack";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -62,8 +63,10 @@ const App = (props: ExtendedAppProps) => {
             <meta name="viewport" content="initial-scale=1, width=device-width" />
           </Head>
           <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Component {...pageProps} />
+            <SnackbarProvider maxSnack={3}>
+              <CssBaseline />
+              <Component {...pageProps} />
+            </SnackbarProvider>
           </ThemeProvider>
         </CacheProvider>
       </Hydrate>
