@@ -167,7 +167,7 @@ const NodeProposal = () => {
           </Grid>
         </Grid>
         {data?.nodeImage && (
-          <FullScreenImage src={data.nodeImage} open={imageFullScreen} onClose={() => setImageFullScreen(false)} />
+          <FullScreenImage alt={data.title || ''} src={data.nodeImage} open={imageFullScreen} onClose={() => setImageFullScreen(false)} />
         )}
 
         <Backdrop

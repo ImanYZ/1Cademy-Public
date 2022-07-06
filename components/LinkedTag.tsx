@@ -36,7 +36,7 @@ export const LinkedTag: FC<Props> = ({ node, nodeImageUrl, nodeContent, title, l
           </Typography>
           {nodeImageUrl && (
             <Box>
-              <img src={nodeImageUrl} width="100%" height="100%" />
+              <img alt="tag image" src={nodeImageUrl} width="100%" height="100%" />
             </Box>
           )}
         </Box>

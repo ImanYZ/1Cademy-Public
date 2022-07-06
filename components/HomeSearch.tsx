@@ -4,6 +4,8 @@ import Image from "next/image";
 import { forwardRef, MutableRefObject, useImperativeHandle, useRef } from "react";
 
 import { loadHomeSearchBackground, toBase64 } from "../lib/utils";
+import heroImage from "../public/LibraryBackground.jpg";
+import logoHero from "../public/LogoExtended.svg";
 import SearchInput from "./SearchInput";
 import Stats from "./Stats";
 
@@ -53,7 +55,7 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
       <Image
         style={{ filter: "brightness(.6)" }}
         alt="1cademy library"
-        src="/LibraryBackground.jpg"
+        src={heroImage}
         layout="fill"
         objectFit="cover"
         priority
@@ -70,7 +72,7 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
             }
           }}
         >
-          <Image src="/LogoExtended.svg" alt="1Cademy Logo" width="421px" height="130px" />
+          <Image src={logoHero} alt="1Cademy Logo" width="421px" height="130px" />
         </Box>
         <Box ref={containerRef} sx={{ width: "100%", mt: { xs: 15, md: 5 } }}>
           <SearchInput onSearch={onSearch}></SearchInput>

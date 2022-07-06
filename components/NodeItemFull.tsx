@@ -11,6 +11,7 @@ import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from 'next/router';
+import Image from "next/image";
 import { FC, ReactNode, useState } from "react";
 
 import { KnowledgeNode } from "../src/knowledgeTypes";
@@ -20,6 +21,7 @@ import NodeTypeIcon from "./NodeTypeIcon";
 import NodeVotes from "./NodeVotes";
 import QuestionItem from "./QuestionItem";
 import { ShareButtons } from "./ShareButtons";
+import ROUTES from '../src/routes';
 
 dayjs.extend(relativeTime);
 
@@ -37,6 +39,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
   const handleClickImageFullScreen = () => {
     setImageFullScreen(true);
   };
+  const [paddingTop, setPaddingTop] = useState("0");
 
   return (
     <Card data-testid="node-item-full">
@@ -72,15 +75,28 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
         {node.nodeImage && (
           <Tooltip title="Click to view image in full-screen!">
             <Box
+              style={{ paddingTop }}
               onClick={handleClickImageFullScreen}
               sx={{
                 display: "block",
+                position: "relative",
                 width: "100%",
+                height: "100%",
                 cursor: "pointer",
                 mt: 3
               }}
             >
-              <img src={node.nodeImage} width="100%" height="100%" loading="lazy" />
+              <Image
+                alt="node image"
+                src={node.nodeImage}
+                objectFit="contain"
+                layout="fill"
+                priority
+                onLoad={({ target }) => {
+                  const { naturalWidth, naturalHeight } = target as HTMLImageElement;
+                  setPaddingTop(`calc(100% / (${naturalWidth} / ${naturalHeight})`);
+                }}
+              />
             </Box>
           </Tooltip>
         )}
@@ -101,7 +117,6 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              border: 'dashed'
             }}
           >
             <NodeVotes corrects={node.corrects} wrongs={node.wrongs} />
@@ -130,7 +145,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
                 {!showShareButtons && <Typography py="2px">Share</Typography>}
               </Button>
               {showShareButtons && <ShareButtons />}
-              <IconButton onClick={() => router.push({ pathname: `/proposal/${node.id}` })}>
+              <IconButton onClick={() => router.push({ pathname: `${ROUTES.proposal}/${node.id}` })}>
                 <EditIcon />
               </IconButton>
             </Box>
@@ -142,7 +157,12 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
         <Box>{tags}</Box>
       </CardContent>
       {node.nodeImage && (
-        <FullScreenImage src={node.nodeImage} open={imageFullScreen} onClose={() => setImageFullScreen(false)} />
+        <FullScreenImage
+          alt={node.title || ""}
+          src={node.nodeImage}
+          open={imageFullScreen}
+          onClose={() => setImageFullScreen(false)}
+        />
       )}
     </Card>
   );

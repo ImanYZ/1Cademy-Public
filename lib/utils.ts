@@ -1,5 +1,7 @@
 import dayjs from "dayjs";
 import slugify from "slugify";
+import { APP_DOMAIN } from "src/1cademyConfig";
+import ROUTES from "src/routes";
 
 import { LinkedKnowledgeNode, LinkedNodeObject, LinkedNodeTag, ReferencesArray, SortTypeWindowOption, TagsArray, TimeWindowOption } from "../src/knowledgeTypes";
 
@@ -74,7 +76,11 @@ export const getNodePageURLTitle = (title: string | undefined, id: string) => {
 };
 
 export const getNodePageUrl = (title: string, id: string) => {
-  return `/${getNodePageURLTitle(title, id)}/${id}`;
+  return `${ROUTES.node}/${getNodePageURLTitle(title, id)}/${id}`;
+};
+
+export const getNodePageWithDomain = (title: string, id: string) => {
+  return `${APP_DOMAIN}${getNodePageUrl(title, id).slice(1)}`;
 };
 
 export const homePageSortByDefaults = {

@@ -48,7 +48,7 @@ export const ReferencesList = ({ references, sx }: ReferencesListProps) => {
                 sx={{ p: "30px 0px", mx: "5px" }}
                 secondaryActionSx={{ mr: "34px" }}
               />
-              <Divider />
+              <Divider component="li" />
             </React.Fragment>
           ))}
         </List>

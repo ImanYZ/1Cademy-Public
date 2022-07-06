@@ -1,8 +1,7 @@
 import NextHead from "next/head";
 import { useRouter } from "next/router";
 import { FC, ReactNode } from "react";
-
-const HOST = "https://1cademy.us";
+import { APP_DOMAIN } from "src/1cademyConfig";
 
 type Props = {
   title?: string;
@@ -17,7 +16,7 @@ const Head: FC<Props> = props => {
     children
   } = props;
   const router = useRouter();
-  const preview = `${HOST}/DarkmodeLogo.png`;
+  const preview = `${APP_DOMAIN}DarkmodeLogo.png`;
 
   return (
     <NextHead>
@@ -30,7 +29,7 @@ const Head: FC<Props> = props => {
       <meta name="twitter:image" content={preview} />
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
-      <meta property="og:url" content={`${HOST}${router.asPath}`} />
+      <meta property="og:url" content={`${APP_DOMAIN.slice(0, -1)}${router.asPath}`} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={preview} />
       <meta property="og:ttl" content="604800" />

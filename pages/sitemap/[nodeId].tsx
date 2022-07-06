@@ -2,22 +2,26 @@ import { GetServerSideProps } from "next";
 import { ParsedUrlQuery } from "querystring";
 
 import { db } from "../../lib/admin";
-import { getNodePageUrl } from "../../lib/utils";
+import { getNodePageWithDomain } from "../../lib/utils";
+
 function SiteMap() {
   // getServerSideProps will do the heavy lifting
 }
+
 interface Params extends ParsedUrlQuery {
   nodeId: string;
 }
+
 export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res, params }) => {
   if (!params)
     return {
       props: {}
     };
-  const tagDoc = await db.collection("nodes").doc(params.nodeId).get();
+  const nodeId = params.nodeId.replace(".xml", "");
+  const tagDoc = await db.collection("nodes").doc(nodeId).get();
   if (!tagDoc.exists) {
     res.writeHead(404, { "Content-Type": "text/xml" });
-    res.write("No Sitemap for Id: " + params.nodeId);
+    res.write(`<message>No Sitemap for Id: ${nodeId}</message>`);
     res.end();
   } else {
     const tagData = tagDoc.data();
@@ -25,13 +29,13 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
       .collection("nodes")
       .where("deleted", "==", false)
       .where("tags", "array-contains", {
-        node: params.nodeId,
+        node: nodeId,
         title: tagData?.title
       })
       .get();
     if (nodesDocs.docs.length === 0) {
       res.writeHead(404, { "Content-Type": "text/xml" });
-      res.write("No Sitemap!");
+      res.write(`<message>No child nodes found for Id: ${nodeId}</message>`);
       res.end();
     } else {
       let xmlContent =
@@ -40,7 +44,7 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
         const nodeData = nodeDoc.data();
         xmlContent += `
           <url>
-            <loc>https://node.1cademy.us${getNodePageUrl(nodeData.title, nodeDoc.id)}</loc>
+            <loc>${getNodePageWithDomain(nodeData.title, nodeDoc.id)}</loc>
             <lastmod>${nodeData.updatedAt.toDate().toISOString()}</lastmod>
             <changefreq>hourly</changefreq>
           </url>`;
@@ -55,4 +59,5 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
     props: {}
   };
 };
+
 export default SiteMap;

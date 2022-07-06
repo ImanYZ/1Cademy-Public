@@ -35,7 +35,7 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
             <NodeTypeIcon nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
           </ListItemIcon>}
         />
-        {idx < src.length - 1 && <Divider />}
+        {idx < src.length - 1 && <Divider component="li" />}
       </React.Fragment>
     ));
   };

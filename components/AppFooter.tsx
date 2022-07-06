@@ -40,7 +40,7 @@ export default function AppFooter() {
       >
         <Box sx={{ width: "177px" }}>
           <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
-            <NextImage src={logo1cademy} width="147px"></NextImage>
+            <NextImage alt="logo 1cademy" src={logo1cademy} width="147px"></NextImage>
           </Box>
           <Box sx={{ display: "flex", justifyContent: { xs: "center", md: "start" }, mt: "5px", mb: "30px" }}>
             <IconButton
@@ -50,14 +50,14 @@ export default function AppFooter() {
               href="https://www.youtube.com/channel/UCKBqMjvnUrxOhfbH1F1VIdQ/"
               sx={{ color: theme => theme.palette.common.white }}
             >
-              <NextImage src={iconYoutube} height="20px" />
+              <NextImage alt="Youtube channel" src={iconYoutube} height="20px" />
             </IconButton>
             <IconButton
               href="mailto:oneweb@umich.edu"
               sx={{ color: theme => theme.palette.common.white }}
               aria-label="Mail us"
             >
-              <NextImage src={iconEmail} height="20px" />
+              <NextImage alt="Email" src={iconEmail} height="20px" />
             </IconButton>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -147,7 +147,7 @@ export default function AppFooter() {
             }}
           >
             <Link
-              href="https://github.com/ImanYZ/VisualExp"
+              href="https://github.com/ImanYZ/1Cademy-Public/"
               target="_blank"
               rel="noreferrer"
               sx={{
@@ -161,7 +161,7 @@ export default function AppFooter() {
             <Typography color={theme => theme.palette.common.white} sx={{ display: { xs: "none", md: "block" } }}>
               We're committed to OpenSource on{" "}
               <Link
-                href="https://github.com/ImanYZ/VisualExp"
+                href="https://github.com/ImanYZ/1Cademy-Public/"
                 target="_blank"
                 rel="noreferrer"
                 sx={{
