@@ -202,12 +202,12 @@ export const mapLinkedKnowledgeNodeToLinkedNodeTag = (nodeTags: LinkedKnowledgeN
 
 export const buildReferences = (references: LinkedKnowledgeNode[]) => {
   const env = process.env.NODE_ENV
-  // if (env === 'development') { return mapLinkedKnowledgeNodeToReferencesArrays(references) }
+  if (env === 'development') { return mapLinkedKnowledgeNodeToReferencesArrays(references) }
   return { references: mapLinkedKnowledgeNodeToLinkedNodeObject(references) }
 }
 
 export const buildTags = (tags: LinkedKnowledgeNode[]) => {
   const env = process.env.NODE_ENV
-  // if (env === 'development') { return mapReferencesNodeToTagsArrays(tags) }
+  if (env === 'development') { return mapReferencesNodeToTagsArrays(tags) }
   return { tags: mapLinkedKnowledgeNodeToLinkedNodeTag(tags) }
 }

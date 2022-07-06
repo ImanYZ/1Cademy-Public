@@ -183,7 +183,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                                     }
                                   </IconButton>
                                 </Box>
-                                <Box sx={{ p: '16px', position: 'relative', background: '#fafafa' }}>
+                                <Box sx={{ width: '100%', p: '16px', position: 'relative', background: '#fafafa' }}>
                                   <Box sx={{ display: 'flex', justifyContent: 'end', gap: '10px', position: 'absolute', color: grey[600], right: '0px', top: '0px' }}>
                                     <IconButton onClick={() => remove(idx)}>
                                       <DeleteIcon />
