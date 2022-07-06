@@ -1,4 +1,30 @@
-import { Theme, ThemeOptions } from "@mui/material/styles";
+import { PaletteColor, PaletteColorOptions, Theme, ThemeOptions } from "@mui/material/styles";
+
+// interface ExtraPalette {
+//   orange: {
+//     main: string;
+//     light?: string;
+//     dark?: string;
+//     contrastText?: string;
+//   };
+// }
+// declare module '@mui/material/styles' {
+
+//   interface Palette {
+//     light: Palette['primary'];
+//   }
+//   interface PaletteOptions {
+//     light: PaletteOptions['primary'];
+//   }
+// }
+// // declare module '@mui/material/styles' {
+// //   interface Palette {
+// //     light: PaletteColor
+// //   }
+// //   interface PaletteOptions {
+// //     light: PaletteColorOptions
+// //   }
+// // }
 
 declare module "@mui/material/styles/createPalette" {
   interface CommonColors {

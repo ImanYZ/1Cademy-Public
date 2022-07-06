@@ -1,5 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import { useRouter } from 'next/router';
 import React, { FC } from "react";

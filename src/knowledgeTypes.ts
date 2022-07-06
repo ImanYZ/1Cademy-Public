@@ -167,6 +167,11 @@ export type ResponseAutocompleteFullNodes = {
   errorMessage?: string;
 };
 
+export type ResponseGeneric = {
+  results?: string;
+  errorMessage?: string;
+};
+
 export type TypesenseNodesSchema = {
   changedAt: string;
   changedAtMillis: number; // typesense

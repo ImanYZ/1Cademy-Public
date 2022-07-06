@@ -10,14 +10,14 @@ type props = {
   defaultImageURI?: string
 }
 
-export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = '' }) => {
+export const ImageUploader: FC<props> = ({ setImage, defaultImageURI = '' }) => {
 
-  const [imageURI, setImageURI] = useState<string | ArrayBuffer | null>(defaultImageURI)
+  const [imageURI, setImageURI] = useState<string | null>(defaultImageURI)
 
   const onChangeImage = ((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       let reader = new FileReader();
-      reader.onload = (ev) => { ev.target && setImageURI(ev.target.result) }
+      reader.onload = (ev) => { ev.target && setImageURI(ev.target.result as string) }
       reader.readAsDataURL(e.target.files[0]);
       setImage(e.target.files[0])
     }
@@ -69,12 +69,12 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
           }}>
             <Box sx={{ position: 'absolute', top: '0px', right: '0px' }}>
               <Tooltip title='Restart to default value'>
-                <IconButton color='light' variant='outlined' sx={{ fontSize: '19px' }} onClick={onResetImage}>
+                <IconButton color='info' sx={{ fontSize: '19px' }} onClick={onResetImage}>
                   <RestartAltIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title='Remove Image'>
-                <IconButton color='light' variant='outlined' sx={{ fontSize: '19px' }} onClick={onRemoveImage}>
+                <IconButton color='info' sx={{ fontSize: '19px' }} onClick={onRemoveImage}>
                   <CloseIcon />
                 </IconButton>
               </Tooltip>
@@ -87,12 +87,13 @@ export const ImageUploader: FC<props> = ({ image, setImage, defaultImageURI = ''
                 type="file"
                 hidden={true}
                 onChange={onChangeImage} />
-              <Button color='light' variant='outlined' component="span" sx={{ fontSize: '19px' }}>
+              <Button color='info' variant='outlined' component="span" sx={{ fontSize: '19px' }}>
                 Change Image
               </Button>
             </label>
           </Box>
-          <img src={imageURI} style={{ width: '100%' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt='Image preview' src={imageURI} style={{ width: '100%' }} />
         </>
         }
       </Box>

@@ -13,7 +13,7 @@ import {
   ResponseAutocompleteProcessedReferencesFilter,
   ResponseAutocompleteSearch,
   ResponseAutocompleteTags,
-  ResponseNodeData,
+  ResponseGeneric,
   SearchNodesParams,
   SearchNodesResponse,
   StatsSchema
@@ -100,7 +100,7 @@ export const getFullNodeAutocomplete = async (searchText: string): Promise<Respo
   return response.data
 };
 
-export const addProposal = async ({ data, nodeType }: { data: ProposalInput, nodeType: NodeType }): Promise<T> => {
+export const addProposal = async ({ data, nodeType }: { data: ProposalInput, nodeType: NodeType }): Promise<ResponseGeneric> => {
   const res = await axios.post("/api/addProposal", { data, nodeType });
   return res.data
 }

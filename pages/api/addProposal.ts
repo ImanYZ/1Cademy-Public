@@ -26,7 +26,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (!proposalNameCollection) { return res.status(400).json({ errorMessage: "Cannot send feedback" }) }
 
     await db.collection(proposalNameCollection).add({ ...buildProposal(data) });
-    res.status(200).end();
+    res.status(200).json({ results: 'successful' })
   } catch (error) {
     console.error(error);
     res.status(500).json({ errorMessage: "Cannot send feedback" });

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ProposalInput } from '../src/knowledgeTypes'
 
 export const buildProposal = ({ children, choices, content, node, parents, referenceIds, referenceLabels, references, summary, tagIds, tags, title }: ProposalInput) => {

@@ -26,7 +26,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
 
   useEffect(() => {
     if (isLoading) return;
-    setSuggestions(data?.results || []);
+    setSuggestions(data?.results?.map(cur => cur.title || '') || []);
   }, [data, isLoading]);
 
   const handleSearch = (e: React.FormEvent) => {

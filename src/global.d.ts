@@ -1,4 +1,4 @@
-import { PaletteColor, PaletteColorOptions } from '@mui/material/styles'
+// import { PaletteColor, PaletteColorOptions } from '@mui/material/styles'
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 
@@ -32,11 +32,11 @@ declare module "slate" {
 
 // }
 
-declare module '@mui/material/styles' {
-  interface Palette {
-    light: PaletteColor
-  }
-  interface PaletteOptions {
-    light: PaletteColorOptions;
-  }
-}
+// declare module '@mui/material/styles' {
+//   interface Palette {
+//     light: PaletteColor
+//   }
+//   interface PaletteOptions {
+//     light: PaletteColorOptions;
+//   }
+// }

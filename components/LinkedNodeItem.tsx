@@ -1,7 +1,7 @@
 import LinkIcon from "@mui/icons-material/Link";
 import { IconButton, Link, ListItem, ListItemButton, ListItemText, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
-import ListItemIcon from "@mui/material/ListItemIcon";
+// import ListItemIcon from "@mui/material/ListItemIcon";
 import Typography from "@mui/material/Typography";
 import { SxProps, Theme } from "@mui/system";
 import LinkNext from "next/link";
@@ -12,7 +12,7 @@ import { isValidHttpUrl } from "../lib/utils";
 import { NodeType } from "../src/knowledgeTypes";
 import HtmlTooltip from "./HtmlTooltip";
 import MarkdownRender from "./Markdown/MarkdownRender";
-import NodeTypeIcon from "./NodeTypeIcon";
+// import NodeTypeIcon from "./NodeTypeIcon";
 
 type Props = {
   title: string;
@@ -31,7 +31,6 @@ const LinkedNodeItem: FC<Props> = ({
   nodeImageUrl,
   nodeContent,
   title,
-  nodeType,
   linkSrc,
   label,
   sx,
