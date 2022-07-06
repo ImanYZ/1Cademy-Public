@@ -305,34 +305,6 @@ export type Feedback = FeedbackInput & {
   createdAt: string;
 };
 
-// export type ProposalInput = {
-//   children: any[],
-//   content: string,
-//   parents: any[],
-//   referenceIds: any[],
-//   referenceLabels: any[],
-//   references: any[],
-//   tagIds: any[],
-//   tags: any[],
-//   title: string,
-//   node: string,
-//   reason: string
-// }
-
-export type ProposalInputDevelop = {
-  children: LinkedNodeObject[],
-  content: string,
-  parents: LinkedNodeObject[],
-  referenceIds: string[],
-  referenceLabels: string[],
-  references: string[],
-  tagIds: string[],
-  tags: string[],
-  title: string,
-  node: string,
-  reason: string
-}
-
 export type ProposalInput = {
   children: LinkedNodeObject[],
   content: string,
@@ -344,5 +316,6 @@ export type ProposalInput = {
   tags?: string[] | { node: string; title?: string; label?: string }[];
   title: string,
   node: string,
-  reason: string
+  summary: string,
+  choices?: KnowledgeChoice[];
 }

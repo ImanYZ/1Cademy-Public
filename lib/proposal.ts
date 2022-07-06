@@ -2,7 +2,7 @@ import React from 'react'
 
 import { ProposalInput } from '../src/knowledgeTypes'
 
-export const buildProposal = ({ children, content, parents, referenceIds, referenceLabels, references, tagIds, tags, title, node, reason }: ProposalInput) => {
+export const buildProposal = ({ children, content, node, parents, referenceIds, referenceLabels, references, summary, tagIds, tags, title }: ProposalInput) => {
     return {
         accepted: false,
         addedInstitContris: false,
@@ -24,7 +24,7 @@ export const buildProposal = ({ children, content, parents, referenceIds, refere
         referenceIds,       // FORM
         referenceLabels,    // FORM
         references,         // FORM
-        summary: reason,    // FORM:REASONING FOR WHY THEY PROPOSE THIS CHANGE.
+        summary,            // FORM: REASONING FOR WHY THEY PROPOSE THIS CHANGE.
         tagIds,             // FORM
         tags,               // FORM
         title,              // FORM

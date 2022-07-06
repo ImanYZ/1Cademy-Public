@@ -4,12 +4,14 @@ import { getFirestore } from "firebase-admin/firestore";
 
 declare global {
   var firebaseApp: App;
+  var hasConfigurations: boolean
 }
 
 // For production:
 // admin.initializeApp();
 
 require("dotenv").config();
+global.hasConfigurations = global.firebaseApp ? true : false
 
 const firebaseApp: App = global.firebaseApp
   ? global.firebaseApp
@@ -28,7 +30,7 @@ const firebaseApp: App = global.firebaseApp
         client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
         storageBucket: process.env.ONECADEMYCRED_STORAGE_BUCKET,
         databaseURL: process.env.ONECADEMYCRED_DATABASE_URL
-      } as any)
+      } as any),
     },
     "onecademy"
   ) as App);
@@ -49,7 +51,10 @@ const isFirestoreDeadlineError = (err: any) => {
   );
 };
 
-const db = getFirestore(firebaseApp);
+const db = getFirestore(firebaseApp)
+if (!global.hasConfigurations) {
+  db.settings({ ignoreUndefinedProperties: true })
+}
 
 // How many transactions/batchWrites out of 500 so far.
 // I wrote the following functions to easily use batchWrites wthout worrying about the 500 limit.

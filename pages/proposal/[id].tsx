@@ -1,15 +1,15 @@
 import { Box, Grid, Skeleton, Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 
 import { FullReferencesAutocomplete } from "../../components/FullReferencesAutocomplete";
 import FullScreenImage from "../../components/FullScreenImage";
 import { FullTagAutocomplete } from "../../components/FullTagAutocomplete";
 import { LinkedNodeEditor } from "../../components/LinkedNodeEditor";
 import { NodeItemFullEditor, ProposalFormValues } from "../../components/NodeItemFullEditor";
-import { getNodeData } from "../../lib/knowledgeApi";
-import { buildReferences, buildTags, mapLinkedKnowledgeNodeToLinkedNodeObject, mapLinkedKnowledgeNodeToLinkedNodeTag, mapReferencesNodeToTagsArrays } from "../../lib/utils";
+import { addProposal, getNodeData } from "../../lib/knowledgeApi";
+import { buildReferences, buildTags, mapLinkedKnowledgeNodeToLinkedNodeObject } from "../../lib/utils";
 import { LinkedKnowledgeNode, ProposalInput } from "../../src/knowledgeTypes";
 import { PagesNavbar } from "..";
 
@@ -29,14 +29,14 @@ const NodeProposal = () => {
   const [nodeTagsSelected, setNodeTagsSelected] = useState<LinkedKnowledgeNode[]>([])
   const [nodeReferencesSelected, setNodeReferencesSelected] = useState<LinkedKnowledgeNode[]>([])
 
+  const { mutate } = useMutation(addProposal, { mutationKey: 'addProposal' })
+
   useEffect(() => {
     if (data?.parents) { setNodeParentsSelected(data.parents) }
     if (data?.children) { setNodeChildrenSelected(data.children) }
     if (data?.tags) { setNodeTagsSelected(data.tags) }
     if (data?.references) { setNodeReferencesSelected(data.references) }
   }, [data])
-
-
 
   const onSubmit = async (formValues: ProposalFormValues) => {
     console.log('submit', nodeTagsSelected)
@@ -45,13 +45,14 @@ const NodeProposal = () => {
       content: formValues.content,
       node: nodeId,
       parents: mapLinkedKnowledgeNodeToLinkedNodeObject(nodeParentsSelected),
-      reason: formValues.reasons,
+      summary: formValues.reasons,
       ...buildReferences(nodeReferencesSelected),
       ...buildTags(nodeTagsSelected),
       title: formValues.title,
+      choices: formValues.questions.length ? formValues.questions : undefined
     }
-
-    console.log('data', data)
+    mutate({ data, nodeType: formValues.nodeType })
+    // console.log('data', data)
   }
 
   const getLinkedNodesFallback = () => <Box>

@@ -2,24 +2,32 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { db } from "../../lib/admin";
 import { buildProposal } from "../../lib/proposal";
-import { ProposalInput } from "../../src/knowledgeTypes";
+import { NodeType, ProposalInput } from "../../src/knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const data = req.body.data as ProposalInput;
-    const proposal = buildProposal(data)
+    const nodeType = req.body.nodeType as NodeType
+    console.log('-----------------> DATA', nodeType, data)
 
-    const env = process.env.NODE_ENV
+    let proposalNameCollection = ''
+    if (nodeType === NodeType.Advertisement) { proposalNameCollection = 'advertisementVersions' }
+    if (nodeType === NodeType.Code) { proposalNameCollection = 'codeVersions' }
+    if (nodeType === NodeType.Concept) { proposalNameCollection = 'conceptVersions' }
+    if (nodeType === NodeType.Idea) { proposalNameCollection = 'ideaVersions' }
+    if (nodeType === NodeType.News) { proposalNameCollection = 'newsVersions' }
+    if (nodeType === NodeType.Private) { proposalNameCollection = 'privateVersions' }
+    if (nodeType === NodeType.Profile) { proposalNameCollection = 'profileVersions' }
+    if (nodeType === NodeType.Question) { proposalNameCollection = 'questionVersions' }
+    if (nodeType === NodeType.Reference) { proposalNameCollection = 'referenceVersions' }
+    if (nodeType === NodeType.Relation) { proposalNameCollection = 'relationVersions' }
+    if (nodeType === NodeType.Sequel) { proposalNameCollection = 'sequelVersions' }
+    if (nodeType === NodeType.Tag) { proposalNameCollection = 'tagVersions' }
 
-    if (env === 'production') {
+    if (!proposalNameCollection) { return res.status(400).json({ errorMessage: "Cannot send feedback" }) }
 
-    }
-
-    if (env === 'development') {
-
-    }
-
-    await db.collection("conceptVersions").add({ ...data, createdAt: new Date() });
+    console.log(' //-> WILL ADD')
+    await db.collection(proposalNameCollection).add({ ...buildProposal(data) });
     res.status(200).end();
   } catch (error) {
     console.error(error);

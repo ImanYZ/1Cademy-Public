@@ -4,6 +4,7 @@ import {
   FeedbackInput,
   FilterValue,
   KnowledgeNode,
+  NodeType,
   ProposalInput,
   ResponseAutocompleteFilter,
   ResponseAutocompleteFullNodes,
@@ -99,7 +100,7 @@ export const getFullNodeAutocomplete = async (searchText: string): Promise<Respo
   return response.data
 };
 
-export const addProposal = async (data: ProposalInput): Promise<T> => {
-  const res = await axios.post("/api/addProposal", { data });
+export const addProposal = async ({ data, nodeType }: { data: ProposalInput, nodeType: NodeType }): Promise<T> => {
+  const res = await axios.post("/api/addProposal", { data, nodeType });
   return res.data
 }
