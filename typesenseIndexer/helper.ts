@@ -1,4 +1,4 @@
-import { NodeFireStore } from "../src/knowledgeTypes";
+import { NodeFireStore } from "./types";
 
 export const getNodeReferences = (nodeData: NodeFireStore) => {
   const references: { node: string; title?: string; label: string }[] = [];
