@@ -1,9 +1,35 @@
+require("dotenv").config();
+import { App, cert, initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
-import { db } from "../lib/admin";
-import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "../src/knowledgeTypes";
 import { getNodeReferences } from "./helper";
 import indexCollection from "./populateIndex";
+import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
+
+// Retrieve Job-defined env vars
+const { CLOUD_RUN_TASK_ATTEMPT = 0 } = process.env;
+// Retrieve User-defined env vars
+const CLOUD_RUN_TASK_INDEX = parseInt(process.env.CLOUD_RUN_TASK_INDEX || "0");
+
+const firebaseApp: App = initializeApp({
+  credential: cert({
+    type: process.env.ONECADEMYCRED_TYPE,
+    project_id: process.env.ONECADEMYCRED_PROJECT_ID,
+    private_key_id: process.env.ONECADEMYCRED_PRIVATE_KEY_ID,
+    private_key: process.env.ONECADEMYCRED_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    client_email: process.env.ONECADEMYCRED_CLIENT_EMAIL,
+    client_id: process.env.ONECADEMYCRED_CLIENT_ID,
+    auth_uri: process.env.ONECADEMYCRED_AUTH_URI,
+    token_uri: process.env.ONECADEMYCRED_TOKEN_URI,
+    auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
+    client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
+    storageBucket: process.env.ONECADEMYCRED_STORAGE_BUCKET,
+    databaseURL: process.env.ONECADEMYCRED_DATABASE_URL
+  } as any)
+});
+
+const db = getFirestore(firebaseApp);
 
 const getUsersFromFirestore = async () => {
   let users: { name: string; username: string; imageUrl: string }[] = [];
@@ -236,11 +262,30 @@ const fillReferencesIndex = async (
 };
 
 const main = async () => {
-  await fillUsersIndex(true);
-  await fillInstitutionsIndex(true);
-  const nodeDocs = await db.collection("nodes").get();
-  await fillNodesIndex(nodeDocs, true);
-  await fillReferencesIndex(nodeDocs, true);
+  console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
+  console.log(`Begin indexing at ${new Date().toISOString()}`);
+  if (CLOUD_RUN_TASK_INDEX === 0) {
+    console.log("Index users tasks");
+    await fillUsersIndex(true);
+  }
+  if (CLOUD_RUN_TASK_INDEX === 1) {
+    console.log("Index Institutions task");
+    await fillInstitutionsIndex(true);
+  }
+  if (CLOUD_RUN_TASK_INDEX === 2) {
+    console.log("Index Nodes and References task");
+    const nodeDocs = await db.collection("nodes").get();
+    await fillNodesIndex(nodeDocs, true);
+    await fillReferencesIndex(nodeDocs, true);
+  }
+  console.log(`End indexing at ${new Date().toISOString()}`);
+  console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);
 };
 
-main();
+// Start script
+console.log("going to start the script");
+main().catch(err => {
+  console.log("Error occurred in typesense indexer:", err);
+  console.error(err);
+  process.exit(1); // Retry Job Task by exiting the process
+});

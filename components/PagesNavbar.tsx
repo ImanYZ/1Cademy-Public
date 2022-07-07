@@ -7,7 +7,7 @@ import React, { ComponentType, FC, ReactNode, useState } from "react";
 
 import AppHeaderNavbar from "./AppHeaderNavbar";
 import AppMenuMovil from "./AppMenuMovil";
-import { Feedback } from "./Feedback";
+import FeedbackForm from "./FeedbackForm";
 import Head from "./Head";
 
 type Props = {
@@ -74,7 +74,10 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
               }}
             >
               <ClickAwayListener onClickAway={() => setShowMobileFeedbackForm(false)}>
-                <Feedback onSuccessFeedback={() => setShowMobileFeedbackForm(false)} sx={{ padding: "30px 50px" }} />
+                <FeedbackForm
+                  onSuccessFeedback={() => setShowMobileFeedbackForm(false)}
+                  sx={{ padding: "30px 50px" }}
+                />
               </ClickAwayListener>
               <IconButton
                 aria-label="Close feedback"
@@ -97,7 +100,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
         placement="top-start"
         title={
           <ClickAwayListener onClickAway={() => setShowFeedbackForm(false)}>
-            <Feedback onSuccessFeedback={() => setShowFeedbackForm(false)} sx={{ padding: "40px 50px" }} />
+            <FeedbackForm onSuccessFeedback={() => setShowFeedbackForm(false)} sx={{ padding: "40px 50px" }} />
           </ClickAwayListener>
         }
         sx={{ display: { xs: "none", md: "block" } }}

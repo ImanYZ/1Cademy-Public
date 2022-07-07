@@ -10,14 +10,15 @@ import remarkMath from "remark-math";
 
 type Props = {
   text: string;
+  fontSize?: string;
 };
-const MarkdownRender: FC<Props> = ({ text }) => {
+const MarkdownRender: FC<Props> = ({ text, fontSize = "inherit" }) => {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        p: ({ ...props }) => <Typography fontSize={"inherit"} lineHeight={"inherit"} {...props} />,
+        p: ({ ...props }) => <Typography fontSize={fontSize} lineHeight={"inherit"} {...props} />,
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
