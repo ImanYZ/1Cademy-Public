@@ -15,8 +15,6 @@
     "deploy:storage": "firebase deploy --only storage",
     "deploy:functions": "firebase deploy --only functions",
     "prepare": "cd .. && husky install .husky",
-    "compileScripts": "cd scripts && tsc",
-    "runScripts": "cd scripts/dist/scripts && node index.js",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "jest --watch",

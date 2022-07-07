@@ -6,3 +6,8 @@ npm-debug.log
 
 .git
 .gitignore
+.next
+docker-compose.prod.yml
+
+#.dockerignore 
+.env
