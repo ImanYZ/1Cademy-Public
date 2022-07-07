@@ -1,5 +1,5 @@
 steps:
-  # Build the container image
+  # Build the container image for NextJS app
   - name: "gcr.io/cloud-builders/docker"
     entrypoint: "bash"
     args:
@@ -25,10 +25,17 @@ steps:
         "NEXT_PUBLIC_APP_ID_DEV",
         "NEXT_PUBLIC_MEASUREMENT_ID_DEV"
       ]
-  # Push the container image to Container Registry
+  # Build the indexer container image for Typesense indexer
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args: ["-c", "docker build -t gcr.io/visualexp-a7d2c/typesense-indexer -f typesenseIndexer.Dockerfile ."]
+  # Push the NextJS container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/visualexp-a7d2c/knowledge-dev"]
-  # Deploy container image to Cloud Run
+  # Push the Typesense Indexer container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/visualexp-a7d2c/typesense-indexer"]
+  # Deploy the NextJS container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -43,8 +50,28 @@ steps:
         "--project",
         "visualexp-a7d2c"
       ]
+  # Deploy Typesense indexer container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "beta",
+        "run",
+        "jobs",
+        "update",
+        "typesense-indexer",
+        "--image",
+        "gcr.io/visualexp-a7d2c/typesense-indexer",
+        "--tasks",
+        "3",
+        "--region",
+        "us-central1",
+        "--project",
+        "visualexp-a7d2c"
+      ]
 images:
   - gcr.io/visualexp-a7d2c/knowledge-dev
+  - gcr.io/visualexp-a7d2c/typesense-indexer
 availableSecrets:
   secretManager:
     - versionName: projects/141114383555/secrets/ONECADEMYCRED_PROJECT_ID_DEV/versions/1
