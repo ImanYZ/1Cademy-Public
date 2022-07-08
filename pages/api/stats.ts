@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getStats } from "../../lib/stats";
+import { getStats } from "../../lib/firestoreServer/stats";
 import { StatsSchema } from "../../src/knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<StatsSchema>) {

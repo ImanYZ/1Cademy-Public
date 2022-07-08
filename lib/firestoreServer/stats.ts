@@ -1,4 +1,4 @@
-import { StatsSchema } from "../src/knowledgeTypes";
+import { StatsSchema } from "../../src/knowledgeTypes";
 import { db } from "./admin";
 
 export const getStats = async (): Promise<StatsSchema> => {

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getContributorsForAutocomplete } from "../../lib/users";
+import { getContributorsForAutocomplete } from "../../lib/firestoreServer/users";
 import { getQueryParameter } from "../../lib/utils";
 import { FilterValue } from "../../src/knowledgeTypes";
 

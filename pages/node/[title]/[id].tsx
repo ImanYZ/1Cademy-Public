@@ -14,7 +14,7 @@ import NodeItemFullSkeleton from "../../../components/NodeItemFullSkeleton";
 import PagesNavbar from "../../../components/PagesNavbar";
 import { ReferencesList } from "../../../components/ReferencesList";
 import { TagsList } from "../../../components/TagsList";
-import { getAllNodeParamsForStaticProps, getNodeData } from "../../../lib/nodes";
+import { getAllNodeParamsForStaticProps, getNodeData } from "../../../lib/firestoreServer/nodes";
 import { escapeBreaksQuotes } from "../../../lib/utils";
 import { KnowledgeNode } from "../../../src/knowledgeTypes";
 

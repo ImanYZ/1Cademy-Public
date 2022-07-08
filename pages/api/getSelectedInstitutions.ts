@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getInstitutionsForAutocomplete } from "../../lib/institutions";
+import { getInstitutionsForAutocomplete } from "../../lib/firestoreServer/institutions";
 import { getQueryParameter } from "../../lib/utils";
 import { FilterValue } from "../../src/knowledgeTypes";
 

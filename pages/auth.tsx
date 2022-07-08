@@ -3,6 +3,7 @@ import { brown } from '@mui/material/colors'
 import React from 'react'
 
 import { SignInForm } from '../components/SignInForm';
+import { SignUpForm } from '../components/SignUpForm';
 
 
 const AuthPage = () => {
@@ -95,12 +96,10 @@ const AuthPage = () => {
                 }}
               >
                 <Tab label="LOG IN" sx={{ width: '50%', }} />
-                <Tab disabled={true} label="SIGN UP" sx={{ width: '50%', }} />
+                <Tab label="SIGN UP" sx={{ width: '50%', }} />
               </Tabs>
               {value === 0 && <SignInForm />}
-              {value === 1 && <Box>
-
-              </Box>}
+              {value === 1 && <SignUpForm />}
             </Box>
           </Box>
 

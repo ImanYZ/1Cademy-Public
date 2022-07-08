@@ -3,34 +3,35 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React from 'react'
 
-import { signIn } from '../lib/firestoreClient/auth';
+import { signIn, signUp } from '../lib/firestoreClient/auth';
 import { RE_EMAIL } from '../src/constants';
 
-interface SignInFormValues {
+interface SignUpFormValues {
+  name: string,
   email: string;
   password: string;
 }
 
-export const SignInForm = () => {
+export const SignUpForm = () => {
 
-  const initialValues: SignInFormValues = {
+  const initialValues: SignUpFormValues = {
+    name: '',
     email: '',
     password: ''
   }
 
-  const validate = (values: SignInFormValues) => {
-    let errors: FormikErrors<SignInFormValues> = {};
+  const validate = (values: SignUpFormValues) => {
+    let errors: FormikErrors<SignUpFormValues> = {};
     if (!values.email) errors.email = "Required"
     if (values.email && !RE_EMAIL.test(values.email)) errors.email = "Invalid email address"
     if (!values.password) errors.password = "Required"
     return errors;
   };
-  const onSubmit = async (values: SignInFormValues, { setSubmitting }: FormikHelpers<SignInFormValues>) => {
-    // await sendFeedback({ ...values, pageURL: url });
-    // setSuccessFeedback(true);
-    console.log('values', values)
-    const res = await signIn(values.email, values.password)
-    console.log('res', res)
+  const onSubmit = async (values: SignUpFormValues, { setSubmitting }: FormikHelpers<SignUpFormValues>) => {
+    console.log('values sing up', values)
+    // const res = await signIn(values.email, values.password)
+    await signUp(values.name, values.email, values.password)
+    // console.log('res', res)
     setSubmitting(false);
   };
 
@@ -44,6 +45,18 @@ export const SignInForm = () => {
       >
         {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
           <form onSubmit={handleSubmit}>
+            <TextField
+              id="name"
+              name="name"
+              label="Name"
+              value={values.name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              variant="outlined"
+              error={Boolean(errors.name) && Boolean(touched.name)}
+              fullWidth
+              sx={{ mb: '16px' }}
+            />
             <TextField
               id="email"
               name="email"
@@ -61,6 +74,7 @@ export const SignInForm = () => {
               id="password"
               name='password'
               label="Password"
+              type='password'
               value={values.password}
               onChange={handleChange}
               onBlur={handleBlur}

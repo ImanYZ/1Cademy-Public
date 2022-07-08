@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { db } from "../../lib/admin";
+import { db } from "../../lib/firestoreServer/admin";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {

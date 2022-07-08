@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
 
 import { generateFeedbackReport } from "../../lib/excel";
-import { getFeedback } from "../../lib/feedback";
+import { getFeedback } from "../../lib/firestoreServer/feedback";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {

@@ -15,7 +15,7 @@ import Image from "next/image";
 import NextLink from "next/link";
 import { useState } from "react";
 
-import { getInstitutionsByName } from "../lib/firestore/institutions";
+import { getInstitutionsByName } from "../lib/firestoreClient/institutions";
 import { getNodePageUrl } from "../lib/utils";
 import { SimpleNode } from "../src/knowledgeTypes";
 import ROUTES from "../src/routes";

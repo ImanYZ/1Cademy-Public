@@ -1,4 +1,4 @@
-import { Feedback } from "../src/knowledgeTypes";
+import { Feedback } from "../../src/knowledgeTypes";
 import { db } from "./admin";
 
 export const getFeedback = async (): Promise<Feedback[]> => {

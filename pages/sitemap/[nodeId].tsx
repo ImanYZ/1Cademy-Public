@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import { ParsedUrlQuery } from "querystring";
 
-import { db } from "../../lib/admin";
+import { db } from "../../lib/firestoreServer/admin";
 import { getNodePageWithDomain } from "../../lib/utils";
 
 function SiteMap() {

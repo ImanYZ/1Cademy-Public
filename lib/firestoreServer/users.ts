@@ -1,4 +1,4 @@
-import { FilterValue } from "../src/knowledgeTypes";
+import { FilterValue } from "../../src/knowledgeTypes";
 import { db } from "./admin";
 
 export const getContributorsForAutocomplete = async (users: string[]) => {

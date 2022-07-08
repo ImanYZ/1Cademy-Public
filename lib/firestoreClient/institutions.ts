@@ -1,9 +1,9 @@
 import { collection, getDocs, query, where } from "firebase/firestore/lite";
 
-import { db } from "./firestoreClient.config";
+import { dbClient } from "./firestoreClient.config";
 
 export const getInstitutionsByName = async (names: string[]) => {
-  const institutionsRef = collection(db, "institutions");
+  const institutionsRef = collection(dbClient, "institutions");
   const res = await Promise.all(
     names.map(async institutionName => {
       const q = query(institutionsRef, where("name", "==", institutionName));

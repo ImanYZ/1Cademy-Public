@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 
-import { getInstitutionsForAutocomplete } from "../../lib/institutions";
+import { getInstitutionsForAutocomplete } from "../../lib/firestoreServer/institutions";
 import { getTypesenseClient } from "../../lib/typesense/typesense.config";
 import {
   buildFilterBy,

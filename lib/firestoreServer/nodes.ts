@@ -7,7 +7,7 @@ import {
   KnowledgeNodeInstitution,
   LinkedKnowledgeNode,
   NodeFireStore
-} from "../src/knowledgeTypes";
+} from "../../src/knowledgeTypes";
 import { admin, batchSet, commitBatch, db } from "./admin";
 
 export const getAllNodeParamsForStaticProps = async () => {

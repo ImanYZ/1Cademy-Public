@@ -1,6 +1,6 @@
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
-import { db } from "../lib/admin";
+import { db } from "../lib/firestoreServer/admin";
 import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "../src/knowledgeTypes";
 import { getNodeReferences } from "./helper";
 import indexCollection from "./populateIndex";
@@ -70,12 +70,12 @@ const getNodesData = (
     return Object.entries(nodeData.contributors || {})
       .map(
         cur =>
-          ({ ...cur[1], username: cur[0] } as {
-            fullname: string;
-            imageUrl: string;
-            reputation: number;
-            username: string;
-          })
+        ({ ...cur[1], username: cur[0] } as {
+          fullname: string;
+          imageUrl: string;
+          reputation: number;
+          username: string;
+        })
       )
       .sort((a, b) => (b.reputation = a.reputation))
       .map(contributor => ({
