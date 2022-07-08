@@ -5,7 +5,7 @@ import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
 import { getNodeReferences } from "./helper";
 import indexCollection from "./populateIndex";
-import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences, LinkedKnowledgeNode } from "./types";
+import { LinkedKnowledgeNode, NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
 
 // Retrieve Job-defined env vars
 const { CLOUD_RUN_TASK_ATTEMPT = 0 } = process.env;
@@ -126,6 +126,7 @@ const getNodesData = (
     const institutionsNames = getInstitutionsName(nodeData);
     const tags = getNodeTags(nodeData);
     const references = getNodeReferences(nodeData);
+
     const titlesReferences = references.map(cur => cur.title || "").filter(cur => cur);
     const labelsReferences = references.map(cur => cur.label).filter(cur => cur);
 
@@ -143,17 +144,17 @@ const getNodesData = (
       id: nodeDoc.id,
       institutions,
       institutionsNames,
-      isTag: nodeData.isTag || false,
       labelsReferences,
       nodeImage: nodeData.nodeImage,
       nodeType: nodeData.nodeType,
+      isTag: nodeData.isTag || false,
       tags,
       title: nodeData.title || "",
       titlesReferences,
       updatedAt: nodeData.updatedAt?.toMillis() || 0,
       wrongs: nodeData.wrongs || 0
-    }
-  })
+    };
+  });
 };
 
 const retrieveNode = async (nodeId: string): Promise<NodeFireStore | null> => {
@@ -259,7 +260,7 @@ const fillNodesIndex = async (
   nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
   forceReIndex?: boolean
 ) => {
-  const data = await getNodesData(nodeDocs);
+  const data = getNodesData(nodeDocs);
   const fields: CollectionFieldSchema[] = [
     { name: "changedAtMillis", type: "int64" },
     { name: "content", type: "string" },
@@ -311,13 +312,27 @@ const fillFullReferencesIndex = async (
 }
 
 const main = async () => {
+  console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
+  console.log(`Begin indexing at ${new Date().toISOString()}`);
+  // if (CLOUD_RUN_TASK_INDEX === 0) {
+  console.log("Index users tasks");
   await fillUsersIndex(true);
+  // }
+  // if (CLOUD_RUN_TASK_INDEX === 1) {
+  console.log("Index Institutions task");
   await fillInstitutionsIndex(true);
+  // }
+  // if (CLOUD_RUN_TASK_INDEX === 2) {
+  console.log("Index Nodes and References task");
   const nodeDocs = await db.collection("nodes").get();
   await fillNodesIndex(nodeDocs, true);
   await fillReferencesIndex(nodeDocs, true);
+
   await fillFullTagsIndex(nodeDocs, true)
   await fillFullReferencesIndex(nodeDocs, true)
+  // }
+  console.log(`End indexing at ${new Date().toISOString()}`);
+  console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);
 };
 
 // Start script

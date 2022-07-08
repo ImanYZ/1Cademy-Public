@@ -6,7 +6,7 @@ import { FC, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
-import { getFullTagAutocomplete } from "../lib/knowledgeApi";
+import { getSearchAutocomplete } from "../lib/knowledgeApi";
 
 type Props = {
   onSearch: (text: string) => void;
@@ -18,7 +18,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
   const [searchText] = useDebounce(text, 250);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  const { data, isLoading } = useQuery(["searchAutocomplete", searchText], () => getFullTagAutocomplete(searchText));
+  const { data, isLoading } = useQuery(["searchAutocomplete", searchText], () => getSearchAutocomplete(searchText));
 
   useEffect(() => {
     setText((router.query.q as string) || "");
@@ -26,7 +26,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
 
   useEffect(() => {
     if (isLoading) return;
-    setSuggestions(data?.results?.map(cur => cur.title || '') || []);
+    setSuggestions(data?.results || [])
   }, [data, isLoading]);
 
   const handleSearch = (e: React.FormEvent) => {
