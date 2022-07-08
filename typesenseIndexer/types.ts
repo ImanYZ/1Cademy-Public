@@ -97,3 +97,12 @@ export enum NodeType {
   "Private" = "Private",
   "Tag" = "Tag"
 }
+
+export type LinkedKnowledgeNode = {
+  label?: string;
+  node: string;
+  title?: string;
+  content?: string;
+  nodeImage?: string;
+  nodeType: NodeType;
+};
