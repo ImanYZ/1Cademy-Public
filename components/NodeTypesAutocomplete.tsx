@@ -7,27 +7,13 @@ import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
 
 import { getQueryParameter } from "../lib/utils";
+import { NODE_TYPE_OPTIONS } from "../src/constants";
 import { NodeType } from "../src/knowledgeTypes";
 import NodeTypeIcon from "./NodeTypeIcon";
 
 type Props = {
   onNodesTypeChange: (newValues: string[]) => void;
 };
-
-const options: NodeType[] = [
-  NodeType.Advertisement,
-  NodeType.Code,
-  NodeType.Concept,
-  NodeType.Idea,
-  NodeType.News,
-  NodeType.Private,
-  NodeType.Profile,
-  NodeType.Question,
-  NodeType.Reference,
-  NodeType.Relation,
-  NodeType.Sequel,
-  NodeType.Tag
-];
 
 const NodeTypesAutocomplete: FC<Props> = ({ onNodesTypeChange }) => {
   const router = useRouter();
@@ -54,7 +40,7 @@ const NodeTypesAutocomplete: FC<Props> = ({ onNodesTypeChange }) => {
     <Tooltip title="There are six different types of nodes on 1Cademy: concept, relation, question, code, reference, and idea. You can tell the type of node by looking at the icon at the bottom-right corner of each node.">
       <Autocomplete
         multiple
-        options={options}
+        options={NODE_TYPE_OPTIONS}
         value={value}
         renderOption={(props, option) => (
           <li {...props}>

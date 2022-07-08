@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
-import { getNodePageUrl, isValidHttpUrl } from "../lib/utils";
+import { getNodePageUrl, getReferenceTitle } from "../lib/utils";
 import { LinkedKnowledgeNode } from "../src/knowledgeTypes";
 import { LinkedTag } from "./LinkedTag";
 
@@ -12,16 +12,8 @@ type TagsListProps = {
 };
 
 export const TagsList = ({ tags, sx }: TagsListProps) => {
-  const getReferenceTitle = (el: LinkedKnowledgeNode) => {
-    if (isValidHttpUrl(el.label)) {
-      return `${el.title}:  ${el.label}`;
-    }
-    return el.title || "";
-  };
 
-  if (!tags.length) {
-    return null;
-  }
+  if (!tags.length) return null
 
   return (
     <Box sx={{ ...sx }}>
@@ -32,6 +24,7 @@ export const TagsList = ({ tags, sx }: TagsListProps) => {
         {tags.map((node, idx) => (
           <LinkedTag
             key={idx}
+            node={node.node}
             title={getReferenceTitle(node)}
             linkSrc={getNodePageUrl(node.title || "", node.node)}
             nodeImageUrl={node.nodeImage}

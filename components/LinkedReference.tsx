@@ -2,7 +2,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import { IconButton, Link, ListItem, ListItemButton, ListItemText, Theme, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import LinkNext from "next/link";
-import React, { FC } from "react";
+import React, { FC, ReactNode } from "react";
 
 import { isValidHttpUrl } from "../lib/utils";
 import { NodeType } from "../src/knowledgeTypes";
@@ -18,10 +18,12 @@ type Props = {
   showListItemIcon?: boolean;
   label: string;
   sx?: SxProps<Theme>;
+  secondaryAction?: ReactNode;
   secondaryActionSx?: SxProps<Theme>;
+  openInNewTab?: boolean
 };
 
-export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, linkSrc, label, sx }) => {
+export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, linkSrc, label, sx, secondaryAction = null, openInNewTab = false }) => {
   return (
     <HtmlTooltip
       title={
@@ -43,6 +45,7 @@ export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, l
         sx={{ display: "flex", px: 0 }}
         secondaryAction={
           <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+            {secondaryAction}
             {isValidHttpUrl(label) && (
               <Tooltip title="Open the reference specified section in new tab">
                 <IconButton
@@ -64,11 +67,14 @@ export const LinkedReference: FC<Props> = ({ nodeImageUrl, nodeContent, title, l
           </Box>
         }
       >
-        <LinkNext passHref href={linkSrc}>
-          <ListItemButton component="a" href={linkSrc} sx={{ ...sx }}>
+        {!openInNewTab && <LinkNext passHref href={linkSrc}>
+          <ListItemButton component="a" sx={{ ...sx }}>
             <ListItemText primary={<MarkdownRender text={title || ""} />} disableTypography={true} />
           </ListItemButton>
-        </LinkNext>
+        </LinkNext>}
+        {openInNewTab && <ListItemButton component="a" href={`../${linkSrc}`} rel="noreferrer" target="_blank" sx={{ ...sx, p: '16px' }}>
+          <ListItemText primary={<MarkdownRender text={title} />} disableTypography={true} />
+        </ListItemButton>}
       </ListItem>
     </HtmlTooltip>
   );
