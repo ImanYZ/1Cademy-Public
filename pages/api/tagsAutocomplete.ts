@@ -19,6 +19,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
     apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string
   });
 
+  if (q.length === 0) {
+    res.status(200).json({ results: defaultTags || [] });
+    return;
+  }
+
   try {
     const searchParameters: SearchParams = { q, query_by: "title", filter_by: "isTag: true" };
     const searchResults = await client.collections<TypesenseNodesSchema>("nodes").documents().search(searchParameters);
@@ -29,5 +34,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
     res.status(500).json({ errorMessage: "Cannot get tags" });
   }
 }
+
+const defaultTags = [
+  "Study Conclusions",
+  "Classics",
+  "10 Usability Heuristics for User Interface Design",
+  "Data Science",
+  "Borderline Personality Disorder",
+  "Lemmatization",
+  "Social Perception",
+  "Library Science",
+  "Are Electronic Cigarettes Less Harmful than Traditional Cigarettes?",
+  "Cognitive Symptoms of Schizophrenia "
+];
 
 export default handler;
