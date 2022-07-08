@@ -14,7 +14,7 @@ import { FC, ReactNode, useState } from "react";
 
 import { KnowledgeNode } from "../src/knowledgeTypes";
 import FullScreenImage from "./FullScreenImage";
-import MarkdownRender from "./Markdown/MarkdownRender";
+import MarkdownRender from "./M../src/knowledgeTypes.oldr";
 import NodeTypeIcon from "./NodeTypeIcon";
 import NodeVotes from "./NodeVotes";
 import QuestionItem from "./QuestionItem";

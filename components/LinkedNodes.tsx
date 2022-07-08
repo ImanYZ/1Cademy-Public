@@ -8,7 +8,7 @@ import React from "react";
 
 import { getNodePageUrl } from "../lib/utils";
 import { LinkedKnowledgeNode } from "../src/knowledgeTypes";
-import LinkedNodeItem from "./LinkedNodeItem";
+import LinkedNodeItem from "./LinkedN../src/knowledgeTypes.old
 import TypographyUnderlined from "./TypographyUnderlined";
 
 type LinkedNodesProps = {

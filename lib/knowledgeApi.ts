@@ -17,7 +17,7 @@ export const getTagsAutocomplete = async (tagName: string): Promise<ResponseAuto
   return response.data;
 };
 
-export const getInstitutionsAutocomplete = async (institutionName: string): Promise<ResponseAutocompleteFilter> => {
+export c../ src / knowledgeTypes.oldutocomplete = async (institutionName: string): Promise<ResponseAutocompleteFilter> => {
   const response = await axios.get("/api/institutionsAutocomplete", { params: { q: institutionName } });
   return response.data;
 };

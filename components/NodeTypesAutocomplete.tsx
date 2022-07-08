@@ -8,7 +8,7 @@ import { FC, useEffect, useState } from "react";
 
 import { getQueryParameter } from "../lib/utils";
 import { NodeType } from "../src/knowledgeTypes";
-import NodeTypeIcon from "./NodeTypeIcon";
+import NodeTypeIcon from "../src/knowledgeTypesd
 
 type Props = {
   onNodesTypeChange: (newValues: string[]) => void;

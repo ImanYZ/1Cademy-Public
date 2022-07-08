@@ -9,7 +9,7 @@ import { FC } from "react";
 
 import { isValidHttpUrl } from "../lib/utils";
 import { NodeType } from "../src/knowledgeTypes";
-import HtmlTooltip from "./HtmlTooltip";
+import HtmlTooltip from ".../src/knowledgeTypes.old
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
 

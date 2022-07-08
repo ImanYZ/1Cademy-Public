@@ -3,7 +3,7 @@ import slugify from "slugify";
 import { APP_DOMAIN } from "src/1cademyConfig";
 import ROUTES from "src/routes";
 
-import { SortTypeWindowOption, TimeWindowOption } from "../src/knowledgeTypes";
+import { SortTypeWindowOption, TimeWindowOption } from "../src/knowledgeTypes";../src/knowledgeTypes.old
 
 export const isValidHttpUrl = (possibleUrl?: string) => {
   let url;

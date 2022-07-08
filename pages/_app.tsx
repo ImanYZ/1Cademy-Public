@@ -14,7 +14,8 @@ import { useMemo, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-import { getDesignTokens, getThemedComponents } from "../src/brandingTheme";
+import { getThemedComponents, lightTheme } from "../src/brandingTheme";
+// import { getDesignTokens, getThemedComponents } from "../src/brandingTheme.old";
 import { createEmotionCache } from "../src/createEmotionCache";
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -41,18 +42,19 @@ const App = (props: ExtendedAppProps) => {
       })
   );
   const theme = useMemo(() => {
-    const brandingDesignTokens = getDesignTokens("light");
-    let nextTheme = createTheme({
-      ...brandingDesignTokens,
-      palette: {
-        ...brandingDesignTokens.palette,
-        mode: "light"
-      }
-    });
+    // const brandingDesignTokens = getDesignTokens("light");
+    // let nextTheme = createTheme({
+    //   ...brandingDesignTokens,
+    //   palette: {
+    //     ...brandingDesignTokens.palette,
+    //     mode: "light"
+    //   }
+    // });
 
-    nextTheme = deepmerge(nextTheme, getThemedComponents());
+    const nextTheme = deepmerge(lightTheme, getThemedComponents());
     return nextTheme;
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,7 +1,4 @@
-import { createTheme } from '@mui/material'
-import { grey } from '@mui/material/colors';
 import { Theme, ThemeOptions } from "@mui/material/styles";
-import { TypographyOptions } from '@mui/material/styles/createTypography';
 
 declare module "@mui/material/styles/createPalette" {
   interface CommonColors {
@@ -25,67 +22,79 @@ const common = {
   gray: "#D3D3D3"
 };
 
-const ONE_ACADEMY_BLACK = '#28282A'
-const ONE_ACADEMY_ORANGE = '#FF8A33'
-const ONE_ACADEMY_WHITE = '#F8F8F8'
+const grey = {
+  50: "#fafafa",
+  100: "#f8f8f8",
+  200: "#eeeeee",
+  300: "#e0e0e0",
+  400: "#bdbdbd",
+  500: "#9e9e9e",
+  600: "#757575",
+  700: "#616161",
+  800: "#424242",
+  900: "#212121"
+};
 
 const systemFont = ["Roboto", "sans-serif"];
 
-const typography: TypographyOptions = {
-  fontFamily: [...systemFont].join(","),
-  h3: {},
-  button: {
-    textTransform: "initial"
-  }
-}
+export const getMetaThemeColor = (mode: "light" | "dark") => {
+  const themeColor = {
+    light: common.orange,
+    dark: common.orangeDark
+  };
+  return themeColor[mode];
+};
 
-export const lightTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: ONE_ACADEMY_ORANGE
+export const getDesignTokens = (mode: "light" | "dark") =>
+  ({
+    palette: {
+      primary: {
+        main: common.orange,
+        ...(mode === "dark" && {
+          main: grey[500]
+        })
+      },
+      warning: {
+        main: "#ffc071",
+        dark: "#ffb25e"
+      },
+      divider: mode === "dark" ? grey[200] : grey[200],
+      mode,
+      background: {
+        default: "#FAFAFA",
+        paper: common.white
+      },
+      ...(mode === "dark" && {
+        background: {
+          default: grey[600],
+          paper: grey[700]
+        }
+      }),
+      common,
+      ...(mode === "light" && {
+        text: {
+          primary: common.black,
+          secondary: grey[700]
+        }
+      }),
+      ...(mode === "dark" && {
+        text: {
+          primary: common.white,
+          secondary: grey[300]
+        }
+      }),
+      grey
     },
-    secondary: {
-      main: ONE_ACADEMY_BLACK
-    },
-    warning: {
-      main: "#ffc071",
-      dark: "#ffb25e"
-    },
-    text: {
-      primary: common.black,
-      secondary: grey[700]
-    },
-    divider: grey[200],
-    common
-  },
-  spacing: 5,
-  typography,
-});
-
-export const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: ONE_ACADEMY_ORANGE
-    },
-    secondary: {
-      main: ONE_ACADEMY_WHITE
-    },
-    warning: {
-      main: "#ffc071",
-      dark: "#ffb25e"
-    },
-    text: {
-      primary: common.white,
-      secondary: grey[300]
-    },
-    divider: grey[200],
-    common
-  },
-  spacing: 5,
-  typography
-});
+    spacing: 5,
+    typography: {
+      fontFamily: [...systemFont].join(","),
+      fontFamilySystem: systemFont.join(","),
+      h3: {},
+      button: {
+        textTransform: "initial"
+      }
+    }
+  } as ThemeOptions);
 
 export function getThemedComponents(): {
   components: Theme["components"];
@@ -204,10 +213,3 @@ export function getThemedComponents(): {
     }
   };
 }
-
-
-export const getMetaThemeColor = (mode: "light" | "dark") => {
-  if (mode === 'light') return common.orange
-  if (mode === 'dark') return common.orangeDark
-  return common.orange
-};

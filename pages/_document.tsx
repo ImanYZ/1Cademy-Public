@@ -3,7 +3,7 @@ import createEmotionServer from "@emotion/server/create-instance";
 import Document, { Head, Html, Main, NextScript } from "next/document";
 import { Children } from "react";
 
-import { getDesignTokens } from "../src/brandingTheme";
+import { getDesignTokens } from "../src/brandingTheme.old";
 import { createEmotionCache } from "../src/createEmotionCache";
 
 class CustomDocument extends Document {
@@ -72,12 +72,12 @@ CustomDocument.getInitialProps = async ctx => {
     originalRenderPage({
       // eslint-disable-next-line react/display-name
       enhanceApp: App => props =>
-        (
-          <App
-            {...props} // @ts-ignore
-            emotionCache={cache}
-          />
-        )
+      (
+        <App
+          {...props} // @ts-ignore
+          emotionCache={cache}
+        />
+      )
     });
 
   const initialProps = await Document.getInitialProps(ctx);
