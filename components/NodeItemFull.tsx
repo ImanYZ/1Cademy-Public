@@ -45,7 +45,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
     <Card data-testid="node-item-full">
       <CardHeader
         sx={{ px: { xs: 5, md: 10 }, pt: { xs: 4, md: 10 }, pb: 8 }}
-        title={<MarkdownRender text={node.title || ""} />}
+        title={<MarkdownRender fontSize="30px" text={node.title || ""} />}
       ></CardHeader>
       <CardContent
         sx={{
@@ -63,7 +63,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
             sx={{
               color: theme => theme.palette.common.black,
               lineHeight: 2,
-              fontSize: "1.2rem"
+              fontSize: "19px"
             }}
           >
             <MarkdownRender text={node.content || ""} />

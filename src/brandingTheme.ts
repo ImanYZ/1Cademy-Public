@@ -1,30 +1,4 @@
-import { PaletteColor, PaletteColorOptions, Theme, ThemeOptions } from "@mui/material/styles";
-
-// interface ExtraPalette {
-//   orange: {
-//     main: string;
-//     light?: string;
-//     dark?: string;
-//     contrastText?: string;
-//   };
-// }
-// declare module '@mui/material/styles' {
-
-//   interface Palette {
-//     light: Palette['primary'];
-//   }
-//   interface PaletteOptions {
-//     light: PaletteOptions['primary'];
-//   }
-// }
-// // declare module '@mui/material/styles' {
-// //   interface Palette {
-// //     light: PaletteColor
-// //   }
-// //   interface PaletteOptions {
-// //     light: PaletteColorOptions
-// //   }
-// // }
+import { Theme, ThemeOptions } from "@mui/material/styles";
 
 declare module "@mui/material/styles/createPalette" {
   interface CommonColors {
@@ -77,7 +51,7 @@ export const getDesignTokens = (mode: "light" | "dark") =>
     primary: {
       main: common.orange,
       ...(mode === "dark" && {
-        main: grey[500]
+        main: common.orange
       })
     },
     secondary: {
@@ -127,10 +101,11 @@ export const getDesignTokens = (mode: "light" | "dark") =>
   typography: {
     fontFamily: [...systemFont].join(","),
     fontFamilySystem: systemFont.join(","),
-    h3: {},
-    button: {
-      textTransform: "initial"
-    }
+    h1: { fontSize: "50px" },
+    h2: { fontSize: "30px" },
+    h3: { fontSize: "25px" },
+    h4: { fontSize: "23px" },
+    button: { textTransform: "initial" }
   }
 } as ThemeOptions);
 
@@ -245,6 +220,14 @@ export function getThemedComponents(): {
         styleOverrides: {
           root: {
             textTransform: "none"
+          }
+        }
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            marginTop: 0,
+            height: 0
           }
         }
       }
