@@ -20,9 +20,7 @@ import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
 
 import { sendFeedback } from "../lib/knowledgeApi";
-
-const RE_EMAIL =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/im;
+import { RE_EMAIL } from "../src/constants";
 
 interface FeedbackFormValues {
   email: string;
