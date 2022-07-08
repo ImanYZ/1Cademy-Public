@@ -5,7 +5,7 @@ import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
 import { getNodeReferences } from "./helper";
 import indexCollection from "./populateIndex";
-import { LinkedKnowledgeNode, NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
+import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
 
 // Retrieve Job-defined env vars
 const { CLOUD_RUN_TASK_ATTEMPT = 0 } = process.env;
@@ -204,38 +204,6 @@ const getReferencesData = async (nodeDocs: FirebaseFirestore.QuerySnapshot<Fireb
   return { processedReferences };
 };
 
-const getFullTags = (
-  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
-): LinkedKnowledgeNode[] => {
-  return nodeDocs.docs
-    .map(cur => ({ nodeId: cur.id, ...(cur.data() as NodeFireStore) }))
-    .filter(cur => cur.isTag)
-    .map((tagData) => ({
-      node: tagData.nodeId,
-      title: tagData.title,
-      content: tagData.content,
-      nodeImage: tagData.nodeImage,
-      nodeType: tagData.nodeType
-    })
-    )
-}
-
-const getFullRefereces = (
-  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
-): LinkedKnowledgeNode[] => {
-  return nodeDocs.docs
-    .map(cur => ({ nodeId: cur.id, ...(cur.data() as NodeFireStore) }))
-    .filter(cur => cur.nodeType === 'Reference')
-    .map((tagData) => ({
-      node: tagData.nodeId,
-      title: tagData.title,
-      content: tagData.content,
-      nodeImage: tagData.nodeImage,
-      nodeType: tagData.nodeType
-    })
-    )
-}
-
 const fillInstitutionsIndex = async (forceReIndex?: boolean) => {
   const data = await getInstitutionsFirestore();
   const fields: CollectionFieldSchema[] = [
@@ -293,44 +261,24 @@ const fillReferencesIndex = async (
   await indexCollection("processedReferences", fieldsProcessedReferences, processedReferences, forceReIndex);
 };
 
-const fillFullTagsIndex = async (
-  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
-  forceReIndex?: boolean
-) => {
-  const data = getFullTags(nodeDocs)
-  const fields: CollectionFieldSchema[] = [{ name: 'title', type: 'string' }]
-  await indexCollection('fullTags', fields, data, forceReIndex)
-}
-
-const fillFullReferencesIndex = async (
-  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
-  forceReIndex?: boolean
-) => {
-  const data = getFullRefereces(nodeDocs)
-  const fields: CollectionFieldSchema[] = [{ name: 'title', type: 'string' }]
-  await indexCollection('fullReferences', fields, data, forceReIndex)
-}
-
 const main = async () => {
   console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
   console.log(`Begin indexing at ${new Date().toISOString()}`);
-  // if (CLOUD_RUN_TASK_INDEX === 0) {
-  console.log("Index users tasks");
-  await fillUsersIndex(true);
-  // }
-  // if (CLOUD_RUN_TASK_INDEX === 1) {
-  console.log("Index Institutions task");
-  await fillInstitutionsIndex(true);
-  // }
-  // if (CLOUD_RUN_TASK_INDEX === 2) {
-  console.log("Index Nodes and References task");
-  const nodeDocs = await db.collection("nodes").get();
-  await fillNodesIndex(nodeDocs, true);
-  await fillReferencesIndex(nodeDocs, true);
+  if (CLOUD_RUN_TASK_INDEX === 0) {
+    console.log("Index users tasks");
+    await fillUsersIndex(true);
+  }
+  if (CLOUD_RUN_TASK_INDEX === 1) {
+    console.log("Index Institutions task");
+    await fillInstitutionsIndex(true);
+  }
+  if (CLOUD_RUN_TASK_INDEX === 2) {
+    console.log("Index Nodes and References task");
+    const nodeDocs = await db.collection("nodes").get();
+    await fillNodesIndex(nodeDocs, true);
+    await fillReferencesIndex(nodeDocs, true);
 
-  await fillFullTagsIndex(nodeDocs, true)
-  await fillFullReferencesIndex(nodeDocs, true)
-  // }
+  }
   console.log(`End indexing at ${new Date().toISOString()}`);
   console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);
 };
