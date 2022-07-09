@@ -5,11 +5,33 @@ import React, { useState } from 'react'
 
 import { signIn, signUp } from '../lib/firestoreClient/auth';
 import { RE_EMAIL } from '../src/constants';
+import { SignUpBasicInfo } from './SignUpBasicInfo';
+import { SignUpPersonalInfo } from './SignUpPersonalInfo';
+import { SignUpProfessionalInfo } from './SignUpProfessionalInfo';
 
-interface SignUpFormValues {
-  name: string,
-  email: string;
-  password: string;
+export interface SignUpFormValues {
+  firstName: string,
+  lastName: string,
+  email: string,
+  username: string,
+  password: string,
+  passwordConfirmation: string,
+  // -----------------------
+  language: string,
+  age: string,
+  gender: string,
+  ethnicity: string,
+  country: string,
+  state: string,
+  city: string,
+  reason: string,
+  foundFrom: string,
+  // -----------------------
+  occupation: string,
+  education: string,
+  institution: string,
+  major: string,
+  fieldOfInterest: string,
 }
 
 export const SignUpForm = () => {
@@ -18,13 +40,27 @@ export const SignUpForm = () => {
 
   const [activeStep, setActiveStep] = useState(0);
 
-
-
-
   const initialValues: SignUpFormValues = {
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    password: ''
+    username: '',
+    password: '',
+    passwordConfirmation: '',
+    language: '',
+    age: '',
+    gender: '',
+    ethnicity: '',
+    country: '',
+    state: '',
+    city: '',
+    reason: '',
+    foundFrom: '',
+    occupation: '',
+    education: '',
+    institution: '',
+    major: '',
+    fieldOfInterest: ''
   }
 
   const validate = (values: SignUpFormValues) => {
@@ -37,123 +73,54 @@ export const SignUpForm = () => {
   const onSubmit = async (values: SignUpFormValues, { setSubmitting }: FormikHelpers<SignUpFormValues>) => {
     console.log('values sing up', values)
     // const res = await signIn(values.email, values.password)
-    await signUp(values.name, values.email, values.password)
+    await signUp(values.username, values.email, values.password)
     // console.log('res', res)
     setSubmitting(false);
   };
 
-  return (
-    <Box sx={{ my: '92px' }}>
+  const onPrevioustStep = () => {
+    if (activeStep < 1) return
+    setActiveStep(step => step - 1)
+  }
 
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => {
+  const onNextStep = () => {
+    if (activeStep > steps.length - 2) return
+    setActiveStep(step => step + 1)
+  }
+
+  return (
+    <Box >
+
+      <Stepper activeStep={activeStep} sx={{ mt: '26px', mb: '46px', mx: '19px' }}>
+        {steps.map((label) => {
           const stepProps: { completed?: boolean } = {};
-          const labelProps: {
-            optional?: React.ReactNode;
-          } = {};
-          // if (isStepOptional(index)) {
-          //   labelProps.optional = (
-          //     <Typography variant="caption">Optional</Typography>
-          //   );
-          // }
-          // if (isStepSkipped(index)) {
-          //   stepProps.completed = false;
-          // }
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
-            </Step>
-          );
+          const labelProps: { optional?: React.ReactNode } = {};
+          return <Step key={label} {...stepProps} >
+            <StepLabel {...labelProps}>{label}</StepLabel>
+          </Step>
         })}
       </Stepper>
-      {/* {activeStep === steps.length ? (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Box sx={{ flex: '1 1 auto' }} />
-            <Button onClick={handleReset}>Reset</Button>
-          </Box>
-        </React.Fragment>
-      ) : (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Button
-              color="inherit"
-              disabled={activeStep === 0}
-              onClick={handleBack}
-              sx={{ mr: 1 }}
-            >
-              Back
-            </Button>
-            <Box sx={{ flex: '1 1 auto' }} />
-            {isStepOptional(activeStep) && (
-              <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                Skip
-              </Button>
-            )}
-            <Button onClick={handleNext}>
-              {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-            </Button>
-          </Box>
-        </React.Fragment>
-      )} */}
 
       <Formik
         initialValues={initialValues}
         validate={validate}
         onSubmit={onSubmit}
       >
-        {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-          <form onSubmit={handleSubmit}>
-            <TextField
-              id="name"
-              name="name"
-              label="Name"
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              variant="outlined"
-              error={Boolean(errors.name) && Boolean(touched.name)}
-              fullWidth
-              sx={{ mb: '16px' }}
-            />
-            <TextField
-              id="email"
-              name="email"
-              label="Email"
-              type='email'
-              value={values.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              variant="outlined"
-              error={Boolean(errors.email) && Boolean(touched.email)}
-              fullWidth
-              sx={{ mb: '16px' }}
-            />
-            <TextField
-              id="password"
-              name='password'
-              label="Password"
-              type='password'
-              value={values.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              variant="outlined"
-              error={Boolean(errors.password) && Boolean(touched.password)}
-              fullWidth
-            />
+        {(formikProps) => {
+          const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = formikProps
+          return <form onSubmit={handleSubmit}>
 
-            <Button type='button' sx={{ my: '40px' }}>Forgot Password?</Button>
-            <Button disabled={isSubmitting} type='submit' variant='contained' fullWidth>LOG IN</Button>
-            {/* <LoadingButton type="submit" color="primary" variant="contained" fullWidth loading={isSubmitting}>
-              Submit
-            </LoadingButton> */}
-            {/* <ArrowForwardIcon sx={{ ml: "10px" }} /> */}
+            <Button onClick={() => console.log(values)}>Get VALUES</Button>
+            {activeStep === 0 && <SignUpBasicInfo formikProps={formikProps} />}
+            {activeStep === 1 && <SignUpPersonalInfo formikProps={formikProps} />}
+            {activeStep === 2 && <SignUpProfessionalInfo formikProps={formikProps} />}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button disabled={isSubmitting} variant='contained' onClick={onPrevioustStep}>Prev</Button>
+              <Button disabled={isSubmitting} variant='contained' onClick={onNextStep}>Next</Button>
+            </Box>
           </form>
-        )}
+        }}
       </Formik>
     </Box>
   )

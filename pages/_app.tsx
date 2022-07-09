@@ -42,15 +42,6 @@ const App = (props: ExtendedAppProps) => {
       })
   );
   const theme = useMemo(() => {
-    // const brandingDesignTokens = getDesignTokens("light");
-    // let nextTheme = createTheme({
-    //   ...brandingDesignTokens,
-    //   palette: {
-    //     ...brandingDesignTokens.palette,
-    //     mode: "light"
-    //   }
-    // });
-
     const nextTheme = deepmerge(lightTheme, getThemedComponents());
     return nextTheme;
   }, []);

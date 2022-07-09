@@ -31,17 +31,9 @@ const ONE_ACADEMY_WHITE = '#F8F8F8'
 
 const systemFont = ["Roboto", "sans-serif"];
 
-const typography: TypographyOptions = {
-  fontFamily: [...systemFont].join(","),
-  h3: {},
-  button: {
-    textTransform: "initial"
-  }
-}
-
 export const lightTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
       main: ONE_ACADEMY_ORANGE
     },
@@ -59,8 +51,17 @@ export const lightTheme = createTheme({
     divider: grey[200],
     common
   },
+  typography: {
+    fontFamily: [...systemFont].join(","),
+    h3: {},
+    body1: {
+      color: 'black'
+    },
+    button: {
+      textTransform: "initial"
+    },
+  },
   spacing: 5,
-  typography,
 });
 
 export const darkTheme = createTheme({
@@ -81,10 +82,19 @@ export const darkTheme = createTheme({
       secondary: grey[300]
     },
     divider: grey[200],
-    common
+    common,
+  },
+  typography: {
+    fontFamily: [...systemFont].join(","),
+    h3: {},
+    body1: {
+      color: 'white'
+    },
+    button: {
+      textTransform: "initial"
+    },
   },
   spacing: 5,
-  typography
 });
 
 export function getThemedComponents(): {
@@ -200,7 +210,7 @@ export function getThemedComponents(): {
             textTransform: "none"
           }
         }
-      }
+      },
     }
   };
 }
