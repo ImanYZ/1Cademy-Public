@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore";
+import { Dispatch } from "react";
 
 export enum NodeType {
   "Relation" = "Relation",
@@ -46,26 +47,26 @@ export type KnowledgeChoice = {
 };
 
 export type ReferencesArray = {
-  referenceIds: string[],
-  referenceLabels: string[],
-  references: string[],
-}
+  referenceIds: string[];
+  referenceLabels: string[];
+  references: string[];
+};
 
 export type LinkedNodeObject = {
-  node: string,
-  title: string,
-  label: string
-}
+  node: string;
+  title: string;
+  label: string;
+};
 
 export type TagsArray = {
-  tagIds: string[],
-  tags: string[],
-}
+  tagIds: string[];
+  tags: string[];
+};
 
 export type LinkedNodeTag = {
-  node: string,
-  title: string,
-}
+  node: string;
+  title: string;
+};
 
 export type NodeFireStore = {
   aChooseUname?: boolean;
@@ -311,16 +312,44 @@ export type Feedback = FeedbackInput & {
 };
 
 export type ProposalInput = {
-  children: LinkedNodeObject[],
-  content: string,
-  parents: LinkedNodeObject[],
+  children: LinkedNodeObject[];
+  content: string;
+  parents: LinkedNodeObject[];
   referenceIds?: string[];
   referenceLabels?: string[];
   references?: string[] | { node: string; title?: string; label?: string }[];
   tagIds?: string[];
   tags?: string[] | { node: string; title?: string; label?: string }[];
-  title: string,
-  node: string,
-  summary: string,
+  title: string;
+  node: string;
+  summary: string;
   choices?: KnowledgeChoice[];
+};
+
+export type User = {
+  fName?: string;
+  lName?: string;
+  userId?: string;
+};
+
+export interface AuthState {
+  readonly isAuthenticated: boolean;
+  readonly user: User | null;
 }
+
+export type AuthActions = {
+  dispatch: Dispatch<DispatchAuthActions>;
+  handleError: (options: ErrorOptions) => void;
+};
+
+export type ErrorOptions = {
+  error: unknown;
+  showErrorToast?: boolean;
+  errorMessage?: string;
+};
+
+export type AuthUpdateUserAction = {
+  type: "updateUser";
+  payload: User;
+};
+export type DispatchAuthActions = AuthUpdateUserAction;
