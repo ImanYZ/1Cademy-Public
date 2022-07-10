@@ -17,7 +17,7 @@ import {
   SearchNodesParams,
   SearchNodesResponse,
   StatsSchema
-} from "../src/knowledgeTypes";
+} from "../knowledgeTypes";
 
 export const getTagsAutocomplete = async (tagName: string): Promise<ResponseAutocompleteTags> => {
   const response = await axios.get("/api/tagsAutocomplete", { params: { q: tagName } });
@@ -80,27 +80,37 @@ export const getSearchAutocomplete = async (searchText: string): Promise<Respons
 
 export const getNodeData = async (nodeId: string): Promise<KnowledgeNode> => {
   const res = await axios.post("/api/nodeData", { nodeId });
-  if (!res?.data) { throw Error('invalid node') }
+  if (!res?.data) {
+    throw Error("invalid node");
+  }
 
-  return res.data.results
+  return res.data.results;
 };
 
 export const getFullTagAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullTag> => {
   const response = await axios.get("/api/fullTagsAutocomplete", { params: { q: searchText } });
-  return response.data
+  return response.data;
 };
 
-export const getFullReferencesAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullReferences> => {
+export const getFullReferencesAutocomplete = async (
+  searchText: string
+): Promise<ResponseAutocompleteFullReferences> => {
   const response = await axios.get("/api/fullReferencesAutocomplete", { params: { q: searchText } });
-  return response.data
+  return response.data;
 };
 
 export const getFullNodeAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullNodes> => {
   const response = await axios.get("/api/fullNodeAutocomplete", { params: { q: searchText } });
-  return response.data
+  return response.data;
 };
 
-export const addProposal = async ({ data, nodeType }: { data: ProposalInput, nodeType: NodeType }): Promise<ResponseGeneric> => {
+export const addProposal = async ({
+  data,
+  nodeType
+}: {
+  data: ProposalInput;
+  nodeType: NodeType;
+}): Promise<ResponseGeneric> => {
   const res = await axios.post("/api/addProposal", { data, nodeType });
-  return res.data
-}
+  return res.data;
+};
