@@ -7,10 +7,11 @@ import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import { styled } from "@mui/system";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { FC } from "react";
+import { FC } from "react";
+
+import SECTIONS from "@/lib/utils/navbarSections";
 
 import LogoDarkMode from "../public/DarkModeLogo.svg";
-import SECTIONS from "../src/navbarSections";
 import AppHeaderSearchBar from "./AppHeaderSearchBar";
 
 type Props = {

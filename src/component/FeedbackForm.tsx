@@ -3,14 +3,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Box, Button, Stack, SxProps, TextField, Theme, Typography } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
-import { createTheme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 import { useFormik } from "formik";
 import React, { forwardRef, useMemo } from "react";
 import { useMutation } from "react-query";
-import { getDesignTokens, getThemedComponents } from "src/brandingTheme";
 import * as yup from "yup";
+
+import { getDesignTokens, getThemedComponents } from "@/lib/theme/brandingTheme";
 
 import { sendFeedback } from "../lib/knowledgeApi";
 

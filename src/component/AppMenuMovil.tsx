@@ -1,8 +1,7 @@
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { Box, Button, Link, MenuItem, MenuList } from "@mui/material";
-import React from "react";
 
-import SECTIONS from "../src/navbarSections";
+import SECTIONS from "@/lib/utils/navbarSections";
 
 interface AppMenuMovilProps {
   onSendFeedback: () => void;
