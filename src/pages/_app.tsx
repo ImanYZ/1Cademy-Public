@@ -1,13 +1,11 @@
-import "../styles/global.css";
+import "../global.css";
 
 import type { EmotionCache } from "@emotion/cache";
 // ** Emotion Imports
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider } from "@mui/material/styles";
-import { createTheme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
-import { AuthProvider } from "context/AuthContext";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -16,8 +14,10 @@ import { useMemo, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-import { getDesignTokens, getThemedComponents } from "../src/brandingTheme";
-import { createEmotionCache } from "../src/createEmotionCache";
+import { AuthProvider } from "@/context/AuthContext";
+
+import { getDesignTokens, getThemedComponents } from "../brandingTheme";
+import { createEmotionCache } from "../createEmotionCache";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();

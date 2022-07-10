@@ -1,8 +1,9 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { createFirebaseApp } from "lib/firestoreClient/firestoreClient.config";
-import authReducer, { INITIAL_STATE } from "lib/reducers/auth";
 import { createContext, FC, ReactNode, useContext, useEffect, useReducer } from "react";
 import { AuthActions, AuthState, ErrorOptions } from "src/knowledgeTypes";
+
+import { createFirebaseApp } from "@/lib/firestoreClient/firestoreClient.config";
+import authReducer, { INITIAL_STATE } from "@/lib/reducers/auth";
 
 const AuthStateContext = createContext<AuthState | undefined>(undefined);
 const AuthDispatchContext = createContext<AuthActions | undefined>(undefined);
