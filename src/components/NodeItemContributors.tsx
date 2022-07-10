@@ -3,8 +3,9 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { FC } from "react";
 
-import { KnowledgeNodeContributor, KnowledgeNodeInstitution } from "../src/knowledgeTypes";
-import ROUTES from "../src/routes";
+import ROUTES from "@/lib/utils/routes";
+
+import { KnowledgeNodeContributor, KnowledgeNodeInstitution } from "../knowledgeTypes";
 import LeaderboardChip from "./LeaderboardChip";
 
 type Props = {

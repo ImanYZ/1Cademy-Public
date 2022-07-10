@@ -14,9 +14,10 @@ import React, { SyntheticEvent, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
-import { getReferencesAutocomplete } from "../lib/knowledgeApi";
-import { getQueryParameter, isValidHttpUrl } from "../lib/utils";
-import { FilterProcessedReferences } from "../src/knowledgeTypes";
+import { getReferencesAutocomplete } from "@/lib/knowledgeApi";
+import { getQueryParameter, isValidHttpUrl } from "@/lib/utils/utils";
+
+import { FilterProcessedReferences } from "../knowledgeTypes";
 
 type ReferencesAutocompleteProps = {
   onReferencesChange: (title: string, label: string) => void;

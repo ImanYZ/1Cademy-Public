@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 
 import TagsAutocomplete from "../components/TagsAutocomplete";
-import { FilterValue } from "../src/knowledgeTypes";
+import { FilterValue } from "../knowledgeTypes";
 import ContributorsAutocomplete from "./ContributorsAutocomplete";
 import InstitutionsAutocomplete from "./InstitutionsAutocomplete";
 import NodeTypesAutocomplete from "./NodeTypesAutocomplete";

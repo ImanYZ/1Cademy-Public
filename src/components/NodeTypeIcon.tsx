@@ -12,9 +12,9 @@ import PersonIcon from "@mui/icons-material/Person";
 import ShareIcon from "@mui/icons-material/Share";
 import { SvgIconProps } from "@mui/material/SvgIcon";
 import Tooltip from "@mui/material/Tooltip";
-import React, { FC } from "react";
+import { FC } from "react";
 
-import { NodeType } from "../src/knowledgeTypes";
+import { NodeType } from "../knowledgeTypes";
 
 type Props = {
   nodeType: NodeType;

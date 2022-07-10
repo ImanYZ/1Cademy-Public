@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
+import { getQueryParameter } from "@/lib/utils/utils";
+
+import { FilterValue } from "../../knowledgeTypes";
 import { getInstitutionsForAutocomplete } from "../../lib/firestoreServer/institutions";
-import { getQueryParameter } from "../../lib/utils";
-import { FilterValue } from "../../src/knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<FilterValue[]>) {
   try {

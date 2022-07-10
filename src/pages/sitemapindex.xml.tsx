@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
-import { APP_DOMAIN } from "src/1cademyConfig";
 
-import { db } from "../lib/firestoreServer/admin";
+import { db } from "@/lib/firestoreServer/admin";
+import { APP_DOMAIN } from "@/lib/utils/1cademyConfig";
 
 function SitemapIndex() {
   // getServerSideProps will do the heavy lifting

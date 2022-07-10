@@ -1,7 +1,8 @@
 import NextHead from "next/head";
 import { useRouter } from "next/router";
 import { FC, ReactNode } from "react";
-import { APP_DOMAIN } from "src/1cademyConfig";
+
+import { APP_DOMAIN } from "@/lib/utils/1cademyConfig";
 
 type Props = {
   title?: string;

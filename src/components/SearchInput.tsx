@@ -6,7 +6,7 @@ import { FC, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
-import { getSearchAutocomplete } from "../lib/knowledgeApi";
+import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 
 type Props = {
   onSearch: (text: string) => void;
@@ -26,7 +26,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
 
   useEffect(() => {
     if (isLoading) return;
-    setSuggestions(data?.results || [])
+    setSuggestions(data?.results || []);
   }, [data, isLoading]);
 
   const handleSearch = (e: React.FormEvent) => {

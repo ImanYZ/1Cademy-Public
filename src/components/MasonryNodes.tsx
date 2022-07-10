@@ -3,8 +3,9 @@ import { Skeleton } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SxProps, Theme } from "@mui/system";
 
-import { randomIntFromInterval } from "../lib/utils";
-import { SimpleNode } from "../src/knowledgeTypes";
+import { randomIntFromInterval } from "@/lib/utils/utils";
+
+import { SimpleNode } from "../knowledgeTypes";
 import { CustomPagination } from "./CustomPagination";
 import { NodeItem } from "./NodeItem";
 

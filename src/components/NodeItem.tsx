@@ -15,10 +15,11 @@ import Image from "next/image";
 import NextLink from "next/link";
 import { useState } from "react";
 
-import { getInstitutionsByName } from "../lib/firestoreClient/institutions";
-import { getNodePageUrl } from "../lib/utils";
-import { SimpleNode } from "../src/knowledgeTypes";
-import ROUTES from "../src/routes";
+import { getInstitutionsByName } from "@/lib/firestoreClient/institutions";
+import ROUTES from "@/lib/utils/routes";
+import { getNodePageUrl } from "@/lib/utils/utils";
+
+import { SimpleNode } from "../knowledgeTypes";
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
 import NodeVotes from "./NodeVotes";

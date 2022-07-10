@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 
-import { getInstitutionsForAutocomplete } from "../../lib/firestoreServer/institutions";
-import { getTypesenseClient } from "../../lib/typesense/typesense.config";
+import { getInstitutionsForAutocomplete } from "@/lib/firestoreServer/institutions";
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 import {
   buildFilterBy,
   buildSortBy,
@@ -10,8 +10,9 @@ import {
   getQueryParameterAsBoolean,
   getQueryParameterAsNumber,
   homePageSortByDefaults
-} from "../../lib/utils";
-import { SearchNodesResponse, SimpleNode, TimeWindowOption, TypesenseNodesSchema } from "../../src/knowledgeTypes";
+} from "@/lib/utils/utils";
+
+import { SearchNodesResponse, SimpleNode, TimeWindowOption, TypesenseNodesSchema } from "../../knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const q = getQueryParameter(req.query.q) || "*";

@@ -1,17 +1,17 @@
-// ** Emotion Imports
 import createEmotionServer from "@emotion/server/create-instance";
 import Document, { Head, Html, Main, NextScript } from "next/document";
 import { Children } from "react";
 
-import { getDesignTokens } from "../brandingTheme";
-import { createEmotionCache } from "../createEmotionCache";
+//TODO: get back getDesignTokens
+// import { getDesignTokens } from "@/lib/theme/brandingTheme";
+import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 
 class CustomDocument extends Document {
   render() {
     return (
       <Html lang="en">
         <Head>
-          <meta
+          {/* <meta
             name="theme-color"
             content={getDesignTokens("light").palette?.common?.darkGrayBackground}
             media="(prefers-color-scheme: light)"
@@ -20,7 +20,7 @@ class CustomDocument extends Document {
             name="theme-color"
             content={getDesignTokens("dark").palette?.common?.darkGrayBackground}
             media="(prefers-color-scheme: dark)"
-          />
+          /> */}
           <link rel="shortcut icon" href="/favicon.ico" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />

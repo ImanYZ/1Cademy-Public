@@ -7,7 +7,7 @@ import {
   KnowledgeNodeInstitution,
   LinkedKnowledgeNode,
   NodeFireStore
-} from "../../src/knowledgeTypes";
+} from "../../knowledgeTypes";
 import { admin, batchSet, commitBatch, db } from "./admin";
 
 export const getAllNodeParamsForStaticProps = async () => {
@@ -176,8 +176,8 @@ const getFullNodeTag = async (nodeData: NodeFireStore) => {
     });
   }
 
-  return convertedTags
-}
+  return convertedTags;
+};
 
 // Endpoint retrieving the node data and its direct parents,children and siblings
 // data based on the id requested.
@@ -235,7 +235,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     }
   }
   // Retrieve the content of all the tags of the node.
-  const convertedTags: LinkedKnowledgeNode[] = await getFullNodeTag(nodeData)
+  const convertedTags: LinkedKnowledgeNode[] = await getFullNodeTag(nodeData);
 
   // Retrieve the content of all the references of the node.
   const nodeReferences = getNodeReferences(nodeData);

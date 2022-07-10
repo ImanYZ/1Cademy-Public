@@ -6,11 +6,11 @@ import TextField from "@mui/material/TextField";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
 
-import { getQueryParameter } from "../lib/utils";
-import { NODE_TYPE_OPTIONS } from "../src/constants";
-import { NodeType } from "../src/knowledgeTypes";
+import { NODE_TYPE_OPTIONS } from "@/lib/utils/constants";
+import { getQueryParameter } from "@/lib/utils/utils";
+
+import { NodeType } from "../knowledgeTypes";
 import NodeTypeIcon from "./NodeTypeIcon";
-// import NodeTypeIcon from "../src/knowledgeTypesd
 
 type Props = {
   onNodesTypeChange: (newValues: string[]) => void;

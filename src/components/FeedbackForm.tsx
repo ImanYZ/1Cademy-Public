@@ -3,16 +3,15 @@ import CheckIcon from "@mui/icons-material/Check";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Box, Button, Stack, SxProps, TextField, Theme, Typography } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 import { useFormik } from "formik";
 import React, { forwardRef, useMemo } from "react";
 import { useMutation } from "react-query";
 import * as yup from "yup";
 
-import { getDesignTokens, getThemedComponents } from "@/lib/theme/brandingTheme";
-
-import { sendFeedback } from "../lib/knowledgeApi";
+import { sendFeedback } from "@/lib/knowledgeApi";
+import { darkTheme, getThemedComponents } from "@/lib/theme/brandingTheme";
 
 interface FeedbackFormValues {
   email: string;
@@ -43,17 +42,9 @@ const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, 
       localStorage.setItem("feedbackFeedback", "");
     }
   });
-  const theme = useMemo(() => {
-    const brandingDesignTokens = getDesignTokens("dark");
-    let nextTheme = createTheme({
-      ...brandingDesignTokens,
-      palette: {
-        ...brandingDesignTokens.palette,
-        mode: "dark"
-      }
-    });
 
-    nextTheme = deepmerge(nextTheme, getThemedComponents());
+  const theme = useMemo(() => {
+    const nextTheme = deepmerge(darkTheme, getThemedComponents());
     return nextTheme;
   }, []);
 

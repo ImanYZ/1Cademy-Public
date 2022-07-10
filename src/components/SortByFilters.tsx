@@ -2,8 +2,9 @@ import { Grid, MenuItem, Select, SelectChangeEvent, ToggleButton, ToggleButtonGr
 import { Box } from "@mui/system";
 import { FC } from "react";
 
-import { SortedByTimeOptions } from "../lib/utils";
-import { SortTypeWindowOption, TimeWindowOption } from "../src/knowledgeTypes";
+import { SortedByTimeOptions } from "@/lib/utils/utils";
+
+import { SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
 import { ShareButtons } from "./ShareButtons";
 
 type Props = {

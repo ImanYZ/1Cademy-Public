@@ -5,31 +5,32 @@ import { useRouter } from "next/router";
 import { ComponentType, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
-import HomeFilter, { HomeFilterRef } from "../components/HomeFilter";
-import HomeSearch, { HomeSearchRef } from "../components/HomeSearch";
-import { useOnScreen } from "../hooks/useOnScreen";
-import { getSearchNodes } from "../lib/knowledgeApi";
+import HomeFilter, { HomeFilterRef } from "@/components/HomeFilter";
+import HomeSearch, { HomeSearchRef } from "@/components/HomeSearch";
+import { getSearchNodes } from "@/lib/knowledgeApi";
 import {
   getDefaultSortedByType,
   getQueryParameter,
   getQueryParameterAsBoolean,
   getQueryParameterAsNumber,
   homePageSortByDefaults
-} from "../lib/utils";
-import { FilterValue, SortTypeWindowOption, TimeWindowOption } from "../src/knowledgeTypes";
+} from "@/lib/utils/utils";
 
-export const PagesNavbar: ComponentType<any> = dynamic(() => import("../components/PagesNavbar").then(m => m.default), {
+import { useOnScreen } from "../hooks/useOnScreen";
+import { FilterValue, SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
+
+export const PagesNavbar: ComponentType<any> = dynamic(() => import("@/components/PagesNavbar").then(m => m.default), {
   ssr: false
 });
 
 export const SortByFilters: ComponentType<any> = dynamic(
-  () => import("../components/SortByFilters").then(m => m.default),
+  () => import("@/components/SortByFilters").then(m => m.default),
   {
     ssr: false
   }
 );
 
-const MasonryNodes: ComponentType<any> = dynamic(() => import("../components/MasonryNodes").then(m => m.MasonryNodes), {
+const MasonryNodes: ComponentType<any> = dynamic(() => import("@/components/MasonryNodes").then(m => m.MasonryNodes), {
   ssr: false
 });
 

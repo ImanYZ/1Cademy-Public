@@ -7,8 +7,8 @@ import { FC, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
-import { getTagsAutocomplete } from "../lib/knowledgeApi";
-import { getQueryParameter } from "../lib/utils";
+import { getTagsAutocomplete } from "@/lib/knowledgeApi";
+import { getQueryParameter } from "@/lib/utils/utils";
 
 type Props = {
   onTagsChange: (newValues: string[]) => void;

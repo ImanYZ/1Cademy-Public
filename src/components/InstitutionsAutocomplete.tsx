@@ -7,9 +7,10 @@ import { FC, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
-import { getInstitutionsAutocomplete, getSelectedInstitutions } from "../lib/knowledgeApi";
-import { getQueryParameter } from "../lib/utils";
-import { FilterValue } from "../src/knowledgeTypes";
+import { getInstitutionsAutocomplete, getSelectedInstitutions } from "@/lib/knowledgeApi";
+import { getQueryParameter } from "@/lib/utils/utils";
+
+import { FilterValue } from "../knowledgeTypes";
 import OptimizedAvatar from "./OptimizedAvatar";
 
 type Props = {

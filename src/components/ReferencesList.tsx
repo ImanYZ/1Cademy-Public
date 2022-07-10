@@ -5,8 +5,9 @@ import Typography from "@mui/material/Typography";
 import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
-import { getNodePageUrl, isValidHttpUrl } from "../lib/utils";
-import { LinkedKnowledgeNode, NodeType } from "../src/knowledgeTypes";
+import { getNodePageUrl, isValidHttpUrl } from "@/lib/utils/utils";
+
+import { LinkedKnowledgeNode, NodeType } from "../knowledgeTypes";
 import { LinkedReference } from "./LinkedReference";
 import NodeTypeIcon from "./NodeTypeIcon";
 
@@ -17,12 +18,10 @@ type ReferencesListProps = {
 
 export const ReferencesList = ({ references, sx }: ReferencesListProps) => {
   const getReferenceContent = (el: LinkedKnowledgeNode) => {
-    return isValidHttpUrl(el.label)
-      ? `${el.title}:  ${el.label}`
-      : el.title || ""
-  }
+    return isValidHttpUrl(el.label) ? `${el.title}:  ${el.label}` : el.title || "";
+  };
 
-  if (!references.length) return null
+  if (!references.length) return null;
 
   return (
     <Box sx={{ ...sx }}>

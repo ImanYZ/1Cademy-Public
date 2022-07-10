@@ -11,7 +11,7 @@ import { FC } from "react";
 
 import SECTIONS from "@/lib/utils/navbarSections";
 
-import LogoDarkMode from "../public/DarkModeLogo.svg";
+import LogoDarkMode from "../../public/DarkModeLogo.svg";
 import AppHeaderSearchBar from "./AppHeaderSearchBar";
 
 type Props = {

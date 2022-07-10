@@ -2,8 +2,9 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Typesense from "typesense";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 
-import { getQueryParameter } from "../../lib/utils";
-import { FilterValue, ResponseAutocompleteFilter } from "../../src/knowledgeTypes";
+import { getQueryParameter } from "@/lib/utils/utils";
+
+import { FilterValue, ResponseAutocompleteFilter } from "../../knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocompleteFilter>) {
   const q = getQueryParameter(req.query.q) || "";

@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 
-import { clientTypesense } from "../../lib/typesense/typesense.config";
-import { getQueryParameter } from "../../lib/utils";
-import { FilterProcessedReferences, ResponseAutocompleteProcessedReferencesFilter } from "../../src/knowledgeTypes";
+import { clientTypesense } from "@/lib/typesense/typesense.config";
+import { getQueryParameter } from "@/lib/utils/utils";
+
+import { FilterProcessedReferences, ResponseAutocompleteProcessedReferencesFilter } from "../../knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocompleteProcessedReferencesFilter>) {
   const q = getQueryParameter(req.query.q) || "";

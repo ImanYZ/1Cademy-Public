@@ -2,7 +2,7 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import { FC } from "react";
 
-import { KnowledgeNodeContributor, KnowledgeNodeInstitution } from "../src/knowledgeTypes";
+import { KnowledgeNodeContributor, KnowledgeNodeInstitution } from "../knowledgeTypes";
 
 type Props = {
   contributor: KnowledgeNodeContributor;

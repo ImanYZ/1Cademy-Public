@@ -1,7 +1,6 @@
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import ReplyIcon from "@mui/icons-material/Reply";
-import { Button, IconButton } from "@mui/material";
-import { CardContent } from "@mui/material";
+import { Button, CardContent, IconButton } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -10,18 +9,19 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useRouter } from 'next/router';
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { FC, ReactNode, useState } from "react";
 
-import { KnowledgeNode } from "../src/knowledgeTypes";
+import ROUTES from "@/lib/utils/routes";
+
+import { KnowledgeNode } from "../knowledgeTypes";
 import FullScreenImage from "./FullScreenImage";
-import MarkdownRender from "./M../src/knowledgeTypes.oldr";
+import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
 import NodeVotes from "./NodeVotes";
 import QuestionItem from "./QuestionItem";
 import { ShareButtons } from "./ShareButtons";
-import ROUTES from '../src/routes';
 
 dayjs.extend(relativeTime);
 
@@ -116,7 +116,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
               width: { xs: "100%" },
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "space-between"
             }}
           >
             <NodeVotes corrects={node.corrects} wrongs={node.wrongs} />

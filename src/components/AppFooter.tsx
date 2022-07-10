@@ -3,14 +3,13 @@ import { Container, Divider, IconButton, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import NextImage from "next/image";
-import React from "react";
 
-import logo1cademy from "../public/1cademy.svg";
-import iconEmail from "../public/icon-email.svg";
-import iconYoutube from "../public/icon-youtube.svg";
-import logoGoogleCloud from "../public/logo-google-cloud.svg";
-import logoHonor from "../public/logo-honor.svg";
-import logoSchoolOfInformation from "../public/logo-school-of-information.svg";
+import logo1cademy from "../../public/1cademy.svg";
+import iconEmail from "../../public/icon-email.svg";
+import iconYoutube from "../../public/icon-youtube.svg";
+import logoGoogleCloud from "../../public/logo-google-cloud.svg";
+import logoHonor from "../../public/logo-honor.svg";
+import logoSchoolOfInformation from "../../public/logo-school-of-information.svg";
 
 export default function AppFooter() {
   return (

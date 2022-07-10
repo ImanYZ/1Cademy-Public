@@ -4,19 +4,19 @@ import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
-import React from "react";
 
-import LinkedNodes from "../../../components/LinkedNodes";
-import { NodeHead } from "../../../components/NodeHead";
-import NodeItemContributors from "../../../components/NodeItemContributors";
-import { NodeItemFull } from "../../../components/NodeItemFull";
-import NodeItemFullSkeleton from "../../../components/NodeItemFullSkeleton";
-import PagesNavbar from "../../../components/PagesNavbar";
-import { ReferencesList } from "../../../components/ReferencesList";
-import { TagsList } from "../../../components/TagsList";
-import { getAllNodeParamsForStaticProps, getNodeData } from "../../../lib/firestoreServer/nodes";
-import { escapeBreaksQuotes } from "../../../lib/utils";
-import { KnowledgeNode } from "../../../src/knowledgeTypes";
+import LinkedNodes from "@/components/LinkedNodes";
+import { NodeHead } from "@/components/NodeHead";
+import NodeItemContributors from "@/components/NodeItemContributors";
+import { NodeItemFull } from "@/components/NodeItemFull";
+import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
+import PagesNavbar from "@/components/PagesNavbar";
+import { ReferencesList } from "@/components/ReferencesList";
+import { TagsList } from "@/components/TagsList";
+import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServer/nodes";
+import { escapeBreaksQuotes } from "@/lib/utils/utils";
+
+import { KnowledgeNode } from "../../../knowledgeTypes";
 
 type Props = {
   node: KnowledgeNode;

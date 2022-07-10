@@ -1,9 +1,9 @@
 import { Box, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React from "react";
 
-import { getNodePageUrl, getReferenceTitle } from "../lib/utils";
-import { LinkedKnowledgeNode } from "../src/knowledgeTypes";
+import { getNodePageUrl, getReferenceTitle } from "@/lib/utils/utils";
+
+import { LinkedKnowledgeNode } from "../knowledgeTypes";
 import { LinkedTag } from "./LinkedTag";
 
 type TagsListProps = {
@@ -12,8 +12,7 @@ type TagsListProps = {
 };
 
 export const TagsList = ({ tags, sx }: TagsListProps) => {
-
-  if (!tags.length) return null
+  if (!tags.length) return null;
 
   return (
     <Box sx={{ ...sx }}>

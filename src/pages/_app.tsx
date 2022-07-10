@@ -1,10 +1,9 @@
 import "../global.css";
 
 import type { EmotionCache } from "@emotion/cache";
-// ** Emotion Imports
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
@@ -14,16 +13,9 @@ import { useMemo, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-<<<<<<< HEAD:pages/_app.tsx
-import { getThemedComponents, lightTheme } from "../src/brandingTheme";
-// import { getDesignTokens, getThemedComponents } from "../src/brandingTheme.old";
-import { createEmotionCache } from "../src/createEmotionCache";
-=======
 import { AuthProvider } from "@/context/AuthContext";
-
-import { getDesignTokens, getThemedComponents } from "../brandingTheme";
-import { createEmotionCache } from "../createEmotionCache";
->>>>>>> feature/analytics:src/pages/_app.tsx
+import { getThemedComponents, lightTheme } from "@/lib/theme/brandingTheme";
+import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -52,7 +44,6 @@ const App = (props: ExtendedAppProps) => {
     const nextTheme = deepmerge(lightTheme, getThemedComponents());
     return nextTheme;
   }, []);
-
 
   return (
     <QueryClientProvider client={queryClient}>

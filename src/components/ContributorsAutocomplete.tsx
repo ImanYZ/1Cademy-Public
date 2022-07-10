@@ -8,10 +8,10 @@ import { FC, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
+import { getContributorsAutocomplete, getSelectedContributors } from "@/lib/knowledgeApi";
 import { getQueryParameter } from "@/lib/utils/utils";
 
 import { FilterValue } from "../knowledgeTypes";
-import { getContributorsAutocomplete, getSelectedContributors } from "../lib/knowledgeApi";
 
 type Props = {
   onContributorsChange: (newValues: FilterValue[]) => void;

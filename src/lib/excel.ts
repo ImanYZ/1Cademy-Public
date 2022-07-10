@@ -1,6 +1,6 @@
 import XLSX from "xlsx";
 
-import { Feedback } from "../src/knowledgeTypes";
+import { Feedback } from "../knowledgeTypes";
 
 export const generateFeedbackReport = (data: Feedback[]) => {
   const wb = XLSX.utils.book_new();

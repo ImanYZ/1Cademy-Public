@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useQuery } from "react-query";
 
-import { getStats } from "../lib/knowledgeApi";
+import { getStats } from "@/lib/knowledgeApi";
 
 const Stats = () => {
   const { data: stats } = useQuery("stats", getStats);

@@ -3,9 +3,10 @@ import { SxProps, Theme } from "@mui/system";
 import Image from "next/image";
 import { forwardRef, MutableRefObject, useImperativeHandle, useRef } from "react";
 
-import { loadHomeSearchBackground, toBase64 } from "../lib/utils";
-import heroImage from "../public/LibraryBackground.jpg";
-import logoHero from "../public/LogoExtended.svg";
+import { loadHomeSearchBackground, toBase64 } from "@/lib/utils/utils";
+
+import heroImage from "../../public/LibraryBackground.jpg";
+import logoHero from "../../public/LogoExtended.svg";
 import SearchInput from "./SearchInput";
 import Stats from "./Stats";
 

@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
-// import Typesense from "typesense";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 
+import { getQueryParameter } from "@/lib/utils/utils";
+
+import { ResponseAutocompleteNodes, TypesenseNodesSchema } from "../../knowledgeTypes";
 import { clientTypesense } from "../../lib/typesense/typesense.config";
-import { getQueryParameter } from "../../lib/utils";
-import { ResponseAutocompleteNodes, TypesenseNodesSchema } from "../../src/knowledgeTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocompleteNodes>) {
   const q = getQueryParameter(req.query.q) || "";

@@ -1,8 +1,9 @@
 import Head from "next/head";
-import { APP_DOMAIN } from "src/1cademyConfig";
 
-import { escapeBreaksQuotes, getNodePageWithDomain } from "../lib/utils";
-import { KnowledgeNode } from "../src/knowledgeTypes";
+import { APP_DOMAIN } from "@/lib/utils/1cademyConfig";
+import { escapeBreaksQuotes, getNodePageWithDomain } from "@/lib/utils/utils";
+
+import { KnowledgeNode } from "../knowledgeTypes";
 
 type NodeHeadProps = {
   node: KnowledgeNode;

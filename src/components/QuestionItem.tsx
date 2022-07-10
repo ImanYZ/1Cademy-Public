@@ -1,9 +1,9 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Checkbox, FormControlLabel, IconButton, List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
-import React, { FC, useState } from "react";
+import { FC, useState } from "react";
 
-import { KnowledgeChoice } from "../src/knowledgeTypes";
+import { KnowledgeChoice } from "../knowledgeTypes";
 import MarkdownRender from "./Markdown/MarkdownRender";
 
 type Props = {

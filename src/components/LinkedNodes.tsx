@@ -7,14 +7,11 @@ import List from "@mui/material/List";
 import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
-import { getNodePageUrl } from "../lib/utils";
-import { LinkedKnowledgeNode } from "../src/knowledgeTypes";
-<<<<<<< HEAD:components/LinkedNodes.tsx
-import LinkedNodeItem from "./LinkedN../src/knowledgeTypes.old
-=======
+import { getNodePageUrl } from "@/lib/utils/utils";
+
+import { LinkedKnowledgeNode } from "../knowledgeTypes";
 import LinkedNodeItem from "./LinkedNodeItem";
 import NodeTypeIcon from "./NodeTypeIcon";
->>>>>>> feature/analytics:src/component/LinkedNodes.tsx
 import TypographyUnderlined from "./TypographyUnderlined";
 
 type LinkedNodesProps = {
@@ -35,9 +32,11 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
           nodeContent={el.content}
           label={el.label || ""}
           sx={{ p: "20px" }}
-          secondaryActions={<ListItemIcon>
-            <NodeTypeIcon nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
-          </ListItemIcon>}
+          secondaryActions={
+            <ListItemIcon>
+              <NodeTypeIcon nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
+            </ListItemIcon>
+          }
         />
         {idx < src.length - 1 && <Divider component="li" />}
       </React.Fragment>
