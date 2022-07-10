@@ -15,8 +15,6 @@
     "deploy:storage": "firebase deploy --only storage",
     "deploy:functions": "firebase deploy --only functions",
     "prepare": "cd .. && husky install .husky",
-    "compileScripts": "cd scripts && tsc",
-    "runScripts": "cd scripts/dist/scripts && node index.js",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "jest --watch",
@@ -41,6 +39,7 @@
     "formik": "^2.2.9",
     "geoip-lite": "^1.4.5",
     "next": "12.1.6",
+    "notistack": "^2.0.5",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-markdown": "^8.0.3",
@@ -51,11 +50,14 @@
     "remark-html": "^15.0.1",
     "remark-math": "^5.1.1",
     "sharp": "^0.30.6",
+    "slate": "^0.81.1",
+    "slate-react": "^0.81.0",
     "slugify": "^1.6.5",
     "typescript": "^4.7.2",
     "typesense": "^1.2.2",
     "use-debounce": "^8.0.1",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.10.0",
@@ -86,5 +88,10 @@
   "lint-staged": {
     "*.+(js|ts|tsx)": "eslint --cache --fix",
     "*.{ts|tsx|js,css,md}": "prettier --write"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "yarn": "please-use-npm",
+    "npm": ">=8.0.0"
   }
 }

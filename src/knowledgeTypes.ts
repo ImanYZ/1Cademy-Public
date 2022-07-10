@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore";
+import { Dispatch } from "react";
 
 export enum NodeType {
   "Relation" = "Relation",
@@ -43,6 +44,28 @@ export type KnowledgeChoice = {
   choice: string;
   correct: boolean;
   feedback: string;
+};
+
+export type ReferencesArray = {
+  referenceIds: string[];
+  referenceLabels: string[];
+  references: string[];
+};
+
+export type LinkedNodeObject = {
+  node: string;
+  title: string;
+  label: string;
+};
+
+export type TagsArray = {
+  tagIds: string[];
+  tags: string[];
+};
+
+export type LinkedNodeTag = {
+  node: string;
+  title: string;
 };
 
 export type NodeFireStore = {
@@ -126,12 +149,27 @@ export type SimpleNode = {
   institutions: { name: string }[];
 };
 
+export type ResponseAutocompleteFullTags = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
 export type ResponseAutocompleteTags = {
   results?: string[];
   errorMessage?: string;
 };
 export type ResponseAutocompleteNodes = {
   results?: string[];
+  errorMessage?: string;
+};
+
+export type ResponseAutocompleteFullNodes = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
+export type ResponseGeneric = {
+  results?: string;
   errorMessage?: string;
 };
 
@@ -148,6 +186,7 @@ export type TypesenseNodesSchema = {
   id: string;
   institutions: { name: string }[];
   institutionsNames: string[]; // typesense
+  isTag: boolean; // typesense
   labelsReferences: string[]; // typesense
   nodeImage?: string;
   nodeType: NodeType; // typesense
@@ -157,7 +196,6 @@ export type TypesenseNodesSchema = {
   updatedAt: number;
   wrongs: number;
   mostHelpful: number; // typesense
-  isTag: boolean; // typesense
 };
 
 export type TypesenseReferencesSchema = {
@@ -166,6 +204,8 @@ export type TypesenseReferencesSchema = {
   title: string;
   label: string;
 };
+
+// tagsNodes: LinkedKnowledgeNode[]
 
 export type ResponseAutocompleteFilter = {
   results?: FilterValue[];
@@ -184,6 +224,21 @@ export type ResponseAutocompleteProcessedReferencesFilter = {
 
 export type ResponseAutocompleteSearch = {
   results?: string[];
+  errorMessage?: string;
+};
+
+export type ResponseAutocompleteFullTag = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
+export type ResponseAutocompleteFullReferences = {
+  results?: LinkedKnowledgeNode[];
+  errorMessage?: string;
+};
+
+export type ResponseNodeData = {
+  results?: KnowledgeNode;
   errorMessage?: string;
 };
 
@@ -255,3 +310,46 @@ export type FeedbackInput = {
 export type Feedback = FeedbackInput & {
   createdAt: string;
 };
+
+export type ProposalInput = {
+  children: LinkedNodeObject[];
+  content: string;
+  parents: LinkedNodeObject[];
+  referenceIds?: string[];
+  referenceLabels?: string[];
+  references?: string[] | { node: string; title?: string; label?: string }[];
+  tagIds?: string[];
+  tags?: string[] | { node: string; title?: string; label?: string }[];
+  title: string;
+  node: string;
+  summary: string;
+  choices?: KnowledgeChoice[];
+};
+
+export type User = {
+  fName?: string;
+  lName?: string;
+  userId?: string;
+};
+
+export interface AuthState {
+  readonly isAuthenticated: boolean;
+  readonly user: User | null;
+}
+
+export type AuthActions = {
+  dispatch: Dispatch<DispatchAuthActions>;
+  handleError: (options: ErrorOptions) => void;
+};
+
+export type ErrorOptions = {
+  error: unknown;
+  showErrorToast?: boolean;
+  errorMessage?: string;
+};
+
+export type AuthUpdateUserAction = {
+  type: "updateUser";
+  payload: User;
+};
+export type DispatchAuthActions = AuthUpdateUserAction;
