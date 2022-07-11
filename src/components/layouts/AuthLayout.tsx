@@ -1,8 +1,9 @@
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { brown } from "@mui/material/colors";
 import { Box, ThemeProvider } from "@mui/system";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { ReactNode } from "react";
-
 import { getDesignTokens } from "../../lib/theme/brandingTheme";
 
 type AuthProps = {
@@ -10,6 +11,8 @@ type AuthProps = {
 };
 
 export const AuthLayout = ({ children }: AuthProps) => {
+  const router = useRouter();
+
   return (
     <ThemeProvider theme={getDesignTokens("dark")}>
       <Box
@@ -92,31 +95,43 @@ export const AuthLayout = ({ children }: AuthProps) => {
               }}
             >
               <Box sx={{ border: "dashed 2px royalBlue" }}>
-                {children}
-                {/* <Tabs
-                  value={value}
-                  onChange={(event: React.SyntheticEvent, newValue: number) => {
-                    setValue(newValue);
-                  }}
+                <Box
                   aria-label="basic tabs example"
                   sx={{
-                    "& .MuiTab-root": {
-                      color: "common.white"
-                    },
-                    "& .MuiTab-root.Mui-selected": {
-                      backgroundColor: "common.white",
-                      color: "common.darkGrayBackground"
-                    },
-                    "& .MuiTabs-indicator": {
-                      display: "none"
-                    }
+                    border: "solid 2px",
+                    borderColor: "common.white"
                   }}
                 >
-                  <Tab label="LOG IN" sx={{ width: "50%" }} />
-                  <Tab label="SIGN UP" sx={{ width: "50%" }} />
-                </Tabs>
-                {value === 0 && <SignInForm />}
-                {value === 1 && <SignUpForm />} */}
+                  <Link href={"/signin"}>
+                    <Button
+                      color="secondary"
+                      sx={{
+                        width: "50%",
+                        p: "12px 16px",
+                        textAlign: "center",
+                        backgroundColor: router.pathname === "/signin" ? "common.white" : "inherit",
+                        color: router.pathname === "/signin" ? "common.darkGrayBackground" : "common.white"
+                      }}
+                    >
+                      LOG IN
+                    </Button>
+                  </Link>
+                  <Link href={"/signup"}>
+                    <Button
+                      color="secondary"
+                      sx={{
+                        width: "50%",
+                        p: "12px 16px",
+                        textAlign: "center",
+                        backgroundColor: router.pathname === "/signup" ? "common.white" : "inherit",
+                        color: router.pathname === "/signup" ? "common.darkGrayBackground" : "common.white"
+                      }}
+                    >
+                      SIGN UP
+                    </Button>
+                  </Link>
+                </Box>
+                {children}
               </Box>
             </Box>
           </Box>

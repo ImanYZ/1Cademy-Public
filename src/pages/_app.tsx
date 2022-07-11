@@ -9,7 +9,7 @@ import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
-import { useMemo, useState } from "react";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import "../global.css";
@@ -18,11 +18,23 @@ import { getDesignTokens, getThemedComponents } from "../lib/theme/brandingTheme
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 
+export type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
 // ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {
-  Component: NextPage;
+  Component: NextPageWithLayout;
   emotionCache: EmotionCache;
 };
+
+// export type NextPageWithLayout = NextPage & {
+//   getLayout?: (page: ReactElement) => ReactNode
+// }
+
+// type AppPropsWithLayout = AppProps & {
+//   Component: NextPageWithLayout
+// }
 
 // ** Configure JSS & ClassName
 const App = (props: ExtendedAppProps) => {
@@ -43,6 +55,8 @@ const App = (props: ExtendedAppProps) => {
     return nextTheme;
   }, []);
 
+  const getLayout = Component.getLayout ?? (page => page);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
@@ -53,9 +67,7 @@ const App = (props: ExtendedAppProps) => {
           <ThemeProvider theme={theme}>
             <SnackbarProvider maxSnack={3}>
               <CssBaseline />
-              <AuthProvider>
-                <Component {...pageProps} />
-              </AuthProvider>
+              <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
             </SnackbarProvider>
           </ThemeProvider>
         </CacheProvider>
