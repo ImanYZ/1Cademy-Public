@@ -1,8 +1,8 @@
 import { GetServerSideProps } from "next";
 import { ParsedUrlQuery } from "querystring";
 
-import { db } from "../../lib/firestoreServer/admin";
-import { getNodePageWithDomain } from "../../lib/utils";
+import { db } from "@/lib/firestoreServer/admin";
+import { getNodePageWithDomain } from "@/lib/utils/utils";
 
 function SiteMap() {
   // getServerSideProps will do the heavy lifting

@@ -1,4 +1,4 @@
-import { FilterValue } from "../knowledgeTypes";
+import { FilterValue } from "../../knowledgeTypes";
 import { db } from "./admin";
 
 export const getInstitutionsForAutocomplete = async (institutions: string[]) => {

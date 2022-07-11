@@ -16,4 +16,9 @@ export const createFirebaseApp = () => {
     getAnalytics();
     return app;
   }
+  return getApps()[0];
+};
+
+export const getFirebaseApp = () => {
+  return getApps()[0];
 };

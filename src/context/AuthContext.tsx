@@ -17,8 +17,8 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   const [state, dispatch] = useReducer(authReducer, store || INITIAL_STATE);
 
   useEffect(() => {
-    const app = createFirebaseApp();
-    const auth = getAuth(app);
+    createFirebaseApp();
+    const auth = getAuth();
 
     const unsubscriber = onAuthStateChanged(auth, user => {
       console.log("user", user);
