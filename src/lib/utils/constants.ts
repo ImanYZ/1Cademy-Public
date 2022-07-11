@@ -37,3 +37,13 @@ export const FOUND_FROM_VALUES = [
   "Not listed (Please specify)",
   "Prefer not to say",
 ];
+
+export const EDUCATION_VALUES = [
+  "Doctoral degree (MD, Ph.D., ...)",
+  "Current Doctoral student",
+  "Master's degree (MS, MA, ME, MBA, MPH, ...)",
+  "Current Master's student",
+  "Bachelor's degree (BS, BA, BE, ...",
+  "Current undergraduate student",
+  "Prefer not to say",
+];

@@ -1,10 +1,20 @@
 import { Autocomplete, TextField } from "@mui/material";
 import { Box } from "@mui/system";
-import { State } from 'country-state-city';
+import { City, Country, State } from 'country-state-city';
+import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
 import { FormikProps } from "formik";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ETHNICITY_VALUES, GENDER_VALUES } from "../lib/utils/constants";
+import { useEffect, useMemo, useState } from "react";
+import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../lib/utils/constants";
 import { SignUpFormValues } from "./SignUpForm";
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,9 +27,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
   const [languages, setLanguages] = useState<string[]>([])
-  const [countries, setCountries] = useState<string[]>([])
-  const [states, setStates] = useState<string[]>([])
-  const [cities, setCities] = useState<string[]>([])
 
 
   useEffect(() => {
@@ -31,36 +38,49 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
       ]
       setLanguages(allLanguages)
     }
-
-    const getCountries = async () => {
-      const cscObj = await import("country-state-city");
-      const allCountries = cscObj.Country.getAllCountries().map(cur => cur.name)
-      setCountries(allCountries)
-    }
     getLanguages()
-    getCountries()
   }, [])
 
-  // const getStateOfCountry = useCallback(() => {
-  //   console.log('will get country')
-  //   if (!values.country) return []
-  //   console.log(1)
-  //   const allStates = State.getStatesOfCountry(values.country).map(cur => cur.name)
-  //   console.log(2, allStates)
-  //   return allStates
-  //   // return []
-  // }, [values.country])
+  const countries = useMemo(() => {
+    const defaultCountry: ICountry = {
+      name: "Prefer not to say", isoCode: '', phonecode: '', flag: '', currency: '', latitude: '', longitude: ''
+    }
+    return [...Country.getAllCountries(), defaultCountry]
+  }, [])
 
-  const statesOfCountry = useMemo(() => {
-    console.log('will get country')
+  const statesOfCountry = useMemo((): IState[] => {
     if (!values.country) return []
-    // const countryCode = countries.find(cur => cur.)
-    console.log(1)
-    const allStates = State.getStatesOfCountry(values.country).map(cur => cur.name)
-    console.log(2, allStates)
-    return allStates
-    // return []
-  }, [values.country])
+
+    const currentCountry = countries.find(cur => cur.name === values.country)
+    if (!currentCountry) return []
+
+    const defaultState: IState = { name: "Prefer not to say", countryCode: '', isoCode: '' }
+    return [...State.getStatesOfCountry(currentCountry.isoCode), defaultState]
+  }, [countries, values.country])
+
+  const citiesOfState = useMemo(() => {
+    if (!values.state) return []
+
+    const currentCountry = countries.find(cur => cur.name === values.country)
+    if (!currentCountry) return []
+
+    const currentState = statesOfCountry.find(cur => cur.name === values.state)
+    if (!currentState) return []
+
+    const defaultCountry: ICity = { name: "Prefer not to say", countryCode: '', stateCode: '', isoCode: '' }
+    return [...City.getCitiesOfState(currentCountry.isoCode, currentState.isoCode), defaultCountry]
+  }, [values.state, values.country, countries, statesOfCountry])
+
+  const onChangeCountry = (_: any, value: string | null) => {
+    setFieldValue("country", value)
+    setFieldValue("state", null)
+    setFieldValue("city", null)
+  }
+
+  const onChangeState = (_: any, value: string | null) => {
+    setFieldValue("state", value)
+    setFieldValue("city", null)
+  }
 
   return (
     <>
@@ -127,14 +147,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
       />
       {values.ethnicity.includes('Not listed (Please specify)') &&
         < TextField
-          id="genderOtherValue"
-          name="genderOtherValue"
-          label="Please specify your gender."
-          value={values.genderOtherValue}
+          id="ethnicityOtherValue"
+          name="ethnicityOtherValue"
+          label="Please specify your ethnicity."
+          value={values.ethnicityOtherValue}
           onChange={handleChange}
           onBlur={handleBlur}
           variant="outlined"
-          error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
+          error={Boolean(errors.ethnicityOtherValue) && Boolean(touched.ethnicityOtherValue)}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -142,9 +162,9 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
       <Autocomplete
         id="country"
         value={values.country}
-        onChange={(_, value) => setFieldValue("country", value)}
+        onChange={onChangeCountry}
         onBlur={() => setTouched({ ...touched, country: true })}
-        options={countries}
+        options={countries.map(cur => cur.name)}
         renderInput={params => <TextField {...params} label="Country" />}
         fullWidth
         sx={{ mb: "16px" }}
@@ -153,9 +173,9 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         <Autocomplete
           id="state"
           value={values.state}
-          onChange={(_, value) => setFieldValue("state", value)}
+          onChange={onChangeState}
           onBlur={() => setTouched({ ...touched, state: true })}
-          options={statesOfCountry}
+          options={statesOfCountry.map(cur => cur.name)}
           renderInput={params => <TextField {...params} label="State" />}
           fullWidth
           sx={{ mb: "16px" }}
@@ -165,7 +185,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           value={values.city}
           onChange={(_, value) => setFieldValue("city", value)}
           onBlur={() => setTouched({ ...touched, city: true })}
-          options={["a", "b"]}
+          options={citiesOfState.map(cur => cur.name)}
           renderInput={params => <TextField {...params} label="City" />}
           fullWidth
           sx={{ mb: "16px" }}
@@ -188,11 +208,25 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         value={values.foundFrom}
         onChange={(_, value) => setFieldValue("foundFrom", value)}
         onBlur={() => setTouched({ ...touched, foundFrom: true })}
-        options={["a", "b"]}
+        options={FOUND_FROM_VALUES}
         renderInput={params => <TextField {...params} label="How did you hear about us? " />}
         fullWidth
         sx={{ mb: "16px" }}
       />
+      {values.foundFrom === 'Not listed (Please specify)' &&
+        < TextField
+          id="foundFromOtherValue"
+          name="foundFromOtherValue"
+          label="Please specify"
+          value={values.foundFromOtherValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          variant="outlined"
+          error={Boolean(errors.foundFromOtherValue) && Boolean(touched.foundFromOtherValue)}
+          fullWidth
+          sx={{ mb: "16px" }}
+        />
+      }
     </>
   );
 };

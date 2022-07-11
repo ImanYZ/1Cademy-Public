@@ -1,7 +1,11 @@
 import { Autocomplete, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { FormikProps } from "formik";
-
+import { EDUCATION_VALUES } from "../lib/utils/constants";
 import { SignUpFormValues } from "./SignUpForm";
+import MAJORS from '../../public/edited_majors.json';
+
+
+
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -28,7 +32,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         value={values.education}
         onChange={(_, value) => setFieldValue("education", value)}
         onBlur={() => setTouched({ ...touched, education: true })}
-        options={["a", "b"]}
+        options={EDUCATION_VALUES}
         renderInput={params => <TextField {...params} label="Education Level" />}
         fullWidth
         sx={{ mb: "16px" }}
@@ -57,6 +61,16 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         fullWidth
         sx={{ mb: "16px" }}
       />
+      {/* <Autocomplete
+        id="major"
+        value={values.major}
+        onChange={(_, value) => setFieldValue("major", value)}
+        onBlur={() => setTouched({ ...touched, major: true })}
+        options={MAJORS}
+        renderInput={params => <TextField {...params} label="Education Level" />}
+        fullWidth
+        sx={{ mb: "16px" }}
+      /> */}
       <TextField
         id="fieldOfInterest"
         name="fieldOfInterest"
@@ -70,7 +84,10 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         sx={{ mb: "16px" }}
       />
       <FormControlLabel
-        control={<Checkbox defaultChecked />}
+        control={<Checkbox
+          checked={values.signUpAgreement}
+          onChange={(_, value) => setFieldValue("signUpAgreement", value)}
+        />}
         label="By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and Cookie Policy"
         sx={{ mb: "16px" }}
       />
