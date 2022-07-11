@@ -1,5 +1,5 @@
-import "../global.css";
-
+import { AuthProvider } from "@/context/AuthContext";
+import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 import type { EmotionCache } from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -12,11 +12,8 @@ import { SnackbarProvider } from "notistack";
 import { useMemo, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-
-import { AuthProvider } from "@/context/AuthContext";
-import { createEmotionCache } from "@/lib/theme/createEmotionCache";
-
-import { getDesignTokens, getThemedComponents } from "../brandingTheme";
+import "../global.css";
+import { getDesignTokens, getThemedComponents } from "../lib/theme/brandingTheme";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -42,7 +39,7 @@ const App = (props: ExtendedAppProps) => {
       })
   );
   const theme = useMemo(() => {
-    const nextTheme = deepmerge(getDesignTokens('light'), getThemedComponents());
+    const nextTheme = deepmerge(getDesignTokens("light"), getThemedComponents());
     return nextTheme;
   }, []);
 

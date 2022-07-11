@@ -1,5 +1,5 @@
-import { createTheme } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { createTheme } from '@mui/material'
+import { grey } from '@mui/material/colors';
 import { Theme } from "@mui/material/styles";
 
 declare module "@mui/material/styles/createPalette" {
@@ -24,76 +24,43 @@ const common = {
   gray: "#D3D3D3"
 };
 
-const ONE_ACADEMY_BLACK = "#28282A";
-const ONE_ACADEMY_ORANGE = "#FF8A33";
-const ONE_ACADEMY_WHITE = "#F8F8F8";
+const ONE_ACADEMY_BLACK = '#28282A'
+const ONE_ACADEMY_ORANGE = '#FF8A33'
+const ONE_ACADEMY_WHITE = '#F8F8F8'
 
 const systemFont = ["Roboto", "sans-serif"];
 
-export const lightTheme = createTheme({
+export const getDesignTokens = (mode: "light" | "dark") => createTheme({
   palette: {
-    mode: "light",
+    mode,
     primary: {
       main: ONE_ACADEMY_ORANGE
     },
     secondary: {
-      main: ONE_ACADEMY_BLACK
+      main: mode === 'light' ? ONE_ACADEMY_BLACK : ONE_ACADEMY_WHITE
     },
     warning: {
       main: "#ffc071",
       dark: "#ffb25e"
     },
     text: {
-      primary: common.black,
-      secondary: grey[700]
-    },
-    divider: grey[200],
-    common
-  },
-  typography: {
-    fontFamily: [...systemFont].join(","),
-    h3: {},
-    body1: {
-      color: "black"
-    },
-    button: {
-      textTransform: "initial"
-    }
-  },
-  spacing: 5
-});
-
-export const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: ONE_ACADEMY_ORANGE
-    },
-    secondary: {
-      main: ONE_ACADEMY_WHITE
-    },
-    warning: {
-      main: "#ffc071",
-      dark: "#ffb25e"
-    },
-    text: {
-      primary: common.white,
+      primary: mode === 'light' ? common.black : common.white,
       secondary: grey[300]
     },
     divider: grey[200],
-    common
+    common,
   },
   typography: {
     fontFamily: [...systemFont].join(","),
     h3: {},
     body1: {
-      color: "white"
+      color: mode === 'light' ? common.black : common.white
     },
     button: {
       textTransform: "initial"
-    }
+    },
   },
-  spacing: 5
+  spacing: 5,
 });
 
 export function getThemedComponents(): {
@@ -210,20 +177,13 @@ export function getThemedComponents(): {
           }
         }
       },
-      MuiFormHelperText: {
-        styleOverrides: {
-          root: {
-            marginTop: 0,
-            height: 0
-          }
-        }
-      }
     }
   };
 }
 
+
 export const getMetaThemeColor = (mode: "light" | "dark") => {
-  if (mode === "light") return common.orange;
-  if (mode === "dark") return common.orangeDark;
-  return common.orange;
+  if (mode === 'light') return common.orange
+  if (mode === 'dark') return common.orangeDark
+  return common.orange
 };

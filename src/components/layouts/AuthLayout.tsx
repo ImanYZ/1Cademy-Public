@@ -1,17 +1,17 @@
-import { Box, Tab, Tabs, ThemeProvider, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { brown } from "@mui/material/colors";
-import React from "react";
+import { Box, ThemeProvider } from "@mui/system";
+import React, { ReactNode } from "react";
 
-import { SignInForm } from "@/components/SignInForm";
-import { SignUpForm } from "@/components/SignUpForm";
+import { getDesignTokens } from "../../lib/theme/brandingTheme";
 
-import { getDesignTokens } from "../brandingTheme";
+type AuthProps = {
+  children: ReactNode;
+};
 
-const AuthPage = () => {
-  const [value, setValue] = React.useState(0);
-
+export const AuthLayout = ({ children }: AuthProps) => {
   return (
-    <ThemeProvider theme={getDesignTokens('dark')}>
+    <ThemeProvider theme={getDesignTokens("dark")}>
       <Box
         sx={{
           width: "100vw",
@@ -92,7 +92,8 @@ const AuthPage = () => {
               }}
             >
               <Box sx={{ border: "dashed 2px royalBlue" }}>
-                <Tabs
+                {children}
+                {/* <Tabs
                   value={value}
                   onChange={(event: React.SyntheticEvent, newValue: number) => {
                     setValue(newValue);
@@ -115,7 +116,7 @@ const AuthPage = () => {
                   <Tab label="SIGN UP" sx={{ width: "50%" }} />
                 </Tabs>
                 {value === 0 && <SignInForm />}
-                {value === 1 && <SignUpForm />}
+                {value === 1 && <SignUpForm />} */}
               </Box>
             </Box>
           </Box>
@@ -124,5 +125,3 @@ const AuthPage = () => {
     </ThemeProvider>
   );
 };
-
-export default AuthPage;

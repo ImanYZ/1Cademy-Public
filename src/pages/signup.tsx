@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { ReactNode } from "react";
+import { AuthLayout } from "../components/layouts/AuthLayout";
+import { SignUpForm } from "../components/SignUpForm";
 
-const signup = () => {
-    return (
-        <div>signup</div>
-    )
-}
+const signUp = () => {
+  return <SignUpForm />;
+};
 
-export default signup
+signUp.getLayout = (page: ReactNode) => {
+  return <AuthLayout>{page}</AuthLayout>;
+};
+
+export default signUp;
