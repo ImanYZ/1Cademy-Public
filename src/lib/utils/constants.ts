@@ -15,5 +15,25 @@ export const NODE_TYPE_OPTIONS: NodeType[] = [
   NodeType.Tag
 ];
 
-export const RE_EMAIL =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/im;
+export const GENDER_VALUES = ["Male", "Female", "Not listed (Please specify)", "Prefer not to say"];
+
+export const ETHNICITY_VALUES = [
+  "White / Caucasian",
+  "Native American",
+  "Asian",
+  "African-American",
+  "Hispanic or Latino",
+  "Native Hawaiian or Pacific Islander",
+  "Not listed (Please specify)",
+  "Prefer not to say",
+];
+
+export const FOUND_FROM_VALUES = [
+  "Online searching",
+  "Word of Mouth",
+  "Internship",
+  "School",
+  "Work",
+  "Not listed (Please specify)",
+  "Prefer not to say",
+];

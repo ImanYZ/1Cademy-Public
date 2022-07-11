@@ -14,8 +14,9 @@ import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
 import { AuthProvider } from "@/context/AuthContext";
-import { getThemedComponents, lightTheme } from "@/lib/theme/brandingTheme";
 import { createEmotionCache } from "@/lib/theme/createEmotionCache";
+
+import { getDesignTokens, getThemedComponents } from "../brandingTheme";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -41,7 +42,7 @@ const App = (props: ExtendedAppProps) => {
       })
   );
   const theme = useMemo(() => {
-    const nextTheme = deepmerge(lightTheme, getThemedComponents());
+    const nextTheme = deepmerge(getDesignTokens('light'), getThemedComponents());
     return nextTheme;
   }, []);
 

@@ -4,13 +4,14 @@ import React from "react";
 
 import { SignInForm } from "@/components/SignInForm";
 import { SignUpForm } from "@/components/SignUpForm";
-import { darkTheme } from "@/lib/theme/brandingTheme";
+
+import { getDesignTokens } from "../brandingTheme";
 
 const AuthPage = () => {
   const [value, setValue] = React.useState(0);
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={getDesignTokens('dark')}>
       <Box
         sx={{
           width: "100vw",
