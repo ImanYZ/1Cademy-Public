@@ -98,7 +98,8 @@ const NodeProposal = () => {
         </Typography>
       </Box>,
       {
-        variant: "success"
+        variant: "success",
+        anchorOrigin: { horizontal: 'left', vertical: 'bottom' }
       }
     );
   };

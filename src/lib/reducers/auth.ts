@@ -9,6 +9,8 @@ function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
   switch (action.type) {
     case "updateUser":
       return { ...state, user: { ...action.payload } };
+    case "loginSucess":
+      return { ...state, user: { ...action.payload }, isAuthenticated: true };
   }
 }
 

@@ -15,10 +15,8 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import "../global.css";
 import { getDesignTokens, getThemedComponents } from "../lib/theme/brandingTheme";
 
-// Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 
-// ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {
   Component: NextPage;
   emotionCache: EmotionCache;
@@ -51,7 +49,13 @@ const App = (props: ExtendedAppProps) => {
             <meta name="viewport" content="initial-scale=1, width=device-width" />
           </Head>
           <ThemeProvider theme={theme}>
-            <SnackbarProvider maxSnack={3}>
+            <SnackbarProvider
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "center"
+              }}
+              maxSnack={3}
+            >
               <CssBaseline />
               <AuthProvider>
                 <Component {...pageProps} />

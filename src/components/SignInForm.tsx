@@ -1,15 +1,18 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { FormikHelpers, useFormik } from "formik";
+import { FC } from "react";
 import * as yup from "yup";
-
-import { signIn } from "@/lib/firestoreClient/auth";
 
 interface SignInFormValues {
   email: string;
   password: string;
 }
 
-export const SignInForm = () => {
+type Props = {
+  onSignIn: (email: string, password: string) => void;
+};
+
+export const SignInForm: FC<Props> = ({ onSignIn }) => {
   const initialValues: SignInFormValues = {
     email: "",
     password: ""
@@ -17,19 +20,23 @@ export const SignInForm = () => {
 
   const validationSchema = yup.object({
     email: yup.string().email("Enter a valid email").required("Required"),
-    password: yup.string().required("Required"),
-  })
+    password: yup.string().required("Required")
+  });
 
   const onSubmit = async (values: SignInFormValues, { setSubmitting }: FormikHelpers<SignInFormValues>) => {
     // await sendFeedback({ ...values, pageURL: url });
     // setSuccessFeedback(true);
     console.log("values", values);
-    const res = await signIn(values.email, values.password);
-    console.log("res", res);
-    setSubmitting(false);
-  }
+    onSignIn(values.email, values.password);
 
-  const formik = useFormik({ initialValues, validationSchema, onSubmit })
+    // const res = await signIn(values.email, values.password);
+    // await resetPassword("two@umich.edu");
+    // const res = await signUp("hodacho", "hodacho@gmail.com", "Pa$$w0rd");
+    // console.log("res", res);
+    setSubmitting(false);
+  };
+
+  const formik = useFormik({ initialValues, validationSchema, onSubmit });
 
   return (
     <Box sx={{ my: "92px" }}>

@@ -1,15 +1,32 @@
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { brown } from "@mui/material/colors";
-import { Box, ThemeProvider } from "@mui/system";
-import React, { ReactNode } from "react";
+import { ThemeProvider } from "@mui/material/styles";
+import { deepmerge } from "@mui/utils";
+import { FirebaseError } from "firebase-admin";
+import React, { useMemo } from "react";
 
-import { getDesignTokens } from "../../lib/theme/brandingTheme";
+import { useAuth } from "@/context/AuthContext";
+import { signIn } from "@/lib/firestoreClient/auth";
+import { getDesignTokens, getThemedComponents } from "@/lib/theme/brandingTheme";
 
-type AuthProps = {
-  children: ReactNode;
-};
+const AuthPage = () => {
+  const [, { handleError }] = useAuth();
+  const [value, setValue] = React.useState(0);
 
-export const AuthLayout = ({ children }: AuthProps) => {
+  const handleSignIn = async (email: string, password: string) => {
+    try {
+      const res = await signIn(email, password);
+      console.log("res", res);
+    } catch (error) {
+      handleError({ error, errorMessage: (error as FirebaseError).message });
+    }
+  };
+
+  const theme = useMemo(() => {
+    const nextTheme = deepmerge(getDesignTokens("light"), getThemedComponents());
+    return nextTheme;
+  }, []);
+
   return (
     <ThemeProvider theme={getDesignTokens("dark")}>
       <Box
@@ -91,33 +108,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
                 background: theme => theme.palette.common.darkGrayBackground
               }}
             >
-              <Box sx={{ border: "dashed 2px royalBlue" }}>
-                {children}
-                {/* <Tabs
-                  value={value}
-                  onChange={(event: React.SyntheticEvent, newValue: number) => {
-                    setValue(newValue);
-                  }}
-                  aria-label="basic tabs example"
-                  sx={{
-                    "& .MuiTab-root": {
-                      color: "common.white"
-                    },
-                    "& .MuiTab-root.Mui-selected": {
-                      backgroundColor: "common.white",
-                      color: "common.darkGrayBackground"
-                    },
-                    "& .MuiTabs-indicator": {
-                      display: "none"
-                    }
-                  }}
-                >
-                  <Tab label="LOG IN" sx={{ width: "50%" }} />
-                  <Tab label="SIGN UP" sx={{ width: "50%" }} />
-                </Tabs>
-                {value === 0 && <SignInForm />}
-                {value === 1 && <SignUpForm />} */}
-              </Box>
+              <Box sx={{ border: "dashed 2px royalBlue" }}>{children}</Box>
             </Box>
           </Box>
         </Box>

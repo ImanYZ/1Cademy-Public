@@ -327,8 +327,38 @@ export type ProposalInput = {
 };
 
 export type User = {
+  background?: string;
+  blocked?: boolean;
+  chooseUname?: boolean;
+  city?: string;
+  clickedConsent?: boolean;
+  clickedCP?: boolean;
+  clickedPP?: boolean;
+  clickedTOS?: boolean;
+  color?: string;
+  consented?: boolean;
+  country?: string;
+  createdAt?: Timestamp;
+  deCourse?: string;
+  deCredits?: number;
+  deInstit?: string;
+  deMajor?: string;
+  email?: string;
+  ethnicity?: string;
   fName?: string;
+  gender?: string;
+  imageUrl?: string;
+  imgOrColor?: boolean;
   lName?: string;
+  lang?: string;
+  practicing?: boolean;
+  stateInfo?: string;
+  sNode?: string;
+  tag?: string;
+  tagId?: string;
+  theme?: string;
+  uname?: string;
+  updatedAt?: Timestamp;
   userId?: string;
 };
 
@@ -352,4 +382,9 @@ export type AuthUpdateUserAction = {
   type: "updateUser";
   payload: User;
 };
-export type DispatchAuthActions = AuthUpdateUserAction;
+
+export type AuthLoginSuccessUserAction = {
+  type: "loginSucess";
+  payload: User;
+};
+export type DispatchAuthActions = AuthUpdateUserAction | AuthLoginSuccessUserAction;
