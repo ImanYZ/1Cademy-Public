@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignInForm } from "../components/SignInForm";
 
