@@ -353,3 +353,16 @@ export type AuthUpdateUserAction = {
   payload: User;
 };
 export type DispatchAuthActions = AuthUpdateUserAction;
+
+export type EmailValidation = {
+  institution: string | null;
+};
+
+export type UsernameValidation = {
+  valid: boolean;
+};
+
+export type ResponseAPI<T> = {
+  results?: T;
+  errorMessage?: string;
+};

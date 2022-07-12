@@ -1,9 +1,11 @@
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
 import { FormikHelpers, useFormik } from "formik";
 import React, { useState } from "react";
+import { useMutation } from "react-query";
 import * as yup from "yup";
 
 import { signUp } from "../lib/firestoreClient/auth";
+import { validateEmail, validateUsername } from "../lib/knowledgeApi";
 import { SignUpBasicInfo } from "./SignUpBasicInfo";
 import { SignUpPersonalInfo } from "./SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "./SignUpProfessionalInfo";
@@ -40,7 +42,10 @@ export interface SignUpFormValues {
 export const SignUpForm = () => {
   const steps = ["Account", "Personal", "Education"];
 
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(1);
+
+  const mutationValidateEmail = useMutation(validateEmail);
+  const mutationValidateUserName = useMutation(validateUsername);
 
   const initialValues: SignUpFormValues = {
     firstName: "",
@@ -127,12 +132,57 @@ export const SignUpForm = () => {
   const formik = useFormik({ initialValues, validationSchema, onSubmit });
 
   const onPreviousStep = () => {
-    if (activeStep < 1) return;
+    if (activeStep < 2) return;
     setActiveStep(step => step - 1);
   };
 
-  const onNextStep = () => {
-    if (activeStep > steps.length - 2) return;
+  const validateEmailByServer = async (): Promise<Boolean> => {
+    const data = await mutationValidateEmail.mutateAsync({ email: formik.values.email });
+    const institutionByEmail = data?.results?.institution || null;
+
+    if (!institutionByEmail) {
+      // This email address is already in use!
+      console.log("This email address is already in use!");
+      formik.setErrors({ ...formik.errors, email: "This email address is already in use!" });
+      return false;
+    }
+
+    if (institutionByEmail === "Not Found!") {
+      // "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu";
+      formik.setErrors({
+        ...formik.errors,
+        email:
+          "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu"
+      });
+      return false;
+    }
+
+    // email is from a valid institution
+    formik.setFieldValue("institution", institutionByEmail);
+    return true;
+  };
+
+  const validateUsernameByServer = async (): Promise<Boolean> => {
+    const data = await mutationValidateUserName.mutateAsync({ username: formik.values.username });
+    const usernameValid = Boolean(data.results?.valid);
+    if (!usernameValid) {
+      // This username is already in use!
+      console.log("This username is already in use!");
+      formik.setErrors({ ...formik.errors, username: "This username is already in use!" });
+      return false;
+    }
+    return true;
+  };
+
+  const onNextStep = async () => {
+    if (activeStep > steps.length - 1) return;
+    if (activeStep === 1) {
+      const isValidEmail = await validateEmailByServer();
+      if (!isValidEmail) return;
+
+      const isValidUsername = await validateUsernameByServer();
+      if (!isValidUsername) return;
+    }
     setActiveStep(step => step + 1);
   };
 
@@ -165,7 +215,7 @@ export const SignUpForm = () => {
 
   return (
     <Box>
-      <Stepper activeStep={activeStep} sx={{ mt: "26px", mb: "46px", mx: "19px" }}>
+      <Stepper activeStep={activeStep - 1} sx={{ mt: "26px", mb: "46px", mx: "19px" }}>
         {steps.map(label => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: { optional?: React.ReactNode } = {};
@@ -178,27 +228,17 @@ export const SignUpForm = () => {
       </Stepper>
       <form onSubmit={formik.handleSubmit}>
         <Button onClick={() => console.log(formik.values, formik.errors)}>
-          Get VALUES [{formik.isValid ? "ok" : "X"}]
+          Get VALUES [{formik.isValid ? "ok" : "X"}] [{activeStep}]
         </Button>
-        {activeStep === 0 && <SignUpBasicInfo formikProps={formik} />}
-        {activeStep === 1 && <SignUpPersonalInfo formikProps={formik} />}
-        {activeStep === 2 && <SignUpProfessionalInfo formikProps={formik} />}
+        {activeStep === 1 && <SignUpBasicInfo formikProps={formik} />}
+        {activeStep === 2 && <SignUpPersonalInfo formikProps={formik} />}
+        {activeStep === 3 && <SignUpProfessionalInfo formikProps={formik} />}
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: "16px" }}>
-          {activeStep === 0 && (
+          {activeStep === 1 && (
             <>
               <div></div>
               <Button disabled={isValidFirstStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
-                Next
-              </Button>
-            </>
-          )}
-          {activeStep === 1 && (
-            <>
-              <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
-                Prev
-              </Button>
-              <Button disabled={isValidSecondStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
                 Next
               </Button>
             </>
@@ -208,11 +248,21 @@ export const SignUpForm = () => {
               <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
                 Prev
               </Button>
+              <Button disabled={isValidSecondStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
+                Next
+              </Button>
+            </>
+          )}
+          {activeStep === 3 && (
+            <>
+              <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
+                Prev
+              </Button>
             </>
           )}
         </Box>
-        {activeStep === 2 && (
-          <Button disabled={formik.isSubmitting || !formik.isValid} variant="contained" onClick={onNextStep} fullWidth>
+        {activeStep === 3 && (
+          <Button disabled={formik.isSubmitting || !formik.isValid} variant="contained" fullWidth>
             Sign up
           </Button>
         )}
