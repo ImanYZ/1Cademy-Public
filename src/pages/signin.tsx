@@ -1,5 +1,5 @@
-import React from "react";
-import { ReactElement } from "react-markdown/lib/react-markdown";
+import React, { ReactNode } from "react";
+
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignInForm } from "../components/SignInForm";
 
