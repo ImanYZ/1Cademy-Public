@@ -76,6 +76,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          py: "54px",
           background: theme => theme.palette.common.darkGrayBackground
         }}
       >
@@ -139,18 +140,21 @@ export const AuthLayout = ({ children }: AuthProps) => {
       <Box
         sx={{
           width: "100vw",
-          height: "100vh",
+          height: { xs: "auto", md: "100vh" },
           display: "flex",
           justifyContent: "center",
+          border: "dashed 2px royalBlue",
           alignItems: "center"
         }}
       >
         <Box
           sx={{
             width: "1300px",
-            height: "auto",
+            minHeight: "auto",
             display: "grid",
-            gridTemplateColumns: "auto auto"
+            border: "dashed 2px pink",
+            gridTemplateColumns: { xs: "auto", md: "auto auto" },
+            gridTemplateRows: { xs: "297px auto", md: "auto" }
           }}
         >
           {leftPanelAuth()}
