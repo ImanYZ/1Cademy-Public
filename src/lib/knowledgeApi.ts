@@ -104,7 +104,10 @@ export const getFullNodeAutocomplete = async (searchText: string): Promise<Respo
   return response.data;
 };
 
-export const addProposal = async ({ data, nodeType }: {
+export const addProposal = async ({
+  data,
+  nodeType
+}: {
   data: ProposalInput;
   nodeType: NodeType;
 }): Promise<ResponseGeneric> => {
