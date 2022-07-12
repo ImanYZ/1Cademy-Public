@@ -1,10 +1,14 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
+
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignInForm } from "../components/SignInForm";
 
-
 const signIn = () => {
-  return <div><SignInForm/></div>;
+  return (
+    <div>
+      <SignInForm />
+    </div>
+  );
 };
 
 signIn.getLayout = (page: ReactNode) => {
