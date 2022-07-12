@@ -388,3 +388,16 @@ export type AuthLoginSuccessAction = {
   payload: User;
 };
 export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
+
+export type EmailValidation = {
+  institution: string | null;
+};
+
+export type UsernameValidation = {
+  valid: boolean;
+};
+
+export type ResponseAPI<T> = {
+  results?: T;
+  errorMessage?: string;
+};

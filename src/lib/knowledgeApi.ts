@@ -1,11 +1,13 @@
 import axios from "axios";
 
 import {
+  EmailValidation,
   FeedbackInput,
   FilterValue,
   KnowledgeNode,
   NodeType,
   ProposalInput,
+  ResponseAPI,
   ResponseAutocompleteFilter,
   ResponseAutocompleteFullNodes,
   ResponseAutocompleteFullReferences,
@@ -16,7 +18,8 @@ import {
   ResponseGeneric,
   SearchNodesParams,
   SearchNodesResponse,
-  StatsSchema
+  StatsSchema,
+  UsernameValidation
 } from "../knowledgeTypes";
 
 export const getTagsAutocomplete = async (tagName: string): Promise<ResponseAutocompleteTags> => {
@@ -104,10 +107,27 @@ export const getFullNodeAutocomplete = async (searchText: string): Promise<Respo
   return response.data;
 };
 
-export const addProposal = async ({ data, nodeType }: {
+export const addProposal = async ({
+  data,
+  nodeType
+}: {
   data: ProposalInput;
   nodeType: NodeType;
 }): Promise<ResponseGeneric> => {
   const res = await axios.post("/api/addProposal", { data, nodeType });
   return res.data;
+};
+
+export const validateEmail = async ({ email }: { email: string }): Promise<ResponseAPI<EmailValidation>> => {
+  const res = await axios.post("/api/validateEmail", { email });
+  return { results: res.data };
+};
+
+export const validateUsername = async ({
+  username
+}: {
+  username: string;
+}): Promise<ResponseAPI<UsernameValidation>> => {
+  const res = await axios.post("/api/validateUsername", { username });
+  return { results: res.data };
 };
