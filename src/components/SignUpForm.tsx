@@ -2,6 +2,7 @@ import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
 import { FormikHelpers, useFormik } from "formik";
 import React, { useState } from "react";
 import * as yup from "yup";
+
 import { signUp } from "../lib/firestoreClient/auth";
 import { SignUpBasicInfo } from "./SignUpBasicInfo";
 import { SignUpPersonalInfo } from "./SignUpPersonalInfo";
@@ -69,40 +70,47 @@ export const SignUpForm = () => {
   };
 
   const validationSchema = yup.object({
-    firstName: yup.string().required("Required"),
-    lastName: yup.string().required("Required"),
-    email: yup.string().email("Enter a valid email").required("Required"),
-    username: yup.string().required("Required"),
-    password: yup.string().required("Required"),
-    passwordConfirmation: yup.string().oneOf([yup.ref("password"), null], "Passwords must match"),
-    language: yup.string().required("Required"),
+    firstName: yup.string().required("Please enter your first name!"),
+    lastName: yup.string().required("Please enter your last name!"),
+    email: yup
+      .string()
+      .email("Invalid email address!")
+      .required("Your email address provided by your academic/research institutions is required!"),
+    username: yup
+      .string()
+      .required("Your desired username is required!")
+      .min(4, "A username with at least 4 characters is required!")
+      .matches(/^((?!(__.*__)|\.|\/).)*$/, "Usernames should not contain . or / or __!"),
+    password: yup.string().min(7, "Password must be at least 7 characters!").required("A secure password is required!"),
+    passwordConfirmation: yup.string().oneOf([yup.ref("password"), null], "Password must match re-entered password!"),
+    language: yup.string().required("Please enter your language!"),
     age: yup
       .number()
       .min(10, "Age should be greater than or equal to 10")
       .max(100, "Age should be less than or equal to 100")
       .required("Required"),
-    gender: yup.string().required("Required"),
+    gender: yup.string().required("Please enter your gender!"),
     genderOtherValue: yup.string().when("gender", {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
-    ethnicity: yup.array().min(1).of(yup.string().required("Required")),
+    ethnicity: yup.array().min(1).of(yup.string().required("Please enter your ethnicity!")),
     ethnicityOtherValue: yup.string().when("ethnicity", {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
       then: yup.string().required("Required")
     }),
-    country: yup.string().required("Required"),
-    state: yup.string().required("Required"),
-    city: yup.string().required("Required"),
-    reason: yup.string().required("Required"),
-    foundFrom: yup.string().required("Required"),
+    country: yup.string().required("Please enter your country!"),
+    state: yup.string().required("Please enter your state!"),
+    city: yup.string().required("Please enter your city!"),
+    reason: yup.string().required("Please enter your reason for joining 1Cademy!"),
+    foundFrom: yup.string().required("Please enter how you heard about us!"),
     foundFromOtherValue: yup.string().when("foundFrom", {
       is: (foundFromValue: string) => foundFromValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
-    occupation: yup.string().required("Required"),
-    education: yup.string().required("Required"),
-    institution: yup.string().required("Required"),
+    occupation: yup.string().required("Please enter your occupation!"),
+    education: yup.string().required("Please enter your educational status!"),
+    institution: yup.string().required("Please enter your institution!"),
     major: yup.string().required("Required"),
     fieldOfInterest: yup.string().required("Required"),
     signUpAgreement: yup.boolean().isTrue()
@@ -128,6 +136,33 @@ export const SignUpForm = () => {
     setActiveStep(step => step + 1);
   };
 
+  const isValidFirstStep = () => {
+    return (
+      Boolean(formik.errors.firstName) ||
+      Boolean(formik.errors.lastName) ||
+      Boolean(formik.errors.email) ||
+      Boolean(formik.errors.username) ||
+      Boolean(formik.errors.password) ||
+      Boolean(formik.errors.passwordConfirmation)
+    );
+  };
+
+  const isValidSecondStep = () => {
+    return (
+      Boolean(formik.errors.language) ||
+      Boolean(formik.errors.age) ||
+      Boolean(formik.errors.gender) ||
+      Boolean(formik.errors.genderOtherValue) ||
+      Boolean(formik.errors.ethnicity) ||
+      Boolean(formik.errors.country) ||
+      Boolean(formik.errors.state) ||
+      Boolean(formik.errors.city) ||
+      Boolean(formik.errors.reason) ||
+      Boolean(formik.errors.foundFrom) ||
+      Boolean(formik.errors.foundFromOtherValue)
+    );
+  };
+
   return (
     <Box>
       <Stepper activeStep={activeStep} sx={{ mt: "26px", mb: "46px", mx: "19px" }}>
@@ -150,19 +185,30 @@ export const SignUpForm = () => {
         {activeStep === 2 && <SignUpProfessionalInfo formikProps={formik} />}
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: "16px" }}>
-          {activeStep > 0 ? (
-            <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
-              Prev
-            </Button>
-          ) : (
-            <div></div>
+          {activeStep === 0 && (
+            <>
+              <div></div>
+              <Button disabled={isValidFirstStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
+                Next
+              </Button>
+            </>
           )}
-          {activeStep < 2 ? (
-            <Button disabled={formik.isSubmitting} variant="contained" onClick={onNextStep}>
-              Next
-            </Button>
-          ) : (
-            <div></div>
+          {activeStep === 1 && (
+            <>
+              <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
+                Prev
+              </Button>
+              <Button disabled={isValidSecondStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
+                Next
+              </Button>
+            </>
+          )}
+          {activeStep === 2 && (
+            <>
+              <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
+                Prev
+              </Button>
+            </>
           )}
         </Box>
         {activeStep === 2 && (

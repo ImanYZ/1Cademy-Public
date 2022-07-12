@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { ReactNode } from "react";
+
 import { getDesignTokens } from "../../lib/theme/brandingTheme";
 
 type AuthProps = {
@@ -75,16 +76,10 @@ export const AuthLayout = ({ children }: AuthProps) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: theme => theme.palette.common.darkGrayBackground,
-          border: "dashed 2px pink"
+          background: theme => theme.palette.common.darkGrayBackground
         }}
       >
-        <Box
-          sx={{
-            maxWidth: "400px",
-            border: "dashed 2px royalBlue"
-          }}
-        >
+        <Box sx={{ maxWidth: "400px" }}>
           <Box
             aria-label="basic tabs example"
             sx={{
