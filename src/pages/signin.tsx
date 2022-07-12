@@ -1,18 +1,24 @@
 import React, { ReactNode } from "react";
 
-import { AuthLayout } from "../components/layouts/AuthLayout";
-import { SignInForm } from "../components/SignInForm";
+import { AuthLayout } from "@/components/layouts/AuthLayout";
+import { SignInForm } from "@/components/SignInForm";
+import { signIn } from "@/lib/firestoreClient/auth";
 
-const signIn = () => {
+const SignInPage = () => {
+  const handleSignIn = async (email: string, password: string) => {
+    const res = await signIn(email, password);
+    console.log("res", res);
+  };
+
   return (
     <div>
-      <SignInForm />
+      <SignInForm onSignIn={handleSignIn} />
     </div>
   );
 };
 
-signIn.getLayout = (page: ReactNode) => {
+SignInPage.getLayout = (page: ReactNode) => {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default signIn;
+export default SignInPage;

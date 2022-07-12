@@ -1,9 +1,9 @@
 import { getAnalytics } from "firebase/analytics";
 import { getApps, initializeApp } from "firebase/app";
 
-export const createFirebaseApp = () => {
+export const initFirebaseClientSDK = () => {
   if (getApps().length <= 0) {
-    const app = initializeApp({
+    initializeApp({
       apiKey: process.env.NEXT_PUBLIC_API_KEY,
       authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
       databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
@@ -13,10 +13,10 @@ export const createFirebaseApp = () => {
       appId: process.env.NEXT_PUBLIC_APP_ID,
       measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID
     });
-    getAnalytics();
-    return app;
+    if (typeof window !== "undefined") {
+      getAnalytics();
+    }
   }
-  return getApps()[0];
 };
 
 export const getFirebaseApp = () => {

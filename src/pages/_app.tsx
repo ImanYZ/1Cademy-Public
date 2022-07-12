@@ -14,6 +14,7 @@ import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { initFirebaseClientSDK } from "@/lib/firestoreClient/firestoreClient.config";
 import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 
 import { getDesignTokens, getThemedComponents } from "../lib/theme/brandingTheme";
@@ -39,6 +40,9 @@ type ExtendedAppProps = AppProps & {
 // }
 
 // ** Configure JSS & ClassName
+
+initFirebaseClientSDK();
+
 const App = (props: ExtendedAppProps) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const [queryClient] = useState(
