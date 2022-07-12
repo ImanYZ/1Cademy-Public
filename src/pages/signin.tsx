@@ -1,18 +1,28 @@
-import React, { ReactNode } from "react";
+import { FirebaseError } from "firebase/app";
+import React, { ReactNode, useState } from "react";
 
 import { AuthLayout } from "@/components/layouts/AuthLayout";
 import { SignInForm } from "@/components/SignInForm";
+import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
 
 const SignInPage = () => {
+  const [, { handleError }] = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSignIn = async (email: string, password: string) => {
-    const res = await signIn(email, password);
-    console.log("res", res);
+    try {
+      setIsLoading(true);
+      await signIn(email, password);
+    } catch (error) {
+      setIsLoading(false);
+      handleError({ error, errorMessage: (error as FirebaseError).message });
+    }
   };
 
   return (
     <div>
-      <SignInForm onSignIn={handleSignIn} />
+      <SignInForm onSignIn={handleSignIn} isLoading={isLoading} />
     </div>
   );
 };

@@ -364,6 +364,7 @@ export type User = {
 
 export interface AuthState {
   readonly isAuthenticated: boolean;
+  readonly isAuthInitialized: boolean;
   readonly user: User | null;
 }
 
@@ -378,13 +379,12 @@ export type ErrorOptions = {
   errorMessage?: string;
 };
 
-export type AuthUpdateUserAction = {
-  type: "updateUser";
-  payload: User;
+export type AuthLogoutSuccessAction = {
+  type: "logoutSucess";
 };
 
-export type AuthLoginSuccessUserAction = {
+export type AuthLoginSuccessAction = {
   type: "loginSucess";
   payload: User;
 };
-export type DispatchAuthActions = AuthUpdateUserAction | AuthLoginSuccessUserAction;
+export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;

@@ -4,7 +4,10 @@ import { Box, ThemeProvider } from "@mui/system";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode } from "react";
+import { ReactNode, useCallback, useEffect } from "react";
+
+import { useAuth } from "@/context/AuthContext";
+import ROUTES from "@/lib/utils/routes";
 
 import { getDesignTokens } from "../../lib/theme/brandingTheme";
 
@@ -13,7 +16,22 @@ type AuthProps = {
 };
 
 export const AuthLayout = ({ children }: AuthProps) => {
+  const [{ isAuthenticated, isAuthInitialized }] = useAuth();
   const router = useRouter();
+
+  const redirectToHome = useCallback(() => {
+    router.replace(ROUTES.home);
+  }, [router]);
+
+  useEffect(() => {
+    if (isAuthenticated && isAuthInitialized) {
+      redirectToHome();
+    }
+  }, [isAuthenticated, isAuthInitialized, redirectToHome]);
+
+  if (!isAuthInitialized || isAuthenticated) {
+    return null;
+  }
 
   const leftPanelAuth = () => {
     return (

@@ -1,5 +1,4 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-// import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useReducer } from "react";
 import { AuthActions, AuthState, ErrorOptions } from "src/knowledgeTypes";
@@ -17,35 +16,28 @@ type Props = {
 
 const AuthProvider: FC<Props> = ({ children, store }) => {
   const [state, dispatch] = useReducer(authReducer, store || INITIAL_STATE);
-  // const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
 
-  // const redirect = useCallback(
-  //   (url: string) => {
-  //     router.replace(url);
-  //   },
-  //   [router]
-  // );
-
   const loadUser = useCallback(async (userId: string) => {
-    console.log("TODO: remove this", userId);
-    const user = await retrieveAuthenticatedUser("4AMf9prT68WTLxJ9ZTSONZ0vDvC3");
-    // dispatch();
-    console.log("user", user);
+    try {
+      const user = await retrieveAuthenticatedUser(userId);
+      if (user) {
+        dispatch({ type: "loginSucess", payload: user });
+      } else {
+        dispatch({ type: "logoutSucess" });
+      }
+    } catch (error) {
+      dispatch({ type: "logoutSucess" });
+    }
   }, []);
 
   useEffect(() => {
-    console.log("======================= va a createFirebaseApp");
     const auth = getAuth();
-
     const unsubscriber = onAuthStateChanged(auth, user => {
-      console.log("user", user);
       if (user) {
-        console.log("user is signed in ");
-        //  dispatch({type:"loginSucess", payload:})
         loadUser(user.uid);
       } else {
-        console.log("user is signed off ");
+        dispatch({ type: "logoutSucess" });
       }
     });
     return () => unsubscriber();

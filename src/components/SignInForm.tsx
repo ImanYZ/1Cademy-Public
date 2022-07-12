@@ -1,5 +1,6 @@
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { FormikHelpers, useFormik } from "formik";
+import { useFormik } from "formik";
 import { FC } from "react";
 import * as yup from "yup";
 
@@ -10,9 +11,10 @@ interface SignInFormValues {
 
 type Props = {
   onSignIn: (email: string, password: string) => void;
+  isLoading?: boolean;
 };
 
-export const SignInForm: FC<Props> = ({ onSignIn }) => {
+export const SignInForm: FC<Props> = ({ onSignIn, isLoading }) => {
   const initialValues: SignInFormValues = {
     email: "",
     password: ""
@@ -23,17 +25,8 @@ export const SignInForm: FC<Props> = ({ onSignIn }) => {
     password: yup.string().required("Required")
   });
 
-  const onSubmit = async (values: SignInFormValues, { setSubmitting }: FormikHelpers<SignInFormValues>) => {
-    // await sendFeedback({ ...values, pageURL: url });
-    // setSuccessFeedback(true);
-    console.log("values", values);
+  const onSubmit = async (values: SignInFormValues) => {
     onSignIn(values.email, values.password);
-
-    // const res = await signIn(values.email, values.password);
-    // await resetPassword("two@umich.edu");
-    // const res = await signUp("hodacho", "hodacho@gmail.com", "Pa$$w0rd");
-    // console.log("res", res);
-    setSubmitting(false);
   };
 
   const formik = useFormik({ initialValues, validationSchema, onSubmit });
@@ -72,13 +65,9 @@ export const SignInForm: FC<Props> = ({ onSignIn }) => {
         <Button type="button" sx={{ my: "40px" }}>
           Forgot Password?
         </Button>
-        <Button disabled={formik.isSubmitting} type="submit" variant="contained" fullWidth>
+        <LoadingButton loading={isLoading} disabled={formik.isSubmitting} type="submit" variant="contained" fullWidth>
           LOG IN
-        </Button>
-        {/* <LoadingButton type="submit" color="primary" variant="contained" fullWidth loading={isSubmitting}>
-              Submit
-            </LoadingButton> */}
-        {/* <ArrowForwardIcon sx={{ ml: "10px" }} /> */}
+        </LoadingButton>
       </form>
     </Box>
   );
