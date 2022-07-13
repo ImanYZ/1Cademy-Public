@@ -80,10 +80,6 @@ const SignIn = () => {
         <LoadingButton loading={isLoading} disabled={formik.isSubmitting} type="submit" variant="contained" fullWidth>
           LOG IN
         </LoadingButton>
-        {/* <LoadingButton type="submit" color="primary" variant="contained" fullWidth loading={isSubmitting}>
-              Submit
-            </LoadingButton> */}
-        {/* <ArrowForwardIcon sx={{ ml: "10px" }} /> */}
       </form>
     </Box>
   );

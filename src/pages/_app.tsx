@@ -25,21 +25,10 @@ export type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 
-// ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {
   Component: NextPageWithLayout;
   emotionCache: EmotionCache;
 };
-
-// export type NextPageWithLayout = NextPage & {
-//   getLayout?: (page: ReactElement) => ReactNode
-// }
-
-// type AppPropsWithLayout = AppProps & {
-//   Component: NextPageWithLayout
-// }
-
-// ** Configure JSS & ClassName
 
 initFirebaseClientSDK();
 
