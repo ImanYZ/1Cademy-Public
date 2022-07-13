@@ -29,9 +29,9 @@ import {
   mapLinkedKnowledgeNodeToLinkedNodeObject
 } from "@/lib/utils/utils";
 
-import { PagesNavbar } from "..";
 import { LinkedKnowledgeNode, ProposalInput } from "../../knowledgeTypes";
 import { addProposal, getNodeData } from "../../lib/knowledgeApi";
+import { PagesNavbar } from "..";
 
 const NodeProposal = () => {
   const router = useRouter();
@@ -98,7 +98,8 @@ const NodeProposal = () => {
         </Typography>
       </Box>,
       {
-        variant: "success"
+        variant: "success",
+        anchorOrigin: { horizontal: "left", vertical: "bottom" }
       }
     );
   };

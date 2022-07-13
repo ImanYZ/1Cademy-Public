@@ -1,8 +1,9 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { createContext, FC, ReactNode, useContext, useEffect, useReducer } from "react";
+import { useSnackbar } from "notistack";
+import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useReducer } from "react";
 import { AuthActions, AuthState, ErrorOptions } from "src/knowledgeTypes";
 
-import { createFirebaseApp } from "@/lib/firestoreClient/firestoreClient.config";
+import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import authReducer, { INITIAL_STATE } from "@/lib/reducers/auth";
 
 const AuthStateContext = createContext<AuthState | undefined>(undefined);
@@ -15,25 +16,40 @@ type Props = {
 
 const AuthProvider: FC<Props> = ({ children, store }) => {
   const [state, dispatch] = useReducer(authReducer, store || INITIAL_STATE);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const loadUser = useCallback(async (userId: string) => {
+    try {
+      const user = await retrieveAuthenticatedUser(userId);
+      if (user) {
+        dispatch({ type: "loginSucess", payload: user });
+      } else {
+        dispatch({ type: "logoutSucess" });
+      }
+    } catch (error) {
+      dispatch({ type: "logoutSucess" });
+    }
+  }, []);
 
   useEffect(() => {
-    createFirebaseApp();
     const auth = getAuth();
-
     const unsubscriber = onAuthStateChanged(auth, user => {
-      console.log("user", user);
       if (user) {
-        console.log("user is signed in ");
+        loadUser(user.uid);
       } else {
-        console.log("user is signed off ");
+        dispatch({ type: "logoutSucess" });
       }
     });
     return () => unsubscriber();
-  }, []);
+  }, [loadUser]);
 
   const handleError = ({ error, errorMessage, showErrorToast = true }: ErrorOptions) => {
     //TODO: setup error reporting in google cloud
     console.log("TODO: setup error reporting in google cloud", error, errorMessage, showErrorToast);
+    if (showErrorToast) {
+      const errorString = typeof error === "string" ? error : "";
+      enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, { variant: "error" });
+    }
   };
 
   const dispatchActions = { dispatch, handleError };

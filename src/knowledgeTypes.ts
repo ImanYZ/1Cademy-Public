@@ -327,13 +327,44 @@ export type ProposalInput = {
 };
 
 export type User = {
+  background?: string;
+  blocked?: boolean;
+  chooseUname?: boolean;
+  city?: string;
+  clickedConsent?: boolean;
+  clickedCP?: boolean;
+  clickedPP?: boolean;
+  clickedTOS?: boolean;
+  color?: string;
+  consented?: boolean;
+  country?: string;
+  createdAt?: Timestamp;
+  deCourse?: string;
+  deCredits?: number;
+  deInstit?: string;
+  deMajor?: string;
+  email?: string;
+  ethnicity?: string;
   fName?: string;
+  gender?: string;
+  imageUrl?: string;
+  imgOrColor?: boolean;
   lName?: string;
+  lang?: string;
+  practicing?: boolean;
+  stateInfo?: string;
+  sNode?: string;
+  tag?: string;
+  tagId?: string;
+  theme?: string;
+  uname?: string;
+  updatedAt?: Timestamp;
   userId?: string;
 };
 
 export interface AuthState {
   readonly isAuthenticated: boolean;
+  readonly isAuthInitialized: boolean;
   readonly user: User | null;
 }
 
@@ -348,11 +379,15 @@ export type ErrorOptions = {
   errorMessage?: string;
 };
 
-export type AuthUpdateUserAction = {
-  type: "updateUser";
+export type AuthLogoutSuccessAction = {
+  type: "logoutSucess";
+};
+
+export type AuthLoginSuccessAction = {
+  type: "loginSucess";
   payload: User;
 };
-export type DispatchAuthActions = AuthUpdateUserAction;
+export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
 
 export type EmailValidation = {
   institution: string | null;

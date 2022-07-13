@@ -1,8 +1,11 @@
+import { LoadingButton } from "@mui/lab";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { FormikHelpers, useFormik } from "formik";
-import React, { ReactNode } from "react";
+import { FirebaseError } from "firebase/app";
+import { useFormik } from "formik";
+import React, { ReactNode, useState } from "react";
 import * as yup from "yup";
 
+import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
@@ -13,6 +16,9 @@ interface SignInFormValues {
 }
 
 const SignIn = () => {
+  const [, { handleError }] = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
   const initialValues: SignInFormValues = {
     email: "",
     password: ""
@@ -22,17 +28,17 @@ const SignIn = () => {
     email: yup.string().email("Enter a valid email").required("Required"),
     password: yup.string().required("Required")
   });
-
-  const onSubmit = async (values: SignInFormValues, { setSubmitting }: FormikHelpers<SignInFormValues>) => {
-    // await sendFeedback({ ...values, pageURL: url });
-    // setSuccessFeedback(true);
-    console.log("values", values);
-    const res = await signIn(values.email, values.password);
-    console.log("res", res);
-    setSubmitting(false);
+  const handleSignIn = async ({ email, password }: SignInFormValues) => {
+    try {
+      setIsLoading(true);
+      await signIn(email, password);
+    } catch (error) {
+      setIsLoading(false);
+      handleError({ error, errorMessage: (error as FirebaseError).message });
+    }
   };
 
-  const formik = useFormik({ initialValues, validationSchema, onSubmit });
+  const formik = useFormik({ initialValues, validationSchema, onSubmit: handleSignIn });
 
   return (
     <Box sx={{ my: "92px" }}>
@@ -71,9 +77,9 @@ const SignIn = () => {
         <Button type="button" sx={{ my: "40px" }}>
           Forgot Password?
         </Button>
-        <Button disabled={formik.isSubmitting} type="submit" variant="contained" fullWidth>
+        <LoadingButton loading={isLoading} disabled={formik.isSubmitting} type="submit" variant="contained" fullWidth>
           LOG IN
-        </Button>
+        </LoadingButton>
         {/* <LoadingButton type="submit" color="primary" variant="contained" fullWidth loading={isSubmitting}>
               Submit
             </LoadingButton> */}
