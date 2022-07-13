@@ -1,14 +1,15 @@
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
-import { FormikHelpers, useFormik } from "formik";
+import { useFormik } from "formik";
 import React, { ReactNode, useState } from "react";
 import { useMutation } from "react-query";
+// import { SignUpFormValues } from "src/knowledgeTypes";
 import * as yup from "yup";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { signUp } from "../lib/firestoreClient/auth";
+// import { signUp } from "../lib/firestoreClient/auth";
 import { validateEmail, validateUsername } from "../lib/knowledgeApi";
 
 export interface SignUpFormValues {
@@ -40,7 +41,7 @@ export interface SignUpFormValues {
   signUpAgreement: boolean;
 }
 
-const SignUp = () => {
+const SignUpPage = () => {
   const steps = ["Account", "Personal", "Education"];
 
   const [activeStep, setActiveStep] = useState(1);
@@ -122,15 +123,19 @@ const SignUp = () => {
     signUpAgreement: yup.boolean().isTrue()
   });
 
-  const onSubmit = async (values: SignUpFormValues, { setSubmitting }: FormikHelpers<SignUpFormValues>) => {
-    console.log("values sing up", values);
-    // const res = await signIn(values.email, values.password)
-    await signUp(values.username, values.email, values.password);
-    // console.log('res', res)
-    setSubmitting(false);
+  // const onSubmit = async (values: SignUpFormValues, { setSubmitting }: FormikHelpers<SignUpFormValues>) => {
+  //   console.log("values sing up", values);
+  //   // const res = await signIn(values.email, values.password)
+  //   await signUp(values.username, values.email, values.password);
+  //   // console.log('res', res)
+  //   setSubmitting(false);
+  // };
+
+  const handleSignUp = (values: SignUpFormValues) => {
+    console.log("Should handle signup", values);
   };
 
-  const formik = useFormik({ initialValues, validationSchema, onSubmit });
+  const formik = useFormik({ initialValues, validationSchema, onSubmit: handleSignUp });
 
   const onPreviousStep = () => {
     if (activeStep < 2) return;
@@ -272,8 +277,8 @@ const SignUp = () => {
   );
 };
 
-SignUp.getLayout = (page: ReactNode) => {
+SignUpPage.getLayout = (page: ReactNode) => {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default SignUp;
+export default SignUpPage;

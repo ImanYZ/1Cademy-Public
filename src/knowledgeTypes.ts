@@ -380,11 +380,11 @@ export type ErrorOptions = {
 };
 
 export type AuthLogoutSuccessAction = {
-  type: "logoutSucess";
+  type: "logoutSuccess";
 };
 
 export type AuthLoginSuccessAction = {
-  type: "loginSucess";
+  type: "loginSuccess";
   payload: User;
 };
 export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
@@ -401,3 +401,32 @@ export type ResponseAPI<T> = {
   results?: T;
   errorMessage?: string;
 };
+
+export interface SignUpFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+  passwordConfirmation: string;
+  // -----------------------
+  language: string;
+  age: string;
+  gender: string | null;
+  genderOtherValue: string;
+  ethnicity: string[];
+  ethnicityOtherValue: string;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  reason: string;
+  foundFrom: string | null;
+  foundFromOtherValue: string;
+  // -----------------------
+  occupation: string;
+  education: string | null;
+  institution: string;
+  major: string;
+  fieldOfInterest: string;
+  signUpAgreement: boolean;
+}

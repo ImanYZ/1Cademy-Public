@@ -22,12 +22,12 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
     try {
       const user = await retrieveAuthenticatedUser(userId);
       if (user) {
-        dispatch({ type: "loginSucess", payload: user });
+        dispatch({ type: "loginSuccess", payload: user });
       } else {
-        dispatch({ type: "logoutSucess" });
+        dispatch({ type: "logoutSuccess" });
       }
     } catch (error) {
-      dispatch({ type: "logoutSucess" });
+      dispatch({ type: "logoutSuccess" });
     }
   }, []);
 
@@ -37,7 +37,7 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
       if (user) {
         loadUser(user.uid);
       } else {
-        dispatch({ type: "logoutSucess" });
+        dispatch({ type: "logoutSuccess" });
       }
     });
     return () => unsubscriber();

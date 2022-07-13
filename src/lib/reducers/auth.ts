@@ -8,9 +8,9 @@ export const INITIAL_STATE: AuthState = {
 
 function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
   switch (action.type) {
-    case "logoutSucess":
+    case "logoutSuccess":
       return { ...state, user: null, isAuthenticated: false, isAuthInitialized: true };
-    case "loginSucess":
+    case "loginSuccess":
       return { ...state, user: { ...action.payload }, isAuthenticated: true, isAuthInitialized: true };
   }
 }
