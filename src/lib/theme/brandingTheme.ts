@@ -17,17 +17,13 @@ declare module "@mui/material/styles/createPalette" {
 
 const common = {
   black: "#1a1a1a",
-  white: "#ffffff",
+  white: "#F8F8F8",
   orange: "#ff8a33",
   orangeLight: "#f9e2d1",
   orangeDark: "#ff6d00",
   darkGrayBackground: "#28282A",
   gray: "#D3D3D3"
 };
-
-const ONE_ACADEMY_BLACK = "#28282A";
-const ONE_ACADEMY_ORANGE = "#FF8A33";
-const ONE_ACADEMY_WHITE = "#F8F8F8";
 
 const systemFont = ["Roboto", "sans-serif"];
 
@@ -36,10 +32,22 @@ export const getDesignTokens = (mode: "light" | "dark") =>
     palette: {
       mode,
       primary: {
-        main: ONE_ACADEMY_ORANGE
+        main: common.orange,
+        ...(mode === "dark" && {
+          main: common.orange
+        })
       },
       secondary: {
-        main: mode === "light" ? ONE_ACADEMY_BLACK : ONE_ACADEMY_WHITE
+        main: common.darkGrayBackground,
+        ...(mode === "dark" && {
+          main: common.white
+        })
+      },
+      light: {
+        main: common.white,
+        ...(mode === "dark" && {
+          main: grey[500]
+        })
       },
       warning: {
         main: "#ffc071",
@@ -49,20 +57,44 @@ export const getDesignTokens = (mode: "light" | "dark") =>
         primary: mode === "light" ? common.black : common.white,
         secondary: grey[300]
       },
-      divider: grey[200],
-      common
+      divider: mode === "dark" ? grey[200] : grey[200],
+      background: {
+        default: "#FAFAFA",
+        paper: common.white
+      },
+      ...(mode === "dark" && {
+        background: {
+          default: grey[600],
+          paper: grey[700]
+        }
+      }),
+      common,
+      ...(mode === "light" && {
+        text: {
+          primary: common.black,
+          secondary: grey[700]
+        }
+      }),
+      ...(mode === "dark" && {
+        text: {
+          primary: common.white,
+          secondary: grey[300]
+        }
+      }),
+      grey
     },
+    spacing: 5,
     typography: {
       fontFamily: [...systemFont].join(","),
-      h3: {},
-      body1: {
-        color: mode === "light" ? common.black : common.white
-      },
+      fontFamilySystem: systemFont.join(","),
+      h1: { fontSize: "50px" },
+      h2: { fontSize: "30px" },
+      h3: { fontSize: "25px" },
+      h4: { fontSize: "23px" },
       button: {
         textTransform: "initial"
       }
-    },
-    spacing: 5
+    }
   } as ThemeOptions);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
