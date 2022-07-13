@@ -1,11 +1,8 @@
 import { Autocomplete, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { FormikProps } from "formik";
+
+import { SignUpFormValues } from "../knowledgeTypes";
 import { EDUCATION_VALUES } from "../lib/utils/constants";
-import { SignUpFormValues } from "./SignUpForm";
-import MAJORS from '../../public/edited_majors.json';
-
-
-
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -84,10 +81,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         sx={{ mb: "16px" }}
       />
       <FormControlLabel
-        control={<Checkbox
-          checked={values.signUpAgreement}
-          onChange={(_, value) => setFieldValue("signUpAgreement", value)}
-        />}
+        control={
+          <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
+        }
         label="By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and Cookie Policy"
         sx={{ mb: "16px" }}
       />

@@ -4,8 +4,9 @@ import "@testing-library/jest-dom/extend-expect";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "react-query";
 
+import * as api from "@/lib/knowledgeApi";
+
 import { statsData } from "../../../testUtils/mockData/stats.data";
-import * as api from "../../lib/knowledgeApi";
 import Stats from "../Stats";
 
 describe("Stats component", () => {

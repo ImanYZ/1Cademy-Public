@@ -9,37 +9,8 @@ import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-// import { signUp } from "../lib/firestoreClient/auth";
+import { SignUpFormValues } from "../knowledgeTypes";
 import { validateEmail, validateUsername } from "../lib/knowledgeApi";
-
-export interface SignUpFormValues {
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-  password: string;
-  passwordConfirmation: string;
-  // -----------------------
-  language: string;
-  age: string;
-  gender: string | null;
-  genderOtherValue: string;
-  ethnicity: string[];
-  ethnicityOtherValue: string;
-  country: string | null;
-  state: string | null;
-  city: string | null;
-  reason: string;
-  foundFrom: string | null;
-  foundFromOtherValue: string;
-  // -----------------------
-  occupation: string;
-  education: string | null;
-  institution: string;
-  major: string;
-  fieldOfInterest: string;
-  signUpAgreement: boolean;
-}
 
 const SignUpPage = () => {
   const steps = ["Account", "Personal", "Education"];
@@ -122,14 +93,6 @@ const SignUpPage = () => {
     fieldOfInterest: yup.string().required("Required"),
     signUpAgreement: yup.boolean().isTrue()
   });
-
-  // const onSubmit = async (values: SignUpFormValues, { setSubmitting }: FormikHelpers<SignUpFormValues>) => {
-  //   console.log("values sing up", values);
-  //   // const res = await signIn(values.email, values.password)
-  //   await signUp(values.username, values.email, values.password);
-  //   // console.log('res', res)
-  //   setSubmitting(false);
-  // };
 
   const handleSignUp = (values: SignUpFormValues) => {
     console.log("Should handle signup", values);
