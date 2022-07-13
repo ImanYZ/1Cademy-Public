@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { db } from "../../lib/firestoreServer/admin";
 
-async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { data } = req.body;
 

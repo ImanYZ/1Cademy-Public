@@ -23,7 +23,50 @@ if (!admin.apps.length) {
   });
   getFirestore().settings({ ignoreUndefinedProperties: true });
 }
-
+const MAX_TRANSACTION_WRITES = 499;
 const db = getFirestore();
+let batch = db.batch();
+let writeCounts = 0;
 
-export { admin, db };
+const makeCommitBatch = async () => {
+  await batch.commit();
+  batch = db.batch();
+  writeCounts = 0;
+};
+
+const isFirestoreDeadlineError = (err: any) => {
+  const errString = err.toString();
+  return (
+    errString.includes("Error: 13 INTERNAL: Received RST_STREAM") ||
+    errString.includes("Error: 4 DEADLINE_EXCEEDED: Deadline exceeded")
+  );
+};
+
+export const commitBatch = async () => {
+  try {
+    await makeCommitBatch();
+  } catch (err) {
+    if (isFirestoreDeadlineError(err)) {
+      const theInterval = setInterval(async () => {
+        try {
+          await makeCommitBatch();
+          clearInterval(theInterval);
+        } catch (err) {
+          if (!isFirestoreDeadlineError(err)) {
+            clearInterval(theInterval);
+            throw err;
+          }
+        }
+      }, 4000);
+    }
+  }
+};
+
+const checkRestartBatchWriteCounts = async () => {
+  writeCounts += 1;
+  if (writeCounts >= MAX_TRANSACTION_WRITES) {
+    await commitBatch();
+  }
+};
+
+export { admin, db, checkRestartBatchWriteCounts };
