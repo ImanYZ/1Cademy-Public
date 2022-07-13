@@ -3,7 +3,7 @@ import { FormikProps } from "formik";
 import React from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
-type SignUpBasicInformationProps = {
+export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
 };
 

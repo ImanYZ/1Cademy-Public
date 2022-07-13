@@ -1,4 +1,4 @@
-import { NodeType } from "src/knowledgeTypes";
+import { NodeType } from "../../knowledgeTypes";
 
 export const NODE_TYPE_OPTIONS: NodeType[] = [
   NodeType.Advertisement,
@@ -25,7 +25,7 @@ export const ETHNICITY_VALUES = [
   "Hispanic or Latino",
   "Native Hawaiian or Pacific Islander",
   "Not listed (Please specify)",
-  "Prefer not to say",
+  "Prefer not to say"
 ];
 
 export const FOUND_FROM_VALUES = [
@@ -35,7 +35,7 @@ export const FOUND_FROM_VALUES = [
   "School",
   "Work",
   "Not listed (Please specify)",
-  "Prefer not to say",
+  "Prefer not to say"
 ];
 
 export const EDUCATION_VALUES = [
@@ -45,5 +45,5 @@ export const EDUCATION_VALUES = [
   "Current Master's student",
   "Bachelor's degree (BS, BA, BE, ...",
   "Current undergraduate student",
-  "Prefer not to say",
+  "Prefer not to say"
 ];

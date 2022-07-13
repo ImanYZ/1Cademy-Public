@@ -145,7 +145,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onChange={(_, value) => setFieldValue("gender", value)}
           onBlur={() => setTouched({ ...touched, gender: true })}
           options={GENDER_VALUES}
-          renderInput={params => <TextField {...params} label="gender" />}
+          renderInput={params => <TextField {...params} label="Gender" />}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -240,7 +240,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         onChange={(_, value) => setFieldValue("foundFrom", value)}
         onBlur={() => setTouched({ ...touched, foundFrom: true })}
         options={FOUND_FROM_VALUES}
-        renderInput={params => <TextField {...params} label="How did you hear about us? " />}
+        renderInput={params => <TextField {...params} label="How did you hear about us?" />}
         fullWidth
         sx={{ mb: "16px" }}
       />

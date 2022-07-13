@@ -18,6 +18,7 @@
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "jest --watch",
+    "test:coverage": "jest --watch --coverage --all",
     "test:ci": "jest --ci"
   },
   "author": "Iman YeckehZaare",
