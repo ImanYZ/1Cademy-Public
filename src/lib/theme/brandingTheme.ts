@@ -1,6 +1,7 @@
-import { createTheme } from '@mui/material'
-import { grey } from '@mui/material/colors';
-import { Theme } from "@mui/material/styles";
+import { createTheme } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { Theme, ThemeOptions } from "@mui/material/styles";
+import { deepmerge } from "@mui/utils";
 
 declare module "@mui/material/styles/createPalette" {
   interface CommonColors {
@@ -24,46 +25,48 @@ const common = {
   gray: "#D3D3D3"
 };
 
-const ONE_ACADEMY_BLACK = '#28282A'
-const ONE_ACADEMY_ORANGE = '#FF8A33'
-const ONE_ACADEMY_WHITE = '#F8F8F8'
+const ONE_ACADEMY_BLACK = "#28282A";
+const ONE_ACADEMY_ORANGE = "#FF8A33";
+const ONE_ACADEMY_WHITE = "#F8F8F8";
 
 const systemFont = ["Roboto", "sans-serif"];
 
-export const getDesignTokens = (mode: "light" | "dark") => createTheme({
-  palette: {
-    mode,
-    primary: {
-      main: ONE_ACADEMY_ORANGE
+export const getDesignTokens = (mode: "light" | "dark") =>
+  ({
+    palette: {
+      mode,
+      primary: {
+        main: ONE_ACADEMY_ORANGE
+      },
+      secondary: {
+        main: mode === "light" ? ONE_ACADEMY_BLACK : ONE_ACADEMY_WHITE
+      },
+      warning: {
+        main: "#ffc071",
+        dark: "#ffb25e"
+      },
+      text: {
+        primary: mode === "light" ? common.black : common.white,
+        secondary: grey[300]
+      },
+      divider: grey[200],
+      common
     },
-    secondary: {
-      main: mode === 'light' ? ONE_ACADEMY_BLACK : ONE_ACADEMY_WHITE
+    typography: {
+      fontFamily: [...systemFont].join(","),
+      h3: {},
+      body1: {
+        color: mode === "light" ? common.black : common.white
+      },
+      button: {
+        textTransform: "initial"
+      }
     },
-    warning: {
-      main: "#ffc071",
-      dark: "#ffb25e"
-    },
-    text: {
-      primary: mode === 'light' ? common.black : common.white,
-      secondary: grey[300]
-    },
-    divider: grey[200],
-    common,
-  },
-  typography: {
-    fontFamily: [...systemFont].join(","),
-    h3: {},
-    body1: {
-      color: mode === 'light' ? common.black : common.white
-    },
-    button: {
-      textTransform: "initial"
-    },
-  },
-  spacing: 5,
-});
+    spacing: 5
+  } as ThemeOptions);
 
-export function getThemedComponents(): {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function getThemedComponents(theme: Theme): {
   components: Theme["components"];
 } {
   return {
@@ -76,7 +79,6 @@ export function getThemedComponents(): {
       MuiButton: {
         defaultProps: {
           disableElevation: true
-          // variant: "contained",
         },
         styleOverrides: {
           containedPrimary: {
@@ -92,7 +94,6 @@ export function getThemedComponents(): {
                 backgroundColor: common.orangeDark
               },
               "&.Mui-disabled .MuiLoadingButton-loadingIndicator": {
-                // backgroundColor: common.orangeDark,
                 color: common.orangeLight
               }
             }
@@ -176,14 +177,16 @@ export function getThemedComponents(): {
             textTransform: "none"
           }
         }
-      },
+      }
     }
   };
 }
 
-
 export const getMetaThemeColor = (mode: "light" | "dark") => {
-  if (mode === 'light') return common.orange
-  if (mode === 'dark') return common.orangeDark
-  return common.orange
+  if (mode === "light") return common.orange;
+  if (mode === "dark") return common.orangeDark;
+  return common.orange;
 };
+
+const darkTheme = createTheme(getDesignTokens("dark"));
+export const brandingDarkTheme = deepmerge(darkTheme, getThemedComponents(darkTheme));

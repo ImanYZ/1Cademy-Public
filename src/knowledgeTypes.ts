@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore";
-import { Dispatch } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 export enum NodeType {
   "Relation" = "Relation",
@@ -445,4 +445,8 @@ export interface SignUpData extends User {}
 export type SignupValidationError = {
   email?: string;
   chooseUname?: boolean;
+};
+
+export type ThemeActions = {
+  setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;
 };

@@ -3,21 +3,18 @@ import "../global.css";
 import type { EmotionCache } from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider } from "@mui/material/styles";
-import { deepmerge } from "@mui/utils";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
-import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { initFirebaseClientSDK } from "@/lib/firestoreClient/firestoreClient.config";
 import { createEmotionCache } from "@/lib/theme/createEmotionCache";
-
-import { getDesignTokens, getThemedComponents } from "../lib/theme/brandingTheme";
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -45,10 +42,6 @@ const App = (props: ExtendedAppProps) => {
         }
       })
   );
-  const theme = useMemo(() => {
-    const nextTheme = deepmerge(getDesignTokens("light"), getThemedComponents());
-    return nextTheme;
-  }, []);
 
   const getLayout = Component.getLayout ?? (page => page);
 
@@ -59,7 +52,7 @@ const App = (props: ExtendedAppProps) => {
           <Head>
             <meta name="viewport" content="initial-scale=1, width=device-width" />
           </Head>
-          <ThemeProvider theme={theme}>
+          <ThemeProvider>
             <SnackbarProvider
               anchorOrigin={{
                 vertical: "top",
