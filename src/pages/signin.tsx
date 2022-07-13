@@ -50,6 +50,7 @@ const SignIn = () => {
           onBlur={formik.handleBlur}
           variant="outlined"
           error={Boolean(formik.errors.email) && Boolean(formik.touched.email)}
+          helperText={formik.errors.email}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -57,11 +58,13 @@ const SignIn = () => {
           id="password"
           name="password"
           label="Password"
+          type="password"
           value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           variant="outlined"
           error={Boolean(formik.errors.password) && Boolean(formik.touched.password)}
+          helperText={formik.errors.password}
           fullWidth
         />
 
