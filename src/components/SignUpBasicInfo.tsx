@@ -1,8 +1,7 @@
 import { TextField } from "@mui/material";
 import { FormikProps } from "formik";
 import React from "react";
-
-import { SignUpFormValues } from "./SignUpForm";
+import { SignUpFormValues } from "src/knowledgeTypes";
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;

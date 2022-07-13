@@ -1,6 +1,3 @@
-// import { firestore } from "firebase-admin";
-import geoip from "geoip-lite";
-
 import {
   KnowledgeNode,
   KnowledgeNodeContributor,
@@ -8,60 +5,11 @@ import {
   LinkedKnowledgeNode,
   NodeFireStore
 } from "../../knowledgeTypes";
-import { admin, batchSet, commitBatch, db } from "./admin";
+import { db } from "./admin";
 
 export const getAllNodeParamsForStaticProps = async () => {
   return [];
 };
-
-// export const getNodesByIds = async (nodeIds: string[]): Promise<SimpleNode[]> => {
-//   if (nodeIds.length === 0) {
-//     return [];
-//   }
-
-//   const nodeDocs = await db.collection("nodes").where(firestore.FieldPath.documentId(), "in", nodeIds).get();
-
-//   const simpleNodes = nodeDocs.docs
-//     .map(nodeDoc => {
-//       const nodeData = nodeDoc.data() as NodeFireStore;
-//       return {
-//         ...nodeData,
-//         id: nodeDoc.id,
-//         tags: getNodeTags(nodeData)
-//       };
-//     })
-//     .map((nodeData): SimpleNode => {
-//       const tags = getNodeTags(nodeData).map(tag => tag.title || "");
-//       // .filter(tag => tag)
-//       // .map(tag => ({ title: tag }));
-//       const contributors = Object.entries(nodeData.contributors || {})
-//         .map(cur => cur[1] as { fullname: string; imageUrl: string; reputation: number })
-//         .sort((a, b) => (b.reputation = a.reputation))
-//         .map(contributor => ({ fullName: contributor.fullname, imageUrl: contributor.imageUrl }));
-
-//       const institutions = Object.entries(nodeData.institutions || {})
-//         .map(cur => ({ name: cur[0], reputation: cur[1].reputation || 0 }))
-//         .sort((a, b) => b.reputation - a.reputation)
-//         .map(institution => ({ name: institution.name }));
-
-//       return {
-//         id: nodeData.id,
-//         title: nodeData.title,
-//         content: nodeData.content,
-//         choices: nodeData.choices || [],
-//         nodeType: nodeData.nodeType,
-//         nodeImage: nodeData.nodeImage,
-//         changedAt: nodeData.changedAt.toDate().toISOString(),
-//         corrects: nodeData.corrects,
-//         wrongs: nodeData.wrongs,
-//         tags,
-//         contributors,
-//         institutions
-//       };
-//     });
-
-//   return simpleNodes;
-// };
 
 // Retrieve all helpful data about the node corresponding to nodeId.
 // const contentHTML = await getNodeHTMLContent(nodeData.content);
@@ -305,53 +253,4 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     institutions: institutionsNodes,
     siblings: siblingsConverted
   };
-};
-
-// Get the user's useragent and location and log views in the database.
-export const logViews = async (req: any, nodeId: string) => {
-  let userAgent;
-  if (req) {
-    // if you are on the server and you get a 'req' property from your context
-    userAgent = req.headers["user-agent"]; // get the user-agent from the headers
-  } else {
-    userAgent = navigator.userAgent; // if you are on the client you can access the navigator from the window object
-  }
-  const forwarded = req.headers["x-forwarded-for"];
-  const ip = forwarded ? (forwarded as string).split(/, /)[0] : req.connection.remoteAddress;
-  const geo = geoip.lookup(ip || "");
-  const viewerRef = db.collection("viewers").doc();
-  await batchSet(viewerRef, {
-    nodeId,
-    ip,
-    userAgent,
-    country: geo?.country,
-    state: geo?.region,
-    city: geo?.city
-  });
-  const viewNumRef = db.collection("viewNums").doc();
-  await batchSet(viewNumRef, {
-    nodeId,
-    num: admin.firestore.FieldValue.increment(1)
-  });
-  const countryViewRef = db.collection("countryViews").doc();
-  await batchSet(countryViewRef, {
-    country: geo?.country,
-    num: admin.firestore.FieldValue.increment(1)
-  });
-  const stateViewRef = db.collection("stateViews").doc();
-  await batchSet(stateViewRef, {
-    state: geo?.region,
-    num: admin.firestore.FieldValue.increment(1)
-  });
-  const cityViewRef = db.collection("cityViews").doc();
-  await batchSet(cityViewRef, {
-    city: geo?.city,
-    num: admin.firestore.FieldValue.increment(1)
-  });
-  const userAgentViewRef = db.collection("userAgentViews").doc();
-  await batchSet(userAgentViewRef, {
-    userAgent,
-    num: admin.firestore.FieldValue.increment(1)
-  });
-  await commitBatch();
 };

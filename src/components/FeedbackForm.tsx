@@ -11,7 +11,7 @@ import { useMutation } from "react-query";
 import * as yup from "yup";
 
 import { sendFeedback } from "@/lib/knowledgeApi";
-import { darkTheme, getThemedComponents } from "@/lib/theme/brandingTheme";
+import { getDesignTokens, getThemedComponents } from "@/lib/theme/brandingTheme";
 
 interface FeedbackFormValues {
   email: string;
@@ -35,6 +35,11 @@ const validationSchema = yup.object({
 });
 
 const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, ref) => {
+  const darkTheme = useMemo(() => {
+    const nextTheme = deepmerge(getDesignTokens("dark"), getThemedComponents());
+    return nextTheme;
+  }, []);
+
   const sendFeedbackMutation = useMutation(sendFeedback, {
     onSuccess: () => {
       localStorage.setItem("feedbackName", "");

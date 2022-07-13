@@ -1,4 +1,4 @@
-import { db } from "@/lib/admin";
+import { db } from "@/lib/firestoreServer/admin";
 
 function nodesData() {
   // getServerSideProps will do the heavy lifting
