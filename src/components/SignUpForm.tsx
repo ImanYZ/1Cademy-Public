@@ -1,45 +1,20 @@
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
-import { FormikHelpers, useFormik } from "formik";
-import React, { useState } from "react";
+import { useFormik } from "formik";
+import React, { FC, useState } from "react";
 import { useMutation } from "react-query";
+import { SignUpFormValues } from "src/knowledgeTypes";
 import * as yup from "yup";
 
-import { signUp } from "../lib/firestoreClient/auth";
 import { validateEmail, validateUsername } from "../lib/knowledgeApi";
 import { SignUpBasicInfo } from "./SignUpBasicInfo";
 import { SignUpPersonalInfo } from "./SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "./SignUpProfessionalInfo";
 
-export interface SignUpFormValues {
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-  password: string;
-  passwordConfirmation: string;
-  // -----------------------
-  language: string;
-  age: string;
-  gender: string | null;
-  genderOtherValue: string;
-  ethnicity: string[];
-  ethnicityOtherValue: string;
-  country: string | null;
-  state: string | null;
-  city: string | null;
-  reason: string;
-  foundFrom: string | null;
-  foundFromOtherValue: string;
-  // -----------------------
-  occupation: string;
-  education: string | null;
-  institution: string;
-  major: string;
-  fieldOfInterest: string;
-  signUpAgreement: boolean;
-}
+type Props = {
+  onSignup: (values: SignUpFormValues) => void;
+};
 
-export const SignUpForm = () => {
+export const SignUpForm: FC<Props> = ({ onSignup }) => {
   const steps = ["Account", "Personal", "Education"];
 
   const [activeStep, setActiveStep] = useState(1);
@@ -121,12 +96,8 @@ export const SignUpForm = () => {
     signUpAgreement: yup.boolean().isTrue()
   });
 
-  const onSubmit = async (values: SignUpFormValues, { setSubmitting }: FormikHelpers<SignUpFormValues>) => {
-    console.log("values sing up", values);
-    // const res = await signIn(values.email, values.password)
-    await signUp(values.username, values.email, values.password);
-    // console.log('res', res)
-    setSubmitting(false);
+  const onSubmit = async (values: SignUpFormValues) => {
+    onSignup(values);
   };
 
   const formik = useFormik({ initialValues, validationSchema, onSubmit });
