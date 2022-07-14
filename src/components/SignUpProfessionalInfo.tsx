@@ -1,4 +1,4 @@
-import { Autocomplete, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
+import { Autocomplete, Checkbox, FormControlLabel, FormHelperText, TextField, Typography } from "@mui/material";
 import { FormikProps } from "formik";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
@@ -21,6 +21,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.occupation) && Boolean(touched.occupation)}
+        helperText={touched.occupation && errors.occupation}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -30,7 +31,14 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         onChange={(_, value) => setFieldValue("education", value)}
         onBlur={() => setTouched({ ...touched, education: true })}
         options={EDUCATION_VALUES}
-        renderInput={params => <TextField {...params} label="Education Level" />}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Education Level"
+            error={Boolean(errors.education) && Boolean(touched.education)}
+            helperText={touched.education && errors.education}
+          />
+        )}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -43,6 +51,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.institution) && Boolean(touched.institution)}
+        helperText={touched.institution && errors.institution}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -55,6 +64,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.major) && Boolean(touched.major)}
+        helperText={touched.major && errors.major}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -67,6 +77,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.fieldOfInterest) && Boolean(touched.fieldOfInterest)}
+        helperText={touched.fieldOfInterest && errors.fieldOfInterest}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -75,10 +86,17 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
           <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
         }
         label={
-          <Typography color={theme => theme.palette.text.primary}>
-            By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and Cookie
-            Policy
-          </Typography>
+          <>
+            <Typography color={theme => theme.palette.text.primary}>
+              By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and
+              Cookie Policy
+            </Typography>
+            {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
+              <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+                {touched.signUpAgreement && errors.signUpAgreement}
+              </FormHelperText>
+            )}
+          </>
         }
         sx={{ mb: "16px" }}
       />

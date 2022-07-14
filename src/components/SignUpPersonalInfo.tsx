@@ -121,7 +121,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         onChange={(_, value) => setFieldValue("language", value)}
         onBlur={() => setTouched({ ...touched, language: true })}
         options={languages}
-        renderInput={params => <TextField {...params} label="Language" />}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Language"
+            error={Boolean(errors.language) && Boolean(touched.language)}
+            helperText={touched.language && errors.language}
+          />
+        )}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -136,6 +143,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onBlur={handleBlur}
           variant="outlined"
           error={Boolean(errors.age) && Boolean(touched.age)}
+          helperText={touched.age && errors.age}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -145,7 +153,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onChange={(_, value) => setFieldValue("gender", value)}
           onBlur={() => setTouched({ ...touched, gender: true })}
           options={GENDER_VALUES}
-          renderInput={params => <TextField {...params} label="Gender" />}
+          renderInput={params => (
+            <TextField
+              {...params}
+              label="Gender"
+              error={Boolean(errors.gender) && Boolean(touched.gender)}
+              helperText={touched.gender && errors.gender}
+            />
+          )}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -160,6 +175,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onBlur={handleBlur}
           variant="outlined"
           error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
+          helperText={touched.genderOtherValue && errors.genderOtherValue}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -171,7 +187,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         onBlur={() => setTouched({ ...touched, ethnicity: true })}
         // structure based from https://blog.hubspot.com/service/survey-demographic-questions
         options={ETHNICITY_VALUES}
-        renderInput={params => <TextField {...params} label="Ethnicity" />}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Ethnicity"
+            error={Boolean(errors.ethnicity) && Boolean(touched.ethnicity)}
+            helperText={touched.ethnicity && errors.ethnicity}
+          />
+        )}
         fullWidth
         multiple
         sx={{ mb: "16px" }}
@@ -186,6 +209,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onBlur={handleBlur}
           variant="outlined"
           error={Boolean(errors.ethnicityOtherValue) && Boolean(touched.ethnicityOtherValue)}
+          helperText={touched.ethnicityOtherValue && errors.ethnicityOtherValue}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -196,7 +220,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         onChange={onChangeCountry}
         onBlur={() => setTouched({ ...touched, country: true })}
         options={countries.map(cur => cur.name)}
-        renderInput={params => <TextField {...params} label="Country" />}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Country"
+            error={Boolean(errors.country) && Boolean(touched.country)}
+            helperText={touched.country && errors.country}
+          />
+        )}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -207,7 +238,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onChange={onChangeState}
           onBlur={() => setTouched({ ...touched, state: true })}
           options={states.map(cur => cur.name)}
-          renderInput={params => <TextField {...params} label="State" />}
+          renderInput={params => (
+            <TextField
+              {...params}
+              label="State"
+              error={Boolean(errors.state) && Boolean(touched.state)}
+              helperText={touched.state && errors.state}
+            />
+          )}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -217,7 +255,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onChange={(_, value) => setFieldValue("city", value)}
           onBlur={() => setTouched({ ...touched, city: true })}
           options={cities.map(cur => cur.name)}
-          renderInput={params => <TextField {...params} label="City" />}
+          renderInput={params => (
+            <TextField
+              {...params}
+              label="City"
+              error={Boolean(errors.city) && Boolean(touched.city)}
+              helperText={touched.city && errors.city}
+            />
+          )}
           fullWidth
           sx={{ mb: "16px" }}
         />
@@ -231,6 +276,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.reason) && Boolean(touched.reason)}
+        helperText={touched.reason && errors.reason}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -240,7 +286,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         onChange={(_, value) => setFieldValue("foundFrom", value)}
         onBlur={() => setTouched({ ...touched, foundFrom: true })}
         options={FOUND_FROM_VALUES}
-        renderInput={params => <TextField {...params} label="How did you hear about us?" />}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="How did you hear about us?"
+            error={Boolean(errors.foundFrom) && Boolean(touched.foundFrom)}
+            helperText={touched.foundFrom && errors.foundFrom}
+          />
+        )}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -254,6 +307,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           onBlur={handleBlur}
           variant="outlined"
           error={Boolean(errors.foundFromOtherValue) && Boolean(touched.foundFromOtherValue)}
+          helperText={touched.foundFromOtherValue && errors.foundFromOtherValue}
           fullWidth
           sx={{ mb: "16px" }}
         />

@@ -59,14 +59,17 @@ const SignUpPage = () => {
       .min(4, "A username with at least 4 characters is required!")
       .matches(/^((?!(__.*__)|\.|\/).)*$/, "Usernames should not contain . or / or __!"),
     password: yup.string().min(7, "Password must be at least 7 characters!").required("A secure password is required!"),
-    passwordConfirmation: yup.string().oneOf([yup.ref("password"), null], "Password must match re-entered password!"),
+    passwordConfirmation: yup
+      .string()
+      .oneOf([yup.ref("password"), null], "Password must match re-entered password!")
+      .required("Re-enter password is required!"),
     language: yup.string().required("Please enter your language!"),
     age: yup
       .number()
       .min(10, "Age should be greater than or equal to 10")
       .max(100, "Age should be less than or equal to 100")
       .required("Required"),
-    gender: yup.string().required("Please enter your gender!"),
+    gender: yup.string().required("Please enter your gender!").nullable(true),
     genderOtherValue: yup.string().when("gender", {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
@@ -76,21 +79,21 @@ const SignUpPage = () => {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
       then: yup.string().required("Required")
     }),
-    country: yup.string().required("Please enter your country!"),
-    state: yup.string().required("Please enter your state!"),
-    city: yup.string().required("Please enter your city!"),
+    country: yup.string().required("Please enter your country!").nullable(true),
+    state: yup.string().required("Please enter your state!").nullable(true),
+    city: yup.string().required("Please enter your city!").nullable(true),
     reason: yup.string().required("Please enter your reason for joining 1Cademy!"),
-    foundFrom: yup.string().required("Please enter how you heard about us!"),
+    foundFrom: yup.string().required("Please enter how you heard about us!").nullable(true),
     foundFromOtherValue: yup.string().when("foundFrom", {
       is: (foundFromValue: string) => foundFromValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
     occupation: yup.string().required("Please enter your occupation!"),
-    education: yup.string().required("Please enter your educational status!"),
+    education: yup.string().required("Please enter your educational status!").nullable(true),
     institution: yup.string().required("Please enter your institution!"),
     major: yup.string().required("Required"),
     fieldOfInterest: yup.string().required("Required"),
-    signUpAgreement: yup.boolean().isTrue()
+    signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
   });
 
   const handleSignUp = (values: SignUpFormValues) => {
@@ -141,16 +144,28 @@ const SignUpPage = () => {
   const onNextStep = async () => {
     if (activeStep > steps.length - 1) return;
     if (activeStep === 1) {
+      console.log(1);
+      touchFirstStep();
+      console.log(2);
+      if (isInvalidFirstStep()) return;
+
+      console.log(3);
       const isValidEmail = await validateEmailByServer();
       if (!isValidEmail) return;
 
       const isValidUsername = await validateUsernameByServer();
       if (!isValidUsername) return;
+
+      setActiveStep(step => step + 1);
     }
-    setActiveStep(step => step + 1);
+    if (activeStep === 2) {
+      touchSecondStep();
+      if (isInvalidSecondStep()) return;
+      setActiveStep(step => step + 1);
+    }
   };
 
-  const isValidFirstStep = () => {
+  const isInvalidFirstStep = () => {
     return (
       Boolean(formik.errors.firstName) ||
       Boolean(formik.errors.lastName) ||
@@ -161,7 +176,7 @@ const SignUpPage = () => {
     );
   };
 
-  const isValidSecondStep = () => {
+  const isInvalidSecondStep = () => {
     return (
       Boolean(formik.errors.language) ||
       Boolean(formik.errors.age) ||
@@ -175,6 +190,35 @@ const SignUpPage = () => {
       Boolean(formik.errors.foundFrom) ||
       Boolean(formik.errors.foundFromOtherValue)
     );
+  };
+
+  const touchFirstStep = () => {
+    formik.setTouched({
+      ...formik.touched,
+      firstName: true,
+      lastName: true,
+      email: true,
+      username: true,
+      password: true,
+      passwordConfirmation: true
+    });
+  };
+
+  const touchSecondStep = () => {
+    formik.setTouched({
+      ...formik.touched,
+      language: true,
+      age: true,
+      gender: true,
+      genderOtherValue: true,
+      ethnicity: true,
+      country: true,
+      state: true,
+      city: true,
+      reason: true,
+      foundFrom: true,
+      foundFromOtherValue: true
+    });
   };
 
   return (
@@ -201,7 +245,8 @@ const SignUpPage = () => {
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: "16px" }}>
           {activeStep === 1 && (
             <>
-              <Button disabled={isValidFirstStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
+              <div></div>
+              <Button disabled={formik.isSubmitting} variant="contained" onClick={onNextStep}>
                 Next
               </Button>
             </>
@@ -211,7 +256,7 @@ const SignUpPage = () => {
               <Button disabled={formik.isSubmitting} variant="outlined" onClick={onPreviousStep} color="secondary">
                 Prev
               </Button>
-              <Button disabled={isValidSecondStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
+              <Button disabled={formik.isSubmitting} variant="contained" onClick={onNextStep}>
                 Next
               </Button>
             </>
@@ -225,7 +270,7 @@ const SignUpPage = () => {
           )}
         </Box>
         {activeStep === 3 && (
-          <Button disabled={formik.isSubmitting || !formik.isValid} variant="contained" fullWidth>
+          <Button type="submit" disabled={formik.isSubmitting} variant="contained" fullWidth>
             Sign up
           </Button>
         )}
