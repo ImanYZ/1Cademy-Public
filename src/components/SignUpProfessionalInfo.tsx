@@ -1,14 +1,22 @@
-import { Autocomplete, Checkbox, FormControlLabel, FormHelperText, TextField, Typography } from "@mui/material";
+import { Autocomplete, Button, Checkbox, FormControlLabel, FormHelperText, TextField, Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import { FormikProps } from "formik";
+import { useState } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
 import { EDUCATION_VALUES } from "../lib/utils/constants";
+import { CookiePolicy } from "./modals/CookiePolicy";
+import { PrivacyPolicy } from "./modals/PrivacyPolicy";
+import { TermsOfUse } from "./modals/TermsOfUse";
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
 };
 
 export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationProps) => {
+  const [openTermOfUse, setOpenTermsOfUse] = useState(false);
+  const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
+  const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
   return (
     <>
@@ -100,6 +108,21 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         }
         sx={{ mb: "16px" }}
       />
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Button type="button" onClick={() => setOpenTermsOfUse(true)}>
+          Terms of Use
+        </Button>
+        <Button type="button" onClick={() => setOpenPrivacyPolicy(true)}>
+          Privacy Policy
+        </Button>
+        <Button type="button" onClick={() => setOpenCookiePolicy(true)}>
+          Cookie Policy
+        </Button>
+      </Box>
+
+      <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />
+      <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
+      <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
     </>
   );
 };
