@@ -11,7 +11,14 @@ import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
 import { SignUpFormValues } from "../knowledgeTypes";
 import { validateEmail, validateUsername } from "../lib/knowledgeApi";
 
+const getDateBySubstractYears = (years: number, date = new Date()) => {
+  date.setFullYear(date.getFullYear() - years);
+  return date;
+};
+
 const SignUpPage = () => {
+  const minDate = getDateBySubstractYears(100);
+  const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
 
   const [activeStep, setActiveStep] = useState(1);
@@ -27,7 +34,7 @@ const SignUpPage = () => {
     password: "",
     passwordConfirmation: "",
     language: "English",
-    age: "",
+    birthDate: "",
     gender: null,
     genderOtherValue: "",
     ethnicity: [],
@@ -63,12 +70,18 @@ const SignUpPage = () => {
       .string()
       .oneOf([yup.ref("password"), null], "Password must match re-entered password")
       .required("Re-enter password is required"),
-    language: yup.string().required("Please enter your language"),
-    age: yup
-      .number()
-      .min(10, "Age should be greater than or equal to 10")
-      .max(100, "Age should be less than or equal to 100")
-      .required("Required"),
+    language: yup.string().required("Please enter your language").nullable(true),
+    // age: yup
+    //   .number()
+    //   .min(10, "Age should be greater than or equal to 10")
+    //   .max(100, "Age should be less than or equal to 100")
+    //   .required("Required"),
+    birthDate: yup
+      .date()
+      .min(minDate, "Your age should be less than or equal to 100 years")
+      .max(maxDate, "Your age should be greater than or equal to 10 years")
+      .required("Please enter your birth date")
+      .nullable(),
     gender: yup.string().required("Please enter your gender").nullable(true),
     genderOtherValue: yup.string().when("gender", {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
@@ -179,7 +192,7 @@ const SignUpPage = () => {
   const isInvalidSecondStep = () => {
     return (
       Boolean(formik.errors.language) ||
-      Boolean(formik.errors.age) ||
+      Boolean(formik.errors.birthDate) ||
       Boolean(formik.errors.gender) ||
       Boolean(formik.errors.genderOtherValue) ||
       Boolean(formik.errors.ethnicity) ||
@@ -208,7 +221,7 @@ const SignUpPage = () => {
     formik.setTouched({
       ...formik.touched,
       language: true,
-      age: true,
+      birthDate: true,
       gender: true,
       genderOtherValue: true,
       ethnicity: true,
@@ -234,7 +247,7 @@ const SignUpPage = () => {
           );
         })}
       </Stepper>
-      <form onSubmit={formik.handleSubmit}>
+      <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
         <Button onClick={() => console.log(formik.values, formik.errors)}>
           Get VALUES [{formik.isValid ? "ok" : "X"}] [{activeStep}]
         </Button>

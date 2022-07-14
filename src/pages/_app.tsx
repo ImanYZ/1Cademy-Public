@@ -3,6 +3,8 @@ import "../global.css";
 import type { EmotionCache } from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -61,7 +63,9 @@ const App = (props: ExtendedAppProps) => {
               maxSnack={3}
             >
               <CssBaseline />
-              <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
+              </LocalizationProvider>
             </SnackbarProvider>
           </ThemeProvider>
         </CacheProvider>

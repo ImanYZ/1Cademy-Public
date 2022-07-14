@@ -420,7 +420,7 @@ export interface SignUpFormValues {
   passwordConfirmation: string;
   // -----------------------
   language: string;
-  age: string;
+  birthDate: string;
   gender: string | null;
   genderOtherValue: string;
   ethnicity: string[];
