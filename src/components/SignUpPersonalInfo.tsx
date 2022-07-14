@@ -146,10 +146,11 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
               error={Boolean(errors.birthDate) && Boolean(touched.birthDate)}
               helperText={
                 touched.birthDate &&
-                errors.birthDate ===
-                  "birthDate must be a `date` type, but the final value was: `Invalid Date` (cast from the value `Invalid Date`)."
+                errors.birthDate &&
+                (errors.birthDate ===
+                "birthDate must be a `date` type, but the final value was: `Invalid Date` (cast from the value `Invalid Date`)."
                   ? "Invalid Date"
-                  : errors.birthDate
+                  : errors.birthDate)
               }
             />
           )}

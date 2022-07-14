@@ -437,7 +437,10 @@ export interface SignUpFormValues {
   institution: string;
   major: string;
   fieldOfInterest: string;
-  signUpAgreement: boolean;
+  clickedConsent: boolean;
+  clickedTOS: boolean;
+  clickedPP: boolean;
+  clickedCP: boolean;
 }
 
 export interface SignUpData extends User {}

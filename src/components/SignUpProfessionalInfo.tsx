@@ -106,7 +106,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       />
       <FormControlLabel
         control={
-          <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
+          <Checkbox checked={values.clickedConsent} onChange={(_, value) => setFieldValue("clickedConsent", value)} />
         }
         label={
           <>
@@ -114,9 +114,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
               By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and
               Cookie Policy
             </Typography>
-            {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
+            {Boolean(errors.clickedConsent) && Boolean(touched.clickedConsent) && (
               <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
-                {touched.signUpAgreement && errors.signUpAgreement}
+                {touched.clickedConsent && errors.clickedConsent}
               </FormHelperText>
             )}
           </>
@@ -124,13 +124,31 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         sx={{ mb: "16px" }}
       />
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Button type="button" onClick={() => setOpenTermsOfUse(true)}>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedTOS", true);
+            setOpenTermsOfUse(true);
+          }}
+        >
           Terms of Use
         </Button>
-        <Button type="button" onClick={() => setOpenPrivacyPolicy(true)}>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedPP", true);
+            setOpenPrivacyPolicy(true);
+          }}
+        >
           Privacy Policy
         </Button>
-        <Button type="button" onClick={() => setOpenCookiePolicy(true)}>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedCP", true);
+            setOpenCookiePolicy(true);
+          }}
+        >
           Cookie Policy
         </Button>
       </Box>
