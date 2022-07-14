@@ -71,11 +71,6 @@ const SignUpPage = () => {
       .oneOf([yup.ref("password"), null], "Password must match re-entered password")
       .required("Re-enter password is required"),
     language: yup.string().required("Please enter your language").nullable(true),
-    // age: yup
-    //   .number()
-    //   .min(10, "Age should be greater than or equal to 10")
-    //   .max(100, "Age should be less than or equal to 100")
-    //   .required("Required"),
     birthDate: yup
       .date()
       .min(minDate, "Your age should be less than or equal to 100 years")

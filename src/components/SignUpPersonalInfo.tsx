@@ -113,7 +113,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
 
     await updateCitiesByState(value);
   };
-
   return (
     <>
       <Autocomplete
@@ -134,20 +133,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         sx={{ mb: "16px" }}
       />
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        {/* <TextField
-          id="age"
-          name="age"
-          label="Age"
-          type={"number"}
-          value={values.birthDate}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          variant="outlined"
-          error={Boolean(errors.birthDate) && Boolean(touched.birthDate)}
-          helperText={touched.birthDate && errors.birthDate}
-          fullWidth
-          sx={{ mb: "16px" }}
-        /> */}
         <DatePicker
           value={values.birthDate}
           onChange={newValue => setFieldValue("birthDate", newValue)}

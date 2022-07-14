@@ -8,6 +8,9 @@ import { ReactNode, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 import libraryImage from "../../../public/LibraryBackground.jpg";
+import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
+import logoHonor from "../../../public/logo-honor.svg";
+import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
 import { brandingDarkTheme } from "../../lib/theme/brandingTheme";
 import ROUTES from "../../lib/utils/routes";
 
@@ -88,6 +91,43 @@ export const AuthLayout = ({ children }: AuthProps) => {
               quality={100}
               style={{ filter: "brightness(0.6)" }}
             />
+            <Box
+              sx={{
+                width: "200px",
+                height: "40px",
+                position: "absolute",
+                bottom: "15px",
+                left: "16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between"
+              }}
+            >
+              <a
+                rel="noreferrer"
+                target="_blank"
+                href="https://www.si.umich.edu/"
+                aria-label="Go to School of information"
+              >
+                <Image src={logoSchoolOfInformation} alt="School of Information" height={41} width={47} />
+              </a>
+              <a
+                rel="noreferrer"
+                target="_blank"
+                href="https://www.honor.education/"
+                aria-label="Go to Honor Education"
+              >
+                <Image src={logoHonor} alt="Honor Education" height={41} width={41} />
+              </a>
+              <a
+                rel="noreferrer"
+                target="_blank"
+                href="https://cloud.google.com/edu/researchers"
+                aria-label="Go to Google Cloud"
+              >
+                <Image src={logoGoogleCloud} alt="Google Cloud" height={41} width={49} />
+              </a>
+            </Box>
             <Box sx={{ zIndex: 1 }}>
               <Typography textAlign={"center"} variant="h4">
                 Welcome to 1Cademy
