@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
 import { FormikProps } from "formik";
 import React from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
@@ -8,7 +8,7 @@ export type SignUpBasicInformationProps = {
 };
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
-  const { values, errors, touched, handleChange, handleBlur } = formikProps;
+  const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   return (
     <>
       <TextField
@@ -92,6 +92,18 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         fullWidth
         sx={{ mb: "16px" }}
       />
+
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={values.theme === "Light"}
+              onChange={() => setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light")}
+            />
+          }
+          label={`Theme: ${values.theme === "Light" ? "🌞" : "🌜"}`}
+        />
+      </FormGroup>
     </>
   );
 };

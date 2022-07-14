@@ -19,7 +19,7 @@ import { EDUCATION_VALUES } from "../lib/utils/constants";
 const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
 const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
 const TermsOfUse = lazy(() => import("./modals/TermsOfUse"));
-const InformedConsent = lazy(() => import("./modals/ConsentForm"));
+const InformedConsent = lazy(() => import("./modals/InformedConsent"));
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;

@@ -33,6 +33,7 @@ const SignUpPage = () => {
     username: "",
     password: "",
     passwordConfirmation: "",
+    theme: "Light",
     language: "English",
     birthDate: "",
     gender: null,

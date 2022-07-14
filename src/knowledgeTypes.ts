@@ -418,6 +418,7 @@ export interface SignUpFormValues {
   username: string;
   password: string;
   passwordConfirmation: string;
+  theme: "Light" | "Dark";
   // -----------------------
   language: string;
   birthDate: string;
