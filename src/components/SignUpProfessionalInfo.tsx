@@ -1,14 +1,35 @@
-import { Autocomplete, Checkbox, FormControlLabel, FormHelperText, TextField, Typography } from "@mui/material";
+import {
+  Autocomplete,
+  Backdrop,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  FormHelperText,
+  TextField,
+  Typography
+} from "@mui/material";
+import { Box } from "@mui/system";
 import { FormikProps } from "formik";
+import { lazy, Suspense, useState } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
 import { EDUCATION_VALUES } from "../lib/utils/constants";
+
+const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
+const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
+const TermsOfUse = lazy(() => import("./modals/TermsOfUse"));
+const InformedConsent = lazy(() => import("./modals/ConsentForm"));
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
 };
 
 export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationProps) => {
+  const [openInformedConsent, setOpenInformedConsent] = useState(false);
+  const [openTermOfUse, setOpenTermsOfUse] = useState(false);
+  const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
+  const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
   return (
     <>
@@ -100,6 +121,59 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         }
         sx={{ mb: "16px" }}
       />
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedConsent", true);
+            setOpenInformedConsent(true);
+          }}
+        >
+          Informed Consent
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedTOS", true);
+            setOpenTermsOfUse(true);
+          }}
+        >
+          Terms of Use
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedPP", true);
+            setOpenPrivacyPolicy(true);
+          }}
+        >
+          Privacy Policy
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedCP", true);
+            setOpenCookiePolicy(true);
+          }}
+        >
+          Cookie Policy
+        </Button>
+      </Box>
+
+      <Suspense
+        fallback={
+          <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={true}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        }
+      >
+        <>
+          <InformedConsent open={openInformedConsent} handleClose={() => setOpenInformedConsent(false)} />
+          <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
+          <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
+          <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />
+        </>
+      </Suspense>
     </>
   );
 };

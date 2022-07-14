@@ -420,7 +420,7 @@ export interface SignUpFormValues {
   passwordConfirmation: string;
   // -----------------------
   language: string;
-  age: string;
+  birthDate: string;
   gender: string | null;
   genderOtherValue: string;
   ethnicity: string[];
@@ -438,6 +438,10 @@ export interface SignUpFormValues {
   major: string;
   fieldOfInterest: string;
   signUpAgreement: boolean;
+  clickedConsent: boolean;
+  clickedTOS: boolean;
+  clickedPP: boolean;
+  clickedCP: boolean;
 }
 
 export interface SignUpData extends User {}

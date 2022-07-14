@@ -32,6 +32,7 @@
     "@mui/icons-material": "^5.8.4",
     "@mui/lab": "5.0.0-alpha.90",
     "@mui/material": "5.9.0",
+    "@mui/x-date-pickers": "^5.0.0-beta.0",
     "axios": "^0.27.2",
     "country-state-city": "^3.0.1",
     "csv-writer": "^1.6.0",

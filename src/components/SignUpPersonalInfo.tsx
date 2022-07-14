@@ -1,5 +1,6 @@
 import { Autocomplete, TextField } from "@mui/material";
 import { Box } from "@mui/system";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
 import { FormikProps } from "formik";
@@ -112,7 +113,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
 
     await updateCitiesByState(value);
   };
-
   return (
     <>
       <Autocomplete
@@ -133,19 +133,27 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         sx={{ mb: "16px" }}
       />
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        <TextField
-          id="age"
-          name="age"
-          label="Age"
-          type={"number"}
-          value={values.age}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          variant="outlined"
-          error={Boolean(errors.age) && Boolean(touched.age)}
-          helperText={touched.age && errors.age}
-          fullWidth
-          sx={{ mb: "16px" }}
+        <DatePicker
+          value={values.birthDate}
+          onChange={newValue => setFieldValue("birthDate", newValue)}
+          renderInput={params => (
+            <TextField
+              {...params}
+              id="birthDate"
+              label="Birth Date"
+              name="birthDate"
+              onBlur={() => setTouched({ ...touched, birthDate: true })}
+              error={Boolean(errors.birthDate) && Boolean(touched.birthDate)}
+              helperText={
+                touched.birthDate &&
+                errors.birthDate &&
+                (errors.birthDate ===
+                "birthDate must be a `date` type, but the final value was: `Invalid Date` (cast from the value `Invalid Date`)."
+                  ? "Invalid Date"
+                  : errors.birthDate)
+              }
+            />
+          )}
         />
         <Autocomplete
           id="gender"

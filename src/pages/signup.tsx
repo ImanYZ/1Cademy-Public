@@ -15,9 +15,16 @@ import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
 import { SignUpFormValues, User } from "../knowledgeTypes";
 
+const getDateBySubstractYears = (years: number, date = new Date()) => {
+  date.setFullYear(date.getFullYear() - years);
+  return date;
+};
+
 const SignUpPage = () => {
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const minDate = getDateBySubstractYears(100);
+  const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
   const mutateSignUp = useMutation(signUpApi);
 
@@ -34,7 +41,7 @@ const SignUpPage = () => {
     password: "",
     passwordConfirmation: "",
     language: "English",
-    age: "",
+    birthDate: "",
     gender: null,
     genderOtherValue: "",
     ethnicity: [],
@@ -50,54 +57,59 @@ const SignUpPage = () => {
     institution: "",
     major: "",
     fieldOfInterest: "",
-    signUpAgreement: false
+    signUpAgreement: false,
+    clickedConsent: false,
+    clickedTOS: false,
+    clickedPP: false,
+    clickedCP: false
   };
 
   const validationSchema = yup.object({
-    firstName: yup.string().required("Please enter your first name!"),
-    lastName: yup.string().required("Please enter your last name!"),
+    firstName: yup.string().required("Please enter your first name"),
+    lastName: yup.string().required("Please enter your last name"),
     email: yup
       .string()
-      .email("Invalid email address!")
-      .required("Your email address provided by your academic/research institutions is required!"),
+      .email("Invalid email address")
+      .required("Your email address provided by your academic/research institutions is required"),
     username: yup
       .string()
-      .required("Your desired username is required!")
-      .min(4, "A username with at least 4 characters is required!")
-      .matches(/^((?!(__.*__)|\.|\/).)*$/, "Usernames should not contain . or / or __!"),
-    password: yup.string().min(7, "Password must be at least 7 characters!").required("A secure password is required!"),
+      .required("Your desired username is required")
+      .min(4, "A username with at least 4 characters is required")
+      .matches(/^((?!(__.*__)|\.|\/).)*$/, "Usernames should not contain . or / or __"),
+    password: yup.string().min(7, "Password must be at least 7 characters").required("A secure password is required"),
     passwordConfirmation: yup
       .string()
-      .oneOf([yup.ref("password"), null], "Password must match re-entered password!")
-      .required("Re-enter password is required!"),
-    language: yup.string().required("Please enter your language!"),
-    age: yup
-      .number()
-      .min(10, "Age should be greater than or equal to 10")
-      .max(100, "Age should be less than or equal to 100")
-      .required("Required"),
-    gender: yup.string().required("Please enter your gender!").nullable(true),
+      .oneOf([yup.ref("password"), null], "Password must match re-entered password")
+      .required("Re-enter password is required"),
+    language: yup.string().required("Please enter your language").nullable(true),
+    birthDate: yup
+      .date()
+      .min(minDate, "Your age should be less than or equal to 100 years")
+      .max(maxDate, "Your age should be greater than or equal to 10 years")
+      .required("Please enter your birth date")
+      .nullable(),
+    gender: yup.string().required("Please enter your gender").nullable(true),
     genderOtherValue: yup.string().when("gender", {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
-    ethnicity: yup.array().min(1).of(yup.string().required("Please enter your ethnicity!")),
+    ethnicity: yup.array().min(1).of(yup.string().required("Please enter your ethnicity")),
     ethnicityOtherValue: yup.string().when("ethnicity", {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
       then: yup.string().required("Required")
     }),
-    country: yup.string().required("Please enter your country!").nullable(true),
-    state: yup.string().required("Please enter your state!").nullable(true),
-    city: yup.string().required("Please enter your city!").nullable(true),
-    reason: yup.string().required("Please enter your reason for joining 1Cademy!"),
-    foundFrom: yup.string().required("Please enter how you heard about us!").nullable(true),
+    country: yup.string().required("Please enter your country").nullable(true),
+    state: yup.string().required("Please enter your state").nullable(true),
+    city: yup.string().required("Please enter your city").nullable(true),
+    reason: yup.string().required("Please enter your reason for joining 1Cademy"),
+    foundFrom: yup.string().required("Please enter how you heard about us").nullable(true),
     foundFromOtherValue: yup.string().when("foundFrom", {
       is: (foundFromValue: string) => foundFromValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
-    occupation: yup.string().required("Please enter your occupation!"),
-    education: yup.string().required("Please enter your educational status!").nullable(true),
-    institution: yup.string().required("Please enter your institution!"),
+    occupation: yup.string().required("Please enter your occupation"),
+    education: yup.string().required("Please enter your educational status").nullable(true),
+    institution: yup.string().required("Please enter your institution"),
     major: yup.string().required("Required"),
     fieldOfInterest: yup.string().required("Required"),
     signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
@@ -226,7 +238,7 @@ const SignUpPage = () => {
   const isInvalidSecondStep = () => {
     return (
       Boolean(formik.errors.language) ||
-      Boolean(formik.errors.age) ||
+      Boolean(formik.errors.birthDate) ||
       Boolean(formik.errors.gender) ||
       Boolean(formik.errors.genderOtherValue) ||
       Boolean(formik.errors.ethnicity) ||
@@ -255,7 +267,7 @@ const SignUpPage = () => {
     formik.setTouched({
       ...formik.touched,
       language: true,
-      age: true,
+      birthDate: true,
       gender: true,
       genderOtherValue: true,
       ethnicity: true,
@@ -281,7 +293,7 @@ const SignUpPage = () => {
           );
         })}
       </Stepper>
-      <form onSubmit={formik.handleSubmit}>
+      <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
         <Button onClick={() => console.log(formik.values, formik.errors)}>
           Get VALUES [{formik.isValid ? "ok" : "X"}] [{activeStep}]
         </Button>
