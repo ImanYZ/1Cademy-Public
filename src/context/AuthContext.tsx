@@ -48,7 +48,10 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
     console.log("TODO: setup error reporting in google cloud", error, errorMessage, showErrorToast);
     if (showErrorToast) {
       const errorString = typeof error === "string" ? error : "";
-      enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, { variant: "error" });
+      enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {
+        variant: "error",
+        autoHideDuration: 10000
+      });
     }
   };
 

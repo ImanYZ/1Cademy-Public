@@ -63,7 +63,8 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       clickedTOS: userData.clickedTOS,
       clickedPP: userData.clickedPP,
       clickedCP: userData.clickedCP,
-      createdAt: userData.createdAt.toDate()
+      createdAt: userData.createdAt.toDate(),
+      email: userData.email
     };
   }
 

@@ -85,7 +85,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
               src={libraryImage}
               layout="fill"
               objectFit="cover"
-              quality={100}
+              priority
               style={{ filter: "brightness(0.6)" }}
             />
             <Box sx={{ zIndex: 1 }}>

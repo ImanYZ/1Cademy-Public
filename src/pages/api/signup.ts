@@ -1,6 +1,6 @@
 import { Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
-import { SignUpData, SignupValidationError } from "src/knowledgeTypes";
+import { SignUpData } from "src/knowledgeTypes";
 
 import { isEmail, isEmpty } from "@/lib/utils/utils";
 
@@ -79,12 +79,12 @@ const checkEmailInstitution = async (email: string, checkFirestore: boolean) => 
 };
 
 const validateSignupData = (data: SignUpData) => {
-  const errors: SignupValidationError = {};
+  const errors: string[] = [];
 
   if (isEmpty(data.email)) {
-    errors.email = "Your email address provided by your academic institutions is required!";
+    errors.push("Your email address provided by your academic institutions is required.");
   } else if (!isEmail(data.email)) {
-    errors.email = "Please enter a valid email address.";
+    errors.push("Please enter a valid email address.");
     // } else if (
     //   data.email.substring(data.email.length - 3, data.email.length) !== "edu"
     // ) {
@@ -93,8 +93,8 @@ const validateSignupData = (data: SignUpData) => {
   }
 
   return {
-    errors,
-    valid: Object.keys(errors).length === 0 ? true : false
+    errors: errors.join(" "),
+    valid: errors.length === 0 ? true : false
   };
 };
 
@@ -153,24 +153,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const { valid, errors } = validateSignupData(data);
     if (!valid) {
-      return res.status(400).json(errors);
+      return res.status(400).json({ errorMessage: errors });
     }
 
     const institution = await checkEmailInstitution(data.email, true);
     if (!institution) {
-      return res.status(400).json({ email: "This email address is already in use!" });
+      return res.status(400).json({ errorMessage: "This email address is already in use!" });
     }
 
     if (institution === "Not Found!") {
       return res.status(400).json({
-        email:
+        errorMessage:
           "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu"
       });
     }
 
     const userAlreadyExists = await unameExists(data.uname);
     if (userAlreadyExists) {
-      return res.status(400).json({ uname: "This username is already in use!" });
+      return res.status(400).json({ errorMessage: "This username is already in use!" });
     }
 
     let userData, credits;
@@ -180,7 +180,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const userId = decodedToken.uid;
     const userRef = db.doc(`/users/${data.uname}`);
     if ((await userRef.get()).exists) {
-      return res.status(500).json({ error: "This username is already taken." });
+      return res.status(500).json({ errorMessage: "This username is already taken." });
     }
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     userData = {
@@ -352,7 +352,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       practicing: userData.practicing,
       createdAt: userData.createdAt.toDate()
     };
-    return res.status(201).json(userData);
+    return res.status(201).json({ user: userData });
   } catch (error) {
     console.error(error);
     res.status(500).json({ errorMessage: "Error on signup" });
