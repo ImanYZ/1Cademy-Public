@@ -13,7 +13,7 @@ const Stats = () => {
   }
 
   return (
-    <Stack data-testid="stats" sx={{ mt: 4, mb: 10 }} spacing={1}>
+    <Stack data-testid="stats" sx={{ mt: 4, mb: 10, color: "common.white" }} spacing={1}>
       <Typography textAlign="center">
         {`Search ${stats.nodes} nodes and ${stats.links} links through ${stats.proposals} proposals`}
       </Typography>

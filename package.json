@@ -17,7 +17,8 @@
     "prepare": "husky install .husky",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
-    "test": "jest --watch --coverage --all --maxWorkers 2",
+    "test": "jest --watch",
+    "test:coverage": "jest --watch --coverage --all",
     "test:ci": "jest --ci"
   },
   "author": "Iman YeckehZaare",

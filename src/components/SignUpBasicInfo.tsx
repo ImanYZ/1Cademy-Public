@@ -1,8 +1,7 @@
 import { TextField } from "@mui/material";
 import { FormikProps } from "formik";
 import React from "react";
-
-import { SignUpFormValues } from "../pages/signup";
+import { SignUpFormValues } from "src/knowledgeTypes";
 
 export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -21,7 +20,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.firstName) && Boolean(touched.firstName)}
-        helperText={errors.firstName}
+        helperText={touched.firstName && errors.firstName}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -34,7 +33,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.lastName) && Boolean(touched.lastName)}
-        helperText={errors.lastName}
+        helperText={touched.lastName && errors.lastName}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -48,7 +47,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.email) && Boolean(touched.email)}
-        helperText={errors.email}
+        helperText={touched.email && errors.email}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -61,7 +60,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.username) && Boolean(touched.username)}
-        helperText={errors.username}
+        helperText={touched.username && errors.username}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -75,7 +74,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.password) && Boolean(touched.password)}
-        helperText={errors.password}
+        helperText={touched.password && errors.password}
         fullWidth
         sx={{ mb: "16px" }}
       />
@@ -89,7 +88,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         onBlur={handleBlur}
         variant="outlined"
         error={Boolean(errors.passwordConfirmation) && Boolean(touched.passwordConfirmation)}
-        helperText={errors.passwordConfirmation}
+        helperText={touched.passwordConfirmation && errors.passwordConfirmation}
         fullWidth
         sx={{ mb: "16px" }}
       />

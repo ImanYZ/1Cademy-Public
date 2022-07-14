@@ -4,9 +4,9 @@ import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
 import { FormikProps } from "formik";
 import { useEffect, useState } from "react";
+import { SignUpFormValues } from "src/knowledgeTypes";
 
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../lib/utils/constants";
-import { SignUpFormValues } from "../pages/signup";
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;

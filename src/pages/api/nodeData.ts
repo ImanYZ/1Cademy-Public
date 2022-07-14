@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getNodeData } from "@/lib/nodes";
+import { getNodeData } from "@/lib/firestoreServer/nodes";
 
 import { ResponseNodeData } from "../../knowledgeTypes";
 

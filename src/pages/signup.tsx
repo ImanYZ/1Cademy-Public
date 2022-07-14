@@ -2,7 +2,6 @@ import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
 import { useFormik } from "formik";
 import React, { ReactNode, useState } from "react";
 import { useMutation } from "react-query";
-// import { SignUpFormValues } from "src/knowledgeTypes";
 import * as yup from "yup";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";

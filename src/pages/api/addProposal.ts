@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
+import { db } from "@/lib/firestoreServer/admin";
+import { buildProposal } from "@/lib/proposal";
+
 import { NodeType, ProposalInput } from "../../knowledgeTypes";
-import { db } from "../../lib/admin";
-import { buildProposal } from "../../lib/proposal";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {

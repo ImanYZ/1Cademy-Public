@@ -8,7 +8,7 @@ import { ReactNode, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 import libraryImage from "../../../public/LibraryBackground.jpg";
-import { getDesignTokens } from "../../lib/theme/brandingTheme";
+import { brandingDarkTheme } from "../../lib/theme/brandingTheme";
 import ROUTES from "../../lib/utils/routes";
 
 type AuthProps = {
@@ -34,7 +34,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
   }
 
   return (
-    <ThemeProvider theme={getDesignTokens("dark")}>
+    <ThemeProvider theme={brandingDarkTheme}>
       <Box
         data-testid="auth-layout"
         sx={{
@@ -45,7 +45,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
           zIndex: -2
         }}
       >
-        <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" quality={100} />
+        <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" priority />
       </Box>
 
       <Box

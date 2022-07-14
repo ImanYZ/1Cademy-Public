@@ -1,7 +1,7 @@
 import { Autocomplete, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { FormikProps } from "formik";
+import { SignUpFormValues } from "src/knowledgeTypes";
 
-import { SignUpFormValues } from "../knowledgeTypes";
 import { EDUCATION_VALUES } from "../lib/utils/constants";
 
 type SignUpBasicInformationProps = {
