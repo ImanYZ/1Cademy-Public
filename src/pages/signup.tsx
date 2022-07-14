@@ -109,8 +109,6 @@ const SignUpPage = () => {
     const institutionByEmail = data?.results?.institution || null;
 
     if (!institutionByEmail) {
-      // This email address is already in use!
-      console.log("This email address is already in use!");
       formik.setErrors({ ...formik.errors, email: "This email address is already in use!" });
       return false;
     }
@@ -134,8 +132,6 @@ const SignUpPage = () => {
     const data = await mutationValidateUserName.mutateAsync({ username: formik.values.username });
     const usernameValid = Boolean(data.results?.valid);
     if (!usernameValid) {
-      // This username is already in use!
-      console.log("This username is already in use!");
       formik.setErrors({ ...formik.errors, username: "This username is already in use!" });
       return false;
     }
@@ -205,7 +201,6 @@ const SignUpPage = () => {
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: "16px" }}>
           {activeStep === 1 && (
             <>
-              <div></div>
               <Button disabled={isValidFirstStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
                 Next
               </Button>
