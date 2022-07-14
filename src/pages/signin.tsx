@@ -2,6 +2,8 @@ import { LoadingButton } from "@mui/lab";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
+import { useRouter } from "next/router";
+import { useSnackbar } from "notistack";
 import React, { ReactNode, useState } from "react";
 import * as yup from "yup";
 
@@ -9,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
+import ROUTES from "../lib/utils/routes";
 
 interface SignInFormValues {
   email: string;
@@ -18,6 +21,8 @@ interface SignInFormValues {
 const SignIn = () => {
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
 
   const initialValues: SignInFormValues = {
     email: "",
@@ -25,13 +30,18 @@ const SignIn = () => {
   };
 
   const validationSchema = yup.object({
-    email: yup.string().email("Enter a valid email").required("Required"),
-    password: yup.string().required("Required")
+    email: yup
+      .string()
+      .email("Invalid email address!")
+      .required("Your email address provided by your academic/research institutions is required!"),
+    password: yup.string().required("A secure password is required!")
   });
   const handleSignIn = async ({ email, password }: SignInFormValues) => {
     try {
       setIsLoading(true);
       await signIn(email, password);
+      enqueueSnackbar("User authenticated", { variant: "success" });
+      router.push(ROUTES.home);
     } catch (error) {
       setIsLoading(false);
       handleError({ error, errorMessage: (error as FirebaseError).message });
@@ -45,7 +55,7 @@ const SignIn = () => {
       <Typography variant="h5" color={"white"} sx={{ mb: "40px" }}>
         You can follow/pin nodes and earn points after logging in
       </Typography>
-      <form onSubmit={formik.handleSubmit}>
+      <form data-testid="signin-form" onSubmit={formik.handleSubmit}>
         <TextField
           id="email"
           name="email"
@@ -77,13 +87,16 @@ const SignIn = () => {
         <Button type="button" sx={{ my: "40px" }}>
           Forgot Password?
         </Button>
-        <LoadingButton loading={isLoading} disabled={formik.isSubmitting} type="submit" variant="contained" fullWidth>
+        <LoadingButton
+          aria-label="submit"
+          loading={isLoading}
+          disabled={formik.isSubmitting}
+          type="submit"
+          variant="contained"
+          fullWidth
+        >
           LOG IN
         </LoadingButton>
-        {/* <LoadingButton type="submit" color="primary" variant="contained" fullWidth loading={isSubmitting}>
-              Submit
-            </LoadingButton> */}
-        {/* <ArrowForwardIcon sx={{ ml: "10px" }} /> */}
       </form>
     </Box>
   );
