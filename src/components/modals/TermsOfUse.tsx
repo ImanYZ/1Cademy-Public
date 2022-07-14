@@ -18,7 +18,7 @@ export const TermsOfUse = ({ open, handleClose }: TermsOfUseProps) => {
     >
       <DialogTitle id="scroll-dialog-title">1Cademy Terms Of Use</DialogTitle>
       <DialogContent dividers>
-        <DialogContentText id="scroll-dialog-description" tabIndex={-1}>
+        <DialogContentText id="scroll-dialog-description" tabIndex={-1} component={"div"}>
           <TermsOfUseContent />
         </DialogContentText>
       </DialogContent>
@@ -31,9 +31,11 @@ export const TermsOfUse = ({ open, handleClose }: TermsOfUseProps) => {
   );
 };
 
+export default TermsOfUse;
+
 const TermsOfUseContent = () => {
   return (
-    <Box component={"div"}>
+    <Box>
       <h3>Introduction</h3>
       <p>
         By retrieving any data from 1Cademy, through an Internet browser, API, or any other means, you guarantee and

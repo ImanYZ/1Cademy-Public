@@ -18,7 +18,7 @@ export const CookiePolicy = ({ open, handleClose }: CookiePolicyProps) => {
     >
       <DialogTitle id="scroll-dialog-title">1Cademy Cookie Policy</DialogTitle>
       <DialogContent dividers>
-        <DialogContentText id="scroll-dialog-description" tabIndex={-1}>
+        <DialogContentText id="scroll-dialog-description" tabIndex={-1} component={"div"}>
           <CookiePolicyContent />
         </DialogContentText>
       </DialogContent>
@@ -31,9 +31,11 @@ export const CookiePolicy = ({ open, handleClose }: CookiePolicyProps) => {
   );
 };
 
+export default CookiePolicy;
+
 const CookiePolicyContent = () => {
   return (
-    <Box component={"div"}>
+    <Box>
       {/* <h3>1Cademy Cookie Policy</h3> */}
       <p>
         A <b>cookie</b> is a small piece of text that enables websites to remember your device and maintain a consistent

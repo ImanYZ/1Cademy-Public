@@ -1,13 +1,28 @@
-import { Autocomplete, Button, Checkbox, FormControlLabel, FormHelperText, TextField, Typography } from "@mui/material";
+import {
+  Autocomplete,
+  Backdrop,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  FormHelperText,
+  TextField,
+  Typography
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { FormikProps } from "formik";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
 import { EDUCATION_VALUES } from "../lib/utils/constants";
-import { CookiePolicy } from "./modals/CookiePolicy";
-import { PrivacyPolicy } from "./modals/PrivacyPolicy";
-import { TermsOfUse } from "./modals/TermsOfUse";
+
+const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
+const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
+const TermsOfUse = lazy(() => import("./modals/TermsOfUse"));
+
+// import { CookiePolicy } from "./modals/CookiePolicy";
+// import { PrivacyPolicy } from "./modals/PrivacyPolicy";
+// import { TermsOfUse } from "./modals/TermsOfUse";
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -120,9 +135,19 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         </Button>
       </Box>
 
-      <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />
-      <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
-      <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
+      <Suspense
+        fallback={
+          <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={true}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        }
+      >
+        <>
+          <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
+          <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
+          <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />
+        </>
+      </Suspense>
     </>
   );
 };

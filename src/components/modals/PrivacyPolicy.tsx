@@ -18,7 +18,7 @@ export const PrivacyPolicy = ({ open, handleClose }: PrivacyPolicyProps) => {
     >
       <DialogTitle id="scroll-dialog-title">1Cademy Privacy Policy</DialogTitle>
       <DialogContent dividers>
-        <DialogContentText id="scroll-dialog-description" tabIndex={-1}>
+        <DialogContentText id="scroll-dialog-description" tabIndex={-1} component={"div"}>
           <PrivacyPolicyContent />
         </DialogContentText>
       </DialogContent>
@@ -31,9 +31,11 @@ export const PrivacyPolicy = ({ open, handleClose }: PrivacyPolicyProps) => {
   );
 };
 
+export default PrivacyPolicy;
+
 const PrivacyPolicyContent = () => {
   return (
-    <Box component={"div"}>
+    <Box>
       <p>
         <b>
           1Cademy reserves the right to retrieve, analyze, store, and mine your interaction data with the provided
