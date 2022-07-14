@@ -50,6 +50,7 @@ const SignUpPage = () => {
     institution: "",
     major: "",
     fieldOfInterest: "",
+    signUpAgreement: false,
     clickedConsent: false,
     clickedTOS: false,
     clickedPP: false,
@@ -104,7 +105,7 @@ const SignUpPage = () => {
     institution: yup.string().required("Please enter your institution"),
     major: yup.string().required("Required"),
     fieldOfInterest: yup.string().required("Required"),
-    clickedConsent: yup.boolean().isTrue("Please accept terms to continue")
+    signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
   });
 
   const handleSignUp = (values: SignUpFormValues) => {

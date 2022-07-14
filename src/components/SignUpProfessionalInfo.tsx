@@ -19,16 +19,14 @@ import { EDUCATION_VALUES } from "../lib/utils/constants";
 const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
 const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
 const TermsOfUse = lazy(() => import("./modals/TermsOfUse"));
-
-// import { CookiePolicy } from "./modals/CookiePolicy";
-// import { PrivacyPolicy } from "./modals/PrivacyPolicy";
-// import { TermsOfUse } from "./modals/TermsOfUse";
+const InformedConsent = lazy(() => import("./modals/ConsentForm"));
 
 type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
 };
 
 export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationProps) => {
+  const [openInformedConsent, setOpenInformedConsent] = useState(false);
   const [openTermOfUse, setOpenTermsOfUse] = useState(false);
   const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
   const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
@@ -106,7 +104,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       />
       <FormControlLabel
         control={
-          <Checkbox checked={values.clickedConsent} onChange={(_, value) => setFieldValue("clickedConsent", value)} />
+          <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
         }
         label={
           <>
@@ -114,9 +112,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
               By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and
               Cookie Policy
             </Typography>
-            {Boolean(errors.clickedConsent) && Boolean(touched.clickedConsent) && (
+            {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
               <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
-                {touched.clickedConsent && errors.clickedConsent}
+                {touched.signUpAgreement && errors.signUpAgreement}
               </FormHelperText>
             )}
           </>
@@ -124,6 +122,15 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         sx={{ mb: "16px" }}
       />
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Button
+          type="button"
+          onClick={() => {
+            setFieldValue("clickedConsent", true);
+            setOpenInformedConsent(true);
+          }}
+        >
+          Informed Consent
+        </Button>
         <Button
           type="button"
           onClick={() => {
@@ -161,6 +168,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         }
       >
         <>
+          <InformedConsent open={openInformedConsent} handleClose={() => setOpenInformedConsent(false)} />
           <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
           <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
           <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />

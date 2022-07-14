@@ -36,7 +36,6 @@ export default CookiePolicy;
 const CookiePolicyContent = () => {
   return (
     <Box>
-      {/* <h3>1Cademy Cookie Policy</h3> */}
       <p>
         A <b>cookie</b> is a small piece of text that enables websites to remember your device and maintain a consistent
         experience throughout different times the website is used. Using 1Cademy will result in both 1Cademy and third
