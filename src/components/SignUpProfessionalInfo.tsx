@@ -1,4 +1,4 @@
-import { Autocomplete, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { Autocomplete, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
 import { FormikProps } from "formik";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
@@ -58,16 +58,6 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         fullWidth
         sx={{ mb: "16px" }}
       />
-      {/* <Autocomplete
-        id="major"
-        value={values.major}
-        onChange={(_, value) => setFieldValue("major", value)}
-        onBlur={() => setTouched({ ...touched, major: true })}
-        options={MAJORS}
-        renderInput={params => <TextField {...params} label="Education Level" />}
-        fullWidth
-        sx={{ mb: "16px" }}
-      /> */}
       <TextField
         id="fieldOfInterest"
         name="fieldOfInterest"
@@ -84,7 +74,12 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         control={
           <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
         }
-        label="By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and Cookie Policy"
+        label={
+          <Typography color={theme => theme.palette.text.primary}>
+            By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and Cookie
+            Policy
+          </Typography>
+        }
         sx={{ mb: "16px" }}
       />
     </>
