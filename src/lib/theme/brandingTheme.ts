@@ -53,10 +53,6 @@ export const getDesignTokens = (mode: "light" | "dark") =>
         main: "#ffc071",
         dark: "#ffb25e"
       },
-      text: {
-        primary: mode === "light" ? common.black : common.white,
-        secondary: grey[300]
-      },
       divider: mode === "dark" ? grey[200] : grey[200],
       background: {
         default: "#FAFAFA",
