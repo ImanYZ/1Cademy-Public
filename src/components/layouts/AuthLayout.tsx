@@ -54,7 +54,6 @@ export const AuthLayout = ({ children }: AuthProps) => {
           height: { xs: "auto", md: "100vh" },
           display: "flex",
           justifyContent: "center",
-          border: "dashed 2px royalBlue",
           alignItems: "center"
         }}
       >
@@ -63,47 +62,41 @@ export const AuthLayout = ({ children }: AuthProps) => {
             width: "1300px",
             minHeight: "auto",
             display: "grid",
-            border: "dashed 2px pink",
-            gridTemplateColumns: { xs: "auto", md: "auto auto" },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             gridTemplateRows: { xs: "297px auto", md: "auto" }
           }}
         >
           {/* left panel */}
-          <>
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                position: "fixed",
-                filter: "brightness(0.6)",
-                zIndex: -1
-              }}
-            >
-              <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" quality={100} />
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              color: theme => theme.palette.common.white
+            }}
+          >
+            {/* this this image has absolute position, by their configuration */}
+            <Image
+              alt="Library"
+              src={libraryImage}
+              layout="fill"
+              objectFit="cover"
+              quality={100}
+              style={{ filter: "brightness(0.6)" }}
+            />
+            <Box sx={{ zIndex: 1 }}>
+              <Typography textAlign={"center"} variant="h4">
+                Welcome to 1Cademy
+              </Typography>
+              <Typography textAlign={"center"} variant="subtitle1">
+                We Visualize Learning Pathways from Books & Research Papers.
+              </Typography>
             </Box>
-
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                color: theme => theme.palette.common.white
-              }}
-            >
-              <Box sx={{ zIndex: 1 }}>
-                <Typography textAlign={"center"} variant="h4">
-                  Welcome to 1Cademy
-                </Typography>
-                <Typography textAlign={"center"} variant="subtitle1">
-                  We Visualize Learning Pathways from Books & Research Papers.
-                </Typography>
-              </Box>
-            </Box>
-          </>
+          </Box>
           {/* right panel */}
           <Box
             sx={{
