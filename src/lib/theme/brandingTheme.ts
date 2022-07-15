@@ -205,6 +205,13 @@ export function getThemedComponents(theme: Theme): {
             textTransform: "none"
           }
         }
+      },
+      MuiFormControlLabel: {
+        styleOverrides: {
+          root: {
+            color: theme.palette.mode === "dark" ? common.white : common.darkGrayBackground
+          }
+        }
       }
     }
   };

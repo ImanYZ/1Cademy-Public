@@ -419,6 +419,8 @@ export interface SignUpFormValues {
   password: string;
   passwordConfirmation: string;
   theme: "Light" | "Dark";
+  background: "Image" | "Color";
+  chooseUname: boolean;
   // -----------------------
   language: string;
   birthDate: string;
