@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
 import { FormikProps } from "formik";
 import React from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
@@ -8,7 +8,13 @@ export type SignUpBasicInformationProps = {
 };
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
-  const { values, errors, touched, handleChange, handleBlur } = formikProps;
+  const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
+
+  const getDisplayNameValue = () => {
+    if (values.chooseUname) return values.username || "Your Username";
+    return values.firstName || values.lastName ? values.firstName + " " + values.lastName : "Your Full Name";
+  };
+
   return (
     <>
       <TextField
@@ -92,6 +98,39 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         fullWidth
         sx={{ mb: "16px" }}
       />
+
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={values.theme === "Light"}
+              onChange={() => setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light")}
+            />
+          }
+          label={`Theme: ${values.theme === "Light" ? "🌞" : "🌜"}`}
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={values.background === "Color"}
+              onChange={() => setFieldValue("background", values.background === "Color" ? "Image" : "Color")}
+            />
+          }
+          label={`Background: ${values.background === "Color" ? "Color" : "Image"}`}
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch checked={values.chooseUname} onChange={() => setFieldValue("chooseUname", !values.chooseUname)} />
+          }
+          label={`Display name: ${getDisplayNameValue()}`}
+        />
+      </FormGroup>
     </>
   );
 };
