@@ -102,6 +102,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         fullWidth
         sx={{ mb: "16px" }}
       />
+
+      {/* <TagsExploratorySearcher /> */}
+
       <FormControlLabel
         control={
           <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
