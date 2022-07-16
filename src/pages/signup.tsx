@@ -1,19 +1,19 @@
 import { LoadingButton } from "@mui/lab";
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
+import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
 import React, { ReactNode, useState } from "react";
 import { useMutation } from "react-query";
 import * as yup from "yup";
 
 import { useAuth } from "@/context/AuthContext";
-import { signUp } from "@/lib/firestoreClient/auth";
 import { signUp as signUpApi, validateEmail, validateUsername } from "@/lib/knowledgeApi";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { SignUpFormValues, User } from "../knowledgeTypes";
+import { SignUpData, SignUpFormValues } from "../knowledgeTypes";
 
 const getDateBySubstractYears = (years: number, date = new Date()) => {
   date.setFullYear(date.getFullYear() - years);
@@ -22,11 +22,24 @@ const getDateBySubstractYears = (years: number, date = new Date()) => {
 
 const SignUpPage = () => {
   const [, { handleError }] = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const minDate = getDateBySubstractYears(100);
   const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
-  const mutateSignUp = useMutation(signUpApi);
+  const mutateSignUp = useMutation(signUpApi, {
+    onSuccess: (data, variables) => {
+      console.log("success data", data);
+      console.log("success variables", variables);
+    },
+    onError: error => {
+      if (error instanceof FirebaseError) {
+        handleError({ error, errorMessage: (error as FirebaseError).message });
+        return;
+      }
+      console.log("catch error", error);
+
+      handleError({ error, errorMessage: error as string });
+    }
+  });
 
   const [activeStep, setActiveStep] = useState(1);
 
@@ -117,28 +130,30 @@ const SignUpPage = () => {
 
   const handleSignUp = async (values: SignUpFormValues) => {
     console.log("Should handle signup", values);
-    const user: User = {
+    const user: SignUpData = {
       uname: values.username,
-      email: "",
-      // email: values.email,
+      email: values.email,
       fName: values.firstName,
       lName: values.lastName,
+      password: values.password,
       lang: values.language,
       country: values.country as string,
       state: values.state as string,
       city: values.city as string,
       gender: values.gender as string,
-      // birthDate:values.birthdate
+      birthDate: values.birthDate,
       foundFrom: values.foundFrom as string,
       education: values.education as string,
       occupation: values.occupation as string,
       ethnicity: values.ethnicity as string[],
       reason: values.reason as string,
       // chooseUname:values.chooseUname,
-      // clickedConsent: values.clickedConsent,
-      //       clickedTOS: values.clickedTOS,
-      //       clickedPP: values.clickedPP,
-      //       clickedCP: values.clickedCP,
+      clickedConsent: values.clickedConsent,
+      clickedTOS: values.clickedTOS,
+      clickedPP: values.clickedPP,
+      clickedCP: values.clickedCP,
+      tagId: "r98BjyFDCe4YyLA3U8ZE",
+      tag: "1Cademy",
       // tag: values.tag,
       // tagId: values.tagId
       deMajor: values.major,
@@ -146,17 +161,7 @@ const SignUpPage = () => {
       // theme: values.theme,
       // background: values.background
     };
-    try {
-      setIsLoading(true);
-      await mutateSignUp.mutateAsync(user);
-      await signUp(user.uname, user.email, values.password);
-      setIsLoading(false);
-    } catch (error: any) {
-      console.log("catch error", error);
-      const errorMessage = error.errorMessage;
-      handleError({ error, errorMessage });
-      setIsLoading(false);
-    }
+    mutateSignUp.mutate(user);
   };
 
   const formik = useFormik({ initialValues, validationSchema, onSubmit: handleSignUp });
@@ -329,7 +334,13 @@ const SignUpPage = () => {
           )}
         </Box>
         {activeStep === 3 && (
-          <LoadingButton loading={isLoading} type="submit" disabled={formik.isSubmitting} variant="contained" fullWidth>
+          <LoadingButton
+            loading={mutateSignUp.isLoading}
+            type="submit"
+            disabled={formik.isSubmitting}
+            variant="contained"
+            fullWidth
+          >
             Sign up
           </LoadingButton>
         )}

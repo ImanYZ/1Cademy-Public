@@ -444,7 +444,9 @@ export interface SignUpFormValues {
   clickedCP: boolean;
 }
 
-export interface SignUpData extends User {}
+export interface SignUpData extends User {
+  password: string;
+}
 
 export type ThemeActions = {
   setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;

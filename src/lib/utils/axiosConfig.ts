@@ -26,11 +26,15 @@ const adapter = axios.create({
 adapter.interceptors.request.use(
   async request => {
     const auth = getAuth();
-    const token = await auth.currentUser?.getIdToken(true);
-    console.log("userToken", token);
-    if (token && token.length > 0) {
-      (request.headers as AxiosRequestHeaders).Authorization = token;
+    try {
+      const token = await auth.currentUser?.getIdToken(true);
+      if (token && token.length > 0) {
+        (request.headers as AxiosRequestHeaders).Authorization = token;
+      }
+    } catch (error) {
+      console.log("axios - cannot get tokenid");
     }
+
     return request;
   },
   error => {
