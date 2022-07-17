@@ -13,6 +13,7 @@ import logoHonor from "../../../public/logo-honor.svg";
 import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
 import { brandingDarkTheme } from "../../lib/theme/brandingTheme";
 import ROUTES from "../../lib/utils/routes";
+import FullPageLogoLoading from "../FullPageLogoLoading";
 
 type AuthProps = {
   children: ReactNode;
@@ -33,7 +34,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
   }, [isAuthenticated, isAuthInitialized, redirectToHome]);
 
   if (!isAuthInitialized || isAuthenticated) {
-    return null;
+    return <FullPageLogoLoading />;
   }
 
   return (

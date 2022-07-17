@@ -2,18 +2,20 @@ import { LoadingButton } from "@mui/lab";
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
 import React, { ReactNode, useState } from "react";
 import { useMutation } from "react-query";
 import * as yup from "yup";
 
 import { useAuth } from "@/context/AuthContext";
+import { sendVerificationEmail, signIn } from "@/lib/firestoreClient/auth";
 import { signUp as signUpApi, validateEmail, validateUsername } from "@/lib/knowledgeApi";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { SignUpData, SignUpFormValues } from "../knowledgeTypes";
+import { SignUpData, SignUpFormValues, User } from "../knowledgeTypes";
 
 const getDateBySubstractYears = (years: number, date = new Date()) => {
   date.setFullYear(date.getFullYear() - years);
@@ -22,21 +24,31 @@ const getDateBySubstractYears = (years: number, date = new Date()) => {
 
 const SignUpPage = () => {
   const [, { handleError }] = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
   const minDate = getDateBySubstractYears(100);
   const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
-  const mutateSignUp = useMutation(signUpApi, {
-    onSuccess: (data, variables) => {
-      console.log("success data", data);
-      console.log("success variables", variables);
+  const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
+    onSuccess: async (data, variables) => {
+      try {
+        await signIn(variables.email, variables.password);
+        await sendVerificationEmail();
+        enqueueSnackbar(
+          "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
+          {
+            variant: "success",
+            autoHideDuration: 20000
+          }
+        );
+      } catch (error) {
+        handleError({ error, showErrorToast: false });
+      }
     },
     onError: error => {
       if (error instanceof FirebaseError) {
         handleError({ error, errorMessage: (error as FirebaseError).message });
         return;
       }
-      console.log("catch error", error);
-
       handleError({ error, errorMessage: error as string });
     }
   });
@@ -75,7 +87,9 @@ const SignUpPage = () => {
     clickedConsent: false,
     clickedTOS: false,
     clickedPP: false,
-    clickedCP: false
+    clickedCP: false,
+    background: "Image",
+    chooseUname: false
   };
 
   const validationSchema = yup.object({
@@ -130,7 +144,6 @@ const SignUpPage = () => {
   });
 
   const handleSignUp = async (values: SignUpFormValues) => {
-    console.log("Should handle signup", values);
     const user: SignUpData = {
       uname: values.username,
       email: values.email,
@@ -148,7 +161,7 @@ const SignUpPage = () => {
       occupation: values.occupation as string,
       ethnicity: values.ethnicity as string[],
       reason: values.reason as string,
-      // chooseUname:values.chooseUname,
+      chooseUname: values.chooseUname,
       clickedConsent: values.clickedConsent,
       clickedTOS: values.clickedTOS,
       clickedPP: values.clickedPP,
@@ -158,9 +171,9 @@ const SignUpPage = () => {
       // tag: values.tag,
       // tagId: values.tagId
       deMajor: values.major,
-      deInstit: values.institution
-      // theme: values.theme,
-      // background: values.background
+      deInstit: values.institution,
+      theme: values.theme,
+      background: values.background as string
     };
     mutateSignUp.mutate(user);
   };
@@ -209,12 +222,9 @@ const SignUpPage = () => {
   const onNextStep = async () => {
     if (activeStep > steps.length - 1) return;
     if (activeStep === 1) {
-      console.log(1);
       touchFirstStep();
-      console.log(2);
       if (isInvalidFirstStep()) return;
 
-      console.log(3);
       const isValidEmail = await validateEmailByServer();
       if (!isValidEmail) return;
 

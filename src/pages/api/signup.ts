@@ -63,7 +63,7 @@ const checkEmailInstitution = async (email: string, checkFirestore: boolean) => 
       if (checkFirestore) {
         const userDocs = await db.collection("users").where("email", "==", email).limit(1).get();
         if (userDocs.docs.length === 0) {
-          throw "The user does not exist!";
+          throw "The user does not exist";
         }
       } else {
         await admin.auth().getUserByEmail(email);
@@ -73,7 +73,7 @@ const checkEmailInstitution = async (email: string, checkFirestore: boolean) => 
         const institutionData = institutionDoc.docs[0].data();
         return institutionData;
       }
-      return "Not Found!";
+      return "Not Found";
     }
   } catch (err) {}
   return false;
@@ -159,10 +159,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const institution = await checkEmailInstitution(data.email, true);
     if (!institution) {
-      return res.status(400).json({ errorMessage: "This email address is already in use!" });
+      return res.status(400).json({ errorMessage: "This email address is already in use" });
     }
 
-    if (institution === "Not Found!") {
+    if (institution === "Not Found") {
       return res.status(400).json({
         errorMessage:
           "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu"
