@@ -1,5 +1,6 @@
 import { LoadingButton } from "@mui/lab";
 import { Box, Card, CardContent, CardHeader, Container, Link, Stack, TextField } from "@mui/material";
+import { FirebaseError } from "firebase/app";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { useFormik } from "formik";
 import { NextPage } from "next";
@@ -11,6 +12,7 @@ import * as yup from "yup";
 
 import LibraryFullBackgroundLayout from "@/components/layouts/LibraryBackgroundLayout";
 import { useAuth } from "@/context/AuthContext";
+import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
 
 const validationSchema = yup.object({
@@ -36,12 +38,13 @@ const ForgotPasswordPage: NextPage = () => {
         variant: "info",
         autoHideDuration: 8000
       });
-    } catch (error) {
-      handleError({ error, errorMessage: "We couldn't send the reset email. Try again later." });
-      setIsLoading(false);
-    } finally {
       router.replace(ROUTES.signIn);
+    } catch (error) {
+      const err = error as FirebaseError;
+      const errorStrig = getFirebaseFriendlyError(err);
+      handleError({ error, errorMessage: `${errorStrig} Check if your email address is correct. ` });
     }
+    setIsLoading(false);
   };
   const formik = useFormik({
     initialValues,
