@@ -2,11 +2,13 @@ import { LoadingButton } from "@mui/lab";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
+import NextLink from "next/link";
 import React, { ReactNode, useState } from "react";
 import * as yup from "yup";
 
 import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
+import ROUTES from "@/lib/utils/routes";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
 
@@ -76,10 +78,9 @@ const SignIn = () => {
           helperText={formik.errors.password}
           fullWidth
         />
-
-        <Button type="button" sx={{ my: "40px" }}>
-          Forgot Password?
-        </Button>
+        <NextLink href={ROUTES.forgotpassword} passHref>
+          <Button sx={{ my: "40px" }}>Forgot Password?</Button>
+        </NextLink>
         <LoadingButton
           aria-label="submit"
           loading={isLoading}
