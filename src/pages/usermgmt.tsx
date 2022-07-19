@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, CardHeader, Link } from "@mui/material";
 import Container from "@mui/material/Container";
-import { applyActionCode, verifyPasswordResetCode } from "firebase/auth";
+import { applyActionCode, getAuth, verifyPasswordResetCode } from "firebase/auth";
 import { GetServerSideProps, NextPage } from "next";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 import LibraryFullBackgroundLayout from "@/components/layouts/LibraryBackgroundLayout";
 import PasswordResetForm from "@/components/PasswordResetForm";
 import { useAuth } from "@/context/AuthContext";
-import { auth } from "@/lib/firestoreServer/admin";
 import ROUTES from "@/lib/utils/routes";
 import { getQueryParameter } from "@/lib/utils/utils";
 
@@ -74,9 +73,7 @@ const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email })
   );
 };
 
-export const getServerSideProps: GetServerSideProps<any> = async ({ query, params }) => {
-  console.log("params", params);
-  console.log("query", query);
+export const getServerSideProps: GetServerSideProps<any> = async ({ query }) => {
   const mode = getQueryParameter(query.mode || "");
   const actionCode = getQueryParameter(query.oobCode) || "";
   let hasErrors = false;
@@ -102,7 +99,7 @@ async function handleResetPassword(actionCode: string) {
   let hasErrors = false;
 
   try {
-    email = await verifyPasswordResetCode(auth, actionCode);
+    email = await verifyPasswordResetCode(getAuth(), actionCode);
   } catch (error) {
     //TODO: Send error to error managemenet google cloud to analyze it"
     console.error("Error verifying password reset code", error);
@@ -114,7 +111,7 @@ async function handleResetPassword(actionCode: string) {
 async function handleVerifyEmail(actionCode: string) {
   let hasErrors = false;
   try {
-    await applyActionCode(auth, actionCode);
+    await applyActionCode(getAuth(), actionCode);
   } catch (error) {
     //TODO: Send error to error managemenet google cloud to analyze it"
     console.error("Error verifying email", error);

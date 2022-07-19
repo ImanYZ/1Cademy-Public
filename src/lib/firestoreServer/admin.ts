@@ -1,10 +1,8 @@
-import { getAuth } from "firebase/auth";
 import admin from "firebase-admin";
 import { cert, initializeApp } from "firebase-admin/app";
 import { getFirestore, WriteBatch } from "firebase-admin/firestore";
 
 require("dotenv").config();
-
 if (!admin.apps.length) {
   initializeApp({
     credential: cert({
@@ -26,7 +24,6 @@ if (!admin.apps.length) {
 }
 const MAX_TRANSACTION_WRITES = 499;
 const db = getFirestore();
-const auth = getAuth();
 
 const makeCommitBatch = async (batch: WriteBatch) => {
   await batch.commit();
@@ -70,4 +67,4 @@ const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: numb
   return [batch, writeCounts];
 };
 
-export { admin, db, auth, checkRestartBatchWriteCounts };
+export { admin, db, checkRestartBatchWriteCounts };
