@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   getAuth,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
@@ -17,6 +18,13 @@ export const signUp = async (name: string, email: string, password: string) => {
 export const signIn = async (email: string, password: string) => {
   const userCredential = await signInWithEmailAndPassword(getAuth(), email, password);
   return userCredential.user;
+};
+
+export const sendVerificationEmail = async () => {
+  const auth = getAuth();
+  if (auth.currentUser) {
+    await sendEmailVerification(auth.currentUser);
+  }
 };
 
 export const resetPassword = async (email: string) => {
@@ -63,7 +71,8 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       clickedTOS: userData.clickedTOS,
       clickedPP: userData.clickedPP,
       clickedCP: userData.clickedCP,
-      createdAt: userData.createdAt.toDate()
+      createdAt: userData.createdAt.toDate(),
+      email: userData.email
     };
   }
 

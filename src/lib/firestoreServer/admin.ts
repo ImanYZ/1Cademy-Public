@@ -1,6 +1,7 @@
+import { getAuth } from "firebase/auth";
 import admin from "firebase-admin";
 import { cert, initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, WriteBatch } from "firebase-admin/firestore";
 
 require("dotenv").config();
 
@@ -25,13 +26,12 @@ if (!admin.apps.length) {
 }
 const MAX_TRANSACTION_WRITES = 499;
 const db = getFirestore();
-let batch = db.batch();
-let writeCounts = 0;
+const auth = getAuth();
 
-const makeCommitBatch = async () => {
+const makeCommitBatch = async (batch: WriteBatch) => {
   await batch.commit();
   batch = db.batch();
-  writeCounts = 0;
+  return [batch, 0];
 };
 
 const isFirestoreDeadlineError = (err: any) => {
@@ -42,14 +42,14 @@ const isFirestoreDeadlineError = (err: any) => {
   );
 };
 
-export const commitBatch = async () => {
+export const commitBatch = async (batch: WriteBatch) => {
   try {
-    await makeCommitBatch();
+    await makeCommitBatch(batch);
   } catch (err) {
     if (isFirestoreDeadlineError(err)) {
       const theInterval = setInterval(async () => {
         try {
-          await makeCommitBatch();
+          await makeCommitBatch(batch);
           clearInterval(theInterval);
         } catch (err) {
           if (!isFirestoreDeadlineError(err)) {
@@ -62,11 +62,12 @@ export const commitBatch = async () => {
   }
 };
 
-const checkRestartBatchWriteCounts = async () => {
+const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: number): Promise<[WriteBatch, number]> => {
   writeCounts += 1;
   if (writeCounts >= MAX_TRANSACTION_WRITES) {
-    await commitBatch();
+    await commitBatch(batch);
   }
+  return [batch, writeCounts];
 };
 
-export { admin, db, checkRestartBatchWriteCounts };
+export { admin, db, auth, checkRestartBatchWriteCounts };

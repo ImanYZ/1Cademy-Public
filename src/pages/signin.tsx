@@ -2,16 +2,15 @@ import { LoadingButton } from "@mui/lab";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
-import { useRouter } from "next/router";
-import { useSnackbar } from "notistack";
+import NextLink from "next/link";
 import React, { ReactNode, useState } from "react";
 import * as yup from "yup";
 
 import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
+import ROUTES from "@/lib/utils/routes";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
-import ROUTES from "../lib/utils/routes";
 
 interface SignInFormValues {
   email: string;
@@ -21,8 +20,6 @@ interface SignInFormValues {
 const SignIn = () => {
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const { enqueueSnackbar } = useSnackbar();
-  const router = useRouter();
 
   const initialValues: SignInFormValues = {
     email: "",
@@ -40,8 +37,6 @@ const SignIn = () => {
     try {
       setIsLoading(true);
       await signIn(email, password);
-      enqueueSnackbar("User authenticated", { variant: "success" });
-      router.push(ROUTES.home);
     } catch (error) {
       setIsLoading(false);
       handleError({ error, errorMessage: (error as FirebaseError).message });
@@ -83,10 +78,9 @@ const SignIn = () => {
           helperText={formik.errors.password}
           fullWidth
         />
-
-        <Button type="button" sx={{ my: "40px" }}>
-          Forgot Password?
-        </Button>
+        <NextLink href={ROUTES.forgotpassword} passHref>
+          <Button sx={{ my: "40px" }}>Forgot Password?</Button>
+        </NextLink>
         <LoadingButton
           aria-label="submit"
           loading={isLoading}

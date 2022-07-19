@@ -3,7 +3,8 @@ const ROUTES = {
   node: "/node",
   proposal: "/proposal",
   signIn: "/signin",
-  signUp: "/signup"
+  signUp: "/signup",
+  forgotpassword: "/forgot-password"
 };
 
 export default ROUTES;

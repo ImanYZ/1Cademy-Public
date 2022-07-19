@@ -344,7 +344,7 @@ export type User = {
   deInstit?: string;
   deMajor?: string;
   email: string;
-  ethnicity?: string;
+  ethnicity?: string[];
   fName?: string;
   gender?: string;
   imageUrl?: string;
@@ -449,12 +449,9 @@ export interface SignUpFormValues {
   clickedCP: boolean;
 }
 
-export interface SignUpData extends User {}
-
-export type SignupValidationError = {
-  email?: string;
-  chooseUname?: boolean;
-};
+export interface SignUpData extends User {
+  password: string;
+}
 
 export type ThemeActions = {
   setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;

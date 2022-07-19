@@ -1,6 +1,7 @@
+import { getAuth } from "firebase-admin/auth";
 import { Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
-import { SignUpData, SignupValidationError } from "src/knowledgeTypes";
+import { SignUpData } from "src/knowledgeTypes";
 
 import { isEmail, isEmpty } from "@/lib/utils/utils";
 
@@ -14,7 +15,7 @@ const addPracticeQuestions = async (
   nodeIds: string[],
   currentTimestamp: Timestamp,
   writeCounts: number
-) => {
+): Promise<[WriteBatch, number]> => {
   let newBatch = batch;
   let practiceRef;
   for (let nodeId of nodeIds) {
@@ -33,7 +34,7 @@ const addPracticeQuestions = async (
       tagId,
       user
     });
-    await checkRestartBatchWriteCounts();
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
   return [newBatch, writeCounts];
 };
@@ -62,7 +63,7 @@ const checkEmailInstitution = async (email: string, checkFirestore: boolean) => 
       if (checkFirestore) {
         const userDocs = await db.collection("users").where("email", "==", email).limit(1).get();
         if (userDocs.docs.length === 0) {
-          throw "The user does not exist!";
+          throw "The user does not exist";
         }
       } else {
         await admin.auth().getUserByEmail(email);
@@ -72,19 +73,19 @@ const checkEmailInstitution = async (email: string, checkFirestore: boolean) => 
         const institutionData = institutionDoc.docs[0].data();
         return institutionData;
       }
-      return "Not Found!";
+      return "Not Found";
     }
   } catch (err) {}
   return false;
 };
 
 const validateSignupData = (data: SignUpData) => {
-  const errors: SignupValidationError = {};
+  const errors: string[] = [];
 
   if (isEmpty(data.email)) {
-    errors.email = "Your email address provided by your academic institutions is required!";
+    errors.push("Your email address provided by your academic institutions is required.");
   } else if (!isEmail(data.email)) {
-    errors.email = "Please enter a valid email address.";
+    errors.push("Please enter a valid email address.");
     // } else if (
     //   data.email.substring(data.email.length - 3, data.email.length) !== "edu"
     // ) {
@@ -93,8 +94,8 @@ const validateSignupData = (data: SignUpData) => {
   }
 
   return {
-    errors,
-    valid: Object.keys(errors).length === 0 ? true : false
+    errors: errors.join(" "),
+    valid: errors.length === 0 ? true : false
   };
 };
 
@@ -142,7 +143,7 @@ const initializeReputationObj = () => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     let writeCounts = 0;
-    const batch = db.batch();
+    let batch = db.batch();
     const data = req.body.data as SignUpData;
     const tag = data.tag || "";
     const tagId = data.tagId || "";
@@ -153,35 +154,37 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const { valid, errors } = validateSignupData(data);
     if (!valid) {
-      return res.status(400).json(errors);
+      return res.status(400).json({ errorMessage: errors });
     }
 
     const institution = await checkEmailInstitution(data.email, true);
     if (!institution) {
-      return res.status(400).json({ email: "This email address is already in use!" });
+      return res.status(400).json({ errorMessage: "This email address is already in use" });
     }
 
-    if (institution === "Not Found!") {
+    if (institution === "Not Found") {
       return res.status(400).json({
-        email:
+        errorMessage:
           "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu"
       });
     }
 
     const userAlreadyExists = await unameExists(data.uname);
     if (userAlreadyExists) {
-      return res.status(400).json({ uname: "This username is already in use!" });
+      return res.status(400).json({ errorMessage: "This username is already in use" });
     }
-
     let userData, credits;
     const deCredits = 3;
     const defaultImageUrl = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
-    const decodedToken = await admin.auth().verifyIdToken(req.headers.authorization || "");
-    const userId = decodedToken.uid;
     const userRef = db.doc(`/users/${data.uname}`);
     if ((await userRef.get()).exists) {
-      return res.status(500).json({ error: "This username is already taken." });
+      return res.status(500).json({ errorMessage: "This username is already taken." });
     }
+    const userRecord = await getAuth().createUser({
+      email: data.email,
+      displayName: data.uname,
+      password: data.password
+    });
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     userData = {
       uname: data.uname,
@@ -218,10 +221,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       theme: data.theme,
       background: data.background,
       practicing: false,
-      userId
+      userId: userRecord.uid
     };
+
     batch.set(userRef, userData);
-    await checkRestartBatchWriteCounts();
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
     const rootTitles = { r98BjyFDCe4YyLA3U8ZE: "1Cademy", [tagId]: tag };
     for (let rootId in rootTitles) {
@@ -242,7 +246,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         };
         const reputationsRef = db.collection("reputations").doc();
         batch.set(reputationsRef, reputations);
-        await checkRestartBatchWriteCounts();
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
 
       const userNodeQuery = db
@@ -264,13 +268,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             updatedAt: currentTimestamp
           };
           batch.update(userNodeRef, userNodeUpdates);
-          await checkRestartBatchWriteCounts();
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           userNodeLogRef = db.collection("userNodesLog").doc();
           batch.set(userNodeLogRef, {
             ...userNodeData,
             ...userNodeUpdates
           });
-          await checkRestartBatchWriteCounts();
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         }
       } else {
         //  if the userNode doesn't exist, create it
@@ -290,10 +294,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         };
         userNodeRef = db.collection("userNodes").doc();
         batch.set(userNodeRef, userNodeData);
-        await checkRestartBatchWriteCounts();
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         userNodeLogRef = db.collection("userNodesLog").doc();
         batch.set(userNodeLogRef, userNodeData);
-        await checkRestartBatchWriteCounts();
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
     }
 
@@ -306,7 +310,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     questionsDocs.forEach(questionDoc => {
       nodeIds.push(questionDoc.id);
     });
-    await addPracticeQuestions(batch, data.uname, tagId, tag, nodeIds, currentTimestamp, writeCounts);
+    [batch, writeCounts] = await addPracticeQuestions(
+      batch,
+      data.uname,
+      tagId,
+      tag,
+      nodeIds,
+      currentTimestamp,
+      writeCounts
+    );
 
     const notificationNumsRef = db.collection("notificationNums").doc(data.uname);
     batch.set(notificationNumsRef, { nNum: 0 });
@@ -320,11 +332,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const bookmarkNumsRef = db.collection("bookmarkNums").doc(data.uname);
     batch.set(bookmarkNumsRef, { bNum: 0 });
-
-    await commitBatch();
-
+    await commitBatch(batch);
     const creditsRef = db.collection("credits").where("credits", "==", deCredits).where("tagId", "==", tagId).limit(1);
     const creditsData = await creditsRef.get();
+
     credits = creditsData.docs[0].data();
     delete credits.createdAt;
     delete credits.credits;
@@ -352,10 +363,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       practicing: userData.practicing,
       createdAt: userData.createdAt.toDate()
     };
-    return res.status(201).json(userData);
+    return res.status(201).json({ user: userData });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ errorMessage: "Error on signup" });
+    res.status(500).json({ message: "Error on Signup" });
   }
 }
 

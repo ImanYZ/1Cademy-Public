@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Button, Paper, Typography } from "@mui/material";
 import { Box, ThemeProvider } from "@mui/system";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import logoHonor from "../../../public/logo-honor.svg";
 import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
 import { brandingDarkTheme } from "../../lib/theme/brandingTheme";
 import ROUTES from "../../lib/utils/routes";
+import FullPageLogoLoading from "../FullPageLogoLoading";
 
 type AuthProps = {
   children: ReactNode;
@@ -33,7 +34,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
   }, [isAuthenticated, isAuthInitialized, redirectToHome]);
 
   if (!isAuthInitialized || isAuthenticated) {
-    return null;
+    return <FullPageLogoLoading />;
   }
 
   return (
@@ -88,7 +89,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
               src={libraryImage}
               layout="fill"
               objectFit="cover"
-              quality={100}
+              priority
               style={{ filter: "brightness(0.6)" }}
             />
             <Box
@@ -138,15 +139,14 @@ export const AuthLayout = ({ children }: AuthProps) => {
             </Box>
           </Box>
           {/* right panel */}
-          <Box
+          <Paper
             sx={{
               width: "100%",
               height: "100%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              py: "54px",
-              background: theme => theme.palette.common.darkGrayBackground
+              py: "54px"
             }}
           >
             <Box sx={{ maxWidth: "400px" }}>
@@ -188,7 +188,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
               </Box>
               {children}
             </Box>
-          </Box>
+          </Paper>
         </Box>
       </Box>
     </ThemeProvider>

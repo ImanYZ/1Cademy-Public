@@ -1,15 +1,21 @@
+import { LoadingButton } from "@mui/lab";
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
+import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
 import React, { ReactNode, useState } from "react";
 import { useMutation } from "react-query";
 import * as yup from "yup";
+
+import { useAuth } from "@/context/AuthContext";
+import { sendVerificationEmail, signIn } from "@/lib/firestoreClient/auth";
+import { signUp as signUpApi, validateEmail, validateUsername } from "@/lib/knowledgeApi";
 
 import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { SignUpFormValues } from "../knowledgeTypes";
-import { validateEmail, validateUsername } from "../lib/knowledgeApi";
+import { SignUpData, SignUpFormValues, User } from "../knowledgeTypes";
 
 const getDateBySubstractYears = (years: number, date = new Date()) => {
   date.setFullYear(date.getFullYear() - years);
@@ -17,9 +23,35 @@ const getDateBySubstractYears = (years: number, date = new Date()) => {
 };
 
 const SignUpPage = () => {
+  const [, { handleError }] = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
   const minDate = getDateBySubstractYears(100);
   const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
+  const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
+    onSuccess: async (data, variables) => {
+      try {
+        await signIn(variables.email, variables.password);
+        await sendVerificationEmail();
+        enqueueSnackbar(
+          "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
+          {
+            variant: "success",
+            autoHideDuration: 20000
+          }
+        );
+      } catch (error) {
+        handleError({ error, showErrorToast: false });
+      }
+    },
+    onError: error => {
+      if (error instanceof FirebaseError) {
+        handleError({ error, errorMessage: (error as FirebaseError).message });
+        return;
+      }
+      handleError({ error, errorMessage: error as string });
+    }
+  });
 
   const [activeStep, setActiveStep] = useState(1);
 
@@ -59,7 +91,9 @@ const SignUpPage = () => {
     clickedConsent: false,
     clickedTOS: false,
     clickedPP: false,
-    clickedCP: false
+    clickedCP: false,
+    background: "Image",
+    chooseUname: false
   };
 
   const validationSchema = yup.object({
@@ -113,8 +147,39 @@ const SignUpPage = () => {
     signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
   });
 
-  const handleSignUp = (values: SignUpFormValues) => {
-    console.log("Should handle signup", values);
+  const handleSignUp = async (values: SignUpFormValues) => {
+    const user: SignUpData = {
+      uname: values.username,
+      email: values.email,
+      fName: values.firstName,
+      lName: values.lastName,
+      password: values.password,
+      lang: values.language,
+      country: values.country as string,
+      state: values.state as string,
+      city: values.city as string,
+      gender: values.gender as string,
+      birthDate: values.birthDate,
+      foundFrom: values.foundFrom as string,
+      education: values.education as string,
+      occupation: values.occupation as string,
+      ethnicity: values.ethnicity as string[],
+      reason: values.reason as string,
+      chooseUname: values.chooseUname,
+      clickedConsent: values.clickedConsent,
+      clickedTOS: values.clickedTOS,
+      clickedPP: values.clickedPP,
+      clickedCP: values.clickedCP,
+      tagId: "r98BjyFDCe4YyLA3U8ZE",
+      tag: "1Cademy",
+      // tag: values.tag,
+      // tagId: values.tagId
+      deMajor: values.major,
+      deInstit: values.institution,
+      theme: values.theme,
+      background: values.background as string
+    };
+    mutateSignUp.mutate(user);
   };
 
   const formik = useFormik({ initialValues, validationSchema, onSubmit: handleSignUp });
@@ -284,9 +349,15 @@ const SignUpPage = () => {
           )}
         </Box>
         {activeStep === 3 && (
-          <Button type="submit" disabled={formik.isSubmitting} variant="contained" fullWidth>
+          <LoadingButton
+            loading={mutateSignUp.isLoading}
+            type="submit"
+            disabled={formik.isSubmitting}
+            variant="contained"
+            fullWidth
+          >
             Sign up
-          </Button>
+          </LoadingButton>
         )}
       </form>
     </Box>
