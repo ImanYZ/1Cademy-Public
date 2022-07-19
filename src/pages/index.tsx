@@ -136,7 +136,7 @@ const HomePage: NextPage = () => {
     <ThemeProvider theme={brandingLightTheme}>
       <PagesNavbar showSearch={!isIntersecting}>
         <HomeSearch sx={{ mt: "var(--navbar-height)" }} onSearch={handleSearch} ref={homeSearchRef} />
-        <Container sx={{ my: 10 }}>
+        <Container sx={{ py: 10 }}>
           <HomeFilter
             onTagsChange={handleTagsChange}
             onInstitutionsChange={handleInstitutionsChange}

@@ -43,7 +43,8 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
         sx={{
           position: "relative",
           mt: "var(--navbar-height)",
-          minHeight: "calc(100vh - var(--navbar-height) - var(--footer-height) )"
+          minHeight: "calc(100vh - var(--navbar-height) - var(--footer-height) )",
+          backgroundColor: theme => theme.palette.background.default
         }}
       >
         {children}
