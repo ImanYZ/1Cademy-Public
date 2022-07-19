@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import * as yup from "yup";
 
-import { SignUpFormValues } from "../../src/pages/signup";
+import { SignUpFormValues } from "../../src/knowledgeTypes";
 
 export const useSignUpFormData = () => {
   const initialValues: SignUpFormValues = {
@@ -11,8 +11,13 @@ export const useSignUpFormData = () => {
     username: "",
     password: "",
     passwordConfirmation: "",
+    theme: "Light",
+    background: "Color",
+    chooseUname: false,
+    tagId: "r98BjyFDCe4YyLA3U8ZE",
+    tag: "1Cademy",
     language: "English",
-    age: "",
+    birthDate: "",
     gender: null,
     genderOtherValue: "",
     ethnicity: [],
@@ -28,7 +33,11 @@ export const useSignUpFormData = () => {
     institution: "",
     major: "",
     fieldOfInterest: "",
-    signUpAgreement: false
+    signUpAgreement: false,
+    clickedConsent: false,
+    clickedTOS: false,
+    clickedPP: false,
+    clickedCP: false
   };
 
   const validationSchema = yup.object({

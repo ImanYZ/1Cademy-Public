@@ -145,31 +145,18 @@ export const AuthLayout = ({ children }: AuthProps) => {
                 </a>
               </Box>
               <Box sx={{ zIndex: 1 }}>
-                <Typography textAlign={"center"} variant="h4">
+                <Typography textAlign={"center"} variant="h1">
                   Welcome to 1Cademy
                 </Typography>
-                <Typography textAlign={"center"} variant="subtitle1">
+                <Typography textAlign={"center"} variant="caption">
                   We Visualize Learning Pathways from Books & Research Papers.
                 </Typography>
-              </Box>
-            </Box>
-            {/* right panel */}
-            <Paper
-              sx={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                py: "54px"
-              }}
-            >
-              <Box sx={{ maxWidth: "400px" }}>
                 <Box
-                  aria-label="basic tabs example"
+                  aria-label="sign in and sing up options"
                   sx={{
                     border: "solid 2px",
-                    borderColor: "common.white"
+                    borderColor: "common.white",
+                    mt: "16px"
                   }}
                 >
                   <Link href={ROUTES.signIn}>
@@ -180,7 +167,12 @@ export const AuthLayout = ({ children }: AuthProps) => {
                         p: "12px 16px",
                         textAlign: "center",
                         backgroundColor: router.pathname === ROUTES.signIn ? "common.white" : "inherit",
-                        color: router.pathname === ROUTES.signIn ? "common.darkGrayBackground" : "common.white"
+                        color: router.pathname === ROUTES.signIn ? "common.darkGrayBackground" : "common.white",
+                        borderRadius: "0px",
+                        ":hover": {
+                          backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
+                          color: "common.darkGrayBackground"
+                        }
                       }}
                     >
                       LOG IN
@@ -194,15 +186,32 @@ export const AuthLayout = ({ children }: AuthProps) => {
                         p: "12px 16px",
                         textAlign: "center",
                         backgroundColor: router.pathname === ROUTES.signUp ? "common.white" : "inherit",
-                        color: router.pathname === ROUTES.signUp ? "common.darkGrayBackground" : "common.white"
+                        color: router.pathname === ROUTES.signUp ? "common.darkGrayBackground" : "common.white",
+                        borderRadius: "0px",
+                        ":hover": {
+                          backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
+                          color: "common.darkGrayBackground"
+                        }
                       }}
                     >
                       SIGN UP
                     </Button>
                   </Link>
                 </Box>
-                {children}
               </Box>
+            </Box>
+            {/* right panel */}
+            <Paper
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                py: "54px"
+              }}
+            >
+              <Box sx={{ maxWidth: "400px" }}>{children}</Box>
             </Paper>
           </Box>
         </Box>

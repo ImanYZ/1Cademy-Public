@@ -298,7 +298,7 @@ const SignUpPage = () => {
 
   return (
     <Box>
-      <Stepper activeStep={activeStep - 1} sx={{ mt: "26px", mb: "46px", mx: "19px" }}>
+      <Stepper activeStep={activeStep - 1} sx={{ mt: "26px", mb: "32px", mx: "19px" }}>
         {steps.map(label => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: { optional?: React.ReactNode } = {};
@@ -310,9 +310,6 @@ const SignUpPage = () => {
         })}
       </Stepper>
       <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
-        <Button onClick={() => console.log(formik.values, formik.errors)}>
-          Get VALUES [{formik.isValid ? "ok" : "X"}] [{activeStep}]
-        </Button>
         {activeStep === 1 && <SignUpBasicInfo formikProps={formik} />}
         {activeStep === 2 && <SignUpPersonalInfo formikProps={formik} />}
         {activeStep === 3 && <SignUpProfessionalInfo formikProps={formik} />}

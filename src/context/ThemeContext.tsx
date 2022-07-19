@@ -12,7 +12,7 @@ type Props = {
   children: ReactNode;
 };
 const ThemeProvider: FC<Props> = ({ children }) => {
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
 
   const theme = useMemo(() => {
     const brandingDesignTokens = getDesignTokens(themeMode);

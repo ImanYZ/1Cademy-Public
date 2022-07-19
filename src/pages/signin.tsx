@@ -48,7 +48,10 @@ const SignIn = () => {
 
   return (
     <Box sx={{ my: "92px" }}>
-      <Typography variant="h5" color={"white"} sx={{ mb: "40px" }}>
+      <Typography variant="h1" sx={{ mb: "8px" }}>
+        Log in
+      </Typography>
+      <Typography variant="body1" sx={{ mb: "32px" }}>
         You can follow/pin nodes and earn points after logging in
       </Typography>
       <form data-testid="signin-form" onSubmit={formik.handleSubmit}>
@@ -64,7 +67,7 @@ const SignIn = () => {
           error={Boolean(formik.errors.email) && Boolean(formik.touched.email)}
           helperText={formik.errors.email}
           fullWidth
-          sx={{ mb: "16px" }}
+          sx={{ mb: "24px" }}
         />
         <TextField
           id="password"
@@ -80,7 +83,7 @@ const SignIn = () => {
           fullWidth
         />
         <NextLink href={ROUTES.forgotpassword} passHref>
-          <Button sx={{ my: "40px" }}>Forgot Password?</Button>
+          <Button sx={{ my: "32px" }}>Forgot Password?</Button>
         </NextLink>
         <LoadingButton
           aria-label="submit"

@@ -115,6 +115,10 @@ export function getThemedComponents(theme: Theme): {
           containedPrimary: {
             backgroundColor: "common.orange",
             color: common.white
+          },
+          containedSecondary: {
+            backgroundColor: theme.palette.mode === "dark" ? common.white : common.darkGrayBackground,
+            color: theme.palette.mode === "dark" ? common.darkGrayBackground : common.white
           }
         },
         variants: [
@@ -227,4 +231,7 @@ export const getMetaThemeColor = (mode: "light" | "dark") => {
 };
 
 const darkTheme = createTheme(getDesignTokens("dark"));
+const lightTheme = createTheme(getDesignTokens("light"));
+
 export const brandingDarkTheme = deepmerge(darkTheme, getThemedComponents(darkTheme));
+export const brandingLightTheme = deepmerge(lightTheme, getThemedComponents(lightTheme));

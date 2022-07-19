@@ -1,4 +1,5 @@
 import Container from "@mui/material/Container";
+import { ThemeProvider } from "@mui/system";
 import { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -18,6 +19,7 @@ import {
 
 import { useOnScreen } from "../hooks/useOnScreen";
 import { FilterValue, SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
+import { brandingLightTheme } from "../lib/theme/brandingTheme";
 
 export const PagesNavbar: ComponentType<any> = dynamic(() => import("@/components/PagesNavbar").then(m => m.default), {
   ssr: false
@@ -131,32 +133,34 @@ const HomePage: NextPage = () => {
   };
 
   return (
-    <PagesNavbar showSearch={!isIntersecting}>
-      <HomeSearch sx={{ mt: "var(--navbar-height)" }} onSearch={handleSearch} ref={homeSearchRef} />
-      <Container sx={{ my: 10 }}>
-        <HomeFilter
-          onTagsChange={handleTagsChange}
-          onInstitutionsChange={handleInstitutionsChange}
-          onContributorsChange={handleContributorsChange}
-          onNodeTypesChange={handleNodeTypesChange}
-          onReferencesChange={handleReferencesChange}
-          ref={homeFilterRef}
-        ></HomeFilter>
-        <SortByFilters
-          sortedByType={sortedByType}
-          handleByType={handleByType}
-          timeWindow={timeWindow}
-          onTimeWindowChanged={handleChangeTimeWindow}
-        />
-        <MasonryNodes
-          nodes={data?.data || []}
-          page={page}
-          totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
-          onChangePage={handleChangePage}
-          isLoading={isLoading}
-        />
-      </Container>
-    </PagesNavbar>
+    <ThemeProvider theme={brandingLightTheme}>
+      <PagesNavbar showSearch={!isIntersecting}>
+        <HomeSearch sx={{ mt: "var(--navbar-height)" }} onSearch={handleSearch} ref={homeSearchRef} />
+        <Container sx={{ my: 10 }}>
+          <HomeFilter
+            onTagsChange={handleTagsChange}
+            onInstitutionsChange={handleInstitutionsChange}
+            onContributorsChange={handleContributorsChange}
+            onNodeTypesChange={handleNodeTypesChange}
+            onReferencesChange={handleReferencesChange}
+            ref={homeFilterRef}
+          ></HomeFilter>
+          <SortByFilters
+            sortedByType={sortedByType}
+            handleByType={handleByType}
+            timeWindow={timeWindow}
+            onTimeWindowChanged={handleChangeTimeWindow}
+          />
+          <MasonryNodes
+            nodes={data?.data || []}
+            page={page}
+            totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
+            onChangePage={handleChangePage}
+            isLoading={isLoading}
+          />
+        </Container>
+      </PagesNavbar>
+    </ThemeProvider>
   );
 };
 
