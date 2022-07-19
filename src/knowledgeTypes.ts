@@ -457,6 +457,12 @@ export type ThemeActions = {
   setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;
 };
 
+export type AppBackground = "Color" | "Image";
+
+export type AuthLayoutActions = {
+  setBackground: Dispatch<SetStateAction<AppBackground>>;
+};
+
 export type Tag = {
   createdAt: string;
   node: string;
