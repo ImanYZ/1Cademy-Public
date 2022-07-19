@@ -421,6 +421,8 @@ export interface SignUpFormValues {
   theme: "Light" | "Dark";
   background: "Image" | "Color";
   chooseUname: boolean;
+  tagId: string;
+  tag: string;
   // -----------------------
   language: string;
   birthDate: string;
@@ -456,4 +458,14 @@ export type SignupValidationError = {
 
 export type ThemeActions = {
   setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;
+};
+
+export type Tag = {
+  createdAt: string;
+  node: string;
+  tagIds: string[];
+  tags: string[];
+  title: string;
+  updatedAt: string;
+  deleted?: boolean; // it appear only if tag is deleted
 };

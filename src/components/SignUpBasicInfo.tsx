@@ -1,7 +1,10 @@
-import { FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
+import { FormControlLabel, FormGroup, Switch, TextField, Typography } from "@mui/material";
 import { FormikProps } from "formik";
-import React from "react";
+import React, { useEffect } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
+
+import { useTagsTreeView } from "../hooks/useTagsTreeView";
+import { TagsExploratorySearcher } from "./TagsExploratorySearcher";
 
 export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -9,6 +12,19 @@ export type SignUpBasicInformationProps = {
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
+  const [allTags, setAllTags] = useTagsTreeView(values.tagId ? [values.tagId] : []);
+
+  useEffect(() => {
+    const getFirstTagChecked = () => {
+      const tagSelected = Object.values(allTags).find(cur => cur.checked);
+      if (!tagSelected) return;
+
+      setFieldValue("tagId", tagSelected.nodeId);
+      setFieldValue("tag", tagSelected.title);
+    };
+
+    getFirstTagChecked();
+  }, [allTags, setFieldValue]);
 
   const getDisplayNameValue = () => {
     if (values.chooseUname) return values.username || "Your Username";
@@ -130,6 +146,13 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           }
           label={`Display name: ${getDisplayNameValue()}`}
         />
+      </FormGroup>
+
+      <FormGroup sx={{ mt: "20px" }}>
+        <TagsExploratorySearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
+        <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
+          You're going to be a member of: <b>{values.tag}</b>
+        </Typography>
       </FormGroup>
     </>
   );

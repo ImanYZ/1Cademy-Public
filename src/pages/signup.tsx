@@ -8,8 +8,6 @@ import { AuthLayout } from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { TagsExploratorySearcher } from "../components/TagsExploratorySearcher";
-import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { SignUpFormValues } from "../knowledgeTypes";
 import { validateEmail, validateUsername } from "../lib/knowledgeApi";
 
@@ -19,8 +17,6 @@ const getDateBySubstractYears = (years: number, date = new Date()) => {
 };
 
 const SignUpPage = () => {
-  const [allTags, setAllTags] = useTagsTreeView();
-  console.log("[TAGS]:", allTags);
   const minDate = getDateBySubstractYears(100);
   const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
@@ -38,6 +34,10 @@ const SignUpPage = () => {
     password: "",
     passwordConfirmation: "",
     theme: "Light",
+    background: "Color",
+    chooseUname: false,
+    tagId: "r98BjyFDCe4YyLA3U8ZE",
+    tag: "1Cademy",
     language: "English",
     birthDate: "",
     gender: null,
@@ -161,12 +161,9 @@ const SignUpPage = () => {
   const onNextStep = async () => {
     if (activeStep > steps.length - 1) return;
     if (activeStep === 1) {
-      console.log(1);
       touchFirstStep();
-      console.log(2);
       if (isInvalidFirstStep()) return;
 
-      console.log(3);
       const isValidEmail = await validateEmailByServer();
       if (!isValidEmail) return;
 
@@ -240,7 +237,6 @@ const SignUpPage = () => {
 
   return (
     <Box>
-      <TagsExploratorySearcher allTags={allTags} setAllTags={setAllTags} />
       <Stepper activeStep={activeStep - 1} sx={{ mt: "26px", mb: "46px", mx: "19px" }}>
         {steps.map(label => {
           const stepProps: { completed?: boolean } = {};
