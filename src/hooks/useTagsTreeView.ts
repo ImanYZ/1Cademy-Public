@@ -46,29 +46,6 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     return oldAllTagsCopy;
   };
 
-  // useEffect(() => {
-  //   // if (wasInitialize) return
-
-  //   const setDefaultCheckedTags = () => {
-  //     setTagsTreeView((oldAllTags) => {
-  //       const newAllTags = { ...oldAllTags };
-  //       console.log('chosenTags', chosenTags)
-  //       console.log('newAllTags', newAllTags)
-  //       for (let chosenTag of chosenTags) {
-  //         console.log(chosenTag)
-  //         if (chosenTag in newAllTags) {
-  //           console.log('will select')
-  //           newAllTags[chosenTag] = { ...newAllTags[chosenTag], checked: true };
-  //         }
-  //       }
-  //       return newAllTags;
-  //     });
-  //   }
-
-  //   setDefaultCheckedTags()
-  //   // setWasInitilize(true)
-  // }, [chosenTags, tagsTreeView]);
-
   useEffect(() => {
     const db = getFirestore();
     const tagsRef = collection(db, "tags");
@@ -82,30 +59,6 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     });
 
     return () => unsubscribe();
-
-    // if (firebase) {
-    //   // Create the query to load the tag and listen for modifications.
-    //   const tagsQuery = firebase.collection("tags");
-    //   // Start listening to the query.
-    //   // creates listener between client and database
-    //   // looks for any changes for data for tagsQuery
-    //   const tagsSnapshot = tagsQuery.onSnapshot(function (snapshot) {
-    //     const docChanges = snapshot.docChanges();
-    //     // made the useEffect independent from oldAllTags
-    //     if (docChanges.length > 0) {
-    //       // ************************************
-    //       // implement this in recoil
-    //       // ************************************
-    //       //  whenever updating based on pre existing value, we are using useState's function updater feature
-    //       // allTags - mirror of tags collection
-    //       setAllTags((oAllTags) => {
-    //         return applyAllTagChanges(oAllTags, docChanges, false);
-    //       });
-    //     }
-    //   });
-    //   // kills snapshot before duplicating it or unmounting component
-    //   return () => tagsSnapshot();
-    // }
   }, []);
 
   return [tagsTreeView, setTagsTreeView] as const;
