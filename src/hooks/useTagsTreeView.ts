@@ -59,7 +59,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [tagsTreeView]);
 
   return [tagsTreeView, setTagsTreeView] as const;
 };
