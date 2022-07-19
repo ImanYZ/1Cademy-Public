@@ -3,6 +3,7 @@ import { FormikProps } from "formik";
 import React, { useEffect } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
+import { use1AcademyTheme } from "../context/ThemeContext";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { TagsExploratorySearcher } from "./TagsExploratorySearcher";
 
@@ -13,6 +14,7 @@ export type SignUpBasicInformationProps = {
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   const [allTags, setAllTags] = useTagsTreeView(values.tagId ? [values.tagId] : []);
+  const [res] = use1AcademyTheme();
 
   useEffect(() => {
     const getFirstTagChecked = () => {
@@ -120,7 +122,10 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           control={
             <Switch
               checked={values.theme === "Light"}
-              onChange={() => setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light")}
+              onChange={() => {
+                setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
+                res.setThemeMode(values.theme === "Light" ? "dark" : "light");
+              }}
             />
           }
           label={`Theme: ${values.theme === "Light" ? "🌞" : "🌜"}`}

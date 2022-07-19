@@ -1,5 +1,5 @@
 import { Button, Paper, Typography } from "@mui/material";
-import { Box, ThemeProvider } from "@mui/system";
+import { Box } from "@mui/system";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -11,7 +11,6 @@ import libraryImage from "../../../public/LibraryBackground.jpg";
 import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
 import logoHonor from "../../../public/logo-honor.svg";
 import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
-import { brandingDarkTheme } from "../../lib/theme/brandingTheme";
 import ROUTES from "../../lib/utils/routes";
 import FullPageLogoLoading from "../FullPageLogoLoading";
 
@@ -38,7 +37,8 @@ export const AuthLayout = ({ children }: AuthProps) => {
   }
 
   return (
-    <ThemeProvider theme={brandingDarkTheme}>
+    // <ThemeProvider theme={brandingDarkTheme}>
+    <Box>
       <Box
         data-testid="auth-layout"
         sx={{
@@ -191,6 +191,7 @@ export const AuthLayout = ({ children }: AuthProps) => {
           </Paper>
         </Box>
       </Box>
-    </ThemeProvider>
+    </Box>
+    // </ThemeProvider>
   );
 };

@@ -43,9 +43,6 @@ function useThemeDispatch() {
   return context;
 }
 
-function useIcarusTheme() {
-  const res: [ThemeActions] = [useThemeDispatch()];
-  return res;
-}
+const use1AcademyTheme = (): [ThemeActions] => [useThemeDispatch()];
 
-export { ThemeProvider, useIcarusTheme };
+export { ThemeProvider, use1AcademyTheme };
