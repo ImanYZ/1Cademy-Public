@@ -91,9 +91,7 @@ const SignUpPage = () => {
     clickedConsent: false,
     clickedTOS: false,
     clickedPP: false,
-    clickedCP: false,
-    background: "Image",
-    chooseUname: false
+    clickedCP: false
   };
 
   const validationSchema = yup.object({
@@ -170,8 +168,6 @@ const SignUpPage = () => {
       clickedTOS: values.clickedTOS,
       clickedPP: values.clickedPP,
       clickedCP: values.clickedCP,
-      // tagId: "r98BjyFDCe4YyLA3U8ZE",
-      // tag: "1Cademy",
       tag: values.tag,
       tagId: values.tagId,
       deMajor: values.major,

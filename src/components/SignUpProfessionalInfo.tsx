@@ -1,14 +1,4 @@
-import {
-  Autocomplete,
-  Backdrop,
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControlLabel,
-  FormHelperText,
-  TextField,
-  Typography
-} from "@mui/material";
+import { Autocomplete, Backdrop, Checkbox, CircularProgress, Link, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { FormikProps } from "formik";
 import { lazy, Suspense, useState } from "react";
@@ -103,64 +93,53 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         sx={{ mb: "16px" }}
       />
 
-      {/* <TagsExploratorySearcher /> */}
-
-      <FormControlLabel
-        control={
-          <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
-        }
-        label={
-          <>
-            <Typography color={theme => theme.palette.text.primary}>
-              By clicking “Sign up”, you acknowledge that you agree to 1Cademy’s Terms of Use, Privacy Policy, and
-              Cookie Policy
-            </Typography>
-            {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
-              <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
-                {touched.signUpAgreement && errors.signUpAgreement}
-              </FormHelperText>
-            )}
-          </>
-        }
-        sx={{ mb: "16px" }}
-      />
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Button
-          type="button"
-          onClick={() => {
-            setFieldValue("clickedConsent", true);
-            setOpenInformedConsent(true);
-          }}
-        >
-          Informed Consent
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            setFieldValue("clickedTOS", true);
-            setOpenTermsOfUse(true);
-          }}
-        >
-          Terms of Use
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            setFieldValue("clickedPP", true);
-            setOpenPrivacyPolicy(true);
-          }}
-        >
-          Privacy Policy
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            setFieldValue("clickedCP", true);
-            setOpenCookiePolicy(true);
-          }}
-        >
-          Cookie Policy
-        </Button>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
+        <Box sx={{ mb: "16px" }}>
+          The data that is generated when you participate in 1Cademy will be used for research by investigators at the
+          University of Michigan School of Information. For more information, please read this <b>Informed Consent</b>.
+          By clicking "Sign Up," you acknowledge that you agree to 1Cademy's{" "}
+          <Link
+            onClick={() => {
+              setFieldValue("clickedTOS", true);
+              setOpenTermsOfUse(true);
+            }}
+            sx={{ cursor: "pointer", textDecoration: "none" }}
+          >
+            Terms of Use
+          </Link>
+          ,{" "}
+          <Link
+            onClick={() => {
+              setFieldValue("clickedPP", true);
+              setOpenPrivacyPolicy(true);
+            }}
+            sx={{ cursor: "pointer", textDecoration: "none" }}
+          >
+            Privacy Policy
+          </Link>
+          ,{" "}
+          <Link
+            onClick={() => {
+              setFieldValue("clickedCP", true);
+              setOpenCookiePolicy(true);
+            }}
+            sx={{ cursor: "pointer", textDecoration: "none" }}
+          >
+            Cookie Policy
+          </Link>{" "}
+          and{" "}
+          <Link
+            onClick={() => {
+              setFieldValue("clickedConsent", true);
+              setOpenInformedConsent(true);
+            }}
+            sx={{ cursor: "pointer", textDecoration: "none" }}
+          >
+            the Informed Consent
+          </Link>
+          .
+        </Box>
       </Box>
 
       <Suspense
