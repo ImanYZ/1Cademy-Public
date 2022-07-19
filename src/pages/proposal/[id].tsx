@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@mui/material";
 import {
   Backdrop,
   Box,
@@ -31,6 +32,7 @@ import {
 
 import { LinkedKnowledgeNode, ProposalInput } from "../../knowledgeTypes";
 import { addProposal, getNodeData } from "../../lib/knowledgeApi";
+import { brandingLightTheme } from "../../lib/theme/brandingTheme";
 import { PagesNavbar } from "..";
 
 const NodeProposal = () => {
@@ -130,94 +132,96 @@ const NodeProposal = () => {
   );
 
   return (
-    <PagesNavbar title={`1Cademy - New Proposal`} showSearch={false}>
-      <Box data-testid="node-editor-container" sx={{ p: { xs: 3, md: 10 } }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12} md={3}>
-            {isLoading
-              ? getLinkedNodesFallback()
-              : data?.parents && (
-                  <LinkedNodeEditor
-                    header="Learn Before"
-                    nodesSelected={nodeParentsSelected}
-                    setNodesSelected={setNodeParentsSelected}
-                  />
-                )}
+    <ThemeProvider theme={brandingLightTheme}>
+      <PagesNavbar title={`1Cademy - New Proposal`} showSearch={false}>
+        <Box data-testid="node-editor-container" sx={{ p: { xs: 3, md: 10 } }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={12} md={3}>
+              {isLoading
+                ? getLinkedNodesFallback()
+                : data?.parents && (
+                    <LinkedNodeEditor
+                      header="Learn Before"
+                      nodesSelected={nodeParentsSelected}
+                      setNodesSelected={setNodeParentsSelected}
+                    />
+                  )}
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
+              {isLoading ? (
+                getNodeItemFullEditorFallback()
+              ) : data ? (
+                <NodeItemFullEditor
+                  node={data}
+                  image={
+                    data.nodeImage ? (
+                      <Tooltip title="Click to view image in full-screen!">
+                        <Box
+                          onClick={handleClickImageFullScreen}
+                          sx={{
+                            display: "block",
+                            width: "100%",
+                            cursor: "pointer",
+                            mt: 3
+                          }}
+                        >
+                          <img src={data.nodeImage} width="100%" height="100%" loading="lazy" />
+                        </Box>
+                      </Tooltip>
+                    ) : null
+                  }
+                  tags={<FullTagAutocomplete tagsSelected={nodeTagsSelected} setTagsSelected={setNodeTagsSelected} />}
+                  references={
+                    <FullReferencesAutocomplete
+                      referencesSelected={nodeReferencesSelected}
+                      setReferencesSelected={setNodeReferencesSelected}
+                    />
+                  }
+                  onSubmit={onSubmit}
+                  onCancel={() => setShowConfirmation(true)}
+                />
+              ) : null}
+            </Grid>
+            <Grid item xs={12} sm={12} md={3}>
+              {isLoading
+                ? getLinkedNodesFallback()
+                : data?.children && (
+                    <LinkedNodeEditor
+                      header="Learn After"
+                      nodesSelected={nodeChildrenSelected}
+                      setNodesSelected={setNodeChildrenSelected}
+                    />
+                  )}
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={12} md={6}>
-            {isLoading ? (
-              getNodeItemFullEditorFallback()
-            ) : data ? (
-              <NodeItemFullEditor
-                node={data}
-                image={
-                  data.nodeImage ? (
-                    <Tooltip title="Click to view image in full-screen!">
-                      <Box
-                        onClick={handleClickImageFullScreen}
-                        sx={{
-                          display: "block",
-                          width: "100%",
-                          cursor: "pointer",
-                          mt: 3
-                        }}
-                      >
-                        <img src={data.nodeImage} width="100%" height="100%" loading="lazy" />
-                      </Box>
-                    </Tooltip>
-                  ) : null
-                }
-                tags={<FullTagAutocomplete tagsSelected={nodeTagsSelected} setTagsSelected={setNodeTagsSelected} />}
-                references={
-                  <FullReferencesAutocomplete
-                    referencesSelected={nodeReferencesSelected}
-                    setReferencesSelected={setNodeReferencesSelected}
-                  />
-                }
-                onSubmit={onSubmit}
-                onCancel={() => setShowConfirmation(true)}
-              />
-            ) : null}
-          </Grid>
-          <Grid item xs={12} sm={12} md={3}>
-            {isLoading
-              ? getLinkedNodesFallback()
-              : data?.children && (
-                  <LinkedNodeEditor
-                    header="Learn After"
-                    nodesSelected={nodeChildrenSelected}
-                    setNodesSelected={setNodeChildrenSelected}
-                  />
-                )}
-          </Grid>
-        </Grid>
-        {data?.nodeImage && (
-          <FullScreenImage
-            alt={data.title || ""}
-            src={data.nodeImage}
-            open={imageFullScreen}
-            onClose={() => setImageFullScreen(false)}
-          />
-        )}
+          {data?.nodeImage && (
+            <FullScreenImage
+              alt={data.title || ""}
+              src={data.nodeImage}
+              open={imageFullScreen}
+              onClose={() => setImageFullScreen(false)}
+            />
+          )}
 
-        <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={isSavingProposal}>
-          <CircularProgress color="inherit" />
-        </Backdrop>
+          <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={isSavingProposal}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
 
-        <Dialog open={showConfirmation} onClose={() => setShowConfirmation(false)} sx={{ width: "444px", m: "auto" }}>
-          <DialogTitle id="alert-dialog-title">{"Are you sure you want to discard the changes?"}</DialogTitle>
+          <Dialog open={showConfirmation} onClose={() => setShowConfirmation(false)} sx={{ width: "444px", m: "auto" }}>
+            <DialogTitle id="alert-dialog-title">{"Are you sure you want to discard the changes?"}</DialogTitle>
 
-          <DialogActions>
-            <Button variant="contained" onClick={() => setShowConfirmation(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) })} autoFocus>
-              Yes, I'm sure
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-    </PagesNavbar>
+            <DialogActions>
+              <Button variant="contained" onClick={() => setShowConfirmation(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) })} autoFocus>
+                Yes, I'm sure
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
+      </PagesNavbar>
+    </ThemeProvider>
   );
 };
 

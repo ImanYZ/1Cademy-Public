@@ -72,7 +72,11 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
   const router = useRouter();
 
   if (router.isFallback) {
-    return <NodeItemFullSkeleton />;
+    return (
+      <ThemeProvider theme={brandingLightTheme}>
+        <NodeItemFullSkeleton />
+      </ThemeProvider>
+    );
   }
 
   const { parents, contributors, references, institutions, tags, children, siblings } = node || {};
