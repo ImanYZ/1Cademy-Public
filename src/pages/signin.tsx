@@ -18,7 +18,6 @@ interface SignInFormValues {
 }
 
 const SignIn = () => {
-  // const [setBackground] = useAuthLayoutProvider()
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 

@@ -24,8 +24,6 @@ export type TagTreeView = {
 export type AllTagsTreeView = { [string: string]: TagTreeView };
 
 type TagsExploratorySearcherProps = {
-  // chosenTags: string[];
-  // setChosenTags: (newChosenTags: string[]) => void;
   allTags: AllTagsTreeView;
   setAllTags: React.Dispatch<React.SetStateAction<AllTagsTreeView>>;
   multiple?: boolean;
@@ -36,12 +34,7 @@ type TagsExploratorySearcherProps = {
  * Show a autocomplete and a tree view to search tags
  * it can be configurable to select one or multiple tags
  */
-export const TagsExploratorySearcher = ({
-  allTags,
-  setAllTags,
-  multiple = false,
-  sx
-}: TagsExploratorySearcherProps) => {
+const TagsExploratorySearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExploratorySearcherProps) => {
   const setAutocompleteInput = useCallback((params: any) => <TextField label="Search for Tags" {...params} />, []);
 
   const setAutocompleteOptions = useCallback(
@@ -195,3 +188,12 @@ export const TagsExploratorySearcher = ({
     </>
   );
 };
+
+const TagExploratorySearcherPropsAreEqual = (
+  prevProps: TagsExploratorySearcherProps,
+  nextProps: TagsExploratorySearcherProps
+) => {
+  return prevProps.allTags === nextProps.allTags;
+};
+
+export const MemoizedTagsExploratorySearcher = React.memo(TagsExploratorySearcher, TagExploratorySearcherPropsAreEqual);

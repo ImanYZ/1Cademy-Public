@@ -6,7 +6,7 @@ import { SignUpFormValues } from "src/knowledgeTypes";
 import { use1AcademyTheme } from "../context/ThemeContext";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { useAuthLayout } from "./layouts/AuthLayout";
-import { TagsExploratorySearcher } from "./TagsExploratorySearcher";
+import { MemoizedTagsExploratorySearcher } from "./TagsExploratorySearcher";
 
 export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -14,7 +14,6 @@ export type SignUpBasicInformationProps = {
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
   const [setBackground] = useAuthLayout();
-  console.log("setBackground", setBackground);
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   const [allTags, setAllTags] = useTagsTreeView(values.tagId ? [values.tagId] : []);
   const [res] = use1AcademyTheme();
@@ -160,7 +159,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
       </FormGroup>
 
       <FormGroup sx={{ mt: "20px" }}>
-        <TagsExploratorySearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
+        <MemoizedTagsExploratorySearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
         <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
           You're going to be a member of: <b>{values.tag}</b>
         </Typography>
