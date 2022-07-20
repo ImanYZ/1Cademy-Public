@@ -82,7 +82,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
   }, [CSCByGeolocation, countries, setFieldValue, touched.country, values.country]);
 
   const updateStatesByCountry = async (currentCountry: string | null) => {
-    console.log("update state by contry");
     if (!currentCountry) return [];
 
     const countryObject = countries.find(cur => cur.name === currentCountry);
@@ -91,7 +90,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
     const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
     const { State } = await import("country-state-city");
     setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
-    console.log("update state by contry ok");
   };
 
   const updateCitiesByState = async (currentState: string | null) => {

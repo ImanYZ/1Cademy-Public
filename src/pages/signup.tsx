@@ -31,11 +31,8 @@ const SignUpPage: NextPageWithLayout = () => {
   const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
     onSuccess: async (data, variables) => {
       try {
-        console.log("success 1");
         await signIn(variables.email, variables.password);
-        console.log("success 2");
         await sendVerificationEmail();
-        console.log("success 3");
         enqueueSnackbar(
           "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
           {
@@ -179,7 +176,6 @@ const SignUpPage: NextPageWithLayout = () => {
       theme: values.theme,
       background: values.background as string
     };
-    console.log("will call signUP");
     mutateSignUp.mutate(user);
   };
 
@@ -222,9 +218,7 @@ const SignUpPage: NextPageWithLayout = () => {
       setActiveStep(step => step + 1);
     }
     if (activeStep === 2) {
-      console.log("active step 2");
       touchSecondStep();
-      console.log("was touched", isInvalidSecondStep());
       if (isInvalidSecondStep()) return;
       setActiveStep(step => step + 1);
     }
@@ -259,7 +253,6 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const touchFirstStep = () => {
-    console.log("touche first step");
     formik.setTouched({
       ...formik.touched,
       firstName: true,
@@ -272,7 +265,6 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const touchSecondStep = () => {
-    console.log("touch second step");
     formik.setTouched({
       ...formik.touched,
       language: true,
@@ -304,7 +296,7 @@ const SignUpPage: NextPageWithLayout = () => {
         })}
       </Stepper>
       <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
-        <Button onClick={() => console.log(formik.values, formik.errors, formik.touched)}>Values,Errors</Button>
+        {/* <Button onClick={() => console.log(formik.values, formik.errors, formik.touched)}>Show: Values, Errors</Button> */}
         {activeStep === 1 && <SignUpBasicInfo formikProps={formik} />}
         {activeStep === 2 && <SignUpPersonalInfo formikProps={formik} />}
         {activeStep === 3 && <SignUpProfessionalInfo formikProps={formik} />}

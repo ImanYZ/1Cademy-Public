@@ -43,8 +43,10 @@ describe("SignIn page", () => {
     cy.findByTestId("signin-form").findByLabelText("Email").type(validEmail);
     cy.findByTestId("signin-form").findByLabelText("Password").type(`${validPassword}{enter}`);
     // it should show success message
-    cy.findByText("User authenticated");
+    // cy.findByText("User authenticated");
     // it should redirect to home page so it isn't the signin page
     cy.url().should("not.contain", `signin`);
+    // should sign out in home page
+    cy.findByRole("button", { name: /Sign out/ }).click();
   });
 });
