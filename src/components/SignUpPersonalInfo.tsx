@@ -58,22 +58,29 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
     if (CSCByGeolocation) return;
 
     const getCSCByGeolocation = async () => {
-      const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=4ddb5d78eaf24b12875c0eb5f790e495");
-      if (!res.data) return;
+      try {
+        const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=4ddb5d78eaf24b12875c0eb5f790e495");
+        if (!res.data) return;
 
-      const { country_name, state_prov, city } = res.data;
-      setCSCByGeolocation({ country: country_name, state: state_prov, city });
-      if (!countries.filter(cur => cur.name === country_name)) return;
+        const { country_name, state_prov, city } = res.data;
+        setCSCByGeolocation({ country: country_name, state: state_prov, city });
+        if (!countries.filter(cur => cur.name === country_name)) return;
 
-      setFieldValue("country", country_name);
-      setFieldValue("state", state_prov);
-      setFieldValue("city", city);
+        setFieldValue("country", country_name);
+        // await updateStatesByCountry(country_name)
+        setFieldValue("state", state_prov);
+        // await updateCitiesByState(state_prov)
+        setFieldValue("city", city);
+      } catch (err) {
+        console.log("cant autocomplete country state city");
+      }
     };
 
     getCSCByGeolocation();
   }, [CSCByGeolocation, countries, setFieldValue, touched.country, values.country]);
 
   const updateStatesByCountry = async (currentCountry: string | null) => {
+    console.log("update state by contry");
     if (!currentCountry) return [];
 
     const countryObject = countries.find(cur => cur.name === currentCountry);
@@ -82,6 +89,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
     const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
     const { State } = await import("country-state-city");
     setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
+    console.log("update state by contry ok");
   };
 
   const updateCitiesByState = async (currentState: string | null) => {
@@ -114,7 +122,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
     await updateCitiesByState(value);
   };
   return (
-    <>
+    <Box data-testid="signup-form-step-2">
       <Autocomplete
         id="language"
         value={values.language}
@@ -278,7 +286,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
       <TextField
         id="reason"
         name="reason"
-        label="Reason for Joining "
+        label="Reason for Joining"
         value={values.reason}
         onChange={handleChange}
         onBlur={handleBlur}
@@ -309,7 +317,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         <TextField
           id="foundFromOtherValue"
           name="foundFromOtherValue"
-          label="Please specify"
+          label="Please specify, How did you hear about us?"
           value={values.foundFromOtherValue}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -320,6 +328,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
           sx={{ mb: "16px" }}
         />
       )}
-    </>
+    </Box>
   );
 };

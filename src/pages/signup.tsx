@@ -65,7 +65,7 @@ const SignUpPage = () => {
     username: "",
     password: "",
     passwordConfirmation: "",
-    theme: "Light",
+    theme: "Dark",
     background: "Color",
     chooseUname: false,
     tagId: "r98BjyFDCe4YyLA3U8ZE",
@@ -123,7 +123,10 @@ const SignUpPage = () => {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
-    ethnicity: yup.array().min(1).of(yup.string().required("Please enter your ethnicity")),
+    ethnicity: yup
+      .array()
+      .min(1, "Please select at least 1 option")
+      .of(yup.string().required("Please enter your ethnicity")),
     ethnicityOtherValue: yup.string().when("ethnicity", {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
       then: yup.string().required("Required")
@@ -140,8 +143,8 @@ const SignUpPage = () => {
     occupation: yup.string().required("Please enter your occupation"),
     education: yup.string().required("Please enter your educational status").nullable(true),
     institution: yup.string().required("Please enter your institution"),
-    major: yup.string().required("Required"),
-    fieldOfInterest: yup.string().required("Required"),
+    major: yup.string().required("Please enter your major"),
+    fieldOfInterest: yup.string().required("Please enter your field of interest"),
     signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
   });
 
@@ -175,6 +178,7 @@ const SignUpPage = () => {
       theme: values.theme,
       background: values.background as string
     };
+    console.log("will call signUP");
     mutateSignUp.mutate(user);
   };
 
@@ -252,12 +256,14 @@ const SignUpPage = () => {
   };
 
   const isInvalidSecondStep = () => {
+    formik.setTouched({ ...formik.touched, ethnicityOtherValue: true });
     return (
       Boolean(formik.errors.language) ||
       Boolean(formik.errors.birthDate) ||
       Boolean(formik.errors.gender) ||
       Boolean(formik.errors.genderOtherValue) ||
       Boolean(formik.errors.ethnicity) ||
+      Boolean(formik.errors.ethnicityOtherValue) ||
       Boolean(formik.errors.country) ||
       Boolean(formik.errors.state) ||
       Boolean(formik.errors.city) ||
@@ -298,7 +304,7 @@ const SignUpPage = () => {
 
   return (
     <Box>
-      <Stepper activeStep={activeStep - 1} sx={{ mt: "26px", mb: "32px", mx: "19px" }}>
+      <Stepper activeStep={activeStep - 1} sx={{ mt: "0px", mb: "16px", mx: "19px" }}>
         {steps.map(label => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: { optional?: React.ReactNode } = {};

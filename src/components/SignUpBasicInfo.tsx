@@ -1,4 +1,4 @@
-import { FormControlLabel, FormGroup, Switch, TextField, Typography } from "@mui/material";
+import { Box, FormControlLabel, FormGroup, Switch, TextField, Typography } from "@mui/material";
 import { FormikProps } from "formik";
 import React, { useEffect } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
@@ -36,7 +36,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
   };
 
   return (
-    <>
+    <Box data-testid="signup-form-step-1">
       <TextField
         id="firstName"
         name="firstName"
@@ -123,14 +123,14 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         <FormControlLabel
           control={
             <Switch
-              checked={values.theme === "Light"}
+              checked={values.theme === "Dark"}
               onChange={() => {
                 setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
                 res.setThemeMode(values.theme === "Light" ? "dark" : "light");
               }}
             />
           }
-          label={`Theme: ${values.theme === "Light" ? "🌞" : "🌜"}`}
+          label={`Theme: ${values.theme === "Dark" ? "🌜" : "🌞"}`}
         />
       </FormGroup>
 
@@ -141,7 +141,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
               checked={values.background === "Color"}
               onChange={() => {
                 setFieldValue("background", values.background === "Color" ? "Image" : "Color");
-                setBackground(values.background);
+                setBackground(values.background === "Color" ? "Image" : "Color");
               }}
             />
           }
@@ -158,12 +158,12 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         />
       </FormGroup>
 
-      <FormGroup sx={{ mt: "20px" }}>
+      <FormGroup data-testid="tree-view" sx={{ mt: "8px" }}>
         <MemoizedTagsExploratorySearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
         <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
-          You're going to be a member of: <b>{values.tag}</b>
+          You're going to be a member of: {values.tag}
         </Typography>
       </FormGroup>
-    </>
+    </Box>
   );
 };

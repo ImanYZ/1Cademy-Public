@@ -205,10 +205,12 @@ export const AuthLayout = ({ children }: AuthProps) => {
               sx={{
                 width: "100%",
                 height: "100%",
+                maxHeight: "100vh",
+                overflowY: "auto",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                py: "54px"
+                py: "8px"
               }}
             >
               <Box sx={{ maxWidth: "400px" }}>{children}</Box>
