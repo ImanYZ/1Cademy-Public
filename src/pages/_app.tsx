@@ -1,9 +1,7 @@
 import "../global.css";
 
-import AdapterDaysJs from "@date-io/dayjs";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
 import { useState } from "react";
@@ -52,9 +50,7 @@ const App = (props: AppPropsWithLayout) => {
               maxSnack={3}
             >
               <CssBaseline />
-              <LocalizationProvider dateAdapter={AdapterDaysJs}>
-                <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
-              </LocalizationProvider>
+              <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
             </SnackbarProvider>
           </ThemeProvider>
         </CacheProvider>
