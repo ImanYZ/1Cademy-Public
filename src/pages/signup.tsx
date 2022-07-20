@@ -37,7 +37,7 @@ const SignUpPage: NextPageWithLayout = () => {
           "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
           {
             variant: "success",
-            autoHideDuration: 20000
+            autoHideDuration: 10000
           }
         );
       } catch (error) {
