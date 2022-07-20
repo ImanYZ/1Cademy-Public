@@ -31,8 +31,11 @@ const SignUpPage: NextPageWithLayout = () => {
   const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
     onSuccess: async (data, variables) => {
       try {
+        console.log("success 1");
         await signIn(variables.email, variables.password);
+        console.log("success 2");
         await sendVerificationEmail();
+        console.log("success 3");
         enqueueSnackbar(
           "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
           {

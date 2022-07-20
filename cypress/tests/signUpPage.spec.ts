@@ -1,4 +1,5 @@
-import { registeredUser } from "../../testUtils/mockData/user.data";
+// import { registeredUser } from "../../testUtils/mockData/user.data";
+import { registeredUser } from "../../testUtils/mockData/signupResponse.data";
 
 describe("SignUp page", () => {
   // it("Should render basic elements the first time the signUp is open", () => {
@@ -15,6 +16,10 @@ describe("SignUp page", () => {
   it("Should show error messages in step 1 when user dont fill and", () => {
     //let's intercept the data to get consistent results for the test
     cy.intercept("POST", "/api/signup", { statusCode: 200, body: registeredUser }).as("signUp");
+    cy.intercept("POST", "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword*", {
+      statusCode: 200,
+      body: registeredUser
+    }).as("signIn");
 
     cy.visit("/signup");
 
@@ -207,12 +212,15 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form")
       .findByRole("button", { name: /Sign up/i })
       .click();
+
+    // cy.visit("/https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword*");
     // cy.findAllByRole('form').submit()
     // cy.findByTestId("signup-form").submit()
 
     // should wait until a user is register
 
-    // cy.wait("@signUp");
+    cy.wait("@signUp");
+    cy.wait("@signIn");
 
     // should show success message
     cy.findByText(
