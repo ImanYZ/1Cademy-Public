@@ -4,16 +4,19 @@ import { FirebaseError } from "firebase/app";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { useFormik } from "formik";
 import { NextPage } from "next";
+import Image from "next/image";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 import { useState } from "react";
 import * as yup from "yup";
 
-import LibraryFullBackgroundLayout from "@/components/layouts/LibraryBackgroundLayout";
+import withAuthUser from "@/components/hoc/withAuthUser";
 import { useAuth } from "@/context/AuthContext";
 import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
+
+import libraryImage from "../../public/LibraryBackground.jpg";
 
 const validationSchema = yup.object({
   email: yup.string().email("Enter a valid email").required("Required")
@@ -55,7 +58,19 @@ const ForgotPasswordPage: NextPage = () => {
   });
 
   return (
-    <LibraryFullBackgroundLayout>
+    <>
+      <Box
+        data-testid="library-background-layout"
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          position: "fixed",
+          filter: "brightness(0.25)",
+          zIndex: -2
+        }}
+      >
+        <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" priority />
+      </Box>
       <Container
         maxWidth="sm"
         sx={{
@@ -90,8 +105,8 @@ const ForgotPasswordPage: NextPage = () => {
           </CardContent>
         </Card>
       </Container>
-    </LibraryFullBackgroundLayout>
+    </>
   );
 };
 
-export default ForgotPasswordPage;
+export default withAuthUser({ shouldRedirectToHomeIfAuthenticated: true })(ForgotPasswordPage);

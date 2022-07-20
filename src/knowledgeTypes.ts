@@ -1,5 +1,8 @@
+import { EmotionCache } from "@emotion/utils";
 import { Timestamp } from "firebase-admin/firestore";
-import { Dispatch, SetStateAction } from "react";
+import { AppProps } from "next/app";
+import { NextPage } from "next/types";
+import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
 export enum NodeType {
   "Relation" = "Relation",
@@ -471,4 +474,13 @@ export type Tag = {
   title: string;
   updatedAt: string;
   deleted?: boolean; // it appear only if tag is deleted
+};
+
+export type NextPageWithLayout<P = {}> = NextPage<P> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+export type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+  emotionCache?: EmotionCache;
 };

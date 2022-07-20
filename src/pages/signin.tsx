@@ -4,20 +4,20 @@ import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
 import NextLink from "next/link";
 import React, { ReactNode, useState } from "react";
+import { NextPageWithLayout } from "src/knowledgeTypes";
 import * as yup from "yup";
 
+import AuthLayout from "@/components/layouts/AuthLayout";
 import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
 import ROUTES from "@/lib/utils/routes";
-
-import { AuthLayout } from "../components/layouts/AuthLayout";
 
 interface SignInFormValues {
   email: string;
   password: string;
 }
 
-const SignIn = () => {
+const SignInPage: NextPageWithLayout = () => {
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -99,8 +99,8 @@ const SignIn = () => {
   );
 };
 
-SignIn.getLayout = (page: ReactNode) => {
+SignInPage.getLayout = (page: ReactNode) => {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default SignIn;
+export default SignInPage;
