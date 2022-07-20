@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import {
   createContext,
   Dispatch,
+  FC,
   ReactNode,
   SetStateAction,
   useCallback,
@@ -26,24 +27,25 @@ import FullPageLogoLoading from "../FullPageLogoLoading";
 
 const AuthLayoutContext = createContext<AuthLayoutActions | undefined>(undefined);
 
-type AuthProps = {
+type Props = {
   children: ReactNode;
 };
 
-export const AuthLayout = ({ children }: AuthProps) => {
+const AuthLayout: FC<Props> = ({ children }) => {
   const [background, setBackground] = useState<AppBackground>("Image");
   const [{ isAuthenticated, isAuthInitialized }] = useAuth();
   const router = useRouter();
 
-  const redirectToHome = useCallback(() => {
-    router.replace(ROUTES.home);
+  const redirectToApp = useCallback(() => {
+    const redirectTo = router.query.from && router.query.from.length > 0 ? (router.query.from as string) : ROUTES.home;
+    router.replace(redirectTo);
   }, [router]);
 
   useEffect(() => {
     if (isAuthenticated && isAuthInitialized) {
-      redirectToHome();
+      redirectToApp();
     }
-  }, [isAuthenticated, isAuthInitialized, redirectToHome]);
+  }, [isAuthenticated, isAuthInitialized, redirectToApp]);
 
   if (!isAuthInitialized || isAuthenticated) {
     return <FullPageLogoLoading />;
@@ -220,12 +222,14 @@ export const AuthLayout = ({ children }: AuthProps) => {
   );
 };
 
-const useAppDispatch = () => {
+const useAuthDispatch = () => {
   const context = useContext(AuthLayoutContext);
   if (context) return context;
   throw new Error("AuthLayoutContext must be used within a AuthLayoutProvider");
 };
 
 export const useAuthLayout = (): [setBackground: Dispatch<SetStateAction<AppBackground>>] => [
-  useAppDispatch().setBackground
+  useAuthDispatch().setBackground
 ];
+
+export default AuthLayout;

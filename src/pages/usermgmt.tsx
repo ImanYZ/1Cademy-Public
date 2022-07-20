@@ -2,14 +2,16 @@ import { Box, Card, CardContent, CardHeader, Link } from "@mui/material";
 import Container from "@mui/material/Container";
 import { applyActionCode, getAuth, verifyPasswordResetCode } from "firebase/auth";
 import { GetServerSideProps, NextPage } from "next";
+import Image from "next/image";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 
-import LibraryFullBackgroundLayout from "@/components/layouts/LibraryBackgroundLayout";
 import PasswordResetForm from "@/components/PasswordResetForm";
 import { useAuth } from "@/context/AuthContext";
 import ROUTES from "@/lib/utils/routes";
 import { getQueryParameter } from "@/lib/utils/utils";
+
+import libraryImage from "../../public/LibraryBackground.jpg";
 
 type Props = {
   mode: "verifyEmail" | "resetPassword";
@@ -29,7 +31,19 @@ const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email })
   console.log("isAuthInitialized", isAuthInitialized);
 
   return (
-    <LibraryFullBackgroundLayout>
+    <Box>
+      <Box
+        data-testid="library-background-layout"
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          position: "fixed",
+          filter: "brightness(0.25)",
+          zIndex: -2
+        }}
+      >
+        <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" priority />
+      </Box>
       <Container maxWidth="sm" data-testid="container-usermgnt" sx={{ py: 10 }}>
         {mode === "verifyEmail" && !hasErrors && (
           <Card>
@@ -69,7 +83,7 @@ const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email })
           </Card>
         )}
       </Container>
-    </LibraryFullBackgroundLayout>
+    </Box>
   );
 };
 
@@ -88,7 +102,12 @@ export const getServerSideProps: GetServerSideProps<any> = async ({ query }) => 
       hasErrors = await handleVerifyEmail(actionCode);
       break;
     default:
-    // Error: invalid mode.
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/"
+        }
+      };
   }
 
   return { props: { mode, hasErrors, email } };

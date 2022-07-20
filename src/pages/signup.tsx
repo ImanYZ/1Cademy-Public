@@ -11,18 +11,18 @@ import { useAuth } from "@/context/AuthContext";
 import { sendVerificationEmail, signIn } from "@/lib/firestoreClient/auth";
 import { signUp as signUpApi, validateEmail, validateUsername } from "@/lib/knowledgeApi";
 
-import { AuthLayout } from "../components/layouts/AuthLayout";
+import AuthLayout from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { SignUpData, SignUpFormValues, User } from "../knowledgeTypes";
+import { NextPageWithLayout, SignUpData, SignUpFormValues, User } from "../knowledgeTypes";
 
 const getDateBySubstractYears = (years: number, date = new Date()) => {
   date.setFullYear(date.getFullYear() - years);
   return date;
 };
 
-const SignUpPage = () => {
+const SignUpPage: NextPageWithLayout = () => {
   const [, { handleError }] = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const minDate = getDateBySubstractYears(100);

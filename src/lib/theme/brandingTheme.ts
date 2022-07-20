@@ -60,7 +60,7 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       },
       ...(mode === "dark" && {
         background: {
-          default: grey[600],
+          default: common.darkGrayBackground,
           paper: common.darkGrayBackground
         }
       }),

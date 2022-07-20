@@ -1,17 +1,15 @@
 import "../global.css";
 
 import AdapterDaysJs from "@date-io/dayjs";
-import type { EmotionCache } from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import type { NextPage } from "next";
-import type { AppProps } from "next/app";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
-import { ReactElement, ReactNode, useState } from "react";
+import { useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { AppPropsWithLayout } from "src/knowledgeTypes";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -20,18 +18,9 @@ import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 
 const clientSideEmotionCache = createEmotionCache();
 
-export type NextPageWithLayout = NextPage & {
-  getLayout?: (page: ReactElement) => ReactNode;
-};
-
-type ExtendedAppProps = AppProps & {
-  Component: NextPageWithLayout;
-  emotionCache: EmotionCache;
-};
-
 initFirebaseClientSDK();
 
-const App = (props: ExtendedAppProps) => {
+const App = (props: AppPropsWithLayout) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const [queryClient] = useState(
     () =>
