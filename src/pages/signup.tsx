@@ -31,8 +31,11 @@ const SignUpPage: NextPageWithLayout = () => {
   const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
     onSuccess: async (data, variables) => {
       try {
+        console.log("success 1");
         await signIn(variables.email, variables.password);
+        console.log("success 2");
         await sendVerificationEmail();
+        console.log("success 3");
         enqueueSnackbar(
           "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
           {
@@ -41,6 +44,7 @@ const SignUpPage: NextPageWithLayout = () => {
           }
         );
       } catch (error) {
+        console.log(error);
         handleError({ error, showErrorToast: false });
       }
     },
@@ -65,7 +69,7 @@ const SignUpPage: NextPageWithLayout = () => {
     username: "",
     password: "",
     passwordConfirmation: "",
-    theme: "Light",
+    theme: "Dark",
     background: "Color",
     chooseUname: false,
     tagId: "r98BjyFDCe4YyLA3U8ZE",
@@ -123,7 +127,10 @@ const SignUpPage: NextPageWithLayout = () => {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
       then: yup.string().required("Required")
     }),
-    ethnicity: yup.array().min(1).of(yup.string().required("Please enter your ethnicity")),
+    ethnicity: yup
+      .array()
+      .min(1, "Please select at least 1 option")
+      .of(yup.string().required("Please enter your ethnicity")),
     ethnicityOtherValue: yup.string().when("ethnicity", {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
       then: yup.string().required("Required")
@@ -140,8 +147,8 @@ const SignUpPage: NextPageWithLayout = () => {
     occupation: yup.string().required("Please enter your occupation"),
     education: yup.string().required("Please enter your educational status").nullable(true),
     institution: yup.string().required("Please enter your institution"),
-    major: yup.string().required("Required"),
-    fieldOfInterest: yup.string().required("Required"),
+    major: yup.string().required("Please enter your major"),
+    fieldOfInterest: yup.string().required("Please enter your field of interest"),
     signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
   });
 
@@ -175,6 +182,7 @@ const SignUpPage: NextPageWithLayout = () => {
       theme: values.theme,
       background: values.background as string
     };
+    console.log("will call signUP");
     mutateSignUp.mutate(user);
   };
 
@@ -234,7 +242,9 @@ const SignUpPage: NextPageWithLayout = () => {
       setActiveStep(step => step + 1);
     }
     if (activeStep === 2) {
+      console.log("active step 2");
       touchSecondStep();
+      console.log("was touched", isInvalidSecondStep());
       if (isInvalidSecondStep()) return;
       setActiveStep(step => step + 1);
     }
@@ -258,6 +268,7 @@ const SignUpPage: NextPageWithLayout = () => {
       Boolean(formik.errors.gender) ||
       Boolean(formik.errors.genderOtherValue) ||
       Boolean(formik.errors.ethnicity) ||
+      Boolean(formik.errors.ethnicityOtherValue) ||
       Boolean(formik.errors.country) ||
       Boolean(formik.errors.state) ||
       Boolean(formik.errors.city) ||
@@ -268,6 +279,7 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const touchFirstStep = () => {
+    console.log("touche first step");
     formik.setTouched({
       ...formik.touched,
       firstName: true,
@@ -280,6 +292,7 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const touchSecondStep = () => {
+    console.log("touch second step");
     formik.setTouched({
       ...formik.touched,
       language: true,
@@ -287,6 +300,7 @@ const SignUpPage: NextPageWithLayout = () => {
       gender: true,
       genderOtherValue: true,
       ethnicity: true,
+      ethnicityOtherValue: true,
       country: true,
       state: true,
       city: true,
@@ -298,7 +312,7 @@ const SignUpPage: NextPageWithLayout = () => {
 
   return (
     <Box>
-      <Stepper activeStep={activeStep - 1} sx={{ mt: "26px", mb: "32px", mx: "19px" }}>
+      <Stepper activeStep={activeStep - 1} sx={{ mt: "0px", mb: "16px", mx: "19px" }}>
         {steps.map(label => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: { optional?: React.ReactNode } = {};
@@ -310,6 +324,7 @@ const SignUpPage: NextPageWithLayout = () => {
         })}
       </Stepper>
       <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
+        <Button onClick={() => console.log(formik.values, formik.errors, formik.touched)}>Values,Errors</Button>
         {activeStep === 1 && <SignUpBasicInfo formikProps={formik} />}
         {activeStep === 2 && <SignUpPersonalInfo formikProps={formik} />}
         {activeStep === 3 && <SignUpProfessionalInfo formikProps={formik} />}

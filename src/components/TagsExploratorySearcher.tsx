@@ -41,8 +41,13 @@ const TagsExploratorySearcher = ({ allTags, setAllTags, multiple = false, sx }: 
     (props: React.HTMLAttributes<HTMLLIElement>, option: TagTreeView, { selected }: AutocompleteRenderOptionState) => {
       return (
         <li {...props} key={option.nodeId}>
-          <Checkbox checked={selected} name={option.nodeId} key={`checkbox-${option.nodeId}`} />
-          {option.title}
+          <FormControlLabel
+            // value={tag.nodeId}
+            control={<Checkbox checked={selected} name={option.nodeId} />}
+            label={option.title}
+          />
+          {/* <Checkbox checked={selected} name={option.nodeId} key={`checkbox-${option.nodeId}`} />
+          {option.title} */}
         </li>
       );
     },
