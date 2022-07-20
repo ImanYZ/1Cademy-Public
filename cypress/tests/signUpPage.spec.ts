@@ -67,7 +67,7 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").findByLabelText("Re-enter Password").type("sam12345678");
 
     // should click in next button
-    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
 
     // ---------------------------------
     // step 2
@@ -102,7 +102,7 @@ describe("SignUp page", () => {
     cy.findByRole("presentation").findByText("Prefer not to say").click();
 
     // should click in next button
-    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
 
     // ---------------------------------
     // step 3
@@ -134,13 +134,13 @@ describe("SignUp page", () => {
     cy.findByText("This email address is already in use").should("exist");
 
     // should go to step 1 and change to a valid email
-    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
-    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click({ force: true });
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click({ force: true });
     cy.findByTestId("signup-form").findByLabelText("Email").clear().type("Samcito2022@gmail.com");
 
     // should go to step 3 and try again
-    cy.findByRole("button", { name: /Next/i }).click();
-    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
     cy.findByTestId("signup-form")
       .findByRole("button", { name: /Sign up/i })
       .click();
@@ -149,13 +149,13 @@ describe("SignUp page", () => {
     cy.findByText("This username is already in use").should("exist");
 
     // should go to step 1 and change to a valid username
-    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
-    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click({ force: true });
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click({ force: true });
     cy.findByTestId("signup-form").findByLabelText("Username").clear().type("Sam22");
 
     // should go to step 3 and try again
-    cy.findByRole("button", { name: /Next/i }).click();
-    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
     cy.findByTestId("signup-form")
       .findByRole("button", { name: /Sign up/i })
       .click();
