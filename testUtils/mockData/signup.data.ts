@@ -1,97 +1,103 @@
-import { useFormik } from "formik";
-import * as yup from "yup";
-
-import { SignUpFormValues } from "../../src/knowledgeTypes";
-
-export const useSignUpFormData = () => {
-  const initialValues: SignUpFormValues = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    username: "",
-    password: "",
-    passwordConfirmation: "",
-    theme: "Light",
-    background: "Color",
-    chooseUname: false,
+export const signUpResponse = {
+  user: {
+    ltermDay: 0,
+    lterm: 0,
+    cnCorrects: 0,
+    cnWrongs: 0,
+    cnInst: 0,
+    cdCorrects: 0,
+    cdWrongs: 0,
+    cdInst: 0,
+    qCorrects: 0,
+    qWrongs: 0,
+    qInst: 0,
+    pCorrects: 0,
+    pWrongs: 0,
+    pInst: 0,
+    sCorrects: 0,
+    sWrongs: 0,
+    sInst: 0,
+    aCorrects: 0,
+    aWrongs: 0,
+    aInst: 0,
+    rfCorrects: 0,
+    rfWrongs: 0,
+    rfInst: 0,
+    nCorrects: 0,
+    nWrongs: 0,
+    nInst: 0,
+    mCorrects: 0,
+    mWrongs: 0,
+    mInst: 0,
+    iCorrects: 0,
+    iWrongs: 0,
+    iInst: 0,
+    positives: 0,
+    negatives: 0,
+    totalPoints: 0,
+    isAdmin: false,
+    iInstValue: 4,
+    deepA: 750,
+    ltermA: 1375,
+    iValue: 10,
     tagId: "r98BjyFDCe4YyLA3U8ZE",
+    meanAInst: 84,
+    deepAInst: 210,
+    meanA: 300,
+    ltermMaxDay: 25,
+    deCourse: "SI691",
     tag: "1Cademy",
-    language: "English",
-    birthDate: "",
-    gender: null,
-    genderOtherValue: "",
-    ethnicity: [],
-    ethnicityOtherValue: "",
-    country: null,
-    state: null,
-    city: null,
-    reason: "",
-    foundFrom: null,
-    foundFromOtherValue: "",
-    occupation: "",
-    education: null,
-    institution: "",
-    major: "",
-    fieldOfInterest: "",
-    signUpAgreement: false,
-    clickedConsent: false,
-    clickedTOS: false,
-    clickedPP: false,
-    clickedCP: false
-  };
+    deCredits: 3,
+    fName: "321321",
+    lName: "2133213",
+    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+    chooseUname: false,
+    lang: "English",
+    uname: "23123",
+    theme: "Dark",
+    background: "Color",
+    practicing: false,
+    createdAt: "2022-07-20T16:32:57.194Z"
+  }
+};
 
-  const validationSchema = yup.object({
-    firstName: yup.string().required("Please enter your first name!"),
-    lastName: yup.string().required("Please enter your last name!"),
-    email: yup
-      .string()
-      .email("Invalid email address!")
-      .required("Your email address provided by your academic/research institutions is required!"),
-    username: yup
-      .string()
-      .required("Your desired username is required!")
-      .min(4, "A username with at least 4 characters is required!")
-      .matches(/^((?!(__.*__)|\.|\/).)*$/, "Usernames should not contain . or / or __!"),
-    password: yup.string().min(7, "Password must be at least 7 characters!").required("A secure password is required!"),
-    passwordConfirmation: yup.string().oneOf([yup.ref("password"), null], "Password must match re-entered password!"),
-    language: yup.string().required("Please enter your language!"),
-    age: yup
-      .number()
-      .min(10, "Age should be greater than or equal to 10")
-      .max(100, "Age should be less than or equal to 100")
-      .required("Required"),
-    gender: yup.string().required("Please enter your gender!"),
-    genderOtherValue: yup.string().when("gender", {
-      is: (genderValue: string) => genderValue === "Not listed (Please specify)",
-      then: yup.string().required("Required")
-    }),
-    ethnicity: yup.array().min(1).of(yup.string().required("Please enter your ethnicity!")),
-    ethnicityOtherValue: yup.string().when("ethnicity", {
-      is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
-      then: yup.string().required("Required")
-    }),
-    country: yup.string().required("Please enter your country!"),
-    state: yup.string().required("Please enter your state!"),
-    city: yup.string().required("Please enter your city!"),
-    reason: yup.string().required("Please enter your reason for joining 1Cademy!"),
-    foundFrom: yup.string().required("Please enter how you heard about us!"),
-    foundFromOtherValue: yup.string().when("foundFrom", {
-      is: (foundFromValue: string) => foundFromValue === "Not listed (Please specify)",
-      then: yup.string().required("Required")
-    }),
-    occupation: yup.string().required("Please enter your occupation!"),
-    education: yup.string().required("Please enter your educational status!"),
-    institution: yup.string().required("Please enter your institution!"),
-    major: yup.string().required("Required"),
-    fieldOfInterest: yup.string().required("Required"),
-    signUpAgreement: yup.boolean().isTrue()
-  });
+export const signInWithPasswordResponse = {
+  kind: "identitytoolkit#VerifyPasswordResponse",
+  localId: "ax7p3NsPApXAwBtekkbrZpgdwPp1",
+  email: "two2@umich.edu",
+  displayName: "23123",
+  idToken:
+    "eyJhbGciOiJSUzI1NiIsImtpZCI6ImJmMWMyNzQzYTJhZmY3YmZmZDBmODRhODY0ZTljMjc4ZjMxYmM2NTQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiMjMxMjMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vb25lY2FkZW15LWRldiIsImF1ZCI6Im9uZWNhZGVteS1kZXYiLCJhdXRoX3RpbWUiOjE2NTgzMzQ3NzksInVzZXJfaWQiOiJheDdwM05zUEFwWEF3QnRla2ticlpwZ2R3UHAxIiwic3ViIjoiYXg3cDNOc1BBcFhBd0J0ZWtrYnJacGdkd1BwMSIsImlhdCI6MTY1ODMzNDc3OSwiZXhwIjoxNjU4MzM4Mzc5LCJlbWFpbCI6InR3bzJAdW1pY2guZWR1IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInR3bzJAdW1pY2guZWR1Il19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.OpsLxfGhTV8y1EWWHCkLbXLudJbxs5carIZ51niu6ql5Rjo3F4mYjwdMfOOCtWrBRJVGjcl_vMJnTnxiotk0RJ_UgbUaLOuCjhfdw89qmnN9c8RQmfcoFOax_5Fg6clDWVrgEgrj6aSdWj60THZzVvZ2j-Aa8rew8jtP7vVKdaA3XYxOBd4mHFXtWmxCYsch5RIMasGrqn-usmp2qvcvVrEm6pA3nMlTlKuVKtuF9BlM6c_cWt6Fxte0NAlkK98HIbG7TRUScZ4F0FPQNBON9bnc-fCTwdey1Nq0vZaCJPPbmvX9VNQz_H5ckgCcCmFw4rzfvFxECGnvQbB5SWOYLA",
+  registered: true,
+  refreshToken:
+    "AOEOulb5meoLdAhxGcTmXgPyAQjQWF_FzmIt1Ohr0pPM0p2IxIvXN4K3hJgLl07SLYXMEY-k4n48iL7RTXjCU3nAOCKha3Qop_h3yR8WzeHOc9oqVH-CRd0xGxEQOUmkYgZ8qDDfikIeD-7E1x9TRGNeaw_gx3dgyDAV9nXr2pv8yj-U2u6cVsL7T_M6e4KgW6PksrAGp5tKEvXRKhzqGWKaooU4J4FRRg",
+  expiresIn: "3600"
+};
 
-  const onSubmit = async () => {
-    console.log("submit function");
-  };
-
-  const signUpFormik = useFormik({ initialValues, validationSchema, onSubmit });
-
-  return { signUpFormik };
+export const lookupResponse = {
+  kind: "identitytoolkit#GetAccountInfoResponse",
+  users: [
+    {
+      localId: "ax7p3NsPApXAwBtekkbrZpgdwPp1",
+      email: "two2@umich.edu",
+      displayName: "23123",
+      passwordHash: "UkVEQUNURUQ=",
+      emailVerified: false,
+      passwordUpdatedAt: 1658334776557,
+      providerUserInfo: [
+        {
+          providerId: "password",
+          displayName: "23123",
+          federatedId: "two2@umich.edu",
+          email: "two2@umich.edu",
+          rawId: "two2@umich.edu"
+        }
+      ],
+      validSince: "1658334776",
+      disabled: false,
+      lastLoginAt: "1658334779696",
+      createdAt: "1658334776557",
+      lastRefreshAt: "2022-07-20T16:32:59.696Z"
+    }
+  ]
 };

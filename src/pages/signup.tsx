@@ -44,6 +44,7 @@ const SignUpPage: NextPageWithLayout = () => {
           }
         );
       } catch (error) {
+        console.log(error);
         handleError({ error, showErrorToast: false });
       }
     },
@@ -241,7 +242,9 @@ const SignUpPage: NextPageWithLayout = () => {
       setActiveStep(step => step + 1);
     }
     if (activeStep === 2) {
+      console.log("active step 2");
       touchSecondStep();
+      console.log("was touched", isInvalidSecondStep());
       if (isInvalidSecondStep()) return;
       setActiveStep(step => step + 1);
     }
@@ -259,7 +262,6 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const isInvalidSecondStep = () => {
-    formik.setTouched({ ...formik.touched, ethnicityOtherValue: true });
     return (
       Boolean(formik.errors.language) ||
       Boolean(formik.errors.birthDate) ||
@@ -277,6 +279,7 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const touchFirstStep = () => {
+    console.log("touche first step");
     formik.setTouched({
       ...formik.touched,
       firstName: true,
@@ -289,6 +292,7 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   const touchSecondStep = () => {
+    console.log("touch second step");
     formik.setTouched({
       ...formik.touched,
       language: true,
@@ -296,6 +300,7 @@ const SignUpPage: NextPageWithLayout = () => {
       gender: true,
       genderOtherValue: true,
       ethnicity: true,
+      ethnicityOtherValue: true,
       country: true,
       state: true,
       city: true,
@@ -319,6 +324,7 @@ const SignUpPage: NextPageWithLayout = () => {
         })}
       </Stepper>
       <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
+        <Button onClick={() => console.log(formik.values, formik.errors, formik.touched)}>Values,Errors</Button>
         {activeStep === 1 && <SignUpBasicInfo formikProps={formik} />}
         {activeStep === 2 && <SignUpPersonalInfo formikProps={formik} />}
         {activeStep === 3 && <SignUpProfessionalInfo formikProps={formik} />}
