@@ -3,6 +3,7 @@ import { Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SignUpData } from "src/knowledgeTypes";
 
+import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import { isEmail, isEmpty } from "@/lib/utils/utils";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
@@ -364,9 +365,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       createdAt: userData.createdAt.toDate()
     };
     return res.status(201).json({ user: userData });
-  } catch (error) {
+  } catch (error: any) {
+    let errorMessage = "Error on Signup";
+    if (error.code && typeof error.code === "string" && (error.code as string).startsWith("auth/")) {
+      errorMessage = getFirebaseFriendlyError(error);
+    }
     console.error(error);
-    res.status(500).json({ message: "Error on Signup" });
+    res.status(500).json({ message: errorMessage });
   }
 }
 

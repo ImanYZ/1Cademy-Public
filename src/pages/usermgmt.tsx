@@ -7,7 +7,6 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 
 import PasswordResetForm from "@/components/PasswordResetForm";
-import { useAuth } from "@/context/AuthContext";
 import ROUTES from "@/lib/utils/routes";
 import { getQueryParameter } from "@/lib/utils/utils";
 
@@ -21,14 +20,8 @@ type Props = {
 
 const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email }) => {
   const router = useRouter();
-  const [{ isAuthenticated, isAuthInitialized, user }] = useAuth();
 
   const actionCode = getQueryParameter(router.query.oobCode) || "";
-  console.log("Client side actionCode", actionCode);
-
-  console.log("FirebaseUserManagementPage user", user);
-  console.log("isAuthenticated", isAuthenticated);
-  console.log("isAuthInitialized", isAuthInitialized);
 
   return (
     <Box>
@@ -87,7 +80,7 @@ const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email })
   );
 };
 
-export const getServerSideProps: GetServerSideProps<any> = async ({ query }) => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const mode = getQueryParameter(query.mode || "");
   const actionCode = getQueryParameter(query.oobCode) || "";
   let hasErrors = false;

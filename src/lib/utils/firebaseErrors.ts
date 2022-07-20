@@ -9,6 +9,8 @@ export const getFirebaseFriendlyError = (error: FirebaseError): string => {
       return "Your request to reset your password has expired or the link has already been used.";
     case "auth/user-not-found":
       return "There is no user record corresponding to this identifier.";
+    case "auth/email-already-exists":
+      return "The email address is already in use by another account.";
     default:
       return error.message;
   }
