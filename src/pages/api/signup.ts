@@ -40,7 +40,7 @@ const addPracticeQuestions = async (
   return [newBatch, writeCounts];
 };
 
-const unameExists = async (uname: string) => {
+export const unameExists = async (uname: string) => {
   try {
     const userDoc = await db.collection("users").doc(uname).get();
     if (userDoc.exists) {
@@ -52,7 +52,7 @@ const unameExists = async (uname: string) => {
   }
 };
 
-const checkEmailInstitution = async (email: string, checkFirestore: boolean) => {
+export const checkEmailInstitution = async (email: string, checkFirestore: boolean) => {
   try {
     const domainName = email.match("@(.+)$")?.[0];
     const institutionDoc = await db

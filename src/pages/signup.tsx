@@ -9,7 +9,7 @@ import * as yup from "yup";
 
 import { useAuth } from "@/context/AuthContext";
 import { sendVerificationEmail, signIn } from "@/lib/firestoreClient/auth";
-import { signUp as signUpApi, validateEmail, validateUsername } from "@/lib/knowledgeApi";
+import { signUp as signUpApi, validateSignUp as validateSignUpApi } from "@/lib/knowledgeApi";
 
 import AuthLayout from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
@@ -58,9 +58,6 @@ const SignUpPage: NextPageWithLayout = () => {
   });
 
   const [activeStep, setActiveStep] = useState(1);
-
-  const mutationValidateEmail = useMutation(validateEmail);
-  const mutationValidateUserName = useMutation(validateUsername);
 
   const initialValues: SignUpFormValues = {
     firstName: "",
@@ -193,38 +190,24 @@ const SignUpPage: NextPageWithLayout = () => {
     setActiveStep(step => step - 1);
   };
 
-  const validateEmailByServer = async (): Promise<Boolean> => {
-    const data = await mutationValidateEmail.mutateAsync({ email: formik.values.email });
-    const institutionByEmail = data?.results?.institution || null;
-
-    if (!institutionByEmail) {
-      formik.setErrors({ ...formik.errors, email: "This email address is already in use!" });
-      return false;
+  const validateSignUp = async (): Promise<Boolean> => {
+    const data = await validateSignUpApi({ uname: formik.values.username, email: formik.values.email });
+    let isValid = true;
+    const formikErrors = { ...formik.errors };
+    if (data.results?.email) {
+      formikErrors.email = data.results?.email;
+      isValid = false;
+    }
+    if (data.results?.uname) {
+      formikErrors.username = data.results?.uname;
+      isValid = false;
     }
 
-    if (institutionByEmail === "Not Found!") {
-      // "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu";
-      formik.setErrors({
-        ...formik.errors,
-        email:
-          "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu"
-      });
-      return false;
+    if (!isValid) {
+      formik.setErrors(formikErrors);
     }
 
-    // email is from a valid institution
-    formik.setFieldValue("institution", institutionByEmail);
-    return true;
-  };
-
-  const validateUsernameByServer = async (): Promise<Boolean> => {
-    const data = await mutationValidateUserName.mutateAsync({ username: formik.values.username });
-    const usernameValid = Boolean(data.results?.valid);
-    if (!usernameValid) {
-      formik.setErrors({ ...formik.errors, username: "This username is already in use!" });
-      return false;
-    }
-    return true;
+    return isValid;
   };
 
   const onNextStep = async () => {
@@ -233,11 +216,8 @@ const SignUpPage: NextPageWithLayout = () => {
       touchFirstStep();
       if (isInvalidFirstStep()) return;
 
-      const isValidEmail = await validateEmailByServer();
-      if (!isValidEmail) return;
-
-      const isValidUsername = await validateUsernameByServer();
-      if (!isValidUsername) return;
+      const isValidSignUpFormData = await validateSignUp();
+      if (!isValidSignUpFormData) return;
 
       setActiveStep(step => step + 1);
     }

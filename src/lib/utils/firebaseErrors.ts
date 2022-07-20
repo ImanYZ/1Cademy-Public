@@ -11,6 +11,8 @@ export const getFirebaseFriendlyError = (error: FirebaseError): string => {
       return "There is no user record corresponding to this identifier.";
     case "auth/email-already-exists":
       return "The email address is already in use by another account.";
+    case "auth/user-not-found":
+      return "There is no user record corresponding to this identifier.";
     default:
       return error.message;
   }

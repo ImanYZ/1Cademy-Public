@@ -401,12 +401,9 @@ export type AuthLoginSuccessAction = {
 };
 export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
 
-export type EmailValidation = {
-  institution: string | null;
-};
-
-export type UsernameValidation = {
-  valid: boolean;
+export type SignUpValidation = {
+  uname?: string;
+  email?: string;
 };
 
 export type ResponseAPI<T> = {

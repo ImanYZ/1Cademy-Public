@@ -10,6 +10,7 @@ import * as yup from "yup";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
+import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
 
 interface SignInFormValues {
@@ -38,8 +39,9 @@ const SignInPage: NextPageWithLayout = () => {
       setIsLoading(true);
       await signIn(email, password);
     } catch (error) {
+      const errorMessage = getFirebaseFriendlyError(error as FirebaseError);
       setIsLoading(false);
-      handleError({ error, errorMessage: (error as FirebaseError).message });
+      handleError({ error, errorMessage });
     }
   };
 

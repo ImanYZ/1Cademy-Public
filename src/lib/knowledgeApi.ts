@@ -1,7 +1,6 @@
 import API from "@/lib/utils/axiosConfig";
 
 import {
-  EmailValidation,
   FeedbackInput,
   FilterValue,
   KnowledgeNode,
@@ -18,9 +17,9 @@ import {
   ResponseGeneric,
   SearchNodesParams,
   SearchNodesResponse,
+  SignUpValidation,
   StatsSchema,
-  User,
-  UsernameValidation
+  User
 } from "../knowledgeTypes";
 
 export const getTagsAutocomplete = async (tagName: string): Promise<ResponseAutocompleteTags> => {
@@ -119,8 +118,14 @@ export const addProposal = async ({
   return res.data;
 };
 
-export const validateEmail = async ({ email }: { email: string }): Promise<ResponseAPI<EmailValidation>> => {
-  const res = await API.post("/api/validateEmail", { email });
+export const validateSignUp = async ({
+  email,
+  uname
+}: {
+  email: string;
+  uname: string;
+}): Promise<ResponseAPI<SignUpValidation>> => {
+  const res = await API.get("/api/signupValidation", { params: { email, uname } });
   return { results: res.data };
 };
 
@@ -129,11 +134,7 @@ export const signUp = async (user: User): Promise<User> => {
   return res.data;
 };
 
-export const validateUsername = async ({
-  username
-}: {
-  username: string;
-}): Promise<ResponseAPI<UsernameValidation>> => {
-  const res = await API.post("/api/validateUsername", { username });
-  return { results: res.data };
+export const signIn = async (): Promise<void> => {
+  const res = await API.post("/api/signin");
+  return res.data;
 };
