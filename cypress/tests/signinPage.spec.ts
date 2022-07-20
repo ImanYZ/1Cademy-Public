@@ -46,5 +46,7 @@ describe("SignIn page", () => {
     cy.findByText("User authenticated");
     // it should redirect to home page so it isn't the signin page
     cy.url().should("not.contain", `signin`);
+    // should sign out in home page
+    cy.findByRole("button", { name: /Sign out/ }).click();
   });
 });

@@ -101,3 +101,11 @@ export const lookupResponse = {
     }
   ]
 };
+
+export const signUpEmailRegistered = {
+  errorMessage: "This email address is already in use"
+};
+
+export const signUpUsernameRegistered = {
+  errorMessage: "This username is already in use"
+};

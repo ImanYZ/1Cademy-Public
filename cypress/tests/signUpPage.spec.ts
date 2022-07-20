@@ -1,5 +1,11 @@
 // import { registeredUser } from "../../testUtils/mockData/user.data";
-import { lookupResponse, signInWithPasswordResponse, signUpResponse } from "../../testUtils/mockData/signup.data";
+import {
+  lookupResponse,
+  signInWithPasswordResponse,
+  signUpEmailRegistered,
+  signUpResponse,
+  signUpUsernameRegistered
+} from "../../testUtils/mockData/signup.data";
 
 describe("SignUp page", () => {
   it("Should render basic elements the first time the signUp is open", () => {
@@ -13,7 +19,161 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").should("exist");
   });
 
-  it("Should show error messages in step 1 when user dont fill and", () => {
+  it("Should show error messages when username or email exist", () => {
+    cy.intercept("POST", "/api/signup", req => {
+      const { email, uname } = req.body.data;
+      if (email === "registeredEmail@gmail.com")
+        return req.reply({
+          statusCode: 400,
+          body: signUpEmailRegistered
+        });
+      if (uname === "registeredUsername")
+        return req.reply({
+          statusCode: 400,
+          body: signUpUsernameRegistered
+        });
+      return req.reply(signUpResponse);
+    }).as("signUp");
+
+    cy.intercept("POST", "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword*", {
+      statusCode: 200,
+      body: signInWithPasswordResponse
+    }).as("signIn");
+
+    cy.intercept(
+      "POST",
+      "https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?database=projects%2Fonecademy-dev%2Fdatabases%2F(default)&gsessionid=Ow1SVUHIT6lSQ2F31vy_SBs9UcKEQJeZ8FgW9iYT8rc&VER=8&RID=rpc&SID=OZ0PN0lTJBP1BfyuJVd7gA&CI=0&AID=446&TYPE=xmlhttp&zx=hoed4f42grnx&t=1",
+      {
+        statusCode: 200,
+        body: {}
+      }
+    );
+    cy.intercept("POST", "https://identitytoolkit.googleapis.com/v1/accounts:lookup*", {
+      statusCode: 200,
+      body: lookupResponse
+    });
+
+    cy.visit("/signup");
+
+    // ---------------------------------
+    // step 1
+    // ---------------------------------
+    // should fill with valid fields step 1 with an registered email
+    cy.findByTestId("signup-form").findByLabelText("First Name").type("Sam");
+    cy.findByTestId("signup-form").findByLabelText("Last Name").type("Flores Cornell");
+    cy.findByTestId("signup-form").findByLabelText("Email").type("registeredEmail@gmail.com");
+    cy.findByTestId("signup-form").findByLabelText("Username").type("registeredUsername");
+    cy.findByTestId("signup-form").findByLabelText("Password").type("sam12345678");
+    cy.findByTestId("signup-form").findByLabelText("Re-enter Password").type("sam12345678");
+
+    // should click in next button
+    cy.findByRole("button", { name: /Next/i }).click();
+
+    // ---------------------------------
+    // step 2
+    // ---------------------------------
+    // should fill with valid fields step 2
+    // cy.findByTestId("signup-form").findByLabelText("Birth Date").clear();
+    cy.findByTestId("signup-form").findByLabelText("Birth Date").type(`05/01/1990`);
+
+    cy.findByTestId("signup-form").findByLabelText("Gender").click();
+    cy.findByRole("presentation").findByText("Male").click();
+
+    cy.findByTestId("signup-form").findByLabelText("Ethnicity").click();
+    cy.findByRole("presentation").findByText("Hispanic or Latino").click();
+
+    // cy.findByTestId("signup-form").findByLabelText("Please specify your ethnicity.").clear().type("unknown");
+
+    cy.findByTestId("signup-form").findByLabelText("Country").clear();
+    cy.findByTestId("signup-form").findByLabelText("Country").click().type("Mexi");
+    cy.findByRole("presentation").findByText("Mexico").click();
+
+    cy.findByTestId("signup-form").findByLabelText("State").clear();
+    cy.findByTestId("signup-form").findByLabelText("State").click().type("Jalis");
+    cy.findByRole("presentation").findByText("Jalisco").click();
+
+    cy.findByTestId("signup-form").findByLabelText("City").clear();
+    cy.findByTestId("signup-form").findByLabelText("City").click().type("Agua");
+    cy.findByRole("presentation").findByText("Agua Caliente").click();
+
+    cy.findByTestId("signup-form").findByLabelText("Reason for Joining").type("I want to improve my learning");
+
+    cy.findByTestId("signup-form").findByLabelText("How did you hear about us?").click();
+    cy.findByRole("presentation").findByText("Prefer not to say").click();
+
+    // should click in next button
+    cy.findByRole("button", { name: /Next/i }).click();
+
+    // ---------------------------------
+    // step 3
+    // ---------------------------------
+    // should fill with valid fields step 3
+    cy.findByTestId("signup-form").findByLabelText("Occupation").type("Engineer");
+
+    cy.findByTestId("signup-form").findByLabelText("Education Level").click();
+    cy.findByRole("presentation").findByText("Prefer not to say").click();
+
+    cy.findByTestId("signup-form").findByLabelText("Institution").clear();
+    cy.findByTestId("signup-form").findByLabelText("Institution").type("MIT");
+
+    cy.findByTestId("signup-form").findByLabelText("Major").type("Computer Science");
+
+    cy.findByTestId("signup-form")
+      .findByLabelText("Research field of interest (if any)")
+      .type("Informatics and Computer");
+
+    cy.findByTestId("signup-form").findByRole("checkbox").check();
+
+    cy.findByTestId("signup-form")
+      .findByRole("button", { name: /Sign up/i })
+      .click();
+
+    // should wait until a user is register
+    cy.wait("@signUp");
+
+    cy.findByText("This email address is already in use").should("exist");
+
+    // should go to step 1 and change to a valid email
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
+    cy.findByTestId("signup-form").findByLabelText("Email").clear().type("Samcito2022@gmail.com");
+
+    // should go to step 3 and try again
+    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByTestId("signup-form")
+      .findByRole("button", { name: /Sign up/i })
+      .click();
+    cy.wait("@signUp");
+
+    cy.findByText("This username is already in use").should("exist");
+
+    // should go to step 1 and change to a valid username
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
+    cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click();
+    cy.findByTestId("signup-form").findByLabelText("Username").clear().type("Sam22");
+
+    // should go to step 3 and try again
+    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByRole("button", { name: /Next/i }).click();
+    cy.findByTestId("signup-form")
+      .findByRole("button", { name: /Sign up/i })
+      .click();
+
+    // should wait until a user is register
+    cy.wait("@signUp");
+    cy.wait("@signIn");
+
+    // should show success message
+    cy.findByText(
+      "We have sent an email with a confirmation link to your email address. Please verify it to start contributing."
+    ).should("exist");
+
+    // should sign out in home page
+    cy.findByRole("button", { name: /Sign out/ }).click();
+  });
+
+  it("Should show error messages and pass through every step and register a user", () => {
     //let's intercept the data to get consistent results for the test
     cy.intercept("POST", "/api/signup", {
       statusCode: 200,
@@ -206,7 +366,7 @@ describe("SignUp page", () => {
     cy.findByText("Please enter your field of interest").should("exist");
     cy.findByText("Please accept terms to continue").should("exist");
 
-    // it should fill correctly all fields from step 2
+    // it should fill correctly all fields from step 3
     cy.findByTestId("signup-form").findByLabelText("Occupation").type("Engineer");
 
     cy.findByTestId("signup-form").findByLabelText("Education Level").click();
