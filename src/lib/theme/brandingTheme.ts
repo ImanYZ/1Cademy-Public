@@ -87,8 +87,8 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       h2: { fontSize: "32px" },
       h3: { fontSize: "24px" },
       h4: { fontSize: "19px" },
-      body1: { fontSize: "19px" },
-      body2: { fontSize: "16px" },
+      body1: { fontSize: "16px" },
+      body2: { fontSize: "19px" },
       caption: { fontSize: "14.5px" },
       button: {
         textTransform: "initial"

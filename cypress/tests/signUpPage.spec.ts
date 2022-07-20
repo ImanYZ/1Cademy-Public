@@ -1,4 +1,3 @@
-// import { registeredUser } from "../../testUtils/mockData/user.data";
 import {
   lookupResponse,
   signInWithPasswordResponse,
@@ -19,10 +18,68 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").should("exist");
   });
 
+  it("should validate by server the institution email and username", () => {
+    cy.intercept("GET", "/api/signupValidation*", req => {
+      const { email, uname } = req.query;
+      // const { email, uname } = req.params.data;
+
+      let emailError = undefined;
+      let unameError = undefined;
+      if (email === "registeredEmail@umich.edu") {
+        emailError = "This email address is already in use";
+      }
+      if (email === "invalidEmail@gmail.com") {
+        emailError =
+          "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu";
+      }
+      if (uname === "registeredUsername") {
+        unameError = "This username is already in use";
+      }
+      if (emailError || unameError) {
+        return req.reply({
+          statusCode: 200,
+          body: { email: emailError, uname: unameError }
+        });
+      }
+      return req.reply({});
+    }).as("signupValidation");
+
+    // ---------------------------------
+    // step 1
+    // ---------------------------------
+    // should fill with valid fields step 1 with an registered email
+    cy.findByTestId("signup-form").findByLabelText("First Name").type("Sam");
+    cy.findByTestId("signup-form").findByLabelText("Last Name").type("Flores Cornell");
+    cy.findByTestId("signup-form").findByLabelText("Email").type("registeredEmail@umich.edu");
+    cy.findByTestId("signup-form").findByLabelText("Username").type("registeredUsername");
+    cy.findByTestId("signup-form").findByLabelText("Password").type("sam12345678");
+    cy.findByTestId("signup-form").findByLabelText("Re-enter Password").type("sam12345678");
+
+    // should click in next button
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
+
+    cy.wait("@signupValidation");
+
+    // show show error messages in step 1
+    cy.findByText("This email address is already in use").should("exist");
+    cy.findByText("This username is already in use").should("exist");
+
+    // should change to a unregistered email
+    cy.findByTestId("signup-form").findByLabelText("Email").clear().type("Sam2020@umich.edu");
+    cy.findByTestId("signup-form").findByLabelText("Username").clear().type("Sam20");
+    cy.findByRole("button", { name: /Next/i }).click({ force: true });
+
+    cy.wait("@signupValidation");
+
+    // should pass to step 2
+    cy.findByTestId("signup-form").findByTestId("signup-form-step-1").should("not.exist");
+    cy.findByTestId("signup-form").findByTestId("signup-form-step-2").should("exist");
+  });
+
   it("Should show error messages when username or email exist", () => {
     cy.intercept("POST", "/api/signup", req => {
       const { email, uname } = req.body.data;
-      if (email === "registeredEmail@gmail.com")
+      if (email === "registeredEmail@umich.edu")
         return req.reply({
           statusCode: 400,
           body: signUpEmailRegistered
@@ -61,7 +118,7 @@ describe("SignUp page", () => {
     // should fill with valid fields step 1 with an registered email
     cy.findByTestId("signup-form").findByLabelText("First Name").type("Sam");
     cy.findByTestId("signup-form").findByLabelText("Last Name").type("Flores Cornell");
-    cy.findByTestId("signup-form").findByLabelText("Email").type("registeredEmail@gmail.com");
+    cy.findByTestId("signup-form").findByLabelText("Email").type("registeredEmail@umich.edu");
     cy.findByTestId("signup-form").findByLabelText("Username").type("registeredUsername");
     cy.findByTestId("signup-form").findByLabelText("Password").type("sam12345678");
     cy.findByTestId("signup-form").findByLabelText("Re-enter Password").type("sam12345678");
@@ -136,7 +193,7 @@ describe("SignUp page", () => {
     // should go to step 1 and change to a valid email
     cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click({ force: true });
     cy.findByTestId("signup-form").findByRole("button", { name: /Prev/i }).click({ force: true });
-    cy.findByTestId("signup-form").findByLabelText("Email").clear().type("Samcito2022@gmail.com");
+    cy.findByTestId("signup-form").findByLabelText("Email").clear().type("Samcito2022@umich.edu");
 
     // should go to step 3 and try again
     cy.findByRole("button", { name: /Next/i }).click({ force: true });
@@ -251,7 +308,7 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").findByLabelText("Last Name").clear();
     cy.findByTestId("signup-form").findByLabelText("Last Name").type("Flores Cornell");
     cy.findByTestId("signup-form").findByLabelText("Email").clear();
-    cy.findByTestId("signup-form").findByLabelText("Email").type("Samcito2022@gmail.com");
+    cy.findByTestId("signup-form").findByLabelText("Email").type("Samcito2022@umich.edu");
     cy.findByTestId("signup-form").findByLabelText("Username").clear();
     cy.findByTestId("signup-form").findByLabelText("Username").type("Sam22");
     cy.findByTestId("signup-form").findByLabelText("Password").clear();

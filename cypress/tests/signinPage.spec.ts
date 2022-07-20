@@ -34,7 +34,7 @@ describe("SignIn page", () => {
     cy.findByTestId("signin-form").findByLabelText("Email").type(invalidEmail);
     cy.findByTestId("signin-form").findByLabelText("Password").type(`${invalidPassword}{enter}`);
     // it should show error message
-    cy.findByText("Firebase: Error (auth/user-not-found).").should("exist");
+    cy.findByText("There is no user record corresponding to this identifier.").should("exist");
     // Let's clear email and password
     cy.findByTestId("signin-form").findByLabelText("Email").clear();
     cy.findByTestId("signin-form").findByLabelText("Password").clear();
