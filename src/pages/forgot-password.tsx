@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
 
-import libraryImage from "../../public/LibraryBackground.jpg";
+import libraryImage from "../../public/darkModeLibraryBackground.jpg";
 
 const validationSchema = yup.object({
   email: yup.string().email("Enter a valid email").required("Required")

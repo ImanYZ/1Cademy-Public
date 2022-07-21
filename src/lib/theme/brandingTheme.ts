@@ -202,7 +202,8 @@ export function getThemedComponents(theme: Theme): {
       MuiToggleButtonGroup: {
         styleOverrides: {
           root: {
-            backgroundColor: "#fff"
+            backgroundColor: theme.palette.mode === "light" ? common.white : common.darkGrayBackground,
+            color: theme.palette.mode === "light" ? common.darkGrayBackground : common.white
           }
         }
       },

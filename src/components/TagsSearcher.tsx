@@ -5,11 +5,15 @@ import {
   Autocomplete,
   AutocompleteChangeDetails,
   AutocompleteChangeReason,
+  // AutocompleteRenderGetTagProps,
   AutocompleteRenderOptionState,
   Checkbox,
+  // Chip,
   FormControlLabel,
   TextField
 } from "@mui/material";
+// import CloseIcon from "@mui/icons-material/Close";
+import { darken } from "@mui/material/styles";
 import { Box, SxProps, Theme } from "@mui/system";
 import React, { useCallback } from "react";
 
@@ -34,7 +38,7 @@ type TagsExploratorySearcherProps = {
  * Show a autocomplete and a tree view to search tags
  * it can be configurable to select one or multiple tags
  */
-const TagsExploratorySearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExploratorySearcherProps) => {
+const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExploratorySearcherProps) => {
   const setAutocompleteInput = useCallback((params: any) => <TextField label="Search for Tags" {...params} />, []);
 
   const setAutocompleteOptions = useCallback(
@@ -153,6 +157,9 @@ const TagsExploratorySearcher = ({ allTags, setAllTags, multiple = false, sx }: 
               label={tag.title}
             />
           }
+          sx={{
+            color: theme => (theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white)
+          }}
         >
           {tag.children ? tag.children.map(nodeId => tagsTreeView(allTags[nodeId])) : null}
         </TreeItem>
@@ -178,11 +185,26 @@ const TagsExploratorySearcher = ({ allTags, setAllTags, multiple = false, sx }: 
         renderInput={setAutocompleteInput}
         fullWidth
       />
-      <Box id="FilterTagsTreeView" sx={{ overflowY: "auto", ...sx }}>
+      <Box
+        id="FilterTagsTreeView"
+        sx={{
+          overflowY: "auto",
+          background: theme => darken(theme.palette.background.default, 0.1),
+          "::-webkit-scrollbar": {
+            width: "12px",
+            height: "12px"
+          },
+          "::-webkit-scrollbar-thumb": {
+            background: theme => theme.palette.common.orange,
+            borderRadius: "3px"
+          },
+          ...sx
+        }}
+      >
         <TreeView
           id="TreeViewRoot"
-          defaultCollapseIcon={<ExpandMoreIcon sx={{ color: theme => theme.palette.common.white }} />}
-          defaultExpandIcon={<ChevronRightIcon sx={{ color: theme => theme.palette.common.white }} />}
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
           multiSelect
         >
           {Object.keys(allTags).map((nodeId: string) => {
@@ -201,4 +223,4 @@ const TagExploratorySearcherPropsAreEqual = (
   return prevProps.allTags === nextProps.allTags;
 };
 
-export const MemoizedTagsExploratorySearcher = React.memo(TagsExploratorySearcher, TagExploratorySearcherPropsAreEqual);
+export const MemoizedTagsSearcher = React.memo(TagsSearcher, TagExploratorySearcherPropsAreEqual);

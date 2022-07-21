@@ -7,7 +7,7 @@ import { use1AcademyTheme } from "../context/ThemeContext";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { ToUpperCaseEveryWord } from "../lib/utils/utils";
 import { useAuthLayout } from "./layouts/AuthLayout";
-import { MemoizedTagsExploratorySearcher } from "./TagsExploratorySearcher";
+import { MemoizedTagsSearcher } from "./TagsSearcher";
 
 export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
@@ -162,7 +162,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
       </FormGroup>
 
       <FormGroup data-testid="tree-view" sx={{ mt: "8px" }}>
-        <MemoizedTagsExploratorySearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
+        <MemoizedTagsSearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
         <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
           You're going to be a member of: {values.tag}
         </Typography>

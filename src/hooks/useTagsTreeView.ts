@@ -1,7 +1,7 @@
 import { collection, DocumentChange, DocumentData, getFirestore, onSnapshot, query } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
-import { AllTagsTreeView } from "../components/TagsExploratorySearcher";
+import { AllTagsTreeView } from "../components/TagsSearcher";
 import { Tag } from "../knowledgeTypes";
 
 const initializeTagsTreeView = (tags: string[]): AllTagsTreeView => {

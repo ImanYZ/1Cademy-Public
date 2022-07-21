@@ -10,7 +10,7 @@ import PasswordResetForm from "@/components/PasswordResetForm";
 import ROUTES from "@/lib/utils/routes";
 import { getQueryParameter } from "@/lib/utils/utils";
 
-import libraryImage from "../../public/LibraryBackground.jpg";
+import libraryImage from "../../public/darkModeLibraryBackground.jpg";
 
 type Props = {
   mode: "verifyEmail" | "resetPassword";

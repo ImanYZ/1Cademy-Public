@@ -2,7 +2,7 @@ import { createTheme } from "@mui/material/styles";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 import React, { createContext, FC, ReactNode, useContext, useMemo, useState } from "react";
-import { ThemeActions } from "src/knowledgeTypes";
+import { AppTheme, ThemeActions } from "src/knowledgeTypes";
 
 import { getDesignTokens, getThemedComponents } from "@/lib/theme/brandingTheme";
 
