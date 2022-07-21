@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material";
+import { alpha, createTheme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { Theme, ThemeOptions } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
@@ -55,7 +55,7 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       },
       divider: mode === "dark" ? grey[200] : grey[200],
       background: {
-        default: "#FAFAFA",
+        default: common.white,
         paper: common.white
       },
       ...(mode === "dark" && {
@@ -114,20 +114,24 @@ export function getThemedComponents(theme: Theme): {
         styleOverrides: {
           containedPrimary: {
             backgroundColor: "common.orange",
-            color: common.white
+            color: common.white,
+            ":hover": {
+              backgroundColor: common.orangeDark
+            }
           },
           containedSecondary: {
             backgroundColor: theme.palette.mode === "dark" ? common.white : common.darkGrayBackground,
-            color: theme.palette.mode === "dark" ? common.darkGrayBackground : common.white
+            color: theme.palette.mode === "dark" ? common.darkGrayBackground : common.white,
+            ":hover": {
+              backgroundColor:
+                theme.palette.mode === "dark" ? alpha(common.white, 0.9) : alpha(common.darkGrayBackground, 0.9)
+            }
           }
         },
         variants: [
           {
             props: { variant: "contained" },
             style: {
-              "&:hover, &.Mui-focusVisible": {
-                backgroundColor: common.orangeDark
-              },
               "&.Mui-disabled .MuiLoadingButton-loadingIndicator": {
                 color: common.orangeLight
               }

@@ -283,8 +283,8 @@ const SignUpPage: NextPageWithLayout = () => {
   };
 
   return (
-    <Box>
-      <Stepper activeStep={activeStep - 1} sx={{ mt: "0px", mb: "16px", mx: "19px" }}>
+    <Box sx={{ p: { xs: "8px", md: "24px", width: "100%" } }}>
+      <Stepper activeStep={activeStep - 1} sx={{ mt: "0px", mb: "16px" }}>
         {steps.map(label => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: { optional?: React.ReactNode } = {};

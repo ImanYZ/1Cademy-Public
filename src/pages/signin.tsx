@@ -48,7 +48,7 @@ const SignInPage: NextPageWithLayout = () => {
   const formik = useFormik({ initialValues, validationSchema, onSubmit: handleSignIn });
 
   return (
-    <Box sx={{ my: "92px" }}>
+    <Box sx={{ p: { xs: "8px", md: "24px", width: "100%" }, my: "92px" }}>
       <Typography variant="h1" sx={{ mb: "8px" }}>
         Log in
       </Typography>

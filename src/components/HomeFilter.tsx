@@ -2,7 +2,6 @@ import { Box } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
-// import TagsAutocomplete from "../components/TagsAutocomplete";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { FilterValue } from "../knowledgeTypes";
 import ContributorsAutocomplete from "./ContributorsAutocomplete";
@@ -35,10 +34,6 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
           .filter(cur => cur.checked)
           .map(cur => cur.title);
         if (!tagSelected) return;
-
-        // setFieldValue("tagId", tagSelected.nodeId);
-        // setFieldValue("tag", tagSelected.title);
-
         onTagsChange(tagSelected);
       };
 
@@ -55,10 +50,6 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
         setTimeout(() => window.scrollBy({ top: yPosition, behavior: "smooth" }), 150);
       }
     }));
-
-    // const handleTagsChange = (values: string[]) => {
-    //   onTagsChange(values);
-    // };
 
     const handleInstitutionsChange = (values: FilterValue[]) => {
       onInstitutionsChange(values);
@@ -78,19 +69,8 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
 
     return (
       <>
-        <Box
-          ref={toScrollRef}
-          display="flex"
-          flexDirection={{ xs: "column", sm: "row" }}
-          mb={"16px"}
-          gap="16px"
-          // display="grid"
-          // gridTemplateColumns="repeat(12, 1fr)"
-          // gap={2}
-          // sx={{ mx: { md: "10px" }, mb: 8 }}
-        >
+        <Box ref={toScrollRef} display="flex" flexDirection={{ xs: "column", sm: "row" }} mb={"16px"} gap="16px">
           <Box width={{ xs: "100%" }}>
-            {/* <TagsAutocomplete onTagsChange={handleTagsChange} /> */}
             <MemoizedTagsSearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} multiple />
           </Box>
           <Box

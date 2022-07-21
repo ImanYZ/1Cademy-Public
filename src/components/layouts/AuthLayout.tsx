@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from "@mui/material";
+import { Button, Typography, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,6 +38,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
   const [{ isAuthenticated, isAuthInitialized }] = useAuth();
   const [themeActions] = use1AcademyTheme();
   const router = useRouter();
+  const isEqualOrBiggerThanMedium = useMediaQuery("(min-width:600px)");
 
   const redirectToApp = useCallback(() => {
     const redirectTo = router.query.from && router.query.from.length > 0 ? (router.query.from as string) : ROUTES.home;
@@ -57,18 +58,34 @@ const AuthLayout: FC<Props> = ({ children }) => {
   return (
     <AuthLayoutContext.Provider value={{ setBackground }}>
       <Box>
-        <Box
-          data-testid="auth-layout"
-          sx={{
-            width: "100vw",
-            height: "100vh",
-            position: "fixed",
-            filter: "brightness(0.25)",
-            zIndex: -2
-          }}
-        >
-          <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
-        </Box>
+        {themeActions.themeMode === "dark" && (
+          <Box
+            data-testid="auth-layout"
+            sx={{
+              width: "100vw",
+              height: "100vh",
+              position: "fixed",
+              filter: "brightness(0.25)",
+              zIndex: -2
+            }}
+          >
+            <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
+          </Box>
+        )}
+        {themeActions.themeMode === "light" && (
+          <Box
+            data-testid="auth-layout"
+            sx={{
+              width: "100vw",
+              height: "100vh",
+              position: "fixed",
+              filter: "brightness(1.4)",
+              zIndex: -2
+            }}
+          >
+            <Image alt="Library" src={lightModeLibraryImage} layout="fill" objectFit="cover" priority />
+          </Box>
+        )}
 
         <Box
           sx={{
@@ -82,159 +99,184 @@ const AuthLayout: FC<Props> = ({ children }) => {
           <Box
             sx={{
               width: "1300px",
-              minHeight: "auto",
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              gridTemplateRows: { xs: "297px auto", md: "auto" }
+              height: { xs: "100vh", md: "95vh" },
+              display: "flex",
+              flexDirection: { sx: "column", md: "row" },
+              color: theme => theme.palette.common.white,
+              background: theme =>
+                themeActions.themeMode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white
             }}
           >
             {/* left panel */}
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                color: theme => theme.palette.common.white,
-                background: theme => theme.palette.common.darkGrayBackground
-              }}
-            >
-              {/* this this image has absolute position, by their configuration */}
-              {background === "Image" && themeActions.themeMode === "dark" && (
-                <Image
-                  alt="Library"
-                  src={darkModeLibraryImage}
-                  layout="fill"
-                  objectFit="cover"
-                  priority
-                  style={{ filter: "brightness(0.6)" }}
-                />
-              )}
-              {background === "Image" && themeActions.themeMode === "light" && (
-                <Image
-                  alt="Library"
-                  src={lightModeLibraryImage}
-                  layout="fill"
-                  objectFit="cover"
-                  priority
-                  style={{ filter: "brightness(1.4) blur(4px)" }}
-                />
-              )}
+            {isEqualOrBiggerThanMedium && (
               <Box
                 sx={{
-                  width: "200px",
-                  height: "40px",
-                  position: "absolute",
-                  bottom: "15px",
-                  left: "16px",
+                  width: "100%",
+                  height: "inherit",
+                  px: "16px",
+                  position: "relative",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between"
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center"
                 }}
               >
-                <a
-                  rel="noreferrer"
-                  target="_blank"
-                  href="https://www.si.umich.edu/"
-                  aria-label="Go to School of information"
-                >
-                  <Image src={logoSchoolOfInformation} alt="School of Information" height={41} width={47} />
-                </a>
-                <a
-                  rel="noreferrer"
-                  target="_blank"
-                  href="https://www.honor.education/"
-                  aria-label="Go to Honor Education"
-                >
-                  <Image src={logoHonor} alt="Honor Education" height={41} width={41} />
-                </a>
-                <a
-                  rel="noreferrer"
-                  target="_blank"
-                  href="https://cloud.google.com/edu/researchers"
-                  aria-label="Go to Google Cloud"
-                >
-                  <Image src={logoGoogleCloud} alt="Google Cloud" height={41} width={49} />
-                </a>
-              </Box>
-              <Box sx={{ zIndex: 1 }}>
-                <Typography textAlign={"center"} variant="h1">
-                  Welcome to 1Cademy
-                </Typography>
-                <Typography textAlign={"center"} variant="caption">
-                  We Visualize Learning Pathways from Books & Research Papers.
-                </Typography>
+                {/* this this image has absolute position, by their configuration */}
+                {background === "Image" && themeActions.themeMode === "dark" && (
+                  <Image
+                    alt="Library"
+                    src={darkModeLibraryImage}
+                    layout="fill"
+                    objectFit="cover"
+                    priority
+                    style={{ filter: "brightness(0.6)" }}
+                  />
+                )}
+                {background === "Image" && themeActions.themeMode === "light" && (
+                  <Image
+                    alt="Library"
+                    src={lightModeLibraryImage}
+                    layout="fill"
+                    objectFit="cover"
+                    priority
+                    style={{ filter: "brightness(1.4) blur(4px)" }}
+                  />
+                )}
                 <Box
-                  aria-label="sign in and sing up options"
                   sx={{
-                    border: "solid 2px",
-                    borderColor: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
-                    mt: "16px"
+                    width: "200px",
+                    height: "40px",
+                    position: "absolute",
+                    bottom: "15px",
+                    left: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between"
                   }}
                 >
-                  <Link href={ROUTES.signIn}>
-                    <Button
-                      color="secondary"
-                      variant={router.pathname === ROUTES.signIn ? "contained" : "outlined"}
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="https://www.si.umich.edu/"
+                    aria-label="Go to School of information"
+                  >
+                    <Image src={logoSchoolOfInformation} alt="School of Information" height={41} width={47} />
+                  </a>
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="https://www.honor.education/"
+                    aria-label="Go to Honor Education"
+                  >
+                    <Image src={logoHonor} alt="Honor Education" height={41} width={41} />
+                  </a>
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="https://cloud.google.com/edu/researchers"
+                    aria-label="Go to Google Cloud"
+                  >
+                    <Image src={logoGoogleCloud} alt="Google Cloud" height={41} width={49} />
+                  </a>
+                </Box>
+                <Box sx={{ zIndex: 1 }}>
+                  <Typography textAlign={"center"} variant="h1">
+                    Welcome to 1Cademy
+                  </Typography>
+                  <Typography textAlign={"center"} variant="caption">
+                    We Visualize Learning Pathways from Books & Research Papers.
+                  </Typography>
+                  <Box
+                    aria-label="sign in and sing up options"
+                    sx={{
+                      border: "solid 2px",
+                      borderColor: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
+                      mt: "16px"
+                    }}
+                  >
+                    <Link href={ROUTES.signIn}>
+                      <Button
+                        color="secondary"
+                        variant={router.pathname === ROUTES.signIn ? "contained" : "outlined"}
+                        sx={{
+                          width: "50%",
+                          p: "12px 16px",
+                          textAlign: "center",
+                          borderRadius: "0px",
+                          border: "0px"
+                        }}
+                      >
+                        LOG IN
+                      </Button>
+                    </Link>
+                    <Link href={ROUTES.signUp}>
+                      <Button
+                        color="secondary"
+                        variant={router.pathname === ROUTES.signUp ? "contained" : "outlined"}
+                        sx={{
+                          width: "50%",
+                          p: "12px 16px",
+                          textAlign: "center",
+                          borderRadius: "0px",
+                          border: "0px"
+                        }}
+                      >
+                        SIGN UP
+                      </Button>
+                    </Link>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+            {/* right panel */}
+            <Box sx={{ width: "100%", height: "inherit" }}>
+              <Box sx={{ height: "inherit", width: "100%", overflowY: "auto" }}>
+                <Box sx={{ maxWidth: "400px", py: "40px", mx: "auto" }}>
+                  {!isEqualOrBiggerThanMedium && (
+                    <Box
+                      aria-label="sign in and sing up options"
                       sx={{
-                        width: "50%",
-                        p: "12px 16px",
-                        textAlign: "center",
-                        // backgroundColor: router.pathname === ROUTES.signIn ? "common.white" : "inherit",
-                        // color: router.pathname === ROUTES.signIn ? "common.darkGrayBackground" : "common.white",
-                        borderRadius: "0px",
-                        border: "0px"
-                        // ":hover": {
-                        //   backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
-                        //   color: "common.darkGrayBackground"
-                        // }
+                        border: "solid 2px",
+                        borderColor: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
+                        mb: "16px"
                       }}
                     >
-                      LOG IN
-                    </Button>
-                  </Link>
-                  <Link href={ROUTES.signUp}>
-                    <Button
-                      color="secondary"
-                      variant={router.pathname === ROUTES.signUp ? "contained" : "outlined"}
-                      sx={{
-                        width: "50%",
-                        p: "12px 16px",
-                        textAlign: "center",
-                        // backgroundColor: router.pathname === ROUTES.signUp ? "common.white" : "inherit",
-                        // color: router.pathname === ROUTES.signUp ? "common.darkGrayBackground" : "common.white",
-                        borderRadius: "0px",
-                        border: "0px"
-                        // ":hover": {
-                        //   backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
-                        //   color: "common.darkGrayBackground"
-                        // }
-                      }}
-                    >
-                      SIGN UP
-                    </Button>
-                  </Link>
+                      <Link href={ROUTES.signIn}>
+                        <Button
+                          color="secondary"
+                          variant={router.pathname === ROUTES.signIn ? "contained" : "outlined"}
+                          sx={{
+                            width: "50%",
+                            p: "12px 16px",
+                            textAlign: "center",
+                            borderRadius: "0px",
+                            border: "0px"
+                          }}
+                        >
+                          LOG IN
+                        </Button>
+                      </Link>
+                      <Link href={ROUTES.signUp}>
+                        <Button
+                          color="secondary"
+                          variant={router.pathname === ROUTES.signUp ? "contained" : "outlined"}
+                          sx={{
+                            width: "50%",
+                            p: "12px 16px",
+                            textAlign: "center",
+                            borderRadius: "0px",
+                            border: "0px"
+                          }}
+                        >
+                          SIGN UP
+                        </Button>
+                      </Link>
+                    </Box>
+                  )}
+                  {children}
                 </Box>
               </Box>
             </Box>
-            {/* right panel */}
-            <Paper
-              sx={{
-                width: "100%",
-                height: "100%",
-                maxHeight: "100vh",
-                overflowY: "auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                py: "8px"
-              }}
-            >
-              <Box sx={{ maxWidth: "400px" }}>{children}</Box>
-            </Paper>
           </Box>
         </Box>
       </Box>
