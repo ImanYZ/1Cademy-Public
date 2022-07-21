@@ -5,7 +5,7 @@ import { forwardRef, MutableRefObject, useImperativeHandle, useRef } from "react
 
 import { loadHomeSearchBackground, toBase64 } from "@/lib/utils/utils";
 
-import heroImage from "../../public/LibraryBackground.jpg";
+import heroImage from "../../public/darkModeLibraryBackground.jpg";
 import logoHero from "../../public/LogoExtended.svg";
 import SearchInput from "./SearchInput";
 import Stats from "./Stats";

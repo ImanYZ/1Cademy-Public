@@ -108,14 +108,15 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
                 target="_blank"
                 rel="noreferrer"
                 sx={{
-                  minWidth: "80px",
+                  minWidth: "90px",
                   display: { xs: "none", md: "block" },
                   fontSize: 16,
                   fontWeight: "700",
                   color: "common.white",
-                  py: "15px",
-                  px: "16px",
-                  borderRadius: 40
+                  p: "6px 16px",
+                  my: "auto",
+                  borderRadius: 40,
+                  textAlign: "center"
                 }}
               >
                 APPLY!
