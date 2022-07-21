@@ -439,8 +439,8 @@ export interface SignUpFormValues {
   // -----------------------
   occupation: string;
   education: string | null;
-  institution: string;
-  major: string;
+  institution: string | null;
+  major: string | null;
   fieldOfInterest: string;
   signUpAgreement: boolean;
   clickedConsent: boolean;
@@ -480,4 +480,20 @@ export type NextPageWithLayout<P = {}> = NextPage<P> & {
 export type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
   emotionCache?: EmotionCache;
+};
+
+export type Institution = {
+  id: string;
+  domains: string[];
+  logoURL: string;
+  usersNum: number;
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+};
+
+export type Major = {
+  Major: string;
+  Major_Category: string;
 };

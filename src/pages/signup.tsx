@@ -82,8 +82,8 @@ const SignUpPage: NextPageWithLayout = () => {
     foundFromOtherValue: "",
     occupation: "",
     education: null,
-    institution: "",
-    major: "",
+    institution: null,
+    major: null,
     fieldOfInterest: "",
     signUpAgreement: false,
     clickedConsent: false,
@@ -140,8 +140,8 @@ const SignUpPage: NextPageWithLayout = () => {
     }),
     occupation: yup.string().required("Please enter your occupation"),
     education: yup.string().required("Please enter your educational status").nullable(true),
-    institution: yup.string().required("Please enter your institution"),
-    major: yup.string().required("Please enter your major"),
+    institution: yup.string().required("Please enter your institution").nullable(),
+    major: yup.string().required("Please enter your major").nullable(),
     fieldOfInterest: yup.string().required("Please enter your field of interest"),
     signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
   });

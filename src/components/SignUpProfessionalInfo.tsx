@@ -1,9 +1,11 @@
 import { Autocomplete, Backdrop, Checkbox, CircularProgress, FormHelperText, Link, TextField } from "@mui/material";
 import { Box } from "@mui/system";
+import { collection, getDocs, getFirestore, query } from "firebase/firestore";
 import { FormikProps } from "formik";
-import { lazy, Suspense, useState } from "react";
-import { SignUpFormValues } from "src/knowledgeTypes";
+import { HTMLAttributes, lazy, Suspense, useEffect, useState } from "react";
+import { Institution, Major, SignUpFormValues } from "src/knowledgeTypes";
 
+import OptimizedAvatar from "../components/OptimizedAvatar";
 import { EDUCATION_VALUES } from "../lib/utils/constants";
 
 const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
@@ -20,7 +22,47 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
   const [openTermOfUse, setOpenTermsOfUse] = useState(false);
   const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
   const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [majors, setMajors] = useState<Major[]>([]);
+
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
+
+  useEffect(() => {
+    const retrieveMajors = async () => {
+      if (majors.length) return;
+
+      const majorsObj = await import("../../public/edited_majors.json");
+      const majorsList = [...majorsObj.default, { Major: "Prefer not to say", Major_Category: "Prefer not to say" }]
+        .sort((l1, l2) => (l1.Major < l2.Major ? -1 : 1))
+        .sort((l1, l2) => (l1.Major_Category < l2.Major_Category ? -1 : 1));
+      setMajors(majorsList);
+    };
+
+    retrieveMajors();
+  }, []);
+
+  useEffect(() => {
+    const retrieveInstitutions = async () => {
+      console.log("get intitutions");
+      const db = getFirestore();
+      const institutionsRef = collection(db, "institutions");
+      const q = query(institutionsRef);
+
+      const querySnapshot = await getDocs(q);
+      let institutions: Institution[] = [];
+      querySnapshot.forEach(doc => {
+        institutions.push({ id: doc.id, ...doc.data() } as Institution);
+      });
+
+      const institutionSorted = institutions
+        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
+        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+
+      setInstitutions(institutionSorted);
+    };
+    retrieveInstitutions();
+  }, []);
+
   return (
     <Box data-testid="signup-form-step-3">
       <TextField
@@ -53,7 +95,31 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         fullWidth
         sx={{ mb: "16px" }}
       />
-      <TextField
+      <Autocomplete
+        id="institution"
+        value={institutions.find(cur => cur.name === values.institution)}
+        onChange={(_, value) => setFieldValue("institution", value?.name)}
+        onBlur={() => setTouched({ ...touched, institution: true })}
+        options={institutions}
+        getOptionLabel={option => option.name}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Institution"
+            error={Boolean(errors.institution) && Boolean(touched.institution)}
+            helperText={touched.institution && errors.institution}
+          />
+        )}
+        renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
+          <li {...props}>
+            <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
+            {option.name}
+          </li>
+        )}
+        fullWidth
+        sx={{ mb: "16px" }}
+      />
+      {/* <TextField
         id="institution"
         name="institution"
         label="Institution"
@@ -65,8 +131,27 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         helperText={touched.institution && errors.institution}
         fullWidth
         sx={{ mb: "16px" }}
+      /> */}
+      <Autocomplete
+        id="major"
+        value={majors.find(cur => cur.Major === values.major)}
+        onChange={(_, value) => setFieldValue("major", value?.Major || "")}
+        onBlur={() => setTouched({ ...touched, major: true })}
+        options={majors}
+        getOptionLabel={option => option.Major}
+        groupBy={option => option.Major_Category}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Major"
+            error={Boolean(errors.major) && Boolean(touched.major)}
+            helperText={touched.major && errors.major}
+          />
+        )}
+        fullWidth
+        sx={{ mb: "16px" }}
       />
-      <TextField
+      {/* <TextField
         id="major"
         name="major"
         label="Major"
@@ -78,7 +163,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         helperText={touched.major && errors.major}
         fullWidth
         sx={{ mb: "16px" }}
-      />
+      /> */}
       <TextField
         id="fieldOfInterest"
         name="fieldOfInterest"
