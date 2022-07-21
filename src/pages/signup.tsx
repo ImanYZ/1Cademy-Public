@@ -64,7 +64,7 @@ const SignUpPage: NextPageWithLayout = () => {
     password: "",
     passwordConfirmation: "",
     theme: "Dark",
-    background: "Color",
+    background: "Image",
     chooseUname: false,
     tagId: "r98BjyFDCe4YyLA3U8ZE",
     tag: "1Cademy",
@@ -171,8 +171,8 @@ const SignUpPage: NextPageWithLayout = () => {
       clickedCP: values.clickedCP,
       tag: values.tag,
       tagId: values.tagId,
-      deMajor: values.major,
-      deInstit: values.institution,
+      deMajor: values.major as string,
+      deInstit: values.institution as string,
       theme: values.theme,
       background: values.background as string
     };

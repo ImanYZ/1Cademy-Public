@@ -63,6 +63,13 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
     retrieveInstitutions();
   }, []);
 
+  const getNameFromInstitutionSelected = () => {
+    if (!values.institution) return null;
+    const foundInstitution = institutions.find(cur => cur.name === values.institution);
+    if (!foundInstitution) return null;
+    return foundInstitution;
+  };
+
   return (
     <Box data-testid="signup-form-step-3">
       <TextField
@@ -97,8 +104,8 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       />
       <Autocomplete
         id="institution"
-        value={institutions.find(cur => cur.name === values.institution)}
-        onChange={(_, value) => setFieldValue("institution", value?.name)}
+        value={getNameFromInstitutionSelected()}
+        onChange={(_, value) => setFieldValue("institution", value?.name || null)}
         onBlur={() => setTouched({ ...touched, institution: true })}
         options={institutions}
         getOptionLabel={option => option.name}
@@ -116,26 +123,14 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
             {option.name}
           </li>
         )}
+        isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
         fullWidth
         sx={{ mb: "16px" }}
       />
-      {/* <TextField
-        id="institution"
-        name="institution"
-        label="Institution"
-        value={values.institution}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        variant="outlined"
-        error={Boolean(errors.institution) && Boolean(touched.institution)}
-        helperText={touched.institution && errors.institution}
-        fullWidth
-        sx={{ mb: "16px" }}
-      /> */}
       <Autocomplete
         id="major"
-        value={majors.find(cur => cur.Major === values.major)}
-        onChange={(_, value) => setFieldValue("major", value?.Major || "")}
+        value={majors.find(cur => cur.Major === values.major) || null}
+        onChange={(_, value) => setFieldValue("major", value?.Major || null)}
         onBlur={() => setTouched({ ...touched, major: true })}
         options={majors}
         getOptionLabel={option => option.Major}
@@ -151,19 +146,6 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         fullWidth
         sx={{ mb: "16px" }}
       />
-      {/* <TextField
-        id="major"
-        name="major"
-        label="Major"
-        value={values.major}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        variant="outlined"
-        error={Boolean(errors.major) && Boolean(touched.major)}
-        helperText={touched.major && errors.major}
-        fullWidth
-        sx={{ mb: "16px" }}
-      /> */}
       <TextField
         id="fieldOfInterest"
         name="fieldOfInterest"

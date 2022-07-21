@@ -238,3 +238,10 @@ export const isEmail = (email: string) => {
   if (email.match(regEx)) return true;
   else return false;
 };
+
+export const ToUpperCaseEveryWord = (text: string) => {
+  return text
+    .split(" ")
+    .map(cur => cur.charAt(0).toLocaleUpperCase() + cur.slice(1))
+    .join(" ");
+};

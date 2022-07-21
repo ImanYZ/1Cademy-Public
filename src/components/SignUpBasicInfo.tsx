@@ -5,6 +5,7 @@ import { SignUpFormValues } from "src/knowledgeTypes";
 
 import { use1AcademyTheme } from "../context/ThemeContext";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
+import { ToUpperCaseEveryWord } from "../lib/utils/utils";
 import { useAuthLayout } from "./layouts/AuthLayout";
 import { MemoizedTagsExploratorySearcher } from "./TagsExploratorySearcher";
 
@@ -32,7 +33,9 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
 
   const getDisplayNameValue = () => {
     if (values.chooseUname) return values.username || "Your Username";
-    return values.firstName || values.lastName ? values.firstName + " " + values.lastName : "Your Full Name";
+    return values.firstName || values.lastName
+      ? ToUpperCaseEveryWord(values.firstName + " " + values.lastName)
+      : "Your Full Name";
   };
 
   return (
@@ -138,7 +141,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         <FormControlLabel
           control={
             <Switch
-              checked={values.background === "Color"}
+              checked={values.background === "Image"}
               onChange={() => {
                 setFieldValue("background", values.background === "Color" ? "Image" : "Color");
                 setBackground(values.background === "Color" ? "Image" : "Color");
@@ -152,7 +155,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
       <FormGroup>
         <FormControlLabel
           control={
-            <Switch checked={values.chooseUname} onChange={() => setFieldValue("chooseUname", !values.chooseUname)} />
+            <Switch checked={!values.chooseUname} onChange={() => setFieldValue("chooseUname", !values.chooseUname)} />
           }
           label={`Display name: ${getDisplayNameValue()}`}
         />
