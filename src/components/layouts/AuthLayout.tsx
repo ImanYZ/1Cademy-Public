@@ -17,10 +17,12 @@ import {
 
 import { useAuth } from "@/context/AuthContext";
 
-import libraryImage from "../../../public/LibraryBackground.jpg";
+import darkModeLibraryImage from "../../../public/darkModeLibraryBackground.jpg";
+import lightModeLibraryImage from "../../../public/lightModeLibraryBackground.jpg";
 import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
 import logoHonor from "../../../public/logo-honor.svg";
 import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
+import { use1AcademyTheme } from "../../context/ThemeContext";
 import { AppBackground, AuthLayoutActions } from "../../knowledgeTypes";
 import ROUTES from "../../lib/utils/routes";
 import FullPageLogoLoading from "../FullPageLogoLoading";
@@ -34,6 +36,7 @@ type Props = {
 const AuthLayout: FC<Props> = ({ children }) => {
   const [background, setBackground] = useState<AppBackground>("Image");
   const [{ isAuthenticated, isAuthInitialized }] = useAuth();
+  const [themeActions] = use1AcademyTheme();
   const router = useRouter();
 
   const redirectToApp = useCallback(() => {
@@ -64,9 +67,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
             zIndex: -2
           }}
         >
-          {background === "Image" && (
-            <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" priority />
-          )}
+          <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
         </Box>
 
         <Box
@@ -97,18 +98,31 @@ const AuthLayout: FC<Props> = ({ children }) => {
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                color: theme => theme.palette.common.white
+                color: theme => theme.palette.common.white,
+                background: theme => theme.palette.common.darkGrayBackground
               }}
             >
               {/* this this image has absolute position, by their configuration */}
-              <Image
-                alt="Library"
-                src={libraryImage}
-                layout="fill"
-                objectFit="cover"
-                priority
-                style={{ filter: "brightness(0.6)" }}
-              />
+              {background === "Image" && themeActions.themeMode === "dark" && (
+                <Image
+                  alt="Library"
+                  src={darkModeLibraryImage}
+                  layout="fill"
+                  objectFit="cover"
+                  priority
+                  style={{ filter: "brightness(0.6)" }}
+                />
+              )}
+              {background === "Image" && themeActions.themeMode === "light" && (
+                <Image
+                  alt="Library"
+                  src={lightModeLibraryImage}
+                  layout="fill"
+                  objectFit="cover"
+                  priority
+                  style={{ filter: "brightness(1.4) blur(4px)" }}
+                />
+              )}
               <Box
                 sx={{
                   width: "200px",
@@ -157,24 +171,26 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   aria-label="sign in and sing up options"
                   sx={{
                     border: "solid 2px",
-                    borderColor: "common.white",
+                    borderColor: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
                     mt: "16px"
                   }}
                 >
                   <Link href={ROUTES.signIn}>
                     <Button
                       color="secondary"
+                      variant={router.pathname === ROUTES.signIn ? "contained" : "outlined"}
                       sx={{
                         width: "50%",
                         p: "12px 16px",
                         textAlign: "center",
-                        backgroundColor: router.pathname === ROUTES.signIn ? "common.white" : "inherit",
-                        color: router.pathname === ROUTES.signIn ? "common.darkGrayBackground" : "common.white",
+                        // backgroundColor: router.pathname === ROUTES.signIn ? "common.white" : "inherit",
+                        // color: router.pathname === ROUTES.signIn ? "common.darkGrayBackground" : "common.white",
                         borderRadius: "0px",
-                        ":hover": {
-                          backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
-                          color: "common.darkGrayBackground"
-                        }
+                        border: "0px"
+                        // ":hover": {
+                        //   backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
+                        //   color: "common.darkGrayBackground"
+                        // }
                       }}
                     >
                       LOG IN
@@ -183,17 +199,19 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   <Link href={ROUTES.signUp}>
                     <Button
                       color="secondary"
+                      variant={router.pathname === ROUTES.signUp ? "contained" : "outlined"}
                       sx={{
                         width: "50%",
                         p: "12px 16px",
                         textAlign: "center",
-                        backgroundColor: router.pathname === ROUTES.signUp ? "common.white" : "inherit",
-                        color: router.pathname === ROUTES.signUp ? "common.darkGrayBackground" : "common.white",
+                        // backgroundColor: router.pathname === ROUTES.signUp ? "common.white" : "inherit",
+                        // color: router.pathname === ROUTES.signUp ? "common.darkGrayBackground" : "common.white",
                         borderRadius: "0px",
-                        ":hover": {
-                          backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
-                          color: "common.darkGrayBackground"
-                        }
+                        border: "0px"
+                        // ":hover": {
+                        //   backgroundColor: router.pathname === ROUTES.signIn ? "common.gray" : "common.white",
+                        //   color: "common.darkGrayBackground"
+                        // }
                       }}
                     >
                       SIGN UP

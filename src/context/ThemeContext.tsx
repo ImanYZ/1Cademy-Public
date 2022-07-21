@@ -12,7 +12,7 @@ type Props = {
   children: ReactNode;
 };
 const ThemeProvider: FC<Props> = ({ children }) => {
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
+  const [themeMode, setThemeMode] = useState<AppTheme>("dark");
 
   const theme = useMemo(() => {
     const brandingDesignTokens = getDesignTokens(themeMode);
@@ -30,7 +30,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <ThemeActionsContext.Provider value={{ setThemeMode }}>{children}</ThemeActionsContext.Provider>
+      <ThemeActionsContext.Provider value={{ setThemeMode, themeMode }}>{children}</ThemeActionsContext.Provider>
     </MuiThemeProvider>
   );
 };

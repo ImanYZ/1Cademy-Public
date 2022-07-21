@@ -454,8 +454,11 @@ export interface SignUpData extends User {
 }
 
 export type ThemeActions = {
-  setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;
+  setThemeMode: Dispatch<SetStateAction<AppTheme>>;
+  themeMode: AppTheme;
 };
+
+export type AppTheme = "light" | "dark";
 
 export type AppBackground = "Color" | "Image";
 

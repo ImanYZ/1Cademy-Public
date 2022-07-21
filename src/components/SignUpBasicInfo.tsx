@@ -17,7 +17,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
   const [setBackground] = useAuthLayout();
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   const [allTags, setAllTags] = useTagsTreeView(values.tagId ? [values.tagId] : []);
-  const [res] = use1AcademyTheme();
+  const [themeActions] = use1AcademyTheme();
 
   useEffect(() => {
     const getFirstTagChecked = () => {
@@ -129,7 +129,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
               checked={values.theme === "Dark"}
               onChange={() => {
                 setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
-                res.setThemeMode(values.theme === "Light" ? "dark" : "light");
+                themeActions.setThemeMode(values.theme === "Light" ? "dark" : "light");
               }}
             />
           }

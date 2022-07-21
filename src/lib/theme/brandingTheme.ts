@@ -83,13 +83,13 @@ export const getDesignTokens = (mode: "light" | "dark") =>
     typography: {
       fontFamily: [...systemFont].join(","),
       fontFamilySystem: systemFont.join(","),
-      h1: { fontSize: "36px" },
-      h2: { fontSize: "32px" },
-      h3: { fontSize: "24px" },
-      h4: { fontSize: "19px" },
-      body1: { fontSize: "16px" },
-      body2: { fontSize: "19px" },
-      caption: { fontSize: "14.5px" },
+      h1: { fontSize: "36px", color: mode === "dark" ? common.white : common.black },
+      h2: { fontSize: "32px", color: mode === "dark" ? common.white : common.black },
+      h3: { fontSize: "24px", color: mode === "dark" ? common.white : common.black },
+      h4: { fontSize: "19px", color: mode === "dark" ? common.white : common.black },
+      body1: { fontSize: "16px", color: mode === "dark" ? common.white : common.black },
+      body2: { fontSize: "19px", color: mode === "dark" ? common.white : common.black },
+      caption: { fontSize: "14.5px", color: mode === "dark" ? common.white : common.black },
       button: {
         textTransform: "initial"
       }
