@@ -170,10 +170,11 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").findByLabelText("Education Level").click();
     cy.findByRole("presentation").findByText("Prefer not to say").click();
 
-    cy.findByTestId("signup-form").findByLabelText("Institution").clear();
-    cy.findByTestId("signup-form").findByLabelText("Institution").type("MIT");
+    cy.findByTestId("signup-form").findByLabelText("Institution").click();
+    cy.findByRole("presentation").findByText("Alma College").click();
 
-    cy.findByTestId("signup-form").findByLabelText("Major").type("Computer Science");
+    cy.findByTestId("signup-form").findByLabelText("Major").click();
+    cy.findByRole("presentation").findByText("Animal Sciences").click();
 
     cy.findByTestId("signup-form")
       .findByLabelText("Research field of interest (if any)")
@@ -264,8 +265,8 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").findByTestId("signup-form-step-2").should("not.exist");
     cy.findByTestId("signup-form").findByTestId("signup-form-step-3").should("not.exist");
     cy.findByTestId("signup-form").findByLabelText("Theme: 🌜").should("be.checked");
-    cy.findByTestId("signup-form").findByLabelText("Background: Color").should("be.checked");
-    cy.findByTestId("signup-form").findByLabelText("Display name: Your Full Name").should("not.be.checked");
+    cy.findByTestId("signup-form").findByLabelText("Background: Image").should("be.checked");
+    cy.findByTestId("signup-form").findByLabelText("Display name: Your Full Name").should("be.checked");
     cy.findByTestId("signup-form").findByTestId("tree-view").should("exist");
 
     // It should show click in next button
@@ -429,10 +430,16 @@ describe("SignUp page", () => {
     cy.findByTestId("signup-form").findByLabelText("Education Level").click();
     cy.findByRole("presentation").findByText("Prefer not to say").click();
 
-    cy.findByTestId("signup-form").findByLabelText("Institution").clear();
-    cy.findByTestId("signup-form").findByLabelText("Institution").type("MIT");
+    cy.findByTestId("signup-form").findByLabelText("Institution").click();
+    cy.findByRole("presentation").findByText("Alma College").click();
 
-    cy.findByTestId("signup-form").findByLabelText("Major").type("Computer Science");
+    cy.findByTestId("signup-form").findByLabelText("Major").click();
+    cy.findByRole("presentation").findByText("Animal Sciences").click();
+
+    // cy.findByTestId("signup-form").findByLabelText("Institution").clear();
+    // cy.findByTestId("signup-form").findByLabelText("Institution").type("MIT");
+
+    // cy.findByTestId("signup-form").findByLabelText("Major").type("Computer Science");
 
     cy.findByTestId("signup-form")
       .findByLabelText("Research field of interest (if any)")
