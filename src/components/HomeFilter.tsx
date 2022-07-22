@@ -71,7 +71,12 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
       <>
         <Box ref={toScrollRef} display="flex" flexDirection={{ xs: "column", sm: "row" }} mb={"16px"} gap="16px">
           <Box width={{ xs: "100%" }}>
-            <MemoizedTagsSearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} multiple />
+            <MemoizedTagsSearcher
+              allTags={allTags}
+              setAllTags={setAllTags}
+              sx={{ maxHeight: "200px", height: "200px" }}
+              multiple
+            />
           </Box>
           <Box
             width={{ xs: "100%" }}

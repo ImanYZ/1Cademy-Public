@@ -5,15 +5,11 @@ import {
   Autocomplete,
   AutocompleteChangeDetails,
   AutocompleteChangeReason,
-  // AutocompleteRenderGetTagProps,
   AutocompleteRenderOptionState,
   Checkbox,
-  // Chip,
   FormControlLabel,
   TextField
 } from "@mui/material";
-// import CloseIcon from "@mui/icons-material/Close";
-import { darken } from "@mui/material/styles";
 import { Box, SxProps, Theme } from "@mui/system";
 import React, { useCallback } from "react";
 
@@ -45,13 +41,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
     (props: React.HTMLAttributes<HTMLLIElement>, option: TagTreeView, { selected }: AutocompleteRenderOptionState) => {
       return (
         <li {...props} key={option.nodeId}>
-          <FormControlLabel
-            // value={tag.nodeId}
-            control={<Checkbox checked={selected} name={option.nodeId} />}
-            label={option.title}
-          />
-          {/* <Checkbox checked={selected} name={option.nodeId} key={`checkbox-${option.nodeId}`} />
-          {option.title} */}
+          <FormControlLabel control={<Checkbox checked={selected} name={option.nodeId} />} label={option.title} />
         </li>
       );
     },
@@ -185,27 +175,22 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
         renderInput={setAutocompleteInput}
         fullWidth
       />
-      <Box
-        id="FilterTagsTreeView"
-        sx={{
-          overflowY: "auto",
-          background: theme => darken(theme.palette.background.default, 0.1),
-          "::-webkit-scrollbar": {
-            width: "12px",
-            height: "12px"
-          },
-          "::-webkit-scrollbar-thumb": {
-            background: theme => theme.palette.common.orange,
-            borderRadius: "3px"
-          },
-          ...sx
-        }}
-      >
+      <Box id="FilterTagsTreeView">
         <TreeView
           id="TreeViewRoot"
           defaultCollapseIcon={<ExpandMoreIcon />}
           defaultExpandIcon={<ChevronRightIcon />}
           multiSelect
+          sx={{
+            overflowY: "auto",
+            borderColor: theme =>
+              theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderRadius: theme => `${theme.shape.borderRadius}px`,
+            borderTopWidth: "0px",
+            ...sx
+          }}
         >
           {Object.keys(allTags).map((nodeId: string) => {
             return allTags[nodeId].tags.length === 0 && tagsTreeView(allTags[nodeId]);
