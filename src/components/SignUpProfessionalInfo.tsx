@@ -43,7 +43,6 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
 
   useEffect(() => {
     const retrieveInstitutions = async () => {
-      console.log("get intitutions");
       const db = getFirestore();
       const institutionsRef = collection(db, "institutions");
       const q = query(institutionsRef);
