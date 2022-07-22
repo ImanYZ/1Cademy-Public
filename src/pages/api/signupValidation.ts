@@ -19,6 +19,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         errors.email =
           "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu";
       }
+
+      if (institution && institution !== "Not Found") {
+        errors.institutionName = institution.name;
+      }
     }
     if (uname.length > 0) {
       const userAlreadyExists = await unameExists(uname);

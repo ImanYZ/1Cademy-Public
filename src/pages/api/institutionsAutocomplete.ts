@@ -20,13 +20,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
     apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string
   });
 
-  if (q.length === 0) {
-    const response: ResponseAutocompleteFilter = {
-      results: defaultInstitutions
-    };
-    res.status(200).json(response);
-    return;
-  }
+  // if (q.length === 0) {
+  //   const response: ResponseAutocompleteFilter = {
+  //     results: defaultInstitutions
+  //   };
+  //   res.status(200).json(response);
+  //   return;
+  // }
 
   try {
     const searchParameters: SearchParams = { q, query_by: "name" };
@@ -49,54 +49,54 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
   }
 }
 
-const defaultInstitutions = [
-  {
-    id: "lsC37AFtQ44Jq8vfSzr6",
-    name: "University of Michigan - Ann Arbor",
-    imageUrl:
-      "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/University%20of%20Michigan%20-%20Ann%20Arbor.png"
-  },
-  {
-    id: "Du5EiRth5TPl4KUyKCGl",
-    name: "Shenandoah University",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Shenandoah%20University.png"
-  },
-  {
-    id: "G3Ac3nERuyXuKkluA1SX",
-    name: "Smith College",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Smith%20College.png"
-  },
-  {
-    id: "k5tbLtCBxBO0wuWJxsAd",
-    name: "Grinnell College",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Grinnell%20College.png"
-  },
-  {
-    id: "Jyp3wLc5UCXg3KoXpvjt",
-    name: "Georgetown University",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Georgetown%20University.png"
-  },
-  {
-    id: "10DQIZoac3TsRxqwormd",
-    name: "Rutgers University, Newark",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Rutgers%20University,%20Newark.png"
-  },
-  {
-    id: "8Ocr2ue2ATSqdGTtcds4",
-    name: "Pepperdine University",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Pepperdine%20University.png"
-  },
-  {
-    id: "C4c9txyIZ8i6mDNgsOab",
-    name: "University of California, Davis",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/University%20of%20California,%20Davis.png"
-  },
+// const defaultInstitutions = [
+//   {
+//     id: "lsC37AFtQ44Jq8vfSzr6",
+//     name: "University of Michigan - Ann Arbor",
+//     imageUrl:
+//       "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/University%20of%20Michigan%20-%20Ann%20Arbor.png"
+//   },
+//   {
+//     id: "Du5EiRth5TPl4KUyKCGl",
+//     name: "Shenandoah University",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Shenandoah%20University.png"
+//   },
+//   {
+//     id: "G3Ac3nERuyXuKkluA1SX",
+//     name: "Smith College",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Smith%20College.png"
+//   },
+//   {
+//     id: "k5tbLtCBxBO0wuWJxsAd",
+//     name: "Grinnell College",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Grinnell%20College.png"
+//   },
+//   {
+//     id: "Jyp3wLc5UCXg3KoXpvjt",
+//     name: "Georgetown University",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Georgetown%20University.png"
+//   },
+//   {
+//     id: "10DQIZoac3TsRxqwormd",
+//     name: "Rutgers University, Newark",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Rutgers%20University,%20Newark.png"
+//   },
+//   {
+//     id: "8Ocr2ue2ATSqdGTtcds4",
+//     name: "Pepperdine University",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Pepperdine%20University.png"
+//   },
+//   {
+//     id: "C4c9txyIZ8i6mDNgsOab",
+//     name: "University of California, Davis",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/University%20of%20California,%20Davis.png"
+//   },
 
-  {
-    id: "VpITXBFmGYbs2rzmSTKC",
-    name: "Syracuse University",
-    imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Syracuse%20University.png"
-  }
-];
+//   {
+//     id: "VpITXBFmGYbs2rzmSTKC",
+//     name: "Syracuse University",
+//     imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/Logos/Syracuse%20University.png"
+//   }
+// ];
 
 export default handler;

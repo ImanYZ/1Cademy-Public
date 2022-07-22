@@ -161,7 +161,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
         />
       </FormGroup>
 
-      <FormGroup data-testid="tree-view" sx={{ mt: "8px" }}>
+      <FormGroup sx={{ mt: "8px" }}>
         <MemoizedTagsSearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px" }} />
         <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
           You're going to be a member of: {values.tag}

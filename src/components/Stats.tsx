@@ -13,11 +13,14 @@ const Stats = () => {
   }
 
   return (
-    <Stack data-testid="stats" sx={{ mt: 4, mb: 10, color: "common.white" }} spacing={1}>
-      <Typography textAlign="center">
+    <Stack data-testid="stats" sx={{ mt: 4, mb: 10 }} spacing={1}>
+      <Typography textAlign="center" sx={{ color: "common.white" }}>
         {`Search ${stats.nodes} nodes and ${stats.links} links through ${stats.proposals} proposals`}
       </Typography>
-      <Typography textAlign="center">{`from ${stats.users} users in ${stats.institutions} institutions`}</Typography>
+      <Typography
+        textAlign="center"
+        sx={{ color: "common.white" }}
+      >{`from ${stats.users} users in ${stats.institutions} institutions`}</Typography>
     </Stack>
   );
 };

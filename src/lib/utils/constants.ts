@@ -11,8 +11,8 @@ export const NODE_TYPE_OPTIONS: NodeType[] = [
   NodeType.Question,
   NodeType.Reference,
   NodeType.Relation,
-  NodeType.Sequel,
-  NodeType.Tag
+  NodeType.Sequel
+  // NodeType.Tag
 ];
 
 export const GENDER_VALUES = ["Male", "Female", "Not listed (Please specify)", "Prefer not to say"];

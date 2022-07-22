@@ -94,7 +94,7 @@ export default function AppFooter() {
               gap: { xs: "20px", md: "50px" }
             }}
           >
-            <Typography fontSize={"16px"} component="h6" sx={{ whiteSpace: "nowrap" }}>
+            <Typography fontSize={"16px"} component="h6" sx={{ whiteSpace: "nowrap", color: "common.white" }}>
               Supported by
             </Typography>
             <Box

@@ -169,7 +169,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
   );
 
   return (
-    <>
+    <Box data-testid="tree-view">
       <Autocomplete
         multiple
         disableCloseOnSelect
@@ -212,7 +212,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
           })}
         </TreeView>
       </Box>
-    </>
+    </Box>
   );
 };
 
