@@ -18,10 +18,10 @@ type Props = {
 
 const NodeTypesAutocomplete: FC<Props> = ({ onNodesTypeChange }) => {
   const router = useRouter();
-  const [value, setValue] = useState<string[]>([]);
+  const [value, setValue] = useState<NodeType[]>([]);
   const [hasBeenCleared, setHasBeenCleared] = useState(false);
 
-  const handleChange = (_: React.SyntheticEvent, newValue: string[]) => {
+  const handleChange = (_: React.SyntheticEvent, newValue: NodeType[]) => {
     if (newValue.length === 0) {
       setHasBeenCleared(true);
     }
@@ -30,7 +30,9 @@ const NodeTypesAutocomplete: FC<Props> = ({ onNodesTypeChange }) => {
   };
 
   useEffect(() => {
-    const nodeTypes = (getQueryParameter(router.query.nodeTypes) || "").split(",").filter(el => el !== "");
+    const nodeTypes = (getQueryParameter(router.query.nodeTypes) || "")
+      .split(",")
+      .filter(el => el !== "") as NodeType[];
 
     if (value.length === 0 && nodeTypes.length > 0 && !hasBeenCleared) {
       setValue(nodeTypes);
