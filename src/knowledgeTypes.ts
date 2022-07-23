@@ -15,8 +15,8 @@ export enum NodeType {
   "Sequel" = "Sequel",
   "Advertisement" = "Advertisement",
   "News" = "News",
-  "Private" = "Private"
-  // "Tag" = "Tag"
+  "Private" = "Private",
+  "Tag" = "Tag"
 }
 
 export type KnowledgeNodeContributor = {
