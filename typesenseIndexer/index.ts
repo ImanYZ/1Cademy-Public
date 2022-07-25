@@ -29,7 +29,7 @@ const firebaseApp: App = initializeApp({
   } as any)
 });
 
-const db = getFirestore(firebaseApp);
+export const db = getFirestore(firebaseApp);
 
 const getUsersFromFirestore = async () => {
   let users: { name: string; username: string; imageUrl: string }[] = [];

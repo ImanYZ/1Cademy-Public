@@ -20,6 +20,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
     apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string
   });
 
+  if (q.length === 0) {
+    const defaultInstitutions =
+      process.env.NODE_ENV === "production"
+        ? require("@/lib/datasets/defaultInstitutions.prod.json")
+        : require("@/lib/datasets/defaultInstitutions.dev.json");
+
+    const response: ResponseAutocompleteFilter = {
+      results: defaultInstitutions
+    };
+    res.status(200).json(response);
+    return;
+  }
+
   try {
     const searchParameters: SearchParams = { q, query_by: "name" };
     const searchResults = await client

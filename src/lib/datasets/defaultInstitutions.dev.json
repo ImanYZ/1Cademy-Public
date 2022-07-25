@@ -1,0 +1,47 @@
+[
+  {
+    "id": "4OPPdHAnHCgeFWsjjHcL",
+    "name": "Smith College",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/Smith%20College.png"
+  },
+  {
+    "id": "K1zf4s9wKU6JILSWY073",
+    "name": "Ohio State University, Columbus",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/Ohio%20State%20University,%20Columbus.png"
+  },
+  {
+    "id": "SrFGUXJBzcQFXUsAJRpp",
+    "name": "University of Michigan - Ann Arbor",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/University%20of%20Michigan%20-%20Ann%20Arbor.png"
+  },
+  {
+    "id": "Xmqy9B19AWaxWqfw2at0",
+    "name": "Grinnell College",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/Grinnell%20College.png"
+  },
+  {
+    "id": "hlIJBZ9lBsvc8NUKG1G4",
+    "name": "University of California, Davis",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/University%20of%20California,%20Davis.png"
+  },
+  {
+    "id": "iT8fEHSiyYafUnQXF4Mh",
+    "name": "San Jose State University",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/San%20Jose%20State%20University.png"
+  },
+  {
+    "id": "owXvduwlSHjJf4yMRtvB",
+    "name": "Rutgers University, Newark",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/Rutgers%20University,%20Newark.png"
+  },
+  {
+    "id": "uOC9pUfXU88MuOmsi1Od",
+    "name": "Michigan State University",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/Michigan%20State%20University.png"
+  },
+  {
+    "id": "ut2jO7Ti1CEELNat4vGF",
+    "name": "University of California, Berkeley",
+    "imageUrl": "https://storage.googleapis.com/onecademy-dev.appspot.com/Logos/University%20of%20California,%20Berkeley.png"
+  }
+]
