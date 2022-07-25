@@ -1,5 +1,4 @@
-import axios, { AxiosRequestHeaders } from "axios";
-import { getAuth } from "firebase/auth";
+import axios from "axios";
 
 function getErrorMessage(error: any) {
   const response = error.response;
@@ -21,26 +20,6 @@ const adapter = axios.create({
     Accept: "application/json"
   }
 });
-
-// Add a request interceptor
-adapter.interceptors.request.use(
-  async request => {
-    const auth = getAuth();
-    try {
-      const token = await auth.currentUser?.getIdToken(true);
-      if (token && token.length > 0) {
-        (request.headers as AxiosRequestHeaders).Authorization = token;
-      }
-    } catch (error) {
-      console.log("axios - cannot get tokenid");
-    }
-
-    return request;
-  },
-  error => {
-    Promise.reject(error);
-  }
-);
 
 adapter.interceptors.response.use(
   response => {
