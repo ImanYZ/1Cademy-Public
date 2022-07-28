@@ -7,5 +7,13 @@ module.exports = {
   },
   experimental: {
     outputStandalone: true
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/sitemap-:nodeId.xml",
+        destination: "/sitemap/:nodeId"
+      }
+    ];
   }
 };
