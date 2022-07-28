@@ -159,43 +159,14 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         sx={{ mb: "16px" }}
       />
 
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+      {/* <Box></Box> */}
+
+      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
         <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
-        <Box sx={{ mb: "16px" }}>
+        <Box>
           <Box>
             The data that is generated when you participate in 1Cademy will be used for research by investigators at the
-            University of Michigan School of Information. For more information, please read this <b>Informed Consent</b>
-            . By clicking "Sign Up," you acknowledge that you agree to 1Cademy's{" "}
-            <Link
-              onClick={() => {
-                setFieldValue("clickedTOS", true);
-                setOpenTermsOfUse(true);
-              }}
-              sx={{ cursor: "pointer", textDecoration: "none" }}
-            >
-              Terms of Use
-            </Link>
-            ,{" "}
-            <Link
-              onClick={() => {
-                setFieldValue("clickedPP", true);
-                setOpenPrivacyPolicy(true);
-              }}
-              sx={{ cursor: "pointer", textDecoration: "none" }}
-            >
-              Privacy Policy
-            </Link>
-            ,{" "}
-            <Link
-              onClick={() => {
-                setFieldValue("clickedCP", true);
-                setOpenCookiePolicy(true);
-              }}
-              sx={{ cursor: "pointer", textDecoration: "none" }}
-            >
-              Cookie Policy
-            </Link>{" "}
-            and{" "}
+            University of Michigan School of Information. For more information, please read this{" "}
             <Link
               onClick={() => {
                 setFieldValue("clickedConsent", true);
@@ -203,9 +174,8 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
               }}
               sx={{ cursor: "pointer", textDecoration: "none" }}
             >
-              the Informed Consent
+              the Informed Consent.
             </Link>
-            .
           </Box>
           {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
             <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
@@ -213,6 +183,40 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
             </FormHelperText>
           )}
         </Box>
+      </Box>
+
+      <Box sx={{ mb: "16px" }}>
+        By clicking "Sign Up," you acknowledge that you agree to 1Cademy's{" "}
+        <Link
+          onClick={() => {
+            setFieldValue("clickedTOS", true);
+            setOpenTermsOfUse(true);
+          }}
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Terms of Use
+        </Link>
+        ,{" "}
+        <Link
+          onClick={() => {
+            setFieldValue("clickedPP", true);
+            setOpenPrivacyPolicy(true);
+          }}
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Privacy Policy
+        </Link>{" "}
+        and{" "}
+        <Link
+          onClick={() => {
+            setFieldValue("clickedCP", true);
+            setOpenCookiePolicy(true);
+          }}
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Cookie Policy
+        </Link>
+        .
       </Box>
 
       <Suspense

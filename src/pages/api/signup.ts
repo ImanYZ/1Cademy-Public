@@ -222,7 +222,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       theme: data.theme,
       background: data.background,
       practicing: false,
-      userId: userRecord.uid
+      userId: userRecord.uid,
+      consented: data.consented
     };
 
     batch.set(userRef, userData);

@@ -143,7 +143,7 @@ const SignUpPage: NextPageWithLayout = () => {
     institution: yup.string().required("Please enter your institution").nullable(),
     major: yup.string().required("Please enter your major").nullable(),
     fieldOfInterest: yup.string().required("Please enter your field of interest"),
-    signUpAgreement: yup.boolean().isTrue("Please accept terms to continue")
+    signUpAgreement: yup.boolean().isTrue("Please accept the Informed Consent to continue")
   });
 
   const handleSignUp = async (values: SignUpFormValues) => {
@@ -174,7 +174,8 @@ const SignUpPage: NextPageWithLayout = () => {
       deMajor: values.major as string,
       deInstit: values.institution as string,
       theme: values.theme,
-      background: values.background as string
+      background: values.background as string,
+      consented: values.signUpAgreement
     };
     mutateSignUp.mutate(user);
   };
