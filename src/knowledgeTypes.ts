@@ -1,4 +1,8 @@
+import { EmotionCache } from "@emotion/utils";
 import { Timestamp } from "firebase-admin/firestore";
+import { AppProps } from "next/app";
+import { NextPage } from "next/types";
+import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
 export enum NodeType {
   "Relation" = "Relation",
@@ -46,26 +50,26 @@ export type KnowledgeChoice = {
 };
 
 export type ReferencesArray = {
-  referenceIds: string[],
-  referenceLabels: string[],
-  references: string[],
-}
+  referenceIds: string[];
+  referenceLabels: string[];
+  references: string[];
+};
 
 export type LinkedNodeObject = {
-  node: string,
-  title: string,
-  label: string
-}
+  node: string;
+  title: string;
+  label: string;
+};
 
 export type TagsArray = {
-  tagIds: string[],
-  tags: string[],
-}
+  tagIds: string[];
+  tags: string[];
+};
 
 export type LinkedNodeTag = {
-  node: string,
-  title: string,
-}
+  node: string;
+  title: string;
+};
 
 export type NodeFireStore = {
   aChooseUname?: boolean;
@@ -311,16 +315,189 @@ export type Feedback = FeedbackInput & {
 };
 
 export type ProposalInput = {
-  children: LinkedNodeObject[],
-  content: string,
-  parents: LinkedNodeObject[],
+  children: LinkedNodeObject[];
+  content: string;
+  parents: LinkedNodeObject[];
   referenceIds?: string[];
   referenceLabels?: string[];
   references?: string[] | { node: string; title?: string; label?: string }[];
   tagIds?: string[];
   tags?: string[] | { node: string; title?: string; label?: string }[];
-  title: string,
-  node: string,
-  summary: string,
+  title: string;
+  node: string;
+  summary: string;
   choices?: KnowledgeChoice[];
+};
+
+export type User = {
+  background?: string;
+  blocked?: boolean;
+  chooseUname?: boolean;
+  city?: string;
+  clickedConsent?: boolean;
+  clickedCP?: boolean;
+  clickedPP?: boolean;
+  clickedTOS?: boolean;
+  color?: string;
+  consented?: boolean;
+  country?: string;
+  createdAt?: Timestamp;
+  deCourse?: string;
+  deCredits?: number;
+  deInstit?: string;
+  deMajor?: string;
+  email: string;
+  ethnicity?: string[];
+  fName?: string;
+  gender?: string;
+  imageUrl?: string;
+  imgOrColor?: boolean;
+  lName?: string;
+  lang?: string;
+  practicing?: boolean;
+  stateInfo?: string;
+  sNode?: string;
+  tag?: string;
+  tagId?: string;
+  theme?: string;
+  uname: string;
+  updatedAt?: Timestamp;
+  userId?: string;
+  state?: string;
+  stateId?: string;
+  education?: string;
+  birthDate?: string;
+  foundFrom?: string;
+  occupation?: string;
+  reason?: string;
+  major?: string;
+  instit?: string;
+};
+
+export interface AuthState {
+  readonly isAuthenticated: boolean;
+  readonly isAuthInitialized: boolean;
+  readonly user: User | null;
 }
+
+export type AuthActions = {
+  dispatch: Dispatch<DispatchAuthActions>;
+  handleError: (options: ErrorOptions) => void;
+};
+
+export type ErrorOptions = {
+  error: unknown;
+  showErrorToast?: boolean;
+  errorMessage?: string;
+};
+
+export type AuthLogoutSuccessAction = {
+  type: "logoutSuccess";
+};
+
+export type AuthLoginSuccessAction = {
+  type: "loginSuccess";
+  payload: User;
+};
+export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
+
+export type SignUpValidation = {
+  uname?: string;
+  email?: string;
+  institutionName?: String;
+};
+
+export type ResponseAPI<T> = {
+  results?: T;
+  errorMessage?: string;
+};
+
+export interface SignUpFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+  passwordConfirmation: string;
+  theme: "Light" | "Dark";
+  background: "Image" | "Color";
+  chooseUname: boolean;
+  tagId: string;
+  tag: string;
+  // -----------------------
+  language: string;
+  birthDate: string;
+  gender: string | null;
+  genderOtherValue: string;
+  ethnicity: string[];
+  ethnicityOtherValue: string;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  reason: string;
+  foundFrom: string | null;
+  foundFromOtherValue: string;
+  // -----------------------
+  occupation: string;
+  education: string | null;
+  institution: string | null;
+  major: string | null;
+  fieldOfInterest: string;
+  signUpAgreement: boolean;
+  clickedConsent: boolean;
+  clickedTOS: boolean;
+  clickedPP: boolean;
+  clickedCP: boolean;
+}
+
+export interface SignUpData extends User {
+  password: string;
+}
+
+export type ThemeActions = {
+  setThemeMode: Dispatch<SetStateAction<AppTheme>>;
+  themeMode: AppTheme;
+};
+
+export type AppTheme = "light" | "dark";
+
+export type AppBackground = "Color" | "Image";
+
+export type AuthLayoutActions = {
+  setBackground: Dispatch<SetStateAction<AppBackground>>;
+};
+
+export type Tag = {
+  createdAt: string;
+  node: string;
+  tagIds: string[];
+  tags: string[];
+  title: string;
+  updatedAt: string;
+  deleted?: boolean; // it appear only if tag is deleted
+};
+
+export type NextPageWithLayout<P = {}> = NextPage<P> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+export type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+  emotionCache?: EmotionCache;
+};
+
+export type Institution = {
+  id: string;
+  domains: string[];
+  logoURL: string;
+  usersNum: number;
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+};
+
+export type Major = {
+  Major: string;
+  Major_Category: string;
+};

@@ -29,7 +29,7 @@ const firebaseApp: App = initializeApp({
   } as any)
 });
 
-const db = getFirestore(firebaseApp);
+export const db = getFirestore(firebaseApp);
 
 const getUsersFromFirestore = async () => {
   let users: { name: string; username: string; imageUrl: string }[] = [];
@@ -96,12 +96,12 @@ const getNodesData = (
     return Object.entries(nodeData.contributors || {})
       .map(
         cur =>
-        ({ ...cur[1], username: cur[0] } as {
-          fullname: string;
-          imageUrl: string;
-          reputation: number;
-          username: string;
-        })
+          ({ ...cur[1], username: cur[0] } as {
+            fullname: string;
+            imageUrl: string;
+            reputation: number;
+            username: string;
+          })
       )
       .sort((a, b) => (b.reputation = a.reputation))
       .map(contributor => ({
@@ -277,7 +277,6 @@ const main = async () => {
     const nodeDocs = await db.collection("nodes").get();
     await fillNodesIndex(nodeDocs, true);
     await fillReferencesIndex(nodeDocs, true);
-
   }
   console.log(`End indexing at ${new Date().toISOString()}`);
   console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);

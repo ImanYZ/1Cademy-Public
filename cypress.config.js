@@ -1,4 +1,5 @@
 import { defineConfig } from "cypress";
+require("dotenv").config();
 
 export default defineConfig({
   env: {
@@ -20,6 +21,8 @@ export default defineConfig({
     video: false,
     setupNodeEvents(on, config) {
       require("@cypress/code-coverage/task")(on, config);
+      config.env.CYPRESS_TEST_VALID_EMAIL = process.env.CYPRESS_TEST_VALID_EMAIL;
+      config.env.CYPRESS_TEST_VALID_PASSWORD = process.env.CYPRESS_TEST_VALID_PASSWORD;
       // include any other plugin code...
 
       // It's IMPORTANT to return the config object
