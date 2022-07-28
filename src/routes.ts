@@ -1,6 +1,7 @@
 const ROUTES = {
   home: "/",
-  node: "/node"
+  node: "/node",
+  proposal: "/proposal"
 };
 
 export default ROUTES;
