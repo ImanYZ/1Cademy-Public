@@ -1,21 +1,20 @@
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
-import HelpIcon from '@mui/icons-material/Help';
-import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, CardContent, Divider, FormControl, IconButton, InputLabel, Link, MenuItem, Select, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors';
-import dayjs from 'dayjs'
+import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import HelpIcon from "@mui/icons-material/Help";
+import { LoadingButton } from "@mui/lab";
+import { Box, Button, Card, CardContent, Divider, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { FieldArray, Formik, FormikErrors, FormikHelpers } from 'formik'
-import React, { FC, ReactNode } from 'react'
+import { FieldArray, Formik, FormikErrors, FormikHelpers } from "formik";
+import React, { FC, ReactNode } from "react";
 
-import { NODE_TYPE_OPTIONS } from '../src/constants';
-import { KnowledgeChoice, KnowledgeNode, NodeType } from '../src/knowledgeTypes'
-import MarkdownRender from './Markdown/MarkdownRender'
-import { MarkdownHelper } from './MarkdownHelper'
-import NodeTypeIcon from './NodeTypeIcon'
+import { KnowledgeChoice, KnowledgeNode, NodeType } from "../src/knowledgeTypes";
+import MarkdownRender from "./Markdown/MarkdownRender";
+import { MarkdownHelper } from "./MarkdownHelper";
+import NodeTypeIcon from "./NodeTypeIcon";
 
 dayjs.extend(relativeTime);
 
@@ -33,55 +32,65 @@ type Props = {
   references: ReactNode;
   tags: ReactNode;
   onSubmit: (formValues: ProposalFormValues) => Promise<void>;
-  onCancel: () => void
-}
+  onCancel: () => void;
+};
 
 export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, onSubmit, onCancel }) => {
-
   const initialValues: ProposalFormValues = {
-    title: node.title || '',
-    content: node.content || '',
-    reasons: '',
+    title: node.title || "",
+    content: node.content || "",
+    reasons: "",
     nodeType: node.nodeType || NodeType.Advertisement,
-    questions: node.choices ? [...node.choices] : [],
-  }
+    questions: node.choices ? [...node.choices] : []
+  };
 
   const validate = (values: ProposalFormValues) => {
-    let errors: FormikErrors<ProposalFormValues> = {}
-    const fillDefaultErrorQuestions = () => errors.questions = values.questions.map(() => ({ choice: '', feedback: '' }))
-    if (!values.title) { errors.title = "required" }
+    let errors: FormikErrors<ProposalFormValues> = {};
+    const fillDefaultErrorQuestions = () =>
+      (errors.questions = values.questions.map(() => ({ choice: "", feedback: "" })));
+    if (!values.title) {
+      errors.title = "required";
+    }
     if (values.questions.length) {
       values.questions.forEach(({ feedback, choice }, idx) => {
         if (!feedback) {
-          if (!errors.questions) { fillDefaultErrorQuestions() }
-          (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback = 'required'
+          if (!errors.questions) {
+            fillDefaultErrorQuestions();
+          }
+          (errors.questions as FormikErrors<{ choice: string; feedback: string }>[])[idx].feedback = "required";
         }
 
         if (!choice) {
-          if (!errors.questions) { fillDefaultErrorQuestions() }
-          (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice = 'required'
+          if (!errors.questions) {
+            fillDefaultErrorQuestions();
+          }
+          (errors.questions as FormikErrors<{ choice: string; feedback: string }>[])[idx].choice = "required";
         }
-      })
+      });
     }
 
-    return errors
-  }
+    return errors;
+  };
 
-  const onSubmitForm = async (values: ProposalFormValues, { setSubmitting, setTouched }: FormikHelpers<ProposalFormValues>) => {
-    setSubmitting(true)
+  const onSubmitForm = async (
+    values: ProposalFormValues,
+    { setSubmitting, setTouched }: FormikHelpers<ProposalFormValues>
+  ) => {
+    setSubmitting(true);
     setTouched({
       title: true,
       questions: values.questions.map(() => ({ choice: true, feedback: true }))
-    })
+    });
 
-    await onSubmit(values)
-  }
+    await onSubmit(values);
+  };
 
-  const getToggleCorrectQuestion = (questions: { choice: string; feedback: string; correct: boolean; }[], index: number) => {
-    return questions.map((cur, idx) => idx === index
-      ? { ...cur, correct: !cur.correct }
-      : { ...cur })
-  }
+  const getToggleCorrectQuestion = (
+    questions: { choice: string; feedback: string; correct: boolean }[],
+    index: number
+  ) => {
+    return questions.map((cur, idx) => (idx === index ? { ...cur, correct: !cur.correct } : { ...cur }));
+  };
 
   return (
     <Card data-testid="node-item-full">
@@ -95,10 +104,8 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
       >
         <Formik initialValues={initialValues} validate={validate} onSubmit={onSubmitForm}>
           {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => {
-
             return (
               <form onSubmit={handleSubmit}>
-
                 <TextField
                   id="reasons"
                   name="reasons"
@@ -116,75 +123,57 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                 />
 
                 <Box sx={{ my: "8px" }}>
-                  <Typography textAlign="right">
+                  {/* <Typography textAlign="right">
                     <Link>Log in</Link> to show your name in the contributors’ list and earn points for your helpful proposals
-                  </Typography>
-                  <Box sx={{ pt: "20px", display: "flex", justifyContent: "end", gap: '10px' }}>
-                    <Button onClick={onCancel} type='button' color='secondary'>Cancel</Button>
-                    <LoadingButton type="submit" color="primary" variant="contained" loading={isSubmitting} >
+                  </Typography> */}
+                  <Box sx={{ pt: "0px", display: "flex", justifyContent: "end", gap: "10px" }}>
+                    <Button onClick={onCancel} type="button" color="secondary">
+                      Cancel
+                    </Button>
+                    <LoadingButton type="submit" color="primary" variant="contained" loading={isSubmitting}>
                       Propose changes
                     </LoadingButton>
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: '8px' }} />
+                <Divider sx={{ my: "8px" }} />
 
                 <MarkdownHelper />
 
-                <FormControl sx={{ width: '200px' }} margin="normal">
-                  <InputLabel id="nodeTypeLabel">Node Type</InputLabel>
-                  <Select
-                    labelId="nodeTypeLabel"
-                    id="nodeType"
-                    name="nodeType"
-                    value={values.nodeType}
-                    label="Node Type"
-                    onChange={(event: SelectChangeEvent) => {
-                      const value = event.target.value as string
-                      setFieldValue('nodeType', value)
-                      setFieldValue('questions', value === NodeType.Question ? [{ choice: '', feedback: '', correct: false }] : [])
-                    }}
-                  >
-                    {
-                      NODE_TYPE_OPTIONS.map((cur, idx) => (
-                        <MenuItem value={cur} key={idx}>
-                          <Box display={'flex'}>
-                            <NodeTypeIcon sx={{ mr: 1 }} nodeType={cur} />
-                            {cur}
-                          </Box>
-                        </MenuItem>
-                      ))
-                    }
-                  </Select>
-                </FormControl>
+                {values.nodeType === NodeType.Question && (
+                  <Box>
+                    <>
+                      <Box sx={{ display: "flex", color: grey[600], my: "32px" }}>
+                        <Typography>Add choices to your question</Typography> <HelpIcon sx={{ ml: "10px" }} />
+                      </Box>
 
-                {values.nodeType === NodeType.Question && <Box>
-                  <>
-                    <Box sx={{ display: 'flex', color: grey[600], my: '32px' }}>
-                      <Typography>Add choices to your question</Typography> <HelpIcon sx={{ ml: '10px' }} />
-                    </Box>
-
-                    {/* questions */}
-                    <FieldArray name="questions">
-                      {({ remove, push }) => (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {
-                            values.questions.map(({ choice, feedback, correct }, idx) => (
-                              <Box key={idx} sx={{ display: 'flex' }}>
-                                <Box sx={{ pr: '23px' }}>
-                                  <IconButton onClick={() => setFieldValue(
-                                    'questions',
-                                    getToggleCorrectQuestion(values.questions, idx))
-                                  }>
-                                    {
-                                      correct
-                                        ? <CheckIcon color='success' />
-                                        : <CloseIcon color='error' />
+                      {/* questions */}
+                      <FieldArray name="questions">
+                        {({ remove, push }) => (
+                          <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            {values.questions.map(({ choice, feedback, correct }, idx) => (
+                              <Box key={idx} sx={{ display: "flex" }}>
+                                <Box sx={{ pr: "23px" }}>
+                                  <IconButton
+                                    onClick={() =>
+                                      setFieldValue("questions", getToggleCorrectQuestion(values.questions, idx))
                                     }
+                                  >
+                                    {correct ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
                                   </IconButton>
                                 </Box>
-                                <Box sx={{ width: '100%', p: '16px', position: 'relative', background: '#fafafa' }}>
-                                  <Box sx={{ display: 'flex', justifyContent: 'end', gap: '10px', position: 'absolute', color: grey[600], right: '0px', top: '0px' }}>
+                                <Box sx={{ width: "100%", p: "16px", position: "relative", background: "#fafafa" }}>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "end",
+                                      gap: "10px",
+                                      position: "absolute",
+                                      color: grey[600],
+                                      right: "0px",
+                                      top: "0px"
+                                    }}
+                                  >
                                     <IconButton onClick={() => remove(idx)}>
                                       <DeleteIcon />
                                     </IconButton>
@@ -197,14 +186,20 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     variant="standard"
-                                    margin='dense'
+                                    margin="dense"
                                     error={Boolean(
                                       errors.questions &&
-                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice &&
-                                      touched.questions &&
-                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].choice
+                                        (errors.questions as FormikErrors<{ choice: string; feedback: string }>[])[
+                                          idx
+                                        ] &&
+                                        (errors.questions as FormikErrors<{ choice: string; feedback: string }>[])[idx]
+                                          .choice &&
+                                        touched.questions &&
+                                        (touched.questions as FormikErrors<{ choice: string; feedback: string }>[])[
+                                          idx
+                                        ] &&
+                                        (touched.questions as FormikErrors<{ choice: string; feedback: string }>[])[idx]
+                                          .choice
                                     )}
                                     fullWidth
                                   />
@@ -217,31 +212,40 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                                     onBlur={handleBlur}
                                     error={Boolean(
                                       errors.questions &&
-                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                      (errors.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback &&
-                                      touched.questions &&
-                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx] &&
-                                      (touched.questions as FormikErrors<{ choice: string; feedback: string; }>[])[idx].feedback
+                                        (errors.questions as FormikErrors<{ choice: string; feedback: string }>[])[
+                                          idx
+                                        ] &&
+                                        (errors.questions as FormikErrors<{ choice: string; feedback: string }>[])[idx]
+                                          .feedback &&
+                                        touched.questions &&
+                                        (touched.questions as FormikErrors<{ choice: string; feedback: string }>[])[
+                                          idx
+                                        ] &&
+                                        (touched.questions as FormikErrors<{ choice: string; feedback: string }>[])[idx]
+                                          .feedback
                                     )}
                                     variant="standard"
-                                    margin='dense'
+                                    margin="dense"
                                     fullWidth
                                   />
                                 </Box>
                               </Box>
-                            ))
-                          }
-                          <Box>
-                            <Button color='secondary' onClick={() => push({ choice: '', feedback: '', correct: false })}>
-                              <AddIcon sx={{ mr: '10px' }} />Add choice
-                            </Button>
+                            ))}
+                            <Box>
+                              <Button
+                                color="secondary"
+                                onClick={() => push({ choice: "", feedback: "", correct: false })}
+                              >
+                                <AddIcon sx={{ mr: "10px" }} />
+                                Add choice
+                              </Button>
+                            </Box>
                           </Box>
-                        </Box>
-                      )}
-                    </FieldArray>
-                  </>
-                </Box>}
-
+                        )}
+                      </FieldArray>
+                    </>
+                  </Box>
+                )}
 
                 <TextField
                   id="title"
@@ -272,7 +276,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                 />
 
                 <Box>
-                  <Typography component='h2' sx={{ fontSize: '30px', mb: '32px', mt: '10px' }}>
+                  <Typography component="h2" sx={{ fontSize: "30px", mb: "32px", mt: "10px" }}>
                     <MarkdownRender text={values.title} />
                   </Typography>
                   <Typography
@@ -302,15 +306,14 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                   )}
                 </Box>
 
-                <Divider sx={{ my: '32px' }} />
+                <Divider sx={{ my: "32px" }} />
                 <Box>{tags}</Box>
                 <Box>{references}</Box>
               </form>
-            )
+            );
           }}
         </Formik>
-
       </CardContent>
-    </Card >
-  )
-}
+    </Card>
+  );
+};
