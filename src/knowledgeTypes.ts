@@ -505,7 +505,15 @@ export type Major = {
 export type NodeUser = {
   title: string;
   content: string;
-  left?: number;
-  top?: number;
-  // width: number,
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  x?: number;
+  y?: number;
+};
+
+export type Point = {
+  x: number;
+  y: number;
 };

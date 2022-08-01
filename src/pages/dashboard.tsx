@@ -1,77 +1,230 @@
+import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 import dagre from "dagre";
 import { useCallback, useEffect, useState } from "react";
-// eslint-disable-next-line no-use-before-define
-/*eslint-disable */
 import { MapInteractionCSS } from "react-map-interaction";
 
-/*eslint-enable */
+import Line from "../components/map/Line/Line";
 import Node from "../components/map/Node";
 // import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
-import { NodeUser } from "../knowledgeTypes";
+import { NodeUser, Point } from "../knowledgeTypes";
 import { dag1, NODE_HEIGHT, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 
 const NODES: { [key: string]: NodeUser } = {
   n1: {
     title: "title node 1",
-    content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas pharetra dapibus vulputate. Ut semper nulla mi. In ex augue, interdum nec tempor ut, iaculis in odio. Quisque eget aliquam libero. Ut fringilla pulvinar lacus, nec vulputate nulla efficitur eu. Aliquam eget ligula lacus. Nam eu sapien eget nunc convallis fermentum eget quis odio. Sed quis tellus eget elit placerat tincidunt. Nam pretium laoreet nunc in rhoncus. Nunc lacinia tempus risus vitae interdum. Sed eget magna ultricies, scelerisque odio nec, pellentesque massa."
+    content: "",
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0
   },
   n2: {
     title: "title node 2",
-    content:
-      "Mauris odio ligula, fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu."
+    content: "",
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0
   },
   n3: {
     title: "title node 3",
     content:
-      "Sdf  sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu."
+      "Sdf  sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0
   },
   n4: {
     title: "title node 4",
     content:
-      "Mauris odi fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu."
+      "Mauris odi fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0
   },
   n5: {
     title: "title node 5",
     content:
-      "Mauris odio ligula, fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu."
+      "Mauris odio ligula, fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0
   }
 };
+
+type Edge = { from: string; to: string };
+const EDGES: Edge[] = [
+  { from: "n1", to: "n2" },
+  { from: "n2", to: "n5" }
+];
+
+type EdgeProcess = { from: Point; to: Point };
+// const EDGES: EdgeProcess[] = []
 
 type DashboardProps = {};
 
 const Dashboard = ({}: DashboardProps) => {
   // dag1.setNode("kspacey", { label: 'sdfkdsf', width: 144, height: 100 });
   // dag1.setNode("sdfsdf", { label: 'sdfkdsf', width: 144, height: 100 });
-  const [mapRendered, setMapRendered] = useState(false);
-  // const [nodes, setNodes] = useState<{ [key: string]: NodeUser }>({});
+  const [mapChanged, setMapChanged] = useState(false);
+  const [nodes, setNodes] = useState<{ [key: string]: NodeUser }>({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [edges, setEdges] = useState<EdgeProcess[]>([]);
 
-  const getNodes = () => {
-    return dag1.nodes().map(cur => {
+  // const getNodes = () => {
+  //   return dag1.nodes().map(cur => {
+  //     const nodeN = dag1.node(cur);
+  //     console.log("nodeN", nodeN);
+  //     const node = NODES[cur];
+  //     const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
+  //     const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
+  //     return { id: cur, node: { ...node, left: newLeft, top: newTop } };
+  //   });
+  // };
+
+  const showDaggerState = () => {
+    dag1.nodes().map((cur, idx) => {
       const nodeN = dag1.node(cur);
-      console.log("nodeN", nodeN);
-      const node = NODES[cur];
       const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
       const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-      return { id: cur, node: { ...node, left: newLeft, top: newTop } };
+      console.log("Node from dagre", idx, newLeft, newTop);
     });
   };
 
   const nodeChanged = useCallback(
     (nodeRef, nodeId: string) => {
-      console.log("nodeRef:", nodeRef);
-      const nodeFromGraph = dag1.node(nodeId);
-      if (!nodeFromGraph) return;
+      console.log("------> nodeChanged", nodeId);
+      // const nodeFromGraph = dag1.node(nodeId);
+      // if (!nodeFromGraph) return;
 
-      if (!nodeRef.current) return;
+      // if (!nodeRef.current) return;
 
-      console.log("nodeRef.current.offsetHeight", nodeRef.current.offsetHeight, NODE_HEIGHT);
-      const newHeight = nodeRef.current.offsetHeight || NODE_HEIGHT;
-      dag1.setNode(nodeId, { ...nodeFromGraph, height: newHeight });
+      // const newHeight = nodeRef.current.offsetHeight || NODE_HEIGHT;
+      // dag1.setNode(nodeId, { ...nodeFromGraph, height: newHeight });
+      // dagre.layout(dag1);
+
+      // const nodeN = dag1.node(nodeId);
+      // const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
+      // const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
+
+      // setNodes(oldNodes => {
+      //   const tmp = { ...oldNodes }
+      //   tmp[nodeId].left = newLeft;
+      //   tmp[nodeId].top = newTop;
+      //   tmp[nodeId].height = nodeRef.current.offsetHeight || NODE_HEIGHT
+      //   tmp[nodeId].width = nodeRef.current.offsetWidth || NODE_WIDTH
+      //   return tmp
+      // })
+
+      // const newUserEdges = dag1.edges().map((edgeId): EdgeProcess => {
+      //   // edgeId.v
+      //   // edgeId.w
+      //   const fromNode = nodes[edgeId.v]
+      //   const toNode = nodes[edgeId.w]
+      //   // const { points } = dag1.edge(edgeId)
+
+      //   // console.log('currentEdge', currentEdge)
+
+      //   const newFromX = fromNode.left + NODE_WIDTH;
+      //   const newFromY = fromNode.top + Math.floor(fromNode.height / 2);
+      //   // const newFromY = fromNode.top + Math.floor(NODE_HEIGHT / 2);
+      //   const newToX = toNode.left;
+      //   const newToY = toNode.top + Math.floor(toNode.height / 2);
+      //   // const newToY = toNode.top + Math.floor(NODE_HEIGHT / 2);
+      //   return { from: { x: newFromX, y: newFromY }, to: { x: newToX, y: newToY } }
+      // })
+
+      // // // const newUserEdges: EdgeProcess[] = dag1.edges().map((edgeId): EdgeProcess => {
+      // // //   const { points } = dag1.edge(edgeId)
+      // // //   // return { from: points[0], to: points[2] }
+      // // //   return {
+      // // //     from: { x: points[0].x + XOFFSET, y: points[0].y + YOFFSET },
+      // // //     to: { x: points[2].x + XOFFSET, y: points[2].y + YOFFSET },
+      // // //   }
+      // // // })
+
+      // setEdges(newUserEdges)
+      // export const setDagEdge = (from, to, edge, oldEdges) => {
+      //   // console.log("In setDagEdge");
+      //   // checks that the from and to nodes exist in map
+      //   if (dag1[0].hasNode(from) && dag1[0].hasNode(to)) {
+      //     const edgeId = from + "-" + to;
+      //     const newEdge = { ...edge };
+      //     dag1[0].setEdge(from, to, newEdge);
+      //     // adds newEdge to oldEdges
+      //     oldEdges[edgeId] = newEdge;
+      //   }
+      //   return oldEdges;
+      // };
+
+      // const nodeFromDagre = dag1.node(nodeId)
+      const node = nodes[nodeId];
+      console.log(nodeId);
+      console.log("----->NODE:", node);
+      // build new Node
+      let newNode: NodeUser = { ...node };
+
+      newNode.width = node?.width !== undefined ? node.width : NODE_WIDTH;
+      newNode.height = node?.height !== undefined ? node.height : NODE_HEIGHT;
+      if (node.left) newNode.left = node.left;
+      if (node.top) newNode.top = node.top;
+      if (node.top) newNode.top = node.top;
+      if (node.x) newNode.x = node.x;
+      if (node.y) newNode.y = node.y;
+
+      // set dag node
+      dag1.setNode(nodeId, newNode);
+      // set Nodes
+
+      setNodes(oldNodes => ({ ...oldNodes, [nodeId]: newNode }));
+      setMapChanged(true);
     },
-    [mapRendered]
+    [nodes]
   );
+
+  useEffect(() => {
+    console.log("------>  WORKED");
+    // simulates the worker.js
+
+    // Update cluster
+
+    // ITERATE oldNodes
+    // get every node (nodeN) calculated by dagre
+    // calculate OFFSETs
+    // update with setDagNode
+    // calculate map
+
+    Object.entries(NODES).forEach(([key]) => dag1.setNode(key, { width: NODE_WIDTH, height: NODE_HEIGHT }));
+    EDGES.forEach(({ from, to }) => {
+      dag1.setEdge(from, to);
+    });
+
+    dagre.layout(dag1);
+
+    const newUserNodes = dag1.nodes().reduce((acu, cur) => {
+      const nodeN = dag1.node(cur);
+      const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
+      const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
+      return {
+        ...acu,
+        [cur]: {
+          ...NODES[cur],
+          left: newLeft,
+          top: newTop
+        }
+      };
+    }, {});
+
+    setNodes(newUserNodes);
+    // setEdges(newUserEdges)
+    // setMapRendered(true);
+
+    // ITERATE EDGES and calculate the new positions
+  }, [mapChanged]);
 
   // const nodeChanged = useMemoizedCallback(
   //   (nodeRef: any, nodeId: string, content: string, title: string, imageLoaded: boolean, openPart: boolean) => {
@@ -126,14 +279,6 @@ const Dashboard = ({}: DashboardProps) => {
   //   [mapRendered, allTags]
   // );
 
-  useEffect(() => {
-    console.log("will fill");
-    Object.entries(NODES).forEach(([key]) => dag1.setNode(key, { with: NODE_WIDTH, height: NODE_HEIGHT }));
-    console.log("will reacalculate dagre");
-    dagre.layout(dag1);
-    setMapRendered(true);
-  }, []);
-
   // useEffect(() => {
   //   console.log('check if we can render')
   //   if (mapRendered) {
@@ -144,6 +289,7 @@ const Dashboard = ({}: DashboardProps) => {
   //   }
   // }, [mapRendered])
 
+  console.log("Nodes", edges);
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       <MapInteractionCSS>
@@ -151,9 +297,14 @@ const Dashboard = ({}: DashboardProps) => {
         {/* link list */}
         {/* node list */}
         {/* {Object.entries(NODES).map(([, value], idx) => <Node key={idx} node={value} />)} */}
-        {getNodes().map((cur, idx) => (
-          <Node key={idx} nodeId={cur.id} node={cur.node} nodeChanged={nodeChanged} />
-        ))}
+        <Button onClick={showDaggerState}>get Nodes</Button>
+        {Object.entries(nodes).map(([key, nodeValue], idx) => {
+          console.log("nodeValue:insidemap", nodeValue);
+          return <Node key={idx} nodeId={key} node={nodeValue} nodeChanged={nodeChanged} />;
+        })}
+        {edges.map(({ from, to }, idx) => {
+          return <Line key={idx} from={from} to={to} label="" leftDirection color="rgb(1, 211, 106)" />;
+        })}
         dash
       </MapInteractionCSS>
     </Box>

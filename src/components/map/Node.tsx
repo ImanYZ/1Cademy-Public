@@ -7,7 +7,7 @@ import { NODE_WIDTH } from "../../lib/utils/Map.utils";
 type NodeProps = {
   nodeId: string;
   node: NodeUser;
-  nodeChanged: (nodeRef, nodeId: string) => void;
+  nodeChanged: (nodeRef: any, nodeId: string) => void;
 };
 
 const Node = ({ nodeId, node, nodeChanged }: NodeProps) => {
@@ -16,10 +16,11 @@ const Node = ({ nodeId, node, nodeChanged }: NodeProps) => {
   useEffect(() => {
     setTimeout(() => {
       nodeChanged(ref, nodeId);
-    }, 700);
-  }, [node]);
-  // console.log(node)
+    }, 10);
+  }, [nodeChanged, node]);
+
   const { title, content, left, top } = node;
+  console.log("::", title, left, top);
   return (
     <div
       ref={ref}
@@ -29,7 +30,8 @@ const Node = ({ nodeId, node, nodeChanged }: NodeProps) => {
         top: top ? top : 1000,
         position: "absolute",
         border: "solid 2px #fdc473",
-        backgroundColor: "#1f1f1f"
+        backgroundColor: "#1f1f1f",
+        boxSizing: "border-box"
       }}
     >
       <h1>{title}</h1>
