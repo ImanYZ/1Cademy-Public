@@ -501,3 +501,11 @@ export type Major = {
   Major: string;
   Major_Category: string;
 };
+
+export type NodeUser = {
+  title: string;
+  content: string;
+  left?: number;
+  top?: number;
+  // width: number,
+};

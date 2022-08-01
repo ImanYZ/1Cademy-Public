@@ -46,3 +46,5 @@ export const EDUCATION_VALUES = [
   "Current undergraduate student",
   "Prefer not to say"
 ];
+
+// export const NODE_WIDTH = 580
