@@ -507,8 +507,8 @@ export type NodeUser = {
   content: string;
   left: number;
   top: number;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   x?: number;
   y?: number;
 };

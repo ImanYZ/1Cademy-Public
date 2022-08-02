@@ -13,7 +13,8 @@ import { dag1, NODE_HEIGHT, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Ma
 const NODES: { [key: string]: NodeUser } = {
   n1: {
     title: "title node 1",
-    content: "",
+    content:
+      "Sdf  sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
     left: 0,
     top: 0,
     width: 0,
@@ -71,6 +72,7 @@ const Dashboard = ({}: DashboardProps) => {
   // dag1.setNode("kspacey", { label: 'sdfkdsf', width: 144, height: 100 });
   // dag1.setNode("sdfsdf", { label: 'sdfkdsf', width: 144, height: 100 });
   const [mapChanged, setMapChanged] = useState(false);
+  const [mapRendered, setMapRendered] = useState(false);
   const [nodes, setNodes] = useState<{ [key: string]: NodeUser }>({});
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [edges, setEdges] = useState<EdgeProcess[]>([]);
@@ -78,7 +80,7 @@ const Dashboard = ({}: DashboardProps) => {
   // const getNodes = () => {
   //   return dag1.nodes().map(cur => {
   //     const nodeN = dag1.node(cur);
-  //     console.log("nodeN", nodeN);
+
   //     const node = NODES[cur];
   //     const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
   //     const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
@@ -87,17 +89,21 @@ const Dashboard = ({}: DashboardProps) => {
   // };
 
   const showDaggerState = () => {
-    dag1.nodes().map((cur, idx) => {
-      const nodeN = dag1.node(cur);
-      const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
-      const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-      console.log("Node from dagre", idx, newLeft, newTop);
-    });
+    console.log("show dagger");
+    // dag1.nodes().map((cur, idx) => {
+    //   const nodeN = dag1.node(cur);
+    //   // const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
+    //   // const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
+
+    // });
   };
 
   const nodeChanged = useCallback(
     (nodeRef, nodeId: string) => {
-      console.log("------> nodeChanged", nodeId);
+      console.log("[NODE CHANGED]", mapRendered);
+      if (!mapRendered) return;
+      if (!nodeRef.current) return;
+      console.log("[node changed]");
       // const nodeFromGraph = dag1.node(nodeId);
       // if (!nodeFromGraph) return;
 
@@ -127,8 +133,6 @@ const Dashboard = ({}: DashboardProps) => {
       //   const toNode = nodes[edgeId.w]
       //   // const { points } = dag1.edge(edgeId)
 
-      //   // console.log('currentEdge', currentEdge)
-
       //   const newFromX = fromNode.left + NODE_WIDTH;
       //   const newFromY = fromNode.top + Math.floor(fromNode.height / 2);
       //   // const newFromY = fromNode.top + Math.floor(NODE_HEIGHT / 2);
@@ -149,7 +153,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       // setEdges(newUserEdges)
       // export const setDagEdge = (from, to, edge, oldEdges) => {
-      //   // console.log("In setDagEdge");
+
       //   // checks that the from and to nodes exist in map
       //   if (dag1[0].hasNode(from) && dag1[0].hasNode(to)) {
       //     const edgeId = from + "-" + to;
@@ -163,72 +167,101 @@ const Dashboard = ({}: DashboardProps) => {
 
       // const nodeFromDagre = dag1.node(nodeId)
       const node = nodes[nodeId];
-      console.log(nodeId);
-      console.log("----->NODE:", node);
+
       // build new Node
       let newNode: NodeUser = { ...node };
 
-      newNode.width = node?.width !== undefined ? node.width : NODE_WIDTH;
-      newNode.height = node?.height !== undefined ? node.height : NODE_HEIGHT;
-      if (node.left) newNode.left = node.left;
-      if (node.top) newNode.top = node.top;
-      if (node.top) newNode.top = node.top;
-      if (node.x) newNode.x = node.x;
-      if (node.y) newNode.y = node.y;
+      const newHeight = nodeRef.current.offsetHeight || NODE_HEIGHT;
+
+      newNode.width = node?.width ? node.width : NODE_WIDTH;
+      // newNode.height = node?.height ? node.height : NODE_HEIGHT;
+      newNode.height = newHeight;
+      if (node?.left) newNode.left = node.left;
+      if (node?.top) newNode.top = node.top;
+      // if (node?.top) newNode.top = node.top;
+      if (node?.x) newNode.x = node.x;
+      if (node?.y) newNode.y = node.y;
 
       // set dag node
-      dag1.setNode(nodeId, newNode);
       // set Nodes
 
-      setNodes(oldNodes => ({ ...oldNodes, [nodeId]: newNode }));
+      setNodes(oldNodes => {
+        const tmp = { ...oldNodes };
+        return { ...tmp, [nodeId]: newNode };
+      });
+      console.log("newNode", { newNode });
+      // dag1.setNode(nodeId, newNode); // uncoment this
       setMapChanged(true);
     },
-    [nodes]
+    [mapRendered]
   );
 
   useEffect(() => {
-    console.log("------>  WORKED");
-    // simulates the worker.js
+    if (dag1.nodes().length !== Object.entries(NODES).length) {
+      Object.entries(NODES).forEach(([key]) => dag1.setNode(key, { width: NODE_WIDTH, height: NODE_HEIGHT }));
+      EDGES.forEach(({ from, to }) => {
+        dag1.setEdge(from, to);
+      });
+      setMapChanged(true);
+    }
+  }, [nodes]);
 
-    // Update cluster
+  useEffect(() => {
+    console.log("[WORKER]");
 
-    // ITERATE oldNodes
-    // get every node (nodeN) calculated by dagre
-    // calculate OFFSETs
-    // update with setDagNode
-    // calculate map
+    let mapChangedFlag = mapChanged;
+    while (mapChangedFlag) {
+      console.log("[worker]");
 
-    Object.entries(NODES).forEach(([key]) => dag1.setNode(key, { width: NODE_WIDTH, height: NODE_HEIGHT }));
-    EDGES.forEach(({ from, to }) => {
-      dag1.setEdge(from, to);
-    });
+      mapChangedFlag = false;
+      // simulates the worker.js
 
-    dagre.layout(dag1);
+      // Update cluster
 
-    const newUserNodes = dag1.nodes().reduce((acu, cur) => {
-      const nodeN = dag1.node(cur);
-      const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
-      const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-      return {
-        ...acu,
-        [cur]: {
-          ...NODES[cur],
-          left: newLeft,
-          top: newTop
+      // ITERATE oldNodes
+      // get every node (nodeN) calculated by dagre
+      // calculate OFFSETs
+      // update with setDagNode
+      // calculate map
+
+      dagre.layout(dag1);
+      const newUserNodes = dag1.nodes().reduce((acu, cur) => {
+        const thisNode = { ...nodes[cur] };
+        const nodeN = dag1.node(cur);
+        const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
+        const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
+        if (!thisNode?.left || !thisNode?.top) {
+          dag1.setNode(cur, { ...nodeN, left: newLeft, top: newTop });
         }
-      };
-    }, {});
+        return {
+          ...acu,
+          [cur]: {
+            ...nodes[cur],
+            left: newLeft,
+            top: newTop
+          }
+        };
+      }, {});
 
-    setNodes(newUserNodes);
-    // setEdges(newUserEdges)
-    // setMapRendered(true);
+      console.log("newUserNodes", newUserNodes);
+      setNodes(newUserNodes);
 
-    // ITERATE EDGES and calculate the new positions
+      setMapChanged(false);
+
+      // setTimeout(() => {
+      //   if (mapRendered) return
+      // }, 1000)
+      setMapRendered(true);
+      // setEdges(newUserEdges)
+      // setMapRendered(true);
+
+      // ITERATE EDGES and calculate the new positions
+    }
   }, [mapChanged]);
 
   // const nodeChanged = useMemoizedCallback(
   //   (nodeRef: any, nodeId: string, content: string, title: string, imageLoaded: boolean, openPart: boolean) => {
-  //     // console.log("In nodeChanged, nodeId:", nodeId);
+
   //     let currentHeight = NODE_HEIGHT;
   //     let newHeight = NODE_HEIGHT;
   //     let nodesChanged = false;
@@ -280,16 +313,15 @@ const Dashboard = ({}: DashboardProps) => {
   // );
 
   // useEffect(() => {
-  //   console.log('check if we can render')
+
   //   if (mapRendered) {
 
-  //     console.log('call the render')
   //     // recalculate height with and mark as nodeChanges to rerender again
   //     setMapRendered(false)
   //   }
   // }, [mapRendered])
 
-  console.log("Nodes", edges);
+  console.log(nodes);
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       <MapInteractionCSS>
@@ -298,8 +330,14 @@ const Dashboard = ({}: DashboardProps) => {
         {/* node list */}
         {/* {Object.entries(NODES).map(([, value], idx) => <Node key={idx} node={value} />)} */}
         <Button onClick={showDaggerState}>get Nodes</Button>
+        <Button
+          onClick={() => {
+            setMapChanged(true);
+          }}
+        >
+          map changed to TRUE {mapChanged ? "T" : "F"}
+        </Button>
         {Object.entries(nodes).map(([key, nodeValue], idx) => {
-          console.log("nodeValue:insidemap", nodeValue);
           return <Node key={idx} nodeId={key} node={nodeValue} nodeChanged={nodeChanged} />;
         })}
         {edges.map(({ from, to }, idx) => {

@@ -16,11 +16,12 @@ const Node = ({ nodeId, node, nodeChanged }: NodeProps) => {
   useEffect(() => {
     setTimeout(() => {
       nodeChanged(ref, nodeId);
-    }, 10);
-  }, [nodeChanged, node]);
+    }, 700);
+    // nodeChanged(ref, nodeId);
+  }, [ref]);
 
   const { title, content, left, top } = node;
-  console.log("::", title, left, top);
+  // console.log("::", title, left, top);
   return (
     <div
       ref={ref}
