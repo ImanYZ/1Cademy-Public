@@ -10,52 +10,7 @@ import Node from "../components/map/Node";
 import { NodeUser, Point } from "../knowledgeTypes";
 import { dag1, NODE_HEIGHT, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 
-const NODES: { [key: string]: NodeUser } = {
-  n1: {
-    title: "title node 1",
-    content:
-      "Sdf  sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0
-  },
-  n2: {
-    title: "title node 2",
-    content: "",
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0
-  },
-  n3: {
-    title: "title node 3",
-    content:
-      "Sdf  sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0
-  },
-  n4: {
-    title: "title node 4",
-    content:
-      "Mauris odi fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0
-  },
-  n5: {
-    title: "title node 5",
-    content:
-      "Mauris odio ligula, fringilla et sapien in, fringilla pharetra velit. Mauris vulputate laoreet purus ut malesuada. Vestibulum ac odio neque. In ante augue, aliquam non malesuada non, placerat in nisl. Nunc a condimentum lectus, in auctor risus. Fusce felis urna, eleifend et lacinia in, blandit in neque. Duis ultricies risus lectus, at mollis odio interdum vitae. Ut commodo eros ut elit tempus, eget ultrices quam convallis. Etiam luctus erat justo, ac laoreet purus auctor eu.",
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0
-  }
-};
+
 
 type Edge = { from: string; to: string };
 const EDGES: Edge[] = [
@@ -68,282 +23,305 @@ type EdgeProcess = { from: Point; to: Point };
 
 type DashboardProps = {};
 
-const Dashboard = ({}: DashboardProps) => {
-  // dag1.setNode("kspacey", { label: 'sdfkdsf', width: 144, height: 100 });
-  // dag1.setNode("sdfsdf", { label: 'sdfkdsf', width: 144, height: 100 });
+const Dashboard = ({ }: DashboardProps) => {
+
+  // /////////////
+  // local states
+  // /////////////
+
+  // used for triggering useEffect after nodes or usernodes change
+  const [userNodeChanges, setUserNodeChanges] = useState([]);
+  const [nodeChanges, setNodeChanges] = useState<any[]>([]);
   const [mapChanged, setMapChanged] = useState(false);
-  const [mapRendered, setMapRendered] = useState(false);
-  const [nodes, setNodes] = useState<{ [key: string]: NodeUser }>({});
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [edges, setEdges] = useState<EdgeProcess[]>([]);
+  // two collections (tables) in database, nodes and usernodes
+  // nodes: collection of all data of each node
+  // usernodes: collection of all data about each interaction between user and node
+  // (ex: node open, hidden, closed, hidden, etc.) (contains every user with every node interacted with)
+  // nodes: dictionary of all nodes visible on map for specific user
+  const [nodes, setNodes] = useState({});
+  // edges: dictionary of all edges visible on map for specific user
+  const [edges, setEdges] = useState({});
+  // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
-  // const getNodes = () => {
-  //   return dag1.nodes().map(cur => {
-  //     const nodeN = dag1.node(cur);
 
-  //     const node = NODES[cur];
-  //     const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
-  //     const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-  //     return { id: cur, node: { ...node, left: newLeft, top: newTop } };
-  //   });
-  // };
-
-  const showDaggerState = () => {
-    console.log("show dagger");
-    // dag1.nodes().map((cur, idx) => {
-    //   const nodeN = dag1.node(cur);
-    //   // const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
-    //   // const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-
-    // });
-  };
-
-  const nodeChanged = useCallback(
-    (nodeRef, nodeId: string) => {
-      console.log("[NODE CHANGED]", mapRendered);
-      if (!mapRendered) return;
-      if (!nodeRef.current) return;
-      console.log("[node changed]");
-      // const nodeFromGraph = dag1.node(nodeId);
-      // if (!nodeFromGraph) return;
-
-      // if (!nodeRef.current) return;
-
-      // const newHeight = nodeRef.current.offsetHeight || NODE_HEIGHT;
-      // dag1.setNode(nodeId, { ...nodeFromGraph, height: newHeight });
-      // dagre.layout(dag1);
-
-      // const nodeN = dag1.node(nodeId);
-      // const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
-      // const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-
-      // setNodes(oldNodes => {
-      //   const tmp = { ...oldNodes }
-      //   tmp[nodeId].left = newLeft;
-      //   tmp[nodeId].top = newTop;
-      //   tmp[nodeId].height = nodeRef.current.offsetHeight || NODE_HEIGHT
-      //   tmp[nodeId].width = nodeRef.current.offsetWidth || NODE_WIDTH
-      //   return tmp
-      // })
-
-      // const newUserEdges = dag1.edges().map((edgeId): EdgeProcess => {
-      //   // edgeId.v
-      //   // edgeId.w
-      //   const fromNode = nodes[edgeId.v]
-      //   const toNode = nodes[edgeId.w]
-      //   // const { points } = dag1.edge(edgeId)
-
-      //   const newFromX = fromNode.left + NODE_WIDTH;
-      //   const newFromY = fromNode.top + Math.floor(fromNode.height / 2);
-      //   // const newFromY = fromNode.top + Math.floor(NODE_HEIGHT / 2);
-      //   const newToX = toNode.left;
-      //   const newToY = toNode.top + Math.floor(toNode.height / 2);
-      //   // const newToY = toNode.top + Math.floor(NODE_HEIGHT / 2);
-      //   return { from: { x: newFromX, y: newFromY }, to: { x: newToX, y: newToY } }
-      // })
-
-      // // // const newUserEdges: EdgeProcess[] = dag1.edges().map((edgeId): EdgeProcess => {
-      // // //   const { points } = dag1.edge(edgeId)
-      // // //   // return { from: points[0], to: points[2] }
-      // // //   return {
-      // // //     from: { x: points[0].x + XOFFSET, y: points[0].y + YOFFSET },
-      // // //     to: { x: points[2].x + XOFFSET, y: points[2].y + YOFFSET },
-      // // //   }
-      // // // })
-
-      // setEdges(newUserEdges)
-      // export const setDagEdge = (from, to, edge, oldEdges) => {
-
-      //   // checks that the from and to nodes exist in map
-      //   if (dag1[0].hasNode(from) && dag1[0].hasNode(to)) {
-      //     const edgeId = from + "-" + to;
-      //     const newEdge = { ...edge };
-      //     dag1[0].setEdge(from, to, newEdge);
-      //     // adds newEdge to oldEdges
-      //     oldEdges[edgeId] = newEdge;
-      //   }
-      //   return oldEdges;
-      // };
-
-      // const nodeFromDagre = dag1.node(nodeId)
-      const node = nodes[nodeId];
-
-      // build new Node
-      let newNode: NodeUser = { ...node };
-
-      const newHeight = nodeRef.current.offsetHeight || NODE_HEIGHT;
-
-      newNode.width = node?.width ? node.width : NODE_WIDTH;
-      // newNode.height = node?.height ? node.height : NODE_HEIGHT;
-      newNode.height = newHeight;
-      if (node?.left) newNode.left = node.left;
-      if (node?.top) newNode.top = node.top;
-      // if (node?.top) newNode.top = node.top;
-      if (node?.x) newNode.x = node.x;
-      if (node?.y) newNode.y = node.y;
-
-      // set dag node
-      // set Nodes
-
-      setNodes(oldNodes => {
-        const tmp = { ...oldNodes };
-        return { ...tmp, [nodeId]: newNode };
-      });
-      console.log("newNode", { newNode });
-      // dag1.setNode(nodeId, newNode); // uncoment this
-      setMapChanged(true);
-    },
-    [mapRendered]
-  );
-
+  // SYNC NODES FUNCTION
+  // READ THIS!!!
+  // nodeChanges, userNodeChanges useEffect
   useEffect(() => {
-    if (dag1.nodes().length !== Object.entries(NODES).length) {
-      Object.entries(NODES).forEach(([key]) => dag1.setNode(key, { width: NODE_WIDTH, height: NODE_HEIGHT }));
-      EDGES.forEach(({ from, to }) => {
-        dag1.setEdge(from, to);
-      });
-      setMapChanged(true);
-    }
-  }, [nodes]);
-
-  useEffect(() => {
-    console.log("[WORKER]");
-
-    let mapChangedFlag = mapChanged;
-    while (mapChangedFlag) {
-      console.log("[worker]");
-
-      mapChangedFlag = false;
-      // simulates the worker.js
-
-      // Update cluster
-
-      // ITERATE oldNodes
-      // get every node (nodeN) calculated by dagre
-      // calculate OFFSETs
-      // update with setDagNode
-      // calculate map
-
-      dagre.layout(dag1);
-      const newUserNodes = dag1.nodes().reduce((acu, cur) => {
-        const thisNode = { ...nodes[cur] };
-        const nodeN = dag1.node(cur);
-        const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
-        const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-        if (!thisNode?.left || !thisNode?.top) {
-          dag1.setNode(cur, { ...nodeN, left: newLeft, top: newTop });
-        }
-        return {
-          ...acu,
-          [cur]: {
-            ...nodes[cur],
-            left: newLeft,
-            top: newTop
+    // console.log("In nodeChanges, userNodeChanges useEffect.");
+    const nodeUserNodeChangesFunc = async () => {
+      // dictionary of all nodes visible on the user's map view
+      let oldNodes = { ...nodes };
+      // dictionary of all links/edges on the user's map view
+      let oldEdges = { ...edges };
+      // let typeVisibilityChanges = nodeTypeVisibilityChanges;
+      // flag for if there are any changes to map
+      let oldMapChanged = mapChanged;
+      if (nodeChanges.length > 0) {
+        for (let change of nodeChanges) {
+          const nodeId = change.nId;
+          let nodeData = change.nData;
+          delete nodeData.deleted;
+          if (nodeData.nodeType !== "Question") {
+            nodeData.choices = [];
           }
-        };
-      }, {});
-
-      console.log("newUserNodes", newUserNodes);
-      setNodes(newUserNodes);
-
-      setMapChanged(false);
-
-      // setTimeout(() => {
-      //   if (mapRendered) return
-      // }, 1000)
-      setMapRendered(true);
-      // setEdges(newUserEdges)
-      // setMapRendered(true);
-
-      // ITERATE EDGES and calculate the new positions
+          // addReference(nodeId, nodeData);
+          if (change.cType === "added") {
+            ({ oldNodes, oldEdges } = createOrUpdateNode(
+              nodeData,
+              nodeId,
+              oldNodes,
+              oldEdges,
+              allTags
+            ));
+            oldMapChanged = true;
+          } else if (change.cType === "modified") {
+            const node = oldNodes[nodeId];
+            {
+              // let isTheSame =
+              //   node.changedAt.getTime() === nodeData.changedAt.toDate().getTime() &&
+              //   node.admin === nodeData.admin &&
+              //   node.aImgUrl === nodeData.aImgUrl &&
+              //   node.fullname === nodeData.fullname &&
+              //   node.chooseUname === nodeData.chooseUname &&
+              //   node.comments === nodeData.comments &&
+              //   node.title === nodeData.title &&
+              //   node.content === nodeData.content &&
+              //   node.corrects === nodeData.corrects &&
+              //   node.maxVersionRating === nodeData.maxVersionRating &&
+              //   node.nodeType === nodeData.nodeType &&
+              //   node.studied === nodeData.studied &&
+              //   node.bookmarks === nodeData.bookmarks &&
+              //   node.versions === nodeData.versions &&
+              //   node.viewers === nodeData.viewers &&
+              //   node.wrongs === nodeData.wrongs;
+              // // isTheSame = compareImages(nodeData, node, isTheSame);
+              // isTheSame = isTheSame && compareProperty(nodeData, node, "nodeImage");
+              // isTheSame = compareLinks(nodeData.tags, node.tags, isTheSame, false);
+              // isTheSame = compareLinks(nodeData.references, node.references, isTheSame, false);
+              // const childrenComparison = compareLinks(
+              //   nodeData.children,
+              //   node.children,
+              //   true,
+              //   false
+              // );
+              // const parentsComparison = compareLinks(nodeData.parents, node.parents, true, false);
+              // isTheSame =
+              //   childrenComparison &&
+              //   parentsComparison &&
+              //   compareChoices(nodeData, node, isTheSame);
+            }
+            if (!compare2Nodes(nodeData, node)) {
+              nodeData = {
+                ...node,
+                ...nodeData,
+                id: nodeId,
+                createdAt: nodeData.createdAt.toDate(),
+                changedAt: nodeData.changedAt.toDate(),
+                updatedAt: nodeData.updatedAt.toDate(),
+              };
+              ({ oldNodes, oldEdges } = createOrUpdateNode(
+                nodeData,
+                nodeId,
+                oldNodes,
+                oldEdges,
+                allTags
+              ));
+              oldMapChanged = true;
+            }
+          }
+        }
+      }
+      // We can take care of some userNodes from userNodeChanges, but we should postpone some others to
+      // handle them after we retrieve their corresponding node documents.
+      // We store those that we handle in this round in this array.
+      const handledUserNodeChangesIds = [];
+      const nodeIds = [];
+      if (userNodeChanges && userNodeChanges.length > 0) {
+        let userNodeData;
+        // iterating through every change
+        for (let userNodeChange of userNodeChanges) {
+          // data of the userNode that is changed
+          userNodeData = userNodeChange.uNodeData;
+          // nodeId of userNode that is changed
+          const nodeId = userNodeData.node;
+          if (!userNodesLoaded) {
+            nodeIds.push(nodeId);
+          } else {
+            // if row is removed
+            if (userNodeChange.cType === "removed") {
+              // if graph includes nodeId, remove it
+              if (dag1[0].hasNode(nodeId)) {
+                oldEdges = removeDagAllEdges(nodeId, oldEdges);
+                oldNodes = removeDagNode(nodeId, oldNodes);
+                oldMapChanged = true;
+              }
+            } else {
+              // change can be addition or modification (not removal) of document for the query on userNode table
+              // modify change for allUserNodes
+              userNodeData = {
+                userNodeId: userNodeChange.uNodeId,
+                correct: userNodeData.correct,
+                wrong: userNodeData.wrong,
+                isStudied: userNodeData.isStudied,
+                // bookmarks were added later, so check if "bookmarked" exists
+                bookmarked: "bookmarked" in userNodeData ? userNodeData.bookmarked : false,
+                open: userNodeData.open,
+                nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
+                // toDate() converts firestore timestamp to JavaScript date object
+                firstVisit: userNodeData.createdAt.toDate(),
+                lastVisit: userNodeData.updatedAt.toDate(),
+              };
+              // specific for addition (in addition to code from 617-632)
+              if (userNodeChange.cType === "added") {
+                {
+                  // if nodeId is already in allUserNodes but not in database
+                  // for deleting duplicates
+                  // ********************************************************
+                  // An issue here needs to be investigated with deleting all userNodes or duplicating nodes.
+                  // ********************************************************
+                  // if (!realoadingAll && nodeId in oldAllUserNodes) {
+                  //   // document just added to database
+                  //   const userNodeDocs = await firebase.db
+                  //     .collection("userNodes")
+                  //     .where("node", "==", nodeId)
+                  //     .where("user", "==", username)
+                  //     .get();
+                  //   if (userNodeDocs.docs.length > 1) {
+                  //     console.log("*********************************************");
+                  //     console.log({ state: "Trying to delete userNodes", nodeId });
+                  //     console.log("*********************************************");
+                  //     let userNodeRef = firebase.db
+                  //       .collection("userNodes")
+                  //       .doc(userNodeDocs.docs[0].id);
+                  //     // checks if "userNodeId" is already in allUserNodes, it would be a duplicate and deletes in the database
+                  //     if (
+                  //       "userNodeId" in oldAllUserNodes[nodeId] &&
+                  //       oldAllUserNodes[nodeId].userNodeId &&
+                  //       userNodeDocs.docs[0].id !== oldAllUserNodes[nodeId].userNodeId
+                  //     ) {
+                  //       // (older) document in database referring to same nodeId
+                  //       userNodeRef = firebase.db
+                  //         .collection("userNodes")
+                  //         .doc(oldAllUserNodes[nodeId].userNodeId);
+                  //       oldAllUserNodes = { ...oldAllUserNodes };
+                  //     }
+                  //     userNodeRef.delete();
+                  //   }
+                  //   // if added but not a duplicate
+                  // } else {
+                }
+                // checks whether map is loaded then make changes
+                if (mapRendered && dag1[0].hasNode(nodeId)) {
+                  setTimeout(() => {
+                    // scrolls to node if map is loaded
+                    scrollToNode(nodeId);
+                  }, 1000);
+                }
+                // }
+              }
+              // for both addition and modifications
+              if (userNodeChange.cType === "added" || userNodeChange.cType === "modified") {
+                // if data for the node is not loaded yet, do nothing
+                if (!(nodeId in oldNodes)) {
+                  nodeIds.push(nodeId);
+                  continue;
+                }
+                // Compare the updatedAt attribute of this node in nodes state with updatedAt in nodeChanges,
+                // and if the latter is greater, update nodeChanges.
+                if (
+                  userNodeData.nodeChanges &&
+                  userNodeData.nodeChanges.updatedAt > oldNodes[nodeId].updatedAt
+                ) {
+                  setNodeChanges((oldNodeChanges) => {
+                    let newNodeChanges = [...oldNodeChanges];
+                    newNodeChanges.push({
+                      cType: "modified",
+                      nId: userNodeData.node,
+                      nData: userNodeData.nodeChanges,
+                    });
+                    return newNodeChanges;
+                  });
+                }
+                if (
+                  // left: current state of userNode
+                  // right: new state of userNode from the database
+                  // checks whether any userNode attributes on map are different from corresponding userNode attributes from database
+                  oldNodes[nodeId].correct !== userNodeData.correct ||
+                  oldNodes[nodeId].wrong !== userNodeData.wrong ||
+                  oldNodes[nodeId].isStudied !== userNodeData.isStudied ||
+                  oldNodes[nodeId].bookmarked !== userNodeData.bookmarked ||
+                  oldNodes[nodeId].open !== userNodeData.open ||
+                  oldNodes[nodeId].firstVisit !== userNodeData.firstVisit ||
+                  oldNodes[nodeId].lastVisit !== userNodeData.lastVisit
+                ) {
+                  oldNodes[nodeId] = {
+                    // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+                    ...oldNodes[nodeId],
+                    ...userNodeData,
+                  };
+                  oldMapChanged = true;
+                }
+              }
+            }
+            handledUserNodeChangesIds.push(userNodeChange.uNodeId);
+          }
+        }
+      }
+      if (!userNodesLoaded) {
+        getNodesData(nodeIds);
+        // setTimeout is used for when the user proposes a child node and the proposal gets accepted, data for the created node and userNode come from the database to the client at the same time
+        // setTimeout(() => {
+        setUserNodesLoaded(true);
+        // }, 400);
+      } else {
+        if (nodeIds.length > 0) {
+          // Get the data for the nodes that are not loaded yet but their corresponding userNodes are loaded.
+          getNodesData(nodeIds);
+        }
+        if (handledUserNodeChangesIds.length > 0) {
+          let oldUserNodeChanges = userNodeChanges.filter(
+            (uNObj) => !handledUserNodeChangesIds.includes(uNObj.uNodeId)
+          );
+          setUserNodeChanges(oldUserNodeChanges);
+        }
+        if (nodeChanges.length > 0 || handledUserNodeChangesIds.length > 0) {
+          setNodes(oldNodes);
+          setEdges(oldEdges);
+          //  map changed fires another use effect that calls dagr
+          //  which calculates the new location of nodes and errors
+          setMapChanged(oldMapChanged);
+          if (nodeChanges.length > 0) {
+            // setNodeTypeVisibilityChanges(typeVisibilityChanges);
+            setNodeChanges([]);
+          }
+        }
+      }
+    };
+    if (nodeChanges.length > 0 || (userNodeChanges && userNodeChanges.length > 0)) {
+      nodeUserNodeChangesFunc();
     }
-  }, [mapChanged]);
+  }, [
+    nodeChanges,
+    userNodeChanges,
+    allNodes,
+    allTags,
+    allUserNodes,
+    username,
+    userNodesLoaded,
+    nodes,
+    edges,
+    // nodeTypeVisibilityChanges,
+    mapChanged,
+  ])
 
-  // const nodeChanged = useMemoizedCallback(
-  //   (nodeRef: any, nodeId: string, content: string, title: string, imageLoaded: boolean, openPart: boolean) => {
-
-  //     let currentHeight = NODE_HEIGHT;
-  //     let newHeight = NODE_HEIGHT;
-  //     let nodesChanged = false;
-  //     if (mapRendered && (nodeRef.current || content !== null || title !== null)) {
-  //       setNodes((oldNodes) => {
-  //         const node = { ...oldNodes[nodeId] };
-  //         if (content !== null && node.content !== content) {
-  //           node.content = content;
-  //           nodesChanged = true;
-  //         }
-  //         if (title !== null && node.title !== title) {
-  //           node.title = title;
-  //           nodesChanged = true;
-  //         }
-  //         if (nodeRef.current) {
-  //           const { current } = nodeRef;
-  //           newHeight = current.offsetHeight;
-  //           if ("height" in node && Number(node.height)) {
-  //             currentHeight = Number(node.height);
-  //           }
-  //           if (
-  //             (Math.abs(currentHeight - newHeight) >= MIN_CHANGE &&
-  //               (node.nodeImage === "" || imageLoaded)) ||
-  //             ("open" in node && node.open && !node.openHeight) ||
-  //             ("open" in node && !node.open && !node.closedHeight)
-  //           ) {
-  //             if (node.open) {
-  //               node.height = newHeight;
-  //               if (openPart === null) {
-  //                 node.openHeight = newHeight;
-  //               }
-  //             } else {
-  //               node.height = newHeight;
-  //               node.closedHeight = newHeight;
-  //             }
-  //             nodesChanged = true;
-  //           }
-  //         }
-  //         if (nodesChanged) {
-  //           return setDagNode(nodeId, node, { ...oldNodes }, () => setMapChanged(true));
-  //         } else {
-  //           return oldNodes;
-  //         }
-  //       });
-  //     }
-  //   },
-  //   //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
-  //   [mapRendered, allTags]
-  // );
-
-  // useEffect(() => {
-
-  //   if (mapRendered) {
-
-  //     // recalculate height with and mark as nodeChanges to rerender again
-  //     setMapRendered(false)
-  //   }
-  // }, [mapRendered])
-
-  console.log(nodes);
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       <MapInteractionCSS>
         {/* show clusters */}
         {/* link list */}
         {/* node list */}
-        {/* {Object.entries(NODES).map(([, value], idx) => <Node key={idx} node={value} />)} */}
-        <Button onClick={showDaggerState}>get Nodes</Button>
-        <Button
-          onClick={() => {
-            setMapChanged(true);
-          }}
-        >
-          map changed to TRUE {mapChanged ? "T" : "F"}
-        </Button>
-        {Object.entries(nodes).map(([key, nodeValue], idx) => {
-          return <Node key={idx} nodeId={key} node={nodeValue} nodeChanged={nodeChanged} />;
-        })}
-        {edges.map(({ from, to }, idx) => {
-          return <Line key={idx} from={from} to={to} label="" leftDirection color="rgb(1, 211, 106)" />;
-        })}
-        dash
+        Interaction map
       </MapInteractionCSS>
     </Box>
   );
