@@ -3,13 +3,19 @@ import { Box } from "@mui/system";
 import dagre from "dagre";
 import { useCallback, useEffect, useState } from "react";
 import { MapInteractionCSS } from "react-map-interaction";
+import { collection, getDocs, getFirestore,onSnapshot, query, where, doc,getDoc } from "firebase/firestore";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 import Line from "../components/map/Line/Line";
 import Node from "../components/map/Node";
 // import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { NodeUser, Point } from "../knowledgeTypes";
-import { dag1, NODE_HEIGHT, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { dag1,compare2Nodes, createOrUpdateNode, NODE_HEIGHT, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { getInstitutionsByName } from "@/lib/firestoreClient/institutions";
 
+// import { compare2Nodes, createOrUpdateNode, dag1, NODE_HEIGHT, NODE_WIDTH, removeDagAllEdges, removeDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { useAuth } from "@/context/AuthContext";
 
 
 type Edge = { from: string; to: string };
@@ -23,14 +29,22 @@ type EdgeProcess = { from: Point; to: Point };
 
 type DashboardProps = {};
 
-const Dashboard = ({ }: DashboardProps) => {
+const Dashboard = ({}: DashboardProps) => {
 
-  // /////////////
+  // -----------------------
+  // global states
+  // -----------------------
+
+  const [{ user }] = useAuth();
+  const [allTags, setAllTags,allTagsLoaded] = useTagsTreeView()
+  const db = getFirestore();
+
+  // -----------------------
   // local states
-  // /////////////
+  // -----------------------
 
   // used for triggering useEffect after nodes or usernodes change
-  const [userNodeChanges, setUserNodeChanges] = useState([]);
+  const [userNodeChanges, setUserNodeChanges] = useState<any[]>([]);
   const [nodeChanges, setNodeChanges] = useState<any[]>([]);
   const [mapChanged, setMapChanged] = useState(false);
   // two collections (tables) in database, nodes and usernodes
@@ -43,17 +57,193 @@ const Dashboard = ({ }: DashboardProps) => {
   const [edges, setEdges] = useState({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
+  // mapRendered: flag for first time map is rendered (set to true after first time)
+  const [mapRendered, setMapRendered] = useState(false);
 
-  // SYNC NODES FUNCTION
+  // scale and translation of the viewport over the map for the map interactions module
+  const [mapInteractionValue, setMapInteractionValue] = useState({
+    scale: 1,
+    translation: { x: 0, y: 0 },
+  });
+
+  // flag for when scrollToNode is called
+  const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
+
+  // -----------------------
+  // flags
+  // -----------------------
+
+  // flag for whether all tags data is downloaded from server
+  // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
+
+  // flag for whether users' nodes data is downloaded from server
+  const [userNodesLoaded, setUserNodesLoaded] = useState(false);
+
+
+
+
+  const getNodesData = useCallback(
+    async (nodeIds: string[]) => {
+      if (nodeIds.length > 0) {
+        let oldNodeChanges = [...nodeChanges];
+        const nodeDocsPromises = [];
+        for (let nodeId of nodeIds) {
+          const nodeRef = doc(db, "nodes", nodeId);
+     
+          nodeDocsPromises.push(getDoc(nodeRef));
+
+        }
+        Promise.all(nodeDocsPromises)
+          .then((nodeDocs : any[]) => {
+            for (let nodeDoc of nodeDocs) { 
+              console.log(nodeDoc.data());
+              if (nodeDoc.exists) {
+                const nData = nodeDoc.data();
+                if (!nData.deleted) {
+                  oldNodeChanges.push({
+                    cType: "added",
+                    nId: nodeDoc.id,
+                    nData,
+                  });
+                }
+              }
+            }
+            setNodeChanges(oldNodeChanges);
+          })
+          .catch(function (error) {
+            console.log("Error getting document:", error);
+          });
+      }
+    },
+    [nodeChanges]
+  );
+  const scrollToNode = useCallback(
+    (nodeId:string) => {
+      if (!scrollToNodeInitialized) {
+        setTimeout(() => {
+          const originalNode = document.getElementById(nodeId);
+          if (
+            originalNode &&
+            "offsetLeft" in originalNode &&
+            originalNode.offsetLeft !== 0 &&
+            "offsetTop" in originalNode &&
+            originalNode.offsetTop !== 0
+          ) {
+            setScrollToNodeInitialized(true);
+            setTimeout(() => {
+              setScrollToNodeInitialized(false);
+            }, 1300);
+            setMapInteractionValue((oldValue) => {
+              // const translateLeft =
+              //   (XOFFSET - originalNode.offsetLeft) * oldValue.scale;
+              // const translateTop =
+              //   (YOFFSET - originalNode.offsetTop) * oldValue.scale;
+              return {
+                scale: 0.94,
+                translation: {
+                  x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
+                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
+                },
+              };
+            });
+          } else {
+            scrollToNode(nodeId);
+          }
+        }, 400);
+      }
+    },
+    [scrollToNodeInitialized]
+  );
+
+  // loads user nodes
+  // downloads all records of userNodes collection where user is authenticated user
+  // sets userNodeChanges
+  useEffect(() => {
+    console.log('[GET USER NODES - SNAPSHOOT]',allTagsLoaded)
+    // console.log("In allTagsLoaded useEffect");
+    // if (firebase && allTagsLoaded && username) {
+    const username = user?.uname
+    console.log("username:::",username,allTagsLoaded,db);
+    if (db && allTagsLoaded && username) {
+      console.log('=====> [get user nodes]')
+      // Create the query to load the userNodes and listen for modifications.
+      // const nodeRef = doc(db, "userNodes");
+
+      const userNodesRef = collection(db, "userNodes")
+      const q = query(
+        userNodesRef,
+        where("user", "==", username),
+        where("visible", "==", true),
+        where("deleted", "==", false)
+      )
+
+      const userNodesSnapshot = onSnapshot(q, snapshot => {
+        setUserNodeChanges((oldUserNodeChanges) => {
+          let newUserNodeChanges = [...oldUserNodeChanges];
+          const docChanges = snapshot.docChanges();
+          if (docChanges.length > 0) {
+            for (let change of docChanges) {
+              const userNodeData = change.doc.data();
+              // only used for useEffect above
+              newUserNodeChanges = [
+                ...oldUserNodeChanges,
+                {
+                  cType: change.type,
+                  uNodeId: change.doc.id,
+                  uNodeData: userNodeData,
+                }
+              ]
+            }
+          }
+          return newUserNodeChanges;
+        });
+      })
+
+      // const userNodesQuery = db
+      //   .collection("userNodes")
+      //   .where("user", "==", username)
+      //   .where("visible", "==", true)
+      //   .where("deleted", "==", false);
+
+      // // called whenever something changes and downloads the changes between the database and query
+      // const userNodesSnapshot = userNodesQuery.onSnapshot(function (snapshot) {
+      //   console.log('GET USER NODES:Snapsh')
+      //   setUserNodeChanges((oldUserNodeChanges) => {
+      //     const docChanges = snapshot.docChanges();
+      //     if (docChanges.length > 0) {
+      //       let newUserNodeChanges = [...oldUserNodeChanges];
+      //       for (let change of docChanges) {
+      //         const userNodeData = change.doc.data();
+      //         // only used for useEffect above
+      //         newUserNodeChanges.push({
+      //           cType: change.type,
+      //           uNodeId: change.doc.id,
+      //           uNodeData: userNodeData,
+      //         });
+      //       }
+      //     }
+      //     return oldUserNodeChanges;
+      //   });
+      // });
+      // before calling useEffect again or exiting useEffect
+      return () => userNodesSnapshot();
+    }
+    // }, [allTagsLoaded, username]);
+  }, [allTagsLoaded, user]);
+
+// SYNC NODES FUNCTION
   // READ THIS!!!
   // nodeChanges, userNodeChanges useEffect
   useEffect(() => {
+    console.log('[SYNCHRONIZATION]')
+    // debugger
     // console.log("In nodeChanges, userNodeChanges useEffect.");
     const nodeUserNodeChangesFunc = async () => {
+      console.log('[synchronization]')
       // dictionary of all nodes visible on the user's map view
-      let oldNodes = { ...nodes };
+      let oldNodes: any = { ...nodes };
       // dictionary of all links/edges on the user's map view
-      let oldEdges = { ...edges };
+      let oldEdges: any = { ...edges };
       // let typeVisibilityChanges = nodeTypeVisibilityChanges;
       // flag for if there are any changes to map
       let oldMapChanged = mapChanged;
@@ -132,13 +322,14 @@ const Dashboard = ({ }: DashboardProps) => {
           }
         }
       }
-      // We can take care of some userNodes from userNodeChanges, but we should postpone some others to
+      // We can take care of some userNodes from userNodeChanges, 
+      // but we should postpone some others to
       // handle them after we retrieve their corresponding node documents.
       // We store those that we handle in this round in this array.
-      const handledUserNodeChangesIds = [];
-      const nodeIds = [];
+      const handledUserNodeChangesIds: string[] = [];
+      const nodeIds: string[] = [];
       if (userNodeChanges && userNodeChanges.length > 0) {
-        let userNodeData;
+        let userNodeData: any;
         // iterating through every change
         for (let userNodeChange of userNodeChanges) {
           // data of the userNode that is changed
@@ -298,30 +489,42 @@ const Dashboard = ({ }: DashboardProps) => {
         }
       }
     };
+
+    console.log({nodeChanges, userNodeChanges})
     if (nodeChanges.length > 0 || (userNodeChanges && userNodeChanges.length > 0)) {
       nodeUserNodeChangesFunc();
     }
   }, [
     nodeChanges,
     userNodeChanges,
-    allNodes,
+    // allNodes,
     allTags,
-    allUserNodes,
-    username,
+    // allUserNodes,
+    // username,
     userNodesLoaded,
     nodes,
     edges,
-    // nodeTypeVisibilityChanges,
+    // nodeTypeVisibilityChanges, // this was comment in iman code
     mapChanged,
   ])
 
+
+console.log(nodeChanges);
+// getNodesData(nodeIds);
+
+
+
+
+
+
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
+      <Button onClick={()=>{getNodesData(nodeIds)}}>TU</Button>
       <MapInteractionCSS>
         {/* show clusters */}
         {/* link list */}
         {/* node list */}
-        Interaction map
+        Interaction map from '{user?.uname}'
       </MapInteractionCSS>
     </Box>
   );
