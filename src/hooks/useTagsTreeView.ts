@@ -21,6 +21,7 @@ const initializeTagsTreeView = (tags: string[]): AllTagsTreeView => {
 };
 
 export const useTagsTreeView = (chosenTags: string[] = []) => {
+  const [allTagsLoaded, setAllTagsLoaded] = useState(false)
   const [tagsTreeView, setTagsTreeView] = useState<AllTagsTreeView>(initializeTagsTreeView(chosenTags));
 
   const applyTagsTreeViewChanges = (
@@ -56,6 +57,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
       if (!docChanges.length) return;
       const newTagsTreeView = applyTagsTreeViewChanges(tagsTreeView, docChanges);
       setTagsTreeView(newTagsTreeView);
+      setAllTagsLoaded(true)
     });
 
     return () => unsubscribe();
@@ -63,7 +65,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return [tagsTreeView, setTagsTreeView] as const;
+  return [tagsTreeView, setTagsTreeView,allTagsLoaded] as const;
 };
 
 export const applyTagRemove = (oldAllTags: AllTagsTreeView, nodeId: string /*, dagreLoaded*/) => {
