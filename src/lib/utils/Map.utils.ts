@@ -509,18 +509,24 @@ export const compareAndUpdateNodeLinks = (node: any, nodeId: string, newNode: an
 };
 
 export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, oldEdges: any, allTags: any) => {
+  // debugger
   // console.log("In createOrUpdateNode, nodeId:", nodeId);
-  for (let childIdx = 0; childIdx < node.children.length; childIdx++) {
-    const child = node.children[childIdx];
+  // CHECK: object.children was node by I changed with newNode
+  for (let childIdx = 0; childIdx < newNode.children.length; childIdx++) {
+    const child = newNode.children[childIdx];
     // specify the visibility and type of the child nodes
-    oldNodes[nodeId].children[childIdx] = {
-      ...oldNodes[nodeId].children[childIdx],
-      visible: child.node in oldNodes
-    };
-    setTypeVisibilityOfParentInsideChild(oldNodes, nodeId, child.node);
+    if (oldNodes[nodeId]) {
+      // CHECK: this condition was added to ensure can access to oldNodes
+      oldNodes[nodeId].children[childIdx] = {
+        ...oldNodes[nodeId].children[childIdx],
+        visible: child.node in oldNodes
+      };
+      setTypeVisibilityOfParentInsideChild(oldNodes, nodeId, child.node);
+    }
   }
-  for (let parentIdx = 0; parentIdx < node.parents.length; parentIdx++) {
-    const parent = node.parents[parentIdx];
+  // CHECK: object.parents was node by I changed with newNode
+  for (let parentIdx = 0; parentIdx < newNode.parents.length; parentIdx++) {
+    const parent = newNode.parents[parentIdx];
     oldNodes[nodeId].parents[parentIdx] = {
       ...oldNodes[nodeId].parents[parentIdx],
       visible: parent.node in oldNodes
