@@ -480,7 +480,6 @@ const Dashboard = ({}: DashboardProps) => {
     mapChanged
   ]);
 
-  console.log(nodeChanges);
   // getNodesData(nodeIds);
 
   return (
