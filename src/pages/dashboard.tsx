@@ -17,18 +17,32 @@ import { compare2Nodes, createOrUpdateNode, dag1 } from "../lib/utils/Map.utils"
 
 type DashboardProps = {};
 
+/**
+ * It will execute some functions in the next order before the user interact with nodes
+ *  1. GET USER NODES - SNAPSHOT
+ *  2. SYNCHRONIZATION:
+ *      Flag: nodeChanges || userNodeChanges
+ *      Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
+ *  3. WORKER:
+ *      Flag: mapChanged
+ *      Description: will calculate the [nodes] and [edges] positions
+ */
 const Dashboard = ({}: DashboardProps) => {
-  // -----------------------
-  // global states
-  // -----------------------
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // GLOBAL STATES
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   const [{ user }] = useAuth();
   const [allTags, , allTagsLoaded] = useTagsTreeView();
   const db = getFirestore();
 
-  // -----------------------
-  // local states
-  // -----------------------
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // LOCAL STATES
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges, setUserNodeChanges] = useState<any[]>([]);
@@ -58,15 +72,23 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
 
-  // -----------------------
-  // flags
-  // -----------------------
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // FLAGS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
+
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // FUNCTIONS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   const getNodesData = useCallback(
     async (nodeIds: string[]) => {
@@ -142,11 +164,17 @@ const Dashboard = ({}: DashboardProps) => {
     [scrollToNodeInitialized]
   );
 
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // USE_EFFECTS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+
   // loads user nodes
   // downloads all records of userNodes collection where user is authenticated user
   // sets userNodeChanges
   useEffect(() => {
-    console.log("[GET USER NODES - SNAPSHOOT]", allTagsLoaded);
+    console.log("[1. GET USER NODES - SNAPSHOT]", allTagsLoaded);
     // console.log("In allTagsLoaded useEffect");
     // if (firebase && allTagsLoaded && username) {
     const username = user?.uname;
@@ -220,7 +248,7 @@ const Dashboard = ({}: DashboardProps) => {
   // READ THIS!!!
   // nodeChanges, userNodeChanges useEffect
   useEffect(() => {
-    console.log("[SYNCHRONIZATION]");
+    console.log("[2. SYNCHRONIZATION]");
     // debugger
     // console.log("In nodeChanges, userNodeChanges useEffect.");
     const nodeUserNodeChangesFunc = async () => {
@@ -480,21 +508,19 @@ const Dashboard = ({}: DashboardProps) => {
     mapChanged
   ]);
 
-  console.log(nodeChanges);
-  // getNodesData(nodeIds);
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // NODE FUNCTIONS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-      <Button
-        onClick={() => {
-          getNodesData(nodeIds);
-        }}
-      >
-        TU
-      </Button>
+      {/* Data from map, DONT REMOVE */}
       <Button onClick={() => console.log(nodes)}>nodes</Button>
       <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+      {/* end Data from map */}
       <MapInteractionCSS>
         {/* show clusters */}
         {/* link list */}
