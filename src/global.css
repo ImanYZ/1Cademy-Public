@@ -14,3 +14,228 @@
 .home-search-input::placeholder {
   font-size: 21px;
 }
+
+/* ------------------------------------------ */
+/* styles from nodes */
+
+.Node {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  border-style: solid;
+  border-radius: 10px;
+  border-color: #fdc473;
+  background-color: #1f1f1f;
+  color: rgb(220, 220, 220);
+}
+.LightMode .Node {
+  background-color: #f0f0f0;
+  color: #454545;
+  font-weight: 490;
+  border-width: 4px;
+}
+
+.Node.Changed {
+  border-color: #fd7373;
+}
+.LightMode .Node.Changed {
+  border-color: #ffa5a5;
+  border-width: 4px;
+}
+
+.Node.active,
+.Node.Choosable:hover {
+  -webkit-box-shadow: 1px 0px 10px 7px rgba(190, 190, 190, 1);
+  -moz-box-shadow: 1px 0px 10px 7px rgba(190, 190, 190, 1);
+  box-shadow: 1px 0px 10px 7px rgba(190, 190, 190, 1);
+}
+.LightMode .Node.active,
+.LightMode .Node.Choosable:hover {
+  -webkit-box-shadow: 1px 0px 10px 7px rgb(0, 204, 255, 0.7);
+  -moz-box-shadow: 1px 0px 10px 7px rgb(0, 204, 255, 0.7);
+  box-shadow: 1px 0px 10px 7px rgb(0, 204, 255, 0.7);
+}
+
+.Node.IsHiding {
+  opacity: 0;
+  -webkit-animation-name: nodeHiding; /* Safari 4.0 - 8.0 */
+  -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+  animation-name: nodeHiding;
+  animation-duration: 1.9s;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes nodeHiding {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Standard syntax */
+@keyframes nodeHiding {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.NodeImage {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card {
+  margin: 0px;
+}
+.card .card-content {
+  padding: 13px !important;
+}
+
+.card-title .CodeMirror {
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.card .card-content .card-title textarea {
+  line-height: 37px;
+  margin-top: 7px;
+  /* margin-bottom: 13px; */
+  font-size: 25px;
+}
+.LightMode .Node.card .card-content .card-title p {
+  font-weight: 490;
+}
+
+.card .card-content .card-title i {
+  line-height: 7px;
+}
+
+.NodeTitleClosed {
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+.card-content .CodeMirror {
+  width: 550px;
+}
+
+.card-content .footer {
+  position: absolute;
+  bottom: 10px;
+  right: 13px;
+  font-size: 13px;
+  width: 97%;
+}
+.card-content .footer i {
+  padding-left: 10px;
+}
+.card-content .footer i.more-left-padding {
+  padding-left: 13px;
+}
+.card-content .footer span {
+  padding-left: 4px;
+}
+
+.card-content .NodeContent {
+  padding-bottom: 22px;
+}
+
+.card-content .NodeContent .collapsible {
+  margin-bottom: 0px;
+}
+
+.card-content .NodeContent .collapsible-header {
+  background-color: rgba(0, 0, 0, 0) !important;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.card-content .NodeContent .collapsible-body {
+  background-color: rgba(0, 0, 0, 0) !important;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.QuestionAddChoice {
+  margin-top: 4px;
+  margin-left: 400px;
+}
+.QuestionAddChoice i {
+  font-size: 20px;
+  margin-bottom: 3px;
+}
+
+.card .card-action {
+  padding: 10px 2.5px;
+}
+.card .card-action .LearnBefore {
+  border-right: 1px solid #ececec;
+  margin-right: -1px;
+}
+.card .card-action .LearnAfter {
+  border-left: 1px solid #ececec;
+}
+.card .card-action .row {
+  margin: 0px;
+}
+.card .card-action .row p {
+  color: #ffab40;
+  text-transform: uppercase;
+  margin: 0px;
+}
+.card .card-action .row a {
+  margin: 0px;
+  padding: 1px 4px 1px 4px;
+  width: 100%;
+}
+
+.fixed-action-btn .horizontal .click-to-toggle {
+  position: relative;
+  float: right;
+  bottom: -4px;
+  right: 10px;
+}
+
+.NodeOptionsItem {
+  margin: 0px 7px 0 0 !important;
+}
+
+.fixed-action-btn.horizontal.click-to-toggle.direction-left > ul {
+  margin: 0px -19px 0 0 !important;
+}
+
+.RemoveImageDIV {
+  float: right;
+  margin-bottom: -34px;
+  margin-right: 4px;
+}
+.RemoveImageDIV .CloseButton i {
+  font-size: 25px;
+}
+
+.NewChildProposalWarning {
+  color: rgb(255, 115, 0);
+  font-size: 16px;
+}
+
+#NewChildProposalTitleHint {
+  font-size: 16px;
+}
+
+.NodeContent .ProposalTitle {
+  margin-top: 13px !important;
+}
+
+.EditingNodeSearchIcon {
+  color: white;
+}
+.LightMode .EditingNodeSearchIcon {
+  color: #454545;
+}
+/* ------------------------------------------ */

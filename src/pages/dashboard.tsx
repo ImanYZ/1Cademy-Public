@@ -11,6 +11,7 @@ import NodesList from "../components/map/NodesList";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { JSONfn } from "../lib/utils/jsonFn";
 import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { OpenPart } from "../nodebookTypes";
 
 // type Edge = { from: string; to: string };
 
@@ -680,7 +681,7 @@ const Dashboard = ({ }: DashboardProps) => {
   //  useMemoizedCallback is used to solve nested setStates in react.
   //  allows for function memoization and most updated values
   const nodeChanged = useMemoizedCallback(
-    (nodeRef, nodeId, content, title, imageLoaded, openPart) => {
+    (nodeRef: any, nodeId: string, content: string | null, title: string | null, imageLoaded: boolean, openPart: OpenPart) => {
       console.log('[NODE CHANGED]', mapRendered)
       let currentHeight = NODE_HEIGHT;
       let newHeight = NODE_HEIGHT;

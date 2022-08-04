@@ -1,0 +1,1 @@
+export type OpenPart = 'LinkingWords' | 'Tags' | 'References' | null
