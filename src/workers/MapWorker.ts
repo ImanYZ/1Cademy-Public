@@ -1,6 +1,9 @@
 // dagre is used for calculating location of nodes and arrows
-// import dagre from "dagre";
-import "https://dagrejs.github.io/project/dagre/latest/dagre.min.js"
+import dagre from "dagre";
+
+import { JSONfn } from "../lib/utils/jsonFn";
+import { setDagNode } from '../lib/utils/Map.utils'
+// import "https://dagrejs.github.io/project/dagre/latest/dagre.min.js"
 // self.importScripts("https://dagrejs.github.io/project/dagre/latest/dagre.min.js");
 
 const layoutHandler = (
@@ -17,7 +20,7 @@ const layoutHandler = (
   MIN_CHANGE,
   MAP_RIGHT_GAP,
   NODE_WIDTH,
-  setDagNode,
+  setDagNodex,
   setDagEdge
 ) => {
   let mapNewWidth, mapNewHeight;
@@ -25,7 +28,7 @@ const layoutHandler = (
     mapChangedFlag = false;
 
     // DAGRE RECALCULATE LAYOUT
-    dagre.layout(dag1[0]);
+    dagre.layout(dag1);
     const clusterRegions = {};
 
     // Iterate oldNodes and find the cluster boundary
@@ -39,7 +42,7 @@ const layoutHandler = (
         oldNodes[nId].tagIds[0] in allTags
       ) {
         //  nodeN is the object corresponding to this node in dagr
-        const nodeN = dag1[0].node(nId);
+        const nodeN = dag1.node(nId);
         if (oldNodes[nId].tagIds[0] in clusterRegions) {
           //  if the cluster is defined, update its bounds
           if (clusterRegions[oldNodes[nId].tagIds[0]].yMin > nodeN.y - nodeN.height / 2) {
@@ -68,7 +71,7 @@ const layoutHandler = (
 
     // Update OldClusterNodes
     for (let cNode in clusterRegions) {
-      const nodeN = dag1[0].node("Tag" + cNode);
+      const nodeN = dag1.node("Tag" + cNode);
       oldClusterNodes[cNode] = {
         id: cNode,
         x: clusterRegions[cNode].xMin + XOFFSET,
@@ -84,8 +87,9 @@ const layoutHandler = (
     // calculate OFFSETs
     // update with setDagNode
     // calculate map
-    oldNodes.map((n) => {
-      const nodeN = dag1[0].node(n);
+    // debugger
+    Object.keys(oldNodes).map((n) => {
+      const nodeN = dag1.node(n);
       // If there is an object (label) assigned to the node in dag1[0], otherwise it'd be undefined:
       if (nodeN) {
         const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
@@ -99,7 +103,7 @@ const layoutHandler = (
           Math.abs(thisNode.left - newLeft) >= MIN_CHANGE ||
           Math.abs(thisNode.top - newTop) >= MIN_CHANGE
         ) {
-          oldNodes = setDagNode(n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, null);
+          oldNodes = setDagNode(n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
           mapNewWidth = newLeft + nodeN.width + MAP_RIGHT_GAP;
           if (oldMapWidth < mapNewWidth) {
             oldMapWidth = mapNewWidth;
@@ -115,9 +119,9 @@ const layoutHandler = (
     });
 
     // ITERATE EDGES and calculate the new positions
-    dag1[0].edges().map((e) => {
-      const fromNode = dag1[0].node(e.v);
-      const toNode = dag1[0].node(e.w);
+    dag1.edges().map((e) => {
+      const fromNode = dag1.node(e.v);
+      const toNode = dag1.node(e.w);
       if (
         "left" in fromNode &&
         "top" in fromNode &&
@@ -163,7 +167,6 @@ const layoutHandler = (
 };
 
 onmessage = (e) => {
-  console.log('----------------------- > get data in MAP_WORKER in map-worker', e.data)
   const {
     mapChangedFlag,
     oldClusterNodes,
@@ -181,6 +184,8 @@ onmessage = (e) => {
     setDagNode,
     setDagEdge,
   } = e.data;
+  let dagerObject = JSONfn.parse(dag1)
+  dagerObject.__proto__ = dagre.graphlib.Graph.prototype;
 
   const workerResults = layoutHandler(
     mapChangedFlag,
@@ -190,14 +195,14 @@ onmessage = (e) => {
     oldNodes,
     oldEdges,
     allTags,
-    JSON.parse(dag1),
+    dagerObject,
     XOFFSET,
     YOFFSET,
     MIN_CHANGE,
     MAP_RIGHT_GAP,
     NODE_WIDTH,
-    JSON.parse(setDagNode),
-    JSON.parse(setDagEdge)
+    JSONfn.parse(setDagNode),
+    JSONfn.parse(setDagEdge)
   );
   postMessage(workerResults);
 };
