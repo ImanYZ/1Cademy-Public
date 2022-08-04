@@ -8,7 +8,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
 import NodesList from "../components/map/NodesList";
-import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
+import { JSONfn } from "../lib/utils/jsonFn";
+import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 
 // type Edge = { from: string; to: string };
 
@@ -20,12 +22,23 @@ type DashboardProps = {};
 /**
  * It will execute some functions in the next order before the user interact with nodes
  *  1. GET USER NODES - SNAPSHOT
+ *      Type: useEffect
+ * 
  *  2. SYNCHRONIZATION:
+ *      Type: useEffect
  *      Flag: nodeChanges || userNodeChanges
  *      Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
+ * 
  *  3. WORKER:
+ *      Type: useEffect
  *      Flag: mapChanged
  *      Description: will calculate the [nodes] and [edges] positions
+ * 
+ *  --- render nodes, every node will call NODE CHANGED
+ * 
+ *  4. NODE CHANGED:
+ *      Type: function
+ *      Flag: mapRendered
  */
 const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
@@ -37,6 +50,12 @@ const Dashboard = ({ }: DashboardProps) => {
   const [{ user }] = useAuth();
   const [allTags, , allTagsLoaded] = useTagsTreeView();
   const db = getFirestore();
+  // node that user is currently selected (node will be highlighted)
+  const [sNode, setSNode] = useState(null); //<--- this was with recoil
+  // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
+  const [choosingNode, setChoosingNode] = useState(null); //<--- this was with recoil
+  // node that is in focus (highlighted)
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   // -----------------------
   // local states
@@ -71,6 +90,9 @@ const Dashboard = ({ }: DashboardProps) => {
     translation: { x: 0, y: 0 }
   });
 
+  // object of cluster boundaries
+  const [clusterNodes, setClusterNodes] = useState({});
+
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
 
@@ -97,7 +119,6 @@ const Dashboard = ({ }: DashboardProps) => {
         Promise.all(nodeDocsPromises)
           .then((nodeDocs: any[]) => {
             for (let nodeDoc of nodeDocs) {
-              console.log(nodeDoc.data());
               if (nodeDoc.exists) {
                 const nData = nodeDoc.data();
                 if (!nData.deleted) {
@@ -496,19 +517,6 @@ const Dashboard = ({ }: DashboardProps) => {
     mapChanged
   ]);
 
-
-  // useEffect(() => {
-  //   console.log('TEST WORKER')
-  //   const testWorker: Worker = new Worker('/test.worker.js', { type: 'module' });
-  //   testWorker.postMessage({ myNumber: 23 });
-  //   testWorker.onmessage = (e) => {
-  //     console.log(' ---> test worker result', e.data)
-  //     testWorker.terminate()
-  //   }
-
-  //   return () => testWorker.terminate()
-  // })
-
   // fire if map changed; responsible for laying out the knowledge map
   useEffect(() => {
     {
@@ -558,16 +566,22 @@ const Dashboard = ({ }: DashboardProps) => {
       let oldNodes = { ...nodes };
       let oldEdges = { ...edges };
 
-      console.log('[3.1 create worker]')
-      const testWorker: Worker = new Worker('/test.worker.js', { type: 'module' });
-      testWorker.postMessage({ myNumber: 5 });
-      testWorker.onmessage = (e) => {
-        console.log(' ---> test worker result', e.data)
-        testWorker.terminate()
-      }
+      // ------------------------------------------- >>
+      // This is as test worker, REMOVE then
+      // console.log('[3.1 create worker]', import.meta.url)
+      // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // // const testWorker: Worker = new Worker('../workers/test.worker.ts', import.meta.url);
+      // const testWorker: Worker = new Worker(new URL('../workers/test.worker.ts', import.meta.url));
+      // testWorker.postMessage({ myNumber: 3 });
+      // testWorker.onmessage = (e) => {
+      //   console.log(' ---> test worker result', e.data)
+      //   testWorker.terminate()
+      // }
+      // ------------------------------------------- <<
 
       // const worker = new window.Worker(process.env.PUBLIC_URL + "/MapWorker.js");
-      const worker: Worker = new Worker('/MapWorker.js', { type: 'module' });
+      // const worker: Worker = new Worker('/MapWorker.js', { type: 'module' });
+      const worker: Worker = new Worker(new URL('../workers/MapWorker.ts', import.meta.url));
       worker.postMessage({
         mapChangedFlag,
         oldClusterNodes,
@@ -576,18 +590,18 @@ const Dashboard = ({ }: DashboardProps) => {
         oldNodes,
         oldEdges,
         allTags,
-        // dag1,
+        dag1: JSONfn.stringify(dag1[0]),
         XOFFSET,
         YOFFSET,
         MIN_CHANGE,
         MAP_RIGHT_GAP,
         NODE_WIDTH,
-        // setDagNode,
-        // setDagEdge,
+        setDagNode: JSONfn.stringify(setDagNode),
+        setDagEdge: JSONfn.stringify(setDagEdge),
       });
       // worker.onerror = (err) => err;
       worker.onmessage = (e) => {
-        console.log('[WORKER.onmessage]', e)
+        console.log('[3.1 WORKER.onmessage]', e.data)
         const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges } =
           e.data;
         worker.terminate();
@@ -619,6 +633,7 @@ const Dashboard = ({ }: DashboardProps) => {
               openLinkedNode(sNode);
             } else {
               //  redirect to the very first node that is loaded
+              console.log('redirect to the very first node that is loaded')
               scrollToNode(Object.keys(nodes)[0]);
             }
             setMapRendered(true);
@@ -645,6 +660,195 @@ const Dashboard = ({ }: DashboardProps) => {
   // NODE FUNCTIONS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
+
+  //  useMemoizedCallback is used to solve nested setStates in react.
+  //  allows for function memoization and most updated values
+  const nodeChanged = useMemoizedCallback(
+    (nodeRef, nodeId, content, title, imageLoaded, openPart) => {
+      console.log('[NODE CHANGED]', mapRendered)
+      let currentHeight = NODE_HEIGHT;
+      let newHeight = NODE_HEIGHT;
+      let nodesChanged = false;
+      if (mapRendered && (nodeRef.current || content !== null || title !== null)) {
+        setNodes((oldNodes) => {
+          const node = { ...oldNodes[nodeId] };
+          if (content !== null && node.content !== content) {
+            node.content = content;
+            nodesChanged = true;
+          }
+          if (title !== null && node.title !== title) {
+            node.title = title;
+            nodesChanged = true;
+          }
+          if (nodeRef.current) {
+            const { current } = nodeRef;
+            newHeight = current.offsetHeight;
+            if ("height" in node && Number(node.height)) {
+              currentHeight = Number(node.height);
+            }
+            if (
+              (Math.abs(currentHeight - newHeight) >= MIN_CHANGE &&
+                (node.nodeImage === "" || imageLoaded)) ||
+              ("open" in node && node.open && !node.openHeight) ||
+              ("open" in node && !node.open && !node.closedHeight)
+            ) {
+              if (node.open) {
+                node.height = newHeight;
+                if (openPart === null) {
+                  node.openHeight = newHeight;
+                }
+              } else {
+                node.height = newHeight;
+                node.closedHeight = newHeight;
+              }
+              nodesChanged = true;
+            }
+          }
+          if (nodesChanged) {
+            return setDagNode(nodeId, node, { ...oldNodes }, () => setMapChanged(true));
+          } else {
+            return oldNodes;
+          }
+        });
+      }
+    },
+    //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
+    [mapRendered, allTags]
+  );
+
+  const openNodeHandler = useMemoizedCallback(
+    async (nodeId) => {
+      console.log("[OPEN NODE HANDLER]");
+      let linkedNodeRef;
+      let userNodeRef = null;
+      let userNodeData = null;
+      const nodeRef = firebase.db.collection("nodes").doc(nodeId);
+      const nodeDoc = await nodeRef.get();
+      if (nodeDoc.exists) {
+        const thisNode = { ...nodeDoc.data(), id: nodeId };
+        try {
+          for (let child of thisNode.children) {
+            linkedNodeRef = firebase.db.collection("nodes").doc(child.node);
+            await firebase.batchUpdate(linkedNodeRef, {
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            });
+          }
+          for (let parent of thisNode.parents) {
+            linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+            // do a batch r
+            await firebase.batchUpdate(linkedNodeRef, {
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            });
+          }
+          const userNodeQuery = firebase.db
+            .collection("userNodes")
+            .where("node", "==", nodeId)
+            .where("user", "==", username)
+            .limit(1);
+          const userNodeDoc = await userNodeQuery.get();
+          let userNodeId = null;
+          if (userNodeDoc.docs.length > 0) {
+            userNodeId = userNodeDoc.docs[0].id;
+            userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
+            userNodeData = userNodeDoc.docs[0].data();
+            userNodeData.visible = true;
+            userNodeData.updatedAt = firebase.firestore.Timestamp.fromDate(new Date());
+            await firebase.batchUpdate(userNodeRef, userNodeData);
+          } else {
+            userNodeRef = firebase.db.collection("userNodes").doc();
+            userNodeId = userNodeRef.id;
+            userNodeData = {
+              changed: true,
+              correct: false,
+              createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: false,
+              bookmarked: false,
+              node: nodeId,
+              open: true,
+              user: username,
+              visible: true,
+              wrong: false,
+            };
+            userNodeRef.set(userNodeData);
+          }
+          await firebase.batchUpdate(nodeRef, {
+            viewers: thisNode.viewers + 1,
+            updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+          });
+          const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+          const userNodeLogData = {
+            ...userNodeData,
+            createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+          };
+          await firebase.batchSet(userNodeLogRef, userNodeLogData);
+
+          let oldNodes = { ...nodes };
+          let oldEdges = { ...edges };
+          let oldAllNodes = { ...allNodes };
+          let oldAllUserNodes = { ...allUserNodes };
+          // if data for the node is loaded
+          let uNodeData = {
+            // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+            ...oldAllNodes[nodeId],
+            ...userNodeData,
+            open: true,
+          };
+          if (userNodeId) {
+            uNodeData[userNodeId] = userNodeId;
+          }
+          ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+            uNodeData,
+            oldNodes,
+            oldEdges,
+            oldAllNodes
+          ));
+          ({ oldNodes, oldEdges } = createOrUpdateNode(
+            uNodeData,
+            nodeId,
+            oldNodes,
+            { ...oldEdges },
+            allTags
+          ));
+          oldAllNodes[nodeId] = uNodeData;
+          oldAllUserNodes = {
+            ...oldAllUserNodes,
+            [nodeId]: userNodeData,
+          };
+
+          await firebase.commitBatch();
+          scrollToNode(nodeId);
+          //  there are some places when calling scroll to node but we are not selecting that node
+          setTimeout(() => {
+            setSelectedNode(nodeId);
+          }, 400);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    },
+    // CHECK: I commente allNode, I dident found where is defined
+    [user, nodes, edges, /*allNodes*/, allTags, /*allUserNodes*/]
+  );
+
+  const openLinkedNode = useCallback(
+    (linkedNodeID: string) => {
+      console.log(['OPEN LINKED NODE'])
+      if (!choosingNode) {
+        let linkedNode = document.getElementById(linkedNodeID);
+        if (linkedNode) {
+          scrollToNode(linkedNodeID);
+          setTimeout(() => {
+            setSelectedNode(linkedNodeID);
+          }, 400);
+        } else {
+          openNodeHandler(linkedNodeID);
+        }
+      }
+    },
+    [choosingNode, openNodeHandler]
+  );
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
