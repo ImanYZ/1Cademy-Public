@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
 import NodesList from "../components/map/NodesList";
-import { compare2Nodes, createOrUpdateNode, dag1 } from "../lib/utils/Map.utils";
+import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 
 // type Edge = { from: string; to: string };
 
@@ -17,10 +17,22 @@ import { compare2Nodes, createOrUpdateNode, dag1 } from "../lib/utils/Map.utils"
 
 type DashboardProps = {};
 
-const Dashboard = ({}: DashboardProps) => {
-  // -----------------------
-  // global states
-  // -----------------------
+/**
+ * It will execute some functions in the next order before the user interact with nodes
+ *  1. GET USER NODES - SNAPSHOT
+ *  2. SYNCHRONIZATION:
+ *      Flag: nodeChanges || userNodeChanges
+ *      Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
+ *  3. WORKER:
+ *      Flag: mapChanged
+ *      Description: will calculate the [nodes] and [edges] positions
+ */
+const Dashboard = ({ }: DashboardProps) => {
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // GLOBAL STATES
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   const [{ user }] = useAuth();
   const [allTags, , allTagsLoaded] = useTagsTreeView();
@@ -43,6 +55,10 @@ const Dashboard = ({}: DashboardProps) => {
   // edges: dictionary of all edges visible on map for specific user
   const [edges, setEdges] = useState({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
+
+  // as map grows, width and height grows based on the nodes shown on the map
+  const [mapWidth, setMapWidth] = useState(700);
+  const [mapHeight, setMapHeight] = useState(400);
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -480,7 +496,155 @@ const Dashboard = ({}: DashboardProps) => {
     mapChanged
   ]);
 
-  // getNodesData(nodeIds);
+
+  // useEffect(() => {
+  //   console.log('TEST WORKER')
+  //   const testWorker: Worker = new Worker('/test.worker.js', { type: 'module' });
+  //   testWorker.postMessage({ myNumber: 23 });
+  //   testWorker.onmessage = (e) => {
+  //     console.log(' ---> test worker result', e.data)
+  //     testWorker.terminate()
+  //   }
+
+  //   return () => testWorker.terminate()
+  // })
+
+  // fire if map changed; responsible for laying out the knowledge map
+  useEffect(() => {
+    {
+      // g.edges().map((e, idx) => {
+      //   const edgeE = g.edge(e);
+      //   const from = edgeE.points[0];
+      //   const to = edgeE.points[2];
+      //   const edgeIndex = edges.findIndex(edge => edge.from === e.v && edge.to === e.w);
+      //   const newFromX = from.x + XOFFSET;
+      //   const newFromY = from.y + YOFFSET;
+      //   const newToX = to.x + XOFFSET;
+      //   const newToY = to.y + YOFFSET;
+      //   if (Math.abs(edges[edgeIndex].fromX - newFromX) >= MIN_CHANGE ||
+      //       Math.abs(edges[edgeIndex].fromY - newFromY) >= MIN_CHANGE ||
+      //       Math.abs(edges[edgeIndex].toX - newToX) >= MIN_CHANGE ||
+      //       Math.abs(edges[edgeIndex].toY - newToY) >= MIN_CHANGE) {
+      //     somethingChanged = true;
+      //   }
+      //   edges[edgeIndex].fromX = newFromX;
+      //   edges[edgeIndex].fromY = newFromY;
+      //   edges[edgeIndex].toX = newToX;
+      //   edges[edgeIndex].toY = newToY;
+      //   return null;
+      // })
+      // console.log("Object.keys(nodes).length:", Object.keys(nodes).length);
+      // console.log("Object.keys(allTags).length:", Object.keys(allTags).length);
+      // console.log("dag1[0].nodeCount():", dag1[0].nodeCount());
+      // console.log("Object.keys(edges).length:", Object.keys(edges).length);
+      // console.log("dag1[0].edgeCount():", dag1[0].edgeCount());
+    }
+    console.log("[3. WORKER - RECALCULATE POSITIONS]", mapChanged);
+    if (
+      mapChanged &&
+      nodeChanges.length === 0 &&
+      userNodeChanges.length === 0 &&
+      // nodeTypeVisibilityChanges.length === 0 &&
+      // (necessaryNodesLoaded && !mapRendered) ||
+      userNodesLoaded &&
+      // Object.keys(nodes).length + Object.keys(allTags).length === dag1[0].nodeCount() &&
+      Object.keys(edges).length === dag1[0].edgeCount()
+    ) {
+      console.log("[3. worker]");
+      let mapChangedFlag = true;
+      const oldClusterNodes = {};
+      let oldMapWidth = mapWidth;
+      let oldMapHeight = mapHeight;
+      let oldNodes = { ...nodes };
+      let oldEdges = { ...edges };
+
+      console.log('[3.1 create worker]')
+      const testWorker: Worker = new Worker('/test.worker.js', { type: 'module' });
+      testWorker.postMessage({ myNumber: 5 });
+      testWorker.onmessage = (e) => {
+        console.log(' ---> test worker result', e.data)
+        testWorker.terminate()
+      }
+
+      // const worker = new window.Worker(process.env.PUBLIC_URL + "/MapWorker.js");
+      const worker: Worker = new Worker('/MapWorker.js', { type: 'module' });
+      worker.postMessage({
+        mapChangedFlag,
+        oldClusterNodes,
+        oldMapWidth,
+        oldMapHeight,
+        oldNodes,
+        oldEdges,
+        allTags,
+        // dag1,
+        XOFFSET,
+        YOFFSET,
+        MIN_CHANGE,
+        MAP_RIGHT_GAP,
+        NODE_WIDTH,
+        // setDagNode,
+        // setDagEdge,
+      });
+      // worker.onerror = (err) => err;
+      worker.onmessage = (e) => {
+        console.log('[WORKER.onmessage]', e)
+        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges } =
+          e.data;
+        worker.terminate();
+        setMapWidth(oldMapWidth);
+        setMapHeight(oldMapHeight);
+        setClusterNodes(oldClusterNodes);
+        setNodes(oldNodes);
+        setEdges(oldEdges);
+        setMapChanged(mapChangedFlag);
+        if (!mapRendered) {
+          setTimeout(() => {
+            let nodeToNavigateTo = null;
+            if (
+              "location" in window &&
+              "pathname" in window.location &&
+              window.location.pathname.length > 1 &&
+              window.location.pathname[0] === "/"
+            ) {
+              const pathParts = window.location.pathname.split("/");
+              if (pathParts.length === 4) {
+                nodeToNavigateTo = pathParts[3];
+              }
+            }
+            // navigate to node that is identified in the URL
+            if (nodeToNavigateTo) {
+              openLinkedNode(nodeToNavigateTo);
+              // Navigate to node that the user interacted with the last time they used 1Cademy.
+            } else if (sNode) {
+              openLinkedNode(sNode);
+            } else {
+              //  redirect to the very first node that is loaded
+              scrollToNode(Object.keys(nodes)[0]);
+            }
+            setMapRendered(true);
+          }, 1000);
+        }
+      };
+    }
+  }, [
+    // necessaryNodesLoaded,
+    // nodeTypeVisibilityChanges,
+    userNodesLoaded,
+    mapChanged,
+    allTags,
+    nodes,
+    edges,
+    mapWidth,
+    mapHeight,
+    userNodeChanges,
+    nodeChanges,
+  ]);
+
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // NODE FUNCTIONS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
