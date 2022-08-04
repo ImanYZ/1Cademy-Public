@@ -1,40 +1,22 @@
 // dagre is used for calculating location of nodes and arrows
 import dagre from "dagre";
 
-type LayoutHandle = {
-  mapChangedFlag: any,
-  oldClusterNodes: any,
-  oldMapWidth: any,
-  oldMapHeight: any,
-  oldNodes: any,
-  oldEdges: any,
-  allTags: any,
-  dag1: any,
-  XOFFSET: number,
-  YOFFSET: number,
-  MIN_CHANGE: number,
-  MAP_RIGHT_GAP: number,
-  NODE_WIDTH: number,
-  setDagNode: any,
-  setDagEdge: any,
-}
-
 const layoutHandler = (
-  { mapChangedFlag,
-    oldClusterNodes,
-    oldMapWidth,
-    oldMapHeight,
-    oldNodes,
-    oldEdges,
-    allTags,
-    dag1,
-    XOFFSET,
-    YOFFSET,
-    MIN_CHANGE,
-    MAP_RIGHT_GAP,
-    NODE_WIDTH,
-    setDagNode,
-    setDagEdge }: LayoutHandle
+  mapChangedFlag,
+  oldClusterNodes,
+  oldMapWidth,
+  oldMapHeight,
+  oldNodes,
+  oldEdges,
+  allTags,
+  dag1,
+  XOFFSET,
+  YOFFSET,
+  MIN_CHANGE,
+  MAP_RIGHT_GAP,
+  NODE_WIDTH,
+  setDagNode,
+  setDagEdge
 ) => {
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
@@ -42,7 +24,7 @@ const layoutHandler = (
 
     // DAGRE RECALCULATE LAYOUT
     dagre.layout(dag1[0]);
-    const clusterRegions: any = {};
+    const clusterRegions = {};
 
     // Iterate oldNodes and find the cluster boundary
     // and update their size
@@ -178,9 +160,7 @@ const layoutHandler = (
   return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges };
 };
 
-type OnMessageProps = { data: LayoutHandle }
-
-onmessage = (e: OnMessageProps) => {
+onmessage = (e) => {
   const {
     mapChangedFlag,
     oldClusterNodes,
@@ -198,7 +178,8 @@ onmessage = (e: OnMessageProps) => {
     setDagNode,
     setDagEdge,
   } = e.data;
-  const workerResults = layoutHandler({
+  console.log('----------------------- > get data in worker in map-worker')
+  const workerResults = layoutHandler(
     mapChangedFlag,
     oldClusterNodes,
     oldMapWidth,
@@ -214,6 +195,6 @@ onmessage = (e: OnMessageProps) => {
     NODE_WIDTH,
     setDagNode,
     setDagEdge
-  });
+  );
   postMessage(workerResults);
 };

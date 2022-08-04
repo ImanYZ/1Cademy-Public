@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
 import NodesList from "../components/map/NodesList";
-import { compare2Nodes, createOrUpdateNode, dag1 } from "../lib/utils/Map.utils";
+import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 
 // type Edge = { from: string; to: string };
 
@@ -512,6 +512,19 @@ const Dashboard = ({ }: DashboardProps) => {
     mapChanged
   ]);
 
+
+  // useEffect(() => {
+  //   console.log('TEST WORKER')
+  //   const testWorker: Worker = new Worker('/test.worker.js', { type: 'module' });
+  //   testWorker.postMessage({ myNumber: 23 });
+  //   testWorker.onmessage = (e) => {
+  //     console.log(' ---> test worker result', e.data)
+  //     testWorker.terminate()
+  //   }
+
+  //   return () => testWorker.terminate()
+  // })
+
   // fire if map changed; responsible for laying out the knowledge map
   useEffect(() => {
     {
@@ -561,8 +574,16 @@ const Dashboard = ({ }: DashboardProps) => {
       let oldNodes = { ...nodes };
       let oldEdges = { ...edges };
 
+      console.log('[3.1 create worker]')
+      const testWorker: Worker = new Worker('/test.worker.js', { type: 'module' });
+      testWorker.postMessage({ myNumber: 5 });
+      testWorker.onmessage = (e) => {
+        console.log(' ---> test worker result', e.data)
+        testWorker.terminate()
+      }
+
       // const worker = new window.Worker(process.env.PUBLIC_URL + "/MapWorker.js");
-      const worker: Worker = new Worker('src/lib/utils/MapWorker.ts');
+      const worker: Worker = new Worker('/MapWorker.js', { type: 'module' });
       worker.postMessage({
         mapChangedFlag,
         oldClusterNodes,
@@ -571,17 +592,18 @@ const Dashboard = ({ }: DashboardProps) => {
         oldNodes,
         oldEdges,
         allTags,
-        dag1,
+        // dag1,
         XOFFSET,
         YOFFSET,
         MIN_CHANGE,
         MAP_RIGHT_GAP,
         NODE_WIDTH,
-        setDagNode,
-        setDagEdge,
+        // setDagNode,
+        // setDagEdge,
       });
       // worker.onerror = (err) => err;
       worker.onmessage = (e) => {
+        console.log('[WORKER.onmessage]', e)
         const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges } =
           e.data;
         worker.terminate();
