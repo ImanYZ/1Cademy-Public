@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getFirestore, onSnapshot, query, where } from "firebase/firestore";
@@ -191,12 +192,6 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     [scrollToNodeInitialized]
   );
-
-  // ---------------------------------------------------------------------
-  // ---------------------------------------------------------------------
-  // USE_EFFECTS
-  // ---------------------------------------------------------------------
-  // ---------------------------------------------------------------------
 
   // loads user nodes
   // downloads all records of userNodes collection where user is authenticated user
@@ -868,7 +863,7 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     [choosingNode, openNodeHandler]
   );
-
+console.log("nodes",nodes);
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       {/* Data from map, DONT REMOVE */}
@@ -883,7 +878,37 @@ const Dashboard = ({ }: DashboardProps) => {
         {/* link list */}
         {/* node list */}
         Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-        {/* <NodesList nodes={nodes} /> */}
+        <NodesList 
+          nodes={nodes} 
+          nodeChanged={nodeChanged}
+          bookmark={()=>{console.log('bookmark')}}
+          markStudied={()=>{console.log('mark studied')}}
+          chosenNodeChanged={()=>{console.log('chosenNodeChanged')}}
+          referenceLabelChange={()=>{console.log('referenceLabel change')}}
+          deleteLink={()=>{console.log('delete link')}}
+          openLinkedNode={()=>{console.log('open link node')}}
+          openAllChildren={()=>{console.log('open all children')}}
+          hideNodeHandler={()=>{console.log('hideNodeHandler')}}
+          hideOffsprings={()=>{console.log('hideOffsprings')}}
+          toggleNode={()=>{console.log('toggleNode')}}
+          openNodePart={()=>{console.log('openNodePart')}}
+          selectNode={()=>{console.log('selectNode')}}
+          nodeClicked={()=>{console.log('nodeClicked')}}
+          correctNode={()=>{console.log('correctNode')}}
+          wrongNode={()=>{console.log('wrongNode')}}
+          uploadNodeImage={()=>{console.log('uploadNodeImage')}}
+          removeImage={()=>{console.log('removeImage')}}
+          changeChoice={()=>{console.log('changeChoice')}}
+          changeFeedback={()=>{console.log('changeFeedback')}}
+          switchChoice={()=>{console.log('switchChoice')}}
+          deleteChoice={()=>{console.log('deleteChoice')}}
+          addChoice={()=>{console.log('addChoice')}}
+          onNodeTitleBlur={()=>{console.log('onNodeTitleBlur')}}
+          saveProposedChildNode={()=>{console.log('saveProposedChildNod')}}
+          saveProposedImprovement={()=>{console.log('saveProposedImprovemny')}}
+          closeSideBar={()=>{console.log('closeSideBar')}}
+          reloadPermanentGrpah={()=>{console.log('reloadPermanentGrpah')}}
+        />
       </MapInteractionCSS>
     </Box>
   );

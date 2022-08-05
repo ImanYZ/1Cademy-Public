@@ -14,7 +14,7 @@ export type ChosenNode = {
   title: string
 }
 
-export type SelectionType = 'AcceptedProposals' | 'Proposals' | null
+export type SelectionType = 'AcceptedProposals' | 'Proposals' |'Citations'|'Comments' | null
 
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
