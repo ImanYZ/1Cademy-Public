@@ -8,9 +8,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
 import NodesList from "../components/map/NodesList";
+import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { JSONfn } from "../lib/utils/jsonFn";
 import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { OpenPart } from "../nodeBookTypes";
 
 // type Edge = { from: string; to: string };
 
@@ -47,6 +49,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const { nodeBookState, nodeBookDispatch } = useNodeBook()
   const [{ user }] = useAuth();
   const [allTags, , allTagsLoaded] = useTagsTreeView();
   const db = getFirestore();
@@ -57,9 +60,11 @@ const Dashboard = ({ }: DashboardProps) => {
   // node that is in focus (highlighted)
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
-  // -----------------------
-  // local states
-  // -----------------------
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // LOCAL STATES
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges, setUserNodeChanges] = useState<any[]>([]);
@@ -96,15 +101,23 @@ const Dashboard = ({ }: DashboardProps) => {
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
 
-  // -----------------------
-  // flags
-  // -----------------------
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // FLAGS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
+
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // FUNCTIONS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
 
   const getNodesData = useCallback(
     async (nodeIds: string[]) => {
@@ -183,7 +196,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // downloads all records of userNodes collection where user is authenticated user
   // sets userNodeChanges
   useEffect(() => {
-    console.log("[GET USER NODES - SNAPSHOOT]", allTagsLoaded);
+    console.log("[1. GET USER NODES - SNAPSHOT]", allTagsLoaded);
     // console.log("In allTagsLoaded useEffect");
     // if (firebase && allTagsLoaded && username) {
     const username = user?.uname;
@@ -257,7 +270,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // READ THIS!!!
   // nodeChanges, userNodeChanges useEffect
   useEffect(() => {
-    console.log("[SYNCHRONIZATION]");
+    console.log("[2. SYNCHRONIZATION]");
     // debugger
     // console.log("In nodeChanges, userNodeChanges useEffect.");
     const nodeUserNodeChangesFunc = async () => {
@@ -664,7 +677,7 @@ const Dashboard = ({ }: DashboardProps) => {
   //  useMemoizedCallback is used to solve nested setStates in react.
   //  allows for function memoization and most updated values
   const nodeChanged = useMemoizedCallback(
-    (nodeRef, nodeId, content, title, imageLoaded, openPart) => {
+    (nodeRef: any, nodeId: string, content: string | null, title: string | null, imageLoaded: boolean, openPart: OpenPart) => {
       console.log('[NODE CHANGED]', mapRendered)
       let currentHeight = NODE_HEIGHT;
       let newHeight = NODE_HEIGHT;
@@ -852,25 +865,27 @@ const Dashboard = ({ }: DashboardProps) => {
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-      <Button
-        onClick={() => {
-          getNodesData(nodeIds);
-        }}
-      >
-        TU
-      </Button>
+      {/* Data from map, DONT REMOVE */}
       <Button onClick={() => console.log(nodes)}>nodes</Button>
       <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+      <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+      <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
+      {/* end Data from map */}
       <MapInteractionCSS>
         {/* show clusters */}
         {/* link list */}
         {/* node list */}
         Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-        <NodesList nodes={nodes} />
+        {/* <NodesList nodes={nodes} /> */}
       </MapInteractionCSS>
     </Box>
   );
 };
 
-export default Dashboard;
+const NodeBook = () => <NodeBookProvider>
+  <Dashboard />
+</NodeBookProvider>
+
+
+export default NodeBook;

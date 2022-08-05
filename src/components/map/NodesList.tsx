@@ -1,19 +1,125 @@
 import { Box } from "@mui/system";
 import React from "react";
 
+import { NODE_WIDTH } from "../../lib/utils/Map.utils";
+import { OpenPart } from "../../nodeBookTypes";
+import { MemoizedNode } from "./Node";
+
 type NodeListProps = {
   nodes: any;
+  selectionType: any,
+  NODE_WIDTH: number,
+  bookmark: any,
+  markStudied: boolean,
+  nodeChanged: (nodeRef: any, nodeId: string, content: string | null, title: string | null, imageLoaded: boolean, openPart: OpenPart) => void
+  chosenNodeChanged: any,
+  referenceLabelChange: any,
+  deleteLink: any,
+  openLinkedNode: any,
+  openAllChildren: any,
+  hideNodeHandler: any,
+  hideOffsprings: any,
+  toggleNode: any,
+  openNodePart: any,
+  selectNode: any,
+  nodeClicked: any,
+  correctNode: any,
+  wrongNode: any,
+  uploadNodeImage: any,
+  removeImage: any,
+  changeChoice: any,
+  changeFeedback: any,
+  switchChoice: any,
+  deleteChoice: any,
+  addChoice: any,
+  onNodeTitleBlur: any,
+  saveProposedChildNode: any,
+  saveProposedImprovement: any,
+  closeSideBar: any,
+  reloadPermanentGrpah: any,
 };
 
 const NodesList = ({ nodes }: NodeListProps) => {
+
+
   return (
     <Box sx={{ border: "dashed 2px orange" }}>
-      <h1>Node List</h1>
+      <h3>Node List</h3>
       {Object.keys(nodes).map(nId => {
         return (
-          <Box key={nId} sx={{ border: "dashed 2px royalBlue" }}>
-            {nodes[nId].title}
-          </Box>
+          // CHECK: I commented some props while implement, please uncomment at the end
+          <MemoizedNode
+            key={nId}
+            identifier={nId}
+            // activeNode={activeNode}
+            // citationsSelected={citationsSelected}
+            // proposalsSelected={proposalsSelected}
+            // acceptedProposalsSelected={acceptedProposalsSelected}
+            // commentsSelected={commentsSelected}
+            // open={nodes[nId].open}
+            left={nodes[nId].left}
+            top={nodes[nId].top}
+            width={NODE_WIDTH}
+            // editable={nodes[nId].editable}
+            // unaccepted={unaccepted}
+            // nodeType={nodes[nId].nodeType}
+            // isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
+            // isNew={nodes[nId].hasOwnProperty("isNew") && nodes[nId].isNew}
+            title={nodes[nId].title}
+            content={nodes[nId].content}
+          // nodeImage={nodes[nId].nodeImage}
+          // viewers={nodes[nId].viewers}
+          // correctNum={nodes[nId].corrects}
+          // markedCorrect={nodes[nId].correct}
+          // wrongNum={nodes[nId].wrongs}
+          // markedWrong={nodes[nId].wrong}
+          // references={nodes[nId].references}
+          // tags={nodes[nId].tags}
+          // parents={nodes[nId].parents}
+          // children={nodes[nId].children}
+          // choices={nodes[nId].choices}
+          // commentsNum={nodes[nId].comments}
+          // proposalsNum={nodes[nId].versions}
+          // admin={nodes[nId].admin}
+          // aImgUrl={nodes[nId].aImgUrl}
+          // aFullname={nodes[nId].aFullname}
+          // aChooseUname={nodes[nId].aChooseUname}
+          // lastVisit={nodes[nId].lastVisit}
+          // studied={nodes[nId].studied}
+          // isStudied={nodes[nId].isStudied}
+          // changed={nodes[nId].changed}
+          // changedAt={nodes[nId].changedAt}
+          // bookmarked={bookmarked}
+          // bookmarks={bookmarks}
+          // bookmark={bookmark}
+          // markStudied={markStudied}
+          // nodeChanged={nodeChanged}
+          // chosenNodeChanged={chosenNodeChanged}
+          // referenceLabelChange={referenceLabelChange}
+          // deleteLink={deleteLink}
+          // openLinkedNode={openLinkedNode}
+          // openAllChildren={openAllChildren}
+          // hideNodeHandler={hideNodeHandler}
+          // hideOffsprings={hideOffsprings}
+          // toggleNode={toggleNode}
+          // openNodePart={openNodePart}
+          // selectNode={selectNode}
+          // nodeClicked={nodeClicked}
+          // correctNode={correctNode}
+          // wrongNode={wrongNode}
+          // uploadNodeImage={uploadNodeImage}
+          // removeImage={removeImage}
+          // changeChoice={changeChoice}
+          // changeFeedback={changeFeedback}
+          // switchChoice={switchChoice}
+          // deleteChoice={deleteChoice}
+          // addChoice={addChoice}
+          // onNodeTitleBLur={onNodeTitleBlur}
+          // saveProposedChildNode={saveProposedChildNode}
+          // saveProposedImprovement={saveProposedImprovement}
+          // closeSideBar={closeSideBar}
+          // reloadPermanentGrpah={reloadPermanentGrpah}
+          />
         );
       })}
     </Box>
