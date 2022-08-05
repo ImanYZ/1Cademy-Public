@@ -8,10 +8,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
 import NodesList from "../components/map/NodesList";
+import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { JSONfn } from "../lib/utils/jsonFn";
 import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
-import { OpenPart } from "../nodebookTypes";
+import { OpenPart } from "../nodeBookTypes";
 
 // type Edge = { from: string; to: string };
 
@@ -48,6 +49,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const { nodeBookState, nodeBookDispatch } = useNodeBook()
   const [{ user }] = useAuth();
   const [allTags, , allTagsLoaded] = useTagsTreeView();
   const db = getFirestore();
@@ -873,16 +875,23 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(nodes)}>nodes</Button>
       <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+      <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+      <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
         {/* show clusters */}
         {/* link list */}
         {/* node list */}
         Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-        <NodesList nodes={nodes} />
+        {/* <NodesList nodes={nodes} /> */}
       </MapInteractionCSS>
     </Box>
   );
 };
 
-export default Dashboard;
+const NodeBook = () => <NodeBookProvider>
+  <Dashboard />
+</NodeBookProvider>
+
+
+export default NodeBook;

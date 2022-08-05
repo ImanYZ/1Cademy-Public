@@ -2,7 +2,7 @@ import { Box } from "@mui/system";
 import React from "react";
 
 import { NODE_WIDTH } from "../../lib/utils/Map.utils";
-import { OpenPart } from "../../nodebookTypes";
+import { OpenPart } from "../../nodeBookTypes";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {

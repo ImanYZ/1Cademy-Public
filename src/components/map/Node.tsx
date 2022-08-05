@@ -2,7 +2,7 @@ import { Typography } from '@mui/material'
 import { Box } from '@mui/system'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { OpenPart } from '../../nodebookTypes'
+import { OpenPart } from '../../nodeBookTypes'
 
 type NodeProps = {
   content: string,
