@@ -1,53 +1,316 @@
-import { Typography } from '@mui/material'
-import { Box } from '@mui/system'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useRef, useCallback } from "react";
+// import { useRecoilValue, useSetRecoilState } from "recoil";
 
-import { OpenPart } from '../../nodeBookTypes'
+import { choosingNodeState, choosingTypeState, chosenNodeState, chosenNodeTitleState } from "../../../store/NodeAtoms";
+import { openMediaState } from "../../../store/MapAtoms";
+import { OpenPart } from "src/nodeBookTypes";
+import { useNodeBook } from "@/context/NodeBookContext";
+
+
+
+
+// import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
+// import NodeHeader from "./NodeHeader/NodeHeader";
+// import NodeFooter from "./NodeFooter/NodeFooter";
+// import LinkingWords from "./LinkingWords/LinkingWords";
+// import QuestionChoices from "./QuestionChoices/QuestionChoices";
+// import MetaButton from "../MetaButton/MetaButton";
+// import { admin } from "@/lib/firestoreServer/admin";
+// import { Draft } from "../../Editor";
+// import { compareLinks, compareChoices, compareImages } from "../MapUtils";
+// import boxShadowCSSGenerator from "../../../utils/boxShadowCSSGenerator";
+
+// import "./Node.css";
+
 
 type NodeProps = {
-  content: string,
-  title: string,
-  identifier: string,
-  left: number,
-  top: number,
-  width: number,
-  nodeChanged: (nodeRef: any, nodeId: string, content: string | null, title: string | null, imageLoaded: boolean, openPart: OpenPart) => void
-}
+  identifier: string;
+  activeNode: any;//organize this i a better forme
+  citationsSelected: any;//
+  proposalsSelected: any;//
+  acceptedProposalsSelected: any;//
+  commentsSelected: any;
+  open: boolean;
+  left: number;
+  top: number;
+  width: number;
+  editable: boolean;
+  unaccepted: any;//
+  nodeType: string;
+  isTag: boolean;
+  isNew: any;//
+  title: string;
+  content: string;
+  nodeImage: string;
+  viewers: number;
+  correctNum: any;//
+  markedCorrect: any;//
+  wrongNum: any;//
+  markedWrong: any;//
+  references: string[];
+  tags: string[] | { node: string; title?: string; label?: string }[];
+  parents: string[];
+  children: string[] | { node: string; title?: string; label?: string }[];
+  choices: string[];
+  commentsNum: number;
+  proposalsNum: number;
+  admin: string;
+  aImgUrl: string;
+  aFullname: string;
+  aChooseUname: boolean;
+  lastVisit: string;
+  studied: number;
+  isStudied: boolean;
+  changed: any;//
+  changedAt: string;
+  bookmarked: boolean;
+  bookmarks: any;//
+  bookmark: any;//
+  markStudied: any;//
+  nodeChanged: (
+    nodeRef: any,
+    nodeId: string,
+    content: string | null,
+    title: string | null,
+    imageLoaded: boolean,
+    openPart: OpenPart
+  ) => void;
+  chosenNodeChanged: any;//
+  referenceLabelChange: any;//
+  deleteLink: any;//
+  openLinkedNode: any;//
+  openAllChildren: any;//
+  hideNodeHandler: any;//
+  hideOffsprings: any;//
+  toggleNode: any;//
+  openNodePart: any;//
+  selectNode: any;//
+  nodeClicked: any;//
+  correctNode: any;//
+  wrongNode: any;//
+  uploadNodeImage: any;//
+  removeImage: any;//
+  changeChoice: any;//
+  changeFeedback: any;//
+  switchChoice: any;//
+  deleteChoice: any;//
+  addChoice: any;//
+  onNodeTitleBLur: any;//
+  saveProposedChildNode: any;//
+  saveProposedImprovement: any;//
+  closeSideBar: any;//
+  reloadPermanentGrpah: any;//
+};
+const Node = ({
+identifier,
+activeNode,
+citationsSelected,
+proposalsSelected,
+acceptedProposalsSelected,
+commentsSelected,
+open,
+left,
+top,
+width,
+editable,
+editableopen,
+unaccepted,
+nodeType,
+isTagopen,
+isNew,
+title,
+content,
+nodeImage,
+viewers,
+correctNum,
+markedCorrect,
+wrongNum,
+markedWrong,
+references,
+tags,
+parents,
+children,
+commentsNum,
+proposalsNum,
+admin,
+aImgUrladmin,
+aFullnameadmin,
+aChooseUname,
+lastVisitadmin,
+studied,
+isStudied,
+changed,
+changedAtadmin,
+bookmarked,
+bookmarks,
+bookmark,
+markStudied,
+nodeChanged,
+chosenNodeChanged,
+referenceLabelChange,
+deleteLink,
+openLinkedNode,
+openAllChildren,
+hideNodeHandler,
+hideOffsprings,
+toggleNode,
+openNodePart,
+selectNode,
+nodeClicked,
+correctNode,
+wrongNode,
+uploadNodeImage,
+removeImage,
+changeChoice,
+changeFeedback,
+switchChoice,
+deleteChoice,
+addChoice,
+onNodeTitleBLur,
+saveProposedChildNode,
+saveProposedImprovement,
+closeSideBar,
+reloadPermanentGrpah,
+isTag,
+}:NodeProps)  => {
 
-const Node = ({ title, content, left, top, width, identifier, nodeChanged }: NodeProps) => {
+  // const choosingNode = useRecoilValue(choosingNodeState);
+  // const choosingType = useRecoilValue(choosingTypeState);
+  // const setChosenNode = useSetRecoilState(chosenNodeState);
+  // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
+  // const setOpenMedia = useSetRecoilState(openMediaState);
 
-  // GLOBAL STATES
-  const choosingNode = useState(null); // <--- this was useRecoilValue
-  const [, setChosenNode] = useState<string | null>(null); // <--- this was useSetRecoilState
-  const [, setChosenNodeTitle] = useState<string | null>(null); // <--- this was useSetRecoilState
-
-  // LOCAL STATES
-  const [openPart, setOpenPart] = useState<OpenPart>(null);
+  const {nodeBookState, nodeBookDispatch} = useNodeBook();
+  
+  const [openPart, setOpenPart] = useState(null);
+  const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  // const [summary, setSummary] = useState("");
+  const [reason, setReason] = useState("");
 
   const nodeRef = useRef(null);
 
-  // this call a nodeClicked from in map.js
-  // IMPORTANT we need to move the node clicked here
-  // const nodeClickHandler = useCallback(
-  //   (event: React.MouseEventHandler<HTMLDivElement> | undefined) => {
-  //     console.log('Click in node handel')
-  //     if (choosingNode) {
-  //       setChosenNode(identifier);
-  //       setChosenNodeTitle(title);
-  //     } else if (
-  //       event &&
-  //       "activeElement" in event.currentTarget &&
-  //       "nodeName" in event.currentTarget.activeElement &&
-  //       event.currentTarget.activeElement.nodeName !== "INPUT"
-  //     ) {
-  //       console.log('will try to call nodeClicked from map.js')
-  //       nodeClicked(event, identifier, nodeType, setOpenPart);
-  //     }
-  //   },
-  //   [choosingNode, identifier, title, nodeClicked, nodeType]
+  const nodeClickHandler = useCallback(
+   (event :any) => {
+      if (nodeBookState.choosingNode) {
+        nodeBookDispatch({type:"setChosenNode",payload:{id:identifier,title}});
+        // setChosenNode(identifier);
+        // setChosenNodeTitle(title);
+      } else if (
+        "activeElement" in event.currentTarget &&
+        "nodeName" in event.currentTarget.activeElement &&
+        event.currentTarget.activeElement.nodeName !== "INPUT"
+      ) {
+        nodeClicked(event, identifier, nodeType, setOpenPart);
+      }
+    },
+    [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
+  );
+
+  ///::::::::::::::::::::::::::::::::::::::::::added by sam::::::::::::::::::::
+  // const hideNodeHandler = useCallback(
+  //   () => hideNodeHandler(identifier, setIsHiding),
+  //   [hideNodeHandler, identifier]
   // );
-  const nodeClickHandler = () => console.log('Click in node handel')
+
+  // const hideOffspringsHandler = useCallback(
+  //   () => hideOffsprings(identifier),
+  //   [hideOffsprings, identifier]
+  // );
+
+  // const toggleNodeHandler = useCallback(
+  //   (event:any) => {
+  //     event.persist();
+  //     toggleNode(event, identifier, open);
+  //   },
+  //   [toggleNode, identifier, open]
+  // );
+
+  // const removeImageHandler = useCallback(() => {
+  //   removeImage(nodeRef, identifier);
+  // }, [nodeRef, removeImage, identifier]);
+
+  // const onImageLoad = useCallback(() => setImageLoaded(true), []);
+
+  // const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
+
+  // const addChoiceHandler = useCallback(
+  //   () => addChoice(nodeRef, identifier),
+  //   [addChoice, nodeRef, identifier]
+  // );
+
+  // const markStudiedHandler = useCallback(
+  //   (event:any) => markStudied(event, identifier),
+  //   [markStudied, identifier]
+  // );
+
+  // const bookmarkHandler = useCallback(
+  //   (event:any) => bookmark(event, identifier),
+  //   [bookmark, identifier]
+  // );
+
+  // const openNodePartHandler = useCallback(
+  //   (event:any, partType:any) => openNodePart(event, identifier, partType, openPart, setOpenPart, tags),
+  //   [identifier, openPart, tags]
+  // );
+
+  // const selectNodeHandler = useCallback(
+  //   (event:any, chosenType:any) => selectNode(event, identifier, chosenType, nodeType),
+  //   [selectNode, identifier, nodeType]
+  // );
+
+  // const correctNodeHandler = useCallback(
+  //   (event:any) => correctNode(event, identifier, nodeType),
+  //   [correctNode, identifier, nodeType]
+  // );
+
+  // const wrongNodeHandler = useCallback(
+  //   (event:any) =>
+  //     wrongNode(
+  //       event,
+  //       identifier,
+  //       nodeType,
+  //       markedWrong,
+  //       markedCorrect,
+  //       wrongNum,
+  //       correctNum
+  //     ),
+  //   [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
+  // );
+
+  // const uploadNodeImageHandler = useCallback(
+  //   (event:any, isUploading:boolean, setIsUploading:any, setPercentageUploaded:any) =>
+  //     uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded),
+  //   [uploadNodeImage, nodeRef, identifier]
+  // );
+
+  // const referenceLabelChangeHandler = useCallback(
+  //   (event:any, referenceIdx:string) => {
+  //     return referenceLabelChange(event, identifier, referenceIdx);
+  //   },
+  //   [referenceLabelChange, identifier]
+  // );
+
+  // const deleteLinkHandler = useCallback(
+  //   (linkIdx, linkType) => deleteLink(identifier, linkIdx, linkType),
+  //   [deleteLink, identifier]
+  // );
+
+  // const titleChange = useCallback(
+  //   value => {
+  //     nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart);
+  //   },
+  //   [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+  // );
+
+  // const contentChange = useCallback(
+  //   value => {
+  //     nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+  //   },
+  //   [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+  // );
+  ///::::::::::::::::::::::::::::::::::::::::::added by sam:::::::::::::::::::://////
 
   const locationSizeChange = useCallback(() => {
     nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
@@ -61,8 +324,8 @@ const Node = ({ title, content, left, top, width, identifier, nodeChanged }: Nod
     locationSizeChange,
     openPart,
     imageLoaded,
-    // props.left,
-    // props.top,
+    // left,
+    // top,
     nodeImage,
     open,
     editable,
@@ -74,608 +337,359 @@ const Node = ({ title, content, left, top, width, identifier, nodeChanged }: Nod
     parents.length,
     children.length,
     title,
-    content,
-    // Reasonably, we should not invoke props.nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
-    // props.nodeChanged,
-    // props.markedCorrect,
-    // props.markedWrong,
-    // props.viewers,
-    // props.correctNum,
-    // props.wrongNum,
-    // props.commentsNum,
-    // props.proposalsNum,
-    // props.lastVisit,
-    // props.studied,
-    // props.isStudied,
-    // props.changed,
-    // props.changedAt,
-    // props.bookmarked,
-    // props.bookmarks,
+    content
+    // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
+    // nodeChanged,
+    // markedCorrect,
+    // markedWrong,
+    // viewers,
+    // correctNum,
+    // wrongNum,
+    // commentsNum,
+    // proposalsNum,
+    // lastVisit,
+    // studied,
+    // isStudied,
+    // changed,
+    // changedAt,
+    // bookmarked,
+    // bookmarks,
   ]);
 
+  useEffect(() => {
+    if (editable) {
+      setOpenPart("References");
+    }
+  }, [editable]);
+
+  useEffect(() => {
+    if (!editable && !activeNode) {
+      setOpenPart(null);
+    }
+  }, [editable, activeNode]);
+
   return (
-    <Box
+    // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
+    <div
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
-      className='Node card'
+      className={
+        "Node card" +
+        (activeNode
+          ? //   &&
+            // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
+            " active"
+          : "") +
+        (changed || !isStudied ? " Changed" : "") +
+        (isHiding ? " IsHiding" : "") +
+        (nodeBookState.choosingNode &&
+        nodeBookState.choosingNode.id !== identifier &&
+        !activeNode &&
+        (nodeBookState.choosingNode.type !== "Reference" || nodeType === "Reference")
+          ? " Choosable"
+          : "")
+      }
       style={{
         left: left ? left : 1000,
         top: top ? top : 1000,
-        width: width,
-      }}>
-      <Typography variant='h1' component={'h1'}>
-        {title}
-      </Typography>
-      <Typography component={'p'}>
-        {content}
-      </Typography>
-    </Box >
-  )
-}
+        width: width
+      }}
+      // style={
+      //   activeNode
+      //     ? {
+      //         left: left,
+      //         top: top,
+      //         width: width,
+      //         WebkitBoxShadow: boxShadowCSS,
+      //         MozBoxShadow: boxShadowCSS,
+      //         boxShadow: boxShadowCSS
+      //       }
+      //     : {
+      //         left: left,
+      //         top: top,
+      //         width: width
+      //       }
+      // }
+    >
+      {open ? (
+        <div className="card-content">
+           <div className="card-title">
+            {title}
+           </div>
+           <p>
+            {content}
+           </p>
+        </div>
 
-export const MemoizedNode = React.memo(Node)
-// import React, { useState, useEffect, useRef, useCallback } from "react";
-// import { useRecoilValue, useSetRecoilState } from "recoil";
+        // <>
+        //   <div className="card-content">
+        //     <div className="card-title">
+        //       {editable &&
+        //         (isNew ? (
+        //           <>
+        //             <p className="NewChildProposalWarning">Before proposing,</p>
+        //             <p className="NewChildProposalWarning">
+        //               - Search <i className="material-icons EditingNodeSearchIcon">search</i> to ensure the node does
+        //               not exist.
+        //             </p>
+        //             {(nodeType === "Concept" ||
+        //               nodeType === "Relation" ||
+        //               nodeType === "Question" ||
+        //               nodeType === "News") &&
+        //               references.length === 0 && (
+        //                 <p className="NewChildProposalWarning">
+        //                   - Make the reference nodes that you'd like to cite, visible on your map view.
+        //                 </p>
+        //               )}
+        //             <p id="NewChildProposalTitleHint">Please enter the node title below:</p>
+        //           </>
+        //         ) : (
+        //           <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
+        //         ))}
+        //       <HyperEditor
+        //         readOnly={!editable}
+        //         onChange={titleChange}
+        //         onBlur={onNodeTitleBLur(title)}
+        //         content={title}
+        //         width={width}
+        //       />
+        //       {!editable && !unaccepted && !choosingNode && (
+        //         <NodeHeader
+        //           identifier={identifier}
+        //           open={true}
+        //           nodeType={nodeType}
+        //           setIsHiding={setIsHiding}
+        //           parentsNum={parents.length}
+        //           hideNodeHandler={hideNodeHandler}
+        //           hideOffsprings={hideOffspringsHandler}
+        //           toggleNode={toggleNodeHandler}
+        //         />
+        //       )}
+        //     </div>
+        //     <div className="NodeContent">
+        //       {editable && <p>Please edit the node content below:</p>}
+        //       <HyperEditor
+        //         readOnly={!editable}
+        //         onChange={contentChange}
+        //         content={content}
+        //         width={width}
+        //       />
+        //       {nodeImage !== "" && (
+        //         <>
+        //           {editable && (
+        //             <div className="RemoveImageDIV">
+        //               <MetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
+        //                 <div className="CloseButton">
+        //                   <i className="material-icons orange-text">delete_forever</i>
+        //                 </div>
+        //               </MetaButton>
+        //             </div>
+        //           )}
+        //           {/* iman */}
+        //           {/* <a href={nodeImage} target="_blank"> */}
+        //           <img
+        //             src={nodeImage}
+        //             alt="Node image"
+        //             className="responsive-img NodeImage"
+        //             onLoad={onImageLoad}
+        //             onClick={onImageClick}
+        //           />
+        //           {/* </a> */}
+        //         </>
+        //       )}
+        //       {/* {nodeType === "Question"  && (
+        //         <>
+        //           <ul className="collapsible">
+        //             {choices.map((choice, idx) => {
+        //               return (
+        //                 <QuestionChoices
+        //                   key={identifier + "Choice" + idx}
+        //                   identifier={identifier}
+        //                   nodeRef={nodeRef}
+        //                   editable={editable}
+        //                   choices={choices}
+        //                   idx={idx}
+        //                   choicesNum={choices.length}
+        //                   choice={choice}
+        //                   deleteChoice={deleteChoice}
+        //                   switchChoice={switchChoice}
+        //                   changeChoice={changeChoice}
+        //                   changeFeedback={changeFeedback}
+        //                   nodeChanged={locationSizeChange}
+        //                 />
+        //               );
+        //             })}
+        //           </ul>
+        //           {editable && (
+        //             <div className="QuestionAddChoice">
+        //               <MetaButton onClick={addChoiceHandler} tooltip="Click to add a new choice to this question.">
+        //                 <i className="material-icons green-text">add</i> Add Choice
+        //               </MetaButton>
+        //             </div>
+        //           )}
+        //         </>
+        //       )} */}
+        //       {/* {editable && (
+        //         <>
+        //           <p className="ProposalTitle">
+        //             {"To expedite your proposal review, explain why you propose this " +
+        //               (isNew ? nodeType + " child node:" : "new version:")}
+        //           </p>
+        //           <HyperEditor content={reason} readOnly={false} onChange={setReason} />
+        //           ::::: ::::::: :::::: ::::: iman code :::::::: ::::: :::: 
+        //           <p className="ProposalTitle">
+        //               Please write a few words to summarize what you've proposed
+        //               in this version:
+        //             </p>
+        //             <HyperEditor
+        //               content={summary}
+        //               readOnly={false}
+        //               onChange={setSummary}
+        //             />
+        //           ::::: ::::::: :::::: ::::: iman code :::::::: ::::: :::: 
+        //         </>
+        //       )} */}
+        //       {/* <NodeFooter
+        //         open={true}
+        //         identifier={identifier}
+        //         activeNode={activeNode}
+        //         citationsSelected={citationsSelected}
+        //         proposalsSelected={proposalsSelected}
+        //         acceptedProposalsSelected={acceptedProposalsSelected}
+        //         commentsSelected={commentsSelected}
+        //         editable={editable}
+        //         title={title}
+        //         content={content}
+        //         unaccepted={unaccepted}
+        //         openPart={openPart}
+        //         nodeType={nodeType}
+        //         isNew={isNew}
+        //         admin={admin}
+        //         aImgUrl={aImgUrl}
+        //         aFullname={aFullname}
+        //         aChooseUname={aChooseUname}
+        //         viewers={viewers}
+        //         correctNum={correctNum}
+        //         markedCorrect={markedCorrect}
+        //         wrongNum={wrongNum}
+        //         markedWrong={markedWrong}
+        //         references={references}
+        //         tags={tags}
+        //         parents={parents}
+        //         children={children}
+        //         commentsNum={commentsNum}
+        //         proposalsNum={proposalsNum}
+        //         studied={studied}
+        //         isStudied={isStudied}
+        //         changed={changed}
+        //         changedAt={changedAt}
+        //         bookmarked={bookmarked}
+        //         bookmarks={bookmarks}
+        //         reloadPermanentGrpah={reloadPermanentGrpah}
+        //         markStudied={markStudiedHandler}
+        //         bookmark={bookmarkHandler}
+        //         nodeChanged={locationSizeChange}
+        //         openNodePart={openNodePartHandler}
+        //         selectNode={selectNodeHandler}
+        //         correctNode={correctNodeHandler}
+        //         wrongNode={wrongNodeHandler}
+        //         uploadNodeImage={uploadNodeImageHandler}
+        //       /> */}
+        //     </div>
+        //   </div>
+        //   {/* {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
+        //     <LinkingWords
+        //       identifier={identifier}
+        //       editable={editable}
+        //       isNew={isNew}
+        //       openPart={openPart}
+        //       title={title}
+        //       reason={reason}
+        //       references={references}
+        //       tags={tags}
+        //       parents={parents}
+        //       children={children}
+        //       chosenNodeChanged={chosenNodeChanged}
+        //       referenceLabelChange={referenceLabelChangeHandler}
+        //       deleteLink={deleteLinkHandler}
+        //       openLinkedNode={openLinkedNode}
+        //       openAllChildren={openAllChildren}
+        //       saveProposedChildNode={saveProposedChildNode}
+        //       saveProposedImprovement={saveProposedImprovement}
+        //       closeSideBar={closeSideBar}
+        //     />
+        //   )} */}
+        // </>
+      ) : (
+        <div className="card-content">
+          <div className="card-title">
+            <div className="NodeTitleClosed">
+              <h3>not open : {title}</h3>
+              {/* <HyperEditor readOnly={true} onChange={titleChange} content={title} width={width} /> */}
+            </div>
+            {/* {!choosingNode && (
+              <NodeHeader
+                identifier={identifier}
+                open={false}
+                nodeType={nodeType}
+                setIsHiding={setIsHiding}
+                parentsNum={parents.length}
+                hideNodeHandler={hideNodeHandler}
+                hideOffsprings={hideOffspringsHandler}
+                toggleNode={toggleNodeHandler}
+              />
+            )} */}
+            {/* <div className="footer">
+              <NodeFooter
+                open={false}
+                identifier={identifier}
+                activeNode={activeNode}
+                citationsSelected={citationsSelected}
+                proposalsSelected={proposalsSelected}
+                acceptedProposalsSelected={acceptedProposalsSelected}
+                commentsSelected={commentsSelected}
+                editable={editable}
+                unaccepted={unaccepted}
+                openPart={openPart}
+                nodeType={nodeType}
+                admin={admin}
+                aImgUrl={aImgUrl}
+                aFullname={aFullname}
+                aChooseUname={aChooseUname}
+                viewers={viewers}
+                correctNum={correctNum}
+                markedCorrect={markedCorrect}
+                wrongNum={wrongNum}
+                markedWrong={markedWrong}
+                references={references}
+                tags={tags}
+                parents={parents}
+                children={children}
+                commentsNum={commentsNum}
+                proposalsNum={proposalsNum}
+                studied={studied}
+                isStudied={isStudied}
+                changedAt={changedAt}
+                bookmarked={bookmarked}
+                bookmarks={bookmarks}
+                reloadPermanentGrpah={reloadPermanentGrpah}
+                nodeChanged={locationSizeChange}
+                openNodePart={openNodePartHandler}
+                selectNode={selectNodeHandler}
+                correctNode={correctNodeHandler}
+                wrongNode={wrongNodeHandler}
+                uploadNodeImage={uploadNodeImageHandler}
+              />
+            </div> */}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-// import {
-//   choosingNodeState,
-//   choosingTypeState,
-//   chosenNodeState,
-//   chosenNodeTitleState,
-// } from "../../../store/NodeAtoms";
-// import { openMediaState } from "../../../store/MapAtoms";
-
-// import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
-// import NodeHeader from "./NodeHeader/NodeHeader";
-// import NodeFooter from "./NodeFooter/NodeFooter";
-// import LinkingWords from "./LinkingWords/LinkingWords";
-// import QuestionChoices from "./QuestionChoices/QuestionChoices";
-// import MetaButton from "../MetaButton/MetaButton";
-// // import { Draft } from "../../Editor";
-// // import { compareLinks, compareChoices, compareImages } from "../MapUtils";
-// // import boxShadowCSSGenerator from "../../../utils/boxShadowCSSGenerator";
-
-// import "./Node.css";
-
-// const Node = (props) => {
-//   const choosingNode = useRecoilValue(choosingNodeState);
-//   const choosingType = useRecoilValue(choosingTypeState);
-//   const setChosenNode = useSetRecoilState(chosenNodeState);
-//   const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
-//   const setOpenMedia = useSetRecoilState(openMediaState);
-
-//   const [openPart, setOpenPart] = useState(null);
-//   const [isHiding, setIsHiding] = useState(false);
-//   const [imageLoaded, setImageLoaded] = useState(false);
-//   // const [summary, setSummary] = useState("");
-//   const [reason, setReason] = useState("");
-
-//   const nodeRef = useRef(null);
-
-//   const nodeClickHandler = useCallback(
-//     (event) => {
-//       if (choosingNode) {
-//         setChosenNode(props.identifier);
-//         setChosenNodeTitle(props.title);
-//       } else if (
-//         "activeElement" in event.currentTarget &&
-//         "nodeName" in event.currentTarget.activeElement &&
-//         event.currentTarget.activeElement.nodeName !== "INPUT"
-//       ) {
-//         props.nodeClicked(event, props.identifier, props.nodeType, setOpenPart);
-//       }
-//     },
-//     [choosingNode, props.identifier, props.title, props.nodeClicked, props.nodeType]
-//   );
-
-//   const hideNodeHandler = useCallback(
-//     () => props.hideNodeHandler(props.identifier, setIsHiding),
-//     [props.hideNodeHandler, props.identifier]
-//   );
-
-//   const hideOffspringsHandler = useCallback(
-//     () => props.hideOffsprings(props.identifier),
-//     [props.hideOffsprings, props.identifier]
-//   );
-
-//   const toggleNodeHandler = useCallback(
-//     (event) => {
-//       event.persist();
-//       props.toggleNode(event, props.identifier, props.open);
-//     },
-//     [props.toggleNode, props.identifier, props.open]
-//   );
-
-//   const removeImageHandler = useCallback(() => {
-//     props.removeImage(nodeRef, props.identifier);
-//   }, [nodeRef, props.removeImage, props.identifier]);
-
-//   const onImageLoad = useCallback(() => setImageLoaded(true), []);
-
-//   const onImageClick = useCallback(() => setOpenMedia(props.nodeImage), [props.nodeImage]);
-
-//   const addChoiceHandler = useCallback(
-//     () => props.addChoice(nodeRef, props.identifier),
-//     [props.addChoice, nodeRef, props.identifier]
-//   );
-
-//   const markStudiedHandler = useCallback(
-//     (event) => props.markStudied(event, props.identifier),
-//     [props.markStudied, props.identifier]
-//   );
-
-//   const bookmarkHandler = useCallback(
-//     (event) => props.bookmark(event, props.identifier),
-//     [props.bookmark, props.identifier]
-//   );
-
-//   const openNodePartHandler = useCallback(
-//     (event, partType) =>
-//       props.openNodePart(event, props.identifier, partType, openPart, setOpenPart, props.tags),
-//     [props.identifier, openPart, props.tags]
-//   );
-
-//   const selectNodeHandler = useCallback(
-//     (event, chosenType) => props.selectNode(event, props.identifier, chosenType, props.nodeType),
-//     [props.selectNode, props.identifier, props.nodeType]
-//   );
-
-//   const correctNodeHandler = useCallback(
-//     (event) => props.correctNode(event, props.identifier, props.nodeType),
-//     [props.correctNode, props.identifier, props.nodeType]
-//   );
-
-//   const wrongNodeHandler = useCallback(
-//     (event) =>
-//       props.wrongNode(
-//         event,
-//         props.identifier,
-//         props.nodeType,
-//         props.markedWrong,
-//         props.markedCorrect,
-//         props.wrongNum,
-//         props.correctNum
-//       ),
-//     [
-//       props.wrongNode,
-//       props.identifier,
-//       props.nodeType,
-//       props.markedWrong,
-//       props.wrongNum,
-//       props.correctNum,
-//     ]
-//   );
-
-//   const uploadNodeImageHandler = useCallback(
-//     (event, isUploading, setIsUploading, setPercentageUploaded) =>
-//       props.uploadNodeImage(
-//         event,
-//         nodeRef,
-//         props.identifier,
-//         isUploading,
-//         setIsUploading,
-//         setPercentageUploaded
-//       ),
-//     [props.uploadNodeImage, nodeRef, props.identifier]
-//   );
-
-//   const referenceLabelChangeHandler = useCallback(
-//     (event, referenceIdx) => {
-//       return props.referenceLabelChange(event, props.identifier, referenceIdx);
-//     },
-//     [props.referenceLabelChange, props.identifier]
-//   );
-
-//   const deleteLinkHandler = useCallback(
-//     (linkIdx, linkType) => props.deleteLink(props.identifier, linkIdx, linkType),
-//     [props.deleteLink, props.identifier]
-//   );
-
-//   const titleChange = useCallback(
-//     (value) => {
-//       props.nodeChanged(nodeRef, props.identifier, null, value, imageLoaded, openPart);
-//     },
-//     [props.nodeChanged, nodeRef, props.identifier, imageLoaded, openPart]
-//   );
-
-//   const contentChange = useCallback(
-//     (value) => {
-//       props.nodeChanged(nodeRef, props.identifier, value, null, imageLoaded, openPart);
-//     },
-//     [props.nodeChanged, nodeRef, props.identifier, imageLoaded, openPart]
-//   );
-
-//   const locationSizeChange = useCallback(() => {
-//     props.nodeChanged(nodeRef, props.identifier, null, null, imageLoaded, openPart);
-//   }, [props.nodeChanged, nodeRef, props.identifier, imageLoaded, openPart]);
-
-//   useEffect(() => {
-//     setTimeout(() => {
-//       locationSizeChange();
-//     }, 700);
-//   }, [
-//     locationSizeChange,
-//     openPart,
-//     imageLoaded,
-//     // props.left,
-//     // props.top,
-//     props.nodeImage,
-//     props.open,
-//     props.editable,
-//     props.unaccepted,
-//     props.isNew,
-//     props.isTag,
-//     props.references.length,
-//     props.tags.length,
-//     props.parents.length,
-//     props.children.length,
-//     props.title,
-//     props.content,
-//     // Reasonably, we should not invoke props.nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
-//     // props.nodeChanged,
-//     // props.markedCorrect,
-//     // props.markedWrong,
-//     // props.viewers,
-//     // props.correctNum,
-//     // props.wrongNum,
-//     // props.commentsNum,
-//     // props.proposalsNum,
-//     // props.lastVisit,
-//     // props.studied,
-//     // props.isStudied,
-//     // props.changed,
-//     // props.changedAt,
-//     // props.bookmarked,
-//     // props.bookmarks,
-//   ]);
-
-//   useEffect(() => {
-//     if (props.editable) {
-//       setOpenPart("References");
-//     }
-//   }, [props.editable]);
-
-//   useEffect(() => {
-//     if (!props.editable && !props.activeNode) {
-//       setOpenPart(null);
-//     }
-//   }, [props.editable, props.activeNode]);
-
-//   return (
-//     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
-//     <div
-//       ref={nodeRef}
-//       id={props.identifier}
-//       onClick={nodeClickHandler}
-//       className={
-//         "Node card" +
-//         (props.activeNode
-//           ? //   &&
-//             // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
-//             " active"
-//           : "") +
-//         (props.changed || !props.isStudied ? " Changed" : "") +
-//         (isHiding ? " IsHiding" : "") +
-//         (choosingNode &&
-//         choosingNode !== props.identifier &&
-//         !props.activeNode &&
-//         (choosingType !== "Reference" || props.nodeType === "Reference")
-//           ? " Choosable"
-//           : "")
-//       }
-//       style={{
-//         left: props.left ? props.left : 1000,
-//         top: props.top ? props.top : 1000,
-//         width: props.width,
-//       }}
-//       // style={
-//       //   props.activeNode
-//       //     ? {
-//       //         left: props.left,
-//       //         top: props.top,
-//       //         width: props.width,
-//       //         WebkitBoxShadow: boxShadowCSS,
-//       //         MozBoxShadow: boxShadowCSS,
-//       //         boxShadow: boxShadowCSS
-//       //       }
-//       //     : {
-//       //         left: props.left,
-//       //         top: props.top,
-//       //         width: props.width
-//       //       }
-//       // }
-//     >
-//       {props.open ? (
-//         <>
-//           <div className="card-content">
-//             <div className="card-title">
-//               {props.editable &&
-//                 (props.isNew ? (
-//                   <>
-//                     <p className="NewChildProposalWarning">Before proposing,</p>
-//                     <p className="NewChildProposalWarning">
-//                       - Search <i className="material-icons EditingNodeSearchIcon">search</i> to
-//                       ensure the node does not exist.
-//                     </p>
-//                     {(props.nodeType === "Concept" ||
-//                       props.nodeType === "Relation" ||
-//                       props.nodeType === "Question" ||
-//                       props.nodeType === "News") &&
-//                       props.references.length === 0 && (
-//                         <p className="NewChildProposalWarning">
-//                           - Make the reference nodes that you'd like to cite, visible on your map
-//                           view.
-//                         </p>
-//                       )}
-//                     <p id="NewChildProposalTitleHint">Please enter the node title below:</p>
-//                   </>
-//                 ) : (
-//                   <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
-//                 ))}
-//               <HyperEditor
-//                 readOnly={!props.editable}
-//                 onChange={titleChange}
-//                 onBlur={props.onNodeTitleBLur(props.title)}
-//                 content={props.title}
-//                 width={props.width}
-//               />
-//               {!props.editable && !props.unaccepted && !choosingNode && (
-//                 <NodeHeader
-//                   identifier={props.identifier}
-//                   open={true}
-//                   nodeType={props.nodeType}
-//                   setIsHiding={setIsHiding}
-//                   parentsNum={props.parents.length}
-//                   hideNodeHandler={hideNodeHandler}
-//                   hideOffsprings={hideOffspringsHandler}
-//                   toggleNode={toggleNodeHandler}
-//                 />
-//               )}
-//             </div>
-//             <div className="NodeContent">
-//               {props.editable && <p>Please edit the node content below:</p>}
-//               <HyperEditor
-//                 readOnly={!props.editable}
-//                 onChange={contentChange}
-//                 content={props.content}
-//                 width={props.width}
-//               />
-//               {"nodeImage" in props && props.nodeImage !== "" && (
-//                 <>
-//                   {props.editable && (
-//                     <div className="RemoveImageDIV">
-//                       <MetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-//                         <div className="CloseButton">
-//                           <i className="material-icons orange-text">delete_forever</i>
-//                         </div>
-//                       </MetaButton>
-//                     </div>
-//                   )}
-//                   {/* <a href={props.nodeImage} target="_blank"> */}
-//                   <img
-//                     src={props.nodeImage}
-//                     alt="Node image"
-//                     className="responsive-img NodeImage"
-//                     onLoad={onImageLoad}
-//                     onClick={onImageClick}
-//                   />
-//                   {/* </a> */}
-//                 </>
-//               )}
-//               {props.nodeType === "Question" && "choices" in props && (
-//                 <>
-//                   <ul className="collapsible">
-//                     {props.choices.map((choice, idx) => {
-//                       return (
-//                         <QuestionChoices
-//                           key={props.identifier + "Choice" + idx}
-//                           identifier={props.identifier}
-//                           nodeRef={nodeRef}
-//                           editable={props.editable}
-//                           choices={props.choices}
-//                           idx={idx}
-//                           choicesNum={props.choices.length}
-//                           choice={choice}
-//                           deleteChoice={props.deleteChoice}
-//                           switchChoice={props.switchChoice}
-//                           changeChoice={props.changeChoice}
-//                           changeFeedback={props.changeFeedback}
-//                           nodeChanged={locationSizeChange}
-//                         />
-//                       );
-//                     })}
-//                   </ul>
-//                   {props.editable && (
-//                     <div className="QuestionAddChoice">
-//                       <MetaButton
-//                         onClick={addChoiceHandler}
-//                         tooltip="Click to add a new choice to this question."
-//                       >
-//                         <i className="material-icons green-text">add</i> Add Choice
-//                       </MetaButton>
-//                     </div>
-//                   )}
-//                 </>
-//               )}
-//               {props.editable && (
-//                 <>
-//                   <p className="ProposalTitle">
-//                     {"To expedite your proposal review, explain why you propose this " +
-//                       (props.isNew ? props.nodeType + " child node:" : "new version:")}
-//                   </p>
-//                   <HyperEditor content={reason} readOnly={false} onChange={setReason} />
-//                   {/* <p className="ProposalTitle">
-//                       Please write a few words to summarize what you've proposed
-//                       in this version:
-//                     </p>
-//                     <HyperEditor
-//                       content={summary}
-//                       readOnly={false}
-//                       onChange={setSummary}
-//                     /> */}
-//                 </>
-//               )}
-//               <NodeFooter
-//                 open={true}
-//                 identifier={props.identifier}
-//                 activeNode={props.activeNode}
-//                 citationsSelected={props.citationsSelected}
-//                 proposalsSelected={props.proposalsSelected}
-//                 acceptedProposalsSelected={props.acceptedProposalsSelected}
-//                 commentsSelected={props.commentsSelected}
-//                 editable={props.editable}
-//                 title={props.title}
-//                 content={props.content}
-//                 unaccepted={props.unaccepted}
-//                 openPart={openPart}
-//                 nodeType={props.nodeType}
-//                 isNew={props.isNew}
-//                 admin={props.admin}
-//                 aImgUrl={props.aImgUrl}
-//                 aFullname={props.aFullname}
-//                 aChooseUname={props.aChooseUname}
-//                 viewers={props.viewers}
-//                 correctNum={props.correctNum}
-//                 markedCorrect={props.markedCorrect}
-//                 wrongNum={props.wrongNum}
-//                 markedWrong={props.markedWrong}
-//                 references={props.references}
-//                 tags={props.tags}
-//                 parents={props.parents}
-//                 children={props.children}
-//                 commentsNum={props.commentsNum}
-//                 proposalsNum={props.proposalsNum}
-//                 studied={props.studied}
-//                 isStudied={props.isStudied}
-//                 changed={props.changed}
-//                 changedAt={props.changedAt}
-//                 bookmarked={props.bookmarked}
-//                 bookmarks={props.bookmarks}
-//                 reloadPermanentGrpah={props.reloadPermanentGrpah}
-//                 markStudied={markStudiedHandler}
-//                 bookmark={bookmarkHandler}
-//                 nodeChanged={locationSizeChange}
-//                 openNodePart={openNodePartHandler}
-//                 selectNode={selectNodeHandler}
-//                 correctNode={correctNodeHandler}
-//                 wrongNode={wrongNodeHandler}
-//                 uploadNodeImage={uploadNodeImageHandler}
-//               />
-//             </div>
-//           </div>
-//           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
-//             <LinkingWords
-//               identifier={props.identifier}
-//               editable={props.editable}
-//               isNew={props.isNew}
-//               openPart={openPart}
-//               title={props.title}
-//               reason={reason}
-//               references={props.references}
-//               tags={props.tags}
-//               parents={props.parents}
-//               children={props.children}
-//               chosenNodeChanged={props.chosenNodeChanged}
-//               referenceLabelChange={referenceLabelChangeHandler}
-//               deleteLink={deleteLinkHandler}
-//               openLinkedNode={props.openLinkedNode}
-//               openAllChildren={props.openAllChildren}
-//               saveProposedChildNode={props.saveProposedChildNode}
-//               saveProposedImprovement={props.saveProposedImprovement}
-//               closeSideBar={props.closeSideBar}
-//             />
-//           )}
-//         </>
-//       ) : (
-//         <div className="card-content">
-//           <div className="card-title">
-//             <div className="NodeTitleClosed">
-//               <HyperEditor
-//                 readOnly={true}
-//                 onChange={titleChange}
-//                 content={props.title}
-//                 width={props.width}
-//               />
-//             </div>
-//             {!choosingNode && (
-//               <NodeHeader
-//                 identifier={props.identifier}
-//                 open={false}
-//                 nodeType={props.nodeType}
-//                 setIsHiding={setIsHiding}
-//                 parentsNum={props.parents.length}
-//                 hideNodeHandler={hideNodeHandler}
-//                 hideOffsprings={hideOffspringsHandler}
-//                 toggleNode={toggleNodeHandler}
-//               />
-//             )}
-//             <div className="footer">
-//               <NodeFooter
-//                 open={false}
-//                 identifier={props.identifier}
-//                 activeNode={props.activeNode}
-//                 citationsSelected={props.citationsSelected}
-//                 proposalsSelected={props.proposalsSelected}
-//                 acceptedProposalsSelected={props.acceptedProposalsSelected}
-//                 commentsSelected={props.commentsSelected}
-//                 editable={props.editable}
-//                 unaccepted={props.unaccepted}
-//                 openPart={openPart}
-//                 nodeType={props.nodeType}
-//                 admin={props.admin}
-//                 aImgUrl={props.aImgUrl}
-//                 aFullname={props.aFullname}
-//                 aChooseUname={props.aChooseUname}
-//                 viewers={props.viewers}
-//                 correctNum={props.correctNum}
-//                 markedCorrect={props.markedCorrect}
-//                 wrongNum={props.wrongNum}
-//                 markedWrong={props.markedWrong}
-//                 references={props.references}
-//                 tags={props.tags}
-//                 parents={props.parents}
-//                 children={props.children}
-//                 commentsNum={props.commentsNum}
-//                 proposalsNum={props.proposalsNum}
-//                 studied={props.studied}
-//                 isStudied={props.isStudied}
-//                 changedAt={props.changedAt}
-//                 bookmarked={props.bookmarked}
-//                 bookmarks={props.bookmarks}
-//                 reloadPermanentGrpah={props.reloadPermanentGrpah}
-//                 nodeChanged={locationSizeChange}
-//                 openNodePart={openNodePartHandler}
-//                 selectNode={selectNodeHandler}
-//                 correctNode={correctNodeHandler}
-//                 wrongNode={wrongNodeHandler}
-//                 uploadNodeImage={uploadNodeImageHandler}
-//               />
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default React.memo(Node);
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ------------------->>  ------------------->>  ------------------->>
-// THIS CODE WAS COMMENTED
-
+export default React.memo(Node);
 // export default React.memo(Node, (prevProps, nextProps) => {
 //   {
 //     // if (prevProps.identifier !== nextProps.identifier) console.log("title:", prevProps.title, "\nprevProps.identifier:", prevProps.identifier, "nextProps.identifier:", nextProps.identifier);
@@ -787,4 +801,3 @@ export const MemoizedNode = React.memo(Node)
 //     prevProps.addChoice === nextProps.addChoice
 //   );
 // });
-// <<-------------------  <<-------------------  <<-------------------
