@@ -194,7 +194,7 @@ const NodeProposal = () => {
           </DialogActions>
         </Dialog>
       </Box>
-    </PagesNavbar >
+    </PagesNavbar>
   );
 };
 

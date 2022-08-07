@@ -43,13 +43,13 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
         '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
       for (let nodeDoc of nodesDocs.docs) {
         const node = nodeDoc.data();
-        const isNewNode = allNodes.findIndex((x: any) => x.title === node.title) === -1;
+        const isNewNode = allNodes.indexOf((title: string) => title === node.title) === -1;
         if (isNewNode) {
-          const nodeData = nodeDoc.data();
+          allNodes.push(node.title);
           xmlContent += `
           <url>
-            <loc>${getNodePageWithDomain(nodeData.title, nodeDoc.id)}</loc>
-            <lastmod>${nodeData.updatedAt.toDate().toISOString()}</lastmod>
+            <loc>${getNodePageWithDomain(node.title, nodeDoc.id)}</loc>
+            <lastmod>${node.updatedAt.toDate().toISOString()}</lastmod>
             <changefreq>hourly</changefreq>
           </url>`;
           xmlContent += "</urlset>";

@@ -23,9 +23,9 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
       <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
     for (let nodeDoc of nodesDocs.docs) {
       const node = nodeDoc.data();
-      const isNewNode = allNodes.findIndex((x: any) => x.title === node.title) === -1;
+      const isNewNode = allNodes.indexOf((title: string) => title === node.title) === -1;
       if (isNewNode) {
-        allNodes.push(nodeDoc);
+        allNodes.push(node.title);
         xmlContent += `
         <sitemap>
         <loc>${APP_DOMAIN}sitemap/${nodeDoc.id}.xml</loc>
