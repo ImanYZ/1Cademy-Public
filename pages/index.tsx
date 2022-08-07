@@ -1,6 +1,7 @@
 import Container from "@mui/material/Container";
 import { NextPage } from "next";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { ComponentType, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
@@ -130,32 +131,37 @@ const HomePage: NextPage = () => {
   };
 
   return (
-    <PagesNavbar showSearch={!isIntersecting}>
-      <HomeSearch sx={{ mt: "var(--navbar-height)" }} onSearch={handleSearch} ref={homeSearchRef} />
-      <Container sx={{ my: 10 }}>
-        <HomeFilter
-          onTagsChange={handleTagsChange}
-          onInstitutionsChange={handleInstitutionsChange}
-          onContributorsChange={handleContributorsChange}
-          onNodeTypesChange={handleNodeTypesChange}
-          onReferencesChange={handleReferencesChange}
-          ref={homeFilterRef}
-        ></HomeFilter>
-        <SortByFilters
-          sortedByType={sortedByType}
-          handleByType={handleByType}
-          timeWindow={timeWindow}
-          onTimeWindowChanged={handleChangeTimeWindow}
-        />
-        <MasonryNodes
-          nodes={data?.data || []}
-          page={page}
-          totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
-          onChangePage={handleChangePage}
-          isLoading={isLoading}
-        />
-      </Container>
-    </PagesNavbar>
+    <>
+      <Head>
+        <title>{`1cademy - Home Page`}</title>
+      </Head>
+      <PagesNavbar showSearch={!isIntersecting}>
+        <HomeSearch sx={{ mt: "var(--navbar-height)" }} onSearch={handleSearch} ref={homeSearchRef} />
+        <Container sx={{ my: 10 }}>
+          <HomeFilter
+            onTagsChange={handleTagsChange}
+            onInstitutionsChange={handleInstitutionsChange}
+            onContributorsChange={handleContributorsChange}
+            onNodeTypesChange={handleNodeTypesChange}
+            onReferencesChange={handleReferencesChange}
+            ref={homeFilterRef}
+          ></HomeFilter>
+          <SortByFilters
+            sortedByType={sortedByType}
+            handleByType={handleByType}
+            timeWindow={timeWindow}
+            onTimeWindowChanged={handleChangeTimeWindow}
+          />
+          <MasonryNodes
+            nodes={data?.data || []}
+            page={page}
+            totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
+            onChangePage={handleChangePage}
+            isLoading={isLoading}
+          />
+        </Container>
+      </PagesNavbar>
+    </>
   );
 };
 
