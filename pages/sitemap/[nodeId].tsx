@@ -4,9 +4,7 @@ import { ParsedUrlQuery } from "querystring";
 import { db } from "../../lib/admin";
 import { getNodePageWithDomain } from "../../lib/utils";
 
-function SiteMap() {
-  // getServerSideProps will do the heavy lifting
-}
+const SiteMap = () => null;
 
 interface Params extends ParsedUrlQuery {
   nodeId: string;
@@ -35,9 +33,13 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
       })
       .get();
     if (nodesDocs.docs.length === 0) {
-      res.writeHead(404, { "Content-Type": "text/xml" });
+      // res.writeHead(404, { "Content-Type": "text/xml" });
+      // res.write(`<message>No child nodes found for Id: ${nodeId}</message>`);
+      // res.end();
+      res.setHeader('Content-Type', 'text/xml');
       res.write(`<message>No child nodes found for Id: ${nodeId}</message>`);
       res.end();
+  
     } else {
       let xmlContent =
         '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
@@ -53,9 +55,13 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
             <changefreq>hourly</changefreq>
           </url>`;
           xmlContent += "</urlset>";
-          res.writeHead(200, { "Content-Type": "text/xml" });
+          // res.writeHead(200, { "Content-Type": "text/xml" });
+          // res.write(xmlContent);
+          // res.end();
+          res.setHeader('Content-Type', 'text/xml');
           res.write(xmlContent);
           res.end();
+      
         }
       }
     }
