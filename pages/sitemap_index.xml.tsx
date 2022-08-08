@@ -39,19 +39,20 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     const nodeTitle: string = node.title;
     const nodeValue: number = node.corrects - node.wrongs;
     const nodeUpdatedAt = node.updatedAt.toDate().toISOString();
-    const nodeTitles: any[] = Object.keys(nodes);
-    const isNodeExist: any = nodeTitles.indexOf((keyTitle: any) => keyTitle === nodeTitle) === -1;
-    if (!isNodeExist) {
+    if (nodeTitle in nodes) {
+      const ObjValues: any = Object.values(nodes)[0];
+      if (nodeValue > ObjValues.value) {
+        nodes[nodeTitle] = {
+          id: nodeId,
+          value: (nodeValue + 1),
+          updatedAt: nodeUpdatedAt,
+        };
+      }
+    } else {
       nodes[nodeTitle] = {
         id: nodeId,
         updatedAt: nodeUpdatedAt,
         value: nodeValue && nodeValue >= 0 ? nodeValue : 0,
-      };
-    } else if (isNodeExist) {
-      nodes[nodeTitle] = {
-        id: nodeId,
-        value: (nodeValue + 1),
-        updatedAt: nodeUpdatedAt,
       };
     }
   });
