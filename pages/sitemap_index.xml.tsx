@@ -26,21 +26,38 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
       ].includes(staticPage);
     })
     .map((staticPagePath: String) => {
-      return `${BASE_URL}/${staticPagePath.replace('.js', '')}`;
+      return `${BASE_URL}/${staticPagePath.replace('.tsx', '')}`;
     });
 
 
+  const nodes: any = {};
   const nodesDocs = await db.collection("nodes").where("deleted", "==", false).where("isTag", "==", true).get();
-  const allNodeIds = nodesDocs.docs.map((x: any) => x.id);
 
-  const nodes: any[] = [];
-  const dynamicPaths = allNodeIds.map((nodeId: String) => {
-    const isNodeAlreadyExist = nodes.indexOf((id: string) => id === nodeId) >= 0;
-    if (!isNodeAlreadyExist) {
-      nodes.push(nodeId);
-      return `${BASE_URL}/sitemap/${nodeId}`
+  await nodesDocs.docs.map(doc => {
+    const node = doc.data();
+    const nodeId = doc.id;
+    const nodeTitle: string = node.title;
+    const nodeValue: number = node.corrects - node.wrongs;
+    const nodeUpdatedAt = node.updatedAt.toDate().toISOString();
+    const nodeTitles: any[] = Object.keys(nodes);
+    const isNodeExist: any = nodeTitles.indexOf((keyTitle: any) => keyTitle === nodeTitle) === -1;
+    if (!isNodeExist) {
+      nodes[nodeTitle] = {
+        id: nodeId,
+        updatedAt: nodeUpdatedAt,
+        value: nodeValue && nodeValue >= 0 ? nodeValue : 0,
+      };
+    } else if (isNodeExist) {
+      nodes[nodeTitle] = {
+        id: nodeId,
+        value: (nodeValue + 1),
+        updatedAt: nodeUpdatedAt,
+      };
     }
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const dynamicPaths = Object.entries(nodes).map(([title, node]: any) => `${BASE_URL}/node/${title}/${node.id}`);
 
   const allPaths = [...staticPaths, ...dynamicPaths];
 
@@ -63,34 +80,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   res.write(sitemap);
   res.end();
 
-
-  // if (nodesDocs.docs.length === 0) {
-  //   res.writeHead(404, { "Content-Type": "text/xml" });
-  //   res.write("No Sitemap Index!");
-  //   res.end();
-  // } else {
-  //   let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-  //     <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  //     <sitemap>
-  //         <loc>https://node.1cademy.us/sitemap-015NGDPVg3ZoJ9SyiZaq.xml</loc>
-  //       </sitemap>
-  //       <sitemap>
-  //         <loc>https://node.1cademy.us/sitemap-KwhAGgtGx3MDrSYIvaq4.xml</loc>
-  //       </sitemap>
-  //       <sitemap>
-  //         <loc>https://node.1cademy.us/sitemap-Lm9V7WPNWC0eDJYDpW3v.xml</loc>
-  //       </sitemap>
-  //       <sitemap>
-  //       <loc>https://node.1cademy.us/sitemap-WgF7yr5q7tJc54apVQSr.xml</loc>
-  //     </sitemap>
-  //     <sitemap>
-  //       <loc>https://node.1cademy.us/sitemap-Z5I4I5OIIfcUY6iPizRZ.xml</loc>
-  //     </sitemap>
-  //   </sitemapindex>`;
-  //   res.writeHead(200, { "Content-Type": "text/xml" });
-  //   res.write(xmlContent);
-  //   res.end();
-  // }
   return {
     props: {}
   };
