@@ -4,9 +4,7 @@ import { ParsedUrlQuery } from "querystring";
 import { db } from "../../lib/admin";
 import { getNodePageWithDomain } from "../../lib/utils";
 
-function SiteMap() {
-  // getServerSideProps will do the heavy lifting
-}
+const SiteMap = () => null;
 
 interface Params extends ParsedUrlQuery {
   nodeId: string;
@@ -34,23 +32,50 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
       })
       .get();
     if (nodesDocs.docs.length === 0) {
-      res.writeHead(404, { "Content-Type": "text/xml" });
+      // res.writeHead(404, { "Content-Type": "text/xml" });
+      // res.write(`<message>No child nodes found for Id: ${nodeId}</message>`);
+      // res.end();
+      res.setHeader('Content-Type', 'text/xml');
       res.write(`<message>No child nodes found for Id: ${nodeId}</message>`);
       res.end();
+
     } else {
+      const nodes: any = {};
+      await nodesDocs.docs.map(doc => {
+        const node = doc.data();
+        const nodeId = doc.id;
+        const nodeTitle: string = node.title;
+        const nodeValue: number = node.corrects - node.wrongs;
+        const nodeUpdatedAt = node.updatedAt.toDate().toISOString();
+        if (nodeTitle in nodes) {
+          const ObjValues: any = Object.values(nodes)[0];
+          if (nodeValue > ObjValues.value) {
+            nodes[nodeTitle] = {
+              id: nodeId,
+              value: (nodeValue + 1),
+              updatedAt: nodeUpdatedAt,
+            };
+          }
+        } else {
+          nodes[nodeTitle] = {
+            id: nodeId,
+            updatedAt: nodeUpdatedAt,
+            value: nodeValue && nodeValue >= 0 ? nodeValue : 0,
+          };
+        }
+      });
       let xmlContent =
         '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-      for (let nodeDoc of nodesDocs.docs) {
-        const nodeData = nodeDoc.data();
+      Object.entries(nodes).forEach(([title, node]: any) => {
         xmlContent += `
           <url>
-            <loc>${getNodePageWithDomain(nodeData.title, nodeDoc.id)}</loc>
-            <lastmod>${nodeData.updatedAt.toDate().toISOString()}</lastmod>
+            <loc>${getNodePageWithDomain(title, node.id)}</loc>
+            <lastmod>${node.updatedAt}</lastmod>
             <changefreq>hourly</changefreq>
           </url>`;
-      }
+      });
       xmlContent += "</urlset>";
-      res.writeHead(200, { "Content-Type": "text/xml" });
+      res.setHeader('Content-Type', 'text/xml');
       res.write(xmlContent);
       res.end();
     }
@@ -58,6 +83,6 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
   return {
     props: {}
   };
-};
+}
 
 export default SiteMap;
