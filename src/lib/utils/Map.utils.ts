@@ -380,6 +380,7 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
 
 // for showing a hidden node
 export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdges: any, oldAllNodes: any) => {
+  console.log({ uNodeData, oldNodes, oldEdges, oldAllNodes })
   // copy list of the node's children to modify userNode object
   uNodeData.children = [...uNodeData.children];
   // for each child
@@ -509,6 +510,8 @@ export const compareAndUpdateNodeLinks = (node: any, nodeId: string, newNode: an
 };
 
 export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, oldEdges: any, allTags: any) => {
+
+  console.log({ newNode, nodeId, oldNodes, oldEdges, allTags })
   // debugger
   // console.log("In createOrUpdateNode, nodeId:", nodeId);
   // CHECK: object.children was node by I changed with newNode
@@ -527,10 +530,12 @@ export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, 
   // CHECK: object.parents was node by I changed with newNode
   for (let parentIdx = 0; parentIdx < newNode.parents.length; parentIdx++) {
     const parent = newNode.parents[parentIdx];
-    oldNodes[nodeId].parents[parentIdx] = {
-      ...oldNodes[nodeId].parents[parentIdx],
-      visible: parent.node in oldNodes
-    };
+    if (oldNodes[nodeId]) {
+      oldNodes[nodeId].parents[parentIdx] = {
+        ...oldNodes[nodeId].parents[parentIdx],
+        visible: parent.node in oldNodes
+      };
+    }
     setTypeVisibilityOfChildInsideParent(oldNodes, nodeId, parent.node);
   }
   let newNodeData;

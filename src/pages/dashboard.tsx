@@ -144,6 +144,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 }
               }
             }
+            console.log('Node data: ', oldNodeChanges)
             setNodeChanges(oldNodeChanges);
           })
           .catch(function (error) {
@@ -363,6 +364,7 @@ const Dashboard = ({ }: DashboardProps) => {
           userNodeData = userNodeChange.uNodeData;
           // nodeId of userNode that is changed
           const nodeId = userNodeData.node;
+          // debugger
           if (!userNodesLoaded) {
             nodeIds.push(nodeId);
           } else {
@@ -740,6 +742,8 @@ const Dashboard = ({ }: DashboardProps) => {
       let userNodeRef = null;
       let userNodeData = null;
 
+      // debugger
+
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef)
 
@@ -752,7 +756,7 @@ const Dashboard = ({ }: DashboardProps) => {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
         try {
           for (let child of thisNode.children) {
-            const linkedNodeRef = doc(db, "nodes", child.node)
+            linkedNodeRef = doc(db, "nodes", child.node)
 
             // linkedNodeRef = db.collection("nodes").doc(child.node);
 
@@ -762,7 +766,7 @@ const Dashboard = ({ }: DashboardProps) => {
           console.log(3)
           for (let parent of thisNode.parents) {
             // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
-            const linkedNodeRef = doc(db, "nodes", parent.node)
+            linkedNodeRef = doc(db, "nodes", parent.node)
             // do a batch r
             batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) })
             // await firebase.batchUpdate(linkedNodeRef, {
@@ -833,19 +837,26 @@ const Dashboard = ({ }: DashboardProps) => {
             viewers: thisNode.viewers + 1,
             updatedAt: Timestamp.fromDate(new Date()),
           })
+          console.log('6.0.1')
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-          const userNodeLogRef = doc(db, "userNodesLog")
+          const userNodeLogRef = collection(db, "userNodesLog")
+          console.log('6.0.2')
           const userNodeLogData = {
             ...userNodeData,
             createdAt: Timestamp.fromDate(new Date()),
           };
-          // await firebase.batchSet(userNodeLogRef, userNodeLogData);
-          batch.set(userNodeLogRef, userNodeLogData)
+          console.log('6.0.3')
 
-          let oldNodes = { ...nodes };
-          let oldEdges = { ...edges };
-          let oldAllNodes = { ...allNodes };
-          let oldAllUserNodes = { ...allUserNodes };
+          // const id = userNodeLogRef.id
+          // await firebase.batchSet(userNodeLogRef, userNodeLogData);
+          batch.set(doc(userNodeLogRef), userNodeLogData)
+
+          console.log(6.1)
+          let oldNodes: any = { ...nodes };
+          let oldEdges: any = { ...edges };
+          let oldAllNodes: any = { ...nodes };
+          let oldAllUserNodes: any = { ...nodeChanges };
+          console.log('oldAllNodes[nodeId]', oldAllNodes[nodeId], oldAllNodes)
           // if data for the node is loaded
           let uNodeData = {
             // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
@@ -853,16 +864,18 @@ const Dashboard = ({ }: DashboardProps) => {
             ...userNodeData,
             open: true,
           };
+          console.log(6.2, uNodeData)
           if (userNodeId) {
             uNodeData[userNodeId] = userNodeId;
           }
-          console.log(7)
-            ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
-              uNodeData,
-              oldNodes,
-              oldEdges,
-              oldAllNodes
-            ));
+          console.log(7);
+          ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+            uNodeData,
+            oldNodes,
+            oldEdges,
+            oldAllNodes
+          ));
+          // console.log(, uNodeData)
           ({ oldNodes, oldEdges } = createOrUpdateNode(
             uNodeData,
             nodeId,
@@ -871,10 +884,10 @@ const Dashboard = ({ }: DashboardProps) => {
             allTags
           ));
           oldAllNodes[nodeId] = uNodeData;
-          oldAllUserNodes = {
-            ...oldAllUserNodes,
-            [nodeId]: userNodeData,
-          };
+          // oldAllUserNodes = {
+          //   ...oldAllUserNodes,
+          //   [nodeId]: userNodeData,
+          // };
           console.log(8)
           // await firebase.commitBatch();
           await batch.commit()
@@ -920,7 +933,7 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
-      <Button onClick={() => openNodeHandler('00NwvYhgES9mjNQ9LRhG')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('015qHLQADYxL8awDbbYK')}>Open Node Handler</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
         {/* show clusters */}
