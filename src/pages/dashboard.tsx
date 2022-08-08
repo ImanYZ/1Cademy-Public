@@ -221,9 +221,10 @@ const Dashboard = ({ }: DashboardProps) => {
           if (docChanges.length > 0) {
             for (let change of docChanges) {
               const userNodeData = change.doc.data();
+              console.log('userNodeData', userNodeData)
               // only used for useEffect above
               newUserNodeChanges = [
-                ...oldUserNodeChanges,
+                ...newUserNodeChanges,
                 {
                   cType: change.type,
                   uNodeId: change.doc.id,
