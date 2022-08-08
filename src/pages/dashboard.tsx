@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
-import { collection, doc, getDoc, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, query, setDoc, Timestamp, where, writeBatch } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { MapInteractionCSS } from "react-map-interaction";
 
@@ -12,7 +12,7 @@ import NodesList from "../components/map/NodesList";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { JSONfn } from "../lib/utils/jsonFn";
-import { compare2Nodes, createOrUpdateNode, dag1, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { compare2Nodes, createOrUpdateNode, dag1, makeNodeVisibleInItsLinks, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 import { OpenPart } from "../nodeBookTypes";
 
 // type Edge = { from: string; to: string };
@@ -650,7 +650,9 @@ const Dashboard = ({ }: DashboardProps) => {
               console.log('redirect to the very first node that is loaded')
               scrollToNode(Object.keys(nodes)[0]);
             }
+            console.log('will update', mapRendered)
             setMapRendered(true);
+            console.log('was update', mapRendered)
           }, 1000);
         }
       };
@@ -684,6 +686,7 @@ const Dashboard = ({ }: DashboardProps) => {
       let newHeight = NODE_HEIGHT;
       let nodesChanged = false;
       if (mapRendered && (nodeRef.current || content !== null || title !== null)) {
+        console.log('[node changed]', mapRendered)
         setNodes((oldNodes) => {
           const node = { ...oldNodes[nodeId] };
           if (content !== null && node.content !== content) {
@@ -736,67 +739,108 @@ const Dashboard = ({ }: DashboardProps) => {
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData = null;
-      const nodeRef = firebase.db.collection("nodes").doc(nodeId);
-      const nodeDoc = await nodeRef.get();
-      if (nodeDoc.exists) {
-        const thisNode = { ...nodeDoc.data(), id: nodeId };
+
+      const nodeRef = doc(db, "nodes", nodeId);
+      const nodeDoc = await getDoc(nodeRef)
+
+      const batch = writeBatch(db)
+      console.log(1)
+      // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
+      // const nodeDoc = await nodeRef.get();
+      if (nodeDoc.exists()) {
+        console.log(2)
+        const thisNode: any = { ...nodeDoc.data(), id: nodeId };
         try {
           for (let child of thisNode.children) {
-            linkedNodeRef = firebase.db.collection("nodes").doc(child.node);
-            await firebase.batchUpdate(linkedNodeRef, {
-              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-            });
+            const linkedNodeRef = doc(db, "nodes", child.node)
+
+            // linkedNodeRef = db.collection("nodes").doc(child.node);
+
+            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) })
+            // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
           }
+          console.log(3)
           for (let parent of thisNode.parents) {
-            linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+            // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+            const linkedNodeRef = doc(db, "nodes", parent.node)
             // do a batch r
-            await firebase.batchUpdate(linkedNodeRef, {
-              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-            });
+            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) })
+            // await firebase.batchUpdate(linkedNodeRef, {
+            //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            // });
           }
-          const userNodeQuery = firebase.db
-            .collection("userNodes")
-            .where("node", "==", nodeId)
-            .where("user", "==", username)
-            .limit(1);
-          const userNodeDoc = await userNodeQuery.get();
+          console.log(4)
+          const userNodesRef = collection(db, "userNodes")
+          const q = query(userNodesRef,
+            where("node", "==", nodeId),
+            where("user", "==", user?.uname),
+            limit(1))
+
+          // const userNodeQuery = firebase.db
+          //   .collection("userNodes")
+          //   .where("node", "==", nodeId)
+          //   .where("user", "==", username)
+          //   .limit(1);
+          // const userNodeDoc = await userNodeQuery.get();
+          const userNodeDoc = await getDocs(q)
           let userNodeId = null;
+          console.log(5)
           if (userNodeDoc.docs.length > 0) {
+            console.log('5B')
+            // if exist documents update the first
             userNodeId = userNodeDoc.docs[0].id;
-            userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
+            // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
+            const userNodeRef = doc(db, "userNodes", userNodeId)
             userNodeData = userNodeDoc.docs[0].data();
             userNodeData.visible = true;
-            userNodeData.updatedAt = firebase.firestore.Timestamp.fromDate(new Date());
-            await firebase.batchUpdate(userNodeRef, userNodeData);
+            userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            // await firebase.batchUpdate(userNodeRef, userNodeData);
+            batch.update(userNodeRef, userNodeData)
           } else {
-            userNodeRef = firebase.db.collection("userNodes").doc();
-            userNodeId = userNodeRef.id;
+            // if NOT exist documents create a document
+            // userNodeRef = firebase.db.collection("userNodes").doc();
+            console.log('5B')
+            userNodeRef = collection(db, "userNodes")
+            // userNodeId = userNodeRef.id;
             userNodeData = {
               changed: true,
               correct: false,
-              createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              // createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              // updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
               deleted: false,
               isStudied: false,
               bookmarked: false,
               node: nodeId,
               open: true,
-              user: username,
+              user: user?.uname,
               visible: true,
               wrong: false,
             };
-            userNodeRef.set(userNodeData);
+            console.log('userNodeData', userNodeData)
+            // userNodeRef.set(userNodeData);
+            // setDoc(userNodeRef, userNodeData)
+            const docRef = await addDoc(userNodeRef, userNodeData)
+            userNodeId = docRef.id
           }
-          await firebase.batchUpdate(nodeRef, {
+          // await firebase.batchUpdate(nodeRef, {
+          //   viewers: thisNode.viewers + 1,
+          //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+          // });
+          console.log(6)
+          batch.update(nodeRef, {
             viewers: thisNode.viewers + 1,
-            updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-          });
-          const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+            updatedAt: Timestamp.fromDate(new Date()),
+          })
+          // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+          const userNodeLogRef = doc(db, "userNodesLog")
           const userNodeLogData = {
             ...userNodeData,
-            createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            createdAt: Timestamp.fromDate(new Date()),
           };
-          await firebase.batchSet(userNodeLogRef, userNodeLogData);
+          // await firebase.batchSet(userNodeLogRef, userNodeLogData);
+          batch.set(userNodeLogRef, userNodeLogData)
 
           let oldNodes = { ...nodes };
           let oldEdges = { ...edges };
@@ -812,12 +856,13 @@ const Dashboard = ({ }: DashboardProps) => {
           if (userNodeId) {
             uNodeData[userNodeId] = userNodeId;
           }
-          ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
-            uNodeData,
-            oldNodes,
-            oldEdges,
-            oldAllNodes
-          ));
+          console.log(7)
+            ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+              uNodeData,
+              oldNodes,
+              oldEdges,
+              oldAllNodes
+            ));
           ({ oldNodes, oldEdges } = createOrUpdateNode(
             uNodeData,
             nodeId,
@@ -830,11 +875,13 @@ const Dashboard = ({ }: DashboardProps) => {
             ...oldAllUserNodes,
             [nodeId]: userNodeData,
           };
-
-          await firebase.commitBatch();
+          console.log(8)
+          // await firebase.commitBatch();
+          await batch.commit()
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
+            console.log(9)
             setSelectedNode(nodeId);
           }, 400);
         } catch (err) {
@@ -863,51 +910,53 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     [choosingNode, openNodeHandler]
   );
-console.log("nodes",nodes);
+
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       {/* Data from map, DONT REMOVE */}
       <Button onClick={() => console.log(nodes)}>nodes</Button>
       <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+      <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
+      <Button onClick={() => openNodeHandler('00NwvYhgES9mjNQ9LRhG')}>Open Node Handler</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
         {/* show clusters */}
         {/* link list */}
         {/* node list */}
         Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-        <NodesList 
-          nodes={nodes} 
+        <NodesList
+          nodes={nodes}
           nodeChanged={nodeChanged}
-          bookmark={()=>{console.log('bookmark')}}
-          markStudied={()=>{console.log('mark studied')}}
-          chosenNodeChanged={()=>{console.log('chosenNodeChanged')}}
-          referenceLabelChange={()=>{console.log('referenceLabel change')}}
-          deleteLink={()=>{console.log('delete link')}}
-          openLinkedNode={()=>{console.log('open link node')}}
-          openAllChildren={()=>{console.log('open all children')}}
-          hideNodeHandler={()=>{console.log('hideNodeHandler')}}
-          hideOffsprings={()=>{console.log('hideOffsprings')}}
-          toggleNode={()=>{console.log('toggleNode')}}
-          openNodePart={()=>{console.log('openNodePart')}}
-          selectNode={()=>{console.log('selectNode')}}
-          nodeClicked={()=>{console.log('nodeClicked')}}
-          correctNode={()=>{console.log('correctNode')}}
-          wrongNode={()=>{console.log('wrongNode')}}
-          uploadNodeImage={()=>{console.log('uploadNodeImage')}}
-          removeImage={()=>{console.log('removeImage')}}
-          changeChoice={()=>{console.log('changeChoice')}}
-          changeFeedback={()=>{console.log('changeFeedback')}}
-          switchChoice={()=>{console.log('switchChoice')}}
-          deleteChoice={()=>{console.log('deleteChoice')}}
-          addChoice={()=>{console.log('addChoice')}}
-          onNodeTitleBlur={()=>{console.log('onNodeTitleBlur')}}
-          saveProposedChildNode={()=>{console.log('saveProposedChildNod')}}
-          saveProposedImprovement={()=>{console.log('saveProposedImprovemny')}}
-          closeSideBar={()=>{console.log('closeSideBar')}}
-          reloadPermanentGrpah={()=>{console.log('reloadPermanentGrpah')}}
+          bookmark={() => { console.log('bookmark') }}
+          markStudied={() => { console.log('mark studied') }}
+          chosenNodeChanged={() => { console.log('chosenNodeChanged') }}
+          referenceLabelChange={() => { console.log('referenceLabel change') }}
+          deleteLink={() => { console.log('delete link') }}
+          openLinkedNode={() => { console.log('open link node') }}
+          openAllChildren={() => { console.log('open all children') }}
+          hideNodeHandler={() => { console.log('hideNodeHandler') }}
+          hideOffsprings={() => { console.log('hideOffsprings') }}
+          toggleNode={() => { console.log('toggleNode') }}
+          openNodePart={() => { console.log('openNodePart') }}
+          selectNode={() => { console.log('selectNode') }}
+          nodeClicked={() => { console.log('nodeClicked') }}
+          correctNode={() => { console.log('correctNode') }}
+          wrongNode={() => { console.log('wrongNode') }}
+          uploadNodeImage={() => { console.log('uploadNodeImage') }}
+          removeImage={() => { console.log('removeImage') }}
+          changeChoice={() => { console.log('changeChoice') }}
+          changeFeedback={() => { console.log('changeFeedback') }}
+          switchChoice={() => { console.log('switchChoice') }}
+          deleteChoice={() => { console.log('deleteChoice') }}
+          addChoice={() => { console.log('addChoice') }}
+          onNodeTitleBlur={() => { console.log('onNodeTitleBlur') }}
+          saveProposedChildNode={() => { console.log('saveProposedChildNod') }}
+          saveProposedImprovement={() => { console.log('saveProposedImprovemny') }}
+          closeSideBar={() => { console.log('closeSideBar') }}
+          reloadPermanentGrpah={() => { console.log('reloadPermanentGrpah') }}
         />
       </MapInteractionCSS>
     </Box>
