@@ -5,6 +5,14 @@ import { db } from "../lib/admin";
 
 const Sitemap = () => null;
 
+const escapeBreaksQuotes = (text: string) => {
+  return text.replace(/(?:\r\n|\r|\n)/g, "<br>").replace(/['"]/g, "").trim().toLowerCase();
+};
+
+const encodeTitle = (title: string) => {
+  return encodeURI(escapeBreaksQuotes(title)).replace(/[&\/\?\\]/g, "");
+};
+
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   let BASE_URL = 'https://node.1cademy.us';
 
@@ -60,17 +68,8 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     if (!node.id) {
       return;
     }
-    let nodeTitle = title.trim().toLowerCase();
-    if (title.includes('&')) {
-      nodeTitle = nodeTitle.split("&").join("and");
-    }
-    if (title.includes('?')) {
-      nodeTitle = nodeTitle.split("?").join("");
-    }
-    if (title.includes('\n')) {
-      nodeTitle = nodeTitle.split("\n").join("");
-    }
-    nodeTitle = nodeTitle.split(" ").join("-");
+    let nodeTitle = encodeTitle(title);
+    console.log(nodeTitle);
     return `${BASE_URL}/node/${nodeTitle}/${node.id}`
   });
 
