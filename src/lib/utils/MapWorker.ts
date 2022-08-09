@@ -100,7 +100,7 @@ const layoutHandler = (
     // calculate OFFSETs
     // update with setDagNode
     // calculate map
-    oldNodes.map((n) => {
+    oldNodes.map((n: string) => {
       const nodeN = dag1[0].node(n);
       // If there is an object (label) assigned to the node in dag1[0], otherwise it'd be undefined:
       if (nodeN) {
@@ -131,7 +131,7 @@ const layoutHandler = (
     });
 
     // ITERATE EDGES and calculate the new positions
-    dag1[0].edges().map((e) => {
+    dag1[0].edges().map((e: any) => {
       const fromNode = dag1[0].node(e.v);
       const toNode = dag1[0].node(e.w);
       if (

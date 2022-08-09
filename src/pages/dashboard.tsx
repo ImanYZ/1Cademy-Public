@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
-import { addDoc, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, query, setDoc, Timestamp, where, writeBatch } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, query, Timestamp, where, writeBatch } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { MapInteractionCSS } from "react-map-interaction";
 

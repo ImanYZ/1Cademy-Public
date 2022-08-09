@@ -15,12 +15,9 @@ export const LinksList = ({ edgeIds, edges, selectedRelation }: LinkListProps) =
       return (
         <Line
           key={eId}
-          identifier={eId}
           label={edges[eId].label}
-          selected={selectedRelation === eId}
           from={{ x: edges[eId].fromX, y: edges[eId].fromY - 1 }}
           to={{ x: edges[eId].toX, y: edges[eId].toY - 1 }}
-          borderBottomStyle="2.5px solid"
           color="#01d36a"
         />
       )

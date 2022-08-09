@@ -11,7 +11,7 @@ export const YOFFSET = 160; // Default Y offset to shift all the nodes and relat
 
 // dagre object
 // list so that the reference can be modified throughout project
-export let dag1: dagre.graphlib.Graph<{}>[] = [];
+export let dag1: dagre.graphlib.Graph[] = [];
 // Using dagre for calculating location of nodes and arrows on map
 dag1[0] = new dagre.graphlib.Graph({ compound: true, directed: true })
   .setGraph({
@@ -387,19 +387,20 @@ export const removeDagEdge = (from: string, to: string, oldEdges: any) => {
 export const removeDagAllEdges = (nodeId: string, oldEdges: any) => {
   // console.log("In removeDagAllEdges");
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
-  const nodeEdges = dag1[0].nodeEdges(nodeId);
-  if (nodeEdges) {
-    for (let edge of nodeEdges) {
-      // remove edge from dagre object
-      // from: edge.v, to: edge.w
-      dag1[0].removeEdge(edge.v, edge.w);
-      const edgeId = edge.v + "-" + edge.w;
-      // removes edge from oldEdges
-      if (edgeId in oldEdges) {
-        delete oldEdges[edgeId];
-      }
-    }
-  }
+  // CHECK: commented this because nodeEdges dont exist in dagre
+  // const nodeEdges = dag1[0].nodeEdges(nodeId);
+  // if (nodeEdges) {
+  //   for (let edge of nodeEdges) {
+  //     // remove edge from dagre object
+  //     // from: edge.v, to: edge.w
+  //     dag1[0].removeEdge(edge.v, edge.w);
+  //     const edgeId = edge.v + "-" + edge.w;
+  //     // removes edge from oldEdges
+  //     if (edgeId in oldEdges) {
+  //       delete oldEdges[edgeId];
+  //     }
+  //   }
+  // }
   return oldEdges;
 };
 
@@ -410,7 +411,7 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
     // if parent is visible on map
     if (parent.node in oldNodes) {
       // find index of nodeId in list of children of parent
-      const childIdx = oldNodes[parent.node].children.findIndex(c => c.node === nodeId);
+      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === nodeId);
       // copy list of children for parent node in oldNodes
       oldNodes[parent.node] = {
         ...oldNodes[parent.node],
@@ -1014,19 +1015,23 @@ export const linkExists = (links: any, newLink: any) => {
   return false;
 };
 
+// CHECK: this function was validated to execute build
 export const getSelectionText = () => {
   var text = "";
-  var activeEl = document.activeElement;
+  var activeEl = document.activeElement as HTMLInputElement;
   var activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
   if (
     activeElTagName == "textarea" ||
-    (activeElTagName == "input" &&
+    (
+      activeElTagName == "input" &&
+      activeEl && // CHECK <--- add this validation
       /^(?:text|search|password|tel|url)$/i.test(activeEl.type) &&
-      typeof activeEl.selectionStart == "number")
+      typeof activeEl.selectionStart == "number"
+    )
   ) {
-    text = activeEl.value.slice(activeEl.selectionStart, activeEl.selectionEnd);
-  } else if (window.getSelection) {
-    text = window.getSelection().toString();
+    text = activeEl.value.slice(activeEl.selectionStart || undefined, activeEl.selectionEnd || undefined);
+  } else if (window?.getSelection) {
+    text = (window.getSelection() || '').toString();
   }
   return text;
 };
@@ -1034,10 +1039,10 @@ export const getSelectionText = () => {
 const applyTagRemove = (oldAllTags: any, nodeId: string, dagreLoaded: boolean) => {
   if (nodeId in oldAllTags) {
     for (let parentTagId of oldAllTags[nodeId].tagIds) {
-      oldAllTags[parentTagId].children = oldAllTags[parentTagId].children.filter(tgId => tgId !== nodeId);
+      oldAllTags[parentTagId].children = oldAllTags[parentTagId].children.filter((tgId: string) => tgId !== nodeId);
     }
     for (let childTagId of oldAllTags[nodeId].children) {
-      oldAllTags[childTagId].tagIds = oldAllTags[childTagId].tagIds.filter(tgId => tgId !== nodeId);
+      oldAllTags[childTagId].tagIds = oldAllTags[childTagId].tagIds.filter((tgId: string) => tgId !== nodeId);
     }
     delete oldAllTags[nodeId];
     if (dagreLoaded && dag1[0].hasNode("Tag" + nodeId)) {
@@ -1080,8 +1085,8 @@ export const applyAllTagChanges = (oAllTags: any, docChanges: any, dagreLoaded: 
         }
         for (let oldTagId of oldAllTags[nodeId].tagIds) {
           if (!tagData.tagIds.includes(oldTagId)) {
-            oldAllTags[nodeId].tagIds = oldAllTags[nodeId].tagIds.filter(tgId => tgId !== oldTagId);
-            oldAllTags[oldTagId].children = oldAllTags[oldTagId].children.filter(tgId => tgId !== nodeId);
+            oldAllTags[nodeId].tagIds = oldAllTags[nodeId].tagIds.filter((tgId: string) => tgId !== oldTagId);
+            oldAllTags[oldTagId].children = oldAllTags[oldTagId].children.filter((tgId: string) => tgId !== nodeId);
           }
         }
       } else {

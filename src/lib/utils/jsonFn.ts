@@ -34,7 +34,7 @@ const stringify = (obj: any) => {
  * @param date2obj 
  * @returns 
  */
-const parse = (str, date2obj = undefined) => {
+const parse = (str: string, date2obj = undefined) => {
 
     var iso8061 = date2obj ? /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/ : false;
 

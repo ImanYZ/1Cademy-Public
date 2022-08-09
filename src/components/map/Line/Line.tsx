@@ -9,7 +9,7 @@ type LineProps = {
   from: Point;
   to: Point;
   label?: string;
-  leftDirection: boolean;
+  leftDirection?: boolean;
   color: string;
 };
 

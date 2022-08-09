@@ -1,8 +1,8 @@
-import { useNodeBook } from "@/context/NodeBookContext";
-import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { Box } from "@mui/system";
 import React from "react";
 import { OpenPart } from "src/nodeBookTypes";
+
+import { useNodeBook } from "@/context/NodeBookContext";
+import { NODE_WIDTH } from "@/lib/utils/Map.utils";
 
 import Node from "./Node";
 
@@ -78,121 +78,121 @@ const NodesList = ({
   closeSideBar,
   reloadPermanentGrpah
 }: NodeListProps) => {
-  const {nodeBookState} = useNodeBook();
-  
+  const { nodeBookState } = useNodeBook();
+
   return (<>
-  {
-    Object.keys(nodes).map(nId => {
-      let unaccepted = false;
-      if ("unaccepted" in nodes[nId]) {
-        unaccepted = nodes[nId].unaccepted;
-      }
-      let bookmarks = 0;
-      if ("bookmarks" in nodes[nId] && Number(nodes[nId].bookmarks)) {
-        bookmarks = nodes[nId].bookmarks;
-      }
-      let bookmarked = false;
-      if ("bookmarked" in nodes[nId]) {
-        bookmarked = nodes[nId].bookmarked;
-      }
-      let activeNode = false;
-      if (nodeBookState.selectedNode === nId) {
-        activeNode = true;
-      }
-      let citationsSelected = false;
-      if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Citations") {
-        citationsSelected = true;
-      }
-      let proposalsSelected = false;
-      if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Proposals") {
-        proposalsSelected = true;
-      }
-      let acceptedProposalsSelected = false;
-      if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "AcceptedProposals") {
-        acceptedProposalsSelected = true;
-      }
-      let commentsSelected = false;
-      if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Comments") {
-        commentsSelected = true;
-      }
-  
-      return (
-        <Node
-          key={nId}
-          identifier={nId}
-          activeNode={activeNode}
-          citationsSelected={citationsSelected}
-          proposalsSelected={proposalsSelected}
-          acceptedProposalsSelected={acceptedProposalsSelected}
-          commentsSelected={commentsSelected}
-          open={nodes[nId].open}
-          left={nodes[nId].left}
-          top={nodes[nId].top}
-          width={NODE_WIDTH}
-          editable={nodes[nId].editable}
-          unaccepted={unaccepted}
-          nodeType={nodes[nId].nodeType}
-          isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
-          isNew={nodes[nId].hasOwnProperty("isNew") && nodes[nId].isNew}
-          title={nodes[nId].title}
-          content={nodes[nId].content}
-          nodeImage={nodes[nId].nodeImage}
-          viewers={nodes[nId].viewers}
-          correctNum={nodes[nId].corrects}
-          markedCorrect={nodes[nId].correct}
-          wrongNum={nodes[nId].wrongs}
-          markedWrong={nodes[nId].wrong}
-          references={nodes[nId].references}
-          tags={nodes[nId].tags}
-          parents={nodes[nId].parents}
-          // eslint-disable-next-line react/no-children-prop
-          children={nodes[nId].children}
-          choices={nodes[nId].choices}
-          commentsNum={nodes[nId].comments}
-          proposalsNum={nodes[nId].versions}
-          admin={nodes[nId].admin}
-          aImgUrl={nodes[nId].aImgUrl}
-          aFullname={nodes[nId].aFullname}
-          aChooseUname={nodes[nId].aChooseUname}
-          lastVisit={nodes[nId].lastVisit}
-          studied={nodes[nId].studied}
-          isStudied={nodes[nId].isStudied}
-          changed={nodes[nId].changed}
-          changedAt={nodes[nId].changedAt}
-          bookmarked={bookmarked}
-          bookmarks={bookmarks}
-          bookmark={bookmark}
-          markStudied={markStudied}
-          nodeChanged={nodeChanged}
-          chosenNodeChanged={chosenNodeChanged}
-          referenceLabelChange={referenceLabelChange}
-          deleteLink={deleteLink}
-          openLinkedNode={openLinkedNode}
-          openAllChildren={openAllChildren}
-          hideNodeHandler={hideNodeHandler}
-          hideOffsprings={hideOffsprings}
-          toggleNode={toggleNode}
-          openNodePart={openNodePart}
-          selectNode={selectNode}
-          nodeClicked={nodeClicked}
-          correctNode={correctNode}
-          wrongNode={wrongNode}
-          uploadNodeImage={uploadNodeImage}
-          removeImage={removeImage}
-          changeChoice={changeChoice}
-          changeFeedback={changeFeedback}
-          switchChoice={switchChoice}
-          deleteChoice={deleteChoice}
-          addChoice={addChoice}
-          onNodeTitleBLur={onNodeTitleBlur}
-          saveProposedChildNode={saveProposedChildNode}
-          saveProposedImprovement={saveProposedImprovement}
-          closeSideBar={closeSideBar}
-          reloadPermanentGrpah={reloadPermanentGrpah}
-        />
-      );
-    })
-  }
+    {
+      Object.keys(nodes).map(nId => {
+        let unaccepted = false;
+        if ("unaccepted" in nodes[nId]) {
+          unaccepted = nodes[nId].unaccepted;
+        }
+        let bookmarks = 0;
+        if ("bookmarks" in nodes[nId] && Number(nodes[nId].bookmarks)) {
+          bookmarks = nodes[nId].bookmarks;
+        }
+        let bookmarked = false;
+        if ("bookmarked" in nodes[nId]) {
+          bookmarked = nodes[nId].bookmarked;
+        }
+        let activeNode = false;
+        if (nodeBookState.selectedNode === nId) {
+          activeNode = true;
+        }
+        let citationsSelected = false;
+        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Citations") {
+          citationsSelected = true;
+        }
+        let proposalsSelected = false;
+        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Proposals") {
+          proposalsSelected = true;
+        }
+        let acceptedProposalsSelected = false;
+        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "AcceptedProposals") {
+          acceptedProposalsSelected = true;
+        }
+        let commentsSelected = false;
+        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Comments") {
+          commentsSelected = true;
+        }
+
+        return (
+          <Node
+            key={nId}
+            identifier={nId}
+            activeNode={activeNode}
+            citationsSelected={citationsSelected}
+            proposalsSelected={proposalsSelected}
+            acceptedProposalsSelected={acceptedProposalsSelected}
+            commentsSelected={commentsSelected}
+            open={nodes[nId].open}
+            left={nodes[nId].left}
+            top={nodes[nId].top}
+            width={NODE_WIDTH}
+            editable={nodes[nId].editable}
+            unaccepted={unaccepted}
+            nodeType={nodes[nId].nodeType}
+            isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
+            isNew={nodes[nId].hasOwnProperty("isNew") && nodes[nId].isNew}
+            title={nodes[nId].title}
+            content={nodes[nId].content}
+            nodeImage={nodes[nId].nodeImage}
+            viewers={nodes[nId].viewers}
+            correctNum={nodes[nId].corrects}
+            markedCorrect={nodes[nId].correct}
+            wrongNum={nodes[nId].wrongs}
+            markedWrong={nodes[nId].wrong}
+            references={nodes[nId].references}
+            tags={nodes[nId].tags}
+            parents={nodes[nId].parents}
+            // eslint-disable-next-line react/no-children-prop
+            children={nodes[nId].children}
+            choices={nodes[nId].choices}
+            commentsNum={nodes[nId].comments}
+            proposalsNum={nodes[nId].versions}
+            admin={nodes[nId].admin}
+            aImgUrl={nodes[nId].aImgUrl}
+            aFullname={nodes[nId].aFullname}
+            aChooseUname={nodes[nId].aChooseUname}
+            lastVisit={nodes[nId].lastVisit}
+            studied={nodes[nId].studied}
+            isStudied={nodes[nId].isStudied}
+            changed={nodes[nId].changed}
+            changedAt={nodes[nId].changedAt}
+            bookmarked={bookmarked}
+            bookmarks={bookmarks}
+            bookmark={bookmark}
+            markStudied={markStudied}
+            nodeChanged={nodeChanged}
+            chosenNodeChanged={chosenNodeChanged}
+            referenceLabelChange={referenceLabelChange}
+            deleteLink={deleteLink}
+            openLinkedNode={openLinkedNode}
+            openAllChildren={openAllChildren}
+            hideNodeHandler={hideNodeHandler}
+            hideOffsprings={hideOffsprings}
+            toggleNode={toggleNode}
+            openNodePart={openNodePart}
+            selectNode={selectNode}
+            nodeClicked={nodeClicked}
+            correctNode={correctNode}
+            wrongNode={wrongNode}
+            uploadNodeImage={uploadNodeImage}
+            removeImage={removeImage}
+            changeChoice={changeChoice}
+            changeFeedback={changeFeedback}
+            switchChoice={switchChoice}
+            deleteChoice={deleteChoice}
+            addChoice={addChoice}
+            onNodeTitleBLur={onNodeTitleBlur}
+            saveProposedChildNode={saveProposedChildNode}
+            saveProposedImprovement={saveProposedImprovement}
+            closeSideBar={closeSideBar}
+            reloadPermanentGrpah={reloadPermanentGrpah}
+          />
+        );
+      })
+    }
   </>);
 };
 export default NodesList;

@@ -1,12 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-
-import { openMediaState } from "../../../store/MapAtoms";
-// import { useRecoilValue, useSetRecoilState } from "recoil";
-import { choosingNodeState, choosingTypeState, chosenNodeState, chosenNodeTitleState } from "../../../store/NodeAtoms";
 
 
 
@@ -115,10 +112,9 @@ const Node = ({
   top,
   width,
   editable,
-  editableopen,
   unaccepted,
   nodeType,
-  isTagopen,
+  isTag,
   isNew,
   title,
   content,
@@ -132,17 +128,18 @@ const Node = ({
   tags,
   parents,
   children,
+  choices,
   commentsNum,
   proposalsNum,
   admin,
-  aImgUrladmin,
-  aFullnameadmin,
+  aImgUrl,
+  aFullname,
   aChooseUname,
-  lastVisitadmin,
+  lastVisit,
   studied,
   isStudied,
   changed,
-  changedAtadmin,
+  changedAt,
   bookmarked,
   bookmarks,
   bookmark,
@@ -173,7 +170,6 @@ const Node = ({
   saveProposedImprovement,
   closeSideBar,
   reloadPermanentGrpah,
-  isTag,
 }: NodeProps) => {
 
   // const choosingNode = useRecoilValue(choosingNodeState);
@@ -184,7 +180,7 @@ const Node = ({
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
-  const [openPart, setOpenPart] = useState(null);
+  const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   // const [summary, setSummary] = useState("");
@@ -693,8 +689,9 @@ const Node = ({
             </div> */}
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 

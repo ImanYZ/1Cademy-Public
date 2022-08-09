@@ -88,11 +88,9 @@ const layoutHandler = (
     // calculate OFFSETs
     // update with setDagNode
     // calculate map
-    // debugger
     Object.keys(oldNodes).map((n) => {
       const nodeN = dag1.node(n);
       // If there is an object (label) assigned to the node in dag1[0], otherwise it'd be undefined:
-      // debugger
       if (nodeN) {
         const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
         const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
@@ -150,7 +148,6 @@ const layoutHandler = (
           Math.abs(thisEdge.toX - newToX) >= MIN_CHANGE ||
           Math.abs(thisEdge.toY - newToY) >= MIN_CHANGE
         ) {
-          // debugger
           oldEdges = setEdgeInDag(
             dag1,
             e.v,
