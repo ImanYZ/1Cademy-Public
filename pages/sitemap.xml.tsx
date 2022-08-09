@@ -17,7 +17,11 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   let BASE_URL = 'https://node.1cademy.us';
 
   const staticPaths = fs
-    .readdirSync("pages")
+    .readdirSync({
+      development: 'pages',
+      production: './',
+      test: '',
+    }[process.env.NODE_ENV])
     .filter((staticPage: string) => {
       return ![
         "sitemap",
