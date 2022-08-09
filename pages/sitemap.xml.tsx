@@ -68,8 +68,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     if (!node.id) {
       return;
     }
-    let nodeTitle = encodeTitle(title);
-    console.log(nodeTitle);
+    const nodeTitle = encodeTitle(title);
     return `${BASE_URL}/node/${nodeTitle}/${node.id}`
   });
 
