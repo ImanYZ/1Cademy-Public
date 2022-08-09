@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useRef, useCallback } from "react";
-// import { useRecoilValue, useSetRecoilState } from "recoil";
-
-import { choosingNodeState, choosingTypeState, chosenNodeState, chosenNodeTitleState } from "../../../store/NodeAtoms";
-import { openMediaState } from "../../../store/MapAtoms";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
+
 import { useNodeBook } from "@/context/NodeBookContext";
+
+import { openMediaState } from "../../../store/MapAtoms";
+// import { useRecoilValue, useSetRecoilState } from "recoil";
+import { choosingNodeState, choosingTypeState, chosenNodeState, chosenNodeTitleState } from "../../../store/NodeAtoms";
 
 
 
@@ -103,77 +104,77 @@ type NodeProps = {
   reloadPermanentGrpah: any;//
 };
 const Node = ({
-identifier,
-activeNode,
-citationsSelected,
-proposalsSelected,
-acceptedProposalsSelected,
-commentsSelected,
-open,
-left,
-top,
-width,
-editable,
-editableopen,
-unaccepted,
-nodeType,
-isTagopen,
-isNew,
-title,
-content,
-nodeImage,
-viewers,
-correctNum,
-markedCorrect,
-wrongNum,
-markedWrong,
-references,
-tags,
-parents,
-children,
-commentsNum,
-proposalsNum,
-admin,
-aImgUrladmin,
-aFullnameadmin,
-aChooseUname,
-lastVisitadmin,
-studied,
-isStudied,
-changed,
-changedAtadmin,
-bookmarked,
-bookmarks,
-bookmark,
-markStudied,
-nodeChanged,
-chosenNodeChanged,
-referenceLabelChange,
-deleteLink,
-openLinkedNode,
-openAllChildren,
-hideNodeHandler,
-hideOffsprings,
-toggleNode,
-openNodePart,
-selectNode,
-nodeClicked,
-correctNode,
-wrongNode,
-uploadNodeImage,
-removeImage,
-changeChoice,
-changeFeedback,
-switchChoice,
-deleteChoice,
-addChoice,
-onNodeTitleBLur,
-saveProposedChildNode,
-saveProposedImprovement,
-closeSideBar,
-reloadPermanentGrpah,
-isTag,
-}:NodeProps)  => {
+  identifier,
+  activeNode,
+  citationsSelected,
+  proposalsSelected,
+  acceptedProposalsSelected,
+  commentsSelected,
+  open,
+  left,
+  top,
+  width,
+  editable,
+  editableopen,
+  unaccepted,
+  nodeType,
+  isTagopen,
+  isNew,
+  title,
+  content,
+  nodeImage,
+  viewers,
+  correctNum,
+  markedCorrect,
+  wrongNum,
+  markedWrong,
+  references,
+  tags,
+  parents,
+  children,
+  commentsNum,
+  proposalsNum,
+  admin,
+  aImgUrladmin,
+  aFullnameadmin,
+  aChooseUname,
+  lastVisitadmin,
+  studied,
+  isStudied,
+  changed,
+  changedAtadmin,
+  bookmarked,
+  bookmarks,
+  bookmark,
+  markStudied,
+  nodeChanged,
+  chosenNodeChanged,
+  referenceLabelChange,
+  deleteLink,
+  openLinkedNode,
+  openAllChildren,
+  hideNodeHandler,
+  hideOffsprings,
+  toggleNode,
+  openNodePart,
+  selectNode,
+  nodeClicked,
+  correctNode,
+  wrongNode,
+  uploadNodeImage,
+  removeImage,
+  changeChoice,
+  changeFeedback,
+  switchChoice,
+  deleteChoice,
+  addChoice,
+  onNodeTitleBLur,
+  saveProposedChildNode,
+  saveProposedImprovement,
+  closeSideBar,
+  reloadPermanentGrpah,
+  isTag,
+}: NodeProps) => {
 
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -181,8 +182,8 @@ isTag,
   // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
   // const setOpenMedia = useSetRecoilState(openMediaState);
 
-  const {nodeBookState, nodeBookDispatch} = useNodeBook();
-  
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+
   const [openPart, setOpenPart] = useState(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -192,9 +193,9 @@ isTag,
   const nodeRef = useRef(null);
 
   const nodeClickHandler = useCallback(
-   (event :any) => {
+    (event: any) => {
       if (nodeBookState.choosingNode) {
-        nodeBookDispatch({type:"setChosenNode",payload:{id:identifier,title}});
+        nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
       } else if (
@@ -378,15 +379,15 @@ isTag,
         "Node card" +
         (activeNode
           ? //   &&
-            // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
-            " active"
+          // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
+          " active"
           : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
         (nodeBookState.choosingNode &&
-        nodeBookState.choosingNode.id !== identifier &&
-        !activeNode &&
-        (nodeBookState.choosingNode.type !== "Reference" || nodeType === "Reference")
+          nodeBookState.choosingNode.id !== identifier &&
+          !activeNode &&
+          (nodeBookState.choosingNode.type !== "Reference" || nodeType === "Reference")
           ? " Choosable"
           : "")
       }
@@ -395,31 +396,36 @@ isTag,
         top: top ? top : 1000,
         width: width
       }}
-      // style={
-      //   activeNode
-      //     ? {
-      //         left: left,
-      //         top: top,
-      //         width: width,
-      //         WebkitBoxShadow: boxShadowCSS,
-      //         MozBoxShadow: boxShadowCSS,
-      //         boxShadow: boxShadowCSS
-      //       }
-      //     : {
-      //         left: left,
-      //         top: top,
-      //         width: width
-      //       }
-      // }
+    // style={
+    //   activeNode
+    //     ? {
+    //         left: left,
+    //         top: top,
+    //         width: width,
+    //         WebkitBoxShadow: boxShadowCSS,
+    //         MozBoxShadow: boxShadowCSS,
+    //         boxShadow: boxShadowCSS
+    //       }
+    //     : {
+    //         left: left,
+    //         top: top,
+    //         width: width
+    //       }
+    // }
     >
       {open ? (
         <div className="card-content">
-           <div className="card-title">
+          <div className="card-title">
             {title}
-           </div>
-           <p>
+          </div>
+          <p>
             {content}
-           </p>
+          </p>
+
+          <div>
+            LinkingWords component
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nobis earum adipisci aliquam praesentium, suscipit in quisquam error autem? Illum, quia quod veritatis praesentium voluptatem at voluptatum temporibus in corrupti porro.</p>
+          </div>
         </div>
 
         // <>
@@ -625,7 +631,10 @@ isTag,
         <div className="card-content">
           <div className="card-title">
             <div className="NodeTitleClosed">
-              <h3>not open : {title}</h3>
+              <h3>{title}</h3>
+              <p>
+                {content}
+              </p>
               {/* <HyperEditor readOnly={true} onChange={titleChange} content={title} width={width} /> */}
             </div>
             {/* {!choosingNode && (

@@ -124,7 +124,7 @@ const layoutHandler = (
     // ITERATE EDGES and calculate the new positions
     dag1.edges().map((e: any) => {
       const fromNode = dag1.node(e.v);
-      // const toNode = dag1.node(e.w);
+      const toNode = dag1.node(e.w);
       // debugger
       if (
         "left" in fromNode &&
@@ -139,7 +139,7 @@ const layoutHandler = (
         const newToX = toNode.left;
         const newToY = toNode.top + Math.floor(toNode.height / 2);
         const thisEdge = oldEdges[e.v + "-" + e.w];
-        
+
         if (
           !("fromX" in thisEdge) ||
           !("fromY" in thisEdge) ||

@@ -667,12 +667,9 @@ const Dashboard = ({ }: DashboardProps) => {
               openLinkedNode(sNode);
             } else {
               //  redirect to the very first node that is loaded
-              console.log('redirect to the very first node that is loaded')
               scrollToNode(Object.keys(nodes)[0]);
             }
-            console.log('will update', mapRendered)
             setMapRendered(true);
-            console.log('was update', mapRendered)
           }, 1000);
         }
       };
@@ -760,17 +757,13 @@ const Dashboard = ({ }: DashboardProps) => {
       let userNodeRef = null;
       let userNodeData: UserNodesData | null = null;
 
-      // debugger
-
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef)
 
       const batch = writeBatch(db)
-      console.log(1, nodeDoc.exists())
       // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
       // const nodeDoc = await nodeRef.get();
       if (nodeDoc.exists()) {
-        console.log(2)
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
         try {
           for (let child of thisNode.children) {
@@ -781,7 +774,6 @@ const Dashboard = ({ }: DashboardProps) => {
             batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) })
             // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
           }
-          console.log(3, thisNode)
           for (let parent of thisNode.parents) {
             // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
             linkedNodeRef = doc(db, "nodes", parent.node)
@@ -791,7 +783,6 @@ const Dashboard = ({ }: DashboardProps) => {
             //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             // });
           }
-          console.log(4)
           const userNodesRef = collection(db, "userNodes")
           const q = query(userNodesRef,
             where("node", "==", nodeId),
@@ -806,9 +797,7 @@ const Dashboard = ({ }: DashboardProps) => {
           // const userNodeDoc = await userNodeQuery.get();
           const userNodeDoc = await getDocs(q)
           let userNodeId = null;
-          console.log(5)
           if (userNodeDoc.docs.length > 0) {
-            console.log('5B')
             // if exist documents update the first
             userNodeId = userNodeDoc.docs[0].id;
             // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
@@ -821,7 +810,6 @@ const Dashboard = ({ }: DashboardProps) => {
           } else {
             // if NOT exist documents create a document
             // userNodeRef = firebase.db.collection("userNodes").doc();
-            console.log('5B')
             userNodeRef = collection(db, "userNodes")
             // userNodeId = userNodeRef.id;
             userNodeData = {
@@ -840,7 +828,6 @@ const Dashboard = ({ }: DashboardProps) => {
               visible: true,
               wrong: false,
             };
-            console.log('userNodeData', userNodeData)
             // userNodeRef.set(userNodeData);
             // setDoc(userNodeRef, userNodeData)
             const docRef = await addDoc(userNodeRef, userNodeData)
@@ -850,12 +837,10 @@ const Dashboard = ({ }: DashboardProps) => {
           //   viewers: thisNode.viewers + 1,
           //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
           // });
-          console.log(6)
           batch.update(nodeRef, {
             viewers: thisNode.viewers + 1,
             updatedAt: Timestamp.fromDate(new Date()),
           })
-          console.log('6.0.1')
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
           const userNodeLogRef = collection(db, "userNodesLog")
 
@@ -868,12 +853,10 @@ const Dashboard = ({ }: DashboardProps) => {
           // await firebase.batchSet(userNodeLogRef, userNodeLogData);
           batch.set(doc(userNodeLogRef), userNodeLogData)
 
-          console.log(6.1)
           let oldNodes: any = { ...nodes };
           let oldEdges: any = { ...edges };
           let oldAllNodes: any = { ...nodes };
           let oldAllUserNodes: any = { ...nodeChanges };
-          console.log('oldAllNodes[nodeId]', oldAllNodes[nodeId], oldAllNodes)
           // if data for the node is loaded
           let uNodeData = {
             // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
@@ -882,18 +865,15 @@ const Dashboard = ({ }: DashboardProps) => {
             ...userNodeData,
             open: true,
           };
-          console.log(6.2, uNodeData)
           if (userNodeId) {
             uNodeData[userNodeId] = userNodeId;
           }
-          console.log(7);
           ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
             uNodeData,
             oldNodes,
             oldEdges,
             oldAllNodes
           ));
-          // console.log(, uNodeData)
           ({ oldNodes, oldEdges } = createOrUpdateNode(
             uNodeData,
             nodeId,
@@ -906,13 +886,11 @@ const Dashboard = ({ }: DashboardProps) => {
           //   ...oldAllUserNodes,
           //   [nodeId]: userNodeData,
           // };
-          console.log(8)
           // await firebase.commitBatch();
           await batch.commit()
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
-            console.log(9)
             setSelectedNode(nodeId);
           }, 400);
         } catch (err) {
@@ -955,7 +933,7 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
       <Button onClick={() => openNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Open Node Handler</Button>
-      <Button onClick={() => openNodeHandler('00NwvYhgES9mjNQ9LRhG')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('a2stE4bLrubOt833U1Cc')}>Open Node Handler</Button>
       <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
