@@ -8,6 +8,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
+import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -102,6 +103,9 @@ const Dashboard = ({ }: DashboardProps) => {
 
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
+
+  // link that is currently selected
+  const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -927,10 +931,13 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, openNodeHandler]
   );
 
+  const edgeIds = Object.keys(edges);
+
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       {/* Data from map, DONT REMOVE */}
       <Button onClick={() => console.log(nodes)}>nodes</Button>
+      <Button onClick={() => console.log(edges)}>edges</Button>
       <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
       <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
@@ -945,6 +952,7 @@ const Dashboard = ({ }: DashboardProps) => {
         {/* link list */}
         {/* node list */}
         Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+        <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
         <NodesList
           nodes={nodes}
           nodeChanged={nodeChanged}
