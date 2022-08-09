@@ -226,7 +226,6 @@ const Dashboard = ({ }: DashboardProps) => {
           if (docChanges.length > 0) {
             for (let change of docChanges) {
               const userNodeData: UserNodesData = change.doc.data() as UserNodesData
-              console.log('userNodeData', userNodeData)
               // only used for useEffect above
               newUserNodeChanges = [
                 ...newUserNodeChanges,
@@ -282,7 +281,7 @@ const Dashboard = ({ }: DashboardProps) => {
     // debugger
     // console.log("In nodeChanges, userNodeChanges useEffect.");
     const nodeUserNodeChangesFunc = async () => {
-      console.log("[synchronization]");
+      console.log("[synchronization]", { nodes, edges });
       // dictionary of all nodes visible on the user's map view
       let oldNodes: any = { ...nodes };
       // dictionary of all links/edges on the user's map view
@@ -361,8 +360,9 @@ const Dashboard = ({ }: DashboardProps) => {
       // We store those that we handle in this round in this array.
       const handledUserNodeChangesIds: string[] = [];
       const nodeIds: string[] = [];
+
+      console.log('[synchronization]: userNodeChanges', userNodeChanges)
       if (userNodeChanges && userNodeChanges.length > 0) {
-        console.log("There is User node changes");
         let userNodeData: UserNodesData;
         // iterating through every change
         for (let userNodeChange of userNodeChanges) {
@@ -374,6 +374,7 @@ const Dashboard = ({ }: DashboardProps) => {
           if (!userNodesLoaded) {
             nodeIds.push(nodeId);
           } else {
+            handledUserNodeChangesIds.push(userNodeChange.uNodeId); // CHECK: move this line
             // if row is removed
             if (userNodeChange.cType === "removed") {
               // if graph includes nodeId, remove it
@@ -396,7 +397,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
                 // toDate() converts firestore timestamp to JavaScript date object
                 firstVisit: userNodeData.createdAt.toDate(),
-                lastVisit: userNodeData.updatedAt.toDate()
+                lastVisit: userNodeData.updatedAt.toDate(),
               };
               // specific for addition (in addition to code from 617-632)
               if (userNodeChange.cType === "added") {
@@ -446,11 +447,11 @@ const Dashboard = ({ }: DashboardProps) => {
                 }
                 // }
               }
+
               // for both addition and modifications
               if (userNodeChange.cType === "added" || userNodeChange.cType === "modified") {
                 // if data for the node is not loaded yet, do nothing
                 if (!(nodeId in oldNodes)) {
-                  console.log("will add in old Nodes");
                   nodeIds.push(nodeId);
                   continue;
                 }
@@ -467,6 +468,15 @@ const Dashboard = ({ }: DashboardProps) => {
                     return newNodeChanges;
                   });
                 }
+                console.log('------------------------->', [
+                  oldNodes[nodeId].correct !== userNodeData.correct,
+                  oldNodes[nodeId].wrong !== userNodeData.wrong,
+                  oldNodes[nodeId].isStudied !== userNodeData.isStudied,
+                  oldNodes[nodeId].bookmarked !== userNodeData.bookmarked,
+                  oldNodes[nodeId].open !== userNodeData.open,
+                  oldNodes[nodeId].firstVisit !== userNodeData.firstVisit,
+                  oldNodes[nodeId].lastVisit !== userNodeData.lastVisit
+                ])
                 if (
                   // left: current state of userNode
                   // right: new state of userNode from the database
@@ -479,6 +489,7 @@ const Dashboard = ({ }: DashboardProps) => {
                   oldNodes[nodeId].firstVisit !== userNodeData.firstVisit ||
                   oldNodes[nodeId].lastVisit !== userNodeData.lastVisit
                 ) {
+                  console.log('------------------------->')
                   oldNodes[nodeId] = {
                     // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
                     ...oldNodes[nodeId],
@@ -488,12 +499,13 @@ const Dashboard = ({ }: DashboardProps) => {
                 }
               }
             }
-            handledUserNodeChangesIds.push(userNodeChange.uNodeId);
+            // handledUserNodeChangesIds.push(userNodeChange.uNodeId);
           }
         }
       }
+      // debugger
       if (!userNodesLoaded) {
-        getNodesData(nodeIds);
+        await getNodesData(nodeIds);
         // setTimeout is used for when the user proposes a child node and the proposal gets accepted, data for the created node and userNode come from the database to the client at the same time
         // setTimeout(() => {
         setUserNodesLoaded(true);
@@ -501,7 +513,8 @@ const Dashboard = ({ }: DashboardProps) => {
       } else {
         if (nodeIds.length > 0) {
           // Get the data for the nodes that are not loaded yet but their corresponding userNodes are loaded.
-          getNodesData(nodeIds);
+          // update nodeChanges (collection: nodes)-> it calls the worker -> it call the dagre -> we update the nodes
+          await getNodesData(nodeIds);
         }
         if (handledUserNodeChangesIds.length > 0) {
           let oldUserNodeChanges = userNodeChanges.filter(uNObj => !handledUserNodeChangesIds.includes(uNObj.uNodeId));
@@ -521,7 +534,6 @@ const Dashboard = ({ }: DashboardProps) => {
       }
     };
 
-    console.log({ nodeChanges, userNodeChanges });
     if (nodeChanges.length > 0 || (userNodeChanges && userNodeChanges.length > 0)) {
       nodeUserNodeChangesFunc();
     }
@@ -569,7 +581,7 @@ const Dashboard = ({ }: DashboardProps) => {
       // console.log("Object.keys(edges).length:", Object.keys(edges).length);
       // console.log("dag1[0].edgeCount():", dag1[0].edgeCount());
     }
-    console.log("[3. WORKER - RECALCULATE POSITIONS]", mapChanged);
+    console.log("[3. WORKER - RECALCULATE POSITIONS]", mapChanged, nodeChanges.length, userNodeChanges.length);
     if (
       mapChanged &&
       nodeChanges.length === 0 &&
@@ -846,12 +858,11 @@ const Dashboard = ({ }: DashboardProps) => {
           console.log('6.0.1')
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
           const userNodeLogRef = collection(db, "userNodesLog")
-          console.log('6.0.2')
+
           const userNodeLogData = {
             ...userNodeData,
             createdAt: Timestamp.fromDate(new Date()),
           };
-          console.log('6.0.3')
 
           // const id = userNodeLogRef.id
           // await firebase.batchSet(userNodeLogRef, userNodeLogData);
@@ -944,7 +955,7 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
       <Button onClick={() => openNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Open Node Handler</Button>
-      <Button onClick={() => openNodeHandler('0280atLl10ZbR7BNahik')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('00NwvYhgES9mjNQ9LRhG')}>Open Node Handler</Button>
       <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
