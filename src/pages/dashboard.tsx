@@ -750,7 +750,7 @@ const Dashboard = ({ }: DashboardProps) => {
       const nodeDoc = await getDoc(nodeRef)
 
       const batch = writeBatch(db)
-      console.log(1)
+      console.log(1, nodeDoc.exists())
       // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
       // const nodeDoc = await nodeRef.get();
       if (nodeDoc.exists()) {
@@ -765,7 +765,7 @@ const Dashboard = ({ }: DashboardProps) => {
             batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) })
             // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
           }
-          console.log(3)
+          console.log(3, thisNode)
           for (let parent of thisNode.parents) {
             // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
             linkedNodeRef = doc(db, "nodes", parent.node)
@@ -863,8 +863,7 @@ const Dashboard = ({ }: DashboardProps) => {
           let uNodeData = {
             // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
             ...oldAllNodes[nodeId],
-            children: [...thisNode.children],
-            parents: [...thisNode.parents],
+            ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
             ...userNodeData,
             open: true,
           };
@@ -937,8 +936,8 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
-      <Button onClick={() => openNodeHandler('06zXeNFbDuVVz8NnqEb0')}>Open Node Handler</Button>
-      <Button onClick={() => openNodeHandler('079fp3jo140lBM099pr4')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('0280atLl10ZbR7BNahik')}>Open Node Handler</Button>
       <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
