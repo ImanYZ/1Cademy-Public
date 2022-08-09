@@ -3,32 +3,31 @@ import { GetServerSideProps } from "next";
 
 import { db } from "../lib/admin";
 
-const SitemapIndex = () => null;
-
+const Sitemap = () => null;
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  let BASE_URL = '';
-  if (typeof window !== 'undefined') {
-    //This is where you will define your base url. You can also use the default dev url http://localhost:3000
-    BASE_URL = `${location.protocol}//${location.host}`;
-  }
+  let BASE_URL = 'https://node.1cademy.us';
 
   const staticPaths = fs
     .readdirSync("pages")
     .filter((staticPage: string) => {
       return ![
-        "sitemap_index.xml.tsx",
+        "sitemap",
+        "proposal",
+        "node",
+        "index.tsx",
+        "nodesData.csv.js",
+        "sitemap.xml.tsx",
         "404.tsx",
         "500.tsx",
         "_app.tsx",
         "_document.tsx",
-        "api"
+        "api",
       ].includes(staticPage);
     })
     .map((staticPagePath: String) => {
       return `${BASE_URL}/${staticPagePath.replace('.tsx', '')}`;
     });
-
 
   const nodes: any = {};
   const nodesDocs = await db.collection("nodes").where("deleted", "==", false).where("isTag", "==", true).get();
@@ -57,23 +56,35 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     }
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const dynamicPaths = Object.entries(nodes).map(([title, node]: any) => `${BASE_URL}/node/${title}/${node.id}`);
+  const dynamicPaths = Object.entries(nodes).map(([title, node]: any) => {
+    if (!node.id) {
+      return;
+    }
+    let nodeTitle = title.trim().toLowerCase();
+    if (title.includes('&')) {
+      nodeTitle = nodeTitle.split("&").join("and");
+    }
+    if (title.includes('?')) {
+      nodeTitle = nodeTitle.split("?").join("");
+    }
+    if (title.includes('\n')) {
+      nodeTitle = nodeTitle.split("\n").join("");
+    }
+    nodeTitle = nodeTitle.split(" ").join("-");
+    return `${BASE_URL}/node/${nodeTitle}/${node.id}`
+  });
 
   const allPaths = [...staticPaths, ...dynamicPaths];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    // This is where we would be putting in our URLs
-    ${allPaths
-      .map((url) => {
-        return `
-          <url>
+    ${allPaths.map(url => (`<url>
             <loc>${url}</loc>
-          </url>
-        `;
-      })
-      .join("")}
+            <lastmod>${new Date().toISOString()}</lastmod>
+            <changefreq>monthly</changefreq>
+            <priority>1.0</priority>
+          </url>`)
+  ).join("")}
   </urlset>
 `;
 
@@ -86,4 +97,4 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   };
 };
 
-export default SitemapIndex;
+export default Sitemap;
