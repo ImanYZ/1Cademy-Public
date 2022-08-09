@@ -11,9 +11,10 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import NodesList from "../components/map/NodesList";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
+import { NodeChanges, NodeFireStore } from "../knowledgeTypes";
 import { JSONfn } from "../lib/utils/jsonFn";
 import { compare2Nodes, createOrUpdateNode, dag1, makeNodeVisibleInItsLinks, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
-import { OpenPart } from "../nodeBookTypes";
+import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
 
 // type Edge = { from: string; to: string };
 
@@ -68,8 +69,8 @@ const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   // used for triggering useEffect after nodes or usernodes change
-  const [userNodeChanges, setUserNodeChanges] = useState<any[]>([]);
-  const [nodeChanges, setNodeChanges] = useState<any[]>([]);
+  const [userNodeChanges, setUserNodeChanges] = useState<UserNodes[]>([]);
+  const [nodeChanges, setNodeChanges] = useState<NodeChanges[]>([]);
   const [mapChanged, setMapChanged] = useState(false);
   // two collections (tables) in database, nodes and usernodes
   // nodes: collection of all data of each node
@@ -134,7 +135,7 @@ const Dashboard = ({ }: DashboardProps) => {
           .then((nodeDocs: any[]) => {
             for (let nodeDoc of nodeDocs) {
               if (nodeDoc.exists) {
-                const nData = nodeDoc.data();
+                const nData: NodeFireStore = nodeDoc.data() as NodeFireStore
                 if (!nData.deleted) {
                   oldNodeChanges.push({
                     cType: "added",
@@ -216,11 +217,11 @@ const Dashboard = ({ }: DashboardProps) => {
 
       const userNodesSnapshot = onSnapshot(q, snapshot => {
         setUserNodeChanges(oldUserNodeChanges => {
-          let newUserNodeChanges = [...oldUserNodeChanges];
+          let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
           const docChanges = snapshot.docChanges();
           if (docChanges.length > 0) {
             for (let change of docChanges) {
-              const userNodeData = change.doc.data();
+              const userNodeData: UserNodesData = change.doc.data() as UserNodesData
               console.log('userNodeData', userNodeData)
               // only used for useEffect above
               newUserNodeChanges = [
@@ -358,7 +359,7 @@ const Dashboard = ({ }: DashboardProps) => {
       const nodeIds: string[] = [];
       if (userNodeChanges && userNodeChanges.length > 0) {
         console.log("There is User node changes");
-        let userNodeData: any;
+        let userNodeData: UserNodesData;
         // iterating through every change
         for (let userNodeChange of userNodeChanges) {
           // data of the userNode that is changed
@@ -741,7 +742,7 @@ const Dashboard = ({ }: DashboardProps) => {
       console.log("[OPEN NODE HANDLER]");
       let linkedNodeRef;
       let userNodeRef = null;
-      let userNodeData = null;
+      let userNodeData: UserNodesData | null = null;
 
       // debugger
 
@@ -796,7 +797,7 @@ const Dashboard = ({ }: DashboardProps) => {
             userNodeId = userNodeDoc.docs[0].id;
             // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
             const userNodeRef = doc(db, "userNodes", userNodeId)
-            userNodeData = userNodeDoc.docs[0].data();
+            userNodeData = userNodeDoc.docs[0].data() as UserNodesData
             userNodeData.visible = true;
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             // await firebase.batchUpdate(userNodeRef, userNodeData);
@@ -862,6 +863,8 @@ const Dashboard = ({ }: DashboardProps) => {
           let uNodeData = {
             // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
             ...oldAllNodes[nodeId],
+            children: [...thisNode.children],
+            parents: [...thisNode.parents],
             ...userNodeData,
             open: true,
           };
@@ -934,7 +937,9 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
-      <Button onClick={() => openNodeHandler('015qHLQADYxL8awDbbYK')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('06zXeNFbDuVVz8NnqEb0')}>Open Node Handler</Button>
+      <Button onClick={() => openNodeHandler('079fp3jo140lBM099pr4')}>Open Node Handler</Button>
+      <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
         {/* show clusters */}

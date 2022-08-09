@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 import { Dispatch } from "react";
 
 import { NodeType } from "./types";
@@ -14,7 +15,7 @@ export type ChosenNode = {
   title: string
 }
 
-export type SelectionType = 'AcceptedProposals' | 'Proposals' |'Citations'|'Comments' | null
+export type SelectionType = 'AcceptedProposals' | 'Proposals' | 'Citations' | 'Comments' | null
 
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
@@ -82,4 +83,35 @@ export type DispatchNodeBookActions =
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>
   handleError: (options: ErrorOptions) => void;
+}
+
+export type UserNodesData = {
+  "updatedAt": Timestamp,
+  "open": boolean,
+  "deleted": boolean,
+  "wrong": boolean,
+  "bookmarked": boolean,
+  "isStudied": boolean,
+  "visible": boolean,
+  "createdAt": Timestamp,
+  "correct": boolean,
+  "user": string,
+  "changed": boolean,
+  "node": string,
+  "nodeChanges"?: any
+}
+
+export type UserNodes = {
+  cType: string,
+  uNodeId: string,
+  uNodeData: UserNodesData
+}
+
+export type NodeBookNodes = {
+  [key: string]: {
+    chooseUname?: boolean;
+    fullname?: string;
+    imageUrl?: string;
+    reputation?: number;
+  };
 }

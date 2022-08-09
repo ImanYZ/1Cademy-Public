@@ -517,3 +517,10 @@ export type Point = {
   x: number;
   y: number;
 };
+
+
+export type NodeChanges = {
+  cType: string,
+  nId: string,
+  nData: NodeFireStore
+}

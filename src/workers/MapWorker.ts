@@ -28,6 +28,7 @@ const layoutHandler = (
     mapChangedFlag = false;
 
     // DAGRE RECALCULATE LAYOUT
+    console.log('DAGGER', dag1)
     dagre.layout(dag1);
     const clusterRegions = {};
 

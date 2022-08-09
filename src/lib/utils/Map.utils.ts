@@ -251,7 +251,7 @@ export const setDagNode = (nodeId: string, node: any, oldNodes: any, allTags: an
   if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
     // setParent sets a cluster for the node with node Id
     // node.tags[0].node: node Id of the first tag from the node data
-    dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]);
+    // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
   }
   if (callback) {
     callback();
