@@ -6,6 +6,7 @@ import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
+import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
@@ -236,50 +237,57 @@ const Node = ({
   //   [addChoice, nodeRef, identifier]
   // );
 
-  // const markStudiedHandler = useCallback(
-  //   (event:any) => markStudied(event, identifier),
-  //   [markStudied, identifier]
-  // );
+  const markStudiedHandler = useCallback(
+    // (event:any) => markStudied(event, identifier)
+    () => console.log('uploadNodeImageHandler'),
+    [markStudied, identifier]
+  );
 
-  // const bookmarkHandler = useCallback(
-  //   (event:any) => bookmark(event, identifier),
-  //   [bookmark, identifier]
-  // );
+  const bookmarkHandler = useCallback(
+    // (event:any) => bookmark(event, identifier)
+    () => console.log('uploadNodeImageHandler'),
+    [bookmark, identifier]
+  );
 
-  // const openNodePartHandler = useCallback(
-  //   (event:any, partType:any) => openNodePart(event, identifier, partType, openPart, setOpenPart, tags),
-  //   [identifier, openPart, tags]
-  // );
+  const openNodePartHandler = useCallback(
+    // (event:any, partType:any) => openNodePart(event, identifier, partType, openPart, setOpenPart, tags)
+    () => console.log('uploadNodeImageHandler'),
+    [identifier, openPart, tags]
+  );
 
-  // const selectNodeHandler = useCallback(
-  //   (event:any, chosenType:any) => selectNode(event, identifier, chosenType, nodeType),
-  //   [selectNode, identifier, nodeType]
-  // );
+  const selectNodeHandler = useCallback(
+    // (event:any, chosenType:any) => selectNode(event, identifier, chosenType, nodeType)
+    () => console.log('uploadNodeImageHandler'),
+    [selectNode, identifier, nodeType]
+  );
 
-  // const correctNodeHandler = useCallback(
-  //   (event:any) => correctNode(event, identifier, nodeType),
-  //   [correctNode, identifier, nodeType]
-  // );
+  const correctNodeHandler = useCallback(
+    // (event:any) => correctNode(event, identifier, nodeType)
+    () => console.log('uploadNodeImageHandler'),
+    [correctNode, identifier, nodeType]
+  );
 
-  // const wrongNodeHandler = useCallback(
-  //   (event:any) =>
-  //     wrongNode(
-  //       event,
-  //       identifier,
-  //       nodeType,
-  //       markedWrong,
-  //       markedCorrect,
-  //       wrongNum,
-  //       correctNum
-  //     ),
-  //   [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
-  // );
+  const wrongNodeHandler = useCallback(
+    // (event:any) =>
+    //   wrongNode(
+    //     event,
+    //     identifier,
+    //     nodeType,
+    //     markedWrong,
+    //     markedCorrect,
+    //     wrongNum,
+    //     correctNum
+    //   )
+    () => console.log('uploadNodeImageHandler'),
+    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
+  );
 
-  // const uploadNodeImageHandler = useCallback(
-  //   (event:any, isUploading:boolean, setIsUploading:any, setPercentageUploaded:any) =>
-  //     uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded),
-  //   [uploadNodeImage, nodeRef, identifier]
-  // );
+  const uploadNodeImageHandler = useCallback(
+    // (event:any, isUploading:boolean, setIsUploading:any, setPercentageUploaded:any) =>
+    //   uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded)
+    () => console.log('uploadNodeImageHandler'),
+    [uploadNodeImage, nodeRef, identifier]
+  );
 
   // const referenceLabelChangeHandler = useCallback(
   //   (event:any, referenceIdx:string) => {
@@ -307,6 +315,8 @@ const Node = ({
   //   [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
   // );
   ///::::::::::::::::::::::::::::::::::::::::::added by sam:::::::::::::::::::://////
+
+
 
   const locationSizeChange = useCallback(() => {
     console.log('[NODE]: will call nodeChanged')
@@ -699,6 +709,52 @@ const Node = ({
         </div>
       )
       }
+      <MemoizedNodeFooter
+        open={true}
+        identifier={identifier}
+        activeNode={activeNode}
+        citationsSelected={citationsSelected}
+        proposalsSelected={proposalsSelected}
+        acceptedProposalsSelected={acceptedProposalsSelected}
+        commentsSelected={commentsSelected}
+        editable={editable}
+        title={title}                  // x
+        content={content}              // x
+        unaccepted={unaccepted}
+        openPart={openPart}
+        nodeType={nodeType}
+        isNew={isNew}                  // x
+        admin={admin}
+        aImgUrl={aImgUrl}
+        aFullname={aFullname}
+        aChooseUname={aChooseUname}
+        viewers={viewers}
+        correctNum={correctNum}
+        markedCorrect={markedCorrect}
+        wrongNum={wrongNum}
+        markedWrong={markedWrong}
+        references={references}
+        tags={tags}
+        parents={parents}
+        // children={children}
+        commentsNum={commentsNum}
+        proposalsNum={proposalsNum}
+        studied={studied}
+        isStudied={isStudied}
+        changed={changed}              // x
+        changedAt={changedAt}
+        bookmarked={bookmarked}
+        bookmarks={bookmarks}
+        reloadPermanentGrpah={reloadPermanentGrpah}
+        markStudied={markStudiedHandler}     // x
+        bookmark={bookmarkHandler}           // x
+        nodeChanged={locationSizeChange}
+        openNodePart={openNodePartHandler}
+        selectNode={selectNodeHandler}
+        correctNode={correctNodeHandler}
+        wrongNode={wrongNodeHandler}
+        uploadNodeImage={uploadNodeImageHandler}
+      />
     </Box >
   );
 };
