@@ -4,9 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-
-
-
+import { Box } from "@mui/material";
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -20,7 +18,6 @@ import { useNodeBook } from "@/context/NodeBookContext";
 // import boxShadowCSSGenerator from "../../../utils/boxShadowCSSGenerator";
 
 // import "./Node.css";
-
 
 type NodeProps = {
   identifier: string;
@@ -368,7 +365,7 @@ const Node = ({
 
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
-    <div
+    <Box
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
@@ -693,7 +690,7 @@ const Node = ({
         </div>
       )
       }
-    </div >
+    </Box >
   );
 };
 
