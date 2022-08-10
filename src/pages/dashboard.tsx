@@ -11,7 +11,6 @@ import {
   limit,
   onSnapshot,
   query,
-  setDoc,
   Timestamp,
   where,
   writeBatch
@@ -42,16 +41,14 @@ import {
   MIN_CHANGE,
   NODE_HEIGHT,
   NODE_WIDTH,
+  removeDagAllEdges,
+  removeDagNode,
   setDagEdge,
   setDagNode,
   XOFFSET,
-  YOFFSET} from "../lib/utils/Map.utils";
+  YOFFSET
+} from "../lib/utils/Map.utils";
 import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
-
-// type Edge = { from: string; to: string };
-
-// type EdgeProcess = { from: Point; to: Point };
-// const EDGES: EdgeProcess[] = []
 
 type DashboardProps = {};
 
@@ -76,7 +73,7 @@ type DashboardProps = {};
  *      Type: function
  *      Flag: mapRendered
  */
-const Dashboard = ({}: DashboardProps) => {
+const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // GLOBAL STATES
@@ -255,7 +252,7 @@ const Dashboard = ({}: DashboardProps) => {
           const docChanges = snapshot.docChanges();
           if (docChanges.length > 0) {
             for (let change of docChanges) {
-              
+
               const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
               console.log("userNodeData", userNodeData);
               // only used for useEffect above
@@ -415,7 +412,7 @@ const Dashboard = ({}: DashboardProps) => {
                 oldMapChanged = true;
               }
             } else {
-            
+
               // change can be addition or modification (not removal) of document for the query on userNode table
               // modify change for allUserNodes
               userNodeData = {
@@ -624,21 +621,6 @@ const Dashboard = ({}: DashboardProps) => {
       let oldNodes = { ...nodes };
       let oldEdges = { ...edges };
 
-      // ------------------------------------------- >>
-      // This is as test worker, REMOVE then
-      // console.log('[3.1 create worker]', import.meta.url)
-      // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      // // const testWorker: Worker = new Worker('../workers/test.worker.ts', import.meta.url);
-      // const testWorker: Worker = new Worker(new URL('../workers/test.worker.ts', import.meta.url));
-      // testWorker.postMessage({ myNumber: 3 });
-      // testWorker.onmessage = (e) => {
-      //   console.log(' ---> test worker result', e.data)
-      //   testWorker.terminate()
-      // }
-      // ------------------------------------------- <<
-
-      // const worker = new window.Worker(process.env.PUBLIC_URL + "/MapWorker.js");
-      // const worker: Worker = new Worker('/MapWorker.js', { type: 'module' });
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
       worker.postMessage({
         mapChangedFlag,
@@ -927,7 +909,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    // CHECK: I commente allNode, I dident found where is defined
+    // CHECK: I commented allNode, I did'nt found where is defined
     [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   );
   const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
@@ -939,7 +921,7 @@ const Dashboard = ({}: DashboardProps) => {
     return { nodeRef, userNodeRef };
   }, []);
   const initNodeStatusChange = useCallback(
-    (nodeId:string, userNodeId:string) => {
+    (nodeId: string, userNodeId: string) => {
       setSelectedNode(nodeId);
       // setSelectedNodeType(null);
       // setSelectionType(null);
@@ -968,154 +950,154 @@ const Dashboard = ({}: DashboardProps) => {
         // setIsHiding(true);
         // navigateToFirstParent(nodeId);
         if (username) {
-         // try {
-      
-            const thisNode = nodes[nodeId];
-            const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
- 
-        //   thisNode={
-        //     "studied": 3,
-        //     "updatedAt": {
-        //         "seconds": 1660084112,
-        //         "nanoseconds": 10000000
-        //     },
-        //     "height": 157,
-        //     "referenceIds": [],
-        //     "contributors": {
-        //         "1man": {
-        //             "reputation": 59.309999999999995,
-        //             "imageUrl": "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
-        //             "chooseUname": false,
-        //             "fullname": "Iman YeckehZaare"
-        //         }
-        //     },
-        //     "contribNames": [
-        //         "1man"
-        //     ],
-        //     "admin": "1man",
-        //     "references": [],
-        //     "maxVersionRating": 31.5,
-        //     "parents": [],
-        //     "institNames": [
-        //         "University of Michigan - Ann Arbor"
-        //     ],
-        //     "changedAt": {
-        //         "seconds": 1653793866,
-        //         "nanoseconds": 0
-        //     },
-        //     "institutions": {
-        //         "University of Michigan - Ann Arbor": {
-        //             "reputation": 59.309999999999995
-        //         }
-        //     },
-        //     "content": "1Cademy is a collaborative online community that supports interdisciplinary research and learning through content generation, mapping, evaluation, and practice.",
-        //     "nodeImage": "",
-        //     "isTag": true,
-        //     "children": [
-        //         {
-        //             "label": "",
-        //             "title": "1Cademy Nodes",
-        //             "node": "wiriyOIvmr5ryzydcQLw"
-        //         },
-        //         {
-        //             "title": "1Cademy Shared Knowledge Graph",
-        //             "label": "",
-        //             "node": "rWYUNisPIVMBoQEYXgNj"
-        //         },
-        //         {
-        //             "title": "1Cademy User (1Cademist)",
-        //             "node": "3bmT7llGDnISfCZz872s",
-        //             "label": ""
-        //         },
-        //         {
-        //             "node": "zudK0OkbETSTffpvVdgd",
-        //             "title": "Under Construction",
-        //             "label": ""
-        //         },
-        //         {
-        //             "node": "zvUuboxIi8ByOlxMObC4",
-        //             "title": "The Story of 1Cademy",
-        //             "label": ""
-        //         },
-        //         {
-        //             "node": "LrUBGjpxuEV2W0shSLXf",
-        //             "title": "The 1Cademy Application",
-        //             "label": ""
-        //         }
-        //     ],
-        //     "corrects": 37,
-        //     "wrongs": 1,
-        //     "title": "1Cademy",
-        //     "createdAt": {
-        //         "seconds": 1579150800,
-        //         "nanoseconds": 0
-        //     },
-        //     "tagIds": [],
-        //     "aImgUrl": "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
-        //     "nodeType": "Concept",
-        //     "closedHeight": 97,
-        //     "comments": 0,
-        //     "aChooseUname": false,
-        //     "viewers": -205,
-        //     "referenceLabels": [],
-        //     "versions": 17,
-        //     "aFullname": "Iman YeckehZaare",
-        //     "bookmarks": 13,
-        //     "tags": [],
-        //     "choices": [],
-        //     "editable": false,
-        //     "left": 580,
-        //     "top": 2829
-        // }
+          // try {
+
+          const thisNode = nodes[nodeId];
+          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
+          //   thisNode={
+          //     "studied": 3,
+          //     "updatedAt": {
+          //         "seconds": 1660084112,
+          //         "nanoseconds": 10000000
+          //     },
+          //     "height": 157,
+          //     "referenceIds": [],
+          //     "contributors": {
+          //         "1man": {
+          //             "reputation": 59.309999999999995,
+          //             "imageUrl": "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
+          //             "chooseUname": false,
+          //             "fullname": "Iman YeckehZaare"
+          //         }
+          //     },
+          //     "contribNames": [
+          //         "1man"
+          //     ],
+          //     "admin": "1man",
+          //     "references": [],
+          //     "maxVersionRating": 31.5,
+          //     "parents": [],
+          //     "institNames": [
+          //         "University of Michigan - Ann Arbor"
+          //     ],
+          //     "changedAt": {
+          //         "seconds": 1653793866,
+          //         "nanoseconds": 0
+          //     },
+          //     "institutions": {
+          //         "University of Michigan - Ann Arbor": {
+          //             "reputation": 59.309999999999995
+          //         }
+          //     },
+          //     "content": "1Cademy is a collaborative online community that supports interdisciplinary research and learning through content generation, mapping, evaluation, and practice.",
+          //     "nodeImage": "",
+          //     "isTag": true,
+          //     "children": [
+          //         {
+          //             "label": "",
+          //             "title": "1Cademy Nodes",
+          //             "node": "wiriyOIvmr5ryzydcQLw"
+          //         },
+          //         {
+          //             "title": "1Cademy Shared Knowledge Graph",
+          //             "label": "",
+          //             "node": "rWYUNisPIVMBoQEYXgNj"
+          //         },
+          //         {
+          //             "title": "1Cademy User (1Cademist)",
+          //             "node": "3bmT7llGDnISfCZz872s",
+          //             "label": ""
+          //         },
+          //         {
+          //             "node": "zudK0OkbETSTffpvVdgd",
+          //             "title": "Under Construction",
+          //             "label": ""
+          //         },
+          //         {
+          //             "node": "zvUuboxIi8ByOlxMObC4",
+          //             "title": "The Story of 1Cademy",
+          //             "label": ""
+          //         },
+          //         {
+          //             "node": "LrUBGjpxuEV2W0shSLXf",
+          //             "title": "The 1Cademy Application",
+          //             "label": ""
+          //         }
+          //     ],
+          //     "corrects": 37,
+          //     "wrongs": 1,
+          //     "title": "1Cademy",
+          //     "createdAt": {
+          //         "seconds": 1579150800,
+          //         "nanoseconds": 0
+          //     },
+          //     "tagIds": [],
+          //     "aImgUrl": "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
+          //     "nodeType": "Concept",
+          //     "closedHeight": 97,
+          //     "comments": 0,
+          //     "aChooseUname": false,
+          //     "viewers": -205,
+          //     "referenceLabels": [],
+          //     "versions": 17,
+          //     "aFullname": "Iman YeckehZaare",
+          //     "bookmarks": 13,
+          //     "tags": [],
+          //     "choices": [],
+          //     "editable": false,
+          //     "left": 580,
+          //     "top": 2829
+          // }
 
 
 
 
-            const userNodeData = {
-              changed: "thisNode.changed",
-              correct: thisNode.corrects,
-              createdAt: Timestamp.fromDate(new Date()),
-              updatedAt: Timestamp.fromDate(new Date()),
-              deleted: false,
-              isStudied: thisNode.studied,
-              bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-              node: nodeId,
-              open: false,
-              user: username,
-              visible: false,
-              wrong: thisNode.wrongs
-            };
-            if(userNodeRef){
-              await batch.set(userNodeRef, userNodeData);
-            }
-            const userNodeLogData = {
-              ...userNodeData,
-              createdAt: Timestamp.fromDate(new Date())
-            };
-           
-            const changeNode = {
-              viewers: thisNode.viewers - 1,
-              updatedAt: Timestamp.fromDate(new Date()),
+          const userNodeData = {
+            changed: "thisNode.changed",
+            correct: thisNode.corrects,
+            createdAt: Timestamp.fromDate(new Date()),
+            updatedAt: Timestamp.fromDate(new Date()),
+            deleted: false,
+            isStudied: thisNode.studied,
+            bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+            node: nodeId,
+            open: false,
+            user: username,
+            visible: false,
+            wrong: thisNode.wrongs
+          };
+          if (userNodeRef) {
+            await batch.set(userNodeRef, userNodeData);
+          }
+          const userNodeLogData = {
+            ...userNodeData,
+            createdAt: Timestamp.fromDate(new Date())
+          };
 
-            };
-            if (userNodeData.open && "openHeight" in thisNode) {
-              changeNode.height = thisNode.openHeight;
-              userNodeLogData.height = thisNode.openHeight;
-            } else if ("closedHeight" in thisNode) {
-              changeNode.closedHeight = thisNode.closedHeight;
-              userNodeLogData.closedHeight = thisNode.closedHeight;
-            }
-            await batch.update(nodeRef, changeNode);
-            const userNodeLogRef = collection(db, "userNodesLog");
-            await batch.set(doc(userNodeLogRef), userNodeLogData);
-            await batch.commit();
-            let oldNodes = { ...nodes };
-            let oldEdges = edges;
-            ({ oldNodes, oldEdges } = hideNodeAndItsLinks(nodeId, oldNodes, oldEdges));
-            setNodes(oldNodes);
-            setEdges(oldEdges);
+          const changeNode = {
+            viewers: thisNode.viewers - 1,
+            updatedAt: Timestamp.fromDate(new Date()),
+
+          };
+          if (userNodeData.open && "openHeight" in thisNode) {
+            changeNode.height = thisNode.openHeight;
+            userNodeLogData.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            changeNode.closedHeight = thisNode.closedHeight;
+            userNodeLogData.closedHeight = thisNode.closedHeight;
+          }
+          await batch.update(nodeRef, changeNode);
+          const userNodeLogRef = collection(db, "userNodesLog");
+          await batch.set(doc(userNodeLogRef), userNodeLogData);
+          await batch.commit();
+          let oldNodes = { ...nodes };
+          let oldEdges = edges;
+          ({ oldNodes, oldEdges } = hideNodeAndItsLinks(nodeId, oldNodes, oldEdges));
+          setNodes(oldNodes);
+          setEdges(oldEdges);
           //} catch (err) {
-            //console.error(err);
+          //console.error(err);
           //}
         }
       }
@@ -1123,8 +1105,6 @@ const Dashboard = ({}: DashboardProps) => {
     [choosingNode, user, nodes, edges, initNodeStatusChange, /*navigateToFirstParent*/]
   );
 
-
-  
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
       console.log(["OPEN LINKED NODE"]);

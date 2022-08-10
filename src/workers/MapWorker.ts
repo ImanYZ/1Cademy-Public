@@ -3,8 +3,6 @@ import dagre from "dagre";
 
 import { JSONfn } from "../lib/utils/jsonFn";
 import { setDagNode, setEdgeInDag, setNodeInDagger } from '../lib/utils/Map.utils'
-// import "https://dagrejs.github.io/project/dagre/latest/dagre.min.js"
-// self.importScripts("https://dagrejs.github.io/project/dagre/latest/dagre.min.js");
 
 const layoutHandler = (
   mapChangedFlag: boolean,
@@ -15,11 +13,11 @@ const layoutHandler = (
   oldEdges: { [x: string]: any; },
   allTags: any,
   dag1: dagre.graphlib.Graph<{}>,
-  XOFFSET: any,
-  YOFFSET: any,
+  XOFFSET: number,
+  YOFFSET: number,
   MIN_CHANGE: number,
-  MAP_RIGHT_GAP: any,
-  NODE_WIDTH: any,
+  MAP_RIGHT_GAP: number,
+  NODE_WIDTH: number,
   setDagNodex: any,
   setDagEdge: any
 ) => {
@@ -188,8 +186,8 @@ onmessage = (e) => {
     setDagNode,
     setDagEdge,
   } = e.data;
-  let dagerObject = JSONfn.parse(dag1)
-  dagerObject.__proto__ = dagre.graphlib.Graph.prototype;
+  let dagreObject = JSONfn.parse(dag1)
+  dagreObject.__proto__ = dagre.graphlib.Graph.prototype;
 
   const workerResults = layoutHandler(
     mapChangedFlag,
@@ -199,7 +197,7 @@ onmessage = (e) => {
     oldNodes,
     oldEdges,
     allTags,
-    dagerObject,
+    dagreObject,
     XOFFSET,
     YOFFSET,
     MIN_CHANGE,
