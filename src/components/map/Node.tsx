@@ -310,6 +310,7 @@ const Node = ({
   ///::::::::::::::::::::::::::::::::::::::::::added by sam:::::::::::::::::::://////
 
   const locationSizeChange = useCallback(() => {
+    console.log('[NODE]: will call nodeChanged')
     nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
   }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
 
@@ -390,7 +391,8 @@ const Node = ({
       style={{
         left: left ? left : 1000,
         top: top ? top : 1000,
-        width: width
+        width: width,
+        transition: '0.5s'
       }}
     // style={
     //   activeNode
@@ -418,7 +420,7 @@ const Node = ({
             {content}
           </p>
 
-          <div>
+          <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             LinkingWords component
             <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nobis earum adipisci aliquam praesentium, suscipit in quisquam error autem? Illum, quia quod veritatis praesentium voluptatem at voluptatum temporibus in corrupti porro.</p>
           </div>

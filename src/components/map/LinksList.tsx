@@ -9,7 +9,6 @@ type LinkListProps = {
 }
 
 export const LinksList = ({ edgeIds, edges, selectedRelation }: LinkListProps) => {
-  console.log({ edgeIds, edges, selectedRelation })
   return <>
     {edgeIds.map((eId) => {
       return (

@@ -61,17 +61,17 @@ type DashboardProps = {};
  *      Type: useEffect
  *      Flag: nodeChanges || userNodeChanges
  *      Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
+ * 
+ *  --- render nodes, every node will call NODE CHANGED
  *
- *  3. WORKER:
+ *  4. NODE CHANGED: (n)
+ *      Type: function
+ * 
+ *  3. WORKER: (n)
  *      Type: useEffect
  *      Flag: mapChanged
  *      Description: will calculate the [nodes] and [edges] positions
  *
- *  --- render nodes, every node will call NODE CHANGED
- *
- *  4. NODE CHANGED:
- *      Type: function
- *      Flag: mapRendered
  */
 const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
@@ -163,7 +163,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
           nodeDocsPromises.push(getDoc(nodeRef));
         }
-        Promise.all(nodeDocsPromises)
+        await Promise.all(nodeDocsPromises)
           .then((nodeDocs: any[]) => {
             for (let nodeDoc of nodeDocs) {
               if (nodeDoc.exists) {
@@ -254,7 +254,6 @@ const Dashboard = ({ }: DashboardProps) => {
             for (let change of docChanges) {
 
               const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-              console.log("userNodeData", userNodeData);
               // only used for useEffect above
               newUserNodeChanges = [
                 ...newUserNodeChanges,
@@ -309,7 +308,7 @@ const Dashboard = ({ }: DashboardProps) => {
     console.log("[2. SYNCHRONIZATION]");
     // console.log("In nodeChanges, userNodeChanges useEffect.");
     const nodeUserNodeChangesFunc = async () => {
-      console.log("[synchronization]", { nodes, edges });
+      console.log("[synchronization]", { nodes, edges, userNodesLoaded });
       // dictionary of all nodes visible on the user's map view
       let oldNodes: any = { ...nodes };
       // dictionary of all links/edges on the user's map view
@@ -318,7 +317,7 @@ const Dashboard = ({ }: DashboardProps) => {
       // flag for if there are any changes to map
       let oldMapChanged = mapChanged;
       if (nodeChanges.length > 0) {
-        console.log("1: will iterate node changes");
+        console.log("  [synchronization]: 1: will iterate node changes");
         for (let change of nodeChanges) {
           const nodeId = change.nId;
           let nodeData = change.nData;
@@ -389,10 +388,11 @@ const Dashboard = ({ }: DashboardProps) => {
       const handledUserNodeChangesIds: string[] = [];
       const nodeIds: string[] = [];
 
-      console.log('[synchronization]: userNodeChanges', userNodeChanges)
+      console.log('  [synchronization]: userNodeChanges', userNodeChanges)
       if (userNodeChanges && userNodeChanges.length > 0) {
         let userNodeData: UserNodesData;
         // iterating through every change
+        console.log('  [synchronization]: 2: will iterate userNodeChanges')
         for (let userNodeChange of userNodeChanges) {
           // data of the userNode that is changed
           userNodeData = userNodeChange.uNodeData;
@@ -400,8 +400,10 @@ const Dashboard = ({ }: DashboardProps) => {
           const nodeId = userNodeData.node;
           // debugger
           if (!userNodesLoaded) {
+            console.log('  [synchronization:!userNodesLoaded]: 2: push nodeId')
             nodeIds.push(nodeId);
           } else {
+            console.log('  [synchronization:userNodesLoaded]: 2: handleUserNodeChangesIds and operation by cType', userNodeChange.cType)
             handledUserNodeChangesIds.push(userNodeChange.uNodeId); // CHECK: move this line
             // if row is removed
             if (userNodeChange.cType === "removed") {
@@ -478,6 +480,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 // }
               }
 
+              console.log('  [synchronization]: 3: operations to added and modified')
               // for both addition and modifications
               if (userNodeChange.cType === "added" || userNodeChange.cType === "modified") {
                 // if data for the node is not loaded yet, do nothing
@@ -488,6 +491,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 // Compare the updatedAt attribute of this node in nodes state with updatedAt in nodeChanges,
                 // and if the latter is greater, update nodeChanges.
                 if (userNodeData.nodeChanges && userNodeData.nodeChanges.updatedAt > oldNodes[nodeId].updatedAt) {
+                  console.log('  -  [synchronization]: 3.1: set node changes')
                   setNodeChanges(oldNodeChanges => {
                     let newNodeChanges = [...oldNodeChanges];
                     newNodeChanges.push({
@@ -510,7 +514,7 @@ const Dashboard = ({ }: DashboardProps) => {
                   // oldNodes[nodeId].firstVisit !== userNodeData.firstVisit || // CHECK: I commented this
                   // oldNodes[nodeId].lastVisit !== userNodeData.lastVisit // CHECK: I commented this
                 ) {
-                  console.log('------------------------->')
+                  console.log('  -  [synchronization]: 3.2: updateOldNodes')
                   oldNodes[nodeId] = {
                     // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
                     ...oldNodes[nodeId],
@@ -526,12 +530,14 @@ const Dashboard = ({ }: DashboardProps) => {
       }
       // debugger
       if (!userNodesLoaded) {
+        console.log('  [synchronization:!userNodesLoaded]: 1: getNodesData')
         await getNodesData(nodeIds);
         // setTimeout is used for when the user proposes a child node and the proposal gets accepted, data for the created node and userNode come from the database to the client at the same time
         // setTimeout(() => {
         setUserNodesLoaded(true);
         // }, 400);
       } else {
+        console.log('  [synchronization:userNodesLoaded]: 1')
         if (nodeIds.length > 0) {
           // Get the data for the nodes that are not loaded yet but their corresponding userNodes are loaded.
           // update nodeChanges (collection: nodes)-> it calls the worker -> it call the dagre -> we update the nodes
@@ -542,11 +548,12 @@ const Dashboard = ({ }: DashboardProps) => {
           setUserNodeChanges(oldUserNodeChanges);
         }
         if (nodeChanges.length > 0 || handledUserNodeChangesIds.length > 0) {
+          console.log('  -  [synchronization]:will update nodes, edges')
           setNodes(oldNodes);
           setEdges(oldEdges);
           //  map changed fires another use effect that calls dagr
           //  which calculates the new location of nodes and errors
-          setMapChanged(oldMapChanged);
+          // setMapChanged(oldMapChanged); // CHECK: I commented this to not call worker after render
           if (nodeChanges.length > 0) {
             // setNodeTypeVisibilityChanges(typeVisibilityChanges);
             setNodeChanges([]);
@@ -569,7 +576,7 @@ const Dashboard = ({ }: DashboardProps) => {
     nodes,
     edges,
     // nodeTypeVisibilityChanges, // this was comment in iman code
-    //mapChanged
+    mapChanged
   ]);
 
   // fire if map changed; responsible for laying out the knowledge map
@@ -675,7 +682,7 @@ const Dashboard = ({ }: DashboardProps) => {
               scrollToNode(Object.keys(nodes)[0]);
             }
             setMapRendered(true);
-          }, 1000);
+          }, 10);
         }
       };
     }
@@ -701,6 +708,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   //  useMemoizedCallback is used to solve nested setStates in react.
   //  allows for function memoization and most updated values
+  // CHECK: mapRendered removed as flag
   const nodeChanged = useMemoizedCallback(
     (
       nodeRef: any,
@@ -710,11 +718,11 @@ const Dashboard = ({ }: DashboardProps) => {
       imageLoaded: boolean,
       openPart: OpenPart
     ) => {
-      console.log("[NODE CHANGED]", mapRendered);
+      console.log("[NODE CHANGED]", /*mapRendered,*/(nodeRef.current || content !== null || title !== null) ? true : false);
       let currentHeight = NODE_HEIGHT;
       let newHeight = NODE_HEIGHT;
       let nodesChanged = false;
-      if (mapRendered && (nodeRef.current || content !== null || title !== null)) {
+      if (/*mapRendered &&*/ (nodeRef.current || content !== null || title !== null)) {
         console.log('[node changed]', mapRendered)
         setNodes((oldNodes) => {
           const node: any = { ...oldNodes[nodeId] };
@@ -750,15 +758,22 @@ const Dashboard = ({ }: DashboardProps) => {
             }
           }
           if (nodesChanged) {
+            console.log('will setDagNode and change MapChanged')
             return setDagNode(nodeId, node, { ...oldNodes }, () => setMapChanged(true));
           } else {
             return oldNodes;
           }
+
         });
+        setMapChanged(true);
+
+        // CHECK
+        // READ: the mapChangedFlag dont guaranty the worker execution execution 
+        // if some worker dont finish dont will change the 
       }
     },
     //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
-    [mapRendered, allTags]
+    [/*mapRendered*/, allTags]
   );
 
   const openNodeHandler = useMemoizedCallback(
@@ -1132,12 +1147,13 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(edges)}>edges</Button>
       <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
       <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+      <Button onClick={() => console.log(mapChanged)}>map changed</Button>
       <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
       <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
       <Button onClick={() => openNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Open Node Handler</Button>
       <Button onClick={() => openNodeHandler('a2stE4bLrubOt833U1Cc')}>Open Node Handler</Button>
-      <Button onClick={() => hideNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Hide Node HAndler</Button>
+      <Button onClick={() => hideNodeHandler('a2stE4bLrubOt833U1Cc')}>Hide Nodx HAndler</Button>
       <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
       {/* end Data from map */}
       <MapInteractionCSS>

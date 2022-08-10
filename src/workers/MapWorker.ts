@@ -21,12 +21,12 @@ const layoutHandler = (
   setDagNodex: any,
   setDagEdge: any
 ) => {
+  console.log('{WORKER}:', { oldNodes })
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;
 
     // DAGRE RECALCULATE LAYOUT
-    console.log('DAGGER', dag1)
     dagre.layout(dag1);
     const clusterRegions: any = {};
 
