@@ -36,7 +36,7 @@ const stringify = (obj: any) => {
  */
 const parse = (str: string, date2obj = undefined) => {
 
-    var iso8061 = date2obj ? /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/ : false;
+    var iso8061 = date2obj ? /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/ : '';
 
     return JSON.parse(str, function (key, value) {
         var prefix;

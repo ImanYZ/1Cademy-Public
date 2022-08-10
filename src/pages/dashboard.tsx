@@ -1,11 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 import { addDoc, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, query, Timestamp, where, writeBatch } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
+/* eslint-disable */
+// @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 
+/* eslint-enable */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
@@ -15,7 +18,7 @@ import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { NodeChanges, NodeFireStore } from "../knowledgeTypes";
 import { JSONfn } from "../lib/utils/jsonFn";
-import { compare2Nodes, createOrUpdateNode, dag1, makeNodeVisibleInItsLinks, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
+import { compare2Nodes, createOrUpdateNode, dag1, makeNodeVisibleInItsLinks, MAP_RIGHT_GAP, MIN_CHANGE, NODE_HEIGHT, NODE_WIDTH, removeDagAllEdges, removeDagNode, setDagEdge, setDagNode, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
 
 // type Edge = { from: string; to: string };
@@ -79,9 +82,9 @@ const Dashboard = ({ }: DashboardProps) => {
   // usernodes: collection of all data about each interaction between user and node
   // (ex: node open, hidden, closed, hidden, etc.) (contains every user with every node interacted with)
   // nodes: dictionary of all nodes visible on map for specific user
-  const [nodes, setNodes] = useState({});
+  const [nodes, setNodes] = useState<{ [key: string]: any }>({});
   // edges: dictionary of all edges visible on map for specific user
-  const [edges, setEdges] = useState({});
+  const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
   // as map grows, width and height grows based on the nodes shown on the map
@@ -345,7 +348,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 ...node,
                 ...nodeData,
                 id: nodeId,
-                createdAt: nodeData.createdAt.toDate(),
+                createdAt: nodeData?.createdAt?.toDate(), //CHECK: I added thios vailadtion
                 changedAt: nodeData.changedAt.toDate(),
                 updatedAt: nodeData.updatedAt.toDate()
               };
@@ -388,7 +391,8 @@ const Dashboard = ({ }: DashboardProps) => {
               // change can be addition or modification (not removal) of document for the query on userNode table
               // modify change for allUserNodes
               userNodeData = {
-                userNodeId: userNodeChange.uNodeId,
+                ...userNodeData, // CHECK: I Added this to complete all fields
+                // userNodeId: userNodeChange.uNodeId,  // CHECK: I commented this
                 correct: userNodeData.correct,
                 wrong: userNodeData.wrong,
                 isStudied: userNodeData.isStudied,
@@ -397,8 +401,8 @@ const Dashboard = ({ }: DashboardProps) => {
                 open: userNodeData.open,
                 nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
                 // toDate() converts firestore timestamp to JavaScript date object
-                firstVisit: userNodeData.createdAt.toDate(),
-                lastVisit: userNodeData.updatedAt.toDate(),
+                // firstVisit: userNodeData.createdAt.toDate(), // CHECK: I commented this
+                // lastVisit: userNodeData.updatedAt.toDate(), // CHECK: I commented this
               };
               // specific for addition (in addition to code from 617-632)
               if (userNodeChange.cType === "added") {
@@ -469,15 +473,6 @@ const Dashboard = ({ }: DashboardProps) => {
                     return newNodeChanges;
                   });
                 }
-                console.log('------------------------->', [
-                  oldNodes[nodeId].correct !== userNodeData.correct,
-                  oldNodes[nodeId].wrong !== userNodeData.wrong,
-                  oldNodes[nodeId].isStudied !== userNodeData.isStudied,
-                  oldNodes[nodeId].bookmarked !== userNodeData.bookmarked,
-                  oldNodes[nodeId].open !== userNodeData.open,
-                  oldNodes[nodeId].firstVisit !== userNodeData.firstVisit,
-                  oldNodes[nodeId].lastVisit !== userNodeData.lastVisit
-                ])
                 if (
                   // left: current state of userNode
                   // right: new state of userNode from the database
@@ -486,9 +481,9 @@ const Dashboard = ({ }: DashboardProps) => {
                   oldNodes[nodeId].wrong !== userNodeData.wrong ||
                   oldNodes[nodeId].isStudied !== userNodeData.isStudied ||
                   oldNodes[nodeId].bookmarked !== userNodeData.bookmarked ||
-                  oldNodes[nodeId].open !== userNodeData.open ||
-                  oldNodes[nodeId].firstVisit !== userNodeData.firstVisit ||
-                  oldNodes[nodeId].lastVisit !== userNodeData.lastVisit
+                  oldNodes[nodeId].open !== userNodeData.open
+                  // oldNodes[nodeId].firstVisit !== userNodeData.firstVisit || // CHECK: I commented this
+                  // oldNodes[nodeId].lastVisit !== userNodeData.lastVisit // CHECK: I commented this
                 ) {
                   console.log('------------------------->')
                   oldNodes[nodeId] = {
@@ -706,7 +701,7 @@ const Dashboard = ({ }: DashboardProps) => {
       if (mapRendered && (nodeRef.current || content !== null || title !== null)) {
         console.log('[node changed]', mapRendered)
         setNodes((oldNodes) => {
-          const node = { ...oldNodes[nodeId] };
+          const node: any = { ...oldNodes[nodeId] };
           if (content !== null && node.content !== content) {
             node.content = content;
             nodesChanged = true;
@@ -764,7 +759,7 @@ const Dashboard = ({ }: DashboardProps) => {
       const batch = writeBatch(db)
       // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
       // const nodeDoc = await nodeRef.get();
-      if (nodeDoc.exists()) {
+      if (nodeDoc.exists() && user) { //CHECK: added user
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
         try {
           for (let child of thisNode.children) {
@@ -825,7 +820,7 @@ const Dashboard = ({ }: DashboardProps) => {
               bookmarked: false,
               node: nodeId,
               open: true,
-              user: user?.uname,
+              user: user.uname,
               visible: true,
               wrong: false,
             };

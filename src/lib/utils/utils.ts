@@ -26,9 +26,7 @@ export const isValidHttpUrl = (possibleUrl?: string) => {
     return false;
   }
 
-  return url.proto
-  
-  === "http:" || url.protocol === "https:";
+  return url.protocol === "http:" || url.protocol === "https:";
 };
 
 export const escapeBreaksQuotes = (text?: string) => {

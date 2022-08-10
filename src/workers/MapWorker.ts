@@ -7,21 +7,21 @@ import { setDagNode, setEdgeInDag, setNodeInDagger } from '../lib/utils/Map.util
 // self.importScripts("https://dagrejs.github.io/project/dagre/latest/dagre.min.js");
 
 const layoutHandler = (
-  mapChangedFlag,
-  oldClusterNodes,
-  oldMapWidth,
-  oldMapHeight,
-  oldNodes,
-  oldEdges,
-  allTags,
-  dag1,
-  XOFFSET,
-  YOFFSET,
-  MIN_CHANGE,
-  MAP_RIGHT_GAP,
-  NODE_WIDTH,
-  setDagNodex,
-  setDagEdge
+  mapChangedFlag: boolean,
+  oldClusterNodes: { [x: string]: { id: string; x: any; y: any; width: number; height: number; title: any; }; },
+  oldMapWidth: number,
+  oldMapHeight: any,
+  oldNodes: { [x: string]: any; },
+  oldEdges: { [x: string]: any; },
+  allTags: any,
+  dag1: dagre.graphlib.Graph<{}>,
+  XOFFSET: any,
+  YOFFSET: any,
+  MIN_CHANGE: number,
+  MAP_RIGHT_GAP: any,
+  NODE_WIDTH: any,
+  setDagNodex: any,
+  setDagEdge: any
 ) => {
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
@@ -30,7 +30,7 @@ const layoutHandler = (
     // DAGRE RECALCULATE LAYOUT
     console.log('DAGGER', dag1)
     dagre.layout(dag1);
-    const clusterRegions = {};
+    const clusterRegions: any = {};
 
     // Iterate oldNodes and find the cluster boundary
     // and update their size
@@ -72,7 +72,7 @@ const layoutHandler = (
 
     // Update OldClusterNodes
     for (let cNode in clusterRegions) {
-      const nodeN = dag1.node("Tag" + cNode);
+      const nodeN = dag1.node("Tag" + cNode) as any;
       oldClusterNodes[cNode] = {
         id: cNode,
         x: clusterRegions[cNode].xMin + XOFFSET,
@@ -121,8 +121,8 @@ const layoutHandler = (
 
     // ITERATE EDGES and calculate the new positions
     dag1.edges().map((e: any) => {
-      const fromNode = dag1.node(e.v);
-      const toNode = dag1.node(e.w);
+      const fromNode = dag1.node(e.v) as any;
+      const toNode = dag1.node(e.w) as any;
       // debugger
       if (
         "left" in fromNode &&
