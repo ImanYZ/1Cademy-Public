@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
+import { Box } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { Box } from "@mui/material";
+
+import { MemoizedNodeHeader } from "./NodeHeader";
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -408,6 +410,13 @@ const Node = ({
     //       }
     // }
     >
+      <MemoizedNodeHeader
+        open={open}
+        onToggleNode={console.log('onToggleNode')}
+        onHideOffsprings={console.log('onHideOffsprings')}
+        onHideNodeHandler={console.log('onHideNodeHandler')}
+        sx={{ position: 'absolute', right: '0px' }}
+      />
       {open ? (
         <div className="card-content">
           <div className="card-title">
