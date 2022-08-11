@@ -27,7 +27,7 @@ type NodeListProps = {
   openAllChildren: any;
   hideNodeHandler: any;
   hideOffsprings: any;
-  toggleNode: any;
+  toggleNode: (event:any,id:string)=>void;
   openNodePart: any;
   selectNode: any;
   nodeClicked: any;

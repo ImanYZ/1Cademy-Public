@@ -83,7 +83,7 @@ type NodeProps = {
   openAllChildren: any;//
   hideNodeHandler: any;//
   hideOffsprings: any;//
-  toggleNode: any;//
+  toggleNode: (event:any,id:string)=>void;//
   openNodePart: any;//
   selectNode: any;//
   nodeClicked: any;//
@@ -220,14 +220,15 @@ const Node = ({
   //   [hideOffsprings, identifier]
   // );
 
-  // const toggleNodeHandler = useCallback(
-  //   (event:any) => {
-  //     event.persist();
-  //     toggleNode(event, identifier, open);
-  //   },
-  //   [toggleNode, identifier, open]
-  // );
-
+  const toggleNodeHandler = useCallback(
+    (event:any) => {
+      console.log("-------------------->toggleNodeHandler")
+      event.persist();
+      toggleNode(event, identifier, /*open*/);
+    },
+    [toggleNode, identifier, open]
+  );
+const first = () => { console.log("first") }
   // const removeImageHandler = useCallback(() => {
   //   removeImage(nodeRef, identifier);
   // }, [nodeRef, removeImage, identifier]);
@@ -464,7 +465,7 @@ const Node = ({
               {!editable && !unaccepted && !nodeBookState.choosingNode/* !choosingNode*/ && (
                 <MemoizedNodeHeader
                   open={open}
-                  onToggleNode={console.log('onToggleNode')}
+                  onToggleNode={first}
                   onHideOffsprings={console.log('onHideOffsprings')}
                   onHideNodeHandler={console.log('onHideNodeHandler')}
                   sx={{ position: 'absolute', right: '0px', top: '0px' }}

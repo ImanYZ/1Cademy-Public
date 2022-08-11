@@ -11,7 +11,9 @@ import {
   limit,
   onSnapshot,
   query,
+  setDoc,
   Timestamp,
+  updateDoc,
   where,
   writeBatch
 } from "firebase/firestore";
@@ -419,7 +421,7 @@ const Dashboard = ({ }: DashboardProps) => {
               // modify change for allUserNodes
               userNodeData = {
                 ...userNodeData, // CHECK: I Added this to complete all fields
-                // userNodeId: userNodeChange.uNodeId,  // CHECK: I commented this
+                userNodeId: userNodeChange.uNodeId,  
                 correct: userNodeData.correct,
                 wrong: userNodeData.wrong,
                 isStudied: userNodeData.isStudied,
@@ -428,8 +430,8 @@ const Dashboard = ({ }: DashboardProps) => {
                 open: userNodeData.open,
                 nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
                 // toDate() converts firestore timestamp to JavaScript date object
-                // firstVisit: userNodeData.createdAt.toDate(), // CHECK: I commented this
-                // lastVisit: userNodeData.updatedAt.toDate(), // CHECK: I commented this
+                firstVisit: userNodeData.createdAt.toDate(), 
+                lastVisit: userNodeData.updatedAt.toDate(), 
               };
               // specific for addition (in addition to code from 617-632)
               if (userNodeChange.cType === "added") {
@@ -928,11 +930,12 @@ const Dashboard = ({ }: DashboardProps) => {
     [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   );
   const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
+    
     const nodeRef = doc(db, "nodes", nodeId);
-    let userNodeRef = null;
-    if (userNodeId) {
-      userNodeRef = doc(db, "userNodes", userNodeId);
-    }
+    const userNodeRef = doc(db, "userNodes", userNodeId);
+    // if (userNodeId) {
+    //   userNodeRef = doc(db, "userNodes", userNodeId);
+    // }//CHECK:We commented this 
     return { nodeRef, userNodeRef };
   }, []);
   const initNodeStatusChange = useCallback(
@@ -1085,12 +1088,12 @@ const Dashboard = ({ }: DashboardProps) => {
           if (userNodeRef) {
             await batch.set(userNodeRef, userNodeData);
           }
-          const userNodeLogData = {
+          const userNodeLogData:any = {
             ...userNodeData,
             createdAt: Timestamp.fromDate(new Date())
           };
 
-          const changeNode = {
+          const changeNode:any = {
             viewers: thisNode.viewers - 1,
             updatedAt: Timestamp.fromDate(new Date()),
 
@@ -1120,6 +1123,65 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, user, nodes, edges, initNodeStatusChange, /*navigateToFirstParent*/]
   );
 
+
+  const toggleNode = useCallback(
+    (event:any,nodeId:string) => {
+      debugger
+      console.log("In toggleNode");
+      if (!choosingNode) {
+        setNodes((oldNodes) => {
+          const thisNode = oldNodes[nodeId];
+          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+          const changeNode:any = {
+            updatedAt: Timestamp.fromDate(new Date()),
+          };
+          if (thisNode.open && "openHeight" in thisNode) {
+            changeNode.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            changeNode.closedHeight = thisNode.closedHeight;
+          }
+          updateDoc(nodeRef,changeNode)
+          // nodeRef.update(changeNode);
+          updateDoc(userNodeRef,{
+            open: !thisNode.open,
+            updatedAt: Timestamp.fromDate(new Date()),
+          })
+          // userNodeRef.update({
+          //   open: !thisNode.open,
+          //   updatedAt: Timestamp.fromDate(new Date()),
+          // });
+          const userNodeLogRef = collection(db, "userNodesLog");
+          // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+          const userNodeLogData:any = {
+            changed: thisNode.changed,
+            correct: thisNode.correct,
+            createdAt: Timestamp.fromDate(new Date()),
+            updatedAt: Timestamp.fromDate(new Date()),
+            deleted: false,
+            isStudied: thisNode.isStudied,
+            bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+            node: nodeId,
+            open: !thisNode.open,
+            user: user?.uname,
+            visible: true,
+            wrong: thisNode.wrong,
+          };
+          if ("openHeight" in thisNode) {
+            userNodeLogData.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            userNodeLogData.closedHeight = thisNode.closedHeight;
+          }
+          setDoc(doc(userNodeLogRef),userNodeLogData);
+          return oldNodes;
+        });
+      }
+      if(event){
+        event.currentTarget.blur();
+      }
+      
+    },
+    [choosingNode, user, initNodeStatusChange]
+  );
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
       console.log(["OPEN LINKED NODE"]);
@@ -1138,6 +1200,148 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, openNodeHandler]
   );
 
+  const openNodePart = useCallback(
+    (event:any, nodeId:string, partType:any, openPart:any, setOpenPart:any, tags:any) => {
+      // console.log("In openNodePart");
+      if (!choosingNode) {
+        if (openPart === partType) {
+          setOpenPart(null);
+          event.currentTarget.blur();
+        } else {
+          setOpenPart(partType);
+          if (user) {
+            const userNodePartsLogRef = collection(db, "userNodePartsLog");
+            userNodePartsLogRef.set({
+              nodeId,
+              uname: user?.uname,
+              partType,
+              createdAt: Timestamp.fromDate(new Date()),
+            });
+          }
+          // if (
+          //   partType === "Tags" &&
+          //   //i commented this two line untile we define the right states 
+          //   // selectionType !== "AcceptedProposals" && 
+          //   // selectionType !== "Proposals"
+          // ) {
+          //   // setSelectedTags(tags);
+          //   // setOpenRecentNodes(true);
+          // }
+        }
+      }
+    },
+    [user, choosingNode, /*selectionType*/]
+  );
+
+  const markStudied = useCallback(
+    (event:any, nodeId:string) => {
+      // console.log("In markStudied");
+      if (!choosingNode) {
+        setNodes((oldNodes) => {
+          const thisNode = oldNodes[nodeId];
+          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+          let studiedNum = 0;
+          if ("studied" in thisNode) {
+            studiedNum = thisNode.studied;
+          }
+          const changeNode = {
+            studied: studiedNum + (thisNode.isStudied ? -1 : 1),
+            updatedAt: Timestamp.fromDate(new Date()),
+          };
+          if (thisNode.open && "openHeight" in thisNode) {
+            changeNode.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            changeNode.closedHeight = thisNode.closedHeight;
+          }
+          nodeRef.update(changeNode);
+          userNodeRef.update({
+            changed: thisNode.isStudied ? thisNode.changed : false,
+            isStudied: !thisNode.isStudied,
+            updatedAt: Timestamp.fromDate(new Date()),
+          });
+          const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+          const userNodeLogData = {
+            correct: thisNode.correct,
+            createdAt: Timestamp.fromDate(new Date()),
+            updatedAt: Timestamp.fromDate(new Date()),
+            deleted: false,
+            changed: thisNode.isStudied ? thisNode.changed : false,
+            isStudied: !thisNode.isStudied,
+            bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+            node: nodeId,
+            open: !thisNode.open,
+            user: user?.uname,
+            visible: true,
+            wrong: thisNode.wrong,
+          };
+          if ("openHeight" in thisNode) {
+            userNodeLogData.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            userNodeLogData.closedHeight = thisNode.closedHeight;
+          }
+          userNodeLogRef.set(userNodeLogData);
+          return oldNodes;
+        });
+      }
+      event.currentTarget.blur();
+    },
+    [choosingNode, user, initNodeStatusChange]
+  );
+
+  const bookmark = useCallback(
+    (event:any, nodeId:string) => {
+      // console.log("In bookmark");
+      if (!choosingNode) {
+        setNodes((oldNodes) => {
+          const thisNode = oldNodes[nodeId];
+          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+          let bookmarks = 0;
+          if ("bookmarks" in thisNode) {
+            bookmarks = thisNode.bookmarks;
+          }
+          const changeNode = {
+            bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
+            updatedAt: Timestamp.fromDate(new Date()),
+          };
+          if (thisNode.open && "openHeight" in thisNode) {
+            changeNode.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            changeNode.closedHeight = thisNode.closedHeight;
+          }
+          nodeRef.update(changeNode);
+          userNodeRef.update({
+            bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
+            updatedAt: Timestamp.fromDate(new Date()),
+          });
+          const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+          const userNodeLogData = {
+            changed: thisNode.changed,
+            isStudied: thisNode.isStudied,
+            correct: thisNode.correct,
+            createdAt: Timestamp.fromDate(new Date()),
+            updatedAt: Timestamp.fromDate(new Date()),
+            deleted: false,
+            bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
+            node: nodeId,
+            open: !thisNode.open,
+            user: user?.uname,
+            visible: true,
+            wrong: thisNode.wrong,
+          };
+          if ("openHeight" in thisNode) {
+            userNodeLogData.height = thisNode.openHeight;
+          } else if ("closedHeight" in thisNode) {
+            userNodeLogData.closedHeight = thisNode.closedHeight;
+          }
+          userNodeLogRef.set(userNodeLogData);
+          return oldNodes;
+        });
+      }
+      event.currentTarget.blur();
+    },
+    [choosingNode, user, initNodeStatusChange]
+  );
+
   const edgeIds = Object.keys(edges);
 
   return (
@@ -1153,7 +1357,6 @@ const Dashboard = ({ }: DashboardProps) => {
       <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
       <Button onClick={() => openNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Open Node Handler</Button>
       <Button onClick={() => openNodeHandler('a2stE4bLrubOt833U1Cc')}>Open Node Handler</Button>
-      <Button onClick={() => hideNodeHandler('a2stE4bLrubOt833U1Cc')}>Hide Nodx HAndler</Button>
       <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
       {/* end Data from map */}
       <MapInteractionCSS>
@@ -1192,9 +1395,7 @@ const Dashboard = ({ }: DashboardProps) => {
           hideOffsprings={() => {
             console.log("hideOffsprings");
           }}
-          toggleNode={() => {
-            console.log("toggleNode");
-          }}
+          toggleNode={toggleNode}
           openNodePart={() => {
             console.log("openNodePart");
           }}
