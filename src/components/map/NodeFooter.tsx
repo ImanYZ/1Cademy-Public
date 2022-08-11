@@ -21,6 +21,7 @@ import React, { useState } from 'react'
 
 import { User } from '../../knowledgeTypes';
 import shortenNumber from '../../lib/utils/shortenNumber';
+import { OpenPart } from '../../nodeBookTypes';
 import NodeTypeIcon from '../NodeTypeIcon';
 import { MemoizedUserStatusIcon } from './UserStatusIcon';
 
@@ -38,7 +39,7 @@ type NodeFooterProps = {
   title: any,
   content: any,
   unaccepted: any,
-  openPart: any,
+  openPart: OpenPart,
   nodeType: any,
   isNew: any,
   admin: any,
@@ -165,7 +166,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </Tooltip>
 
                 <Tooltip title={"Propose/evaluate versions of this node."} placement='top'>
-                  <Button onClick={() => console.log('selectPendingProposals')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                  <Button onClick={() => console.log('selectPendingProposals')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.proposalsSelected ? theme => theme.palette.common.orange : 'inherit' }}>
                     <CreateIcon fontSize='inherit' />{` ${dayjs(new Date(props.changedAt.seconds * 1000)).fromNow()}`}
                   </Button>
                 </Tooltip>
@@ -288,7 +289,9 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </Tooltip>
 
                 <Tooltip title={"View tags assigned to this node."} placement='top'>
-                  <Button onClick={() => console.log('selectTags')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                  <Button
+                    onClick={() => console.log('selectTags')}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.openPart === 'Tags' ? theme => theme.palette.common.orange : 'inherit' }}>
                     <LocalOfferIcon fontSize='inherit' />
                     <span>{shortenNumber(props.tags.length, 2, false)}</span>
                   </Button>
@@ -331,11 +334,15 @@ const NodeFooter = (props: NodeFooterProps) => {
             ) : (
 
               <Tooltip title={"View tags and citations used in this node."} placement='top'>
-                <Button onClick={() => console.log('selectReferences')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                <Button
+                  onClick={() => console.log('selectReferences')}
+                  sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.openPart === 'References' ? theme => theme.palette.common.orange : 'inherit' }}
+                >
                   <MenuBookIcon fontSize='inherit' />
                   <span className="CitationsSpanBeforeTagIcon">
-                    {shortenNumber(props.references.length, 2, false)} |
+                    {shortenNumber(props.references.length, 2, false)}
                   </span>
+                  <Box component={'span'} sx={{ mx: '5px' }}> | </Box>
                   <LocalOfferIcon fontSize='inherit' />
                   <span>{shortenNumber(props.tags.length, 2, false)}</span>
                 </Button>
@@ -388,21 +395,27 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </MetaButton> */}
 
                 <Tooltip title={"Vote to delete node."} placement='top'>
-                  <Button onClick={() => console.log('props.wrongNode')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
-                    <CloseIcon fontSize='inherit' />
+                  <Button
+                    onClick={() => console.log('props.wrongNode')}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: 'white' }}>
+                    <CloseIcon fontSize='inherit' sx={{ color: props.markedCorrect ? 'red' : 'inherit' }} />
                     <span>{shortenNumber(props.wrongNum, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"Vote to prevent further changes."} placement='top'>
-                  <Button onClick={() => console.log('props.correctNode')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
-                    <DoneIcon fontSize='inherit' />
+                  <Button
+                    onClick={() => console.log('props.correctNode')}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: 'white' }}>
+                    <DoneIcon fontSize='inherit' sx={{ color: props.markedCorrect ? 'green' : 'inherit' }} />
                     <span>{shortenNumber(props.correctNum, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"Bookmark this node."} placement='top'>
-                  <Button onClick={() => console.log('props.bookmark')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                  <Button
+                    onClick={() => console.log('props.bookmark')}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.bookmarked ? theme => theme.palette.common.orange : 'inherit' }}>
                     {props.bookmarked ? <BookmarkIcon fontSize='inherit' /> : <BookmarkBorderIcon fontSize='inherit' />}
                     <span>{shortenNumber(props.bookmarks, 2, false)}</span>
                   </Button>
@@ -412,7 +425,9 @@ const NodeFooter = (props: NodeFooterProps) => {
                   title={!props.isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                   placement='top'
                 >
-                  <Button onClick={() => console.log('props.markStudied')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                  <Button
+                    onClick={() => console.log('props.markStudied')}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.isStudied ? theme => theme.palette.common.orange : 'inherit' }}>
                     {props.isStudied ? <DraftsIcon fontSize='inherit' /> : <MailIcon fontSize='inherit' />}
                     <span>{shortenNumber(props.studied, 2, false)}</span>
                   </Button>
@@ -514,7 +529,9 @@ const NodeFooter = (props: NodeFooterProps) => {
               </>
             )}
             <Tooltip title={"View parent and child nodes."} placement='top'>
-              <Button onClick={() => console.log('selectLinkingWords')} sx={{ width: 'auto' }}>
+              <Button
+                onClick={() => console.log('selectLinkingWords')}
+                sx={{ width: 'auto', color: props.openPart === 'LinkingWords' ? theme => theme.palette.common.orange : 'inherit' }}>
                 <span className="">{shortenNumber(props.parents.length, 2, false)}</span>
                 <SwapHorizIcon fontSize='inherit' />
                 <span>{shortenNumber(props.nodesChildren.length, 2, false)}</span>
@@ -554,12 +571,19 @@ const NodeFooter = (props: NodeFooterProps) => {
         ) : (
           <>
             <Tooltip
-              title={shortenNumber(props.correctNum, 2, false) + " 1Cademist" + (props.correctNum === 1 ? " has" : "s have") + " found this node helpful and " + shortenNumber(props.wrongNum, 2, false) + " found it unhelpful."}
+              title={
+                shortenNumber(props.correctNum, 2, false) +
+                " 1Cademist" +
+                (props.correctNum === 1 ? " has" : "s have") +
+                " found this node helpful and " +
+                shortenNumber(props.wrongNum, 2, false) +
+                " found it unhelpful."
+              }
               placement='top'>
-              <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
-                <CloseIcon fontSize='inherit' />
+              <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px', fontSize: '15px' }}>
+                <CloseIcon fontSize='inherit' sx={{ color: props.markedWrong ? 'red' : 'inherit' }} />
                 <span>{shortenNumber(props.wrongNum, 2, false)}</span>
-                <DoneIcon fontSize='inherit' />
+                <DoneIcon fontSize='inherit' sx={{ color: props.markedCorrect ? 'green' : 'inherit' }} />
                 <span>{shortenNumber(props.wrongNum, 2, false)}</span>
               </Box>
             </Tooltip>
@@ -571,8 +595,10 @@ const NodeFooter = (props: NodeFooterProps) => {
                 (props.bookmarks === 1 ? " has" : "s have") +
                 " bookmarked this node."}
               placement='top'>
-              <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
-                {props.bookmarked ? <BookmarkIcon fontSize='inherit' /> : <BookmarkBorderIcon fontSize='inherit' />}
+              <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px', fontSize: '15px' }}>
+                {props.bookmarked
+                  ? <BookmarkIcon fontSize='inherit' sx={{ color: props.bookmarked ? theme => theme.palette.common.orange : 'inherit' }} />
+                  : <BookmarkBorderIcon fontSize='inherit' sx={{ color: props.bookmarked ? theme => theme.palette.common.orange : 'inherit' }} />}
                 <span>{shortenNumber(props.bookmarks, 2, false)}</span>
               </Box>
             </Tooltip>
@@ -587,7 +613,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                 " child node" +
                 (props.nodesChildren.length === 1 ? "." : "s.")}
               placement='top'>
-              <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px', fontSize: '15px' }}>
                 <span /*className="FooterParentNodesClosed"*/>
                   {shortenNumber(props.parents.length, 2, false)}
                 </span>
