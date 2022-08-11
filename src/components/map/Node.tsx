@@ -729,7 +729,7 @@ const Node = ({
             )}
             <div className="footer">
               <MemoizedNodeFooter
-                open={true}
+                open={false}
                 identifier={identifier}
                 activeNode={activeNode}
                 citationsSelected={citationsSelected}
