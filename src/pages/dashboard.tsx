@@ -421,7 +421,7 @@ const Dashboard = ({ }: DashboardProps) => {
               // modify change for allUserNodes
               userNodeData = {
                 ...userNodeData, // CHECK: I Added this to complete all fields
-                userNodeId: userNodeChange.uNodeId,  
+                userNodeId: userNodeChange.uNodeId,
                 correct: userNodeData.correct,
                 wrong: userNodeData.wrong,
                 isStudied: userNodeData.isStudied,
@@ -430,8 +430,8 @@ const Dashboard = ({ }: DashboardProps) => {
                 open: userNodeData.open,
                 nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
                 // toDate() converts firestore timestamp to JavaScript date object
-                firstVisit: userNodeData.createdAt.toDate(), 
-                lastVisit: userNodeData.updatedAt.toDate(), 
+                firstVisit: userNodeData.createdAt.toDate(),
+                lastVisit: userNodeData.updatedAt.toDate(),
               };
               // specific for addition (in addition to code from 617-632)
               if (userNodeChange.cType === "added") {
@@ -930,7 +930,7 @@ const Dashboard = ({ }: DashboardProps) => {
     [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   );
   const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
-    
+
     const nodeRef = doc(db, "nodes", nodeId);
     const userNodeRef = doc(db, "userNodes", userNodeId);
     // if (userNodeId) {
@@ -1088,12 +1088,12 @@ const Dashboard = ({ }: DashboardProps) => {
           if (userNodeRef) {
             await batch.set(userNodeRef, userNodeData);
           }
-          const userNodeLogData:any = {
+          const userNodeLogData: any = {
             ...userNodeData,
             createdAt: Timestamp.fromDate(new Date())
           };
 
-          const changeNode:any = {
+          const changeNode: any = {
             viewers: thisNode.viewers - 1,
             updatedAt: Timestamp.fromDate(new Date()),
 
@@ -1125,14 +1125,14 @@ const Dashboard = ({ }: DashboardProps) => {
 
 
   const toggleNode = useCallback(
-    (event:any,nodeId:string) => {
-      debugger
+    (event: any, nodeId: string) => {
+      // debugger
       console.log("In toggleNode");
       if (!choosingNode) {
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-          const changeNode:any = {
+          const changeNode: any = {
             updatedAt: Timestamp.fromDate(new Date()),
           };
           if (thisNode.open && "openHeight" in thisNode) {
@@ -1140,9 +1140,9 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
-          updateDoc(nodeRef,changeNode)
+          updateDoc(nodeRef, changeNode)
           // nodeRef.update(changeNode);
-          updateDoc(userNodeRef,{
+          updateDoc(userNodeRef, {
             open: !thisNode.open,
             updatedAt: Timestamp.fromDate(new Date()),
           })
@@ -1152,7 +1152,7 @@ const Dashboard = ({ }: DashboardProps) => {
           // });
           const userNodeLogRef = collection(db, "userNodesLog");
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-          const userNodeLogData:any = {
+          const userNodeLogData: any = {
             changed: thisNode.changed,
             correct: thisNode.correct,
             createdAt: Timestamp.fromDate(new Date()),
@@ -1171,14 +1171,14 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
-          setDoc(doc(userNodeLogRef),userNodeLogData);
+          setDoc(doc(userNodeLogRef), userNodeLogData);
           return oldNodes;
         });
       }
-      if(event){
+      if (event) {
         event.currentTarget.blur();
       }
-      
+
     },
     [choosingNode, user, initNodeStatusChange]
   );
@@ -1201,7 +1201,7 @@ const Dashboard = ({ }: DashboardProps) => {
   );
 
   const openNodePart = useCallback(
-    (event:any, nodeId:string, partType:any, openPart:any, setOpenPart:any, tags:any) => {
+    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags: any) => {
       // console.log("In openNodePart");
       if (!choosingNode) {
         if (openPart === partType) {
@@ -1234,7 +1234,7 @@ const Dashboard = ({ }: DashboardProps) => {
   );
 
   const markStudied = useCallback(
-    (event:any, nodeId:string) => {
+    (event: any, nodeId: string) => {
       // console.log("In markStudied");
       if (!choosingNode) {
         setNodes((oldNodes) => {
@@ -1289,7 +1289,7 @@ const Dashboard = ({ }: DashboardProps) => {
   );
 
   const bookmark = useCallback(
-    (event:any, nodeId:string) => {
+    (event: any, nodeId: string) => {
       // console.log("In bookmark");
       if (!choosingNode) {
         setNodes((oldNodes) => {
