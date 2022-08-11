@@ -131,8 +131,8 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         onClick={openUserInfo}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
-          <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" />
-          {/* <OptimizedAvatar imageUrl={props.imageUrl} /> */}
+          {/* <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" /> */}
+          <OptimizedAvatar imageUrl={props.imageUrl} renderAsAvatar={true} contained={false} sx={{ border: 'none' }} />
         </div>
         {!props.inNodeFooter && (
           <>
@@ -154,11 +154,13 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
           className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")}
           onClick={preventEventPropagation}
         >
-          {props.inUserBar
+          {/* {props.inUserBar
             ? "Your profile settings"
             : props.chooseUname
               ? props.uname
-              : props.fullname}
+              : props.fullname} */}
+
+          {props.inUserBar && "Your profile settings"}
           {!("inNodeFooter" in props && props.inNodeFooter) &&
             "totalPositives" in props &&
             "totalNegatives" in props && (

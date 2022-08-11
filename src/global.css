@@ -94,7 +94,7 @@
   margin: 0px;
 }
 .card .card-content {
-  padding: 13px !important;
+  padding: 13px 13px 0px 13px !important;
 }
 
 .card-title .CodeMirror {
@@ -126,9 +126,9 @@
 }
 
 .card-content .footer {
-  position: absolute;
+  /* position: absolute;
   bottom: 10px;
-  right: 13px;
+  right: 13px; */
   font-size: 13px;
   width: 97%;
 }
@@ -143,7 +143,7 @@
 }
 
 .card-content .NodeContent {
-  padding-bottom: 22px;
+  /* padding-bottom: 22px; */
 }
 
 .card-content .NodeContent .collapsible {
@@ -379,27 +379,27 @@
 /* ------------------------------------------- */
 /* styles from nodeFooter */
 .NodeFooter {
-  position: relative;
+  /* position: relative;
   bottom: -9.1px;
   font-size: 13px;
   line-height: 13px;
-  font-weight: 100;
+  font-weight: 100; */
 }
 .NodeFooter.Right {
-  float: right;
-  right: -10px;
+  /* float: right;
+  right: -10px; */
 }
 .NodeFooter.Left {
-  float: left;
+  /* float: left;
   left: -4px;
   bottom: -13px;
-  font-size: 14.5px;
+  font-size: 14.5px; */
 }
 
-.FooterParentNodesOpen {
+/* .FooterParentNodesOpen {
   margin-right: 4px;
   margin-left: -4px;
-}
+} */
 .FooterParentNodesClosed {
   margin-right: -5.5px;
   margin-left: -4px;
@@ -421,29 +421,29 @@
 }
 
 .NodeFooter.Left {
-  margin-top: -10px;
+  /* margin-top: -10px; */
 }
 
 .NodeTypeIconOpen {
-  position: relative;
+  /* position: relative;
   top: -34px;
   left: 40px;
   font-size: 16px;
   line-height: 4px;
   margin-bottom: -7px;
-  padding-top: 16px;
+  padding-top: 16px; */
 }
 
 .NodeTypeIconClosed {
-  position: relative;
+  /* position: relative;
   top: 10px;
   left: 4px;
   font-size: 16px;
-  margin-bottom: 22px;
+  margin-bottom: 22px; */
 }
 
 .NodeFooter .SidebarButton {
-  margin-bottom: -13px;
+  /* margin-bottom: -13px; */
 }
 
 .NodeFooter .btn-floating,

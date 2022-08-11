@@ -79,8 +79,8 @@ const NodeFooter = (props: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   return (
-    <>
-      <div className="NodeFooter Left">
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box className="NodeFooter Left" sx={{ display: 'flex', alignItems: 'center' }}>
         {props.open &&
           (props.isNew ? (
             //   <UserStatusIcon
@@ -144,8 +144,8 @@ const NodeFooter = (props: NodeFooterProps) => {
             "{props.nodeType}" node.
           </span> */}
         </div>
-      </div>
-      <div className="NodeFooter Right">
+      </Box>
+      <Box className="NodeFooter Right" sx={{ display: 'flex', alignItems: 'center' }}>
         {props.open ? (
           <>
             {!props.editable && !props.unaccepted ? (
@@ -153,20 +153,20 @@ const NodeFooter = (props: NodeFooterProps) => {
               <>
 
                 <Tooltip title="Adjust the node height." placement='top'>
-                  <IconButton onClick={() => console.log('props.nodeChanged')} >
-                    <HeightIcon fontSize='small' />
+                  <IconButton onClick={() => console.log('props.nodeChanged')} sx={{ fontSize: '15px', p: '4px 7px' }}>
+                    <HeightIcon fontSize='inherit' />
                   </IconButton>
                 </Tooltip>
 
                 <Tooltip title={isSpeaking ? "Stop narration." : "Narrate the node."} placement='top'>
-                  <IconButton onClick={() => console.log('narrateNode')} >
-                    {isSpeaking ? <VoiceOverOffIcon fontSize='small' /> : <RecordVoiceOverIcon fontSize='small' />}
+                  <IconButton onClick={() => console.log('narrateNode')} sx={{ fontSize: '15px', p: '4px 7px' }}>
+                    {isSpeaking ? <VoiceOverOffIcon fontSize='inherit' /> : <RecordVoiceOverIcon fontSize='inherit' />}
                   </IconButton>
                 </Tooltip>
 
                 <Tooltip title={"Propose/evaluate versions of this node."} placement='top'>
-                  <Button onClick={() => console.log('selectPendingProposals')} >
-                    <CreateIcon fontSize='small' />{` ${dayjs(new Date(props.changedAt.seconds * 1000)).fromNow()}`}
+                  <Button onClick={() => console.log('selectPendingProposals')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                    <CreateIcon fontSize='inherit' />{` ${dayjs(new Date(props.changedAt.seconds * 1000)).fromNow()}`}
                   </Button>
                 </Tooltip>
 
@@ -246,7 +246,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                   </i>
                   {isUploading && (
                     <>
-                      <div className="preloader-wrapper active small ImageUploadButtonLoader">
+                      <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
                         <div className="spinner-layer spinner-yellow-only">
                           <div className="circle-clipper left">
                             <div className="circle"></div>
@@ -262,18 +262,18 @@ const NodeFooter = (props: NodeFooterProps) => {
             {!props.editable && !props.unaccepted && props.nodeType === "Reference" ? (
               <>
                 <Tooltip title={"View nodes that have cited this node."} placement='top'>
-                  <Button onClick={() => console.log('selectCitations')} >
+                  <Button onClick={() => console.log('selectCitations')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
                     {props.citationsSelected ? (
                       <>
-                        <ArrowForwardIcon fontSize='small' sx={{ color: theme => theme.palette.common.orange }} />
-                        <MenuBookIcon fontSize='small' sx={{ color: theme => theme.palette.common.orange }} />
+                        <ArrowForwardIcon fontSize='inherit' sx={{ color: theme => theme.palette.common.orange }} />
+                        <MenuBookIcon fontSize='inherit' sx={{ color: theme => theme.palette.common.orange }} />
                         {/* <i className="material-icons orange-text">arrow_forward</i>
                         <i className="material-icons SeparateIcon orange-text">menu_book</i> */}
                       </>
                     ) : (
                       <>
-                        <ArrowForwardIcon fontSize='small' />
-                        <MenuBookIcon fontSize='small' />
+                        <ArrowForwardIcon fontSize='inherit' />
+                        <MenuBookIcon fontSize='inherit' />
                         {/* <i className="material-icons grey-text">arrow_forward</i>
                         <i className="material-icons SeparateIcon grey-text">menu_book</i> */}
                       </>
@@ -288,8 +288,8 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </Tooltip>
 
                 <Tooltip title={"View tags assigned to this node."} placement='top'>
-                  <Button onClick={() => console.log('selectTags')} >
-                    <LocalOfferIcon fontSize='small' />
+                  <Button onClick={() => console.log('selectTags')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                    <LocalOfferIcon fontSize='inherit' />
                     <span>{shortenNumber(props.tags.length, 2, false)}</span>
                   </Button>
                 </Tooltip>
@@ -331,12 +331,12 @@ const NodeFooter = (props: NodeFooterProps) => {
             ) : (
 
               <Tooltip title={"View tags and citations used in this node."} placement='top'>
-                <Button onClick={() => console.log('selectReferences')} >
-                  <MenuBookIcon fontSize='small' />
+                <Button onClick={() => console.log('selectReferences')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                  <MenuBookIcon fontSize='inherit' />
                   <span className="CitationsSpanBeforeTagIcon">
                     {shortenNumber(props.references.length, 2, false)} |
                   </span>
-                  <LocalOfferIcon fontSize='small' />
+                  <LocalOfferIcon fontSize='inherit' />
                   <span>{shortenNumber(props.tags.length, 2, false)}</span>
                 </Button>
               </Tooltip>
@@ -388,22 +388,22 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </MetaButton> */}
 
                 <Tooltip title={"Vote to delete node."} placement='top'>
-                  <Button onClick={() => console.log('props.wrongNode')} >
-                    <CloseIcon fontSize='small' />
+                  <Button onClick={() => console.log('props.wrongNode')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                    <CloseIcon fontSize='inherit' />
                     <span>{shortenNumber(props.wrongNum, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"Vote to prevent further changes."} placement='top'>
-                  <Button onClick={() => console.log('props.correctNode')} >
-                    <DoneIcon fontSize='small' />
+                  <Button onClick={() => console.log('props.correctNode')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                    <DoneIcon fontSize='inherit' />
                     <span>{shortenNumber(props.correctNum, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"Bookmark this node."} placement='top'>
-                  <Button onClick={() => console.log('props.bookmark')} >
-                    {props.bookmarked ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
+                  <Button onClick={() => console.log('props.bookmark')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                    {props.bookmarked ? <BookmarkIcon fontSize='inherit' /> : <BookmarkBorderIcon fontSize='inherit' />}
                     <span>{shortenNumber(props.bookmarks, 2, false)}</span>
                   </Button>
                 </Tooltip>
@@ -412,8 +412,8 @@ const NodeFooter = (props: NodeFooterProps) => {
                   title={!props.isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                   placement='top'
                 >
-                  <Button onClick={() => console.log('props.markStudied')} >
-                    {props.isStudied ? <DraftsIcon fontSize='small' /> : <MailIcon fontSize='small' />}
+                  <Button onClick={() => console.log('props.markStudied')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
+                    {props.isStudied ? <DraftsIcon fontSize='inherit' /> : <MailIcon fontSize='inherit' />}
                     <span>{shortenNumber(props.studied, 2, false)}</span>
                   </Button>
                 </Tooltip>
@@ -514,9 +514,9 @@ const NodeFooter = (props: NodeFooterProps) => {
               </>
             )}
             <Tooltip title={"View parent and child nodes."} placement='top'>
-              <Button onClick={() => console.log('selectLinkingWords')} >
-                <span className="FooterParentNodesOpen">{shortenNumber(props.parents.length, 2, false)}</span>
-                <SwapHorizIcon fontSize='small' />
+              <Button onClick={() => console.log('selectLinkingWords')} sx={{ width: 'auto' }}>
+                <span className="">{shortenNumber(props.parents.length, 2, false)}</span>
+                <SwapHorizIcon fontSize='inherit' />
                 <span>{shortenNumber(props.nodesChildren.length, 2, false)}</span>
               </Button>
             </Tooltip>
@@ -557,9 +557,9 @@ const NodeFooter = (props: NodeFooterProps) => {
               title={shortenNumber(props.correctNum, 2, false) + " 1Cademist" + (props.correctNum === 1 ? " has" : "s have") + " found this node helpful and " + shortenNumber(props.wrongNum, 2, false) + " found it unhelpful."}
               placement='top'>
               <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
-                <CloseIcon fontSize='small' />
+                <CloseIcon fontSize='inherit' />
                 <span>{shortenNumber(props.wrongNum, 2, false)}</span>
-                <DoneIcon fontSize='small' />
+                <DoneIcon fontSize='inherit' />
                 <span>{shortenNumber(props.wrongNum, 2, false)}</span>
               </Box>
             </Tooltip>
@@ -572,7 +572,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                 " bookmarked this node."}
               placement='top'>
               <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
-                {props.bookmarked ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
+                {props.bookmarked ? <BookmarkIcon fontSize='inherit' /> : <BookmarkBorderIcon fontSize='inherit' />}
                 <span>{shortenNumber(props.bookmarks, 2, false)}</span>
               </Box>
             </Tooltip>
@@ -591,7 +591,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                 <span /*className="FooterParentNodesClosed"*/>
                   {shortenNumber(props.parents.length, 2, false)}
                 </span>
-                <SwapHorizIcon fontSize='small' />
+                <SwapHorizIcon fontSize='inherit' />
                 <span>{shortenNumber(props.nodesChildren.length, 2, false)}</span>
               </Box>
             </Tooltip>
@@ -669,8 +669,8 @@ const NodeFooter = (props: NodeFooterProps) => {
             </MetaButton> */}
           </>
         )}
-      </div>
-    </>
+      </Box>
+    </Box>
   );
 
   //   return (
@@ -710,7 +710,7 @@ const NodeFooter = (props: NodeFooterProps) => {
   //               <>
   //                 <Tooltip title="Adjust the node height." placement='top'>
   //                   <IconButton onClick={() => console.log('props.nodeChanged')} >
-  //                     <HeightIcon fontSize='small' />
+  //                     <HeightIcon fontSize='inherit' />
   //                   </IconButton>
   //                 </Tooltip>
   //                 <Tooltip title={isSpeaking ? "Stop narration." : "Narrate the node."} placement='top'>
