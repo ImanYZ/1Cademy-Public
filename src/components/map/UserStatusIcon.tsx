@@ -1,17 +1,20 @@
+import { Tooltip } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react'
 
 import usePrevious from '../../hooks/usePrevious';
 import { preventEventPropagation } from '../../lib/utils/eventHandlers';
 import shortenNumber from '../../lib/utils/shortenNumber';
+import OptimizedAvatar from '../OptimizedAvatar';
+import RoundImage from './RoundImage';
 
 type UserStatusIconProps = {
-  uname: any,
+  uname: string,
   imageUrl: string,
-  fullname: any,
+  fullname: string,
   chooseUname: any,
   online: boolean,
-  inUserBar: any,
-  inNodeFooter: any,
+  inUserBar: boolean,
+  inNodeFooter: boolean,
   reloadPermanentGrpah: any,
   totalPositives?: any,
   totalNegatives?: any,
@@ -85,64 +88,94 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     // }
     console.log('openUserInfo')
   }, [
-    firebase,
-    props.inUserBar,
-    username,
-    props.uname,
-    props.imageUrl,
-    props.fullname,
-    props.chooseUname,
+    // firebase,
+    // props.inUserBar,
+    // username,
+    // props.uname,
+    // props.imageUrl,
+    // props.fullname,
+    // props.chooseUname,
   ]);
 
+  const getTooltipTitle = (): JSX.Element => {
+    let title: string = ''
+    title += props.inUserBar
+      ? "Your profile settings"
+      : props.chooseUname
+        ? props.uname
+        : props.fullname
+
+    if (!("inNodeFooter" in props && props.inNodeFooter) &&
+      "totalPositives" in props &&
+      "totalNegatives" in props) {
+      <>
+        <span>{title}</span>
+        {/* {tag ? " ― " + tag.title : ""} */}
+        <br></br>
+        {shortenNumber(props.totalPositives, 2, false) + " "}
+        <i className="material-icons DoneIcon green-text">done</i>
+        {" ― "}
+        {/* <i className="material-icons gray-text">remove</i>{" "} */}
+        <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
+        <i className="material-icons red-text">close</i>
+      </>
+    }
+
+    return <span>{title}</span>
+  }
+
   return (
-    <div
-      className={"SidebarButton Tooltip" + (props.inUserBar ? " inUserBar" : "")}
-      onClick={openUserInfo}
-    >
-      <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
-        <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" />
-      </div>
-      {!props.inNodeFooter && (
-        <>
-          <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-          <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
-            <i className="material-icons DoneIcon green-text">done</i>{" "}
-            {/* <i className="material-icons">remove</i>{" "} */}
-            {/* <i className="material-icons red-text">close</i>{" "} */}
-            <span>{shortenNumber(props.totalPoints, 2, false)}</span>
-            {props.inUserBar && tag && <div id="UserProfileButtonDefaultTag">{tag.title}</div>}
-          </span>
-          {/* <span className="UserStatusTotalAwards">
+    <Tooltip title={getTooltipTitle()}>
+      <div
+        className={"SidebarButton Tooltip" + (props.inUserBar ? " inUserBar" : "")}
+        onClick={openUserInfo}
+      >
+        <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
+          <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" />
+          {/* <OptimizedAvatar imageUrl={props.imageUrl} /> */}
+        </div>
+        {!props.inNodeFooter && (
+          <>
+            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+            <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
+              <i className="material-icons DoneIcon green-text">done</i>{" "}
+              {/* <i className="material-icons">remove</i>{" "} */}
+              {/* <i className="material-icons red-text">close</i>{" "} */}
+              <span>{shortenNumber(props.totalPoints, 2, false)}</span>
+              {props.inUserBar && tag && <div id="UserProfileButtonDefaultTag">{tag.title}</div>}
+            </span>
+            {/* <span className="UserStatusTotalAwards">
             <i className="material-icons amber-text">grade</i>{" "}
             <span>{shortenNumber(props.totalAwards, 2, false)}</span>
           </span> */}
-        </>
-      )}
-      <span
-        className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")}
-        onClick={preventEventPropagation}
-      >
-        {props.inUserBar
-          ? "Your profile settings"
-          : props.chooseUname
-            ? props.uname
-            : props.fullname}
-        {!("inNodeFooter" in props && props.inNodeFooter) &&
-          "totalPositives" in props &&
-          "totalNegatives" in props && (
-            <>
-              {/* {tag ? " ― " + tag.title : ""} */}
-              <br></br>
-              {shortenNumber(props.totalPositives, 2, false) + " "}
-              <i className="material-icons DoneIcon green-text">done</i>
-              {" ― "}
-              {/* <i className="material-icons gray-text">remove</i>{" "} */}
-              <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-              <i className="material-icons red-text">close</i>
-            </>
-          )}
-      </span>
-    </div>
+          </>
+        )}
+        <span
+          className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")}
+          onClick={preventEventPropagation}
+        >
+          {props.inUserBar
+            ? "Your profile settings"
+            : props.chooseUname
+              ? props.uname
+              : props.fullname}
+          {!("inNodeFooter" in props && props.inNodeFooter) &&
+            "totalPositives" in props &&
+            "totalNegatives" in props && (
+              <>
+                {/* {tag ? " ― " + tag.title : ""} */}
+                <br></br>
+                {shortenNumber(props.totalPositives, 2, false) + " "}
+                <i className="material-icons DoneIcon green-text">done</i>
+                {" ― "}
+                {/* <i className="material-icons gray-text">remove</i>{" "} */}
+                <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
+                <i className="material-icons red-text">close</i>
+              </>
+            )}
+        </span>
+      </div>
+    </Tooltip >
   )
 }
 

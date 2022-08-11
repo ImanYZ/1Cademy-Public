@@ -374,3 +374,175 @@
   margin-top: -9.1px;
   margin-right: -1px;
 }
+
+
+/* ------------------------------------------- */
+/* styles from nodeFooter */
+.NodeFooter {
+  position: relative;
+  bottom: -9.1px;
+  font-size: 13px;
+  line-height: 13px;
+  font-weight: 100;
+}
+.NodeFooter.Right {
+  float: right;
+  right: -10px;
+}
+.NodeFooter.Left {
+  float: left;
+  left: -4px;
+  bottom: -13px;
+  font-size: 14.5px;
+}
+
+.FooterParentNodesOpen {
+  margin-right: 4px;
+  margin-left: -4px;
+}
+.FooterParentNodesClosed {
+  margin-right: -5.5px;
+  margin-left: -4px;
+}
+
+.ImageUploadButton {
+  font-size: 19px;
+}
+
+.ImageUploadButtonLoader {
+  margin: -10px 0px -4px 10px;
+  position: relative;
+  width: 25px !important;
+  height: 25px !important;
+}
+
+.ImageUploadPercentage {
+  margin-left: 4px;
+}
+
+.NodeFooter.Left {
+  margin-top: -10px;
+}
+
+.NodeTypeIconOpen {
+  position: relative;
+  top: -34px;
+  left: 40px;
+  font-size: 16px;
+  line-height: 4px;
+  margin-bottom: -7px;
+  padding-top: 16px;
+}
+
+.NodeTypeIconClosed {
+  position: relative;
+  top: 10px;
+  left: 4px;
+  font-size: 16px;
+  margin-bottom: 22px;
+}
+
+.NodeFooter .SidebarButton {
+  margin-bottom: -13px;
+}
+
+.NodeFooter .btn-floating,
+.NodeFooter .UserAvatar.UserStatusIcon {
+  margin: 0px 0px 0px 0px;
+  height: 28px;
+  line-height: 28px;
+  width: 28px;
+}
+
+.CitationsSpanBeforeTagIcon {
+  margin-right: 7px;
+}
+
+.FooterTagIcon {
+  font-size: 14.2px !important;
+  margin-right: 0px !important;
+  margin-top: 1px !important;
+}
+
+
+/* --------------------------------------------- */
+/* styles from user status icon */
+
+.UserAvatar.UserStatusIcon {
+  margin: 0px 0px 0px 0px;
+  height: 40.9px;
+  line-height: 40.9px;
+  width: 40.9px;
+  direction: ltr;
+  transition: all 2.2s; /* vendorless fallback */
+  -o-transition: all 2.2s; /* opera */
+  -ms-transition: all 2.2s; /* IE 10 */
+  -moz-transition: all 2.2s; /* Firefox */
+  -webkit-transition: all 2.2s; /*safari and chrome */
+}
+.SidebarButton .GainedPoint .SidebarButton .GainedPoint {
+  -webkit-box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
+  -moz-box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
+  box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
+}
+.SidebarButton .LostPoint .SidebarButton .LostPoint {
+  -webkit-box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
+  -moz-box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
+  box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
+}
+
+.UserStatusOnlineIcon,
+.UserStatusOfflineIcon {
+  position: relative;
+  white-space: nowrap;
+  margin: -10px 0px -4px 0px;
+  height: 13px;
+  width: 13px;
+  border-radius: 50%;
+  background-color: greenyellow;
+  overflow: hidden;
+}
+
+.Lightmode .UserStatusOnlineIcon {
+  background-color: rgb(99, 165, 0);
+}
+
+.UserStatusOfflineIcon {
+  background-color: #a7a7a7;
+}
+
+.UserStatusTotalPoints,
+.UserStatusTotalAwards {
+  color: white;
+  display: block;
+  position: relative;
+  left: 46px;
+  top: -30.1px;
+  line-height: 0;
+  height: 0;
+  width: 82px;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0s, line-height 0s, height 0s; /* vendorless fallback */
+  -o-transition: visibility 0s, line-height 0s, height 0s; /* opera */
+  -ms-transition: visibility 0s, line-height 0s, height 0s; /* IE 10 */
+  -moz-transition: visibility 0s, line-height 0s, height 0s; /* Firefox */
+  -webkit-transition: visibility 0s, line-height 0s, height 0s; /*safari and chrome */
+}
+.LightMode .UserStatusTotalPoints,
+.LightMode .UserStatusTotalAwards {
+  color: #454545;
+}
+.UserStatusTotalAwards {
+  top: -34px;
+}
+
+.UserStatusTotalPoints.inUserBar {
+  top: -39px;
+}
+
+#UserProfileButtonDefaultTag {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

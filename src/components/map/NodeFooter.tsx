@@ -1,15 +1,19 @@
-import CreateIcon from '@mui/icons-material/Create';
 import { AddBoxOutlined } from '@mui/icons-material';
+import CreateIcon from '@mui/icons-material/Create';
 import HeightIcon from '@mui/icons-material/Height';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import VoiceOverOffIcon from '@mui/icons-material/VoiceOverOff';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import { Box } from '@mui/system';
-import React from 'react'
+import dayjs from 'dayjs';
+import relativeTime from "dayjs/plugin/relativeTime";
+import React, { useState } from 'react'
 
 import { User } from '../../knowledgeTypes';
 import NodeTypeIcon from '../NodeTypeIcon';
 import { MemoizedUserStatusIcon } from './UserStatusIcon';
+
+dayjs.extend(relativeTime);
 
 type NodeFooterProps = {
   open: boolean,
@@ -38,7 +42,7 @@ type NodeFooterProps = {
   references: any,
   tags: any,
   parents: any,
-  children: any,
+  nodesChildren: any,
   commentsNum: any,
   proposalsNum: any,
   studied: any,
@@ -64,8 +68,8 @@ const NodeFooter = (props: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   return (
-    <Box>
-      <Box className="NodeFooter Left">
+    <Box className="footer">
+      <Box className="NodeFooter Left" sx={{ display: 'flex' }}>
         {props.open &&
           (props.isNew ? (
             <MemoizedUserStatusIcon
@@ -90,17 +94,7 @@ const NodeFooter = (props: NodeFooterProps) => {
               reloadPermanentGrpah={props.reloadPermanentGrpah}
             />
           ))}
-        <Tooltip title={`This is 
-            ${props.nodeType[0] == "A" ||
-            props.nodeType[0] == "E" ||
-            props.nodeType[0] == "I" ||
-            props.nodeType[0] == "O" ||
-            props.nodeType[0] == "U"
-            ? "an"
-            : "a"}
-              ${props.nodeType} node.`}>
-          <NodeTypeIcon nodeType={props.nodeType} />
-        </Tooltip>
+        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
       </Box>
       <Box className="NodeFooter Right">
         {props.open ? (
@@ -135,7 +129,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </MetaButton> */}
                 <Tooltip title={"Propose/evaluate versions of this node."} placement='top'>
                   <Button onClick={() => console.log('selectPendingProposals')} >
-                    <CreateIcon />{` ${dayjs(props.changedAt).fromNow()}`}
+                    <CreateIcon />{` ${dayjs(new Date(props.changedAt.seconds * 1000)).fromNow()}`}
                   </Button>
                 </Tooltip>
                 {/* <MetaButton
@@ -199,6 +193,7 @@ const NodeFooter = (props: NodeFooterProps) => {
           </>
         ) : (
           // note open
+          <></>
         )}
       </Box>
     </Box>

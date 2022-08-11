@@ -11,16 +11,17 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PersonIcon from "@mui/icons-material/Person";
 import ShareIcon from "@mui/icons-material/Share";
 import { SvgIconProps } from "@mui/material/SvgIcon";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import { FC } from "react";
 
 import { NodeType } from "../knowledgeTypes";
 
 type Props = {
   nodeType: NodeType;
+  tooltipPlacement: TooltipProps['placement'];
 } & SvgIconProps;
 
-const NodeTypeIcon: FC<Props> = ({ nodeType, color = "primary", ...rest }) => {
+const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement, color = "primary", ...rest }) => {
   const renderIcon = () => {
     switch (nodeType) {
       case "Code":
@@ -51,7 +52,7 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, color = "primary", ...rest }) => {
         return <LockIcon color={color} {...rest} />;
     }
   };
-  return <Tooltip title={`${nodeType} node`}>{renderIcon()}</Tooltip>;
+  return <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>{renderIcon()}</Tooltip>;
 };
 
 export default NodeTypeIcon;

@@ -145,8 +145,7 @@ const NodesList = ({
             references={nodes[nId].references}
             tags={nodes[nId].tags}
             parents={nodes[nId].parents}
-            // eslint-disable-next-line react/no-children-prop
-            children={nodes[nId].children}
+            nodesChildren={nodes[nId].children}
             choices={nodes[nId].choices}
             commentsNum={nodes[nId].comments}
             proposalsNum={nodes[nId].versions}
