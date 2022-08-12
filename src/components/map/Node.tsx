@@ -84,7 +84,7 @@ type NodeProps = {
   hideNodeHandler: any;//
   hideOffsprings: any;//
   toggleNode: (event: any, id: string) => void;//
-  openNodePart: any;//
+  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void;//
   selectNode: any;//
   nodeClicked: any;//
   correctNode: any;//
@@ -221,6 +221,7 @@ const Node = ({
   // );
 
   const toggleNodeHandler = useCallback(
+
     (event: any) => {
       console.log("-------------------->toggleNodeHandler")
       // event.persist();
@@ -242,20 +243,25 @@ const Node = ({
   // );
 
   const markStudiedHandler = useCallback(
-    // (event:any) => markStudied(event, identifier)
-    () => console.log('uploadNodeImageHandler'),
+    (event: any) => {
+      console.log("first");
+      markStudied(event, identifier);
+    },
+
     [markStudied, identifier]
   );
 
   const bookmarkHandler = useCallback(
-    // (event:any) => bookmark(event, identifier)
-    () => console.log('uploadNodeImageHandler'),
+    (event: any) => bookmark(event, identifier),
     [bookmark, identifier]
   );
 
   const openNodePartHandler = useCallback(
-    // (event:any, partType:any) => openNodePart(event, identifier, partType, openPart, setOpenPart, tags)
-    () => console.log('uploadNodeImageHandler'),
+    (event: any, partType: any) => {
+      console.log("openNodePartHandler");
+      openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
+    },
+
     [identifier, openPart, tags]
   );
 
@@ -461,7 +467,8 @@ const Node = ({
                 width={width}
               /> */}
               {title}
-              {!editable && !unaccepted && !nodeBookState.choosingNode/* !choosingNode*/ && (
+              {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
+
                 <MemoizedNodeHeader
                   open={open}
                   onToggleNode={toggleNodeHandler}
@@ -708,7 +715,7 @@ const Node = ({
               /> */}
               {title}
             </div>
-            {!nodeBookState.choosingNode /*choosingNode*/ && (
+            {!nodeBookState.choosingNode /* && choosingNode */ && (
               <MemoizedNodeHeader
                 open={open}
                 onToggleNode={toggleNodeHandler}

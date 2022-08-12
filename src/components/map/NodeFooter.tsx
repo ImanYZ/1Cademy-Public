@@ -17,7 +17,7 @@ import { Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { User } from '../../knowledgeTypes';
 import shortenNumber from '../../lib/utils/shortenNumber';
@@ -75,15 +75,72 @@ type NodeFooterProps = {
   user: User
 }
 
-const NodeFooter = (props: NodeFooterProps) => {
+
+
+
+const NodeFooter = ({open,
+  identifier,
+  activeNode,
+  citationsSelected,
+  proposalsSelected,
+  acceptedProposalsSelected,
+  commentsSelected,
+  editable,
+  title,
+  content,
+  unaccepted,
+  openPart,
+  nodeType,
+  isNew,
+  admin,
+  aImgUrl,
+  aFullname,
+  aChooseUname,
+  viewers,
+  correctNum,
+  markedCorrect,
+  wrongNum,
+  markedWrong,
+  references,
+  tags,
+  parents,
+  nodesChildren,
+  commentsNum,
+  proposalsNum,
+  studied,
+  isStudied,
+  changed,
+  changedAt,
+  bookmarked,
+  bookmarks,
+  reloadPermanentGrpah,
+  markStudied,
+  bookmark,
+  nodeChanged,
+  openNodePart,
+  selectNode,
+  correctNode,
+  wrongNode,
+  uploadNodeImage,
+  user
+}: NodeFooterProps) => {
 
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+
+  const selectLinkingWords = useCallback(
+    (event:any) => {
+      
+      openNodePart(event, "LinkingWords");
+    },
+    [openNodePart]
+  );
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box className="NodeFooter Left" sx={{ display: 'flex', alignItems: 'center' }}>
-        {props.open &&
-          (props.isNew ? (
+        {open &&
+          (isNew ? (
             //   <UserStatusIcon
             //     uname={username}
             //     imageUrl={imageUrl}
@@ -92,69 +149,69 @@ const NodeFooter = (props: NodeFooterProps) => {
             //     online={false}
             //     inUserBar={false}
             //     inNodeFooter={true}
-            //     reloadPermanentGrpah={props.reloadPermanentGrpah}
+            //     reloadPermanentGrpah={reloadPermanentGrpah}
             //   />
             // ) : (
             //   <UserStatusIcon
-            //     uname={props.admin}
-            //     imageUrl={props.aImgUrl}
-            //     fullname={props.aFullname}
-            //     chooseUname={props.aChooseUname}
+            //     uname={admin}
+            //     imageUrl={aImgUrl}
+            //     fullname={aFullname}
+            //     chooseUname={aChooseUname}
             //     online={false}
             //     inUserBar={false}
             //     inNodeFooter={true}
-            //     reloadPermanentGrpah={props.reloadPermanentGrpah}
+            //     reloadPermanentGrpah={reloadPermanentGrpah}
             //   />
             <MemoizedUserStatusIcon
-              uname={props.user.uname}
-              imageUrl={props.user.imageUrl || ""}
-              fullname={props.user.fName + " " + props.user.lName}
-              chooseUname={props.user.chooseUname}
+              uname={user.uname}
+              imageUrl={user.imageUrl || ""}
+              fullname={user.fName + " " + user.lName}
+              chooseUname={user.chooseUname}
               online={false}
               inUserBar={false}
               inNodeFooter={true}
-              reloadPermanentGrpah={props.reloadPermanentGrpah}
+              reloadPermanentGrpah={reloadPermanentGrpah}
             />
           ) : (
             <MemoizedUserStatusIcon
-              uname={props.admin}
-              imageUrl={props.aImgUrl}
-              fullname={props.aFullname}
-              chooseUname={props.aChooseUname}
+              uname={admin}
+              imageUrl={aImgUrl}
+              fullname={aFullname}
+              chooseUname={aChooseUname}
               online={false}
               inUserBar={false}
               inNodeFooter={true}
-              reloadPermanentGrpah={props.reloadPermanentGrpah}
+              reloadPermanentGrpah={reloadPermanentGrpah}
             />
           ))}
-        <div className={props.open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}>
-          {/* <NodeTypeIcon nodeType={props.nodeType} /> */}
-          <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
+        <div className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}>
+          {/* <NodeTypeIcon nodeType={nodeType} /> */}
+          <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} />
           {/* <span
-            className={"TooltipText " + (props.open ? "Top" : "Bottom")}
+            className={"TooltipText " + (open ? "Top" : "Bottom")}
             onClick={preventEventPropagation}
           >
             This is{" "}
-            {props.nodeType[0] == "A" ||
-              props.nodeType[0] == "E" ||
-              props.nodeType[0] == "I" ||
-              props.nodeType[0] == "O" ||
-              props.nodeType[0] == "U"
+            {nodeType[0] == "A" ||
+              nodeType[0] == "E" ||
+              nodeType[0] == "I" ||
+              nodeType[0] == "O" ||
+              nodeType[0] == "U"
               ? "an"
               : "a"}{" "}
-            "{props.nodeType}" node.
+            "{nodeType}" node.
           </span> */}
         </div>
       </Box>
       <Box className="NodeFooter Right" sx={{ display: 'flex', alignItems: 'center' }}>
-        {props.open ? (
+        {open ? (
           <>
-            {!props.editable && !props.unaccepted ? (
+            {!editable && !unaccepted ? (
               // Accepted nodes
               <>
 
                 <Tooltip title="Adjust the node height." placement='top'>
-                  <IconButton onClick={() => console.log('props.nodeChanged')} sx={{ fontSize: '15px', p: '4px 7px' }}>
+                  <IconButton onClick={() => console.log('nodeChanged')} sx={{ fontSize: '15px', p: '4px 7px' }}>
                     <HeightIcon fontSize='inherit' />
                   </IconButton>
                 </Tooltip>
@@ -166,13 +223,13 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </Tooltip>
 
                 <Tooltip title={"Propose/evaluate versions of this node."} placement='top'>
-                  <Button onClick={() => console.log('selectPendingProposals')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.proposalsSelected ? theme => theme.palette.common.orange : 'inherit' }}>
-                    <CreateIcon fontSize='inherit' />{` ${dayjs(new Date(props.changedAt.seconds * 1000)).fromNow()}`}
+                  <Button onClick={() => console.log('selectPendingProposals')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: proposalsSelected ? theme => theme.palette.common.orange : 'inherit' }}>
+                    <CreateIcon fontSize='inherit' />{` ${dayjs(new Date(changedAt.seconds * 1000)).fromNow()}`}
                   </Button>
                 </Tooltip>
 
                 {/* <MetaButton
-                  onClick={props.nodeChanged}
+                  onClick={nodeChanged}
                   tooltip="Adjust the node height."
                   tooltipPosition="Top"
                 >
@@ -195,34 +252,34 @@ const NodeFooter = (props: NodeFooterProps) => {
                   <i
                     className={
                       "material-icons SeparateIcon " +
-                      (props.acceptedProposalsSelected ? "orange-text" : "grey-text")
+                      (acceptedProposalsSelected ? "orange-text" : "grey-text")
                     }
                   >
                     event_available
                   </i>
-                  <span>{dayjs(props.changedAt).fromNow()}</span>
+                  <span>{dayjs(changedAt).fromNow()}</span>
                 </MetaButton> */}
                 {/* <MetaButton
                   onClick={selectPendingProposals}
                   tooltip="Propose/evaluate versions of this node."
                   // {
-                  //   shortenNumber(props.proposalsNum, 2, false) +
+                  //   shortenNumber(proposalsNum, 2, false) +
                   //   " proposal" +
-                  //   (props.proposalsNum > 1 ? "s" : "") +
+                  //   (proposalsNum > 1 ? "s" : "") +
                   //   " exist" +
-                  //   (props.proposalsNum === 1 ? "s" : "") +
+                  //   (proposalsNum === 1 ? "s" : "") +
                   //   " on this node. Click to propose an improvement or review a proposal on the pending proposals list."
                   // }
                   tooltipPosition="Top"
                 >
                   <i
                     className={
-                      "material-icons " + (props.proposalsSelected ? "orange-text" : "grey-text")
+                      "material-icons " + (proposalsSelected ? "orange-text" : "grey-text")
                     }
                   >
                     create
                   </i>
-                  <span>{dayjs(props.changedAt).fromNow()}</span>
+                  <span>{dayjs(changedAt).fromNow()}</span>
                 </MetaButton> */}
               </>
             ) : (
@@ -260,11 +317,11 @@ const NodeFooter = (props: NodeFooterProps) => {
                 </MetaButton> */}
               </>
             )}
-            {!props.editable && !props.unaccepted && props.nodeType === "Reference" ? (
+            {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
                 <Tooltip title={"View nodes that have cited this node."} placement='top'>
                   <Button onClick={() => console.log('selectCitations')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px' }}>
-                    {props.citationsSelected ? (
+                    {citationsSelected ? (
                       <>
                         <ArrowForwardIcon fontSize='inherit' sx={{ color: theme => theme.palette.common.orange }} />
                         <MenuBookIcon fontSize='inherit' sx={{ color: theme => theme.palette.common.orange }} />
@@ -284,16 +341,16 @@ const NodeFooter = (props: NodeFooterProps) => {
                   ******************************************************** */}
                     <span>{shortenNumber(10, 2, false)}</span>
                     {/* CHECK: please get correct value from citations */}
-                    {/* <span>{shortenNumber(citations[props.identifier].size, 2, false)}</span> */}
+                    {/* <span>{shortenNumber(citations[identifier].size, 2, false)}</span> */}
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"View tags assigned to this node."} placement='top'>
                   <Button
                     onClick={() => console.log('selectTags')}
-                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.openPart === 'Tags' ? theme => theme.palette.common.orange : 'inherit' }}>
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: openPart === 'Tags' ? theme => theme.palette.common.orange : 'inherit' }}>
                     <LocalOfferIcon fontSize='inherit' />
-                    <span>{shortenNumber(props.tags.length, 2, false)}</span>
+                    <span>{shortenNumber(tags.length, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
@@ -302,7 +359,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                   tooltip="View nodes that have cited this node."
                   tooltipPosition="Top"
                 >
-                  {props.citationsSelected ? (
+                  {citationsSelected ? (
                     <>
                       <i className="material-icons orange-text">arrow_forward</i>
                       <i className="material-icons SeparateIcon orange-text">menu_book</i>
@@ -313,7 +370,7 @@ const NodeFooter = (props: NodeFooterProps) => {
                       <i className="material-icons SeparateIcon grey-text">menu_book</i>
                     </>
                   )}
-                  <span>{shortenNumber(citations[props.identifier].size, 2, false)}</span>
+                  <span>{shortenNumber(citations[identifier].size, 2, false)}</span>
                 </MetaButton> */}
 
                 {/* <MetaButton
@@ -323,12 +380,12 @@ const NodeFooter = (props: NodeFooterProps) => {
                 >
                   <i
                     className={
-                      "material-icons " + (props.openPart === "Tags" ? "orange-text" : "grey-text")
+                      "material-icons " + (openPart === "Tags" ? "orange-text" : "grey-text")
                     }
                   >
                     local_offer
                   </i>
-                  <span>{shortenNumber(props.tags.length, 2, false)}</span>
+                  <span>{shortenNumber(tags.length, 2, false)}</span>
                 </MetaButton> */}
               </>
             ) : (
@@ -336,15 +393,15 @@ const NodeFooter = (props: NodeFooterProps) => {
               <Tooltip title={"View tags and citations used in this node."} placement='top'>
                 <Button
                   onClick={() => console.log('selectReferences')}
-                  sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.openPart === 'References' ? theme => theme.palette.common.orange : 'inherit' }}
+                  sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: openPart === 'References' ? theme => theme.palette.common.orange : 'inherit' }}
                 >
                   <MenuBookIcon fontSize='inherit' />
                   <span className="CitationsSpanBeforeTagIcon">
-                    {shortenNumber(props.references.length, 2, false)}
+                    {shortenNumber(references.length, 2, false)}
                   </span>
                   <Box component={'span'} sx={{ mx: '5px' }}> | </Box>
                   <LocalOfferIcon fontSize='inherit' />
-                  <span>{shortenNumber(props.tags.length, 2, false)}</span>
+                  <span>{shortenNumber(tags.length, 2, false)}</span>
                 </Button>
               </Tooltip>
 
@@ -356,26 +413,26 @@ const NodeFooter = (props: NodeFooterProps) => {
               //   <i
               //     className={
               //       "material-icons SeparateIcon " +
-              //       (props.openPart === "References" ? "orange-text" : "grey-text")
+              //       (openPart === "References" ? "orange-text" : "grey-text")
               //     }
               //   >
               //     menu_book
               //   </i>
               //   <span className="CitationsSpanBeforeTagIcon">
-              //     {shortenNumber(props.references.length, 2, false)} |
+              //     {shortenNumber(references.length, 2, false)} |
               //   </span>
               //   <i
               //     className={
               //       "material-icons FooterTagIcon " +
-              //       (props.openPart === "References" ? "orange-text" : "grey-text")
+              //       (openPart === "References" ? "orange-text" : "grey-text")
               //     }
               //   >
               //     local_offer
               //   </i>
-              //   <span>{shortenNumber(props.tags.length, 2, false)}</span>
+              //   <span>{shortenNumber(tags.length, 2, false)}</span>
               // </MetaButton>
             )}
-            {!props.editable && !props.unaccepted && (
+            {!editable && !unaccepted && (
               <>
                 {/* <MetaButton
                   onClick={event => {}}
@@ -385,79 +442,79 @@ const NodeFooter = (props: NodeFooterProps) => {
                   <i
                     className={
                       "material-icons " + 
-                      (props.activeNode &&
-                      props.commentsSelected
+                      (activeNode &&
+                      commentsSelected
                         ? "orange-text"
                         : "grey-text"
                       )}
                   >forum</i>
-                  <span>{shortenNumber(props.commentsNum, 2, false)}</span>
+                  <span>{shortenNumber(commentsNum, 2, false)}</span>
                 </MetaButton> */}
 
                 <Tooltip title={"Vote to delete node."} placement='top'>
                   <Button
-                    onClick={() => console.log('props.wrongNode')}
+                    onClick={() => console.log('wrongNode')}
                     sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: 'white' }}>
-                    <CloseIcon fontSize='inherit' sx={{ color: props.markedCorrect ? 'red' : 'inherit' }} />
-                    <span>{shortenNumber(props.wrongNum, 2, false)}</span>
+                    <CloseIcon fontSize='inherit' sx={{ color: markedCorrect ? 'red' : 'inherit' }} />
+                    <span>{shortenNumber(wrongNum, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"Vote to prevent further changes."} placement='top'>
                   <Button
-                    onClick={() => console.log('props.correctNode')}
+                    onClick={() => console.log('correctNode')}
                     sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: 'white' }}>
-                    <DoneIcon fontSize='inherit' sx={{ color: props.markedCorrect ? 'green' : 'inherit' }} />
-                    <span>{shortenNumber(props.correctNum, 2, false)}</span>
+                    <DoneIcon fontSize='inherit' sx={{ color: markedCorrect ? 'green' : 'inherit' }} />
+                    <span>{shortenNumber(correctNum, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip title={"Bookmark this node."} placement='top'>
                   <Button
-                    onClick={() => console.log('props.bookmark')}
-                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.bookmarked ? theme => theme.palette.common.orange : 'inherit' }}>
-                    {props.bookmarked ? <BookmarkIcon fontSize='inherit' /> : <BookmarkBorderIcon fontSize='inherit' />}
-                    <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+                    onClick={bookmark}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: bookmarked ? theme => theme.palette.common.orange : 'inherit' }}>
+                    {bookmarked ? <BookmarkIcon fontSize='inherit' /> : <BookmarkBorderIcon fontSize='inherit' />}
+                    <span>{shortenNumber(bookmarks, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 <Tooltip
-                  title={!props.isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
+                  title={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                   placement='top'
                 >
                   <Button
-                    onClick={() => console.log('props.markStudied')}
-                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: props.isStudied ? theme => theme.palette.common.orange : 'inherit' }}>
-                    {props.isStudied ? <DraftsIcon fontSize='inherit' /> : <MailIcon fontSize='inherit' />}
-                    <span>{shortenNumber(props.studied, 2, false)}</span>
+                    onClick={markStudied}
+                    sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: isStudied ? theme => theme.palette.common.orange : 'inherit' }}>
+                    {isStudied ? <DraftsIcon fontSize='inherit' /> : <MailIcon fontSize='inherit' />}
+                    <span>{shortenNumber(studied, 2, false)}</span>
                   </Button>
                 </Tooltip>
 
                 {/* <MetaButton
-                  onClick={props.wrongNode}
+                  onClick={wrongNode}
                   tooltip="Vote to delete node."
                   tooltipPosition="Top"
                 >
-                  <i className={"material-icons " + (props.markedWrong ? "red-text" : "grey-text")}>
+                  <i className={"material-icons " + (markedWrong ? "red-text" : "grey-text")}>
                     close
                   </i>
-                  <span>{shortenNumber(props.wrongNum, 2, false)}</span>
+                  <span>{shortenNumber(wrongNum, 2, false)}</span>
                 </MetaButton> */}
 
                 {/* <MetaButton
-                  onClick={props.correctNode}
+                  onClick={correctNode}
                   tooltip="Vote to prevent further changes."
                   tooltipPosition="Top"
                 >
                   <i
                     className={
                       "material-icons DoneIcon " +
-                      (props.markedCorrect ? "green-text" : "grey-text")
+                      (markedCorrect ? "green-text" : "grey-text")
                     }
                   >
                     done
                   </i>
-                  <span>{shortenNumber(props.correctNum, 2, false)}</span>
+                  <span>{shortenNumber(correctNum, 2, false)}</span>
                 </MetaButton> */}
 
                 {/* <MetaButton
@@ -466,75 +523,75 @@ const NodeFooter = (props: NodeFooterProps) => {
                   >
                   <i
                     className={"material-icons "
-                      (props.markedAdmired
+                      (markedAdmired
                         ? "amber-text"
                         : "amber-text text-lighten-3")
                     }
                   >grade</i>
-                  <span>{shortenNumber(props.admiredNum, 2, false)}</span>
+                  <span>{shortenNumber(admiredNum, 2, false)}</span>
                 </MetaButton> */}
                 {/* <MetaButton
-                  onClick={props.bookmark}
+                  onClick={bookmark}
                   tooltip="Bookmark this node."
                   // {
                   //   `You've ${
-                  //     !props.bookmarked ? "not " : ""
+                  //     !bookmarked ? "not " : ""
                   //   }bookmarked this node. ` +
-                  //   shortenNumber(props.bookmarks, 2, false) +
+                  //   shortenNumber(bookmarks, 2, false) +
                   //   " 1Cademist" +
-                  //   (props.bookmarks === 1 ? " has" : "s have") +
+                  //   (bookmarks === 1 ? " has" : "s have") +
                   //   " bookmarked this node."
                   // }
                   tooltipPosition="Top"
                 >
                   <i
-                    className={"material-icons " + (props.bookmarked ? "orange-text" : "grey-text")}
+                    className={"material-icons " + (bookmarked ? "orange-text" : "grey-text")}
                   >
-                    {props.bookmarked ? "bookmark" : "bookmark_border"}
+                    {bookmarked ? "bookmark" : "bookmark_border"}
                   </i>
-                  <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+                  <span>{shortenNumber(bookmarks, 2, false)}</span>
                 </MetaButton> */}
                 {/* <MetaButton
-                  onClick={props.markStudied}
+                  onClick={markStudied}
                   tooltip={
-                    !props.isStudied
+                    !isStudied
                       ? 'Mark this node as "studied."'
                       : 'Mark this node as "not studied."'
                   }
                   // {
-                  //   (!props.isStudied
+                  //   (!isStudied
                   //     ? "You've not marked this node as Studied. "
                   //     : `This node is ${
-                  //         props.changed ? "changed" : "not chagned"
+                  //         changed ? "changed" : "not chagned"
                   //       } since the last time you marked it as Studied. `) +
-                  //   shortenNumber(props.studied, 2, false) +
+                  //   shortenNumber(studied, 2, false) +
                   //   " 1Cademist" +
-                  //   (props.studied === 1 ? " has" : "s have") +
+                  //   (studied === 1 ? " has" : "s have") +
                   //   " studied this node."
                   // }
                   tooltipPosition="Top"
                 >
                   <i className={"material-icons SeparateIcon grey-text"}>
-                    {props.isStudied ? "drafts" : "mail"}
+                    {isStudied ? "drafts" : "mail"}
                   </i>
-                  <span>{shortenNumber(props.studied, 2, false)}</span>
+                  <span>{shortenNumber(studied, 2, false)}</span>
                 </MetaButton> */}
                 {/* <MetaButton
                     tooltip="# of 1Cademists who have this node visible on their map."
                     tooltipPosition="Top"
                   >
                   <i className="material-icons grey-text">visibility</i>
-                  <span>{shortenNumber(props.viewers, 2, false)}</span>
+                  <span>{shortenNumber(viewers, 2, false)}</span>
                 </MetaButton> */}
               </>
             )}
             <Tooltip title={"View parent and child nodes."} placement='top'>
               <Button
-                onClick={() => console.log('selectLinkingWords')}
-                sx={{ width: 'auto', color: props.openPart === 'LinkingWords' ? theme => theme.palette.common.orange : 'inherit' }}>
-                <span className="">{shortenNumber(props.parents.length, 2, false)}</span>
+                onClick={selectLinkingWords}
+                sx={{ width: 'auto', color: openPart === 'LinkingWords' ? theme => theme.palette.common.orange : 'inherit' }}>
+                <span className="">{shortenNumber(parents.length, 2, false)}</span>
                 <SwapHorizIcon fontSize='inherit' />
-                <span>{shortenNumber(props.nodesChildren.length, 2, false)}</span>
+                <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
               </Button>
             </Tooltip>
 
@@ -543,155 +600,155 @@ const NodeFooter = (props: NodeFooterProps) => {
               tooltip="View parent and child nodes."
               // {
               //   "This node has " +
-              //   shortenNumber(props.parents.length, 2, false) +
+              //   shortenNumber(parents.length, 2, false) +
               //   " parent node" +
-              //   (props.parents.length === 1 ? "" : "s") +
+              //   (parents.length === 1 ? "" : "s") +
               //   " and " +
-              //   shortenNumber(props.children.length, 2, false) +
+              //   shortenNumber(children.length, 2, false) +
               //   " child node" +
-              //   (props.children.length === 1 ? "." : "s.") +
+              //   (children.length === 1 ? "." : "s.") +
               //   " Click to see the child and parent nodes of this node."
               // }
               tooltipPosition="Top"
             >
               <span className="FooterParentNodesOpen">
-                {shortenNumber(props.parents.length, 2, false)}
+                {shortenNumber(parents.length, 2, false)}
               </span>
               <i
                 className={
                   "material-icons " +
-                  (props.openPart === "LinkingWords" ? "orange-text" : "grey-text")
+                  (openPart === "LinkingWords" ? "orange-text" : "grey-text")
                 }
               >
                 swap_horiz
               </i>
-              <span>{shortenNumber(props.children.length, 2, false)}</span>
+              <span>{shortenNumber(children.length, 2, false)}</span>
             </MetaButton> */}
           </>
         ) : (
           <>
             <Tooltip
               title={
-                shortenNumber(props.correctNum, 2, false) +
+                shortenNumber(correctNum, 2, false) +
                 " 1Cademist" +
-                (props.correctNum === 1 ? " has" : "s have") +
+                (correctNum === 1 ? " has" : "s have") +
                 " found this node helpful and " +
-                shortenNumber(props.wrongNum, 2, false) +
+                shortenNumber(wrongNum, 2, false) +
                 " found it unhelpful."
               }
               placement='top'>
               <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px', fontSize: '15px' }}>
-                <CloseIcon fontSize='inherit' sx={{ color: props.markedWrong ? 'red' : 'inherit' }} />
-                <span>{shortenNumber(props.wrongNum, 2, false)}</span>
-                <DoneIcon fontSize='inherit' sx={{ color: props.markedCorrect ? 'green' : 'inherit' }} />
-                <span>{shortenNumber(props.wrongNum, 2, false)}</span>
+                <CloseIcon fontSize='inherit' sx={{ color: markedWrong ? 'red' : 'inherit' }} />
+                <span>{shortenNumber(wrongNum, 2, false)}</span>
+                <DoneIcon fontSize='inherit' sx={{ color: markedCorrect ? 'green' : 'inherit' }} />
+                <span>{shortenNumber(wrongNum, 2, false)}</span>
               </Box>
             </Tooltip>
 
             <Tooltip
-              title={`You've ${!props.bookmarked ? "not " : ""}bookmarked this node. ` +
-                shortenNumber(props.bookmarks, 2, false) +
+              title={`You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
+                shortenNumber(bookmarks, 2, false) +
                 " 1Cademist" +
-                (props.bookmarks === 1 ? " has" : "s have") +
+                (bookmarks === 1 ? " has" : "s have") +
                 " bookmarked this node."}
               placement='top'>
               <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px', fontSize: '15px' }}>
-                {props.bookmarked
-                  ? <BookmarkIcon fontSize='inherit' sx={{ color: props.bookmarked ? theme => theme.palette.common.orange : 'inherit' }} />
-                  : <BookmarkBorderIcon fontSize='inherit' sx={{ color: props.bookmarked ? theme => theme.palette.common.orange : 'inherit' }} />}
-                <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+                {bookmarked
+                  ? <BookmarkIcon fontSize='inherit' sx={{ color: bookmarked ? theme => theme.palette.common.orange : 'inherit' }} />
+                  : <BookmarkBorderIcon fontSize='inherit' sx={{ color: bookmarked ? theme => theme.palette.common.orange : 'inherit' }} />}
+                <span>{shortenNumber(bookmarks, 2, false)}</span>
               </Box>
             </Tooltip>
 
             <Tooltip
               title={"This node has " +
-                shortenNumber(props.parents.length, 2, false) +
+                shortenNumber(parents.length, 2, false) +
                 " parent node" +
-                (props.parents.length === 1 ? "" : "s") +
+                (parents.length === 1 ? "" : "s") +
                 " and " +
-                shortenNumber(props.nodesChildren.length, 2, false) +
+                shortenNumber(nodesChildren.length, 2, false) +
                 " child node" +
-                (props.nodesChildren.length === 1 ? "." : "s.")}
+                (nodesChildren.length === 1 ? "." : "s.")}
               placement='top'>
               <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px', fontSize: '15px' }}>
                 <span /*className="FooterParentNodesClosed"*/>
-                  {shortenNumber(props.parents.length, 2, false)}
+                  {shortenNumber(parents.length, 2, false)}
                 </span>
                 <SwapHorizIcon fontSize='inherit' />
-                <span>{shortenNumber(props.nodesChildren.length, 2, false)}</span>
+                <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
               </Box>
             </Tooltip>
 
             {/* <MetaButton
               tooltip={
-                shortenNumber(props.correctNum, 2, false) +
+                shortenNumber(correctNum, 2, false) +
                 " 1Cademist" +
-                (props.correctNum === 1 ? " has" : "s have") +
+                (correctNum === 1 ? " has" : "s have") +
                 " found this node helpful and " +
-                shortenNumber(props.wrongNum, 2, false) +
+                shortenNumber(wrongNum, 2, false) +
                 " found it unhelpful."
               }
             >
               <i
                 className={
                   "material-icons " +
-                  (props.markedWrong ? "red-text more-left-padding" : "grey-text more-left-padding")
+                  (markedWrong ? "red-text more-left-padding" : "grey-text more-left-padding")
                 }
               >
                 close
               </i>
-              <span>{shortenNumber(props.wrongNum, 2, false)}</span>
-              <i className={"material-icons " + (props.markedCorrect ? "green-text" : "grey-text")}>
+              <span>{shortenNumber(wrongNum, 2, false)}</span>
+              <i className={"material-icons " + (markedCorrect ? "green-text" : "grey-text")}>
                 done
               </i>
-              <span>{shortenNumber(props.correctNum, 2, false)}</span>
+              <span>{shortenNumber(correctNum, 2, false)}</span>
             </MetaButton> */}
             {/* <MetaButton
               tooltip={
-                `You've ${!props.bookmarked ? "not " : ""}bookmarked this node. ` +
-                shortenNumber(props.bookmarks, 2, false) +
+                `You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
+                shortenNumber(bookmarks, 2, false) +
                 " 1Cademist" +
-                (props.bookmarks === 1 ? " has" : "s have") +
+                (bookmarks === 1 ? " has" : "s have") +
                 " bookmarked this node."
               }
             >
-              <i className={"material-icons " + (props.bookmarked ? "orange-text" : "grey-text")}>
-                {props.bookmarked ? "bookmark" : "bookmark_border"}
+              <i className={"material-icons " + (bookmarked ? "orange-text" : "grey-text")}>
+                {bookmarked ? "bookmark" : "bookmark_border"}
               </i>
-              <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+              <span>{shortenNumber(bookmarks, 2, false)}</span>
             </MetaButton> */}
             {/* <MetaButton tooltip="# of 1Cademists who have studied this node.">
               <i
                 className={
                   "material-icons " + (
-                  props.studied
+                  studied
                     ? "orange-text"
                     : "grey-text"
                   )}
               >school</i>
-              <span>{shortenNumber(props.studied, 2, false)}</span>
+              <span>{shortenNumber(studied, 2, false)}</span>
             </MetaButton> */}
             {/* <MetaButton
               tooltip={
                 "This node has " +
-                shortenNumber(props.parents.length, 2, false) +
+                shortenNumber(parents.length, 2, false) +
                 " parent node" +
-                (props.parents.length === 1 ? "" : "s") +
+                (parents.length === 1 ? "" : "s") +
                 " and " +
-                shortenNumber(props.children.length, 2, false) +
+                shortenNumber(children.length, 2, false) +
                 " child node" +
-                (props.children.length === 1 ? "." : "s.")
+                (children.length === 1 ? "." : "s.")
               }
             >
               <span className="FooterParentNodesClosed">
-                {shortenNumber(props.parents.length, 2, false)}
+                {shortenNumber(parents.length, 2, false)}
               </span>
               <i className="material-icons grey-text">swap_horiz</i>
-              <span>{shortenNumber(props.children.length, 2, false)}</span>
+              <span>{shortenNumber(children.length, 2, false)}</span>
             </MetaButton> */}
             {/* <MetaButton tooltip="# of 1Cademists who have this node visible on their map.">
               <i className="material-icons grey-text">visibility</i>
-              <span>{shortenNumber(props.viewers, 2, false)}</span>
+              <span>{shortenNumber(viewers, 2, false)}</span>
             </MetaButton> */}
           </>
         )}
@@ -702,40 +759,40 @@ const NodeFooter = (props: NodeFooterProps) => {
   //   return (
   //     <Box className="footer">
   //       <Box className="NodeFooter Left" sx={{ display: 'flex' }}>
-  //         {props.open &&
-  //           (props.isNew ? (
+  //         {open &&
+  //           (isNew ? (
   //             <MemoizedUserStatusIcon
-  //               uname={props.user.uname}
-  //               imageUrl={props.user.imageUrl || ""}
-  //               fullname={props.user.fName + " " + props.user.lName}
-  //               chooseUname={props.user.chooseUname}
+  //               uname={user.uname}
+  //               imageUrl={user.imageUrl || ""}
+  //               fullname={user.fName + " " + user.lName}
+  //               chooseUname={user.chooseUname}
   //               online={false}
   //               inUserBar={false}
   //               inNodeFooter={true}
-  //               reloadPermanentGrpah={props.reloadPermanentGrpah}
+  //               reloadPermanentGrpah={reloadPermanentGrpah}
   //             />
   //           ) : (
   //             <MemoizedUserStatusIcon
-  //               uname={props.admin}
-  //               imageUrl={props.aImgUrl}
-  //               fullname={props.aFullname}
-  //               chooseUname={props.aChooseUname}
+  //               uname={admin}
+  //               imageUrl={aImgUrl}
+  //               fullname={aFullname}
+  //               chooseUname={aChooseUname}
   //               online={false}
   //               inUserBar={false}
   //               inNodeFooter={true}
-  //               reloadPermanentGrpah={props.reloadPermanentGrpah}
+  //               reloadPermanentGrpah={reloadPermanentGrpah}
   //             />
   //           ))}
-  //         <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
+  //         <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} />
   //       </Box>
   //       <Box className="NodeFooter Right">
-  //         {props.open ? (
+  //         {open ? (
   //           <>
-  //             {!props.editable && !props.unaccepted ? (
+  //             {!editable && !unaccepted ? (
   //               // Accepted nodes
   //               <>
   //                 <Tooltip title="Adjust the node height." placement='top'>
-  //                   <IconButton onClick={() => console.log('props.nodeChanged')} >
+  //                   <IconButton onClick={() => console.log('nodeChanged')} >
   //                     <HeightIcon fontSize='inherit' />
   //                   </IconButton>
   //                 </Tooltip>
@@ -752,40 +809,40 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                   <i
   //                     className={
   //                       "material-icons SeparateIcon " +
-  //                       (props.acceptedProposalsSelected ? "orange-text" : "grey-text")
+  //                       (acceptedProposalsSelected ? "orange-text" : "grey-text")
   //                     }
   //                   >
   //                     event_available
   //                   </i>
-  //                   <span>{dayjs(props.changedAt).fromNow()}</span>
+  //                   <span>{dayjs(changedAt).fromNow()}</span>
   //                 </MetaButton> */}
   //                 <Tooltip title={"Propose/evaluate versions of this node."} placement='top'>
   //                   <Button onClick={() => console.log('selectPendingProposals')} >
-  //                     <CreateIcon fontSize='small' />{` ${dayjs(new Date(props.changedAt.seconds * 1000)).fromNow()}`}
+  //                     <CreateIcon fontSize='small' />{` ${dayjs(new Date(changedAt.seconds * 1000)).fromNow()}`}
   //                   </Button>
   //                 </Tooltip>
   //                 {/* <MetaButton
   //                   onClick={selectPendingProposals}
   //                   tooltip="Propose/evaluate versions of this node."
   //                   // {
-  //                   //   shortenNumber(props.proposalsNum, 2, false) +
+  //                   //   shortenNumber(proposalsNum, 2, false) +
   //                   //   " proposal" +
-  //                   //   (props.proposalsNum > 1 ? "s" : "") +
+  //                   //   (proposalsNum > 1 ? "s" : "") +
   //                   //   " exist" +
-  //                   //   (props.proposalsNum === 1 ? "s" : "") +
+  //                   //   (proposalsNum === 1 ? "s" : "") +
   //                   //   " on this node. Click to propose an improvement or review a proposal on the pending proposals list."
   //                   // }
   //                   tooltipPosition="Top"
   //                 >
   //                   <i
   //                     className={
-  //                       "material-icons " + (props.proposalsSelected ? "orange-text" : "grey-text")
+  //                       "material-icons " + (proposalsSelected ? "orange-text" : "grey-text")
   //                     }
   //                   >
   //                     create
   //                   </i>
-  //                   <span>{dayjs(props.changedAt).fromNow()}</span>
-  //                    // <span>{shortenNumber(props.proposalsNum, 2, false)}</span> 
+  //                   <span>{dayjs(changedAt).fromNow()}</span>
+  //                    // <span>{shortenNumber(proposalsNum, 2, false)}</span> 
   //                 </MetaButton> */}
   //               </>
   //             ) : (
@@ -822,14 +879,14 @@ const NodeFooter = (props: NodeFooterProps) => {
   //               </>
   //             )}
 
-  //             {!props.editable && !props.unaccepted && props.nodeType === "Reference" ? (
+  //             {!editable && !unaccepted && nodeType === "Reference" ? (
   //               <>
   //                 <MetaButton
   //                   onClick={selectCitations}
   //                   tooltip="View nodes that have cited this node."
   //                   tooltipPosition="Top"
   //                 >
-  //                   {props.citationsSelected ? (
+  //                   {citationsSelected ? (
   //                     <>
   //                       <i className="material-icons orange-text">arrow_forward</i>
   //                       <i className="material-icons SeparateIcon orange-text">menu_book</i>
@@ -843,7 +900,7 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                   {/* ********************************************************
   //                   Retrieve all the nodes that are citing this from the nodes collection.
   //                   ******************************************************** */}
-  //                   <span>{shortenNumber(citations[props.identifier].size, 2, false)}</span>
+  //                   <span>{shortenNumber(citations[identifier].size, 2, false)}</span>
   //                 </MetaButton>
   //                 <MetaButton
   //                   onClick={selectTags}
@@ -852,12 +909,12 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                 >
   //                   <i
   //                     className={
-  //                       "material-icons " + (props.openPart === "Tags" ? "orange-text" : "grey-text")
+  //                       "material-icons " + (openPart === "Tags" ? "orange-text" : "grey-text")
   //                     }
   //                   >
   //                     local_offer
   //                   </i>
-  //                   <span>{shortenNumber(props.tags.length, 2, false)}</span>
+  //                   <span>{shortenNumber(tags.length, 2, false)}</span>
   //                 </MetaButton>
   //               </>
   //             ) : (
@@ -869,26 +926,26 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                 <i
   //                   className={
   //                     "material-icons SeparateIcon " +
-  //                     (props.openPart === "References" ? "orange-text" : "grey-text")
+  //                     (openPart === "References" ? "orange-text" : "grey-text")
   //                   }
   //                 >
   //                   menu_book
   //                 </i>
   //                 <span className="CitationsSpanBeforeTagIcon">
-  //                   {shortenNumber(props.references.length, 2, false)} |
+  //                   {shortenNumber(references.length, 2, false)} |
   //                 </span>
   //                 <i
   //                   className={
   //                     "material-icons FooterTagIcon " +
-  //                     (props.openPart === "References" ? "orange-text" : "grey-text")
+  //                     (openPart === "References" ? "orange-text" : "grey-text")
   //                   }
   //                 >
   //                   local_offer
   //                 </i>
-  //                 <span>{shortenNumber(props.tags.length, 2, false)}</span>
+  //                 <span>{shortenNumber(tags.length, 2, false)}</span>
   //               </MetaButton>
   //             )}
-  //             {!props.editable && !props.unaccepted && (
+  //             {!editable && !unaccepted && (
   //               <>
   //                 {/* //                 <MetaButton
   //                   //                  onClick={event => {}}
@@ -898,38 +955,38 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                   //                  <i
   //                   //                    className={
   //                   //                      "material-icons " + 
-  //                   //                      (props.activeNode &&
-  //                   //                      props.commentsSelected
+  //                   //                      (activeNode &&
+  //                   //                      commentsSelected
   //                   //                        ? "orange-text"
   //                   //                        : "grey-text"
   //                   //                      )}
   //                   //                  >forum</i>
-  //                   //                  <span>{shortenNumber(props.commentsNum, 2, false)}</span>
+  //                   //                  <span>{shortenNumber(commentsNum, 2, false)}</span>
   //                   //                </MetaButton>  */}
   //                 <MetaButton
-  //                   onClick={props.wrongNode}
+  //                   onClick={wrongNode}
   //                   tooltip="Vote to delete node."
   //                   tooltipPosition="Top"
   //                 >
-  //                   <i className={"material-icons " + (props.markedWrong ? "red-text" : "grey-text")}>
+  //                   <i className={"material-icons " + (markedWrong ? "red-text" : "grey-text")}>
   //                     close
   //                   </i>
-  //                   <span>{shortenNumber(props.wrongNum, 2, false)}</span>
+  //                   <span>{shortenNumber(wrongNum, 2, false)}</span>
   //                 </MetaButton>
   //                 <MetaButton
-  //                   onClick={props.correctNode}
+  //                   onClick={correctNode}
   //                   tooltip="Vote to prevent further changes."
   //                   tooltipPosition="Top"
   //                 >
   //                   <i
   //                     className={
   //                       "material-icons DoneIcon " +
-  //                       (props.markedCorrect ? "green-text" : "grey-text")
+  //                       (markedCorrect ? "green-text" : "grey-text")
   //                     }
   //                   >
   //                     done
   //                   </i>
-  //                   <span>{shortenNumber(props.correctNum, 2, false)}</span>
+  //                   <span>{shortenNumber(correctNum, 2, false)}</span>
   //                 </MetaButton>
   //                 {/* //                 <MetaButton
   //                   //                    tooltip="# of 1Admins who have awarded this node."
@@ -937,65 +994,65 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                   //                  >
   //                   //                  <i
   //                   //                    className={"material-icons "
-  //                   //                      (props.markedAdmired
+  //                   //                      (markedAdmired
   //                   //                        ? "amber-text"
   //                   //                        : "amber-text text-lighten-3")
   //                   //                    }
   //                   //                  >grade</i>
-  //                   //                  <span>{shortenNumber(props.admiredNum, 2, false)}</span>
+  //                   //                  <span>{shortenNumber(admiredNum, 2, false)}</span>
   //                   //</MetaButton>  */}
   //                 <MetaButton
-  //                   onClick={props.bookmark}
+  //                   onClick={bookmark}
   //                   tooltip="Bookmark this node."
   //                   // {
   //                   //   `You've ${
-  //                   //     !props.bookmarked ? "not " : ""
+  //                   //     !bookmarked ? "not " : ""
   //                   //   }bookmarked this node. ` +
-  //                   //   shortenNumber(props.bookmarks, 2, false) +
+  //                   //   shortenNumber(bookmarks, 2, false) +
   //                   //   " 1Cademist" +
-  //                   //   (props.bookmarks === 1 ? " has" : "s have") +
+  //                   //   (bookmarks === 1 ? " has" : "s have") +
   //                   //   " bookmarked this node."
   //                   // }
   //                   tooltipPosition="Top"
   //                 >
   //                   <i
-  //                     className={"material-icons " + (props.bookmarked ? "orange-text" : "grey-text")}
+  //                     className={"material-icons " + (bookmarked ? "orange-text" : "grey-text")}
   //                   >
-  //                     {props.bookmarked ? "bookmark" : "bookmark_border"}
+  //                     {bookmarked ? "bookmark" : "bookmark_border"}
   //                   </i>
-  //                   <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+  //                   <span>{shortenNumber(bookmarks, 2, false)}</span>
   //                 </MetaButton>
   //                 <MetaButton
-  //                   onClick={props.markStudied}
+  //                   onClick={markStudied}
   //                   tooltip={
-  //                     !props.isStudied
+  //                     !isStudied
   //                       ? 'Mark this node as "studied."'
   //                       : 'Mark this node as "not studied."'
   //                   }
   //                   // {
-  //                   //   (!props.isStudied
+  //                   //   (!isStudied
   //                   //     ? "You've not marked this node as Studied. "
   //                   //     : `This node is ${
-  //                   //         props.changed ? "changed" : "not chagned"
+  //                   //         changed ? "changed" : "not chagned"
   //                   //       } since the last time you marked it as Studied. `) +
-  //                   //   shortenNumber(props.studied, 2, false) +
+  //                   //   shortenNumber(studied, 2, false) +
   //                   //   " 1Cademist" +
-  //                   //   (props.studied === 1 ? " has" : "s have") +
+  //                   //   (studied === 1 ? " has" : "s have") +
   //                   //   " studied this node."
   //                   // }
   //                   tooltipPosition="Top"
   //                 >
   //                   <i className={"material-icons SeparateIcon grey-text"}>
-  //                     {props.isStudied ? "drafts" : "mail"}
+  //                     {isStudied ? "drafts" : "mail"}
   //                   </i>
-  //                   <span>{shortenNumber(props.studied, 2, false)}</span>
+  //                   <span>{shortenNumber(studied, 2, false)}</span>
   //                   {/* </MetaButton>
   //  //                 <MetaButton
   //  //                    tooltip="# of 1Cademists who have this node visible on their map."
   //  //                    tooltipPosition="Top"
   //  //                  >
   //  //                  <i className="material-icons grey-text">visibility</i>
-  //  //                  <span>{shortenNumber(props.viewers, 2, false)}</span>
+  //  //                  <span>{shortenNumber(viewers, 2, false)}</span>
   //  //                </MetaButton>  */}
   //                 </>
   //         )}
@@ -1004,144 +1061,144 @@ const NodeFooter = (props: NodeFooterProps) => {
   //                   tooltip="View parent and child nodes."
   //                   // {
   //                   //   "This node has " +
-  //                   //   shortenNumber(props.parents.length, 2, false) +
+  //                   //   shortenNumber(parents.length, 2, false) +
   //                   //   " parent node" +
-  //                   //   (props.parents.length === 1 ? "" : "s") +
+  //                   //   (parents.length === 1 ? "" : "s") +
   //                   //   " and " +
-  //                   //   shortenNumber(props.children.length, 2, false) +
+  //                   //   shortenNumber(children.length, 2, false) +
   //                   //   " child node" +
-  //                   //   (props.children.length === 1 ? "." : "s.") +
+  //                   //   (children.length === 1 ? "." : "s.") +
   //                   //   " Click to see the child and parent nodes of this node."
   //                   // }
   //                   tooltipPosition="Top"
   //                 >
   //                   <span className="FooterParentNodesOpen">
-  //                     {shortenNumber(props.parents.length, 2, false)}
+  //                     {shortenNumber(parents.length, 2, false)}
   //                   </span>
   //                   <i
   //                     className={
   //                       "material-icons " +
-  //                       (props.openPart === "LinkingWords" ? "orange-text" : "grey-text")
+  //                       (openPart === "LinkingWords" ? "orange-text" : "grey-text")
   //                     }
   //                   >
   //                     swap_horiz
   //                   </i>
-  //                   <span>{shortenNumber(props.children.length, 2, false)}</span>
+  //                   <span>{shortenNumber(children.length, 2, false)}</span>
   //                 </MetaButton>
   //               </>
   //             ) : (
   //             // Node is close
   //             <Box sx={{ display: 'flex' }}>
   //               <Tooltip
-  //                 title={shortenNumber(props.correctNum, 2, false) + " 1Cademist" + (props.correctNum === 1 ? " has" : "s have") + " found this node helpful and " + shortenNumber(props.wrongNum, 2, false) + " found it unhelpful."}
+  //                 title={shortenNumber(correctNum, 2, false) + " 1Cademist" + (correctNum === 1 ? " has" : "s have") + " found this node helpful and " + shortenNumber(wrongNum, 2, false) + " found it unhelpful."}
   //                 placement='top'>
   //                 <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
   //                   <CloseIcon fontSize='small' />
-  //                   <span>{shortenNumber(props.wrongNum, 2, false)}</span>
+  //                   <span>{shortenNumber(wrongNum, 2, false)}</span>
   //                   <DoneIcon fontSize='small' />
-  //                   <span>{shortenNumber(props.wrongNum, 2, false)}</span>
+  //                   <span>{shortenNumber(wrongNum, 2, false)}</span>
   //                 </Box>
   //               </Tooltip>
   //               {/* <MetaButton
   //               tooltip={
-  //                 shortenNumber(props.correctNum, 2, false) +
+  //                 shortenNumber(correctNum, 2, false) +
   //                 " 1Cademist" +
-  //                 (props.correctNum === 1 ? " has" : "s have") +
+  //                 (correctNum === 1 ? " has" : "s have") +
   //                 " found this node helpful and " +
-  //                 shortenNumber(props.wrongNum, 2, false) +
+  //                 shortenNumber(wrongNum, 2, false) +
   //                 " found it unhelpful."
   //               }
   //             >
   //               <i
   //                 className={
   //                   "material-icons " +
-  //                   (props.markedWrong ? "red-text more-left-padding" : "grey-text more-left-padding")
+  //                   (markedWrong ? "red-text more-left-padding" : "grey-text more-left-padding")
   //                 }
   //               >
   //                 close
   //               </i>
-  //               <span>{shortenNumber(props.wrongNum, 2, false)}</span>
-  //               <i className={"material-icons " + (props.markedCorrect ? "green-text" : "grey-text")}>
+  //               <span>{shortenNumber(wrongNum, 2, false)}</span>
+  //               <i className={"material-icons " + (markedCorrect ? "green-text" : "grey-text")}>
   //                 done
   //               </i>
-  //               <span>{shortenNumber(props.correctNum, 2, false)}</span>
+  //               <span>{shortenNumber(correctNum, 2, false)}</span>
   //             </MetaButton> */}
   //               <Tooltip
-  //                 title={`You've ${!props.bookmarked ? "not " : ""}bookmarked this node. ` +
-  //                   shortenNumber(props.bookmarks, 2, false) +
+  //                 title={`You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
+  //                   shortenNumber(bookmarks, 2, false) +
   //                   " 1Cademist" +
-  //                   (props.bookmarks === 1 ? " has" : "s have") +
+  //                   (bookmarks === 1 ? " has" : "s have") +
   //                   " bookmarked this node."}
   //                 placement='top'>
   //                 <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
-  //                   {props.bookmarked ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
-  //                   <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+  //                   {bookmarked ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
+  //                   <span>{shortenNumber(bookmarks, 2, false)}</span>
   //                 </Box>
   //               </Tooltip>
   //               {/* <MetaButton
   //               tooltip={
-  //                 `You've ${!props.bookmarked ? "not " : ""}bookmarked this node. ` +
-  //                 shortenNumber(props.bookmarks, 2, false) +
+  //                 `You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
+  //                 shortenNumber(bookmarks, 2, false) +
   //                 " 1Cademist" +
-  //                 (props.bookmarks === 1 ? " has" : "s have") +
+  //                 (bookmarks === 1 ? " has" : "s have") +
   //                 " bookmarked this node."
   //               }
   //             >
-  //               <i className={"material-icons " + (props.bookmarked ? "orange-text" : "grey-text")}>
-  //                 {props.bookmarked ? "bookmark" : "bookmark_border"}
+  //               <i className={"material-icons " + (bookmarked ? "orange-text" : "grey-text")}>
+  //                 {bookmarked ? "bookmark" : "bookmark_border"}
   //               </i>
-  //               <span>{shortenNumber(props.bookmarks, 2, false)}</span>
+  //               <span>{shortenNumber(bookmarks, 2, false)}</span>
   //             </MetaButton> */}
   //               {/* //             <MetaButton tooltip="# of 1Cademists who have studied this node.">
   // //              <i
   // //                className={
   // //                  "material-icons " + (
-  // //                  props.studied
+  // //                  studied
   // //                    ? "orange-text"
   // //                    : "grey-text"
   // //                  )}
   // //              >school</i>
-  // //              <span>{shortenNumber(props.studied, 2, false)}</span>
+  // //              <span>{shortenNumber(studied, 2, false)}</span>
   // //            </MetaButton>  */}
   //               <Tooltip
   //                 title={"This node has " +
-  //                   shortenNumber(props.parents.length, 2, false) +
+  //                   shortenNumber(parents.length, 2, false) +
   //                   " parent node" +
-  //                   (props.parents.length === 1 ? "" : "s") +
+  //                   (parents.length === 1 ? "" : "s") +
   //                   " and " +
-  //                   shortenNumber(props.nodesChildren.length, 2, false) +
+  //                   shortenNumber(nodesChildren.length, 2, false) +
   //                   " child node" +
-  //                   (props.nodesChildren.length === 1 ? "." : "s.")}
+  //                   (nodesChildren.length === 1 ? "." : "s.")}
   //                 placement='top'>
   //                 <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 7px' }}>
   //                   <span /*className="FooterParentNodesClosed"*/>
-  //                     {shortenNumber(props.parents.length, 2, false)}
+  //                     {shortenNumber(parents.length, 2, false)}
   //                   </span>
   //                   <SwapHorizIcon fontSize='small' />
-  //                   <span>{shortenNumber(props.nodesChildren.length, 2, false)}</span>
+  //                   <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
   //                 </Box>
   //               </Tooltip>
   //               {/* <MetaButton
   //               tooltip={
   //                 "This node has " +
-  //                 shortenNumber(props.parents.length, 2, false) +
+  //                 shortenNumber(parents.length, 2, false) +
   //                 " parent node" +
-  //                 (props.parents.length === 1 ? "" : "s") +
+  //                 (parents.length === 1 ? "" : "s") +
   //                 " and " +
-  //                 shortenNumber(props.children.length, 2, false) +
+  //                 shortenNumber(children.length, 2, false) +
   //                 " child node" +
-  //                 (props.children.length === 1 ? "." : "s.")
+  //                 (children.length === 1 ? "." : "s.")
   //               }
   //             >
   //               <span className="FooterParentNodesClosed">
-  //                 {shortenNumber(props.parents.length, 2, false)}
+  //                 {shortenNumber(parents.length, 2, false)}
   //               </span>
   //               <i className="material-icons grey-text">swap_horiz</i>
-  //               <span>{shortenNumber(props.children.length, 2, false)}</span>
+  //               <span>{shortenNumber(children.length, 2, false)}</span>
   //             </MetaButton> */}
   //               {/* // <MetaButton tooltip="# of 1Cademists who have this node visible on their map.">
   // //              <i className="material-icons grey-text">visibility</i>
-  // //              <span>{shortenNumber(props.viewers, 2, false)}</span>
+  // //              <span>{shortenNumber(viewers, 2, false)}</span>
   // //            </MetaButton>  */}
   //             </Box>
   //         )}
@@ -1151,6 +1208,3 @@ const NodeFooter = (props: NodeFooterProps) => {
 }
 
 export const MemoizedNodeFooter = React.memo(NodeFooter);
-
-
-
