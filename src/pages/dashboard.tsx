@@ -5,6 +5,8 @@ import {
   addDoc,
   collection,
   doc,
+  DocumentData,
+  DocumentReference,
   getDoc,
   getDocs,
   getFirestore,
@@ -577,7 +579,7 @@ const Dashboard = ({ }: DashboardProps) => {
     // allNodes,
     allTags,
     // allUserNodes,
-    // username,
+    user,
     userNodesLoaded,
     nodes,
     edges,
@@ -846,7 +848,7 @@ const Dashboard = ({ }: DashboardProps) => {
             batch.update(nodeRef, changeNode)
             const userNodeLogRef = collection(db, "userNodesLog")
             // await firebase.batchSet(userNodeLogRef, userNodeLogData);
-            batch.set(userNodeRef, userNodeLogData)
+            batch.set(doc(userNodeLogRef), userNodeLogData)
           }
           // await firebase.commitBatch();
           await batch.commit()
@@ -855,6 +857,7 @@ const Dashboard = ({ }: DashboardProps) => {
           for (let offsp of offsprings) {
             ({ oldNodes, oldEdges } = hideNodeAndItsLinks(offsp, oldNodes, oldEdges));
           }
+          // CHECK: I commented this because in the SYNC function it will update nodes and edges
           // setNodes(oldNodes);
           // setEdges(oldEdges);
         } catch (err) {
@@ -868,7 +871,7 @@ const Dashboard = ({ }: DashboardProps) => {
   );
 
   const openNodeHandler = useMemoizedCallback(
-    async nodeId => {
+    async (nodeId: string) => {
       console.log("[OPEN NODE HANDLER]");
       let linkedNodeRef;
       let userNodeRef = null;
@@ -949,8 +952,9 @@ const Dashboard = ({ }: DashboardProps) => {
             // userNodeRef.set(userNodeData);
             // setDoc(userNodeRef, userNodeData)
             console.log('[open node handle]: will add userNode')
-            const docRef = await addDoc(userNodeRef, userNodeData);
-            userNodeId = docRef.id;
+            batch.set(doc(userNodeRef), userNodeData)  // CHECK: changed with batch
+            // const docRef = await addDoc(userNodeRef, userNodeData);
+            // userNodeId = docRef.id; // CHECK: commented this
           }
           // await firebase.batchUpdate(nodeRef, {
           //   viewers: thisNode.viewers + 1,
@@ -1003,13 +1007,16 @@ const Dashboard = ({ }: DashboardProps) => {
             allTags
           ));
           oldAllNodes[nodeId] = uNodeData;
-          // setNodes(oldNodes=>{...oldNodes,[nodeId]})
+          // setNodes(oldAllNodes)
+          // setNodes(oldNodes => ({ ...oldNodes, oldNodes[nodeId]}))
           // oldAllUserNodes = {
           //   ...oldAllUserNodes,
           //   [nodeId]: userNodeData,
           // };
           // await firebase.commitBatch();
+          console.log(' ---- --- start commit')
           await batch.commit();
+          console.log(' ---- --- end commit')
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
@@ -1024,13 +1031,14 @@ const Dashboard = ({ }: DashboardProps) => {
     [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   );
 
-  const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
+  const getNodeUserNode = useCallback((nodeId: string, userNodeId?: string) => {
 
     const nodeRef = doc(db, "nodes", nodeId);
-    const userNodeRef = doc(db, "userNodes", userNodeId);
-    // if (userNodeId) {
-    //   userNodeRef = doc(db, "userNodes", userNodeId);
-    // }//CHECK:We commented this 
+    // const userNodeRef = doc(db, "userNodes", userNodeId);
+    let userNodeRef: DocumentReference<DocumentData> | null = null
+    if (userNodeId) {
+      userNodeRef = doc(db, "userNodes", userNodeId);
+    }//CHECK:We commented this 
     return { nodeRef, userNodeRef };
   }, []);
 
@@ -1072,7 +1080,7 @@ const Dashboard = ({ }: DashboardProps) => {
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
 
           const userNodeData = {
-            changed: thisNode.changed,
+            changed: thisNode.changed || false,
             correct: thisNode.corrects,
             createdAt: Timestamp.fromDate(new Date()),
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1110,16 +1118,18 @@ const Dashboard = ({ }: DashboardProps) => {
           batch.update(nodeRef, changeNode);
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
+          console.log('begin commit')
           await batch.commit();
+          console.log('end commit')
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
+          const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
+          setNodes(newNodes);
+          // setEdges(newEdges);
           /*
           let oldNodes = { ...nodes };
           let oldEdges = { ...edges };
-          // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, oldNodes, oldEdges)
           // console.log({ newNodes, newEdges })
-          // setNodes(newNodes);
-          // setEdges(newEdges);
           */
           //} catch (err) {
           //console.error(err);
