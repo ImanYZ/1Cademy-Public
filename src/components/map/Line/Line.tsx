@@ -53,7 +53,8 @@ const Line = (props: LineProps) => {
         position: "absolute",
         textAlign: "center",
         height: "0px",
-        borderBottom: "2.5px solid rgb(1, 211, 106)"
+        borderBottom: "2.5px solid rgb(1, 211, 106)",
+        transition: '0.5s',
       }}
     >
       <div className="RightArrow" style={rightArrowStyle}></div>

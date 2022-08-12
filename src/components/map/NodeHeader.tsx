@@ -35,7 +35,7 @@ const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, s
         </IconButton>
       </Tooltip>
       <Tooltip title='Hide the node from your map.'>
-        <IconButton onClick={onHideNodeHandler} aria-label="delete" size="small">
+        <IconButton onClick={e => onHideNodeHandler(e)} aria-label="delete" size="small">
           <CloseIcon fontSize="inherit" />
         </IconButton>
       </Tooltip>

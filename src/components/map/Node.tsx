@@ -81,7 +81,7 @@ type NodeProps = {
   deleteLink: any;//
   openLinkedNode: any;//
   openAllChildren: any;//
-  hideNodeHandler: any;//
+  onHideNode: any;//
   hideOffsprings: any;//
   toggleNode: (event: any, id: string) => void;//
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void;//
@@ -152,8 +152,8 @@ const Node = ({
   deleteLink,
   openLinkedNode,
   openAllChildren,
-  hideNodeHandler,
-  hideOffsprings,
+  onHideNode,
+  hideOffsprings: onHideOffsprings,
   toggleNode,
   openNodePart,
   selectNode,
@@ -210,20 +210,22 @@ const Node = ({
   );
 
   const hideNodeHandler = useCallback(
-    () => hideNodeHandler(identifier, setIsHiding),
-    [hideNodeHandler, identifier]
+    (event: any) => {
+      console.log('Hide Node Handler is called', event.target)
+      event.preventDefault();
+      event.stopPropagation()
+      onHideNode(identifier, setIsHiding)
+    },
+    [onHideNode, identifier]
   );
-  ///::::::::::::::::::::::::::::::::::::::::::added by sam::::::::::::::::::::
 
-  // const hideOffspringsHandler = useCallback(
-  //   () => hideOffsprings(identifier),
-  //   [hideOffsprings, identifier]
-  // );
+  const hideOffspringsHandler = useCallback(
+    () => onHideOffsprings(identifier),
+    [onHideOffsprings, identifier]
+  );
 
   const toggleNodeHandler = useCallback(
-
     (event: any) => {
-      console.log("-------------------->toggleNodeHandler")
       // event.persist();
       toggleNode(event, identifier, /*open*/);
     },
@@ -413,6 +415,7 @@ const Node = ({
         left: left ? left : 1000,
         top: top ? top : 1000,
         width: width,
+        transition: '0.5s',
       }}
     // style={
     //   activeNode
@@ -430,7 +433,7 @@ const Node = ({
     //         width: width
     //       }
     // }
-    >
+    >{identifier}
       {open ? (
         <>
           <div className="card-content">
@@ -472,7 +475,7 @@ const Node = ({
                 <MemoizedNodeHeader
                   open={open}
                   onToggleNode={toggleNodeHandler}
-                  onHideOffsprings={console.log('onHideOffsprings')}
+                  onHideOffsprings={hideOffspringsHandler}
                   onHideNodeHandler={hideNodeHandler}
                   sx={{ position: 'absolute', right: '0px', top: '0px' }}
                 />
@@ -719,7 +722,7 @@ const Node = ({
               <MemoizedNodeHeader
                 open={open}
                 onToggleNode={toggleNodeHandler}
-                onHideOffsprings={console.log('onHideOffsprings')}
+                onHideOffsprings={hideOffspringsHandler}
                 onHideNodeHandler={hideNodeHandler}
                 sx={{ position: 'absolute', right: '0px', top: '0px' }}
               />

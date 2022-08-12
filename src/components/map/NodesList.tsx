@@ -27,7 +27,7 @@ type NodeListProps = {
   openAllChildren: any;
   hideNodeHandler: any;
   hideOffsprings: any;
-  toggleNode: (event:any,id:string)=>void;
+  toggleNode: (event: any, id: string) => void;
   openNodePart: any;
   selectNode: any;
   nodeClicked: any;
@@ -168,7 +168,7 @@ const NodesList = ({
             deleteLink={deleteLink}
             openLinkedNode={openLinkedNode}
             openAllChildren={openAllChildren}
-            hideNodeHandler={hideNodeHandler}
+            onHideNode={hideNodeHandler}
             hideOffsprings={hideOffsprings}
             toggleNode={toggleNode}
             openNodePart={openNodePart}

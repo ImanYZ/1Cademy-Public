@@ -149,6 +149,9 @@ const Dashboard = ({ }: DashboardProps) => {
   // flag for whether users' nodes data is downloaded from server
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
+  // flag set to true when sending request to server
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -245,6 +248,7 @@ const Dashboard = ({ }: DashboardProps) => {
       const q = query(
         userNodesRef,
         where("user", "==", username),
+        where("visible", "==", true),
         where("deleted", "==", false)
       );
 
@@ -516,7 +520,7 @@ const Dashboard = ({ }: DashboardProps) => {
                   // oldNodes[nodeId].firstVisit !== userNodeData.firstVisit || // CHECK: I commented this
                   // oldNodes[nodeId].lastVisit !== userNodeData.lastVisit // CHECK: I commented this
                 ) {
-                  console.log('  -  [synchronization]: 3.2: updateOldNodes')
+                  console.log('  -  [synchronization]: 3.2: updateOldNodes', { nodeId, userNodeData })
                   oldNodes[nodeId] = {
                     // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
                     ...oldNodes[nodeId],
@@ -778,6 +782,91 @@ const Dashboard = ({ }: DashboardProps) => {
     [/*mapRendered*/, allTags]
   );
 
+  const recursiveOffsprings = useCallback((nodeId: string): any[] => {
+    // CHECK: this could be improve changing recursive function to iterative
+    // because the recursive has a limit of call in stack memory
+    console.log("[recursiveOffsprings]", nodeId);
+    // debugger
+    const children = dag1[0].successors(nodeId);
+    let offsprings: any[] = [];
+    if (children && children.length > 0) {
+      for (let child of children) {
+        offsprings = [...offsprings, child, ...recursiveOffsprings(child)];
+      }
+    }
+    return offsprings;
+  }, []);
+
+  const hideOffsprings = useMemoizedCallback(
+    async (nodeId) => {
+      if (!nodeBookState.choosingNode && user) {
+        // setIsHiding(true);
+        setIsSubmitting(true);
+        const offsprings = recursiveOffsprings(nodeId);
+        console.log('[hideOffsprings]', offsprings)
+        // debugger
+        const batch = writeBatch(db)
+        try {
+          for (let offsp of offsprings) {
+            const thisNode = nodes[offsp];
+            console.log({ offsp, userNodeId: thisNode.userNodeId, thisNode, nodes })
+            const { nodeRef, userNodeRef } = initNodeStatusChange(offsp, thisNode.userNodeId);
+            const userNodeData = {
+              changed: thisNode.changed,
+              correct: thisNode.correct,
+              createdAt: Timestamp.fromDate(thisNode.firstVisit),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: thisNode.isStudied,
+              bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+              node: offsp,
+              open: thisNode.open,
+              user: user.uname,
+              visible: false,
+              wrong: thisNode.wrong,
+            };
+            // await firebase.batchSet(userNodeRef, userNodeData);
+            batch.set(userNodeRef, userNodeData)
+            const userNodeLogData: any = {
+              ...userNodeData,
+              createdAt: Timestamp.fromDate(new Date()),
+            };
+            const changeNode: any = {
+              viewers: thisNode.viewers - 1,
+              updatedAt: Timestamp.fromDate(new Date()),
+            };
+            if (userNodeData.open && "openHeight" in thisNode) {
+              changeNode.height = thisNode.openHeight;
+              userNodeLogData.height = thisNode.openHeight;
+            } else if ("closedHeight" in thisNode) {
+              changeNode.closedHeight = thisNode.closedHeight;
+              userNodeLogData.closedHeight = thisNode.closedHeight;
+            }
+            // await firebase.batchUpdate(nodeRef, changeNode);
+            batch.update(nodeRef, changeNode)
+            const userNodeLogRef = collection(db, "userNodesLog")
+            // await firebase.batchSet(userNodeLogRef, userNodeLogData);
+            batch.set(userNodeRef, userNodeLogData)
+          }
+          // await firebase.commitBatch();
+          await batch.commit()
+          let oldNodes = { ...nodes };
+          let oldEdges = edges;
+          for (let offsp of offsprings) {
+            ({ oldNodes, oldEdges } = hideNodeAndItsLinks(offsp, oldNodes, oldEdges));
+          }
+          // setNodes(oldNodes);
+          // setEdges(oldEdges);
+        } catch (err) {
+          console.error(err);
+        }
+        scrollToNode(nodeId);
+        setIsSubmitting(false);
+      }
+    },
+    [choosingNode, nodes, recursiveOffsprings]
+  );
+
   const openNodeHandler = useMemoizedCallback(
     async nodeId => {
       console.log("[OPEN NODE HANDLER]");
@@ -814,7 +903,7 @@ const Dashboard = ({ }: DashboardProps) => {
           const userNodesRef = collection(db, "userNodes")
           const q = query(userNodesRef,
             where("node", "==", nodeId),
-            where("user", "==", user?.uname),
+            where("user", "==", user.uname),
             limit(1))
 
           // const userNodeQuery = firebase.db
@@ -834,6 +923,7 @@ const Dashboard = ({ }: DashboardProps) => {
             userNodeData.visible = true;
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             // await firebase.batchUpdate(userNodeRef, userNodeData);
+            console.log('[open node handle]: will update userNode')
             batch.update(userNodeRef, userNodeData);
           } else {
             // if NOT exist documents create a document
@@ -858,6 +948,7 @@ const Dashboard = ({ }: DashboardProps) => {
             };
             // userNodeRef.set(userNodeData);
             // setDoc(userNodeRef, userNodeData)
+            console.log('[open node handle]: will add userNode')
             const docRef = await addDoc(userNodeRef, userNodeData);
             userNodeId = docRef.id;
           }
@@ -865,6 +956,7 @@ const Dashboard = ({ }: DashboardProps) => {
           //   viewers: thisNode.viewers + 1,
           //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
           // });
+          console.log('[open node handle]: extra data in nodes')
           batch.update(nodeRef, {
             viewers: thisNode.viewers + 1,
             updatedAt: Timestamp.fromDate(new Date()),
@@ -879,10 +971,11 @@ const Dashboard = ({ }: DashboardProps) => {
 
           // const id = userNodeLogRef.id
           // await firebase.batchSet(userNodeLogRef, userNodeLogData);
+          console.log('[open node handle]: will update user node log')
           batch.set(doc(userNodeLogRef), userNodeLogData);
 
-          let oldNodes: any = { ...nodes };
-          let oldEdges: any = { ...edges };
+          let oldNodes: { [key: string]: any } = { ...nodes };
+          let oldEdges: { [key: string]: any } = { ...edges };
           let oldAllNodes: any = { ...nodes };
           let oldAllUserNodes: any = { ...nodeChanges };
           // if data for the node is loaded
@@ -910,6 +1003,7 @@ const Dashboard = ({ }: DashboardProps) => {
             allTags
           ));
           oldAllNodes[nodeId] = uNodeData;
+          // setNodes(oldNodes=>{...oldNodes,[nodeId]})
           // oldAllUserNodes = {
           //   ...oldAllUserNodes,
           //   [nodeId]: userNodeData,
@@ -929,6 +1023,7 @@ const Dashboard = ({ }: DashboardProps) => {
     // CHECK: I commented allNode, I did'nt found where is defined
     [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   );
+
   const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
 
     const nodeRef = doc(db, "nodes", nodeId);
@@ -938,6 +1033,7 @@ const Dashboard = ({ }: DashboardProps) => {
     // }//CHECK:We commented this 
     return { nodeRef, userNodeRef };
   }, []);
+
   const initNodeStatusChange = useCallback(
     (nodeId: string, userNodeId: string) => {
       setSelectedNode(nodeId);
@@ -961,118 +1057,22 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const hideNodeHandler = useCallback(
     async (nodeId: string, /*setIsHiding: any*/) => {
-      // console.log("In hideNodeHandler");
+      console.log("[hideNodeHandler]");
       const batch = writeBatch(db);
       const username = user?.uname;
       if (!choosingNode) {
+        console.log(1)
         // setIsHiding(true);
         // navigateToFirstParent(nodeId);
         if (username) {
           // try {
 
+          console.log(2)
           const thisNode = nodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
 
-          //   thisNode={
-          //     "studied": 3,
-          //     "updatedAt": {
-          //         "seconds": 1660084112,
-          //         "nanoseconds": 10000000
-          //     },
-          //     "height": 157,
-          //     "referenceIds": [],
-          //     "contributors": {
-          //         "1man": {
-          //             "reputation": 59.309999999999995,
-          //             "imageUrl": "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
-          //             "chooseUname": false,
-          //             "fullname": "Iman YeckehZaare"
-          //         }
-          //     },
-          //     "contribNames": [
-          //         "1man"
-          //     ],
-          //     "admin": "1man",
-          //     "references": [],
-          //     "maxVersionRating": 31.5,
-          //     "parents": [],
-          //     "institNames": [
-          //         "University of Michigan - Ann Arbor"
-          //     ],
-          //     "changedAt": {
-          //         "seconds": 1653793866,
-          //         "nanoseconds": 0
-          //     },
-          //     "institutions": {
-          //         "University of Michigan - Ann Arbor": {
-          //             "reputation": 59.309999999999995
-          //         }
-          //     },
-          //     "content": "1Cademy is a collaborative online community that supports interdisciplinary research and learning through content generation, mapping, evaluation, and practice.",
-          //     "nodeImage": "",
-          //     "isTag": true,
-          //     "children": [
-          //         {
-          //             "label": "",
-          //             "title": "1Cademy Nodes",
-          //             "node": "wiriyOIvmr5ryzydcQLw"
-          //         },
-          //         {
-          //             "title": "1Cademy Shared Knowledge Graph",
-          //             "label": "",
-          //             "node": "rWYUNisPIVMBoQEYXgNj"
-          //         },
-          //         {
-          //             "title": "1Cademy User (1Cademist)",
-          //             "node": "3bmT7llGDnISfCZz872s",
-          //             "label": ""
-          //         },
-          //         {
-          //             "node": "zudK0OkbETSTffpvVdgd",
-          //             "title": "Under Construction",
-          //             "label": ""
-          //         },
-          //         {
-          //             "node": "zvUuboxIi8ByOlxMObC4",
-          //             "title": "The Story of 1Cademy",
-          //             "label": ""
-          //         },
-          //         {
-          //             "node": "LrUBGjpxuEV2W0shSLXf",
-          //             "title": "The 1Cademy Application",
-          //             "label": ""
-          //         }
-          //     ],
-          //     "corrects": 37,
-          //     "wrongs": 1,
-          //     "title": "1Cademy",
-          //     "createdAt": {
-          //         "seconds": 1579150800,
-          //         "nanoseconds": 0
-          //     },
-          //     "tagIds": [],
-          //     "aImgUrl": "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
-          //     "nodeType": "Concept",
-          //     "closedHeight": 97,
-          //     "comments": 0,
-          //     "aChooseUname": false,
-          //     "viewers": -205,
-          //     "referenceLabels": [],
-          //     "versions": 17,
-          //     "aFullname": "Iman YeckehZaare",
-          //     "bookmarks": 13,
-          //     "tags": [],
-          //     "choices": [],
-          //     "editable": false,
-          //     "left": 580,
-          //     "top": 2829
-          // }
-
-
-
-
           const userNodeData = {
-            changed: "thisNode.changed",
+            changed: thisNode.changed,
             correct: thisNode.corrects,
             createdAt: Timestamp.fromDate(new Date()),
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1085,8 +1085,9 @@ const Dashboard = ({ }: DashboardProps) => {
             visible: false,
             wrong: thisNode.wrongs
           };
+          console.log(3, userNodeData)
           if (userNodeRef) {
-            await batch.set(userNodeRef, userNodeData);
+            batch.set(userNodeRef, userNodeData);
           }
           const userNodeLogData: any = {
             ...userNodeData,
@@ -1105,15 +1106,21 @@ const Dashboard = ({ }: DashboardProps) => {
             changeNode.closedHeight = thisNode.closedHeight;
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
-          await batch.update(nodeRef, changeNode);
+          console.log(4)
+          batch.update(nodeRef, changeNode);
           const userNodeLogRef = collection(db, "userNodesLog");
-          await batch.set(doc(userNodeLogRef), userNodeLogData);
+          batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+
+          // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
+          /*
           let oldNodes = { ...nodes };
-          let oldEdges = edges;
-          ({ oldNodes, oldEdges } = hideNodeAndItsLinks(nodeId, oldNodes, oldEdges));
-          setNodes(oldNodes);
-          setEdges(oldEdges);
+          let oldEdges = { ...edges };
+          // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, oldNodes, oldEdges)
+          // console.log({ newNodes, newEdges })
+          // setNodes(newNodes);
+          // setEdges(newEdges);
+          */
           //} catch (err) {
           //console.error(err);
           //}
@@ -1125,8 +1132,8 @@ const Dashboard = ({ }: DashboardProps) => {
 
 
   const toggleNode = useCallback(
-    (event:any,nodeId:string) => {
-  
+    (event: any, nodeId: string) => {
+
       console.log("In toggleNode");
       if (!choosingNode) {
         setNodes((oldNodes) => {
@@ -1211,7 +1218,7 @@ const Dashboard = ({ }: DashboardProps) => {
           setOpenPart(partType);
           if (user) {
             const userNodePartsLogRef = collection(db, "userNodePartsLog");
-            setDoc(doc(userNodePartsLogRef),{
+            setDoc(doc(userNodePartsLogRef), {
               nodeId,
               uname: user?.uname,
               partType,
@@ -1244,7 +1251,7 @@ const Dashboard = ({ }: DashboardProps) => {
           if ("studied" in thisNode) {
             studiedNum = thisNode.studied;
           }
-          const changeNode:any = {
+          const changeNode: any = {
             studied: studiedNum + (thisNode.isStudied ? -1 : 1),
             updatedAt: Timestamp.fromDate(new Date()),
           };
@@ -1253,15 +1260,15 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
-          updateDoc(nodeRef,changeNode);
-          updateDoc(userNodeRef,{
+          updateDoc(nodeRef, changeNode);
+          updateDoc(userNodeRef, {
             changed: thisNode.isStudied ? thisNode.changed : false,
             isStudied: !thisNode.isStudied,
             updatedAt: Timestamp.fromDate(new Date()),
           })
           const userNodeLogRef = collection(db, "userNodesLog");
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-          const userNodeLogData :any= {
+          const userNodeLogData: any = {
             correct: thisNode.correct,
             createdAt: Timestamp.fromDate(new Date()),
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1280,7 +1287,7 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
-          setDoc(doc(userNodeLogRef),userNodeLogData);
+          setDoc(doc(userNodeLogRef), userNodeLogData);
           return oldNodes;
         });
       }
@@ -1300,7 +1307,7 @@ const Dashboard = ({ }: DashboardProps) => {
           if ("bookmarks" in thisNode) {
             bookmarks = thisNode.bookmarks;
           }
-          const changeNode :any  = {
+          const changeNode: any = {
             bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
             updatedAt: Timestamp.fromDate(new Date()),
           };
@@ -1309,13 +1316,13 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
-          updateDoc(nodeRef,changeNode);
-          updateDoc(userNodeRef,{
+          updateDoc(nodeRef, changeNode);
+          updateDoc(userNodeRef, {
             bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
             updatedAt: Timestamp.fromDate(new Date()),
           });
           const userNodeLogRef = collection(db, "userNodesLog");
-          const userNodeLogData :any = {
+          const userNodeLogData: any = {
             changed: thisNode.changed,
             isStudied: thisNode.isStudied,
             correct: thisNode.correct,
@@ -1334,7 +1341,7 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
-          setDoc(doc(userNodeLogRef),userNodeLogData);
+          setDoc(doc(userNodeLogRef), userNodeLogData);
           return oldNodes;
         });
       }
@@ -1347,20 +1354,24 @@ const Dashboard = ({ }: DashboardProps) => {
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-      {/* Data from map, DONT REMOVE */}
-      <Button onClick={() => console.log(nodes)}>nodes</Button>
-      <Button onClick={() => console.log(edges)}>edges</Button>
-      <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-      <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-      <Button onClick={() => console.log(mapChanged)}>map changed</Button>
-      <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-      <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-      <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
-      <Button onClick={() => openNodeHandler('011Y1p6nPmPvfHuhkAyw')}>Open Node Handler</Button>
-      <Button onClick={() => openNodeHandler('a2stE4bLrubOt833U1Cc')}>Open Node Handler</Button>
-      <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
+
       {/* end Data from map */}
       <MapInteractionCSS>
+        <Box>
+          {/* Data from map, DONT REMOVE */}
+          <Button onClick={() => console.log(nodes)}>nodes</Button>
+          <Button onClick={() => console.log(edges)}>edges</Button>
+          <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+          <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+          <Button onClick={() => console.log(mapChanged)}>map changed</Button>
+          <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+          <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+          <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
+          <Button onClick={() => openNodeHandler("wiriyOIvmr5ryzydcQLw")}>Open Node Handler</Button>
+          <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
+          <Button onClick={() => openNodeHandler("3bmT7llGDnISfCZz872s")}>Open Node Handler</Button>
+          <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
+        </Box>
         {/* show clusters */}
         {/* link list */}
         {/* node list */}
@@ -1386,12 +1397,8 @@ const Dashboard = ({ }: DashboardProps) => {
           openAllChildren={() => {
             console.log("open all children");
           }}
-          hideNodeHandler={() => {
-            console.log("hideNodeHandler");
-          }}
-          hideOffsprings={() => {
-            console.log("hideOffsprings");
-          }}
+          hideNodeHandler={hideNodeHandler}
+          hideOffsprings={hideOffsprings}
           toggleNode={toggleNode}
           openNodePart={openNodePart}
           selectNode={() => {
