@@ -8,7 +8,7 @@ import React from 'react'
 
 type NodeHeaderProps = {
   open: boolean,
-  onToggleNode:any,
+  onToggleNode: any,
   onHideOffsprings: any,
   onHideNodeHandler: any,
   sx?: SxProps<Theme>

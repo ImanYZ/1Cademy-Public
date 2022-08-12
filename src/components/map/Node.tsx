@@ -224,12 +224,11 @@ const Node = ({
 
     (event:any) => {
       console.log("-------------------->toggleNodeHandler")
-      event.persist();
+      // event.persist();
       toggleNode(event, identifier, /*open*/);
     },
     [toggleNode, identifier, open]
   );
-const first = () => { console.log("first") }
   // const removeImageHandler = useCallback(() => {
   //   removeImage(nodeRef, identifier);
   // }, [nodeRef, removeImage, identifier]);
