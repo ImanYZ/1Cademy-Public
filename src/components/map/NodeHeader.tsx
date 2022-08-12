@@ -20,10 +20,10 @@ const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, s
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         {
           open
-            ? <IconButton onClick={onToggleNode} aria-label="delete" size="small">
+            ? <IconButton onClick={onToggleNode} aria-label="Close the node" size="small">
               <RemoveIcon fontSize="inherit" />
             </IconButton>
-            : <IconButton onClick={() => { onToggleNode() }} aria-label="delete" size="small">
+            : <IconButton onClick={onToggleNode} aria-label="open the node" size="small">
               <FullscreenIcon fontSize="inherit" />
             </IconButton>
         }

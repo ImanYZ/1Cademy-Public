@@ -209,11 +209,11 @@ const Node = ({
     [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
   );
 
+  const hideNodeHandler = useCallback(
+    () => hideNodeHandler(identifier, setIsHiding),
+    [hideNodeHandler, identifier]
+  );
   ///::::::::::::::::::::::::::::::::::::::::::added by sam::::::::::::::::::::
-  // const hideNodeHandler = useCallback(
-  //   () => hideNodeHandler(identifier, setIsHiding),
-  //   [hideNodeHandler, identifier]
-  // );
 
   // const hideOffspringsHandler = useCallback(
   //   () => hideOffsprings(identifier),
@@ -466,7 +466,7 @@ const Node = ({
                   open={open}
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={console.log('onHideOffsprings')}
-                  onHideNodeHandler={console.log('onHideNodeHandler')}
+                  onHideNodeHandler={hideNodeHandler}
                   sx={{ position: 'absolute', right: '0px', top: '0px' }}
                 />
                 // <NodeHeader
@@ -713,7 +713,7 @@ const Node = ({
                 open={open}
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={console.log('onHideOffsprings')}
-                onHideNodeHandler={console.log('onHideNodeHandler')}
+                onHideNodeHandler={hideNodeHandler}
                 sx={{ position: 'absolute', right: '0px', top: '0px' }}
               />
               // <NodeHeader
