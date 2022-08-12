@@ -23,7 +23,7 @@ const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, s
             ? <IconButton onClick={onToggleNode} aria-label="delete" size="small">
               <RemoveIcon fontSize="inherit" />
             </IconButton>
-            : <IconButton onClick={()=>{onToggleNode} aria-label="delete" size="small">
+            : <IconButton onClick={onToggleNode} aria-label="delete" size="small">
               <FullscreenIcon fontSize="inherit" />
             </IconButton>
         }

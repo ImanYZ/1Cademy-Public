@@ -1126,7 +1126,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const toggleNode = useCallback(
     (event:any,nodeId:string) => {
-      debugger
+  
       console.log("In toggleNode");
       if (!choosingNode) {
         setNodes((oldNodes) => {
@@ -1211,7 +1211,7 @@ const Dashboard = ({ }: DashboardProps) => {
           setOpenPart(partType);
           if (user) {
             const userNodePartsLogRef = collection(db, "userNodePartsLog");
-            userNodePartsLogRef.set({
+            setDoc(doc(userNodePartsLogRef),{
               nodeId,
               uname: user?.uname,
               partType,
@@ -1235,6 +1235,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const markStudied = useCallback(
     (event:any, nodeId:string) => {
+      
       // console.log("In markStudied");
       if (!choosingNode) {
         setNodes((oldNodes) => {
@@ -1244,7 +1245,7 @@ const Dashboard = ({ }: DashboardProps) => {
           if ("studied" in thisNode) {
             studiedNum = thisNode.studied;
           }
-          const changeNode = {
+          const changeNode:any = {
             studied: studiedNum + (thisNode.isStudied ? -1 : 1),
             updatedAt: Timestamp.fromDate(new Date()),
           };
@@ -1253,14 +1254,15 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
-          nodeRef.update(changeNode);
-          userNodeRef.update({
+          updateDoc(nodeRef,changeNode);
+          updateDoc(userNodeRef,{
             changed: thisNode.isStudied ? thisNode.changed : false,
             isStudied: !thisNode.isStudied,
             updatedAt: Timestamp.fromDate(new Date()),
-          });
-          const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-          const userNodeLogData = {
+          })
+          const userNodeLogRef = collection(db, "userNodesLog");
+          // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+          const userNodeLogData :any= {
             correct: thisNode.correct,
             createdAt: Timestamp.fromDate(new Date()),
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1279,7 +1281,7 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
-          userNodeLogRef.set(userNodeLogData);
+          setDoc(doc(userNodeLogRef),userNodeLogData);
           return oldNodes;
         });
       }
@@ -1299,7 +1301,7 @@ const Dashboard = ({ }: DashboardProps) => {
           if ("bookmarks" in thisNode) {
             bookmarks = thisNode.bookmarks;
           }
-          const changeNode = {
+          const changeNode :any  = {
             bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
             updatedAt: Timestamp.fromDate(new Date()),
           };
@@ -1308,13 +1310,13 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
-          nodeRef.update(changeNode);
-          userNodeRef.update({
+          updateDoc(nodeRef,changeNode);
+          updateDoc(userNodeRef,{
             bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
             updatedAt: Timestamp.fromDate(new Date()),
           });
-          const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-          const userNodeLogData = {
+          const userNodeLogRef = collection(db, "userNodesLog");
+          const userNodeLogData :any = {
             changed: thisNode.changed,
             isStudied: thisNode.isStudied,
             correct: thisNode.correct,
@@ -1333,7 +1335,7 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
-          userNodeLogRef.set(userNodeLogData);
+          setDoc(doc(userNodeLogRef),userNodeLogData);
           return oldNodes;
         });
       }
@@ -1368,12 +1370,8 @@ const Dashboard = ({ }: DashboardProps) => {
         <NodesList
           nodes={nodes}
           nodeChanged={nodeChanged}
-          bookmark={() => {
-            console.log("bookmark");
-          }}
-          markStudied={() => {
-            console.log("mark studied");
-          }}
+          bookmark={bookmark}
+          markStudied={markStudied}
           chosenNodeChanged={() => {
             console.log("chosenNodeChanged");
           }}
@@ -1396,9 +1394,7 @@ const Dashboard = ({ }: DashboardProps) => {
             console.log("hideOffsprings");
           }}
           toggleNode={toggleNode}
-          openNodePart={() => {
-            console.log("openNodePart");
-          }}
+          openNodePart={openNodePart}
           selectNode={() => {
             console.log("selectNode");
           }}
