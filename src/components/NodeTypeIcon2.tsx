@@ -14,7 +14,7 @@ import { SvgIconProps } from "@mui/material/SvgIcon";
 import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import { FC } from "react";
 
-import { NodeType } from "../knowledgeTypes";
+import { NodeType } from "../types";
 
 type Props = {
   tooltipPlacement: TooltipProps['placement'];
@@ -46,8 +46,6 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement, color = "primary"
         return <ArticleIcon color={color} {...rest} />;
       case "Private":
         return <LockIcon color={color} {...rest} />;
-      case "Tag":
-        return <LocalOfferIcon color={color} {...rest} />;
       default:
         return <LockIcon color={color} {...rest} />;
     }

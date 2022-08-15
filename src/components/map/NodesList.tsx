@@ -143,7 +143,7 @@ const NodesList = ({
             wrongNum={nodes[nId].wrongs}
             markedWrong={nodes[nId].wrong}
             references={nodes[nId].references}
-            tags={nodes[nId].tags}
+            tags={nodes[nId].tags.map((cur: string) => ({ node: nodes[nId].tagIds, title: cur }))} // CHECK: I added this because we need id and title
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
             choices={nodes[nId].choices}

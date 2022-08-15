@@ -3,6 +3,7 @@ import React, { useCallback } from "react";
 
 // import HyperEditor from "../../../Editor/HyperEditor/HyperEditorWrapper";
 import { NodeType } from "../../../types";
+import NodeTypeIcon from "../../NodeTypeIcon2";
 // import MetaButton from "../../MetaButton/MetaButton";
 
 const doNothing = () => { };
@@ -12,9 +13,9 @@ type LinkingButtonProps = {
   // nodeID: any,
   linkedNodeID: any,
   linkedNodeTitle: string,
-  linkedNodeType: "child" | "children" | "tag",
-  nodeType: NodeType,
-  visible: boolean,
+  linkedNodeType: "child" | "children" | "tag" | "parent" | "reference",
+  nodeType?: NodeType,
+  visible?: boolean,
   iClassName?: string,
 }
 
@@ -65,33 +66,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
           //       : "Left"
           //   }
           // > */}
-        <i className={iClassName}>
-          {"iClassName" in props
-            ? props.iClassName
-            : props.nodeType === "Code"
-              ? "code"
-              : props.nodeType === "Concept"
-                ? "local_library"
-                : props.nodeType === "Relation"
-                  ? "share"
-                  : props.nodeType === "Question"
-                    ? "help_outline"
-                    : props.nodeType === "Profile"
-                      ? "person"
-                      : props.nodeType === "Sequel"
-                        ? "more_horiz"
-                        : props.nodeType === "Advertisement"
-                          ? "event"
-                          : props.nodeType === "Reference"
-                            ? "menu_book"
-                            : props.nodeType === "Idea"
-                              ? "emoji_objects"
-                              : props.nodeType === "News"
-                                ? "article"
-                                : props.nodeType === "Private"
-                                  ? "lock"
-                                  : ""}
-        </i>
+        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
         {/* CHECK: I commented this, please uncomment this */}
         {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
         <p>{props.linkedNodeTitle}</p>

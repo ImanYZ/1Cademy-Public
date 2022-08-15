@@ -8,6 +8,7 @@ import { OpenPart } from "src/nodeBookTypes";
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from '../../context/AuthContext';
+import LinkingWords from './LinkingWords/LinkingWords';
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 
@@ -301,17 +302,17 @@ const Node = ({
     [uploadNodeImage, nodeRef, identifier]
   );
 
-  // const referenceLabelChangeHandler = useCallback(
-  //   (event:any, referenceIdx:string) => {
-  //     return referenceLabelChange(event, identifier, referenceIdx);
-  //   },
-  //   [referenceLabelChange, identifier]
-  // );
+  const referenceLabelChangeHandler = useCallback(
+    (event: any, referenceIdx: string) => {
+      return referenceLabelChange(event, identifier, referenceIdx);
+    },
+    [referenceLabelChange, identifier]
+  );
 
-  // const deleteLinkHandler = useCallback(
-  //   (linkIdx, linkType) => deleteLink(identifier, linkIdx, linkType),
-  //   [deleteLink, identifier]
-  // );
+  const deleteLinkHandler = useCallback(
+    (linkIdx: any, linkType: any) => deleteLink(identifier, linkIdx, linkType),
+    [deleteLink, identifier]
+  );
 
   // const titleChange = useCallback(
   //   value => {
@@ -679,30 +680,30 @@ const Node = ({
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             // CHECK: I commented this
-            // <LinkingWords
-            //   identifier={identifier}
-            //   editable={editable}
-            //   isNew={isNew}
-            //   openPart={openPart}
-            //   title={title}
-            //   reason={reason}
-            //   references={references}
-            //   tags={tags}
-            //   parents={parents}
-            //   children={children}
-            //   chosenNodeChanged={chosenNodeChanged}
-            //   referenceLabelChange={referenceLabelChangeHandler}
-            //   deleteLink={deleteLinkHandler}
-            //   openLinkedNode={openLinkedNode}
-            //   openAllChildren={openAllChildren}
-            //   saveProposedChildNode={saveProposedChildNode}
-            //   saveProposedImprovement={saveProposedImprovement}
-            //   closeSideBar={closeSideBar}
-            // />
-            <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
-              LinkingWords component
-              <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nobis earum adipisci aliquam praesentium, suscipit in quisquam error autem? Illum, quia quod veritatis praesentium voluptatem at voluptatum temporibus in corrupti porro.</p>
-            </div>
+            <LinkingWords
+              identifier={identifier}
+              editable={editable}
+              isNew={isNew}
+              openPart={openPart}
+              title={title}
+              reason={reason}
+              references={references}
+              tags={tags}
+              parents={parents}
+              nodesChildren={nodesChildren}
+              chosenNodeChanged={chosenNodeChanged}
+              referenceLabelChange={referenceLabelChangeHandler}
+              deleteLink={deleteLinkHandler}
+              openLinkedNode={openLinkedNode}
+              openAllChildren={openAllChildren}
+              saveProposedChildNode={saveProposedChildNode}
+              saveProposedImprovement={saveProposedImprovement}
+              closeSideBar={closeSideBar}
+            />
+            // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
+            //   LinkingWords component
+            //   <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nobis earum adipisci aliquam praesentium, suscipit in quisquam error autem? Illum, quia quod veritatis praesentium voluptatem at voluptatum temporibus in corrupti porro.</p>
+            // </div>
           )}
         </>
       ) : (

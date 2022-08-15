@@ -706,8 +706,13 @@ export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, 
   return { oldNodes, oldEdges };
 };
 
+// CHECK: this function is was working with objects
+// but need to be modified to work with new arrays
+// this works correctly in dashboard with array but,
+// dont work in worker
 export const copyNode = (node: any) => {
   let newNode = { ...node };
+  // console.log('==============> node', node.tagIds, node.tags)
   newNode.parents = [];
   for (let parent of node.parents) {
     newNode.parents.push({ ...parent });
@@ -716,13 +721,17 @@ export const copyNode = (node: any) => {
   for (let child of node.children) {
     newNode.children.push({ ...child });
   }
+  // newNode.tagIds = [...node.tagIds];
+  // newNode.tags = [...node.tags];
   newNode.tagIds = [];
   for (let tagId of node.tagIds) {
-    newNode.tagIds.push({ ...tagId });
+    // newNode.tagIds.push({ ...tagId });
+    newNode.tagIds.push(tagId)
   }
   newNode.tags = [];
   for (let tag of node.tags) {
-    newNode.tags.push({ ...tag });
+    // newNode.tags.push({ ...tag });
+    newNode.tags.push(tag)
   }
   newNode.referenceIds = [];
   for (let referenceId of node.referenceIds) {
@@ -742,6 +751,7 @@ export const copyNode = (node: any) => {
       newNode.choices.push({ ...choice });
     }
   }
+  // console.log('==============X newNode', newNode.tagIds, newNode.tags)
   return newNode;
 };
 

@@ -63,21 +63,25 @@ const layoutHandler = (
             yMax: nodeN.y + nodeN.height / 2,
             xMin: nodeN.x - nodeN.width / 2,
             xMax: nodeN.x + nodeN.width / 2,
+            title: oldNodes[nId].tags[0] // CHECK I added this
           };
         }
       }
     }
+    // console.log(' --X', clusterRegions)
 
     // Update OldClusterNodes
     for (let cNode in clusterRegions) {
       const nodeN = dag1.node("Tag" + cNode) as any;
+      // console.log('  --- ---- --- >>', nodeN)
       oldClusterNodes[cNode] = {
         id: cNode,
         x: clusterRegions[cNode].xMin + XOFFSET,
         y: clusterRegions[cNode].yMin + YOFFSET,
         width: clusterRegions[cNode].xMax - clusterRegions[cNode].xMin,
         height: clusterRegions[cNode].yMax - clusterRegions[cNode].yMin,
-        title: nodeN.title,
+        title: clusterRegions[cNode].title,
+        // title: nodeN.title,// CHECK I commented this, because we will use the title setted
       };
     }
 

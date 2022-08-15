@@ -1009,6 +1009,13 @@ const Dashboard = ({ }: DashboardProps) => {
             { ...oldEdges },
             allTags
           ));
+
+          // CHECK: need to update the nodes and edges 
+          // to get the last changes from:
+          //  makeNodeVisibleInItsLinks and createOrUpdateNode
+          // setNodes(oldNodes)
+          // setEdges(oldEdges)
+
           // oldAllNodes[nodeId] = uNodeData;
           // setNodes(oldAllNodes)
           // setNodes(oldNodes => ({ ...oldNodes, oldNodes[nodeId]}))
@@ -1032,6 +1039,25 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     // CHECK: I commented allNode, I did'nt found where is defined
     [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
+  );
+
+  const openLinkedNode = useCallback(
+    (linkedNodeID: string) => {
+      console.log('[openLinkedNode]')
+      // console.log("In openLinkedNode");
+      if (!choosingNode) {
+        let linkedNode = document.getElementById(linkedNodeID);
+        if (linkedNode) {
+          scrollToNode(linkedNodeID);
+          setTimeout(() => {
+            setSelectedNode(linkedNodeID);
+          }, 400);
+        } else {
+          openNodeHandler(linkedNodeID);
+        }
+      }
+    },
+    [choosingNode, openNodeHandler]
   );
 
   const getNodeUserNode = useCallback((nodeId: string, userNodeId?: string) => {
@@ -1203,23 +1229,23 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     [choosingNode, user, initNodeStatusChange]
   );
-  const openLinkedNode = useCallback(
-    (linkedNodeID: string) => {
-      console.log(["OPEN LINKED NODE"]);
-      if (!choosingNode) {
-        let linkedNode = document.getElementById(linkedNodeID);
-        if (linkedNode) {
-          scrollToNode(linkedNodeID);
-          setTimeout(() => {
-            setSelectedNode(linkedNodeID);
-          }, 400);
-        } else {
-          openNodeHandler(linkedNodeID);
-        }
-      }
-    },
-    [choosingNode, openNodeHandler]
-  );
+  // const openLinkedNode = useCallback(
+  //   (linkedNodeID: string) => {
+  //     console.log(["OPEN LINKED NODE"]);
+  //     if (!choosingNode) {
+  //       let linkedNode = document.getElementById(linkedNodeID);
+  //       if (linkedNode) {
+  //         scrollToNode(linkedNodeID);
+  //         setTimeout(() => {
+  //           setSelectedNode(linkedNodeID);
+  //         }, 400);
+  //       } else {
+  //         openNodeHandler(linkedNodeID);
+  //       }
+  //     }
+  //   },
+  //   [choosingNode, openNodeHandler]
+  // );
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags: any) => {
@@ -1405,9 +1431,7 @@ const Dashboard = ({ }: DashboardProps) => {
           deleteLink={() => {
             console.log("delete link");
           }}
-          openLinkedNode={() => {
-            console.log("open link node");
-          }}
+          openLinkedNode={openLinkedNode}
           openAllChildren={() => {
             console.log("open all children");
           }}

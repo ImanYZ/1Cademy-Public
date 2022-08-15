@@ -546,3 +546,87 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* --------------------------------------------- */
+/* LinkingWords styles */
+
+.LinkingWordsContainer {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: 100%;
+}
+
+.ReferenceLink input {
+  color: rgb(220, 220, 220);
+}
+.LightMode .ReferenceLink input {
+  color: #454545;
+}
+
+/* .ProposalCommentSubmitButton {
+  margin-left: 340px;
+}
+.ProposalCommentSubmitButton .MetaButton {
+  padding: 7px 16px 7px 7px;
+}
+ */
+.ProposalCommentSubmitButton .btn {
+  margin-top: 7px;
+  margin-bottom: 4px;
+}
+.ProposalCommentSubmitButton .btn.green {
+  margin-left: 13px;
+}
+
+.ProposalCommentSubmitButton i {
+  margin: 7px;
+}
+
+.ProposalCommentSubmitButton:hover i {
+  color: #00e676 !important;
+}
+
+.LearnBefore .MetaButton,
+.LearnAfter .MetaButton {
+  width: 264px;
+}
+
+.LinkDeleteButton {
+  float: right;
+}
+.LinkDeleteButton .MetaButton {
+  width: 34px;
+}
+.LinkDeleteButton .MetaButton i {
+  font-size: 19px;
+}
+
+.LearnBefore .MetaButton .HyperEditor p,
+.LearnAfter .MetaButton .HyperEditor p {
+  color: rgb(220, 220, 220) !important;
+  text-transform: unset !important;
+}
+
+.LightMode .LearnBefore .MetaButton .HyperEditor p,
+.LightMode .LearnAfter .MetaButton .HyperEditor p {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.LearnBefore .MetaButton .HyperEditor:hover p,
+.LearnAfter .MetaButton .HyperEditor:hover p,
+.LearnBefore .MetaButton .HyperEditor:hover,
+.LearnAfter .MetaButton .HyperEditor:hover {
+  color: white;
+}
+
+.LightMode .LearnBefore .MetaButton .HyperEditor:hover p,
+.LightMode .LearnAfter .MetaButton .HyperEditor:hover p,
+.LightMode .LearnBefore .MetaButton .HyperEditor:hover,
+.LightMode .LearnAfter .MetaButton .HyperEditor:hover {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.LinkingButtonIcon {
+  float: left;
+  margin-top: 4px !important;
+}

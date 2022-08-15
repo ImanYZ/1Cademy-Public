@@ -78,7 +78,7 @@ type NodeFooterProps = {
 
 
 
-const NodeFooter = ({open,
+const NodeFooter = ({ open,
   identifier,
   activeNode,
   citationsSelected,
@@ -127,17 +127,23 @@ const NodeFooter = ({open,
 
   const [isSpeaking, setIsSpeaking] = useState(false);
 
+  const selectReferences = useCallback(
+    (event) => {
+      openNodePart(event, "References");
+    },
+    [openNodePart]
+  );
 
   const selectLinkingWords = useCallback(
-    (event:any) => {
-      
+    (event: any) => {
+
       openNodePart(event, "LinkingWords");
     },
     [openNodePart]
   );
 
   const narrateNode = useCallback(
-    (event:any) => {
+    (event: any) => {
       if (!window.speechSynthesis.speaking) {
         const msg = new SpeechSynthesisUtterance(
           "Node title: " + title + " \n " + "Node content: " + content
@@ -411,7 +417,7 @@ const NodeFooter = ({open,
 
               <Tooltip title={"View tags and citations used in this node."} placement='top'>
                 <Button
-                  onClick={() => console.log('selectReferences')}
+                  onClick={selectReferences}
                   sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: openPart === 'References' ? theme => theme.palette.common.orange : 'inherit' }}
                 >
                   <MenuBookIcon fontSize='inherit' />
