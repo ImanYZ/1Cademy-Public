@@ -136,6 +136,25 @@ const NodeFooter = ({open,
     [openNodePart]
   );
 
+  const narrateNode = useCallback(
+    (event:any) => {
+      if (!window.speechSynthesis.speaking) {
+        const msg = new SpeechSynthesisUtterance(
+          "Node title: " + title + " \n " + "Node content: " + content
+        );
+        window.speechSynthesis.speak(msg);
+        setIsSpeaking(true);
+        window.speechSynthesis.onend = () => {
+          setIsSpeaking(false);
+        };
+      } else {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+      }
+    },
+    [title, content]
+  );
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box className="NodeFooter Left" sx={{ display: 'flex', alignItems: 'center' }}>
@@ -217,7 +236,7 @@ const NodeFooter = ({open,
                 </Tooltip>
 
                 <Tooltip title={isSpeaking ? "Stop narration." : "Narrate the node."} placement='top'>
-                  <IconButton onClick={() => console.log('narrateNode')} sx={{ fontSize: '15px', p: '4px 7px' }}>
+                  <IconButton onClick={narrateNode} sx={{ fontSize: '15px', p: '4px 7px' }}>
                     {isSpeaking ? <VoiceOverOffIcon fontSize='inherit' /> : <RecordVoiceOverIcon fontSize='inherit' />}
                   </IconButton>
                 </Tooltip>
