@@ -42,7 +42,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     });
 
   const nodes: any = {};
-  const nodesDocs = await db.collection("nodes").where("deleted", "==", false).where("isTag", "==", true).get();
+  const nodesDocs = await db.collection("nodes").where("isTag", "==", true).get();
 
   await nodesDocs.docs.map(doc => {
     const node = doc.data();
@@ -68,7 +68,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     }
   });
 
-  const dynamicPaths = Object.entries(nodes).map(([title, node]: any) => {
+  const dynamicPaths = await Object.entries(nodes).map(([title, node]: any) => {
     if (!node.id) {
       return;
     }
@@ -76,19 +76,19 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     return `${BASE_URL}/node/${nodeTitle}/${node.id}`
   });
 
-  const allPaths = [...staticPaths, ...dynamicPaths];
+  const allPaths = await [...staticPaths, ...dynamicPaths];
 
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  const sitemap = await `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${allPaths.map(url => (`<url>
+    ${allPaths.map(url => (
+    `<url>
             <loc>${url}</loc>
             <lastmod>${new Date().toISOString()}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>1.0</priority>
           </url>`)
   ).join("")}
-  </urlset>
-`;
+  </urlset>`;
 
   res.setHeader("Content-Type", "text/xml");
   res.write(sitemap);
