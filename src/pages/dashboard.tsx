@@ -617,7 +617,7 @@ const Dashboard = ({ }: DashboardProps) => {
       // console.log("Object.keys(edges).length:", Object.keys(edges).length);
       // console.log("dag1[0].edgeCount():", dag1[0].edgeCount());
     }
-    console.log("[3. WORKER - RECALCULATE POSITIONS]", mapChanged, nodeChanges.length, userNodeChanges.length);
+    console.log("[3. WORKER - RECALCULATE POSITIONS]", mapChanged, nodeChanges.length, userNodeChanges.length, userNodesLoaded, Object.keys(edges).length === dag1[0].edgeCount(), Object.keys(edges).length, dag1[0].edgeCount());
     if (
       mapChanged &&
       nodeChanges.length === 0 &&
@@ -980,12 +980,12 @@ const Dashboard = ({ }: DashboardProps) => {
 
           let oldNodes: { [key: string]: any } = { ...nodes };
           let oldEdges: { [key: string]: any } = { ...edges };
-          let oldAllNodes: any = { ...nodes };
-          let oldAllUserNodes: any = { ...nodeChanges };
+          // let oldAllNodes: any = { ...nodes };
+          // let oldAllUserNodes: any = { ...nodeChanges };
           // if data for the node is loaded
           let uNodeData = {
             // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
-            ...oldAllNodes[nodeId],
+            ...nodes[nodeId],
             ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
             ...userNodeData,
             open: true
@@ -993,20 +993,23 @@ const Dashboard = ({ }: DashboardProps) => {
           if (userNodeId) {
             uNodeData[userNodeId] = userNodeId;
           }
-          ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+          ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks( // modify nodes and edges
             uNodeData,
             oldNodes,
             oldEdges,
-            oldAllNodes
+            // oldAllNodes
           ));
-          ({ oldNodes, oldEdges } = createOrUpdateNode(
+
+          // debugger
+
+          ({ oldNodes, oldEdges } = createOrUpdateNode( // modify dagger
             uNodeData,
             nodeId,
             oldNodes,
             { ...oldEdges },
             allTags
           ));
-          oldAllNodes[nodeId] = uNodeData;
+          // oldAllNodes[nodeId] = uNodeData;
           // setNodes(oldAllNodes)
           // setNodes(oldNodes => ({ ...oldNodes, oldNodes[nodeId]}))
           // oldAllUserNodes = {
@@ -1124,8 +1127,9 @@ const Dashboard = ({ }: DashboardProps) => {
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
           const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
+          console.log(' -- hideNodeAndItsLinks')
           setNodes(newNodes);
-          // setEdges(newEdges);
+          setEdges(newEdges);
           /*
           let oldNodes = { ...nodes };
           let oldEdges = { ...edges };

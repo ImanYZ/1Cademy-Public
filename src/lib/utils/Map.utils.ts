@@ -167,6 +167,28 @@ export const setTypeVisibilityOfParentInsideChild = (oldNodes: any, nodeId: stri
 };
 
 // setting the node type and visibility of a child node inside a parent
+export const setTypeVisibilityOfChildInsideParent2 = (nodeParent: any, oldNodes: any, nodeId: string, parentId: string) => {
+  // const oldNodesCopy = { ...oldNodes }
+  let parentCopy = copyNode(nodeParent)
+  // parentCopy = { ...parentCopy, children: [...parentCopy.children] }
+  const childIdx = parentCopy.children.findIndex((c: any) => c.node === nodeId);
+  parentCopy.children[childIdx] = { ...parentCopy.children[childIdx], visible: true }
+  return parentCopy
+
+  // if (parentId in oldNodesCopy) {
+  //   oldNodes[parentId] = {
+  //     ...oldNodes[parentId],
+  //     children: [...oldNodes[parentId].children]
+  //   };
+  //   const childIdx = oldNodes[parentId].children.findIndex((c: any) => c.node === nodeId);
+  //   oldNodes[parentId].children[childIdx] = {
+  //     ...oldNodes[parentId].children[childIdx],
+  //     visible: true
+  //   };
+  // }
+};
+
+// setting the node type and visibility of a child node inside a parent
 export const setTypeVisibilityOfChildInsideParent = (oldNodes: any, nodeId: string, parentId: string) => {
   if (parentId in oldNodes) {
     oldNodes[parentId] = {
@@ -350,6 +372,7 @@ export const setDagEdge = (from: string, to: string, edge: any, oldEdges: any) =
   // checks that the from and to nodes exist in map
   if (dag1[0].hasNode(from) && dag1[0].hasNode(to)) {
     const edgeId = from + "-" + to;
+    console.log('edgeId', edgeId)
     const newEdge = { ...edge };
     dag1[0].setEdge(from, to, newEdge);
     // adds newEdge to oldEdges
@@ -464,8 +487,8 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
 };
 
 // for showing a hidden node
-export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdges: any, oldAllNodes: any) => {
-  console.log({ uNodeData, oldNodes, oldEdges, oldAllNodes })
+export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdges: any/*, oldAllNodes: any*/) => {
+  console.log({ uNodeData, oldNodes, oldEdges })
   // copy list of the node's children to modify userNode object
   uNodeData.children = [...uNodeData.children];
   // for each child
@@ -476,7 +499,8 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
     uNodeData.children[childIdx] = {
       ...uNodeData.children[childIdx],
       // whether the child is currently visible on the map
-      visible: child.node in oldAllNodes && "visible" in oldAllNodes[child.node] && oldAllNodes[child.node].visible
+      // visible: child.node in oldAllNodes && "visible" in oldAllNodes[child.node] && oldAllNodes[child.node].visible
+      visible: child.node in oldNodes && "visible" in oldNodes[child.node] && oldNodes[child.node].visible
     };
   }
   uNodeData.parents = [...uNodeData.parents];
@@ -487,7 +511,7 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
     uNodeData.parents[parentIdx] = {
       ...uNodeData.parents[parentIdx],
       // whether the parent is currently visible on the map
-      visible: parent.node in oldAllNodes && "visible" in oldAllNodes[parent.node] && oldAllNodes[parent.node].visible
+      visible: parent.node in oldNodes && "visible" in oldNodes[parent.node] && oldNodes[parent.node].visible
     };
   }
   // for every child
@@ -596,7 +620,6 @@ export const compareAndUpdateNodeLinks = (node: any, nodeId: string, newNode: an
 
 export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, oldEdges: any, allTags: any) => {
 
-  // debugger
   // console.log("In createOrUpdateNode, nodeId:", nodeId);
   // CHECK: object.children was node by I changed with newNode
   for (let childIdx = 0; childIdx < newNode.children.length; childIdx++) {
