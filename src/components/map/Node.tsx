@@ -280,18 +280,8 @@ const Node = ({
     [correctNode, identifier, nodeType]
   );
 
-  const wrongNodeHandler = useCallback(
-    // (event:any) =>
-    //   wrongNode(
-    //     event,
-    //     identifier,
-    //     nodeType,
-    //     markedWrong,
-    //     markedCorrect,
-    //     wrongNum,
-    //     correctNum
-    //   )
-    () => console.log('uploadNodeImageHandler'),
+  const wrongNodeHandler = useCallback((event: any) =>
+    wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
     [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
   );
 

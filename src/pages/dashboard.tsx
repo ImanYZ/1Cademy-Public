@@ -1501,6 +1501,28 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, getMapGraph]
   );
 
+  const wrongNode = useCallback(
+    (event: any, nodeId: string, nodeType: NodeType, wrong: any, correct: any, wrongs: number, corrects: number) => {
+      console.log("[WRONG NODE]");
+      if (!choosingNode) {
+        let deleteOK = true;
+        setSelectedNode(nodeId);
+        // setSelectedNodeType(nodeType);
+        if ((!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1)) {
+          deleteOK = window.confirm(
+            "You are going to permanently delete this node by downvoting it. Are you sure?"
+          );
+        }
+        if (deleteOK) {
+          setIsSubmitting(true);
+          getMapGraph(`/wrongNode/${nodeId}`);
+        }
+      }
+      event.currentTarget.blur();
+    },
+    [choosingNode, getMapGraph]
+  );
+
   const edgeIds = Object.keys(edges);
 
   return (
@@ -1545,7 +1567,7 @@ const Dashboard = ({ }: DashboardProps) => {
           selectNode={() => { console.log("selectNode"); }}
           nodeClicked={() => { console.log("nodeClicked"); }}
           correctNode={correctNode}
-          wrongNode={() => { console.log("wrongNode"); }}
+          wrongNode={wrongNode}
           uploadNodeImage={() => { console.log("uploadNodeImage"); }}
           removeImage={() => { console.log("removeImage"); }}
           changeChoice={() => { console.log("changeChoice"); }}

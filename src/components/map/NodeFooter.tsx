@@ -478,7 +478,7 @@ const NodeFooter = ({ open,
 
                 <Tooltip title={"Vote to delete node."} placement='top'>
                   <Button
-                    onClick={() => console.log('wrongNode')}
+                    onClick={wrongNode}
                     sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: 'white' }}>
                     <CloseIcon fontSize='inherit' sx={{ color: markedCorrect ? 'red' : 'inherit' }} />
                     <span>{shortenNumber(wrongNum, 2, false)}</span>
