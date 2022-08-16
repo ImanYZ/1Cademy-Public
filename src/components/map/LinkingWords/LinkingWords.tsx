@@ -2,8 +2,8 @@
 
 // import Button from "@material-ui/core/Button";
 import React, { useCallback, useEffect } from "react";
-// import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
+// import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useNodeBook } from "@/context/NodeBookContext";
 
 // import { selectedNodeState } from "../../../../store/MapAtoms";
@@ -144,6 +144,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
       props.saveProposedImprovement,
     ]
   );
+
+  console.log('r', props.references, 't', props.tags)
 
   return props.openPart === "LinkingWords" ||
     props.openPart === "Tags" ||

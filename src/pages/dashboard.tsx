@@ -1282,8 +1282,9 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
-      // console.log("In markStudied");
+      console.log("[MARK STUDIED]");
       if (!choosingNode) {
+        console.log("[mark studied]");
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
@@ -1300,7 +1301,9 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
+          // console.log(' -- update node')
           updateDoc(nodeRef, changeNode);
+          // console.log(' -- update user node')
           updateDoc(userNodeRef, {
             changed: thisNode.isStudied ? thisNode.changed : false,
             isStudied: !thisNode.isStudied,
@@ -1409,7 +1412,7 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
           <Button onClick={() => openNodeHandler("wiriyOIvmr5ryzydcQLw")}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
-          <Button onClick={() => openNodeHandler("3bmT7llGDnISfCZz872s")}>Open Node Handler</Button>
+          <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
           <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
         </Box>
         {/* show clusters */}

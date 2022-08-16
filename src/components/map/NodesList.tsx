@@ -142,8 +142,15 @@ const NodesList = ({
             markedCorrect={nodes[nId].correct}
             wrongNum={nodes[nId].wrongs}
             markedWrong={nodes[nId].wrong}
-            references={nodes[nId].references}
-            tags={nodes[nId].tags.map((cur: string) => ({ node: nodes[nId].tagIds, title: cur }))} // CHECK: I added this because we need id and title
+            references={nodes[nId].references.map((cur: string, idx: number) => ({
+              title: cur,
+              node: nodes[nId].referenceIds[idx],
+              label: nodes[nId].referenceLabels[idx]
+            }))}
+            tags={nodes[nId].tags.map((cur: string, idx: number) => ({
+              node: nodes[nId].tagIds[idx],
+              title: cur
+            }))} // CHECK: I added this because we need id and title
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
             choices={nodes[nId].choices}

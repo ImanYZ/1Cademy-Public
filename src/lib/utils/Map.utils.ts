@@ -735,15 +735,18 @@ export const copyNode = (node: any) => {
   }
   newNode.referenceIds = [];
   for (let referenceId of node.referenceIds) {
-    newNode.referenceIds.push({ ...referenceId });
+    // newNode.referenceIds.push({ ...referenceId });
+    newNode.referenceIds.push(referenceId)
   }
   newNode.references = [];
   for (let reference of node.references) {
-    newNode.references.push({ ...reference });
+    // newNode.references.push({ ...reference });
+    newNode.references.push(reference)
   }
   newNode.referenceLabels = [];
   for (let referenceLabel of node.referenceLabels) {
-    newNode.referenceLabels.push({ ...referenceLabel });
+    // newNode.referenceLabels.push({ ...referenceLabel });
+    newNode.referenceLabels.push(referenceLabel)
   }
   if (newNode.nodeType === "Question") {
     newNode.choices = [];
@@ -751,7 +754,7 @@ export const copyNode = (node: any) => {
       newNode.choices.push({ ...choice });
     }
   }
-  // console.log('==============X newNode', newNode.tagIds, newNode.tags)
+  console.log('==============X newNode', { newNode })
   return newNode;
 };
 
