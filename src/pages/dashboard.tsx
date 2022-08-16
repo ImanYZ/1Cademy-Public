@@ -34,6 +34,7 @@ import NodesList from "../components/map/NodesList";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { NodeChanges, NodeFireStore } from "../knowledgeTypes";
+import { postWithToken } from "../lib/mapApi";
 import { JSONfn } from "../lib/utils/jsonFn";
 import {
   compare2Nodes,
@@ -53,6 +54,7 @@ import {
   YOFFSET
 } from "../lib/utils/Map.utils";
 import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
+import { NodeType } from "../types";
 
 type DashboardProps = {};
 
@@ -139,6 +141,12 @@ const Dashboard = ({ }: DashboardProps) => {
   // link that is currently selected
   const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
 
+  // when proposing improvements, lists of added/removed parent/child links
+  const [addedParents, setAddedParents] = useState([]);
+  const [addedChildren, setAddedChildren] = useState([]);
+  const [removedParents, setRemovedParents] = useState([]);
+  const [removedChildren, setRemovedChildren] = useState([]);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FLAGS
@@ -159,6 +167,92 @@ const Dashboard = ({ }: DashboardProps) => {
   // FUNCTIONS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
+
+
+  const reloadPermanentGrpah = useMemoizedCallback(() => {
+    console.log("[Reload permanent Graph]");
+    let oldNodes = nodes;
+    let oldEdges = edges;
+    // if (tempNodes.length > 0 || Object.keys(changedNodes).length > 0) {
+    //   oldNodes = { ...oldNodes };
+    //   oldEdges = { ...oldEdges };
+    // }
+    // for (let tempNode of tempNodes) {
+    //   oldEdges = removeDagAllEdges(tempNode, oldEdges);
+    //   oldNodes = removeDagNode(tempNode, oldNodes);
+    //   tempNodes.delete(tempNode);
+    // }
+    // for (let cId of Object.keys(changedNodes)) {
+    //   const changedNode = changedNodes[cId];
+    //   if (cId in oldNodes) {
+    //     oldEdges = compareAndUpdateNodeLinks(oldNodes[cId], cId, changedNode, oldEdges);
+    //   } else {
+    //     oldEdges = setNewParentChildrenEdges(cId, changedNode, oldEdges);
+    //   }
+    //   oldNodes = setDagNode(cId, copyNode(changedNode), oldNodes, null);
+    //   delete changedNodes[cId];
+    // }
+    setEdges(oldEdges);
+    setNodes(oldNodes);
+    setMapChanged(true);
+  }, [nodes, edges, allTags]);
+
+  const resetAddedRemovedParentsChildren = useCallback(() => {
+    // CHECK: this could be improve merging this 4 states in 1 state object
+    // so we reduce the rerenders, also we can set only the empty array here
+    setAddedParents((oldAddedParents) => (oldAddedParents === [] ? oldAddedParents : []));
+    setAddedChildren((oldAddedChildren) => (oldAddedChildren === [] ? oldAddedChildren : []));
+    setRemovedParents((oldRemovedParents) => (oldRemovedParents === [] ? oldRemovedParents : []));
+    setRemovedChildren((oldRemovedChildren) => oldRemovedChildren === [] ? oldRemovedChildren : []);
+  }, []);
+
+  const getMapGraph = useCallback(
+    async (mapURL: string, postData: any = false) => {
+      // console.log("In getMapGraph");
+      reloadPermanentGrpah();
+      try {
+        await postWithToken(mapURL, postData)
+        // // await firebase.idToken();
+        // if (postData) {
+        //   // await axios.post(mapURL, postData);
+        // } else {
+        //   await axios.post(mapURL);
+        // }
+      } catch (err) {
+        console.error(err);
+        // await firebase.idToken();
+        try {
+          await postWithToken(mapURL, postData)
+          // if (postData) {
+          //   await axios.post(mapURL, postData);
+          // } else {
+          //   await axios.post(mapURL);
+          // }
+        } catch (err) {
+          console.error(err);
+          // window.location.reload();
+        }
+      }
+      setSelectedRelation(null);
+      // setSelectedNode(null);
+      // CHECK:I commented this ------ >>>
+      // setSelectedNodeType(null);
+      // setSelectionType(null);
+      // setOpenPendingProposals(false);
+      // setOpenChat(false);
+      // setOpenNotifications(false);
+      // setOpenToolbar(false);
+      // setOpenSearch(false);
+      // setOpenBookmarks(false);
+      // setOpenRecentNodes(false);
+      // setOpenTrends(false);
+      // setOpenMedia(false);
+      //  <<< -------   -----   ------
+      resetAddedRemovedParentsChildren();
+      setIsSubmitting(false);
+    },
+    [resetAddedRemovedParentsChildren]
+  );
 
   const getNodesData = useCallback(
     async (nodeIds: string[]) => {
@@ -1393,6 +1487,20 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, user, initNodeStatusChange]
   );
 
+  const correctNode = useCallback(
+    (event: any, nodeId: string, nodeType: NodeType) => {
+      console.log("[CORRECT NODE]");
+      if (!choosingNode) {
+        setSelectedNode(nodeId);
+        // setSelectedNodeType(nodeType);
+        setIsSubmitting(true);
+        getMapGraph(`/correctNode/${nodeId}`);
+      }
+      event.currentTarget.blur();
+    },
+    [choosingNode, getMapGraph]
+  );
+
   const edgeIds = Object.keys(edges);
 
   return (
@@ -1425,71 +1533,31 @@ const Dashboard = ({ }: DashboardProps) => {
           nodeChanged={nodeChanged}
           bookmark={bookmark}
           markStudied={markStudied}
-          chosenNodeChanged={() => {
-            console.log("chosenNodeChanged");
-          }}
-          referenceLabelChange={() => {
-            console.log("referenceLabel change");
-          }}
-          deleteLink={() => {
-            console.log("delete link");
-          }}
+          chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
+          referenceLabelChange={() => { console.log("referenceLabel change"); }}
+          deleteLink={() => { console.log("delete link"); }}
           openLinkedNode={openLinkedNode}
-          openAllChildren={() => {
-            console.log("open all children");
-          }}
+          openAllChildren={() => { console.log("open all children"); }}
           hideNodeHandler={hideNodeHandler}
           hideOffsprings={hideOffsprings}
           toggleNode={toggleNode}
           openNodePart={openNodePart}
-          selectNode={() => {
-            console.log("selectNode");
-          }}
-          nodeClicked={() => {
-            console.log("nodeClicked");
-          }}
-          correctNode={() => {
-            console.log("correctNode");
-          }}
-          wrongNode={() => {
-            console.log("wrongNode");
-          }}
-          uploadNodeImage={() => {
-            console.log("uploadNodeImage");
-          }}
-          removeImage={() => {
-            console.log("removeImage");
-          }}
-          changeChoice={() => {
-            console.log("changeChoice");
-          }}
-          changeFeedback={() => {
-            console.log("changeFeedback");
-          }}
-          switchChoice={() => {
-            console.log("switchChoice");
-          }}
-          deleteChoice={() => {
-            console.log("deleteChoice");
-          }}
-          addChoice={() => {
-            console.log("addChoice");
-          }}
-          onNodeTitleBlur={() => {
-            console.log("onNodeTitleBlur");
-          }}
-          saveProposedChildNode={() => {
-            console.log("saveProposedChildNod");
-          }}
-          saveProposedImprovement={() => {
-            console.log("saveProposedImprovemny");
-          }}
-          closeSideBar={() => {
-            console.log("closeSideBar");
-          }}
-          reloadPermanentGrpah={() => {
-            console.log("reloadPermanentGrpah");
-          }}
+          selectNode={() => { console.log("selectNode"); }}
+          nodeClicked={() => { console.log("nodeClicked"); }}
+          correctNode={correctNode}
+          wrongNode={() => { console.log("wrongNode"); }}
+          uploadNodeImage={() => { console.log("uploadNodeImage"); }}
+          removeImage={() => { console.log("removeImage"); }}
+          changeChoice={() => { console.log("changeChoice"); }}
+          changeFeedback={() => { console.log("changeFeedback"); }}
+          switchChoice={() => { console.log("switchChoice"); }}
+          deleteChoice={() => { console.log("deleteChoice"); }}
+          addChoice={() => { console.log("addChoice"); }}
+          onNodeTitleBlur={() => { console.log("onNodeTitleBlur"); }}
+          saveProposedChildNode={() => { console.log("saveProposedChildNod"); }}
+          saveProposedImprovement={() => { console.log("saveProposedImprovemny"); }}
+          closeSideBar={() => { console.log("closeSideBar"); }}
+          reloadPermanentGrpah={() => { console.log("reloadPermanentGrpah"); }}
         />
       </MapInteractionCSS>
     </Box>

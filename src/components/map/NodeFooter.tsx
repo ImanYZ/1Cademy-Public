@@ -487,7 +487,7 @@ const NodeFooter = ({ open,
 
                 <Tooltip title={"Vote to prevent further changes."} placement='top'>
                   <Button
-                    onClick={() => console.log('correctNode')}
+                    onClick={correctNode}
                     sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: 'white' }}>
                     <DoneIcon fontSize='inherit' sx={{ color: markedCorrect ? 'green' : 'inherit' }} />
                     <span>{shortenNumber(correctNum, 2, false)}</span>

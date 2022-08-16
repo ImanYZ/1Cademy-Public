@@ -35,6 +35,14 @@ export const logout = async () => {
   await signOut(getAuth());
 };
 
+export const getIdToken = async (): Promise<string | undefined> => {
+  const auth = getAuth();
+  const token = auth.currentUser?.getIdToken(/* forceRefresh */ true)
+  return token
+  // const userToken = await this.auth.currentUser.getIdToken(/* forceRefresh */ true);
+  // axios.defaults.headers.common["Authorization"] = userToken;
+}
+
 export const retrieveAuthenticatedUser = async (userId: string) => {
   let user: User | null = null;
   const db = getFirestore();

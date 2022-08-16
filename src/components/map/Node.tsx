@@ -275,8 +275,8 @@ const Node = ({
   );
 
   const correctNodeHandler = useCallback(
-    // (event:any) => correctNode(event, identifier, nodeType)
-    () => console.log('uploadNodeImageHandler'),
+    (event: any) => correctNode(event, identifier, nodeType),
+    // () => console.log('uploadNodeImageHandler'),
     [correctNode, identifier, nodeType]
   );
 
