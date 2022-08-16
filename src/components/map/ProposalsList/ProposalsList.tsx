@@ -1,0 +1,178 @@
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import React, { useCallback } from "react";
+import { useRecoilValue } from "recoil";
+
+import LoadingImg from "../../../../../assets/1Cademy_Loading_Dots.gif";
+import { usernameState } from "../../../../../store/AuthAtoms";
+import shortenNumber from "../../../../../utils/shortenNumber";
+import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
+import MetaButton from "../../../MetaButton/MetaButton";
+import proposalSummariesGenerator from "../proposalSummariesGenerator";
+import ProposalItem from "./ProposalItem/ProposalItem";
+import UserHeader from "./UserHeader/UserHeader";
+
+// import "./ProposalsList.css";
+
+const doNothing = () => { };
+
+dayjs.extend(relativeTime);
+
+type ProposalsListProps = {
+  proposals: any,
+  setProposals: any,
+  proposeNodeImprovement: any,
+  fetchProposals: any,
+  rateProposal: any,
+  selectProposal: any,
+  deleteProposal: any,
+  editHistory: any,
+  proposeNewChild: any,
+  openProposal: any,
+  isAdmin: any,
+  isRetrieving: any,
+}
+
+const ProposalsList = (props: ProposalsListProps) => {
+  const username = useRecoilValue(usernameState);
+
+  const rateProposalClick = useCallback(
+    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
+      props.rateProposal(
+        event,
+        props.proposals,
+        props.setProposals,
+        proposal.id,
+        proposalIdx,
+        correct,
+        wrong,
+        award
+      ),
+    [props.rateProposal, props.proposals]
+  );
+
+  const deleteProposalClick = useCallback(
+    (proposal: any, proposalIdx: any) => (event: any) =>
+      props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
+    [props.deleteProposal, props.proposals]
+  );
+
+  return !props.isRetrieving ? (
+    props.proposals.map((proposal: any, proposalIdx: any) => {
+      const proposalSummaries = proposalSummariesGenerator(proposal);
+      if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
+        if (props.openProposal === proposal.id) {
+          let adminTooltip = "# of 1Admins who have awarded this proposal.";
+          if (!props.isAdmin) {
+            adminTooltip +=
+              " You cannot give this proposal an award, beccause you are not the 1Admin of this node.";
+          } else {
+            if (proposal.proposer === username) {
+              adminTooltip += " You cannot give your own proposal an award!";
+            } else {
+              adminTooltip +=
+                " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
+            }
+          }
+          return (
+            <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
+              <UserHeader imageUrl={proposal.imageUrl} />
+              <div className="title Username">{proposal.proposer}</div>
+              <div className="title Time">{dayjs(proposal.createdAt).fromNow()}</div>
+              <div className="ProposalTitle">
+                {proposalSummaries.length > 0 ? (
+                  proposalSummaries.map((prSummary: any, sIdx: number) => {
+                    return <p key={"Summary" + proposal.id + sIdx}>{prSummary}</p>;
+                  })
+                ) : (
+                  <p>{proposal.summary}</p>
+                  // CHECK: I commented this, uncomment when build the editor please
+                  // <HyperEditor readOnly={true} onChange={doNothing} content={proposal.summary} />
+                )}
+              </div>
+              <div className="ProposalBody">
+                <HyperEditor readOnly={true} onChange={doNothing} content={proposal.proposal} />
+              </div>
+              <div className="secondary-content">
+                <MetaButton
+                  onClick={rateProposalClick(proposal, proposalIdx, false, true, false)}
+                  tooltip="Click if you find this proposal Unhelpful."
+                  tooltipPosition="BottomLeft"
+                >
+                  <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>
+                    close
+                  </i>
+                  <span>{shortenNumber(proposal.wrongs, 2, false)}</span>
+                </MetaButton>
+                <MetaButton
+                  onClick={rateProposalClick(proposal, proposalIdx, true, false, false)}
+                  tooltip="Click if you find this proposal helpful."
+                  tooltipPosition="BottomLeft"
+                >
+                  <i
+                    className={
+                      proposal.correct
+                        ? "material-icons DoneIcon green-text"
+                        : "material-icons DoneIcon grey-text"
+                    }
+                  >
+                    done
+                  </i>
+                  <span>{shortenNumber(proposal.corrects, 2, false)}</span>
+                </MetaButton>
+                <MetaButton
+                  onClick={
+                    !props.isAdmin || proposal.proposer === username
+                      ? false
+                      : rateProposalClick(proposal, proposalIdx, false, false, true)
+                  }
+                  tooltip={adminTooltip}
+                  tooltipPosition="BottomLeft"
+                >
+                  <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>
+                    grade
+                  </i>
+                  <span>{shortenNumber(proposal.awards, 2, false)}</span>
+                </MetaButton>
+                {!proposal.accepted && proposal.proposer === username && (
+                  <MetaButton
+                    onClick={deleteProposalClick(proposal, proposalIdx)}
+                    tooltip="Delete your proposal."
+                    tooltipPosition="BottomLeft"
+                  >
+                    <i className="material-icons grey-text">delete_forever</i>
+                  </MetaButton>
+                )}
+              </div>
+
+              {/* <CommentsList proposal={proposal} /> */}
+            </li>
+          );
+        } else {
+          return (
+            <ProposalItem
+              proposal={proposal}
+              selectProposal={props.selectProposal}
+              proposalSummaries={proposalSummaries}
+              shouldSelectProposal={true}
+              showTitle={true}
+            />
+          );
+        }
+      }
+    })
+  ) : (
+    <div className="CenterredLoadingImageSidebar">
+      <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
+      {/* <div className="preloader-wrapper active big">
+        <div className="spinner-layer spinner-yellow-only">
+          <div className="circle-clipper left">
+            <div className="circle"></div>
+          </div>
+        </div>
+      </div> */}
+    </div>
+  );
+};
+
+export default React.memo(ProposalsList);

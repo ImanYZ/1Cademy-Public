@@ -31,6 +31,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
 import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
+import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { NodeChanges, NodeFireStore } from "../knowledgeTypes";
@@ -161,6 +162,9 @@ const Dashboard = ({ }: DashboardProps) => {
 
   // flag set to true when sending request to server
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // flag to open proposal sidebar
+  const [openProposals, setOpenProposals] = useState(false);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -1527,13 +1531,18 @@ const Dashboard = ({ }: DashboardProps) => {
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-
-      {/* end Data from map */}
-      <MapInteractionCSS>
+      <MemoizedSidebar closeSideBar={() => console.log('close SideBar')} />
+      <Box sx={{ position: 'fixed', zIndex: '3' }}>
+        {/* Data from map, DONT REMOVE */}
         <Box>
-          {/* Data from map, DONT REMOVE */}
+          Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+        </Box>
+        <Box>
           <Button onClick={() => console.log(nodes)}>nodes</Button>
           <Button onClick={() => console.log(edges)}>edges</Button>
+          <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
+        </Box>
+        <Box>
           <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
           <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
           <Button onClick={() => console.log(mapChanged)}>map changed</Button>
@@ -1543,12 +1552,16 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => openNodeHandler("wiriyOIvmr5ryzydcQLw")}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
-          <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
         </Box>
+        <Box>
+          <Button onClick={() => setOpenProposals(!openProposals)}>Toggle Open proposals</Button>
+        </Box>
+      </Box>
+
+      {/* end Data from map */}
+      <MapInteractionCSS>
         {/* show clusters */}
-        {/* link list */}
-        {/* node list */}
-        Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+
         <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
         <NodesList
           nodes={nodes}

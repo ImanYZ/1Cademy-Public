@@ -630,3 +630,914 @@
   float: left;
   margin-top: 4px !important;
 }
+
+
+/* --------------------------------------------- */
+/* sidebar styles */
+#Sidebar {
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 4; /* Stay on top */
+  top: 0; /* Stay at the top */
+  left: -430px;
+  overflow-x: hidden; /* Disable horizontal scroll */
+  overflow-y: hidden;
+  padding: 0px;
+  width: 430px;
+  height: 100vh;
+  background-color: rgb(31, 31, 31);
+  color: rgb(220, 220, 220) !important;
+  /* -webkit-box-shadow: 1px 0px 10px 0px rgba(190, 190, 190, 1);
+  -moz-box-shadow: 1px 0px 10px 0px rgba(190, 190, 190, 1);
+  box-shadow: 1px 0px 10px 0px rgba(190, 190, 190, 1); */
+  transition: left 1s; /* vendorless fallback */
+  -o-transition: left 1s; /* opera */
+  -ms-transition: left 1s; /* IE 10 */
+  -moz-transition: left 1s; /* Firefox */
+  -webkit-transition: left 1s; /*safari and chrome */
+}
+.LightMode #Sidebar {
+  background-color: #f0f0f0;
+  color: #454545 !important;
+}
+
+#Sidebar.active {
+  left: 0px;
+  -webkit-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
+  -moz-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
+  box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
+}
+
+#SidebarBody {
+  height: 100%;
+  overflow: hidden;
+}
+
+#SidebarBody .collection {
+  border-color: rgb(103, 103, 103);
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+#SidebarBody .collection-item {
+  background: none;
+}
+
+#SidebarBody .collection-item:hover {
+  background: rgba(128, 128, 128, 0.13);
+}
+
+#SidebarBody .CenterredLoadingImage {
+  width: 400px;
+}
+
+#Sidebar .CodeMirror {
+  width: 430px;
+}
+
+.SidebarTitle {
+  font-size: 19px;
+  font-weight: 310;
+}
+
+.SidebarExplanation {
+  font-size: 16px;
+  font-weight: 310;
+}
+
+.ProposalForm {
+  margin-bottom: 25px;
+}
+
+.CenterredLoadingImageSidebar {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 7;
+}
+
+#ContinueButton {
+  margin-left: 130px;
+  margin-bottom: 25px;
+}
+
+.NodeChangeTime {
+  font-weight: 100;
+  font-size: 13px !important;
+  margin-right: 10px;
+}
+
+.collection .collection-item {
+  cursor: pointer;
+}
+
+.collection .collection-item.Studied {
+  border-color: #fdc473;
+  border-width: 4px;
+}
+.collection .collection-item.NotStudied {
+  border-color: #fd7373;
+  border-width: 4px;
+}
+
+.Proposals .collection-item .Username {
+  margin-top: -64px;
+}
+
+.Proposals .collection-item .Time {
+  font-weight: 250;
+  font-size: 10px !important;
+}
+
+.ProposalTitle {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.CollapsedProposal .Time {
+  margin-left: -61px !important;
+}
+
+.CollapsedProposal {
+  min-height: 0px !important;
+}
+
+.secondary-content {
+  top: 10px !important;
+  right: 13px !important;
+}
+
+.NoProposals {
+  margin-left: 10px;
+}
+
+.TrendPlotRow {
+  border-bottom: 1px solid white;
+}
+
+#NodesStatistics {
+  padding: 7px 13px 4px 13px;
+}
+
+#NodesStatistics .row {
+  margin-bottom: 7px;
+}
+
+#NodesStatistics .grey-text {
+  font-size: 14.8px;
+}
+
+.NodeSortButton {
+  cursor: default !important;
+}
+
+.NodeSortButton .Tooltip {
+  margin-right: 22px;
+}
+
+.NodeSortButton .row {
+  margin-bottom: 0px;
+}
+
+#NodeSortDirection {
+  margin-bottom: 10px;
+}
+
+#FilterNodeTypesLabel {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.dropdown-content {
+  background-color: rgb(31, 31, 31);
+  top: 0px !important;
+}
+
+.LightMode .dropdown-content {
+  background-color: #f0f0f0;
+}
+
+.select-wrapper input.select-dropdown {
+  color: #9e9e9e;
+}
+
+/*.LightMode .select-wrapper input.select-dropdown {
+  color: #454545;
+}*/
+
+#OnlyShowTypes {
+  color: #9e9e9e;
+  margin-bottom: -19px;
+}
+
+.NodeTypeSelector {
+  margin: 13px 10px 40px -10px !important;
+}
+
+.NodeTypeSelector [type="checkbox"] + span:not(.lever) {
+  padding-left: 25px;
+}
+
+#NumberOfFilteredNodes {
+  margin-bottom: 0px;
+}
+
+#SidebarButtonsContainer {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  height: 100vh;
+  padding-top: 10px;
+  /* padding-left: 22px; */
+  z-index: 4;
+  background-color: rgb(31, 31, 31);
+  -webkit-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
+  -moz-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
+  box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
+}
+.LightMode #SidebarButtonsContainer {
+  background-color: #f0f0f0;
+  -webkit-box-shadow: -1px 0px 10px 0px #3b3b3b;
+  -moz-box-shadow: -1px 0px 10px 0px #3b3b3b;
+  box-shadow: -1px 0px 10px 0px #3b3b3b;
+}
+#SidebarButtonsContainer:focus #SidebarButtons,
+#SidebarButtonsContainer:hover #SidebarButtons {
+  width: 130px;
+  margin-left: 7px;
+  margin-right: 7px;
+}
+#SidebarButtonsContainer:focus #UsersStatusList,
+#SidebarButtonsContainer:hover #UsersStatusList {
+  margin-left: -7px;
+  margin-right: -400px;
+  padding-right: 400px;
+}
+#SidebarButtonsContainer:focus #SidebarButtons .SidebarButton,
+#SidebarButtonsContainer:hover #SidebarButtons .SidebarButton {
+  width: 121px;
+  left: 1px;
+}
+#SidebarButtonsContainer:focus #SidebarButtons .SidebarButton.inUserBar,
+#SidebarButtonsContainer:hover #SidebarButtons .SidebarButton.inUserBar {
+  width: 133px;
+  left: -4px;
+}
+#SidebarButtonsContainer:focus #SidebarButtons .Logo,
+#SidebarButtonsContainer:hover #SidebarButtons .Logo {
+  margin-left: 28px;
+}
+#SidebarButtonsContainer:focus #SearchButton,
+#SidebarButtonsContainer:hover #SearchButton {
+  width: 158.6px;
+  line-height: 31px;
+  text-transform: none;
+}
+#SidebarButtonsContainer:focus .SidebarDescription,
+#SidebarButtonsContainer:hover .SidebarDescription {
+  visibility: visible;
+  line-height: 16px;
+  height: 19px;
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}
+#SidebarButtonsContainer:focus #SearchButton .MuiButton-label,
+#SidebarButtonsContainer:hover #SearchButton .MuiButton-label {
+  justify-content: left;
+}
+#SidebarButtonsContainer:focus #SearchButton .SidebarDescription,
+#SidebarButtonsContainer:hover #SearchButton .SidebarDescription {
+  left: 2.5px;
+  top: 1px;
+}
+#SidebarButtonsContainer:focus #SidebarButtons .preloader-wrapper,
+#SidebarButtonsContainer:hover #SidebarButtons .preloader-wrapper {
+  top: -50.2px;
+}
+#SidebarButtonsContainer:focus .UserStatusTotalPoints,
+#SidebarButtonsContainer:focus .UserStatusTotalAwards,
+#SidebarButtonsContainer:hover .UserStatusTotalPoints,
+#SidebarButtonsContainer:hover .UserStatusTotalAwards {
+  visibility: visible;
+  line-height: 19px;
+  height: 41.2px;
+  font-size: 13px;
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}
+#SidebarButtonsContainer:focus .NotificationsNum,
+#SidebarButtonsContainer:hover .NotificationsNum {
+  top: -47.7px;
+  left: -7px;
+  transition: top 1s, left 1s;
+  -o-transition: top 1s, left 1s;
+  -ms-transition: top 1s, left 1s;
+  -moz-transition: top 1s, left 1s;
+  -webkit-transition: top 1s, left 1s;
+}
+
+#LeaderboardChanger {
+  visibility: hidden;
+  margin-left: 4px;
+  height: 0px;
+  width: 94px;
+  font-size: 13px;
+}
+#SidebarButtonsContainer:focus #LeaderboardChanger,
+#SidebarButtonsContainer:hover #LeaderboardChanger {
+  visibility: visible;
+  line-height: 16px;
+  height: 41.2px;
+  overflow: visible;
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}
+
+#SidebarButtons {
+  display: block;
+  width: 64px;
+  margin-left: 16px;
+  transform-origin: top right;
+  transition: width 1s, margin-left 1s; /* vendorless fallback */
+  -o-transition: width 1s, margin-left 1s; /* opera */
+  -ms-transition: width 1s, margin-left 1s; /* IE 10 */
+  -moz-transition: width 1s, margin-left 1s; /* Firefox */
+  -webkit-transition: width 1s, margin-left 1s; /*safari and chrome */
+}
+
+#SidebarButtons .Logo {
+  margin-left: -13px;
+  margin-top: -4px;
+  margin-bottom: 4px;
+  transition: margin-left 1s; /* vendorless fallback */
+  -o-transition: margin-left 1s; /* opera */
+  -ms-transition: margin-left 1s; /* IE 10 */
+  -moz-transition: margin-left 1s; /* Firefox */
+  -webkit-transition: margin-left 1s; /*safari and chrome */
+}
+#SidebarButtons .Logo .MetaButton {
+  padding-top: 0px;
+  height: 91px;
+  width: 79px;
+}
+
+#SidebarButtons .preloader-wrapper {
+  position: relative;
+  top: -29.1px;
+  left: -5.8px;
+  transition: top 1s; /* vendorless fallback */
+  -o-transition: top 1s; /* opera */
+  -ms-transition: top 1s; /* IE 10 */
+  -moz-transition: top 1s; /* Firefox */
+  -webkit-transition: top 1s; /*safari and chrome */
+}
+
+#SidebarButtons .MetaButton {
+  display: block;
+  line-height: 28px;
+  height: 37px;
+  width: 130px;
+}
+
+.SidebarDescription {
+  display: block;
+  position: relative;
+  left: 25px;
+  top: -19px;
+  line-height: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0s, line-height 0s, height 0s; /* vendorless fallback */
+  -o-transition: visibility 0s, line-height 0s, height 0s; /* opera */
+  -ms-transition: visibility 0s, line-height 0s, height 0s; /* IE 10 */
+  -moz-transition: visibility 0s, line-height 0s, height 0s; /* Firefox */
+  -webkit-transition: visibility 0s, line-height 0s, height 0s; /*safari and chrome */
+}
+
+#SidebarButtons .SidebarButton {
+  padding: 4px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  transition: width 1s, left 1s; /* vendorless fallback */
+  -o-transition: width 1s, left 1s; /* opera */
+  -ms-transition: width 1s, left 1s; /* IE 10 */
+  -moz-transition: width 1s, left 1s; /* Firefox */
+  -webkit-transition: width 1s, left 1s; /*safari and chrome */
+}
+#SidebarButtons .SidebarButton:hover,
+#SidebarButtons .SidebarButton:focus {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.UserStatusTotalPoints .material-icons,
+.UserStatusTotalPoints .material-icons,
+.ComLeaderboardChipDesc .material-icons,
+.TooltipText .material-icons {
+  margin-top: -4px;
+  font-size: 16px;
+}
+
+#UsersStatusList .SidebarButton {
+  left: -19px;
+  top: 0px;
+  direction: ltr;
+  overflow: visible;
+}
+
+.SidebarButton {
+  display: block;
+  position: relative;
+  padding-bottom: 16px;
+  margin-top: 0px;
+}
+.SidebarButton.Tooltip {
+  overflow: visible;
+}
+
+.SidebarButton .preloader-wrapper {
+  position: absolute;
+  top: 1.9px;
+  left: 1.9px;
+}
+
+.SidebarButton .btn-floating {
+  background-color: rgb(31, 31, 31);
+}
+
+#SearchButton {
+  border-radius: 0px 50px 50px 0px;
+  border-style: none;
+  background-color: rgba(255, 152, 0, 1);
+  color: white;
+  width: 85.6px;
+  line-height: 19px;
+  height: 40px;
+  overflow: visible;
+  margin-top: 7px;
+  margin-left: -22px;
+  margin-bottom: 7px;
+  text-align: left;
+  padding-left: 31px;
+  transition: width 1s; /* vendorless fallback */
+  -o-transition: width 1s; /* opera */
+  -ms-transition: width 1s; /* IE 10 */
+  -moz-transition: width 1s; /* Firefox */
+  -webkit-transition: width 1s; /*safari and chrome */
+}
+#SearchButton:hover,
+#SearchButton:focus {
+  -webkit-box-shadow: 1px 0px 10px 0px rgba(190, 190, 190, 1);
+  -moz-box-shadow: 1px 0px 10px 0px rgba(190, 190, 190, 1);
+  box-shadow: 1px 0px 10px 0px rgba(190, 190, 190, 1);
+}
+
+.NotificationsNum {
+  position: relative;
+  left: -7px;
+  top: -28px;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: 13px;
+  height: 14.5px;
+  line-height: 13px;
+  width: fit-content;
+  border-radius: 19px;
+  background-color: #f44336;
+  color: white;
+}
+
+.LightMode #SidebarBody .collection .collection-item {
+  border-bottom: 1px solid #b4b4b4;
+}
+
+.ShowHideSidebarSection {
+  color: rgb(190, 190, 190) !important;
+  border-left: 10px solid;
+  border-top-color: rgb(148, 91, 0) !important;
+  border-right-color: rgb(148, 91, 0) !important;
+  border-bottom-color: rgb(148, 91, 0) !important;
+  border-left-color: rgb(122, 0, 0) !important;
+  background-color: rgb(148, 91, 0) !important;
+}
+.Lightmode .ShowHideSidebarSection {
+  color: rgb(0 0 0) !important;
+  border-left: 10px solid;
+  border-top-color: rgb(148, 91, 0) !important;
+  border-right-color: rgb(148, 91, 0) !important;
+  border-bottom-color: rgb(148, 91, 0) !important;
+  border-left-color: rgb(255 179 0) !important;
+  background-color: rgb(254 211 139) !important;
+}
+
+.ShowHideSidebarSection:hover,
+.ShowHideSidebarSection:focus {
+  background: none;
+  color: rgb(255, 255, 255) !important;
+}
+
+.ShowHideSidebarSection i {
+  font-size: 25px !important;
+}
+.ShowHideSidebarSection:hover i {
+  color: #ff9100 !important;
+}
+
+#LeaderboardCommunity {
+  margin: 22px 0px -34px -25px;
+}
+
+button.MuiTab-textColorInherit:focus {
+  background-color: inherit;
+}
+
+#SidebarTabsContainer .MuiTabs-indicator {
+  background-color: #ff9100;
+}
+
+.SearchIcon {
+  font-size: 22px;
+  margin: 4px 4px -4px 4px;
+}
+
+.LeaderbaordIcon {
+  font-size: 22px;
+  margin-left: 1.6px;
+  margin-bottom: -2.5px;
+}
+
+.MuiButtonBase-root.MuiTab-root.MuiTab-textColorInherit:hover {
+  background-color: rgba(255, 255, 255, 0.13);
+}
+
+#LeaderboardTag {
+  margin-top: -10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#LeaderboardType {
+  margin-bottom: -10px;
+}
+
+#SidebarButtons #MultipleChoiceBtnContainer {
+  left: 137.5px;
+  top: 370px;
+  width: 130px;
+  height: 186.1px;
+}
+
+#MiniUserPrifileHeader {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: 415px;
+  height: 100%;
+}
+
+#MiniUserPrifileHeader #UserProfilePicture {
+  margin: 0px 2.5px 0px 10px;
+}
+
+#MiniUserPrifileHeader .UserAvatar.UserStatusIcon {
+  margin: 0px 25px 25px 25px;
+  height: 160px;
+  width: 160px;
+}
+
+#MiniUserPrifileHeader .MetaButton .UserAvatar.UserStatusIcon {
+  margin: 10px;
+  height: 160px;
+  width: 160px;
+}
+
+#MiniUserPrifilePointsContainer {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: 40px 40px;
+  margin-top: 25px;
+  margin-bottom: 19px;
+}
+
+#MiniUserPrifilePointsContainer .MiniUserProfilePoints {
+  height: 40px;
+}
+
+#MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
+  margin-left: 55px;
+}
+
+#MiniUserPrifilePointsContainer .MiniUserProfilePoints i,
+#MiniUserPrifileInstitution img,
+#MiniUserPrifileTotalPoints i {
+  margin-right: 10px;
+}
+#MiniUserPrifiletag i {
+  margin-right: 7px;
+}
+
+#MiniUserPrifileIdentity {
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+}
+
+#MiniUserPrifileName {
+  font-size: 25px;
+}
+
+#MiniUserPrifileAboveProfilePicture {
+  height: 31px;
+}
+
+#MiniUserPrifileFullProfileLink {
+  height: 31px;
+}
+
+
+/* ---------------------------------------- */
+/* metabutton styles */
+.MetaButton {
+  text-align: left;
+  padding: 4px 7px 4px 7px;
+  color: rgb(190, 190, 190) !important;
+  /* text-transform: none !important; */
+  /* transition: color 0.1s ease; vendorless fallback */
+  /* -o-transition: color 0.1s ease; opera */
+  /* -ms-transition: color 0.1s ease; IE 10 */
+  /* -moz-transition: color 0.1s ease; Firefox */
+  /* -webkit-transition: color 0.1s ease; safari and chrome */
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  overflow: visible;
+  z-index: 1;
+
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+.MetaButton.Round {
+  border-radius: 50%;
+}
+
+.MetaButton.Clickable {
+  cursor: pointer;
+}
+
+.LightMode .MetaButton {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.MetaButton.Clickable:hover,
+.MetaButton.Clickable:focus {
+  background: rgba(255, 255, 255, 0.13);
+  color: rgb(255, 255, 255) !important;
+}
+.LightMode .MetaButton.Clickable:hover,
+.LightMode .MetaButton.Clickable:focus {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.MetaButton.Clickable:hover i {
+  color: #ff9100 !important;
+}
+
+.MetaButton .CloseButton {
+  background: rgb(34, 34, 34);
+  background: radial-gradient(
+    circle,
+    rgba(34, 34, 34, 1) 0%,
+    rgba(69, 69, 69, 1) 4%,
+    rgba(0, 212, 255, 0) 70%
+  );
+}
+
+.LightMode .MetaButton .CloseButton {
+  background: rgb(255, 255, 255);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 4%,
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+.LightMode .MetaButton .CloseButton i {
+  color: #808080 !important;
+}
+
+.MetaButton:hover .CloseButton i {
+  color: red !important;
+}
+
+.MetaButton.hoverable:hover,
+.MetaButton.hoverable:focus,
+.TooltipText {
+  -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.MetaButton span {
+  padding-left: 4px;
+}
+
+
+/* ------------------------------------------ */
+/* styles from sidebar wrapper */
+
+#SidebarContainer {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 130px auto;
+  height: 100%;
+  margin-top: 0px;
+  overflow: hidden;
+}
+
+#SidebarContainer.MiniUserProfileSidebar {
+  grid-template-rows: 220px 115px auto;
+}
+
+#SidebarHeader {
+  display: block;
+  width: 100%;
+  height: 100%;
+  -webkit-transform: translateX(0);
+  transform: translateX(0);
+}
+
+#SidebarHeaderText {
+  display: block;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  padding-left: 13px;
+  width: 100%;
+  color: white;
+  font-size: 40px;
+  font-weight: 250;
+  background: linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%);
+}
+.LightMode #SidebarHeaderText {
+  color: #454545;
+  background: rgb(255, 255, 255);
+  background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%);
+}
+.LightMode #SidebarHeaderText h4 {
+  color: black !important;
+}
+
+#SideBarClose {
+  position: fixed;
+  top: 1px;
+  left: 373px;
+  font-size: 25px;
+}
+
+#ScrollToTop {
+  position: fixed;
+  bottom: 1px;
+  left: 373px;
+  font-size: 25px;
+}
+
+/* --------------------------------------- */
+/* styles from proposals */
+#ProposalsContainer {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 115px auto;
+  width: 100%;
+  height: 100%;
+}
+
+#ProposeNewChildImprovementTitle {
+  border: none;
+  font-size: 19px;
+  margin: 13px 13px 0px 13px;
+}
+
+#ProposalButtonsCollection {
+  margin: 0;
+  padding: 10px 0px 10px 0px;
+  background: none;
+}
+
+#ProposalButtonsCollection:hover {
+  background: none;
+}
+
+#ProposalButtonsRow {
+  text-align: center;
+  margin: 0 auto;
+}
+
+
+/* --------------------------------------- */
+/* styles from newChild proposal */
+
+.NewProposalButton {
+  margin: 5.5px 1px;
+}
+
+.NewProposalButtonText {
+  text-align: center;
+}
+
+.NewProposalIcons {
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.NewProposalIcons i {
+  margin-right: 4px;
+}
+
+
+/* ------------------------------------------- */
+/* proposal list styles */
+.Proposals .collection-item .Username {
+  margin-top: -64px;
+}
+
+.Proposals .collection-item .Time textarea {
+  font-weight: 100;
+  font-size: 16px;
+}
+
+.ProposalTitle {
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 0px !important;
+}
+
+.CollapsedProposal .Time,
+.CollapsedProposal .ProposalTitle {
+  margin-left: -61px !important;
+}
+
+.CollapsedProposal {
+  min-height: 0px !important;
+}
+
+.ProposalBody,
+.CommentBody {
+  margin-left: -61px !important;
+}
+
+.CommentBody {
+  margin-top: 13px !important;
+}
+
+.ProposalComments {
+  margin: 13px -22px 4px -61px !important;
+}
+
+.CommentOnProposal {
+  margin-left: -61px !important;
+  margin-right: -22px !important;
+}
+
+.secondary-content {
+  top: 10px !important;
+  right: 13px !important;
+}
+
+.NoProposals {
+  margin-left: 10px;
+}

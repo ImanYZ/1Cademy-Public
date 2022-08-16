@@ -4,7 +4,7 @@ import { OpenPart } from "src/nodeBookTypes";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
 
-import Node from "./Node";
+import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
   nodes: any;
@@ -117,7 +117,7 @@ const NodesList = ({
         }
 
         return (
-          <Node
+          <MemoizedNode
             key={nId}
             identifier={nId}
             activeNode={activeNode}

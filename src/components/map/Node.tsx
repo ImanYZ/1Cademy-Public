@@ -378,7 +378,8 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
-  if (!user) { return }
+  if (!user) { return null }
+
 
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
@@ -454,15 +455,14 @@ const Node = ({
                 ))}
               {/* CHECK: I commented this */}
               {/* <HyperEditor
-                readOnly={!editable}
-                onChange={titleChange}
-                onBlur={onNodeTitleBLur(title)}
-                content={title}
-                width={width}
-              /> */}
+                 readOnly={!editable}
+                 onChange={titleChange}
+                 onBlur={onNodeTitleBLur(title)}
+                 content={title}
+                 width={width}
+               /> */}
               {title}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
-
                 <MemoizedNodeHeader
                   open={open}
                   onToggleNode={toggleNodeHandler}
@@ -486,21 +486,21 @@ const Node = ({
               {editable && <p>Please edit the node content below:</p>}
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
-                readOnly={!editable}
-                onChange={contentChange}
-                content={content}
-                width={width}
-              /> */}
+                 readOnly={!editable}
+                 onChange={contentChange}
+                 content={content}
+                 width={width}
+               /> */}
               {content}
               {nodeImage !== "" && (
                 <>
                   {editable && (
                     <div className="RemoveImageDIV">
                       {/* <MetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                        <div className="CloseButton">
-                          <i className="material-icons orange-text">delete_forever</i>
-                        </div>
-                      </MetaButton> */}
+                         <div className="CloseButton">
+                           <i className="material-icons orange-text">delete_forever</i>
+                         </div>
+                       </MetaButton> */}
                       <Tooltip onClick={() => console.log('removeImageHandler')} title={"Click to remove the image."}>
                         <DeleteForeverIcon />
                       </Tooltip>
@@ -519,40 +519,40 @@ const Node = ({
               )}
               {/* CHECK: I commented this */}
               {/* {nodeType === "Question" && "choices" in props && (
-                <>
-                  <ul className="collapsible">
-                    {choices.map((choice, idx) => {
-                      return (
-                        <QuestionChoices
-                          key={identifier + "Choice" + idx}
-                          identifier={identifier}
-                          nodeRef={nodeRef}
-                          editable={editable}
-                          choices={choices}
-                          idx={idx}
-                          choicesNum={choices.length}
-                          choice={choice}
-                          deleteChoice={deleteChoice}
-                          switchChoice={switchChoice}
-                          changeChoice={changeChoice}
-                          changeFeedback={changeFeedback}
-                          nodeChanged={locationSizeChange}
-                        />
-                      );
-                    })}
-                  </ul>
-                  {editable && (
-                    <div className="QuestionAddChoice">
-                      <MetaButton
-                        onClick={addChoiceHandler}
-                        tooltip="Click to add a new choice to this question."
-                      >
-                        <i className="material-icons green-text">add</i> Add Choice
-                      </MetaButton>
-                    </div>
-                  )}
-                </>
-              )} */}
+                 <>
+                   <ul className="collapsible">
+                     {choices.map((choice, idx) => {
+                       return (
+                         <QuestionChoices
+                           key={identifier + "Choice" + idx}
+                           identifier={identifier}
+                           nodeRef={nodeRef}
+                           editable={editable}
+                           choices={choices}
+                           idx={idx}
+                           choicesNum={choices.length}
+                           choice={choice}
+                           deleteChoice={deleteChoice}
+                           switchChoice={switchChoice}
+                           changeChoice={changeChoice}
+                           changeFeedback={changeFeedback}
+                           nodeChanged={locationSizeChange}
+                         />
+                       );
+                     })}
+                   </ul>
+                   {editable && (
+                     <div className="QuestionAddChoice">
+                       <MetaButton
+                         onClick={addChoiceHandler}
+                         tooltip="Click to add a new choice to this question."
+                       >
+                         <i className="material-icons green-text">add</i> Add Choice
+                       </MetaButton>
+                     </div>
+                   )}
+                 </>
+               )} */}
               {editable && (
                 <>
                   <p className="ProposalTitle">
@@ -563,14 +563,14 @@ const Node = ({
                   {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
                   {reason}
                   {/* <p className="ProposalTitle">
-                      Please write a few words to summarize what you've proposed
-                      in this version:
-                    </p>
-                    <HyperEditor
-                      content={summary}
-                      readOnly={false}
-                      onChange={setSummary}
-                    /> */}
+                       Please write a few words to summarize what you've proposed
+                       in this version:
+                     </p>
+                     <HyperEditor
+                       content={summary}
+                       readOnly={false}
+                       onChange={setSummary}
+                     /> */}
                 </>
               )}
               <MemoizedNodeFooter
@@ -621,51 +621,51 @@ const Node = ({
                 user={user}
               />
               {/* <NodeFooter
-                open={true}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                title={title}                  // x
-                content={content}              // x
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                isNew={isNew}                  // x
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                children={children}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changed={changed}              // x
-                changedAt={changedAt}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                markStudied={markStudiedHandler}     // x
-                bookmark={bookmarkHandler}           // x
-                nodeChanged={locationSizeChange}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                uploadNodeImage={uploadNodeImageHandler}
-              /> */}
+                 open={true}
+                 identifier={identifier}
+                 activeNode={activeNode}
+                 citationsSelected={citationsSelected}
+                 proposalsSelected={proposalsSelected}
+                 acceptedProposalsSelected={acceptedProposalsSelected}
+                 commentsSelected={commentsSelected}
+                 editable={editable}
+                 title={title}                  // x
+                 content={content}              // x
+                 unaccepted={unaccepted}
+                 openPart={openPart}
+                 nodeType={nodeType}
+                 isNew={isNew}                  // x
+                 admin={admin}
+                 aImgUrl={aImgUrl}
+                 aFullname={aFullname}
+                 aChooseUname={aChooseUname}
+                 viewers={viewers}
+                 correctNum={correctNum}
+                 markedCorrect={markedCorrect}
+                 wrongNum={wrongNum}
+                 markedWrong={markedWrong}
+                 references={references}
+                 tags={tags}
+                 parents={parents}
+                 children={children}
+                 commentsNum={commentsNum}
+                 proposalsNum={proposalsNum}
+                 studied={studied}
+                 isStudied={isStudied}
+                 changed={changed}              // x
+                 changedAt={changedAt}
+                 bookmarked={bookmarked}
+                 bookmarks={bookmarks}
+                 reloadPermanentGrpah={reloadPermanentGrpah}
+                 markStudied={markStudiedHandler}     // x
+                 bookmark={bookmarkHandler}           // x
+                 nodeChanged={locationSizeChange}
+                 openNodePart={openNodePartHandler}
+                 selectNode={selectNodeHandler}
+                 correctNode={correctNodeHandler}
+                 wrongNode={wrongNodeHandler}
+                 uploadNodeImage={uploadNodeImageHandler}
+               /> */}
             </div>
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -702,11 +702,11 @@ const Node = ({
             <div className="NodeTitleClosed">
               {/* CHECK: I commented this */}
               {/* <HyperEditor
-                readOnly={true}
-                onChange={titleChange}
-                content={title}
-                width={width}
-              /> */}
+                 readOnly={true}
+                 onChange={titleChange}
+                 content={title}
+                 width={width}
+               /> */}
               {title}
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (
@@ -777,437 +777,56 @@ const Node = ({
                 user={user}
               />
               {/* <NodeFooter
-                open={false}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                children={children}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changedAt={changedAt}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                nodeChanged={locationSizeChange}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                uploadNodeImage={uploadNodeImageHandler}
-              /> */}
+                 open={false}
+                 identifier={identifier}
+                 activeNode={activeNode}
+                 citationsSelected={citationsSelected}
+                 proposalsSelected={proposalsSelected}
+                 acceptedProposalsSelected={acceptedProposalsSelected}
+                 commentsSelected={commentsSelected}
+                 editable={editable}
+                 unaccepted={unaccepted}
+                 openPart={openPart}
+                 nodeType={nodeType}
+                 admin={admin}
+                 aImgUrl={aImgUrl}
+                 aFullname={aFullname}
+                 aChooseUname={aChooseUname}
+                 viewers={viewers}
+                 correctNum={correctNum}
+                 markedCorrect={markedCorrect}
+                 wrongNum={wrongNum}
+                 markedWrong={markedWrong}
+                 references={references}
+                 tags={tags}
+                 parents={parents}
+                 children={children}
+                 commentsNum={commentsNum}
+                 proposalsNum={proposalsNum}
+                 studied={studied}
+                 isStudied={isStudied}
+                 changedAt={changedAt}
+                 bookmarked={bookmarked}
+                 bookmarks={bookmarks}
+                 reloadPermanentGrpah={reloadPermanentGrpah}
+                 nodeChanged={locationSizeChange}
+                 openNodePart={openNodePartHandler}
+                 selectNode={selectNodeHandler}
+                 correctNode={correctNodeHandler}
+                 wrongNode={wrongNodeHandler}
+                 uploadNodeImage={uploadNodeImageHandler}
+               /> */}
             </div>
           </div>
         </div>
       )}
     </div>
   );
-
-  // return (
-  //   // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
-  //   <Box
-  //     ref={nodeRef}
-  //     id={identifier}
-  //     onClick={nodeClickHandler}
-  //     className={
-  //       "Node card" +
-  //       (activeNode
-  //         ? //   &&
-  //         // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
-  //         " active"
-  //         : "") +
-  //       (changed || !isStudied ? " Changed" : "") +
-  //       (isHiding ? " IsHiding" : "") +
-  //       (nodeBookState.choosingNode &&
-  //         nodeBookState.choosingNode.id !== identifier &&
-  //         !activeNode &&
-  //         (nodeBookState.choosingNode.type !== "Reference" || nodeType === "Reference")
-  //         ? " Choosable"
-  //         : "")
-  //     }
-  //     style={{
-  //       left: left ? left : 1000,
-  //       top: top ? top : 1000,
-  //       width: width,
-  //       transition: '0.5s'
-  //     }}
-  //   // style={
-  //   //   activeNode
-  //   //     ? {
-  //   //         left: left,
-  //   //         top: top,
-  //   //         width: width,
-  //   //         WebkitBoxShadow: boxShadowCSS,
-  //   //         MozBoxShadow: boxShadowCSS,
-  //   //         boxShadow: boxShadowCSS
-  //   //       }
-  //   //     : {
-  //   //         left: left,
-  //   //         top: top,
-  //   //         width: width
-  //   //       }
-  //   // }
-  //   >
-  //     <MemoizedNodeHeader
-  //       open={open}
-  //       onToggleNode={console.log('onToggleNode')}
-  //       onHideOffsprings={console.log('onHideOffsprings')}
-  //       onHideNodeHandler={console.log('onHideNodeHandler')}
-  //       sx={{ position: 'absolute', right: '0px' }}
-  //     />
-  //     {open ? (
-  //       <div className="card-content">
-  //         <div className="card-title">
-  //           {title}
-  //         </div>
-  //         <p>
-  //           {content}
-  //         </p>
-
-  //         <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
-  //           LinkingWords component
-  //           <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nobis earum adipisci aliquam praesentium, suscipit in quisquam error autem? Illum, quia quod veritatis praesentium voluptatem at voluptatum temporibus in corrupti porro.</p>
-  //         </div>
-  //         <MemoizedNodeFooter
-  //           open={true}
-  //           identifier={identifier}
-  //           activeNode={activeNode}
-  //           citationsSelected={citationsSelected}
-  //           proposalsSelected={proposalsSelected}
-  //           acceptedProposalsSelected={acceptedProposalsSelected}
-  //           commentsSelected={commentsSelected}
-  //           editable={editable}
-  //           title={title}                  // x
-  //           content={content}              // x
-  //           unaccepted={unaccepted}
-  //           openPart={openPart}
-  //           nodeType={nodeType}
-  //           isNew={isNew}                  // x
-  //           admin={admin}
-  //           aImgUrl={aImgUrl}
-  //           aFullname={aFullname}
-  //           aChooseUname={aChooseUname}
-  //           viewers={viewers}
-  //           correctNum={correctNum}
-  //           markedCorrect={markedCorrect}
-  //           wrongNum={wrongNum}
-  //           markedWrong={markedWrong}
-  //           references={references}
-  //           tags={tags}
-  //           parents={parents}
-  //           nodesChildren={nodesChildren}
-  //           commentsNum={commentsNum}
-  //           proposalsNum={proposalsNum}
-  //           studied={studied}
-  //           isStudied={isStudied}
-  //           changed={changed}              // x
-  //           changedAt={changedAt}
-  //           bookmarked={bookmarked}
-  //           bookmarks={bookmarks}
-  //           reloadPermanentGrpah={reloadPermanentGrpah}
-  //           markStudied={markStudiedHandler}     // x
-  //           bookmark={bookmarkHandler}           // x
-  //           nodeChanged={locationSizeChange}
-  //           openNodePart={openNodePartHandler}
-  //           selectNode={selectNodeHandler}
-  //           correctNode={correctNodeHandler}
-  //           wrongNode={wrongNodeHandler}
-  //           uploadNodeImage={uploadNodeImageHandler}
-  //         />
-  //       </div>
-
-  //       // <>
-  //       //   <div className="card-content">
-  //       //     <div className="card-title">
-  //       //       {editable &&
-  //       //         (isNew ? (
-  //       //           <>
-  //       //             <p className="NewChildProposalWarning">Before proposing,</p>
-  //       //             <p className="NewChildProposalWarning">
-  //       //               - Search <i className="material-icons EditingNodeSearchIcon">search</i> to ensure the node does
-  //       //               not exist.
-  //       //             </p>
-  //       //             {(nodeType === "Concept" ||
-  //       //               nodeType === "Relation" ||
-  //       //               nodeType === "Question" ||
-  //       //               nodeType === "News") &&
-  //       //               references.length === 0 && (
-  //       //                 <p className="NewChildProposalWarning">
-  //       //                   - Make the reference nodes that you'd like to cite, visible on your map view.
-  //       //                 </p>
-  //       //               )}
-  //       //             <p id="NewChildProposalTitleHint">Please enter the node title below:</p>
-  //       //           </>
-  //       //         ) : (
-  //       //           <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
-  //       //         ))}
-  //       //       <HyperEditor
-  //       //         readOnly={!editable}
-  //       //         onChange={titleChange}
-  //       //         onBlur={onNodeTitleBLur(title)}
-  //       //         content={title}
-  //       //         width={width}
-  //       //       />
-  //       //       {!editable && !unaccepted && !choosingNode && (
-  //       //         <NodeHeader
-  //       //           identifier={identifier}
-  //       //           open={true}
-  //       //           nodeType={nodeType}
-  //       //           setIsHiding={setIsHiding}
-  //       //           parentsNum={parents.length}
-  //       //           hideNodeHandler={hideNodeHandler}
-  //       //           hideOffsprings={hideOffspringsHandler}
-  //       //           toggleNode={toggleNodeHandler}
-  //       //         />
-  //       //       )}
-  //       //     </div>
-  //       //     <div className="NodeContent">
-  //       //       {editable && <p>Please edit the node content below:</p>}
-  //       //       <HyperEditor
-  //       //         readOnly={!editable}
-  //       //         onChange={contentChange}
-  //       //         content={content}
-  //       //         width={width}
-  //       //       />
-  //       //       {nodeImage !== "" && (
-  //       //         <>
-  //       //           {editable && (
-  //       //             <div className="RemoveImageDIV">
-  //       //               <MetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-  //       //                 <div className="CloseButton">
-  //       //                   <i className="material-icons orange-text">delete_forever</i>
-  //       //                 </div>
-  //       //               </MetaButton>
-  //       //             </div>
-  //       //           )}
-  //       //           {/* iman */}
-  //       //           {/* <a href={nodeImage} target="_blank"> */}
-  //       //           <img
-  //       //             src={nodeImage}
-  //       //             alt="Node image"
-  //       //             className="responsive-img NodeImage"
-  //       //             onLoad={onImageLoad}
-  //       //             onClick={onImageClick}
-  //       //           />
-  //       //           {/* </a> */}
-  //       //         </>
-  //       //       )}
-  //       //       {/* {nodeType === "Question"  && (
-  //       //         <>
-  //       //           <ul className="collapsible">
-  //       //             {choices.map((choice, idx) => {
-  //       //               return (
-  //       //                 <QuestionChoices
-  //       //                   key={identifier + "Choice" + idx}
-  //       //                   identifier={identifier}
-  //       //                   nodeRef={nodeRef}
-  //       //                   editable={editable}
-  //       //                   choices={choices}
-  //       //                   idx={idx}
-  //       //                   choicesNum={choices.length}
-  //       //                   choice={choice}
-  //       //                   deleteChoice={deleteChoice}
-  //       //                   switchChoice={switchChoice}
-  //       //                   changeChoice={changeChoice}
-  //       //                   changeFeedback={changeFeedback}
-  //       //                   nodeChanged={locationSizeChange}
-  //       //                 />
-  //       //               );
-  //       //             })}
-  //       //           </ul>
-  //       //           {editable && (
-  //       //             <div className="QuestionAddChoice">
-  //       //               <MetaButton onClick={addChoiceHandler} tooltip="Click to add a new choice to this question.">
-  //       //                 <i className="material-icons green-text">add</i> Add Choice
-  //       //               </MetaButton>
-  //       //             </div>
-  //       //           )}
-  //       //         </>
-  //       //       )} */}
-  //       //       {/* {editable && (
-  //       //         <>
-  //       //           <p className="ProposalTitle">
-  //       //             {"To expedite your proposal review, explain why you propose this " +
-  //       //               (isNew ? nodeType + " child node:" : "new version:")}
-  //       //           </p>
-  //       //           <HyperEditor content={reason} readOnly={false} onChange={setReason} />
-  //       //           ::::: ::::::: :::::: ::::: iman code :::::::: ::::: :::: 
-  //       //           <p className="ProposalTitle">
-  //       //               Please write a few words to summarize what you've proposed
-  //       //               in this version:
-  //       //             </p>
-  //       //             <HyperEditor
-  //       //               content={summary}
-  //       //               readOnly={false}
-  //       //               onChange={setSummary}
-  //       //             />
-  //       //           ::::: ::::::: :::::: ::::: iman code :::::::: ::::: :::: 
-  //       //         </>
-  //       //       )} */}
-  //       //       {/* <NodeFooter
-  //       //         open={true}
-  //       //         identifier={identifier}
-  //       //         activeNode={activeNode}
-  //       //         citationsSelected={citationsSelected}
-  //       //         proposalsSelected={proposalsSelected}
-  //       //         acceptedProposalsSelected={acceptedProposalsSelected}
-  //       //         commentsSelected={commentsSelected}
-  //       //         editable={editable}
-  //       //         title={title}
-  //       //         content={content}
-  //       //         unaccepted={unaccepted}
-  //       //         openPart={openPart}
-  //       //         nodeType={nodeType}
-  //       //         isNew={isNew}
-  //       //         admin={admin}
-  //       //         aImgUrl={aImgUrl}
-  //       //         aFullname={aFullname}
-  //       //         aChooseUname={aChooseUname}
-  //       //         viewers={viewers}
-  //       //         correctNum={correctNum}
-  //       //         markedCorrect={markedCorrect}
-  //       //         wrongNum={wrongNum}
-  //       //         markedWrong={markedWrong}
-  //       //         references={references}
-  //       //         tags={tags}
-  //       //         parents={parents}
-  //       //         children={children}
-  //       //         commentsNum={commentsNum}
-  //       //         proposalsNum={proposalsNum}
-  //       //         studied={studied}
-  //       //         isStudied={isStudied}
-  //       //         changed={changed}
-  //       //         changedAt={changedAt}
-  //       //         bookmarked={bookmarked}
-  //       //         bookmarks={bookmarks}
-  //       //         reloadPermanentGrpah={reloadPermanentGrpah}
-  //       //         markStudied={markStudiedHandler}
-  //       //         bookmark={bookmarkHandler}
-  //       //         nodeChanged={locationSizeChange}
-  //       //         openNodePart={openNodePartHandler}
-  //       //         selectNode={selectNodeHandler}
-  //       //         correctNode={correctNodeHandler}
-  //       //         wrongNode={wrongNodeHandler}
-  //       //         uploadNodeImage={uploadNodeImageHandler}
-  //       //       /> */}
-  //       //     </div>
-  //       //   </div>
-  //       //   {/* {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
-  //       //     <LinkingWords
-  //       //       identifier={identifier}
-  //       //       editable={editable}
-  //       //       isNew={isNew}
-  //       //       openPart={openPart}
-  //       //       title={title}
-  //       //       reason={reason}
-  //       //       references={references}
-  //       //       tags={tags}
-  //       //       parents={parents}
-  //       //       children={children}
-  //       //       chosenNodeChanged={chosenNodeChanged}
-  //       //       referenceLabelChange={referenceLabelChangeHandler}
-  //       //       deleteLink={deleteLinkHandler}
-  //       //       openLinkedNode={openLinkedNode}
-  //       //       openAllChildren={openAllChildren}
-  //       //       saveProposedChildNode={saveProposedChildNode}
-  //       //       saveProposedImprovement={saveProposedImprovement}
-  //       //       closeSideBar={closeSideBar}
-  //       //     />
-  //       //   )} */}
-  //       // </>
-  //     ) : (
-  //       <div className="card-content">
-  //         <div className="card-title">
-  //           <div className="NodeTitleClosed">
-  //             <h3>{title}</h3>
-  //             <p>
-  //               {content}
-  //             </p>
-  //             {/* <HyperEditor readOnly={true} onChange={titleChange} content={title} width={width} /> */}
-  //           </div>
-  //           {/* {!choosingNode && (
-  //             <NodeHeader
-  //               identifier={identifier}
-  //               open={false}
-  //               nodeType={nodeType}
-  //               setIsHiding={setIsHiding}
-  //               parentsNum={parents.length}
-  //               hideNodeHandler={hideNodeHandler}
-  //               hideOffsprings={hideOffspringsHandler}
-  //               toggleNode={toggleNodeHandler}
-  //             />
-  //           )} */}
-  //           {/* <div className="footer">
-  //             <NodeFooter
-  //               open={false}
-  //               identifier={identifier}
-  //               activeNode={activeNode}
-  //               citationsSelected={citationsSelected}
-  //               proposalsSelected={proposalsSelected}
-  //               acceptedProposalsSelected={acceptedProposalsSelected}
-  //               commentsSelected={commentsSelected}
-  //               editable={editable}
-  //               unaccepted={unaccepted}
-  //               openPart={openPart}
-  //               nodeType={nodeType}
-  //               admin={admin}
-  //               aImgUrl={aImgUrl}
-  //               aFullname={aFullname}
-  //               aChooseUname={aChooseUname}
-  //               viewers={viewers}
-  //               correctNum={correctNum}
-  //               markedCorrect={markedCorrect}
-  //               wrongNum={wrongNum}
-  //               markedWrong={markedWrong}
-  //               references={references}
-  //               tags={tags}
-  //               parents={parents}
-  //               children={children}
-  //               commentsNum={commentsNum}
-  //               proposalsNum={proposalsNum}
-  //               studied={studied}
-  //               isStudied={isStudied}
-  //               changedAt={changedAt}
-  //               bookmarked={bookmarked}
-  //               bookmarks={bookmarks}
-  //               reloadPermanentGrpah={reloadPermanentGrpah}
-  //               nodeChanged={locationSizeChange}
-  //               openNodePart={openNodePartHandler}
-  //               selectNode={selectNodeHandler}
-  //               correctNode={correctNodeHandler}
-  //               wrongNode={wrongNodeHandler}
-  //               uploadNodeImage={uploadNodeImageHandler}
-  //             />
-  //           </div> */}
-  //         </div>
-  //       </div>
-  //     )
-  //     }
-  //   </Box >
-  // );
 }
 
-export default React.memo(Node);
+export const MemoizedNode = React.memo(Node);
+
+// export default React.memo(Node);
 // export default React.memo(Node, (prevProps, nextProps) => {
 //   {
 //     // if (prevProps.identifier !== nextProps.identifier) console.log("title:", prevProps.title, "\nprevProps.identifier:", prevProps.identifier, "nextProps.identifier:", nextProps.identifier);
