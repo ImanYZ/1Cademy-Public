@@ -145,8 +145,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
     ]
   );
 
-  console.log('r', props.references, 't', props.tags)
-
   return props.openPart === "LinkingWords" ||
     props.openPart === "Tags" ||
     props.openPart === "References" ? (
