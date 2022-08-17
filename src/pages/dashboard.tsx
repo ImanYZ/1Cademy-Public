@@ -38,7 +38,9 @@ import { NodeChanges, NodeFireStore } from "../knowledgeTypes";
 import { postWithToken } from "../lib/mapApi";
 import { JSONfn } from "../lib/utils/jsonFn";
 import {
+  changedNodes,
   compare2Nodes,
+  copyNode,
   createOrUpdateNode,
   dag1,
   hideNodeAndItsLinks,
@@ -51,9 +53,11 @@ import {
   removeDagNode,
   setDagEdge,
   setDagNode,
+  tempNodes,
   XOFFSET,
   YOFFSET
 } from "../lib/utils/Map.utils";
+import { newId } from "../lib/utils/newid";
 import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { NodeType } from "../types";
 
@@ -147,6 +151,9 @@ const Dashboard = ({ }: DashboardProps) => {
 
   // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leaderboard or on nodes)
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
+  const [openProposal, setOpenProposal] = useState<string | boolean>(false);
 
   // when proposing improvements, lists of added/removed parent/child links
   const [addedParents, setAddedParents] = useState([]);
@@ -1697,6 +1704,84 @@ const Dashboard = ({ }: DashboardProps) => {
     ]
   );
 
+  const proposeNewChild = useMemoizedCallback(
+    (event, childNodeType: string) => {
+
+      if (!user) return
+
+      console.log("[PROPOSE_NEW_CHILD]");
+      event.preventDefault();
+      setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
+      reloadPermanentGrpah();
+      const newNodeId = newId();
+      setNodes((oldNodes) => {
+        if (!nodeBookState.selectedNode) return oldNodes // CHECK: I added this to validate
+
+        if (!(nodeBookState.selectedNode in changedNodes)) {
+          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+        }
+        if (!tempNodes.has(newNodeId)) {
+          tempNodes.add(newNodeId);
+        }
+
+        const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+        const newChildNode: any = {
+          isStudied: true,
+          bookmarked: false,
+          isNew: true,
+          id: newNodeId,
+          correct: true,
+          updatedAt: new Date(),
+          open: true,
+          user: user.uname,
+          visible: true,
+          deleted: false,
+          wrong: false,
+          createdAt: new Date(),
+          firstVisit: new Date(),
+          lastVisit: new Date(),
+          versions: 1,
+          viewers: 1,
+          children: [],
+          nodeType: childNodeType,
+          parents: [
+            { node: selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType },
+          ],
+          comments: 0,
+          tags: [tag],
+          title: "",
+          wrongs: 0,
+          corrects: 1,
+          content: "",
+          nodeImage: "",
+          studied: 1,
+          references: [],
+          choices: [],
+          editable: true,
+          width: NODE_WIDTH,
+        };
+        if (childNodeType === "Question") {
+          newChildNode.choices = [
+            {
+              choice: "Replace this with the choice.",
+              correct: true,
+              feedback: "Replace this with the choice-specific feedback.",
+            },
+          ];
+        }
+        return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
+          setEdges((oldEdges) => {
+            if (!nodeBookState.selectedNode) return oldEdges //CHECK: I add this to validate
+            return setDagEdge(nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
+          });
+          setMapChanged(true);
+          scrollToNode(newNodeId);
+        });
+      });
+    },
+    [user, tag, selectedNode, allTags, reloadPermanentGrpah]
+  );
+
   /////////////////////////////////////////////////////
   // Inner functions
 
@@ -1711,11 +1796,11 @@ const Dashboard = ({ }: DashboardProps) => {
         selectProposal={() => console.log('selectProposal')}
         deleteProposal={() => console.log('deleteProposal')}
         closeSideBar={closeSideBar}
-        proposeNewChild={() => console.log('proposeNewChild')}
+        proposeNewChild={proposeNewChild}
         selectionType={nodeBookState.selectionType}
 
       />
-      <Box sx={{ position: 'fixed', zIndex: '3' }}>
+      <Box sx={{ position: 'fixed', zIndex: '3', background: '#123' }}>
         {/* Data from map, DONT REMOVE */}
         <Box>
           Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
@@ -1731,10 +1816,6 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => console.log(mapChanged)}>map changed</Button>
           <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
           <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-          <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
-          <Button onClick={() => openNodeHandler("wiriyOIvmr5ryzydcQLw")}>Open Node Handler</Button>
-          <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
-          <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
         </Box>
         <Box>
           <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>

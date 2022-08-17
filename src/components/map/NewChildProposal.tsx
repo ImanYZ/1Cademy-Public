@@ -52,8 +52,7 @@ const NewChildProposal = (props: NewChildProposalProps) => {
             {props.icon === 'emoji_objects' && <EmojiObjectsIcon fontSize='small' />}
             {/* <i className={"material-icons orange-text"}>{props.icon}</i> */}
           </div>
-          {/* CHECK: I commented this */}
-          {/* <div className="NewProposalButtonText">{props.childNodeType}</div> */}
+          <div className="NewProposalButtonText">{props.childNodeType}</div>
         </div>
       </MetaButton>
     </span>

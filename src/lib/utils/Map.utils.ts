@@ -29,7 +29,7 @@ dag1[0] = new dagre.graphlib.Graph({ compound: true, directed: true })
 // set of ids of changedNodes
 export const tempNodes = new Set();
 // all nodes that have been modified
-export const changedNodes = {};
+export const changedNodes: any = {};
 // object of sets
 // keys: reference node ids
 // values: set of node ids that are citing this reference
