@@ -269,8 +269,8 @@ const Node = ({
   );
 
   const selectNodeHandler = useCallback(
-    // (event:any, chosenType:any) => selectNode(event, identifier, chosenType, nodeType)
-    () => console.log('uploadNodeImageHandler'),
+    (event: any, chosenType: any) => selectNode(event, identifier, chosenType, nodeType),
+    // () => console.log('uploadNodeImageHandler'),
     [selectNode, identifier, nodeType]
   );
 

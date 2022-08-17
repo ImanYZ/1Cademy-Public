@@ -142,6 +142,12 @@ const Dashboard = ({ }: DashboardProps) => {
   // link that is currently selected
   const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
 
+  // node type that is currently selected
+  const [selectedNodeType, setSelectedNodeType] = useState(null);
+
+  // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leaderboard or on nodes)
+  const [selectedUser, setSelectedUser] = useState(null);
+
   // when proposing improvements, lists of added/removed parent/child links
   const [addedParents, setAddedParents] = useState([]);
   const [addedChildren, setAddedChildren] = useState([]);
@@ -165,6 +171,36 @@ const Dashboard = ({ }: DashboardProps) => {
 
   // flag to open proposal sidebar
   const [openProposals, setOpenProposals] = useState(false);
+
+  // flag for if pending proposals for a selected node is open
+  const [openPendingProposals, setOpenPendingProposals] = useState(false);
+
+  // flag for if chat is open
+  const [openChat, setOpenChat] = useState(false);
+
+  // flag for if notifications is open
+  const [openNotifications, setOpenNotifications] = useState(false);
+
+  // flag for if presentations is open
+  const [openPresentations, setOpenPresentations] = useState(false);
+
+  // flag for is search is open
+  const [openToolbar, setOpenToolbar] = useState(false);
+
+  // flag for is search is open
+  const [openSearch, setOpenSearch] = useState(false);
+
+  // flag for whether bookmarks is open
+  const [openBookmarks, setOpenBookmarks] = useState(false);
+
+  // flag for whether recentNodes is open
+  const [openRecentNodes, setOpenRecentNodes] = useState(false);
+
+  // flag for whether trends is open
+  const [openTrends, setOpenTrends] = useState(false);
+
+  // flag for whether media is full-screen
+  const [openMedia, setOpenMedia] = useState(false);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -1527,11 +1563,158 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, getMapGraph]
   );
 
+  /////////////////////////////////////////////////////
+  // Node Improvement Functions
+
+  /////////////////////////////////////////////////////
+  // Sidebar Functions
+
+  const closeSideBar = useMemoizedCallback(() => {
+
+    console.log("In closeSideBar");
+
+    if (!user) return
+
+    if (
+      nodeBookState.selectionType === "AcceptedProposals" ||
+      nodeBookState.selectionType === "Proposals" ||
+      (selectedNode && "selectedNode" in nodes && nodes[selectedNode].editable)
+    ) {
+      reloadPermanentGrpah();
+    }
+    console.log("After reloadPermanentGrpah");
+    let sidebarType: any = nodeBookState.selectionType;
+    if (openPendingProposals) {
+      sidebarType = "PendingProposals";
+    } else if (openChat) {
+      sidebarType = "Chat";
+    } else if (openNotifications) {
+      sidebarType = "Notifications";
+    } else if (openPresentations) {
+      sidebarType = "Presentations";
+    } else if (openToolbar) {
+      sidebarType = "UserSettings";
+    } else if (openSearch) {
+      sidebarType = "Search";
+    } else if (openBookmarks) {
+      sidebarType = "Bookmarks";
+    } else if (openRecentNodes) {
+      sidebarType = "RecentNodes";
+    } else if (openTrends) {
+      sidebarType = "Trends";
+    } else if (openMedia) {
+      sidebarType = "Media";
+    }
+
+    nodeBookDispatch({ type: 'setChoosingNode', payload: null })
+    nodeBookDispatch({ type: 'setChosenNode', payload: null })
+    nodeBookDispatch({ type: 'setSelectionType', payload: null })
+    // setChoosingNode(false);
+    // setChosenNode(null);
+    // setChosenNodeTitle(null);
+    // setSelectionType(null);
+    setSelectedUser(null);
+    setOpenPendingProposals(false);
+    setOpenChat(false);
+    setOpenNotifications(false);
+    setOpenPresentations(false);
+    setOpenToolbar(false);
+    setOpenSearch(false);
+    setOpenBookmarks(false);
+    setOpenRecentNodes(false);
+    setOpenTrends(false);
+    setOpenMedia(false);
+    if (selectedNode && selectedNode !== "" && dag1[0].hasNode(selectedNode)) {
+      scrollToNode(selectedNode);
+    }
+    console.log("After scrollToNode");
+    // CHECK: I commented this, please uncomment
+    // const userClosedSidebarLogRef = firebase.db.collection("userClosedSidebarLog").doc();
+    // userClosedSidebarLogRef.set({
+    //   uname: user.uname,
+    //   sidebarType,
+    //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+    // });
+  }, [
+    user,
+    nodes,
+    selectedNode,
+    nodeBookState.selectionType,
+    openPendingProposals,
+    openChat,
+    openNotifications,
+    openPresentations,
+    openToolbar,
+    openSearch,
+    openBookmarks,
+    openRecentNodes,
+    openTrends,
+    openMedia,
+    reloadPermanentGrpah,
+  ]);
+
+  /////////////////////////////////////////////////////
+  // Proposals Functions
+
+  const selectNode = useCallback(
+    (event: any, nodeId: string, chosenType: any, nodeType: any) => {
+      // console.log("In selectNode");
+      if (!choosingNode) {
+        if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
+          reloadPermanentGrpah();
+        }
+        if (selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
+          // setSelectedNode(null);
+          // setSelectionType(null);
+          nodeBookDispatch({ type: 'setSelectedNode', payload: null })
+          nodeBookDispatch({ type: 'setSelectionType', payload: null })
+          setSelectedNodeType(null);
+          setOpenPendingProposals(false);
+          setOpenChat(false);
+          setOpenNotifications(false);
+          setOpenToolbar(false);
+          setOpenSearch(false);
+          setOpenRecentNodes(false);
+          setOpenTrends(false);
+          setOpenMedia(false);
+          resetAddedRemovedParentsChildren();
+          event.currentTarget.blur();
+        } else {
+          setSelectedNodeType(nodeType);
+          nodeBookDispatch({ type: 'setSelectionType', payload: chosenType })
+          setSelectedNode(nodeId);
+        }
+      }
+    },
+    [
+      choosingNode,
+      nodeBookState.selectionType,
+      selectedNode,
+      // selectionType,
+      reloadPermanentGrpah,
+      // proposeNodeImprovement,
+      resetAddedRemovedParentsChildren,
+    ]
+  );
+
+  /////////////////////////////////////////////////////
+  // Inner functions
+
   const edgeIds = Object.keys(edges);
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
-      <MemoizedSidebar closeSideBar={() => console.log('close SideBar')} />
+      <MemoizedSidebar
+        proposeNodeImprovement={() => console.log('proposeNodeImprovement')}
+        fetchProposals={() => console.log('fetchProposals')}
+        rateProposal={() => console.log('rateProposal')}
+        selectProposal={() => console.log('selectProposal')}
+        deleteProposal={() => console.log('deleteProposal')}
+        closeSideBar={closeSideBar}
+        proposeNewChild={() => console.log('proposeNewChild')}
+        selectionType={nodeBookState.selectionType}
+
+      />
       <Box sx={{ position: 'fixed', zIndex: '3' }}>
         {/* Data from map, DONT REMOVE */}
         <Box>
@@ -1554,7 +1737,7 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
         </Box>
         <Box>
-          <Button onClick={() => setOpenProposals(!openProposals)}>Toggle Open proposals</Button>
+          <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
         </Box>
       </Box>
 
@@ -1577,7 +1760,7 @@ const Dashboard = ({ }: DashboardProps) => {
           hideOffsprings={hideOffsprings}
           toggleNode={toggleNode}
           openNodePart={openNodePart}
-          selectNode={() => { console.log("selectNode"); }}
+          selectNode={selectNode}
           nodeClicked={() => { console.log("nodeClicked"); }}
           correctNode={correctNode}
           wrongNode={wrongNode}

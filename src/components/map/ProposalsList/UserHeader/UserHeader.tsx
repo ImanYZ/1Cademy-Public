@@ -1,8 +1,8 @@
 import React from "react";
 
-import "./UserHeader.css";
+// import "./UserHeader.css";
 
-const UserHeader = (props) => {
+const UserHeader = (props: any) => {
   return (
     <div className="ProposalUsername">
       <div className="UserAvatar">

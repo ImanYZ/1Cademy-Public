@@ -1,5 +1,7 @@
 // import "./SidebarWrapper.css";
 
+import CloseIcon from '@mui/icons-material/Close';
+import { Box } from '@mui/material';
 import Image from "next/image";
 import React from "react";
 
@@ -19,7 +21,19 @@ type SidebarWrapperProps = {
 const SidebarWrapper = (props: SidebarWrapperProps) => {
   return (
     <>
-      <div id="SidebarContainer" className={props.noHeader ? "MiniUserProfileSidebar" : ""}>
+      <Box id="SidebarContainer" className={props.noHeader ? "MiniUserProfileSidebar" : ""} sx={{ border: 'dashed 2px royalBlue', position: 'relative' }}>
+        <Box id="SideBarClose" sx={{ position: 'absolute', top: '10px', right: '10px' }}>
+          <MetaButton
+            onClick={props.closeSideBar}
+            tooltip="Close the sidebar."
+            tooltipPosition="left"
+          >
+            <CloseIcon />
+            {/* <div className="CloseButton">
+            <i className="material-icons">close</i>
+          </div> */}
+          </MetaButton>
+        </Box>
         {!props.noHeader ? (
           <>
             <div id="SidebarHeader">
@@ -37,18 +51,7 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
         ) : (
           props.children
         )}
-      </div>
-      <div id="SideBarClose">
-        <MetaButton
-          onClick={props.closeSideBar}
-          tooltip="Close the sidebar."
-          tooltipPosition="Left"
-        >
-          <div className="CloseButton">
-            <i className="material-icons">close</i>
-          </div>
-        </MetaButton>
-      </div>
+      </Box>
       {/* <div id="ScrollToTop">
         <MetaButton onClick={props.scrollToTop} tooltip="Back to top." tooltipPosition="Left">
           <i className="material-icons gray-text">arrow_upward</i>

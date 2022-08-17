@@ -1,16 +1,23 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
-import { useRecoilValue } from "recoil";
 
-import LoadingImg from "../../../../../assets/1Cademy_Loading_Dots.gif";
-import { usernameState } from "../../../../../store/AuthAtoms";
-import shortenNumber from "../../../../../utils/shortenNumber";
-import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
-import MetaButton from "../../../MetaButton/MetaButton";
-import proposalSummariesGenerator from "../proposalSummariesGenerator";
+import { useAuth } from "../../../context/AuthContext";
+import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
+import shortenNumber from "../../../lib/utils/shortenNumber";
+import MetaButton from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
 import UserHeader from "./UserHeader/UserHeader";
+// import { useRecoilValue } from "recoil";
+
+// import LoadingImg from "../../../../../assets/1Cademy_Loading_Dots.gif";
+// import { usernameState } from "../../../../../store/AuthAtoms";
+// import shortenNumber from "../../../../../utils/shortenNumber";
+// import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
+// import MetaButton from "../../../MetaButton/MetaButton";
+// import proposalSummariesGenerator from "../proposalSummariesGenerator";
+// import ProposalItem from "./ProposalItem/ProposalItem";
+// import UserHeader from "./UserHeader/UserHeader";
 
 // import "./ProposalsList.css";
 
@@ -34,7 +41,9 @@ type ProposalsListProps = {
 }
 
 const ProposalsList = (props: ProposalsListProps) => {
-  const username = useRecoilValue(usernameState);
+  const [user] = useAuth();
+
+  const username = user.user?.uname
 
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
@@ -91,34 +100,37 @@ const ProposalsList = (props: ProposalsListProps) => {
                 )}
               </div>
               <div className="ProposalBody">
-                <HyperEditor readOnly={true} onChange={doNothing} content={proposal.proposal} />
+                {/* CHECK: I commented this */}
+                {/* <HyperEditor readOnly={true} onChange={doNothing} content={proposal.proposal} /> */}
+                <p>{proposal.proposal}</p>
               </div>
               <div className="secondary-content">
                 <MetaButton
                   onClick={rateProposalClick(proposal, proposalIdx, false, true, false)}
                   tooltip="Click if you find this proposal Unhelpful."
-                  tooltipPosition="BottomLeft"
+                  tooltipPosition="bottom-start"
                 >
-                  <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>
-                    close
-                  </i>
-                  <span>{shortenNumber(proposal.wrongs, 2, false)}</span>
+                  <>
+                    <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>
+                      close
+                    </i>
+                    <span>{shortenNumber(proposal.wrongs, 2, false)}</span>
+                  </>
                 </MetaButton>
                 <MetaButton
                   onClick={rateProposalClick(proposal, proposalIdx, true, false, false)}
                   tooltip="Click if you find this proposal helpful."
-                  tooltipPosition="BottomLeft"
+                  tooltipPosition="bottom-start"
                 >
-                  <i
-                    className={
-                      proposal.correct
-                        ? "material-icons DoneIcon green-text"
-                        : "material-icons DoneIcon grey-text"
-                    }
-                  >
-                    done
-                  </i>
-                  <span>{shortenNumber(proposal.corrects, 2, false)}</span>
+                  <>
+                    <i className={proposal.correct
+                      ? "material-icons DoneIcon green-text"
+                      : "material-icons DoneIcon grey-text"
+                    }>
+                      done
+                    </i>
+                    <span>{shortenNumber(proposal.corrects, 2, false)}</span>
+                  </>
                 </MetaButton>
                 <MetaButton
                   onClick={
@@ -127,18 +139,20 @@ const ProposalsList = (props: ProposalsListProps) => {
                       : rateProposalClick(proposal, proposalIdx, false, false, true)
                   }
                   tooltip={adminTooltip}
-                  tooltipPosition="BottomLeft"
+                  tooltipPosition="bottom-start"
                 >
-                  <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>
-                    grade
-                  </i>
-                  <span>{shortenNumber(proposal.awards, 2, false)}</span>
+                  <>
+                    <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>
+                      grade
+                    </i>
+                    <span>{shortenNumber(proposal.awards, 2, false)}</span>
+                  </>
                 </MetaButton>
                 {!proposal.accepted && proposal.proposer === username && (
                   <MetaButton
                     onClick={deleteProposalClick(proposal, proposalIdx)}
                     tooltip="Delete your proposal."
-                    tooltipPosition="BottomLeft"
+                    tooltipPosition="bottom-start"
                   >
                     <i className="material-icons grey-text">delete_forever</i>
                   </MetaButton>

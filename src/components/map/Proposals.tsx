@@ -1,18 +1,22 @@
-import "./Proposals.css";
+// import "./Proposals.css";
 
+// import { TabPanel } from "@mui/lab";
+// import { Box, Tab, Tabs } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
 
-import {
-  openProposalState,
-  selectedNodeState,
-  selectionTypeState,
-} from "../../../../../store/MapAtoms";
-import SidebarTabs from "../../SidebarTabs/SidebarTabs";
-import EditProposal from "../EditProposal/EditProposal";
+// import { useRecoilState, useRecoilValue } from "recoil";
+// import {
+//   openProposalState,
+//   selectedNodeState,
+//   selectionTypeState,
+// } from "../../../../../store/MapAtoms";
+// import SidebarTabs from "../../SidebarTabs/SidebarTabs";
+// import EditProposal from "../EditProposal/EditProposal";
 // import NewChildProposal from "../NewChildProposal/NewChildProposal";
 // import ProposalsList from "../ProposalsList/ProposalsList";
 import NewChildProposal from "./NewChildProposal";
+import ProposalsList from "./ProposalsList/ProposalsList";
+import { MemoizedSidebarTabs } from "./SidebarTabs/SidebarTabs";
 
 const proposedChildTypesIcons = {
   Concept: "local_library",
@@ -33,9 +37,9 @@ type ProposalsProps = {
 }
 
 const Proposals = (props: ProposalsProps) => {
-  const selectedNode = useRecoilValue(selectedNodeState);
-  const selectionType = useRecoilValue(selectionTypeState);
-  const [openProposal, setOpenProposal] = useRecoilState(openProposalState);
+  const [selectedNode] = useState();
+  const [selectionType] = useState();
+  const [openProposal, setOpenProposal] = useState();
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(false);
@@ -60,60 +64,68 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Pending Proposals",
       content: (
-        <ProposalsList
-          proposals={proposals}
-          setProposals={setProposals}
-          proposeNodeImprovement={props.proposeNodeImprovement}
-          fetchProposals={props.fetchProposals}
-          rateProposal={props.rateProposal}
-          selectProposal={props.selectProposal}
-          deleteProposal={props.deleteProposal}
-          editHistory={false}
-          proposeNewChild={props.proposeNewChild}
-          openProposal={openProposal}
-          isAdmin={isAdmin}
-          isRetrieving={isRetrieving}
-        />
+        <>
+          pending proposals here
+          <ProposalsList
+            proposals={proposals}
+            setProposals={setProposals}
+            proposeNodeImprovement={props.proposeNodeImprovement}
+            fetchProposals={props.fetchProposals}
+            rateProposal={props.rateProposal}
+            selectProposal={props.selectProposal}
+            deleteProposal={props.deleteProposal}
+            editHistory={false}
+            proposeNewChild={props.proposeNewChild}
+            openProposal={openProposal}
+            isAdmin={isAdmin}
+            isRetrieving={isRetrieving}
+          />
+        </>
       ),
     },
     {
       title: "Approved Proposals",
       content: (
-        <ProposalsList
-          proposals={proposals}
-          setProposals={setProposals}
-          proposeNodeImprovement={props.proposeNodeImprovement}
-          fetchProposals={props.fetchProposals}
-          rateProposal={props.rateProposal}
-          selectProposal={props.selectProposal}
-          deleteProposal={props.deleteProposal}
-          editHistory={true}
-          proposeNewChild={props.proposeNewChild}
-          openProposal={openProposal}
-          isAdmin={isAdmin}
-          isRetrieving={isRetrieving}
-        />
+        <>
+          Aproved proposals here
+          <ProposalsList
+            proposals={proposals}
+            setProposals={setProposals}
+            proposeNodeImprovement={props.proposeNodeImprovement}
+            fetchProposals={props.fetchProposals}
+            rateProposal={props.rateProposal}
+            selectProposal={props.selectProposal}
+            deleteProposal={props.deleteProposal}
+            editHistory={true}
+            proposeNewChild={props.proposeNewChild}
+            openProposal={openProposal}
+            isAdmin={isAdmin}
+            isRetrieving={isRetrieving}
+          />
+        </>
       ),
     },
   ];
 
   return (
-    <div id="ProposalsContainer">
+    <div id="ProposalsContainer" style={{ border: 'dashed 2px yellow' }}>
       {/* <div id="ProposeNewChildImprovementTitle">
         <strong>Propose New Child / Improvement</strong>
       </div> */}
       <div id="ProposalButtonsCollection">
-        <EditProposal
+        <h6>Here Edit proposal component</h6>
+        {/* CHECK: I commented this */}
+        {/* <EditProposal
           openProposal={openProposal}
           proposeNodeImprovement={props.proposeNodeImprovement}
-        />
-        <div id="ProposalButtonsRow">
+        /> */}
+        <div id="ProposalButtonsRow" style={{ border: 'solid 0px pink' }}>
           {Object.keys(proposedChildTypesIcons).map((childNodeType) => {
             return (
               <NewChildProposal
                 key={childNodeType}
                 childNodeType={childNodeType}
-                icon={/*proposedChildTypesIcons[childNodeType]*/ 'name-icon'}
+                icon={proposedChildTypesIcons[childNodeType]}
                 openProposal={openProposal}
                 setOpenProposal={setOpenProposal}
                 proposeNewChild={props.proposeNewChild}
@@ -122,7 +134,9 @@ const Proposals = (props: ProposalsProps) => {
           })}
         </div>
       </div>
-      <SidebarTabs tabsTitle="Proposals tabs" tabsItems={tabsItems} />
+      <br />
+      <MemoizedSidebarTabs tabsTitle="Proposals tabs" tabsItems={tabsItems} />
+
     </div>
   );
 };

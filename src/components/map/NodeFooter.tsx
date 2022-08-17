@@ -134,6 +134,13 @@ const NodeFooter = ({ open,
     [openNodePart]
   );
 
+  const selectPendingProposals = useCallback(
+    (event) => {
+      selectNode(event, "Proposals");
+    },
+    [selectNode]
+  );
+
   const selectLinkingWords = useCallback(
     (event: any) => {
 
@@ -248,7 +255,7 @@ const NodeFooter = ({ open,
                 </Tooltip>
 
                 <Tooltip title={"Propose/evaluate versions of this node."} placement='top'>
-                  <Button onClick={() => console.log('selectPendingProposals')} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: proposalsSelected ? theme => theme.palette.common.orange : 'inherit' }}>
+                  <Button onClick={selectPendingProposals} sx={{ minWidth: 'auto', fontSize: '15px', p: '4px 7px', color: proposalsSelected ? theme => theme.palette.common.orange : 'inherit' }}>
                     <CreateIcon fontSize='inherit' />{` ${dayjs(new Date(changedAt.seconds * 1000)).fromNow()}`}
                   </Button>
                 </Tooltip>

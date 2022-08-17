@@ -1,5 +1,6 @@
 // import "./MetaButton.css";
 
+import { Button, Tooltip, TooltipProps } from "@mui/material";
 import React, { useCallback } from "react";
 
 // import { useRecoilValue } from "recoil";
@@ -16,8 +17,8 @@ const doNothing = () => { };
 
 type MetaButtonProps = {
   children: JSX.Element,
-  tooltipPosition?: any,
-  tooltip?: any,
+  tooltipPosition?: TooltipProps['placement'],
+  tooltip?: string,
   onClick?: any,
   onDoubleClick?: any,
   round?: boolean,
@@ -46,30 +47,32 @@ const MetaButton = (props: MetaButtonProps) => {
 
   if ("onClick" in props && props.onClick) {
     return (
-      <button
-        className={
-          // (isSubmitting
-          //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
-          "MetaButton Clickable waves-effect waves-light grey-text hoverable" +
-          ("round" in props && props.round ? " Round" : "") +
-          // )
-          ("tooltip" in props && props.tooltip ? " Tooltip" : "")
-        }
-        // style={{ disabled: isSubmitting }}
-        // disabled={isSubmitting}
-        onClick={metaButtonClick}
-        onDoubleClick={handleDoubleClick}
-      >
-        {props.children}
-        {"tooltip" in props && props.tooltip && (
+      <Tooltip title={props.tooltip || ''} placement={props.tooltipPosition}>
+        <Button
+          className={
+            // (isSubmitting
+            //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
+            "MetaButton Clickable waves-effect waves-light grey-text hoverable" +
+            ("round" in props && props.round ? " Round" : "") +
+            // )
+            ("tooltip" in props && props.tooltip ? " Tooltip" : "")
+          }
+          // style={{ disabled: isSubmitting }}
+          // disabled={isSubmitting}
+          onClick={metaButtonClick}
+          onDoubleClick={handleDoubleClick}
+        >
+          {props.children}
+          {/* {"tooltip" in props && props.tooltip && (
           <span
             className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}
             onClick={preventEventPropagation}
           >
             {props.tooltip}
           </span>
-        )}
-      </button>
+        )} */}
+        </Button>
+      </Tooltip>
     );
   } else {
     return (

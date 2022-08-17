@@ -1,8 +1,10 @@
 import { Drawer } from '@mui/material';
-import React, { Suspense, useRef, useState } from 'react'
+import React, { Suspense, useRef } from 'react'
 
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
+import { SelectionType } from '../../../nodeBookTypes';
+import Proposals from '../Proposals';
 import { MemoizedSidebarWrapper } from './SidebarWrapper';
 
 type ProposalSidebar = {
@@ -10,16 +12,17 @@ type ProposalSidebar = {
   // reputationsWeeklyLoaded: any,
   // reputationsMonthlyLoaded: any,
   // openLinkedNode: any,
-  // proposeNodeImprovement: any,
-  // fetchProposals: any,
-  // rateProposal: any,
-  // selectProposal: any,
-  // deleteProposal: any,
+  proposeNodeImprovement: any,
+  fetchProposals: any,
+  rateProposal: any,
+  selectProposal: any,
+  deleteProposal: any,
   closeSideBar: any,
-  // proposeNewChild: any,
+  proposeNewChild: any,
   // reloadPermanentGrpah: any,
   // openPractice: any,
   // setOpenPractice: any,
+  selectionType: SelectionType
 }
 
 const Sidebar = (props: ProposalSidebar) => {
@@ -172,27 +175,27 @@ const Sidebar = (props: ProposalSidebar) => {
       <div
         id="Sidebar"
         ref={sidebarRef}
-        className="active"
-      // CHECK: I commented this
-      // className={
-      //   selectionType === "Proposals" ||
-      //     selectionType === "AcceptedProposals" ||
-      //     selectionType === "Comments" ||
-      //     selectionType === "Citations" ||
-      //     selectionType === "UserInfo" ||
-      //     openPendingProposals ||
-      //     openChat ||
-      //     openNotifications ||
-      //     openPresentations ||
-      //     openToolbar ||
-      //     openSearch ||
-      //     openBookmarks ||
-      //     openRecentNodes
-      //     ? //  ||
-      //     // openTrends
-      //     "active"
-      //     : ""
-      // }
+        // className="active"
+        className={
+          props.selectionType === "Proposals" ||
+            props.selectionType === "AcceptedProposals" ||
+            props.selectionType === "Comments" ||
+            props.selectionType === "Citations" ||
+            props.selectionType === "UserInfo" //||
+            // CHECK: I commented this
+            // openPendingProposals ||
+            // openChat ||
+            // openNotifications ||
+            // openPresentations ||
+            // openToolbar ||
+            // openSearch ||
+            // openBookmarks ||
+            // openRecentNodes
+            ? //  ||
+            // openTrends
+            "active"
+            : ""
+        }
       // style={
       //   selectedNode
       //     ? {
@@ -211,7 +214,7 @@ const Sidebar = (props: ProposalSidebar) => {
             scrollToTop={console.log('scrollToTop')}
             closeSideBar={props.closeSideBar}
           >
-            {/* <Proposals
+            <Proposals
               proposeNodeImprovement={props.proposeNodeImprovement}
               fetchProposals={props.fetchProposals}
               rateProposal={props.rateProposal}
@@ -219,7 +222,7 @@ const Sidebar = (props: ProposalSidebar) => {
               deleteProposal={props.deleteProposal}
               // editHistory={false}
               proposeNewChild={props.proposeNewChild}
-            /> */}
+            />
           </MemoizedSidebarWrapper>
 
           {/* {openPresentations ? (
