@@ -99,7 +99,7 @@ const Dashboard = ({ }: DashboardProps) => {
   const [sNode, setSNode] = useState(null); //<--- this was with recoil
   // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
   const [choosingNode, setChoosingNode] = useState(null); //<--- this was with recoil
-  // node that is in focus (highlighted)
+  // // node that is in focus (highlighted)
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------
@@ -1665,12 +1665,13 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      // console.log("In selectNode");
+      console.log("[SELECT_NODE]");
       if (!choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGrpah();
         }
         if (selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
+          console.log('[select node]: reset all')
           // setSelectedNode(null);
           // setSelectionType(null);
           nodeBookDispatch({ type: 'setSelectedNode', payload: null })
@@ -1687,9 +1688,11 @@ const Dashboard = ({ }: DashboardProps) => {
           resetAddedRemovedParentsChildren();
           event.currentTarget.blur();
         } else {
+          console.log('[select node]: set NodeId')
           setSelectedNodeType(nodeType);
           nodeBookDispatch({ type: 'setSelectionType', payload: chosenType })
-          setSelectedNode(nodeId);
+          nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
+          // setSelectedNode(nodeId);
         }
       }
     },
@@ -1714,7 +1717,10 @@ const Dashboard = ({ }: DashboardProps) => {
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGrpah();
       const newNodeId = newId();
+      console.log('[propose new child]:', 0)
       setNodes((oldNodes) => {
+
+        console.log('set Nodes', selectedNode, nodeBookState.selectedNode)
         if (!nodeBookState.selectedNode) return oldNodes // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
@@ -1724,7 +1730,9 @@ const Dashboard = ({ }: DashboardProps) => {
           tempNodes.add(newNodeId);
         }
 
+        console.log('[propose new child]:', 1)
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+        console.log('[propose new child]:', 2)
         const newChildNode: any = {
           isStudied: true,
           bookmarked: false,
@@ -1748,7 +1756,8 @@ const Dashboard = ({ }: DashboardProps) => {
             { node: selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType },
           ],
           comments: 0,
-          tags: [tag],
+          tags: [user.tag],
+          tagIds: [user.tagId], // CHECK: I added this
           title: "",
           wrongs: 0,
           corrects: 1,
@@ -1756,6 +1765,8 @@ const Dashboard = ({ }: DashboardProps) => {
           nodeImage: "",
           studied: 1,
           references: [],
+          referenceIds: [], // CHECK: I added this
+          referenceLabels: [], // CHECK: I added this
           choices: [],
           editable: true,
           width: NODE_WIDTH,
@@ -1769,8 +1780,13 @@ const Dashboard = ({ }: DashboardProps) => {
             },
           ];
         }
+
+        console.log('[propose new child]:', 3, newChildNode)
+        debugger
         return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
+          console.log('setDagNode')
           setEdges((oldEdges) => {
+            console.log('setEdges')
             if (!nodeBookState.selectedNode) return oldEdges //CHECK: I add this to validate
             return setDagEdge(nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
           });
@@ -1779,7 +1795,7 @@ const Dashboard = ({ }: DashboardProps) => {
         });
       });
     },
-    [user, tag, selectedNode, allTags, reloadPermanentGrpah]
+    [user, nodeBookState.selectedNode, selectedNode, allTags, reloadPermanentGrpah]
   );
 
   /////////////////////////////////////////////////////
@@ -1800,7 +1816,7 @@ const Dashboard = ({ }: DashboardProps) => {
         selectionType={nodeBookState.selectionType}
 
       />
-      <Box sx={{ position: 'fixed', zIndex: '3', background: '#123' }}>
+      <Box sx={{ position: 'fixed', right: '10px', zIndex: '1300', background: '#123' }}>
         {/* Data from map, DONT REMOVE */}
         <Box>
           Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
@@ -1809,6 +1825,8 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => console.log(nodes)}>nodes</Button>
           <Button onClick={() => console.log(edges)}>edges</Button>
           <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
+          <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+          <Button onClick={() => console.log(user)}>user</Button>
         </Box>
         <Box>
           <Button onClick={() => console.log(nodeChanges)}>node changes</Button>

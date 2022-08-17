@@ -433,6 +433,7 @@ const Node = ({
               {editable &&
                 (isNew ? (
                   <>
+                    {/* New Node with inputs */}
                     <p className="NewChildProposalWarning">Before proposing,</p>
                     <p className="NewChildProposalWarning">
                       - Search <i className="material-icons EditingNodeSearchIcon">search</i> to
