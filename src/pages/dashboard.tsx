@@ -5,6 +5,7 @@ import {
   addDoc,
   collection,
   doc,
+  DocumentChange,
   DocumentData,
   DocumentReference,
   getDoc,
@@ -13,6 +14,7 @@ import {
   limit,
   onSnapshot,
   query,
+  QuerySnapshot,
   setDoc,
   Timestamp,
   updateDoc,
@@ -54,6 +56,7 @@ import {
   YOFFSET
 } from "../lib/utils/Map.utils";
 import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
+import { FullNodeData, NodesData, UserNodeChanges } from "../noteBookTypes";
 import { NodeType } from "../types";
 
 type DashboardProps = {};
@@ -78,6 +81,31 @@ type DashboardProps = {};
  *      Flag: mapChanged
  *      Description: will calculate the [nodes] and [edges] positions
  *
+ *  --- render nodes, every node will call NODE CHANGED
+ */
+
+/**
+ * 1. NODES CHANGES - LISTENER with SNAPSHOT
+ *      Type: useEffect
+ *     - Get UserNodesData (userNodeChanges)
+ *     - Get NodeData for every userNode
+ *     - Build Full Nodes (Merge nodeData and userNodeData)
+ *     - SYNCHRONIZATION: merge FullNodes into Nodes
+ *         Type: useEffect
+ *         Flag: nodeChanges || userNodeChanges
+ *         Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
+ * 
+ *  --- render nodes, every node will call NODE CHANGED
+ *
+ *  4. NODE CHANGED: (n)
+ *      Type: function
+ * 
+ *  3. WORKER: (n)
+ *      Type: useEffect
+ *      Flag: mapChanged
+ *      Description: will calculate the [nodes] and [edges] positions
+ *
+ *  --- render nodes, every node will call NODE CHANGED
  */
 const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
@@ -167,6 +195,109 @@ const Dashboard = ({ }: DashboardProps) => {
   // FUNCTIONS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
+
+  useEffect(() => {
+    console.log("[0. NODES CHANGES - LISTENER with SNAPSHOT]", allTagsLoaded);
+
+    if (!db) return
+    if (!user) return
+
+    const userNodesRef = collection(db, "userNodes");
+    const q = query(
+      userNodesRef,
+      where("user", "==", user.uname),
+      where("visible", "==", true),
+      where("deleted", "==", false)
+    )
+
+    const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
+      // const docChanges = snapshot.docChanges();
+      // if (!docChanges.length) return null
+
+      return docChanges.map(change => {
+        const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
+        return {
+          cType: change.type,
+          uNodeId: change.doc.id,
+          uNodeData: userNodeData
+        }
+      })
+    }
+
+    const getNodes = async (nodeIds: string[]): Promise<NodesData[]> => {
+
+      return await Promise.all(
+        nodeIds.map(async nodeId => {
+          const nodeRef = doc(db, "nodes", nodeId)
+          const nodeDoc = await getDoc(nodeRef)
+          if (!nodeDoc.exists) return null
+
+          const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+          if (nData.deleted) return null
+
+          return {
+            cType: "added",
+            nId: nodeDoc.id,
+            nData
+          }
+        })
+      )
+    }
+
+    const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData => {
+
+      const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id)
+
+      return userNodesChanges.map(cur => {
+        const nodeDataFound = findNodeDataById(cur.uNodeId)
+
+        if (!nodeDataFound) return null
+
+        const fullNodeData: FullNodeData = {
+          ...cur.uNodeData,
+          ...nodeDataFound.nData,
+          editable: false,
+          left: 0,
+          top: 0
+        }
+        return fullNodeData
+      })
+    }
+
+    const userNodesSnapshot = onSnapshot(q, snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) return null
+
+      const userNodeChanges = getUserNodeChanges(docChanges)
+      const nodeIds = userNodeChanges.map(cur => cur.uNodeId)
+      const nodesData = await getNodes(nodeIds)
+
+
+
+      setUserNodeChanges(userNodeChangesCopy)
+
+      setUserNodeChanges(oldUserNodeChanges => {
+        let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
+        const docChanges = snapshot.docChanges();
+        if (docChanges.length > 0) {
+          for (let change of docChanges) {
+
+            const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
+            // only used for useEffect above
+            newUserNodeChanges = [
+              ...newUserNodeChanges,
+              {
+                cType: change.type,
+                uNodeId: change.doc.id,
+                uNodeData: userNodeData
+              }
+            ];
+          }
+        }
+        return newUserNodeChanges;
+      });
+    });
+  }, [allTagsLoaded, user]);
 
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
