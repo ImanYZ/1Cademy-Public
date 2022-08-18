@@ -13,6 +13,7 @@ import {
   getFirestore,
   limit,
   onSnapshot,
+  Query,
   query,
   QuerySnapshot,
   setDoc,
@@ -131,6 +132,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const [flag, setFlag] = useState(false)
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges, setUserNodeChanges] = useState<UserNodes[]>([]);
   const [nodeChanges, setNodeChanges] = useState<NodeChanges[]>([]);
@@ -201,6 +203,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
     if (!db) return
     if (!user) return
+    if (!allTagsLoaded) return
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -210,6 +213,12 @@ const Dashboard = ({ }: DashboardProps) => {
       where("deleted", "==", false)
     )
 
+    snapshot(q)
+
+
+  }, [allTags, allTagsLoaded, db, user]);
+
+  const snapshot = useCallback((q: Query<DocumentData>) => {
     const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
       // const docChanges = snapshot.docChanges();
       // if (!docChanges.length) return null
@@ -244,30 +253,10 @@ const Dashboard = ({ }: DashboardProps) => {
           nData
         }
       })
-      // return await Promise.all(
-      //   nodeDocs.map(async (nodeDoc, idx) => {
-      //     // const nodeRef = doc(db, "nodes", nodeId)
-      //     // const nodeDoc = await getDoc(nodeRef)
-      //     if (!nodeDoc.exists) return null
-
-      //     const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
-      //     console.log('nData', idx, nData)
-      //     if (nData.deleted) return null
-
-      //     return {
-      //       cType: "added",
-      //       nId: nodeDoc.id,
-      //       nData
-      //     }
-      //   })
-      // )
     }
 
     const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
-
       const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id)
-
-      // TODO: this works only for added data, Add please to modify and remove
       const res = userNodesChanges.map(cur => {
         const nodeDataFound = findNodeDataById(cur.uNodeData.node)
 
@@ -335,13 +324,11 @@ const Dashboard = ({ }: DashboardProps) => {
         }
       }, { newNodes: { ...nodes }, newEdges: { ...edges } })
     }
-
     const userNodesSnapshot = onSnapshot(q, async (snapshot) => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return null
 
-
-      console.log(1)
+      console.log(1, { nodes, edges })
       const userNodeChanges = getUserNodeChanges(docChanges)
       console.log(2, { userNodeChanges })
       const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node)
@@ -351,38 +338,14 @@ const Dashboard = ({ }: DashboardProps) => {
       const fullNodes = buildFullNodes(userNodeChanges, nodesData)
       console.log(5, { fullNodes })
       const { newNodes, newEdges } = fillDagre(fullNodes)
-      console.log('----------------> ', { newNodes, newEdges })
       setNodes(newNodes)
       setEdges(newEdges)
 
       setUserNodesLoaded(true)
 
       return () => userNodesSnapshot();
-
-      // setUserNodeChanges(userNodeChangesCopy)
-
-      // setUserNodeChanges(oldUserNodeChanges => {
-      //   let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
-      //   const docChanges = snapshot.docChanges();
-      //   if (docChanges.length > 0) {
-      //     for (let change of docChanges) {
-
-      //       const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-      //       // only used for useEffect above
-      //       newUserNodeChanges = [
-      //         ...newUserNodeChanges,
-      //         {
-      //           cType: change.type,
-      //           uNodeId: change.doc.id,
-      //           uNodeData: userNodeData
-      //         }
-      //       ];
-      //     }
-      //   }
-      //   return newUserNodeChanges;
-      // });
-    });
-  }, [allTagsLoaded, user]);
+    })
+  }, [nodes, edges])
 
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
@@ -470,40 +433,40 @@ const Dashboard = ({ }: DashboardProps) => {
     [resetAddedRemovedParentsChildren]
   );
 
-  const getNodesData = useCallback(
-    async (nodeIds: string[]) => {
-      if (nodeIds.length > 0) {
-        let oldNodeChanges = [...nodeChanges];
-        const nodeDocsPromises = [];
-        for (let nodeId of nodeIds) {
-          const nodeRef = doc(db, "nodes", nodeId);
+  // const getNodesData = useCallback(
+  //   async (nodeIds: string[]) => {
+  //     if (nodeIds.length > 0) {
+  //       let oldNodeChanges = [...nodeChanges];
+  //       const nodeDocsPromises = [];
+  //       for (let nodeId of nodeIds) {
+  //         const nodeRef = doc(db, "nodes", nodeId);
 
-          nodeDocsPromises.push(getDoc(nodeRef));
-        }
-        await Promise.all(nodeDocsPromises)
-          .then((nodeDocs: any[]) => {
-            for (let nodeDoc of nodeDocs) {
-              if (nodeDoc.exists) {
-                const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
-                if (!nData.deleted) {
-                  oldNodeChanges.push({
-                    cType: "added",
-                    nId: nodeDoc.id,
-                    nData
-                  });
-                }
-              }
-            }
-            console.log("Node data: ", oldNodeChanges);
-            setNodeChanges(oldNodeChanges);
-          })
-          .catch(function (error) {
-            console.log("Error getting document:", error);
-          });
-      }
-    },
-    [nodeChanges]
-  );
+  //         nodeDocsPromises.push(getDoc(nodeRef));
+  //       }
+  //       await Promise.all(nodeDocsPromises)
+  //         .then((nodeDocs: any[]) => {
+  //           for (let nodeDoc of nodeDocs) {
+  //             if (nodeDoc.exists) {
+  //               const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+  //               if (!nData.deleted) {
+  //                 oldNodeChanges.push({
+  //                   cType: "added",
+  //                   nId: nodeDoc.id,
+  //                   nData
+  //                 });
+  //               }
+  //             }
+  //           }
+  //           console.log("Node data: ", oldNodeChanges);
+  //           setNodeChanges(oldNodeChanges);
+  //         })
+  //         .catch(function (error) {
+  //           console.log("Error getting document:", error);
+  //         });
+  //     }
+  //   },
+  //   [nodeChanges]
+  // );
   const scrollToNode = useCallback(
     (nodeId: string) => {
       if (!scrollToNodeInitialized) {
@@ -619,284 +582,284 @@ const Dashboard = ({ }: DashboardProps) => {
   //   // }, [allTagsLoaded, username]);
   // }, [allTagsLoaded, user]);
 
-  // SYNC NODES FUNCTION
-  // READ THIS!!!
-  // nodeChanges, userNodeChanges useEffect
-  useEffect(() => {
+  // // SYNC NODES FUNCTION
+  // // READ THIS!!!
+  // // nodeChanges, userNodeChanges useEffect
+  // useEffect(() => {
 
-    console.log("[2. SYNCHRONIZATION]");
-    // console.log("In nodeChanges, userNodeChanges useEffect.");
-    const nodeUserNodeChangesFunc = async () => {
-      console.log("[synchronization]", { nodes, edges, userNodesLoaded });
-      // dictionary of all nodes visible on the user's map view
-      let oldNodes: any = { ...nodes };
-      // dictionary of all links/edges on the user's map view
-      let oldEdges: any = { ...edges };
-      // let typeVisibilityChanges = nodeTypeVisibilityChanges;
-      // flag for if there are any changes to map
-      let oldMapChanged = mapChanged;
-      if (nodeChanges.length > 0) {
-        console.log("  [synchronization]: 1: will iterate node changes");
-        for (let change of nodeChanges) {
-          const nodeId = change.nId;
-          let nodeData = change.nData;
-          delete nodeData.deleted;
-          if (nodeData.nodeType !== "Question") {
-            nodeData.choices = [];
-          }
-          // addReference(nodeId, nodeData);
-          if (change.cType === "added") {
-            // debugger
-            ({ oldNodes, oldEdges } = createOrUpdateNode(nodeData, nodeId, oldNodes, oldEdges, allTags));
-            oldMapChanged = true;
-          } else if (change.cType === "modified") {
-            const node = oldNodes[nodeId];
-            {
-              // let isTheSame =
-              //   node.changedAt.getTime() === nodeData.changedAt.toDate().getTime() &&
-              //   node.admin === nodeData.admin &&
-              //   node.aImgUrl === nodeData.aImgUrl &&
-              //   node.fullname === nodeData.fullname &&
-              //   node.chooseUname === nodeData.chooseUname &&
-              //   node.comments === nodeData.comments &&
-              //   node.title === nodeData.title &&
-              //   node.content === nodeData.content &&
-              //   node.corrects === nodeData.corrects &&
-              //   node.maxVersionRating === nodeData.maxVersionRating &&
-              //   node.nodeType === nodeData.nodeType &&
-              //   node.studied === nodeData.studied &&
-              //   node.bookmarks === nodeData.bookmarks &&
-              //   node.versions === nodeData.versions &&
-              //   node.viewers === nodeData.viewers &&
-              //   node.wrongs === nodeData.wrongs;
-              // // isTheSame = compareImages(nodeData, node, isTheSame);
-              // isTheSame = isTheSame && compareProperty(nodeData, node, "nodeImage");
-              // isTheSame = compareLinks(nodeData.tags, node.tags, isTheSame, false);
-              // isTheSame = compareLinks(nodeData.references, node.references, isTheSame, false);
-              // const childrenComparison = compareLinks(
-              //   nodeData.children,
-              //   node.children,
-              //   true,
-              //   false
-              // );
-              // const parentsComparison = compareLinks(nodeData.parents, node.parents, true, false);
-              // isTheSame =
-              //   childrenComparison &&
-              //   parentsComparison &&
-              //   compareChoices(nodeData, node, isTheSame);
-            }
-            if (!compare2Nodes(nodeData, node)) {
-              nodeData = {
-                ...node,
-                ...nodeData,
-                id: nodeId,
-                createdAt: nodeData?.createdAt?.toDate(), //CHECK: I added thios vailadtion
-                changedAt: nodeData.changedAt.toDate(),
-                updatedAt: nodeData.updatedAt.toDate()
-              };
-              ({ oldNodes, oldEdges } = createOrUpdateNode(nodeData, nodeId, oldNodes, oldEdges, allTags));
-              oldMapChanged = true;
-            }
-          }
-        }
-      }
-      // We can take care of some userNodes from userNodeChanges,
-      // but we should postpone some others to
-      // handle them after we retrieve their corresponding node documents.
-      // We store those that we handle in this round in this array.
-      const handledUserNodeChangesIds: string[] = [];
-      const nodeIds: string[] = [];
+  //   console.log("[2. SYNCHRONIZATION]");
+  //   // console.log("In nodeChanges, userNodeChanges useEffect.");
+  //   const nodeUserNodeChangesFunc = async () => {
+  //     console.log("[synchronization]", { nodes, edges, userNodesLoaded });
+  //     // dictionary of all nodes visible on the user's map view
+  //     let oldNodes: any = { ...nodes };
+  //     // dictionary of all links/edges on the user's map view
+  //     let oldEdges: any = { ...edges };
+  //     // let typeVisibilityChanges = nodeTypeVisibilityChanges;
+  //     // flag for if there are any changes to map
+  //     let oldMapChanged = mapChanged;
+  //     if (nodeChanges.length > 0) {
+  //       console.log("  [synchronization]: 1: will iterate node changes");
+  //       for (let change of nodeChanges) {
+  //         const nodeId = change.nId;
+  //         let nodeData = change.nData;
+  //         delete nodeData.deleted;
+  //         if (nodeData.nodeType !== "Question") {
+  //           nodeData.choices = [];
+  //         }
+  //         // addReference(nodeId, nodeData);
+  //         if (change.cType === "added") {
+  //           // debugger
+  //           ({ oldNodes, oldEdges } = createOrUpdateNode(nodeData, nodeId, oldNodes, oldEdges, allTags));
+  //           oldMapChanged = true;
+  //         } else if (change.cType === "modified") {
+  //           const node = oldNodes[nodeId];
+  //           {
+  //             // let isTheSame =
+  //             //   node.changedAt.getTime() === nodeData.changedAt.toDate().getTime() &&
+  //             //   node.admin === nodeData.admin &&
+  //             //   node.aImgUrl === nodeData.aImgUrl &&
+  //             //   node.fullname === nodeData.fullname &&
+  //             //   node.chooseUname === nodeData.chooseUname &&
+  //             //   node.comments === nodeData.comments &&
+  //             //   node.title === nodeData.title &&
+  //             //   node.content === nodeData.content &&
+  //             //   node.corrects === nodeData.corrects &&
+  //             //   node.maxVersionRating === nodeData.maxVersionRating &&
+  //             //   node.nodeType === nodeData.nodeType &&
+  //             //   node.studied === nodeData.studied &&
+  //             //   node.bookmarks === nodeData.bookmarks &&
+  //             //   node.versions === nodeData.versions &&
+  //             //   node.viewers === nodeData.viewers &&
+  //             //   node.wrongs === nodeData.wrongs;
+  //             // // isTheSame = compareImages(nodeData, node, isTheSame);
+  //             // isTheSame = isTheSame && compareProperty(nodeData, node, "nodeImage");
+  //             // isTheSame = compareLinks(nodeData.tags, node.tags, isTheSame, false);
+  //             // isTheSame = compareLinks(nodeData.references, node.references, isTheSame, false);
+  //             // const childrenComparison = compareLinks(
+  //             //   nodeData.children,
+  //             //   node.children,
+  //             //   true,
+  //             //   false
+  //             // );
+  //             // const parentsComparison = compareLinks(nodeData.parents, node.parents, true, false);
+  //             // isTheSame =
+  //             //   childrenComparison &&
+  //             //   parentsComparison &&
+  //             //   compareChoices(nodeData, node, isTheSame);
+  //           }
+  //           if (!compare2Nodes(nodeData, node)) {
+  //             nodeData = {
+  //               ...node,
+  //               ...nodeData,
+  //               id: nodeId,
+  //               createdAt: nodeData?.createdAt?.toDate(), //CHECK: I added thios vailadtion
+  //               changedAt: nodeData.changedAt.toDate(),
+  //               updatedAt: nodeData.updatedAt.toDate()
+  //             };
+  //             ({ oldNodes, oldEdges } = createOrUpdateNode(nodeData, nodeId, oldNodes, oldEdges, allTags));
+  //             oldMapChanged = true;
+  //           }
+  //         }
+  //       }
+  //     }
+  //     // We can take care of some userNodes from userNodeChanges,
+  //     // but we should postpone some others to
+  //     // handle them after we retrieve their corresponding node documents.
+  //     // We store those that we handle in this round in this array.
+  //     const handledUserNodeChangesIds: string[] = [];
+  //     const nodeIds: string[] = [];
 
-      console.log('  [synchronization]: userNodeChanges', userNodeChanges)
-      if (userNodeChanges && userNodeChanges.length > 0) {
-        let userNodeData: UserNodesData;
-        // iterating through every change
-        console.log('  [synchronization]: 2: will iterate userNodeChanges')
-        for (let userNodeChange of userNodeChanges) {
-          // data of the userNode that is changed
-          userNodeData = userNodeChange.uNodeData;
-          // nodeId of userNode that is changed
-          const nodeId = userNodeData.node;
-          // debugger
-          if (!userNodesLoaded) {
-            console.log('  [synchronization:!userNodesLoaded]: 2: push nodeId')
-            nodeIds.push(nodeId);
-          } else {
-            console.log('  [synchronization:userNodesLoaded]: 2: handleUserNodeChangesIds and operation by cType', userNodeChange.cType)
-            handledUserNodeChangesIds.push(userNodeChange.uNodeId); // CHECK: move this line
-            // if row is removed
-            if (userNodeChange.cType === "removed") {
-              // if graph includes nodeId, remove it
-              if (dag1[0].hasNode(nodeId)) {
-                oldEdges = removeDagAllEdges(nodeId, oldEdges);
-                oldNodes = removeDagNode(nodeId, oldNodes);
-                oldMapChanged = true;
-              }
-            } else {
+  //     console.log('  [synchronization]: userNodeChanges', userNodeChanges)
+  //     if (userNodeChanges && userNodeChanges.length > 0) {
+  //       let userNodeData: UserNodesData;
+  //       // iterating through every change
+  //       console.log('  [synchronization]: 2: will iterate userNodeChanges')
+  //       for (let userNodeChange of userNodeChanges) {
+  //         // data of the userNode that is changed
+  //         userNodeData = userNodeChange.uNodeData;
+  //         // nodeId of userNode that is changed
+  //         const nodeId = userNodeData.node;
+  //         // debugger
+  //         if (!userNodesLoaded) {
+  //           console.log('  [synchronization:!userNodesLoaded]: 2: push nodeId')
+  //           nodeIds.push(nodeId);
+  //         } else {
+  //           console.log('  [synchronization:userNodesLoaded]: 2: handleUserNodeChangesIds and operation by cType', userNodeChange.cType)
+  //           handledUserNodeChangesIds.push(userNodeChange.uNodeId); // CHECK: move this line
+  //           // if row is removed
+  //           if (userNodeChange.cType === "removed") {
+  //             // if graph includes nodeId, remove it
+  //             if (dag1[0].hasNode(nodeId)) {
+  //               oldEdges = removeDagAllEdges(nodeId, oldEdges);
+  //               oldNodes = removeDagNode(nodeId, oldNodes);
+  //               oldMapChanged = true;
+  //             }
+  //           } else {
 
-              // change can be addition or modification (not removal) of document for the query on userNode table
-              // modify change for allUserNodes
-              userNodeData = {
-                ...userNodeData, // CHECK: I Added this to complete all fields
-                userNodeId: userNodeChange.uNodeId,
-                correct: userNodeData.correct,
-                wrong: userNodeData.wrong,
-                isStudied: userNodeData.isStudied,
-                // bookmarks were added later, so check if "bookmarked" exists
-                bookmarked: "bookmarked" in userNodeData ? userNodeData.bookmarked : false,
-                open: userNodeData.open,
-                nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
-                // toDate() converts firestore timestamp to JavaScript date object
-                firstVisit: userNodeData.createdAt.toDate(),
-                lastVisit: userNodeData.updatedAt.toDate(),
-              };
-              // specific for addition (in addition to code from 617-632)
-              if (userNodeChange.cType === "added") {
-                {
-                  // if nodeId is already in allUserNodes but not in database
-                  // for deleting duplicates
-                  // ********************************************************
-                  // An issue here needs to be investigated with deleting all userNodes or duplicating nodes.
-                  // ********************************************************
-                  // if (!realoadingAll && nodeId in oldAllUserNodes) {
-                  //   // document just added to database
-                  //   const userNodeDocs = await firebase.db
-                  //     .collection("userNodes")
-                  //     .where("node", "==", nodeId)
-                  //     .where("user", "==", username)
-                  //     .get();
-                  //   if (userNodeDocs.docs.length > 1) {
-                  //     console.log("*********************************************");
-                  //     console.log({ state: "Trying to delete userNodes", nodeId });
-                  //     console.log("*********************************************");
-                  //     let userNodeRef = firebase.db
-                  //       .collection("userNodes")
-                  //       .doc(userNodeDocs.docs[0].id);
-                  //     // checks if "userNodeId" is already in allUserNodes, it would be a duplicate and deletes in the database
-                  //     if (
-                  //       "userNodeId" in oldAllUserNodes[nodeId] &&
-                  //       oldAllUserNodes[nodeId].userNodeId &&
-                  //       userNodeDocs.docs[0].id !== oldAllUserNodes[nodeId].userNodeId
-                  //     ) {
-                  //       // (older) document in database referring to same nodeId
-                  //       userNodeRef = firebase.db
-                  //         .collection("userNodes")
-                  //         .doc(oldAllUserNodes[nodeId].userNodeId);
-                  //       oldAllUserNodes = { ...oldAllUserNodes };
-                  //     }
-                  //     userNodeRef.delete();
-                  //   }
-                  //   // if added but not a duplicate
-                  // } else {
-                }
-                // checks whether map is loaded then make changes
-                if (mapRendered && dag1[0].hasNode(nodeId)) {
-                  setTimeout(() => {
-                    // scrolls to node if map is loaded
-                    scrollToNode(nodeId);
-                  }, 1000);
-                }
-                // }
-              }
+  //             // change can be addition or modification (not removal) of document for the query on userNode table
+  //             // modify change for allUserNodes
+  //             userNodeData = {
+  //               ...userNodeData, // CHECK: I Added this to complete all fields
+  //               userNodeId: userNodeChange.uNodeId,
+  //               correct: userNodeData.correct,
+  //               wrong: userNodeData.wrong,
+  //               isStudied: userNodeData.isStudied,
+  //               // bookmarks were added later, so check if "bookmarked" exists
+  //               bookmarked: "bookmarked" in userNodeData ? userNodeData.bookmarked : false,
+  //               open: userNodeData.open,
+  //               nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
+  //               // toDate() converts firestore timestamp to JavaScript date object
+  //               firstVisit: userNodeData.createdAt.toDate(),
+  //               lastVisit: userNodeData.updatedAt.toDate(),
+  //             };
+  //             // specific for addition (in addition to code from 617-632)
+  //             if (userNodeChange.cType === "added") {
+  //               {
+  //                 // if nodeId is already in allUserNodes but not in database
+  //                 // for deleting duplicates
+  //                 // ********************************************************
+  //                 // An issue here needs to be investigated with deleting all userNodes or duplicating nodes.
+  //                 // ********************************************************
+  //                 // if (!realoadingAll && nodeId in oldAllUserNodes) {
+  //                 //   // document just added to database
+  //                 //   const userNodeDocs = await firebase.db
+  //                 //     .collection("userNodes")
+  //                 //     .where("node", "==", nodeId)
+  //                 //     .where("user", "==", username)
+  //                 //     .get();
+  //                 //   if (userNodeDocs.docs.length > 1) {
+  //                 //     console.log("*********************************************");
+  //                 //     console.log({ state: "Trying to delete userNodes", nodeId });
+  //                 //     console.log("*********************************************");
+  //                 //     let userNodeRef = firebase.db
+  //                 //       .collection("userNodes")
+  //                 //       .doc(userNodeDocs.docs[0].id);
+  //                 //     // checks if "userNodeId" is already in allUserNodes, it would be a duplicate and deletes in the database
+  //                 //     if (
+  //                 //       "userNodeId" in oldAllUserNodes[nodeId] &&
+  //                 //       oldAllUserNodes[nodeId].userNodeId &&
+  //                 //       userNodeDocs.docs[0].id !== oldAllUserNodes[nodeId].userNodeId
+  //                 //     ) {
+  //                 //       // (older) document in database referring to same nodeId
+  //                 //       userNodeRef = firebase.db
+  //                 //         .collection("userNodes")
+  //                 //         .doc(oldAllUserNodes[nodeId].userNodeId);
+  //                 //       oldAllUserNodes = { ...oldAllUserNodes };
+  //                 //     }
+  //                 //     userNodeRef.delete();
+  //                 //   }
+  //                 //   // if added but not a duplicate
+  //                 // } else {
+  //               }
+  //               // checks whether map is loaded then make changes
+  //               if (mapRendered && dag1[0].hasNode(nodeId)) {
+  //                 setTimeout(() => {
+  //                   // scrolls to node if map is loaded
+  //                   scrollToNode(nodeId);
+  //                 }, 1000);
+  //               }
+  //               // }
+  //             }
 
-              console.log('  [synchronization]: 3: operations to added and modified')
-              // for both addition and modifications
-              if (userNodeChange.cType === "added" || userNodeChange.cType === "modified") {
-                // if data for the node is not loaded yet, do nothing
-                if (!(nodeId in oldNodes)) {
-                  nodeIds.push(nodeId);
-                  continue;
-                }
-                // Compare the updatedAt attribute of this node in nodes state with updatedAt in nodeChanges,
-                // and if the latter is greater, update nodeChanges.
-                if (userNodeData.nodeChanges && userNodeData.nodeChanges.updatedAt > oldNodes[nodeId].updatedAt) {
-                  console.log('  -  [synchronization]: 3.1: set node changes')
-                  setNodeChanges(oldNodeChanges => {
-                    let newNodeChanges = [...oldNodeChanges];
-                    newNodeChanges.push({
-                      cType: "modified",
-                      nId: userNodeData.node,
-                      nData: userNodeData.nodeChanges
-                    });
-                    return newNodeChanges;
-                  });
-                }
-                if (
-                  // left: current state of userNode
-                  // right: new state of userNode from the database
-                  // checks whether any userNode attributes on map are different from corresponding userNode attributes from database
-                  oldNodes[nodeId].correct !== userNodeData.correct ||
-                  oldNodes[nodeId].wrong !== userNodeData.wrong ||
-                  oldNodes[nodeId].isStudied !== userNodeData.isStudied ||
-                  oldNodes[nodeId].bookmarked !== userNodeData.bookmarked ||
-                  oldNodes[nodeId].open !== userNodeData.open
-                  // oldNodes[nodeId].firstVisit !== userNodeData.firstVisit || // CHECK: I commented this
-                  // oldNodes[nodeId].lastVisit !== userNodeData.lastVisit // CHECK: I commented this
-                ) {
-                  console.log('  -  [synchronization]: 3.2: updateOldNodes', { nodeId, userNodeData })
-                  oldNodes[nodeId] = {
-                    // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
-                    ...oldNodes[nodeId],
-                    ...userNodeData
-                  };
-                  oldMapChanged = true;
-                }
-              }
-            }
-            // handledUserNodeChangesIds.push(userNodeChange.uNodeId);
-          }
-        }
-      }
-      // debugger
-      if (!userNodesLoaded) {
-        console.log('  [synchronization:!userNodesLoaded]: 1: getNodesData')
-        await getNodesData(nodeIds);
-        // setTimeout is used for when the user proposes a child node and the proposal gets accepted, data for the created node and userNode come from the database to the client at the same time
-        // setTimeout(() => {
-        setUserNodesLoaded(true);
-        // }, 400);
-      } else {
-        console.log('  [synchronization:userNodesLoaded]: 1')
-        if (nodeIds.length > 0) {
-          // Get the data for the nodes that are not loaded yet but their corresponding userNodes are loaded.
-          // update nodeChanges (collection: nodes)-> it calls the worker -> it call the dagre -> we update the nodes
-          await getNodesData(nodeIds);
-        }
-        if (handledUserNodeChangesIds.length > 0) {
-          let oldUserNodeChanges = userNodeChanges.filter(uNObj => !handledUserNodeChangesIds.includes(uNObj.uNodeId));
-          setUserNodeChanges(oldUserNodeChanges);
-        }
-        if (nodeChanges.length > 0 || handledUserNodeChangesIds.length > 0) {
-          console.log('  -  [synchronization]:will update nodes, edges')
-          setNodes(oldNodes);
-          setEdges(oldEdges);
-          //  map changed fires another use effect that calls dagr
-          //  which calculates the new location of nodes and errors
-          // setMapChanged(oldMapChanged); // CHECK: I commented this to not call worker after render
-          if (nodeChanges.length > 0) {
-            // setNodeTypeVisibilityChanges(typeVisibilityChanges);
-            setNodeChanges([]);
-          }
-        }
-      }
-    };
+  //             console.log('  [synchronization]: 3: operations to added and modified')
+  //             // for both addition and modifications
+  //             if (userNodeChange.cType === "added" || userNodeChange.cType === "modified") {
+  //               // if data for the node is not loaded yet, do nothing
+  //               if (!(nodeId in oldNodes)) {
+  //                 nodeIds.push(nodeId);
+  //                 continue;
+  //               }
+  //               // Compare the updatedAt attribute of this node in nodes state with updatedAt in nodeChanges,
+  //               // and if the latter is greater, update nodeChanges.
+  //               if (userNodeData.nodeChanges && userNodeData.nodeChanges.updatedAt > oldNodes[nodeId].updatedAt) {
+  //                 console.log('  -  [synchronization]: 3.1: set node changes')
+  //                 setNodeChanges(oldNodeChanges => {
+  //                   let newNodeChanges = [...oldNodeChanges];
+  //                   newNodeChanges.push({
+  //                     cType: "modified",
+  //                     nId: userNodeData.node,
+  //                     nData: userNodeData.nodeChanges
+  //                   });
+  //                   return newNodeChanges;
+  //                 });
+  //               }
+  //               if (
+  //                 // left: current state of userNode
+  //                 // right: new state of userNode from the database
+  //                 // checks whether any userNode attributes on map are different from corresponding userNode attributes from database
+  //                 oldNodes[nodeId].correct !== userNodeData.correct ||
+  //                 oldNodes[nodeId].wrong !== userNodeData.wrong ||
+  //                 oldNodes[nodeId].isStudied !== userNodeData.isStudied ||
+  //                 oldNodes[nodeId].bookmarked !== userNodeData.bookmarked ||
+  //                 oldNodes[nodeId].open !== userNodeData.open
+  //                 // oldNodes[nodeId].firstVisit !== userNodeData.firstVisit || // CHECK: I commented this
+  //                 // oldNodes[nodeId].lastVisit !== userNodeData.lastVisit // CHECK: I commented this
+  //               ) {
+  //                 console.log('  -  [synchronization]: 3.2: updateOldNodes', { nodeId, userNodeData })
+  //                 oldNodes[nodeId] = {
+  //                   // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+  //                   ...oldNodes[nodeId],
+  //                   ...userNodeData
+  //                 };
+  //                 oldMapChanged = true;
+  //               }
+  //             }
+  //           }
+  //           // handledUserNodeChangesIds.push(userNodeChange.uNodeId);
+  //         }
+  //       }
+  //     }
+  //     // debugger
+  //     if (!userNodesLoaded) {
+  //       console.log('  [synchronization:!userNodesLoaded]: 1: getNodesData')
+  //       await getNodesData(nodeIds);
+  //       // setTimeout is used for when the user proposes a child node and the proposal gets accepted, data for the created node and userNode come from the database to the client at the same time
+  //       // setTimeout(() => {
+  //       setUserNodesLoaded(true);
+  //       // }, 400);
+  //     } else {
+  //       console.log('  [synchronization:userNodesLoaded]: 1')
+  //       if (nodeIds.length > 0) {
+  //         // Get the data for the nodes that are not loaded yet but their corresponding userNodes are loaded.
+  //         // update nodeChanges (collection: nodes)-> it calls the worker -> it call the dagre -> we update the nodes
+  //         await getNodesData(nodeIds);
+  //       }
+  //       if (handledUserNodeChangesIds.length > 0) {
+  //         let oldUserNodeChanges = userNodeChanges.filter(uNObj => !handledUserNodeChangesIds.includes(uNObj.uNodeId));
+  //         setUserNodeChanges(oldUserNodeChanges);
+  //       }
+  //       if (nodeChanges.length > 0 || handledUserNodeChangesIds.length > 0) {
+  //         console.log('  -  [synchronization]:will update nodes, edges')
+  //         setNodes(oldNodes);
+  //         setEdges(oldEdges);
+  //         //  map changed fires another use effect that calls dagr
+  //         //  which calculates the new location of nodes and errors
+  //         // setMapChanged(oldMapChanged); // CHECK: I commented this to not call worker after render
+  //         if (nodeChanges.length > 0) {
+  //           // setNodeTypeVisibilityChanges(typeVisibilityChanges);
+  //           setNodeChanges([]);
+  //         }
+  //       }
+  //     }
+  //   };
 
-    if (nodeChanges.length > 0 || (userNodeChanges && userNodeChanges.length > 0)) {
-      nodeUserNodeChangesFunc();
-    }
-  }, [
-    nodeChanges,
-    userNodeChanges,
-    // allNodes,
-    allTags,
-    // allUserNodes,
-    user,
-    userNodesLoaded,
-    nodes,
-    edges,
-    // nodeTypeVisibilityChanges, // this was comment in iman code
-    mapChanged
-  ]);
+  //   if (nodeChanges.length > 0 || (userNodeChanges && userNodeChanges.length > 0)) {
+  //     nodeUserNodeChangesFunc();
+  //   }
+  // }, [
+  //   nodeChanges,
+  //   userNodeChanges,
+  //   // allNodes,
+  //   allTags,
+  //   // allUserNodes,
+  //   user,
+  //   userNodesLoaded,
+  //   nodes,
+  //   edges,
+  //   // nodeTypeVisibilityChanges, // this was comment in iman code
+  //   mapChanged
+  // ]);
 
   // fire if map changed; responsible for laying out the knowledge map
   useEffect(() => {
@@ -1189,6 +1152,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
+      // setFlag(!flag)
       console.log("[OPEN NODE HANDLER]");
       let linkedNodeRef;
       let userNodeRef = null;

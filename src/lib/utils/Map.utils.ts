@@ -413,7 +413,6 @@ export const removeDagAllEdges = (nodeId: string, edges: any) => {
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
   // CHECK: commented this because nodeEdges dont exist in dagre
   const nodeEdges = dag1[0].nodeEdges(nodeId);
-  console.log('-------------------------> nodeEdges', nodeEdges)
 
   if (nodeEdges) {
     for (let edge of nodeEdges) {
@@ -423,20 +422,15 @@ export const removeDagAllEdges = (nodeId: string, edges: any) => {
       const edgeId = edge.v + "-" + edge.w;
       // removes edge from oldEdges
       if (edgeId in oldEdges) {
-        console.log('remove', edgeId)
-        console.log('B: oldEdges[edgeId]', oldEdges[edgeId])
         delete oldEdges[edgeId];
-        console.log('A: oldEdges[edgeId]', oldEdges[edgeId])
       }
     }
   }
-  console.log('oldEdges', oldEdges)
   return oldEdges;
 };
 
 // for hiding nodes in the map
 export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any) => {
-  console.log('pp')
   // for every parent
   for (let parent of oldNodes[nodeId].parents) {
     // if parent is visible on map
@@ -456,7 +450,6 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
       };
     }
   }
-  console.log('cc')
   // for every child
   for (let child of oldNodes[nodeId].children) {
     // if child is visible on map
@@ -477,10 +470,8 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
     }
   }
 
-  console.log('REE')
   // remove edges from this node to every other node
   oldEdges = removeDagAllEdges(nodeId, { ...oldEdges });
-  console.log('RNN')
   // removes the node itself
   oldNodes = removeDagNode(nodeId, oldNodes);
   return { oldNodes, oldEdges };
