@@ -22,7 +22,7 @@ import {
   where,
   writeBatch
 } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -147,6 +147,9 @@ const Dashboard = ({ }: DashboardProps) => {
   const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
+  const nodeRef = useRef<any>(null)
+  const edgesRef = useRef<any>(null)
+
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
@@ -213,12 +216,16 @@ const Dashboard = ({ }: DashboardProps) => {
       where("deleted", "==", false)
     )
 
-    snapshot(q)
-
+    const killSnapshot = snapshot(q, nodes)
+    return () => {
+      console.log('  ---X Kills the snapshoot')
+      killSnapshot()
+    }
 
   }, [allTags, allTagsLoaded, db, user]);
 
-  const snapshot = useCallback((q: Query<DocumentData>) => {
+  const snapshot = useCallback((q: Query<DocumentData>, node: any) => {
+    console.log('--> node', node)
     const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
       // const docChanges = snapshot.docChanges();
       // if (!docChanges.length) return null
@@ -292,13 +299,32 @@ const Dashboard = ({ }: DashboardProps) => {
       return res
     }
 
-    const fillDagre = (fullNodes: FullNodeData[]) => {
+    const fillDagre = (fullNodes: FullNodeData[], currentNodes: FullNodeData, currentEdges: any) => {
+      console.log('-- > fill dadre')
+      dag1[0].nodes().forEach(function (v) {
+        console.log("Node " + v + ": " + JSON.stringify(dag1[0].node(v)));
+      });
+      dag1[0].edges().forEach(function (e) {
+        console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(dag1[0].edge(e)));
+      });
+      console.log('<< -- fill dadre')
+      // debugger
       return fullNodes.reduce((
         acu: { newNodes: { [key: string]: any }, newEdges: { [key: string]: any } },
-        cur) => {
+        cur, idx) => {
         let tmpNodes = {}
         let tmpEdges = {}
         // debugger
+
+        console.log('-- > fill dadre', idx)
+        dag1[0].nodes().forEach(function (v) {
+          console.log("Node " + v + ": " + JSON.stringify(dag1[0].node(v)));
+        });
+        dag1[0].edges().forEach(function (e) {
+          console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(dag1[0].edge(e)));
+        });
+        console.log('<< -- fill dadre')
+
         if (cur.nodeChangeType === 'added') {
           const res = createOrUpdateNode(cur, cur.node, acu.newNodes, acu.newEdges, allTags)
           tmpNodes = res.oldNodes
@@ -314,38 +340,54 @@ const Dashboard = ({ }: DashboardProps) => {
         }
         if (cur.nodeChangeType === 'removed') {
           if (dag1[0].hasNode(cur.node)) {
-            tmpNodes = removeDagAllEdges(cur.node, acu.newEdges);
-            tmpEdges = removeDagNode(cur.node, acu.newNodes);
+            console.log('-- > fill dadre', idx)
+            dag1[0].nodes().forEach(function (v) {
+              console.log("Node " + v + ": " + JSON.stringify(dag1[0].node(v)));
+            });
+            dag1[0].edges().forEach(function (e) {
+              console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(dag1[0].edge(e)));
+            });
+            console.log('<< -- fill dadre')
+            // PROBABLIY yoou need to add hideNodeAndItsLinks, to update children and parents nodes
+            tmpEdges = removeDagAllEdges(cur.node, acu.newEdges);
+            tmpNodes = removeDagNode(cur.node, acu.newNodes);
+            console.log(' ---x ----x tmpEdges', tmpEdges)
           }
         }
         return {
-          newNodes: { ...acu.newNodes, ...tmpNodes },
-          newEdges: { ...acu.newEdges, ...tmpEdges },
+          // newNodes: { ...acu.newNodes, ...tmpNodes },
+          // newEdges: { ...acu.newEdges, ...tmpEdges },
+          newNodes: { ...tmpNodes },
+          newEdges: { ...tmpEdges },
         }
-      }, { newNodes: { ...nodes }, newEdges: { ...edges } })
+      }, { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } })
     }
     const userNodesSnapshot = onSnapshot(q, async (snapshot) => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return null
 
-      console.log(1, { nodes, edges })
+      console.log('- [Snapshot]', 1, /*{ nodes, edges },*/ nodeRef)
       const userNodeChanges = getUserNodeChanges(docChanges)
-      console.log(2, { userNodeChanges })
+      console.log('- [Snapshot]', 2, { userNodeChanges })
       const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node)
-      console.log(3, { nodeIds })
+      console.log('- [Snapshot]', 3, { nodeIds })
       const nodesData = await getNodes(nodeIds)
-      console.log(4, { nodesData })
+      console.log('- [Snapshot]', 4, { nodesData })
       const fullNodes = buildFullNodes(userNodeChanges, nodesData)
-      console.log(5, { fullNodes })
-      const { newNodes, newEdges } = fillDagre(fullNodes)
+      console.log('- [Snapshot]', 5, { fullNodes })
+      const { newNodes, newEdges } = fillDagre(fullNodes, nodeRef.current, edgesRef.current)
+      console.log('- [Snapshot]', 6, { newNodes, newEdges })
       setNodes(newNodes)
       setEdges(newEdges)
 
       setUserNodesLoaded(true)
 
-      return () => userNodesSnapshot();
     })
-  }, [nodes, edges])
+    return () => userNodesSnapshot();
+  }, [db, allTags])
+
+  useEffect(() => { nodeRef.current = nodes }, [nodes])
+  useEffect(() => { edgesRef.current = edges }, [edges])
 
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
@@ -1305,9 +1347,9 @@ const Dashboard = ({ }: DashboardProps) => {
           //   [nodeId]: userNodeData,
           // };
           // await firebase.commitBatch();
-          console.log(' ---- --- start commit')
+          // console.log(' ---- --- start commit')
           await batch.commit();
-          console.log(' ---- --- end commit')
+          // console.log(' ---- --- end commit')
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
@@ -1433,10 +1475,14 @@ const Dashboard = ({ }: DashboardProps) => {
           console.log('end commit')
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
-          const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
-          console.log(' -- hideNodeAndItsLinks')
-          setNodes(newNodes);
-          setEdges(newEdges);
+          // console.log('before hide')
+          // dagerInfo()
+          // console.log('after hide')
+          // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
+          // console.log(' -- hideNodeAndItsLinks')
+          // setNodes(newNodes);
+          // setEdges(newEdges);
+
           /*
           let oldNodes = { ...nodes };
           let oldEdges = { ...edges };
@@ -1456,6 +1502,7 @@ const Dashboard = ({ }: DashboardProps) => {
     (event: any, nodeId: string) => {
 
       console.log("In toggleNode");
+      // debugger
       if (!choosingNode) {
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
@@ -1463,11 +1510,13 @@ const Dashboard = ({ }: DashboardProps) => {
           const changeNode: any = {
             updatedAt: Timestamp.fromDate(new Date()),
           };
+          console.log('it', 0)
           if (thisNode.open && "openHeight" in thisNode) {
             changeNode.height = thisNode.openHeight;
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
+          console.log('it', 2)
           updateDoc(nodeRef, changeNode)
           // nodeRef.update(changeNode);
           updateDoc(userNodeRef, {
@@ -1478,6 +1527,7 @@ const Dashboard = ({ }: DashboardProps) => {
           //   open: !thisNode.open,
           //   updatedAt: Timestamp.fromDate(new Date()),
           // });
+          console.log('it', 3)
           const userNodeLogRef = collection(db, "userNodesLog");
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
           const userNodeLogData: any = {
@@ -1500,6 +1550,7 @@ const Dashboard = ({ }: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
+          console.log('[toggleNode]:oldNodes', oldNodes)
           return oldNodes;
         });
       }
@@ -1712,8 +1763,16 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const edgeIds = Object.keys(edges);
 
-  console.info('-- --- ------->', nodes)
+  console.info('render: -- --- ------->', { nodes, edges })
 
+  const dagerInfo = () => {
+    dag1[0].nodes().forEach(function (v) {
+      console.log("Node " + v + ": " + JSON.stringify(dag1[0].node(v)));
+    });
+    dag1[0].edges().forEach(function (e) {
+      console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(dag1[0].edge(e)));
+    });
+  }
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
 
@@ -1733,6 +1792,7 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
           <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
+          <Button onClick={() => console.log('DAGGER INFO', dagerInfo())}>Dager INFO</Button>
         </Box>
         {/* show clusters */}
         {/* link list */}
