@@ -35,7 +35,7 @@ import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
-import { NodeChanges, NodeFireStore } from "../knowledgeTypes";
+import { NodeChanges } from "../knowledgeTypes";
 import { postWithToken } from "../lib/mapApi";
 import { JSONfn } from "../lib/utils/jsonFn";
 import {
@@ -56,7 +56,7 @@ import {
   YOFFSET
 } from "../lib/utils/Map.utils";
 import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
-import { FullNodeData, NodesData, UserNodeChanges } from "../noteBookTypes";
+import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../noteBookTypes";
 import { NodeType } from "../types";
 
 type DashboardProps = {};
@@ -225,77 +225,162 @@ const Dashboard = ({ }: DashboardProps) => {
     }
 
     const getNodes = async (nodeIds: string[]): Promise<NodesData[]> => {
+      const nodeDocsPromises = nodeIds.map((nodeId, idx) => {
+        const nodeRef = doc(db, "nodes", nodeId)
+        return getDoc(nodeRef)
+      })
 
-      return await Promise.all(
-        nodeIds.map(async nodeId => {
-          const nodeRef = doc(db, "nodes", nodeId)
-          const nodeDoc = await getDoc(nodeRef)
-          if (!nodeDoc.exists) return null
+      const nodeDocs = await Promise.all(nodeDocsPromises)
 
-          const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
-          if (nData.deleted) return null
+      return nodeDocs.map(nodeDoc => {
+        if (!nodeDoc.exists()) return null
 
-          return {
-            cType: "added",
-            nId: nodeDoc.id,
-            nData
-          }
-        })
-      )
+        const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+        if (nData.deleted) return null
+
+        return {
+          cType: "added",
+          nId: nodeDoc.id,
+          nData
+        }
+      })
+      // return await Promise.all(
+      //   nodeDocs.map(async (nodeDoc, idx) => {
+      //     // const nodeRef = doc(db, "nodes", nodeId)
+      //     // const nodeDoc = await getDoc(nodeRef)
+      //     if (!nodeDoc.exists) return null
+
+      //     const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+      //     console.log('nData', idx, nData)
+      //     if (nData.deleted) return null
+
+      //     return {
+      //       cType: "added",
+      //       nId: nodeDoc.id,
+      //       nData
+      //     }
+      //   })
+      // )
     }
 
-    const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData => {
+    const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
 
       const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id)
 
-      return userNodesChanges.map(cur => {
-        const nodeDataFound = findNodeDataById(cur.uNodeId)
+      // TODO: this works only for added data, Add please to modify and remove
+      const res = userNodesChanges.map(cur => {
+        const nodeDataFound = findNodeDataById(cur.uNodeData.node)
 
         if (!nodeDataFound) return null
 
         const fullNodeData: FullNodeData = {
-          ...cur.uNodeData,
-          ...nodeDataFound.nData,
+          ...cur.uNodeData, // User node data
+          ...nodeDataFound.nData, // Node Data
+          userNodeId: cur.uNodeId,
+          nodeChangeType: cur.cType,
+          userNodeChangeType: nodeDataFound.cType,
           editable: false,
           left: 0,
-          top: 0
+          top: 0,
+          firstVisit: cur.uNodeData.createdAt.toDate(),
+          lastVisit: cur.uNodeData.updatedAt.toDate(),
+          changedAt: nodeDataFound.nData.changedAt.toDate(),
+          createdAt: nodeDataFound.nData.createdAt.toDate(),
+          updatedAt: nodeDataFound.nData.updatedAt.toDate(),
+          references: nodeDataFound.nData.references || [],
+          referenceIds: nodeDataFound.nData.referenceIds || [],
+          referenceLabels: nodeDataFound.nData.referenceLabels || [],
+          tags: nodeDataFound.nData.tags || [],
+          tagIds: nodeDataFound.nData.tagIds || [],
         }
+        if (nodeDataFound.nData.nodeType !== 'Question') { fullNodeData.choices = [] }
+        fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false
+        fullNodeData.nodeChanges = cur.uNodeData?.nodeChanges || null
+
         return fullNodeData
-      })
+      }).flatMap(cur => cur || [])
+
+      return res
     }
 
-    const userNodesSnapshot = onSnapshot(q, snapshot => {
+    const fillDagre = (fullNodes: FullNodeData[]) => {
+      return fullNodes.reduce((
+        acu: { newNodes: { [key: string]: any }, newEdges: { [key: string]: any } },
+        cur) => {
+        let tmpNodes = {}
+        let tmpEdges = {}
+        // debugger
+        if (cur.nodeChangeType === 'added') {
+          const res = createOrUpdateNode(cur, cur.node, acu.newNodes, acu.newEdges, allTags)
+          tmpNodes = res.oldNodes
+          tmpEdges = res.oldEdges
+        }
+        if (cur.nodeChangeType === 'modified') {
+          const node = acu.newNodes[cur.node];
+          if (!compare2Nodes(cur, node)) {
+            const res = createOrUpdateNode(cur, cur.node, acu.newNodes, acu.newEdges, allTags)
+            tmpNodes = res.oldNodes
+            tmpEdges = res.oldEdges
+          }
+        }
+        if (cur.nodeChangeType === 'removed') {
+          if (dag1[0].hasNode(cur.node)) {
+            tmpNodes = removeDagAllEdges(cur.node, acu.newEdges);
+            tmpEdges = removeDagNode(cur.node, acu.newNodes);
+          }
+        }
+        return {
+          newNodes: { ...acu.newNodes, ...tmpNodes },
+          newEdges: { ...acu.newEdges, ...tmpEdges },
+        }
+      }, { newNodes: { ...nodes }, newEdges: { ...edges } })
+    }
+
+    const userNodesSnapshot = onSnapshot(q, async (snapshot) => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return null
 
+
+      console.log(1)
       const userNodeChanges = getUserNodeChanges(docChanges)
-      const nodeIds = userNodeChanges.map(cur => cur.uNodeId)
+      console.log(2, { userNodeChanges })
+      const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node)
+      console.log(3, { nodeIds })
       const nodesData = await getNodes(nodeIds)
+      console.log(4, { nodesData })
+      const fullNodes = buildFullNodes(userNodeChanges, nodesData)
+      console.log(5, { fullNodes })
+      const { newNodes, newEdges } = fillDagre(fullNodes)
+      console.log('----------------> ', { newNodes, newEdges })
+      setNodes(newNodes)
+      setEdges(newEdges)
 
+      setUserNodesLoaded(true)
 
+      return () => userNodesSnapshot();
 
-      setUserNodeChanges(userNodeChangesCopy)
+      // setUserNodeChanges(userNodeChangesCopy)
 
-      setUserNodeChanges(oldUserNodeChanges => {
-        let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
-        const docChanges = snapshot.docChanges();
-        if (docChanges.length > 0) {
-          for (let change of docChanges) {
+      // setUserNodeChanges(oldUserNodeChanges => {
+      //   let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
+      //   const docChanges = snapshot.docChanges();
+      //   if (docChanges.length > 0) {
+      //     for (let change of docChanges) {
 
-            const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-            // only used for useEffect above
-            newUserNodeChanges = [
-              ...newUserNodeChanges,
-              {
-                cType: change.type,
-                uNodeId: change.doc.id,
-                uNodeData: userNodeData
-              }
-            ];
-          }
-        }
-        return newUserNodeChanges;
-      });
+      //       const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
+      //       // only used for useEffect above
+      //       newUserNodeChanges = [
+      //         ...newUserNodeChanges,
+      //         {
+      //           cType: change.type,
+      //           uNodeId: change.doc.id,
+      //           uNodeData: userNodeData
+      //         }
+      //       ];
+      //     }
+      //   }
+      //   return newUserNodeChanges;
+      // });
     });
   }, [allTagsLoaded, user]);
 
@@ -459,85 +544,86 @@ const Dashboard = ({ }: DashboardProps) => {
     [scrollToNodeInitialized]
   );
 
-  // loads user nodes
-  // downloads all records of userNodes collection where user is authenticated user
-  // sets userNodeChanges
-  useEffect(() => {
-    console.log("[1. GET USER NODES - SNAPSHOT]", allTagsLoaded);
-    // console.log("In allTagsLoaded useEffect");
-    // if (firebase && allTagsLoaded && username) {
-    const username = user?.uname;
-    if (db && allTagsLoaded && username) {
-      // Create the query to load the userNodes and listen for modifications.
-      // const nodeRef = doc(db, "userNodes");
+  // // loads user nodes
+  // // downloads all records of userNodes collection where user is authenticated user
+  // // sets userNodeChanges
+  // useEffect(() => {
+  //   console.log("[1. GET USER NODES - SNAPSHOT]", allTagsLoaded);
+  //   // console.log("In allTagsLoaded useEffect");
+  //   // if (firebase && allTagsLoaded && username) {
+  //   const username = user?.uname;
+  //   if (db && allTagsLoaded && username) {
+  //     // Create the query to load the userNodes and listen for modifications.
+  //     // const nodeRef = doc(db, "userNodes");
 
-      const userNodesRef = collection(db, "userNodes");
-      const q = query(
-        userNodesRef,
-        where("user", "==", username),
-        where("visible", "==", true),
-        where("deleted", "==", false)
-      );
+  //     const userNodesRef = collection(db, "userNodes");
+  //     const q = query(
+  //       userNodesRef,
+  //       where("user", "==", username),
+  //       where("visible", "==", true),
+  //       where("deleted", "==", false)
+  //     );
 
-      const userNodesSnapshot = onSnapshot(q, snapshot => {
-        setUserNodeChanges(oldUserNodeChanges => {
-          let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
-          const docChanges = snapshot.docChanges();
-          if (docChanges.length > 0) {
-            for (let change of docChanges) {
+  //     const userNodesSnapshot = onSnapshot(q, snapshot => {
+  //       setUserNodeChanges(oldUserNodeChanges => {
+  //         let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
+  //         const docChanges = snapshot.docChanges();
+  //         if (docChanges.length > 0) {
+  //           for (let change of docChanges) {
 
-              const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-              // only used for useEffect above
-              newUserNodeChanges = [
-                ...newUserNodeChanges,
-                {
-                  cType: change.type,
-                  uNodeId: change.doc.id,
-                  uNodeData: userNodeData
-                }
-              ];
-            }
-          }
-          return newUserNodeChanges;
-        });
-      });
+  //             const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
+  //             // only used for useEffect above
+  //             newUserNodeChanges = [
+  //               ...newUserNodeChanges,
+  //               {
+  //                 cType: change.type,
+  //                 uNodeId: change.doc.id,
+  //                 uNodeData: userNodeData
+  //               }
+  //             ];
+  //           }
+  //         }
+  //         return newUserNodeChanges;
+  //       });
+  //     });
 
-      // const userNodesQuery = db
-      //   .collection("userNodes")
-      //   .where("user", "==", username)
-      //   .where("visible", "==", true)
-      //   .where("deleted", "==", false);
+  //     // const userNodesQuery = db
+  //     //   .collection("userNodes")
+  //     //   .where("user", "==", username)
+  //     //   .where("visible", "==", true)
+  //     //   .where("deleted", "==", false);
 
-      // // called whenever something changes and downloads the changes between the database and query
-      // const userNodesSnapshot = userNodesQuery.onSnapshot(function (snapshot) {
-      //   console.log('GET USER NODES:Snapsh')
-      //   setUserNodeChanges((oldUserNodeChanges) => {
-      //     const docChanges = snapshot.docChanges();
-      //     if (docChanges.length > 0) {
-      //       let newUserNodeChanges = [...oldUserNodeChanges];
-      //       for (let change of docChanges) {
-      //         const userNodeData = change.doc.data();
-      //         // only used for useEffect above
-      //         newUserNodeChanges.push({
-      //           cType: change.type,
-      //           uNodeId: change.doc.id,
-      //           uNodeData: userNodeData,
-      //         });
-      //       }
-      //     }
-      //     return oldUserNodeChanges;
-      //   });
-      // });
-      // before calling useEffect again or exiting useEffect
-      return () => userNodesSnapshot();
-    }
-    // }, [allTagsLoaded, username]);
-  }, [allTagsLoaded, user]);
+  //     // // called whenever something changes and downloads the changes between the database and query
+  //     // const userNodesSnapshot = userNodesQuery.onSnapshot(function (snapshot) {
+  //     //   console.log('GET USER NODES:Snapsh')
+  //     //   setUserNodeChanges((oldUserNodeChanges) => {
+  //     //     const docChanges = snapshot.docChanges();
+  //     //     if (docChanges.length > 0) {
+  //     //       let newUserNodeChanges = [...oldUserNodeChanges];
+  //     //       for (let change of docChanges) {
+  //     //         const userNodeData = change.doc.data();
+  //     //         // only used for useEffect above
+  //     //         newUserNodeChanges.push({
+  //     //           cType: change.type,
+  //     //           uNodeId: change.doc.id,
+  //     //           uNodeData: userNodeData,
+  //     //         });
+  //     //       }
+  //     //     }
+  //     //     return oldUserNodeChanges;
+  //     //   });
+  //     // });
+  //     // before calling useEffect again or exiting useEffect
+  //     return () => userNodesSnapshot();
+  //   }
+  //   // }, [allTagsLoaded, username]);
+  // }, [allTagsLoaded, user]);
 
   // SYNC NODES FUNCTION
   // READ THIS!!!
   // nodeChanges, userNodeChanges useEffect
   useEffect(() => {
+
     console.log("[2. SYNCHRONIZATION]");
     // console.log("In nodeChanges, userNodeChanges useEffect.");
     const nodeUserNodeChangesFunc = async () => {
@@ -842,7 +928,13 @@ const Dashboard = ({ }: DashboardProps) => {
       // console.log("Object.keys(edges).length:", Object.keys(edges).length);
       // console.log("dag1[0].edgeCount():", dag1[0].edgeCount());
     }
-    console.log("[3. WORKER - RECALCULATE POSITIONS]", mapChanged, nodeChanges.length, userNodeChanges.length, userNodesLoaded, Object.keys(edges).length === dag1[0].edgeCount(), Object.keys(edges).length, dag1[0].edgeCount());
+    console.log("[3. WORKER - RECALCULATE POSITIONS]",
+      mapChanged,
+      nodeChanges.length,
+      userNodeChanges.length,
+      userNodesLoaded,
+      Object.keys(edges).length === dag1[0].edgeCount(), Object.keys(edges).length, dag1[0].edgeCount()
+    );
     if (
       mapChanged &&
       nodeChanges.length === 0 &&
@@ -1655,6 +1747,8 @@ const Dashboard = ({ }: DashboardProps) => {
   );
 
   const edgeIds = Object.keys(edges);
+
+  console.info('-- --- ------->', nodes)
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>

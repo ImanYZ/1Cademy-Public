@@ -44,10 +44,10 @@ export type NodeFireStore = {
     parents: { node: string; label: string; title: string }[];
     referenceIds: string[];
     referenceLabels: string[];
-    references: string[] | { node: string; title?: string; label?: string }[];
+    references: string[];
     studied: number;
     tagIds: string[];
-    tags: string[] | { node: string; title?: string; label?: string }[];
+    tags: string[];
     title: string;
     updatedAt: Timestamp;
     versions?: number;
@@ -59,11 +59,19 @@ export type UserNodeChanges = { cType: string, uNodeId: string, uNodeData: UserN
 
 export type NodesData = { cType: string, nId: string, nData: NodeFireStore, } | null
 
-
-
-export type FullNodeData = UserNodesData & NodeFireStore & {
+export type FullNodeData = Omit<UserNodesData, 'changedAt' | 'createdAt' | 'updatedAt'> &
+    Omit<NodeFireStore, 'changedAt' | 'createdAt' | 'updatedAt'> &
+{
     editable: boolean,
     left: number,
     openHeight?: number,
-    top: number
-} 
+    top: number,
+    userNodeId: string,
+    nodeChangeType: string /*'added' | ''*/
+    userNodeChangeType: string /*'added' | ''*/
+    firstVisit: Date,
+    lastVisit: Date,
+    changedAt: Date,
+    createdAt: Date,
+    updatedAt: Date,
+}

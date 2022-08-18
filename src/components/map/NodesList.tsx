@@ -116,6 +116,8 @@ const NodesList = ({
           commentsSelected = true;
         }
 
+        console.log('---------------->x', nId, nodes[nId])
+
         return (
           <Node
             key={nId}
