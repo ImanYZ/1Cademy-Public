@@ -349,6 +349,8 @@ const Dashboard = ({ }: DashboardProps) => {
             });
             console.log('<< -- fill dadre')
             // PROBABLIY yoou need to add hideNodeAndItsLinks, to update children and parents nodes
+
+            // !IMPORTANT, Don't change the order, first remove edges then nodes
             tmpEdges = removeDagAllEdges(cur.node, acu.newEdges);
             tmpNodes = removeDagNode(cur.node, acu.newNodes);
             console.log(' ---x ----x tmpEdges', tmpEdges)
