@@ -5,6 +5,7 @@ import dagre from "dagre";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   DocumentChange,
   DocumentData,
@@ -149,12 +150,12 @@ const Dashboard = ({ }: DashboardProps) => {
   // usernodes: collection of all data about each interaction between user and node
   // (ex: node open, hidden, closed, hidden, etc.) (contains every user with every node interacted with)
   // nodes: dictionary of all nodes visible on map for specific user
-  const [nodes, setNodes] = useState<{ [key: string]: any }>({});
+  const [nodes, setNodes] = useState<{ [key: string]: FullNodeData }>({});
   // edges: dictionary of all edges visible on map for specific user
   const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
-  const nodeRef = useRef<any>(null)
+  const nodeRef = useRef<FullNodeData>(null)
   const edgesRef = useRef<any>(null)
 
   // as map grows, width and height grows based on the nodes shown on the map
@@ -1245,15 +1246,16 @@ const Dashboard = ({ }: DashboardProps) => {
           } else {
             // if NOT exist documents create a document
             userNodeRef = collection(db, "userNodes")
-            userNodeId = userNodeRef.id;
+            // userNodeId = userNodeRef.id;
+            // console.log(' ---->> userNodeId', userNodeRef, userNodeId)
             userNodeData = {
               changed: true,
               correct: false,
               createdAt: Timestamp.fromDate(new Date()),
               updatedAt: Timestamp.fromDate(new Date()),
-              firstVisit: Timestamp.fromDate(new Date()),//CHECK
-              lastVisit: Timestamp.fromDate(new Date()),//CHECK
-              userNodeId: userNodeId,
+              // firstVisit: Timestamp.fromDate(new Date()),//CHECK
+              // lastVisit: Timestamp.fromDate(new Date()),//CHECK
+              // userNodeId: newId(),
               deleted: false,
               isStudied: false,
               bookmarked: false,
@@ -1394,6 +1396,12 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const hideNodeHandler = useCallback(
     async (nodeId: string, /*setIsHiding: any*/) => {
+      /**
+       * changes in DB
+       * change userNode
+       * change node
+       * create userNodeLog
+       */
       const batch = writeBatch(db);
       const username = user?.uname;
       if (!choosingNode) {
@@ -1408,7 +1416,7 @@ const Dashboard = ({ }: DashboardProps) => {
           const userNodeData = {
             changed: thisNode.changed || false,
             correct: thisNode.corrects,
-            createdAt: Timestamp.fromDate(new Date()),
+            createdAt: Timestamp.fromDate(thisNode.firstVisit),
             updatedAt: Timestamp.fromDate(new Date()),
             deleted: false,
             isStudied: thisNode.studied,
@@ -1934,6 +1942,19 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const edgeIds = Object.keys(edges);
 
+  // const first = () => {
+  //   // const nodeRef = doc(db, "userNodes");
+  //   // const nodeDoc = await getDoc(nodeRef);
+
+  //   const q = query(
+  //     collection(db, "userNodes"),
+  //     where("user", "==", 'jimy')
+  //   )
+
+  //   await deleteDoc(doc(db, "cities", "DC"));
+
+  // }
+
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
       <MemoizedSidebar
@@ -1951,6 +1972,7 @@ const Dashboard = ({ }: DashboardProps) => {
         {/* Data from map, DONT REMOVE */}
         <Box>
           Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+          {/* <Button onClick={() => Object.keys(nodes).forEach(cur))}>REMOVE ALL</Button> */}
         </Box>
         <Box>
           <Button onClick={() => console.log(nodes)}>nodes</Button>
@@ -1968,6 +1990,7 @@ const Dashboard = ({ }: DashboardProps) => {
         </Box>
         <Box>
           <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
+          <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
         </Box>
       </Box>
 

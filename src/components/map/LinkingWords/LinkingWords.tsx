@@ -369,7 +369,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
         {props.openPart === "LinkingWords" && (
           <>
             <strong>Children (Follow-ups)</strong>
-            {props.nodesChildren.map((child: any, idx: number) => {
+            {props.nodesChildren.map((child: any) => {
               return (
                 <div key={props.identifier + "LinkTo" + child.node + "DIV"}>
                   <LinkingButton
