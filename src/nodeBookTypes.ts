@@ -86,8 +86,8 @@ export type NodeBookActions = {
 }
 
 export type UserNodesData = {
-  "firstVisit":Date,//CHECK
-  "lastVisit":Date,//CHECK
+  "firstVisit":Timestamp,//CHECK
+  "lastVisit":Timestamp,//CHECK
   "userNodeId":string,//CHECK
   "updatedAt": Timestamp,
   "open": boolean,

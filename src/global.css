@@ -631,3 +631,141 @@
   float: left;
   margin-top: 4px !important;
 }
+.card-title .header {
+  position: absolute;
+  line-height: 19px;
+}
+.card-title .header.left {
+  top: 7px;
+  left: 7px;
+  font-size: 14.5px;
+}
+
+.card-title .header.right {
+  top: 1px;
+  right: 7px;
+  font-size: 13px;
+}
+.card-title .header .MetaButton {
+  margin-top: 4px;
+  padding: 4px 7px !important;
+  line-height: 4px;
+  height: 19px;
+}
+.card-title .header .MetaButton .TooltipText {
+  line-height: 16px;
+}
+.card-title .header .MetaButton i {
+  font-size: 19px;
+  line-height: 7px;
+}
+
+.card-title .header .MetaButton .CloseButton i {
+  margin-top: -1.9px;
+}
+
+.MinimizeButton:hover,
+.MinimizeButton:focus {
+  color: orange !important;
+}
+
+.MetaButton {
+  text-align: left;
+  padding: 4px 7px 4px 7px;
+  color: rgb(190, 190, 190) !important;
+  /* text-transform: none !important; */
+  /* transition: color 0.1s ease; vendorless fallback */
+  /* -o-transition: color 0.1s ease; opera */
+  /* -ms-transition: color 0.1s ease; IE 10 */
+  /* -moz-transition: color 0.1s ease; Firefox */
+  /* -webkit-transition: color 0.1s ease; safari and chrome */
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  overflow: visible;
+  z-index: 1;
+
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+.MetaButton.Round {
+  border-radius: 50%;
+}
+
+.MetaButton.Clickable {
+  cursor: pointer;
+}
+
+.LightMode .MetaButton {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.MetaButton.Clickable:hover,
+.MetaButton.Clickable:focus {
+  background: rgba(255, 255, 255, 0.13);
+  color: rgb(255, 255, 255) !important;
+}
+.LightMode .MetaButton.Clickable:hover,
+.LightMode .MetaButton.Clickable:focus {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.MetaButton.Clickable:hover i {
+  color: #ff9100 !important;
+}
+
+.MetaButton .CloseButton {
+  background: rgb(34, 34, 34);
+  background: radial-gradient(
+    circle,
+    rgba(34, 34, 34, 1) 0%,
+    rgba(69, 69, 69, 1) 4%,
+    rgba(0, 212, 255, 0) 70%
+  );
+}
+
+.LightMode .MetaButton .CloseButton {
+  background: rgb(255, 255, 255);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 4%,
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+.LightMode .MetaButton .CloseButton i {
+  color: #808080 !important;
+}
+
+.MetaButton:hover .CloseButton i {
+  color: red !important;
+}
+
+.MetaButton.hoverable:hover,
+.MetaButton.hoverable:focus,
+.TooltipText {
+  -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.MetaButton span {
+  padding-left: 4px;
+}
