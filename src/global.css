@@ -187,6 +187,7 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+  max-width: 100%; /* <---- Added this to fix*/
 }
 
 .card {
@@ -1374,6 +1375,44 @@ button.MuiTab-textColorInherit:focus {
 
 /* ---------------------------------------- */
 /* metabutton styles */
+.card-title .header {
+  position: absolute;
+  line-height: 19px;
+}
+.card-title .header.left {
+  top: 7px;
+  left: 7px;
+  font-size: 14.5px;
+}
+
+.card-title .header.right {
+  top: 1px;
+  right: 7px;
+  font-size: 13px;
+}
+.card-title .header .MetaButton {
+  margin-top: 4px;
+  padding: 4px 7px !important;
+  line-height: 4px;
+  height: 19px;
+}
+.card-title .header .MetaButton .TooltipText {
+  line-height: 16px;
+}
+.card-title .header .MetaButton i {
+  font-size: 19px;
+  line-height: 7px;
+}
+
+.card-title .header .MetaButton .CloseButton i {
+  margin-top: -1.9px;
+}
+
+.MinimizeButton:hover,
+.MinimizeButton:focus {
+  color: orange !important;
+}
+
 .MetaButton {
   text-align: left;
   padding: 4px 7px 4px 7px;

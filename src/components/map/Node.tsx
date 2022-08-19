@@ -236,7 +236,7 @@ const Node = ({
   //   removeImage(nodeRef, identifier);
   // }, [nodeRef, removeImage, identifier]);
 
-  // const onImageLoad = useCallback(() => setImageLoaded(true), []);
+  const onImageLoad = useCallback(() => setImageLoaded(true), []);
 
   // const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
@@ -512,7 +512,7 @@ const Node = ({
                     src={nodeImage}
                     alt="Node image"
                     className="responsive-img NodeImage"
-                    onLoad={() => console.log('onImageLoad')}
+                    onLoad={onImageLoad}
                     onClick={() => console.log('onImageClick')}
                   />
                   {/* </a> */}

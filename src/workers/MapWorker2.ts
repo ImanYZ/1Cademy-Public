@@ -1,7 +1,6 @@
 // dagre is used for calculating location of nodes and arrows
 import dagre from "dagre";
 
-import { dagreUtils } from "../lib/utils/dagre.util";
 import { JSONfn } from "../lib/utils/jsonFn";
 import { setDagNode, setEdgeInDag, setNodeInDagger } from '../lib/utils/Map.utils'
 
@@ -20,16 +19,14 @@ const layoutHandler = (
   MAP_RIGHT_GAP: number,
   NODE_WIDTH: number,
   setDagNodex: any,
-  setDagEdge: any,
-  g: dagre.graphlib.Graph<{}>,
+  setDagEdge: any
 ) => {
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;
 
     // DAGRE RECALCULATE LAYOUT
-    // dagre.layout(dag1);
-    dagre.layout(g);
+    dagre.layout(dag1);
     const clusterRegions: any = {};
 
     // Iterate oldNodes and find the cluster boundary
@@ -43,8 +40,7 @@ const layoutHandler = (
         oldNodes[nId].tagIds[0] in allTags
       ) {
         //  nodeN is the object corresponding to this node in dagr
-        // const nodeN = dag1.node(nId);
-        const nodeN = g.node(nId);
+        const nodeN = dag1.node(nId);
         if (oldNodes[nId].tagIds[0] in clusterRegions) {
           //  if the cluster is defined, update its bounds
           if (clusterRegions[oldNodes[nId].tagIds[0]].yMin > nodeN.y - nodeN.height / 2) {
@@ -75,7 +71,7 @@ const layoutHandler = (
 
     // Update OldClusterNodes
     for (let cNode in clusterRegions) {
-      // const nodeN = dag1.node("Tag" + cNode) as any;
+      const nodeN = dag1.node("Tag" + cNode) as any;
       // console.log('  --- ---- --- >>', nodeN)
       oldClusterNodes[cNode] = {
         id: cNode,
@@ -94,8 +90,7 @@ const layoutHandler = (
     // update with setDagNode
     // calculate map
     Object.keys(oldNodes).map((n) => {
-      // const nodeN = dag1.node(n);
-      const nodeN = g.node(n);
+      const nodeN = dag1.node(n);
       // If there is an object (label) assigned to the node in dag1[0], otherwise it'd be undefined:
       if (nodeN) {
         const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
@@ -109,8 +104,7 @@ const layoutHandler = (
           Math.abs(thisNode.left - newLeft) >= MIN_CHANGE ||
           Math.abs(thisNode.top - newTop) >= MIN_CHANGE
         ) {
-          // oldNodes = setNodeInDagger(dag1, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
-          oldNodes = setNodeInDagger(g, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
+          oldNodes = setNodeInDagger(dag1, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
 
           mapNewWidth = newLeft + nodeN.width + MAP_RIGHT_GAP;
           if (oldMapWidth < mapNewWidth) {
@@ -127,14 +121,11 @@ const layoutHandler = (
     });
 
     // ITERATE EDGES and calculate the new positions
-    // dag1.edges().map((e: any) => {
-    g.edges().map((e: any) => {
+    dag1.edges().map((e: any) => {
       console.log(' -- ---- ----> dag1: edges')
       // debugger
-      // const fromNode = dag1.node(e.v) as any;
-      // const toNode = dag1.node(e.w) as any;
-      const fromNode = g.node(e.v) as any;
-      const toNode = g.node(e.w) as any;
+      const fromNode = dag1.node(e.v) as any;
+      const toNode = dag1.node(e.w) as any;
       console.log({
         fromNode,
         toNode,
@@ -178,21 +169,8 @@ const layoutHandler = (
           Math.abs(thisEdge.toY - newToY) >= MIN_CHANGE
         ) {
 
-          // oldEdges = setEdgeInDag(
-          //   dag1,
-          //   e.v,
-          //   e.w,
-          //   {
-          //     ...thisEdge,
-          //     fromX: newFromX,
-          //     fromY: newFromY,
-          //     toX: newToX,
-          //     toY: newToY,
-          //   },
-          //   oldEdges
-          // );
           oldEdges = setEdgeInDag(
-            g,
+            dag1,
             e.v,
             e.w,
             {
@@ -204,8 +182,7 @@ const layoutHandler = (
             },
             oldEdges
           );
-          // console.log('dag1', dag1)
-          console.log('dag1', g)
+          console.log('dag1', dag1)
           mapChangedFlag = true;
         }
         return null;
@@ -213,8 +190,7 @@ const layoutHandler = (
     });
   }
   const dag = JSONfn.stringify(dag1)
-  const graph = dagreUtils.mapGraphToObject(g)
-  return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, dag, graph };
+  return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, dag };
 };
 
 onmessage = (e) => {
@@ -234,12 +210,9 @@ onmessage = (e) => {
     NODE_WIDTH,
     setDagNode,
     setDagEdge,
-    graph,
   } = e.data;
   let dagreObject = JSONfn.parse(dag1)
   dagreObject.__proto__ = dagre.graphlib.Graph.prototype;
-
-  const g = dagreUtils.mapObjectToGraph(graph)
 
   const workerResults = layoutHandler(
     mapChangedFlag,
@@ -256,8 +229,7 @@ onmessage = (e) => {
     MAP_RIGHT_GAP,
     NODE_WIDTH,
     JSONfn.parse(setDagNode),
-    JSONfn.parse(setDagEdge),
-    g
+    JSONfn.parse(setDagEdge)
   );
   postMessage(workerResults);
 };
