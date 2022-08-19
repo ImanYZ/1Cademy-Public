@@ -21,7 +21,6 @@ const layoutHandler = (
   setDagNodex: any,
   setDagEdge: any
 ) => {
-  console.log('{WORKER}:', { oldNodes })
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;

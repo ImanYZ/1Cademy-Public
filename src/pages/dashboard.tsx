@@ -1669,9 +1669,6 @@ const Dashboard = ({ }: DashboardProps) => {
   );
 
   const edgeIds = Object.keys(edges);
-
-  console.info('render: -- --- ------->', { nodes, edges })
-
   const dagerInfo = () => {
     dag1[0].nodes().forEach(function (v) {
     });

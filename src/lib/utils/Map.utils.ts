@@ -238,7 +238,6 @@ export const getDependentNodes = (dependents: any[], necessaryNodeIds: string[],
 // oldNodes: current value of nodesState in Map.js
 // callback: called after oldNodes is updated and the new node is added to the dagre object
 export const setDagNode = (nodeId: string, node: any, oldNodes: any, allTags: any, callback?: any) => {
-  // console.log("In setDagNode", nodeId);
   let newNode: any = {};
   // 10
   // unde
@@ -296,7 +295,6 @@ export const setDagNode = (nodeId: string, node: any, oldNodes: any, allTags: an
 
 // same as setDagNode, with dag1 argument
 export const setNodeInDagger = (dag: any, nodeId: string, node: any, oldNodes: any, allTags: any, callback: any) => {
-  // console.log("In setDagNode", nodeId);
   let newNode: any = {};
   // 10
   // unde
@@ -353,7 +351,6 @@ export const setNodeInDagger = (dag: any, nodeId: string, node: any, oldNodes: a
 
 // removes a node from the map
 export const removeDagNode = (nodeId: string, oldNodes: any) => {
-  // console.log("In removeDagNode");
   // removes nodeId from dagre object
   dag1[0].removeNode(nodeId);
   // removes nodeId from oldNodes
@@ -368,11 +365,9 @@ export const removeDagNode = (nodeId: string, oldNodes: any) => {
 // to: node id of destination of the new edge
 // edge: data of the new edge
 export const setDagEdge = (from: string, to: string, edge: any, oldEdges: any) => {
-  // console.log("In setDagEdge");
   // checks that the from and to nodes exist in map
   if (dag1[0].hasNode(from) && dag1[0].hasNode(to)) {
     const edgeId = from + "-" + to;
-    console.log('edgeId', edgeId)
     const newEdge = { ...edge };
     dag1[0].setEdge(from, to, newEdge);
     // adds newEdge to oldEdges
@@ -383,7 +378,6 @@ export const setDagEdge = (from: string, to: string, edge: any, oldEdges: any) =
 
 // same as setDagEdge, with dag1 argument
 export const setEdgeInDag = (dag1: any, from: string, to: string, edge: any, oldEdges: any) => {
-  // console.log("In setDagEdge");
   // checks that the from and to nodes exist in map
   if (dag1.hasNode(from) && dag1.hasNode(to)) {
     const edgeId = from + "-" + to;
@@ -397,7 +391,6 @@ export const setEdgeInDag = (dag1: any, from: string, to: string, edge: any, old
 
 // removes edge from dagre object and oldEdges
 export const removeDagEdge = (from: string, to: string, oldEdges: any) => {
-  // console.log("In removeDagEdge");
   dag1[0].removeEdge(from, to);
   const edgeId = from + "-" + to;
   if (edgeId in oldEdges) {
@@ -410,17 +403,13 @@ export const removeDagEdge = (from: string, to: string, oldEdges: any) => {
 export const removeDagAllEdges = (nodeId: string, edges: any) => {
   const oldEdges = { ...edges }
   // debugger
-  // console.log("In removeDagAllEdges");
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
   // CHECK: commented this because nodeEdges dont exist in dagre
   dag1[0].nodes().forEach(function (v) {
-    console.log("Node " + v + ": " + JSON.stringify(dag1[0].node(v)));
   });
   dag1[0].edges().forEach(function (e) {
-    console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(dag1[0].edge(e)));
   });
   const nodeEdges = dag1[0].nodeEdges(nodeId);
-  console.log('removeDagAllEdges: nodeEdges from dagger', { nodeId, nodeEdges })
 
   if (nodeEdges) {
     for (let edge of nodeEdges) {
@@ -458,7 +447,6 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
       };
     }
   }
-  console.log(' -- 1.oldNodes', oldNodes)
   // for every child
   for (let child of oldNodes[nodeId].children) {
     // if child is visible on map
@@ -478,20 +466,16 @@ export const hideNodeAndItsLinks = (nodeId: string, oldNodes: any, oldEdges: any
       };
     }
   }
-  console.log(' -- 2.oldNodes', oldNodes)
 
   // remove edges from this node to every other node
   oldEdges = removeDagAllEdges(nodeId, { ...oldEdges });
-  console.log(' -- 3.oldEdges', oldEdges)
   // removes the node itself
   oldNodes = removeDagNode(nodeId, oldNodes);
-  console.log(' -- 4.oldNodes', oldNodes)
   return { oldNodes, oldEdges };
 };
 
 // for showing a hidden node
 export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdges: any/*, oldAllNodes: any*/) => {
-  console.log({ uNodeData, oldNodes, oldEdges })
   // copy list of the node's children to modify userNode object
   uNodeData.children = [...uNodeData.children];
   // for each child
@@ -564,7 +548,6 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
 // newNode: data of the node that is being proposed on
 // called when any node from the database is loaded in order to create links from the node to existing nodes on the map
 export const setNewParentChildrenEdges = (nodeId: string, newNode: any, oldEdges: any) => {
-  // console.log("In setNewParentChildrenEdges");
   for (let child of newNode.children) {
     // checks whether the dagre object doesn't have any edge defined from nodeId to id of the child
     // should not add another edge if edge already exists
@@ -588,7 +571,6 @@ export const setNewParentChildrenEdges = (nodeId: string, newNode: any, oldEdges
 // newNode: the updated data of the node that should be changed on the map
 // compares the links in node with newNode and if there is a difference, update oldEdges and dagre object
 export const compareAndUpdateNodeLinks = (node: any, nodeId: string, newNode: any, oldEdges: any) => {
-  // console.log("In compareAndUpdateNodeLinks");
   // Put everything in CompareLinks.
   // for loops look at existing parent/child links of node
   // for each child of node on the map
@@ -623,7 +605,6 @@ export const compareAndUpdateNodeLinks = (node: any, nodeId: string, newNode: an
 
 export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, oldEdges: any, allTags: any) => {
 
-  // console.log("In createOrUpdateNode, nodeId:", nodeId);
   // CHECK: object.children was node by I changed with newNode
   for (let childIdx = 0; childIdx < newNode.children.length; childIdx++) {
     const child = newNode.children[childIdx];
@@ -715,7 +696,6 @@ export const createOrUpdateNode = (newNode: any, nodeId: string, oldNodes: any, 
 // dont work in worker
 export const copyNode = (node: any) => {
   let newNode = { ...node };
-  // console.log('==============> node', node.tagIds, node.tags)
   newNode.parents = [];
   for (let parent of node.parents) {
     newNode.parents.push({ ...parent });
@@ -757,7 +737,6 @@ export const copyNode = (node: any) => {
       newNode.choices.push({ ...choice });
     }
   }
-  // console.log('==============X newNode', { newNode })
   return newNode;
 };
 
