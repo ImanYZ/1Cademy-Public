@@ -995,6 +995,7 @@ const Dashboard = ({ }: DashboardProps) => {
       imageLoaded: boolean,
       openPart: OpenPart
     ) => {
+      console.log('[NODE_CHANGED]')
       let currentHeight = NODE_HEIGHT;
       let newHeight = NODE_HEIGHT;
       let nodesChanged = false;
@@ -1012,6 +1013,8 @@ const Dashboard = ({ }: DashboardProps) => {
           if (nodeRef.current) {
             const { current } = nodeRef;
             newHeight = current.offsetHeight;
+            console.log({ offsetHeight: current.offsetHeight })
+            debugger
             if ("height" in node && Number(node.height)) {
               currentHeight = Number(node.height);
             }
@@ -1033,6 +1036,7 @@ const Dashboard = ({ }: DashboardProps) => {
             }
           }
           if (nodesChanged) {
+            console.log('node added in dag', { node })
             return setDagNode(nodeId, node, { ...oldNodes }, () => setMapChanged(true));
           } else {
             return oldNodes;
@@ -1090,8 +1094,8 @@ const Dashboard = ({ }: DashboardProps) => {
               visible: false,
               wrong: thisNode.wrong,
             };
-            
-            userNodeRef?batch.set(userNodeRef, userNodeData):null
+
+            userNodeRef ? batch.set(userNodeRef, userNodeData) : null
             const userNodeLogData: any = {
               ...userNodeData,
               createdAt: Timestamp.fromDate(new Date()),
@@ -1191,9 +1195,9 @@ const Dashboard = ({ }: DashboardProps) => {
               correct: false,
               createdAt: Timestamp.fromDate(new Date()),
               updatedAt: Timestamp.fromDate(new Date()),
-              firstVisit:  Timestamp.fromDate(new Date()),//CHECK
-              lastVisit:  Timestamp.fromDate(new Date()),//CHECK
-              userNodeId:userNodeId,
+              firstVisit: Timestamp.fromDate(new Date()),//CHECK
+              lastVisit: Timestamp.fromDate(new Date()),//CHECK
+              userNodeId: userNodeId,
               deleted: false,
               isStudied: false,
               bookmarked: false,
@@ -1234,8 +1238,8 @@ const Dashboard = ({ }: DashboardProps) => {
             open: true
           };
 
-            uNodeData[userNodeId] = userNodeId;
-    
+          uNodeData[userNodeId] = userNodeId;
+
           ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks( // modify nodes and edges
             uNodeData,
             oldNodes,

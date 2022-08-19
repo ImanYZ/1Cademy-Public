@@ -122,8 +122,20 @@ const layoutHandler = (
 
     // ITERATE EDGES and calculate the new positions
     dag1.edges().map((e: any) => {
+      console.log(' -- ---- ----> dag1: edges')
+      debugger
       const fromNode = dag1.node(e.v) as any;
       const toNode = dag1.node(e.w) as any;
+      console.log({
+        fromNode,
+        toNode,
+        exist: "left" in fromNode &&
+          "top" in fromNode &&
+          "left" in toNode &&
+          "top" in toNode &&
+          "height" in fromNode &&
+          "height" in toNode
+      })
       // debugger
       if (
         "left" in fromNode &&
@@ -139,6 +151,13 @@ const layoutHandler = (
         const newToY = toNode.top + Math.floor(toNode.height / 2);
         const thisEdge = oldEdges[e.v + "-" + e.w];
 
+        console.log({
+          newFromX,
+          newFromY,
+          newToX,
+          newToY,
+          thisEdge
+        })
         if (
           !("fromX" in thisEdge) ||
           !("fromY" in thisEdge) ||
@@ -149,6 +168,7 @@ const layoutHandler = (
           Math.abs(thisEdge.toX - newToX) >= MIN_CHANGE ||
           Math.abs(thisEdge.toY - newToY) >= MIN_CHANGE
         ) {
+
           oldEdges = setEdgeInDag(
             dag1,
             e.v,
@@ -162,6 +182,7 @@ const layoutHandler = (
             },
             oldEdges
           );
+          console.log('dag1', dag1)
           mapChangedFlag = true;
         }
         return null;
