@@ -299,11 +299,7 @@ const Dashboard = ({ }: DashboardProps) => {
     }
 
     const fillDagre = (fullNodes: FullNodeData[], currentNodes: FullNodeData, currentEdges: any) => {
-      console.log("[FILL DAGRE]")
-      dag1[0].nodes().forEach(function (v) {
-      });
-      dag1[0].edges().forEach(function (e) {
-      });
+      console.log("[FILL DAGRE]", { currentNodes, currentEdges })
       // debugger
       return fullNodes.reduce((
         acu: { newNodes: { [key: string]: any }, newEdges: { [key: string]: any } },
@@ -324,8 +320,15 @@ const Dashboard = ({ }: DashboardProps) => {
         }
         if (cur.nodeChangeType === 'modified') {
           const node = acu.newNodes[cur.node];
+          // console.log('current node', node)
+          const currentNode = {
+            ...cur,
+            left: node.left,
+            top: node.top,
+          }// <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+          // console.log('currentNode', currentNode)
           if (!compare2Nodes(cur, node)) {
-            const res = createOrUpdateNode(cur, cur.node, acu.newNodes, acu.newEdges, allTags)
+            const res = createOrUpdateNode(currentNode, cur.node, acu.newNodes, acu.newEdges, allTags)
             tmpNodes = res.oldNodes
             tmpEdges = res.oldEdges
           }
@@ -362,7 +365,7 @@ const Dashboard = ({ }: DashboardProps) => {
       const { newNodes, newEdges } = fillDagre(fullNodes, nodeRef.current, edgesRef.current)
       setNodes(newNodes)
       setEdges(newEdges)
-
+      console.log('userNodesSnapshot:', { userNodeChanges, nodeIds, nodesData, fullNodes })
       setUserNodesLoaded(true)
 
     })
@@ -1303,14 +1306,14 @@ const Dashboard = ({ }: DashboardProps) => {
     [choosingNode, openNodeHandler]
   );
 
-  const getNodeUserNode = useCallback((nodeId: string, userNodeId?: string) => {
+  const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
 
     const nodeRef = doc(db, "nodes", nodeId);
     // const userNodeRef = doc(db, "userNodes", userNodeId);
-    let userNodeRef: DocumentReference<DocumentData> | null = null
-    if (userNodeId) {
-      userNodeRef = doc(db, "userNodes", userNodeId);
-    }//CHECK:We commented this 
+    // let userNodeRef: DocumentReference<DocumentData> | null = null
+    const userNodeRef = doc(db, "userNodes", userNodeId);
+    // if (userNodeId) {
+    // }//CHECK:We commented this 
     return { nodeRef, userNodeRef };
   }, []);
 
@@ -1409,11 +1412,13 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
+      console.log('[TOGGLE_NODE]')
 
       // debugger
       if (!choosingNode) {
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
+          console.log('[TOGGLE_NODE]', thisNode)
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           const changeNode: any = {
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1423,8 +1428,10 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
+          console.log('update node')
           updateDoc(nodeRef, changeNode)
           // nodeRef.update(changeNode);
+          console.log('update user node')
           updateDoc(userNodeRef, {
             open: !thisNode.open,
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1454,6 +1461,7 @@ const Dashboard = ({ }: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
+          console.log('update user node log')
           setDoc(doc(userNodeLogRef), userNodeLogData);
           return oldNodes;
         });
@@ -1461,7 +1469,6 @@ const Dashboard = ({ }: DashboardProps) => {
       if (event) {
         event.currentTarget.blur();
       }
-
     },
     [choosingNode, user, initNodeStatusChange]
   );
