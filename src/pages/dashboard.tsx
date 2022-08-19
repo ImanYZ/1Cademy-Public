@@ -1477,23 +1477,7 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     [choosingNode, user, initNodeStatusChange]
   );
-  // const openLinkedNode = useCallback(
-  //   (linkedNodeID: string) => {
-  //     if (!choosingNode) {
-  //       let linkedNode = document.getElementById(linkedNodeID);
-  //       if (linkedNode) {
-  //         scrollToNode(linkedNodeID);
-  //         setTimeout(() => {
-  //           setSelectedNode(linkedNodeID);
-  //         }, 400);
-  //       } else {
-  //         openNodeHandler(linkedNodeID);
-  //       }
-  //     }
-  //   },
-  //   [choosingNode, openNodeHandler]
-  // );
-
+  
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags: any) => {
       if (!choosingNode) {
