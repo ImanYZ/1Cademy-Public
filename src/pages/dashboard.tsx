@@ -1,6 +1,7 @@
 
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
+import dagre from "dagre";
 import {
   addDoc,
   collection,
@@ -38,11 +39,12 @@ import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { NodeChanges } from "../knowledgeTypes";
 import { postWithToken } from "../lib/mapApi";
+import { dagreUtils } from "../lib/utils/dagre.util";
 import { JSONfn } from "../lib/utils/jsonFn";
 import {
   compare2Nodes,
   createOrUpdateNode,
-  dag1,
+  // dag1,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
   MAP_RIGHT_GAP,
@@ -180,6 +182,8 @@ const Dashboard = ({ }: DashboardProps) => {
   const [removedParents, setRemovedParents] = useState([]);
   const [removedChildren, setRemovedChildren] = useState([]);
 
+  const g = useRef(dagreUtils.createGraph())
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FLAGS
@@ -306,15 +310,9 @@ const Dashboard = ({ }: DashboardProps) => {
         cur, idx) => {
         let tmpNodes = {}
         let tmpEdges = {}
-        // debugger
-
-        dag1[0].nodes().forEach(function (v) {
-        });
-        dag1[0].edges().forEach(function (e) {
-        });
 
         if (cur.nodeChangeType === 'added') {
-          const res = createOrUpdateNode(cur, cur.node, acu.newNodes, acu.newEdges, allTags)
+          const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags)
           tmpNodes = res.oldNodes
           tmpEdges = res.oldEdges
         }
@@ -328,22 +326,22 @@ const Dashboard = ({ }: DashboardProps) => {
           }// <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
           // console.log('currentNode', currentNode)
           if (!compare2Nodes(cur, node)) {
-            const res = createOrUpdateNode(currentNode, cur.node, acu.newNodes, acu.newEdges, allTags)
+            const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags)
             tmpNodes = res.oldNodes
             tmpEdges = res.oldEdges
           }
         }
         if (cur.nodeChangeType === 'removed') {
-          if (dag1[0].hasNode(cur.node)) {
-            dag1[0].nodes().forEach(function (v) {
+          if (g.current.hasNode(cur.node)) {
+            g.current.nodes().forEach(function (v) {
             });
-            dag1[0].edges().forEach(function (e) {
+            g.current.edges().forEach(function (e) {
             });
             // PROBABLIY yoou need to add hideNodeAndItsLinks, to update children and parents nodes
 
             // !IMPORTANT, Don't change the order, first remove edges then nodes
-            tmpEdges = removeDagAllEdges(cur.node, acu.newEdges);
-            tmpNodes = removeDagNode(cur.node, acu.newNodes);
+            tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
+            tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
           }
         }
         return {
@@ -704,7 +702,7 @@ const Dashboard = ({ }: DashboardProps) => {
   //           // if row is removed
   //           if (userNodeChange.cType === "removed") {
   //             // if graph includes nodeId, remove it
-  //             if (dag1[0].hasNode(nodeId)) {
+  //             if (g.current.hasNode(nodeId)) {
   //               oldEdges = removeDagAllEdges(nodeId, oldEdges);
   //               oldNodes = removeDagNode(nodeId, oldNodes);
   //               oldMapChanged = true;
@@ -764,7 +762,7 @@ const Dashboard = ({ }: DashboardProps) => {
   //                 // } else {
   //               }
   //               // checks whether map is loaded then make changes
-  //               if (mapRendered && dag1[0].hasNode(nodeId)) {
+  //               if (mapRendered && g.current.hasNode(nodeId)) {
   //                 setTimeout(() => {
   //                   // scrolls to node if map is loaded
   //                   scrollToNode(nodeId);
@@ -899,8 +897,8 @@ const Dashboard = ({ }: DashboardProps) => {
       // nodeTypeVisibilityChanges.length === 0 &&
       // (necessaryNodesLoaded && !mapRendered) ||
       userNodesLoaded &&
-      // Object.keys(nodes).length + Object.keys(allTags).length === dag1[0].nodeCount() &&
-      Object.keys(edges).length === dag1[0].edgeCount()
+      // Object.keys(nodes).length + Object.keys(allTags).length === g.current.nodeCount() &&
+      Object.keys(edges).length === g.current.edgeCount()
     ) {
       let mapChangedFlag = true;
       const oldClusterNodes = {};
@@ -918,19 +916,27 @@ const Dashboard = ({ }: DashboardProps) => {
         oldNodes,
         oldEdges,
         allTags,
-        dag1: JSONfn.stringify(dag1[0]),
+        dag1: JSONfn.stringify(g.current),
         XOFFSET,
         YOFFSET,
         MIN_CHANGE,
         MAP_RIGHT_GAP,
         NODE_WIDTH,
         setDagNode: JSONfn.stringify(setDagNode),
-        setDagEdge: JSONfn.stringify(setDagEdge)
+        setDagEdge: JSONfn.stringify(setDagEdge),
+        graph: dagreUtils.mapGraphToObject(g.current)
       });
       // worker.onerror = (err) => err;
       worker.onmessage = e => {
-        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges } = e.data;
+        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, dag, graph } = e.data;
+        let dagreObject = JSONfn.parse(dag)
+        dagreObject.__proto__ = dagre.graphlib.Graph.prototype;
+        const gg = dagreUtils.mapObjectToGraph(graph)
+        console.log(' -- Dager updated by worker:', dagreObject, gg)
+
         worker.terminate();
+        g.current = gg
+        // setG(gg)
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
         setClusterNodes(oldClusterNodes);
@@ -1017,7 +1023,7 @@ const Dashboard = ({ }: DashboardProps) => {
             const { current } = nodeRef;
             newHeight = current.offsetHeight;
             console.log({ offsetHeight: current.offsetHeight })
-            debugger
+            // debugger
             if ("height" in node && Number(node.height)) {
               currentHeight = Number(node.height);
             }
@@ -1040,7 +1046,7 @@ const Dashboard = ({ }: DashboardProps) => {
           }
           if (nodesChanged) {
             console.log('node added in dag', { node })
-            return setDagNode(nodeId, node, { ...oldNodes }, () => setMapChanged(true));
+            return setDagNode(g.current, nodeId, node, { ...oldNodes }, () => setMapChanged(true));
           } else {
             return oldNodes;
           }
@@ -1061,7 +1067,7 @@ const Dashboard = ({ }: DashboardProps) => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
     // debugger
-    const children = dag1[0].successors(nodeId);
+    const children = g.current.successors(nodeId);
     let offsprings: any[] = [];
     if (children && children.length > 0) {
       for (let child of children) {
@@ -1125,7 +1131,7 @@ const Dashboard = ({ }: DashboardProps) => {
           let oldNodes = { ...nodes };
           let oldEdges = edges;
           for (let offsp of offsprings) {
-            ({ oldNodes, oldEdges } = hideNodeAndItsLinks(offsp, oldNodes, oldEdges));
+            ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offsp, oldNodes, oldEdges));
           }
           // CHECK: I commented this because in the SYNC function it will update nodes and edges
           // setNodes(oldNodes);
@@ -1253,6 +1259,7 @@ const Dashboard = ({ }: DashboardProps) => {
           // debugger
 
           ({ oldNodes, oldEdges } = createOrUpdateNode( // modify dagger
+            g.current,
             uNodeData,
             nodeId,
             oldNodes,
@@ -1649,9 +1656,9 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const edgeIds = Object.keys(edges);
   const dagerInfo = () => {
-    dag1[0].nodes().forEach(function (v) {
+    g.current.nodes().forEach(function (v) {
     });
-    dag1[0].edges().forEach(function (e) {
+    g.current.edges().forEach(function (e) {
     });
   }
   return (
@@ -1672,7 +1679,7 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => openNodeHandler("cT9GuxTvW8S6ZAWl30RR")}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
-          <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
+          <Button onClick={() => console.log('DAGGER', g.current)}>Dager</Button>
           <Button onClick={() => console.log('DAGGER INFO', dagerInfo())}>Dager INFO</Button>
         </Box>
         {/* show clusters */}

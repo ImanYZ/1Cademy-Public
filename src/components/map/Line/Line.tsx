@@ -28,7 +28,7 @@ const Line = (props: LineProps) => {
 
   const style = {
     transform: `translate(${from.x - 0.5 * len * (1 - Math.cos(angle))}px,
-                          ${from.y + 0.5 * len * Math.sin(angle)}px)
+                          ${from.y - 100 + 0.5 * len * Math.sin(angle)}px)
                           rotate(${angle}rad)`,
     width: `${len}px`
     // borderBottom:
