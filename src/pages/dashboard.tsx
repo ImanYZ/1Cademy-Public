@@ -1090,8 +1090,8 @@ const Dashboard = ({ }: DashboardProps) => {
               visible: false,
               wrong: thisNode.wrong,
             };
-            // await firebase.batchSet(userNodeRef, userNodeData);
-            batch.set(userNodeRef, userNodeData)
+            
+            userNodeRef?batch.set(userNodeRef, userNodeData):null
             const userNodeLogData: any = {
               ...userNodeData,
               createdAt: Timestamp.fromDate(new Date()),
@@ -1171,13 +1171,6 @@ const Dashboard = ({ }: DashboardProps) => {
             where("node", "==", nodeId),
             where("user", "==", user.uname),
             limit(1))
-
-          // const userNodeQuery = firebase.db
-          //   .collection("userNodes")
-          //   .where("node", "==", nodeId)
-          //   .where("user", "==", username)
-          //   .limit(1);
-          // const userNodeDoc = await userNodeQuery.get();
           const userNodeDoc = await getDocs(q);
           let userNodeId = null;
           if (userNodeDoc.docs.length > 0) {
@@ -1188,20 +1181,19 @@ const Dashboard = ({ }: DashboardProps) => {
             userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
             userNodeData.visible = true;
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
-            // await firebase.batchUpdate(userNodeRef, userNodeData);
             batch.update(userNodeRef, userNodeData);
           } else {
             // if NOT exist documents create a document
-            // userNodeRef = firebase.db.collection("userNodes").doc();
             userNodeRef = collection(db, "userNodes")
-            // userNodeId = userNodeRef.id;
+            userNodeId = userNodeRef.id;
             userNodeData = {
               changed: true,
               correct: false,
-              // createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-              // updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
               createdAt: Timestamp.fromDate(new Date()),
               updatedAt: Timestamp.fromDate(new Date()),
+              firstVisit:  Timestamp.fromDate(new Date()),//CHECK
+              lastVisit:  Timestamp.fromDate(new Date()),//CHECK
+              userNodeId:userNodeId,
               deleted: false,
               isStudied: false,
               bookmarked: false,
@@ -1211,21 +1203,14 @@ const Dashboard = ({ }: DashboardProps) => {
               visible: true,
               wrong: false
             };
-            // userNodeRef.set(userNodeData);
-            // setDoc(userNodeRef, userNodeData)
             batch.set(doc(userNodeRef), userNodeData)  // CHECK: changed with batch
             // const docRef = await addDoc(userNodeRef, userNodeData);
             // userNodeId = docRef.id; // CHECK: commented this
           }
-          // await firebase.batchUpdate(nodeRef, {
-          //   viewers: thisNode.viewers + 1,
-          //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-          // });
           batch.update(nodeRef, {
             viewers: thisNode.viewers + 1,
             updatedAt: Timestamp.fromDate(new Date()),
           })
-          // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
           const userNodeLogRef = collection(db, "userNodesLog")
 
           const userNodeLogData = {
@@ -1234,7 +1219,6 @@ const Dashboard = ({ }: DashboardProps) => {
           };
 
           // const id = userNodeLogRef.id
-          // await firebase.batchSet(userNodeLogRef, userNodeLogData);
           batch.set(doc(userNodeLogRef), userNodeLogData);
 
           let oldNodes: { [key: string]: any } = { ...nodes };
@@ -1249,9 +1233,9 @@ const Dashboard = ({ }: DashboardProps) => {
             ...userNodeData,
             open: true
           };
-          if (userNodeId) {
+
             uNodeData[userNodeId] = userNodeId;
-          }
+    
           ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks( // modify nodes and edges
             uNodeData,
             oldNodes,
@@ -1477,7 +1461,7 @@ const Dashboard = ({ }: DashboardProps) => {
     },
     [choosingNode, user, initNodeStatusChange]
   );
-  
+
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags: any) => {
       if (!choosingNode) {
@@ -1674,7 +1658,7 @@ const Dashboard = ({ }: DashboardProps) => {
           <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
           <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
           <Button onClick={() => console.log(nodeBookDispatch({ type: 'setSNode', payload: 'tempSNode' }))}>dispatch</Button>
-          <Button onClick={() => openNodeHandler("wiriyOIvmr5ryzydcQLw")}>Open Node Handler</Button>
+          <Button onClick={() => openNodeHandler("cT9GuxTvW8S6ZAWl30RR")}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
           <Button onClick={() => openNodeHandler("00NwvYhgES9mjNQ9LRhG")}>Open Node Handler</Button>
           <Button onClick={() => console.log('DAGGER', dag1[0])}>Dager</Button>
