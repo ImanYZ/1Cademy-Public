@@ -23,6 +23,7 @@ const layoutHandler = (
   setDagEdge: any,
   g: dagre.graphlib.Graph<{}>,
 ) => {
+  console.log('{ WORKER }')
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;

@@ -46,6 +46,7 @@ import { JSONfn } from "../lib/utils/jsonFn";
 import {
   changedNodes,
   compare2Nodes,
+  compareAndUpdateNodeLinks,
   copyNode,
   createOrUpdateNode,
   // dag1,
@@ -59,6 +60,7 @@ import {
   removeDagNode,
   setDagEdge,
   setDagNode,
+  setNewParentChildrenEdges,
   tempNodes,
   XOFFSET,
   YOFFSET
@@ -132,7 +134,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
   const [choosingNode, setChoosingNode] = useState(null); //<--- this was with recoil
   // // node that is in focus (highlighted)
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  // const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -140,7 +142,6 @@ const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  const [flag, setFlag] = useState(false)
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges, setUserNodeChanges] = useState<UserNodes[]>([]);
   const [nodeChanges, setNodeChanges] = useState<NodeChanges[]>([]);
@@ -155,8 +156,8 @@ const Dashboard = ({ }: DashboardProps) => {
   const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
-  const nodeRef = useRef<FullNodeData>(null)
-  const edgesRef = useRef<any>(null)
+  const nodeRef = useRef<{ [key: string]: FullNodeData } | null>(null)
+  const edgesRef = useRef<{ [key: string]: any } | null>(null)
 
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
@@ -424,27 +425,33 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]")
+    debugger
     let oldNodes = nodes;
     let oldEdges = edges;
-    // if (tempNodes.length > 0 || Object.keys(changedNodes).length > 0) {
-    //   oldNodes = { ...oldNodes };
-    //   oldEdges = { ...oldEdges };
-    // }
+    if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
+      oldNodes = { ...oldNodes };
+      oldEdges = { ...oldEdges };
+    }
     // for (let tempNode of tempNodes) {
     //   oldEdges = removeDagAllEdges(tempNode, oldEdges);
     //   oldNodes = removeDagNode(tempNode, oldNodes);
     //   tempNodes.delete(tempNode);
     // }
-    // for (let cId of Object.keys(changedNodes)) {
-    //   const changedNode = changedNodes[cId];
-    //   if (cId in oldNodes) {
-    //     oldEdges = compareAndUpdateNodeLinks(oldNodes[cId], cId, changedNode, oldEdges);
-    //   } else {
-    //     oldEdges = setNewParentChildrenEdges(cId, changedNode, oldEdges);
-    //   }
-    //   oldNodes = setDagNode(cId, copyNode(changedNode), oldNodes, null);
-    //   delete changedNodes[cId];
-    // }
+    tempNodes.forEach(tempNode => {
+      oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
+      oldNodes = removeDagNode(g.current, tempNode, oldNodes);
+      tempNodes.delete(tempNode);
+    })
+    for (let cId of Object.keys(changedNodes)) {
+      const changedNode = changedNodes[cId];
+      if (cId in oldNodes) {
+        oldEdges = compareAndUpdateNodeLinks(g.current, oldNodes[cId], cId, changedNode, oldEdges);
+      } else {
+        oldEdges = setNewParentChildrenEdges(g.current, cId, changedNode, oldEdges);
+      }
+      oldNodes = setDagNode(g.current, cId, copyNode(changedNode), oldNodes, allTags, null);
+      delete changedNodes[cId];
+    }
     setEdges(oldEdges);
     setNodes(oldNodes);
     setMapChanged(true);
@@ -1334,7 +1341,8 @@ const Dashboard = ({ }: DashboardProps) => {
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
-            setSelectedNode(nodeId);
+            nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
+            // setSelectedNode(nodeId);
           }, 400);
         } catch (err) {
           console.error(err);
@@ -1352,7 +1360,8 @@ const Dashboard = ({ }: DashboardProps) => {
         if (linkedNode) {
           scrollToNode(linkedNodeID);
           setTimeout(() => {
-            setSelectedNode(linkedNodeID);
+            nodeBookDispatch({ type: 'setSelectedNode', payload: linkedNodeID })
+            // setSelectedNode(linkedNodeID);
           }, 400);
         } else {
           openNodeHandler(linkedNodeID);
@@ -1375,7 +1384,8 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const initNodeStatusChange = useCallback(
     (nodeId: string, userNodeId: string) => {
-      setSelectedNode(nodeId);
+      // setSelectedNode(nodeId);
+      nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
       // setSelectedNodeType(null);
       // setSelectionType(null);
       // setOpenPendingProposals(false);
@@ -1678,7 +1688,8 @@ const Dashboard = ({ }: DashboardProps) => {
   const correctNode = useCallback(
     (event: any, nodeId: string, nodeType: NodeType) => {
       if (!choosingNode) {
-        setSelectedNode(nodeId);
+        // setSelectedNode(nodeId);
+        nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
         // setSelectedNodeType(nodeType);
         setIsSubmitting(true);
         getMapGraph(`/correctNode/${nodeId}`);
@@ -1692,7 +1703,8 @@ const Dashboard = ({ }: DashboardProps) => {
     (event: any, nodeId: string, nodeType: NodeType, wrong: any, correct: any, wrongs: number, corrects: number) => {
       if (!choosingNode) {
         let deleteOK = true;
-        setSelectedNode(nodeId);
+        // setSelectedNode(nodeId);
+        nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
         // setSelectedNodeType(nodeType);
         if ((!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1)) {
           deleteOK = window.confirm(
@@ -1724,7 +1736,7 @@ const Dashboard = ({ }: DashboardProps) => {
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
       nodeBookState.selectionType === "Proposals" ||
-      (selectedNode && "selectedNode" in nodes && nodes[selectedNode].editable)
+      (nodeBookState.selectedNode && "selectedNode" in nodes && nodes[selectedNode].editable)
     ) {
       reloadPermanentGrpah();
     }
@@ -1770,8 +1782,10 @@ const Dashboard = ({ }: DashboardProps) => {
     setOpenRecentNodes(false);
     setOpenTrends(false);
     setOpenMedia(false);
-    if (selectedNode && selectedNode !== "" && dag1[0].hasNode(selectedNode)) {
-      scrollToNode(selectedNode);
+    if (nodeBookState.selectedNode &&
+      nodeBookState.selectedNode !== "" &&
+      g.current.hasNode(nodeBookState.selectedNode)) {
+      scrollToNode(nodeBookState.selectedNode);
     }
     console.log("After scrollToNode");
     // CHECK: I commented this, please uncomment
@@ -1784,7 +1798,7 @@ const Dashboard = ({ }: DashboardProps) => {
   }, [
     user,
     nodes,
-    selectedNode,
+    nodeBookState.selectedNode,
     nodeBookState.selectionType,
     openPendingProposals,
     openChat,
@@ -1807,9 +1821,10 @@ const Dashboard = ({ }: DashboardProps) => {
       console.log("[SELECT_NODE]");
       if (!choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
+          console.log('[select node]: will call reload permanet graph')
           reloadPermanentGrpah();
         }
-        if (selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
+        if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           console.log('[select node]: reset all')
           // setSelectedNode(null);
           // setSelectionType(null);
@@ -1838,7 +1853,8 @@ const Dashboard = ({ }: DashboardProps) => {
     [
       choosingNode,
       nodeBookState.selectionType,
-      selectedNode,
+      nodeBookState.selectedNode,
+      // selectedNode,
       // selectionType,
       reloadPermanentGrpah,
       // proposeNodeImprovement,
@@ -1859,7 +1875,7 @@ const Dashboard = ({ }: DashboardProps) => {
       console.log('[propose new child]:', 0)
       setNodes((oldNodes) => {
 
-        console.log('set Nodes', selectedNode, nodeBookState.selectedNode)
+        console.log('set Nodes', nodeBookState.selectedNode)
         if (!nodeBookState.selectedNode) return oldNodes // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
@@ -1892,7 +1908,7 @@ const Dashboard = ({ }: DashboardProps) => {
           children: [],
           nodeType: childNodeType,
           parents: [
-            { node: selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType },
+            { node: nodeBookState.selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType },
           ],
           comments: 0,
           tags: [user.tag],
@@ -1922,38 +1938,25 @@ const Dashboard = ({ }: DashboardProps) => {
 
         console.log('[propose new child]:', 3, newChildNode)
         // debugger
-        return setDagNode(g, newNodeId, newChildNode, { ...oldNodes }, () => {
-          console.log('setDagNode')
+        return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
+          // console.log('setDagNode')
           setEdges((oldEdges) => {
-            console.log('setEdges')
+            // console.log('setEdges')
             if (!nodeBookState.selectedNode) return oldEdges //CHECK: I add this to validate
-            return setDagEdge(g, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
+            return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
           });
           setMapChanged(true);
           scrollToNode(newNodeId);
         });
       });
     },
-    [user, nodeBookState.selectedNode, selectedNode, allTags, reloadPermanentGrpah]
+    [user, nodeBookState.selectedNode, allTags, reloadPermanentGrpah]
   );
 
   /////////////////////////////////////////////////////
   // Inner functions
 
   const edgeIds = Object.keys(edges);
-
-  // const first = () => {
-  //   // const nodeRef = doc(db, "userNodes");
-  //   // const nodeDoc = await getDoc(nodeRef);
-
-  //   const q = query(
-  //     collection(db, "userNodes"),
-  //     where("user", "==", 'jimy')
-  //   )
-
-  //   await deleteDoc(doc(db, "cities", "DC"));
-
-  // }
 
   return (
     <Box sx={{ width: "100vw", height: "100vh" }}>
@@ -1977,6 +1980,7 @@ const Dashboard = ({ }: DashboardProps) => {
         <Box>
           <Button onClick={() => console.log(nodes)}>nodes</Button>
           <Button onClick={() => console.log(edges)}>edges</Button>
+          <Button onClick={() => console.log(allTags)}>allTags</Button>
           <Button onClick={() => console.log('DAGGER', g)}>Dager</Button>
           <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
           <Button onClick={() => console.log(user)}>user</Button>

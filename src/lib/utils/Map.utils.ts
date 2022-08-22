@@ -26,8 +26,8 @@ export const YOFFSET = 160; // Default Y offset to shift all the nodes and relat
 //   });
 
 // export const visibleNodes = new Set();
-// set of ids of changedNodes
-export const tempNodes = new Set();
+// set of ids of changedNodes: for example (proposal nodes)
+export const tempNodes = new Set<string>();
 // all nodes that have been modified
 export const changedNodes: any = {};
 // object of sets
@@ -238,6 +238,7 @@ export const getDependentNodes = (dependents: any[], necessaryNodeIds: string[],
 // oldNodes: current value of nodesState in Map.js
 // callback: called after oldNodes is updated and the new node is added to the dagre object
 export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: any, oldNodes: any, allTags: any, callback?: any) => {
+  console.log('---> set Dag Node')
   let newNode: any = {};
   // 10
   // unde
@@ -274,7 +275,9 @@ export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: an
     // node.tags[0].node: node Id of the first tag from the node data
     // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
   }
+  console.log(' --> before callback')
   if (callback) {
+    console.log(' ----------------> execute callback')
     callback();
   }
   // ***************************************************************
