@@ -8,6 +8,7 @@ import { OpenPart } from "src/nodeBookTypes";
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from '../../context/AuthContext';
+import { Editor } from '../Editor';
 import LinkingWords from './LinkingWords/LinkingWords';
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -562,6 +563,8 @@ const Node = ({
                   </p>
                   {/* CHECK: I commented this */}
                   {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
+                  <Editor />
+                  <input type="text" />
                   {reason}
                   {/* <p className="ProposalTitle">
                        Please write a few words to summarize what you've proposed

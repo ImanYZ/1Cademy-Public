@@ -179,6 +179,10 @@ const Dashboard = ({ }: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  // flag for whether cursor is not on text
+  // for determining whether the map should move if the user clicks and drags
+  const [mapHovered, setMapHovered] = useState(false);
+
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
@@ -398,7 +402,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]")
-    debugger
+    // debugger
     let oldNodes = nodes;
     let oldEdges = edges;
     if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
@@ -1923,6 +1927,25 @@ const Dashboard = ({ }: DashboardProps) => {
   /////////////////////////////////////////////////////
   // Inner functions
 
+  const mapContentMouseOver = useCallback((event: any) => {
+    console.log('mapContentMouseOver', event)
+    if (
+      event.target.tagName.toLowerCase() === "input" ||
+      event.target.tagName.toLowerCase() === "textarea" ||
+      // event.target.className.includes("EditableTextarea") ||
+      // event.target.className.includes("HyperEditor") ||
+      // event.target.className.includes("CodeMirror") ||
+      // event.target.className.includes("cm-math") ||
+      // event.target.parentNode.className.includes("CodeMirror")
+      event.target.className === "ClusterSection" ||
+      event.target.parentNode.parentNode.id === "MapContent"
+    ) {
+      setMapHovered(true);
+    } else {
+      setMapHovered(false);
+    }
+  }, []);
+
   const edgeIds = Object.keys(edges);
 
   return (
@@ -1943,6 +1966,7 @@ const Dashboard = ({ }: DashboardProps) => {
         <Box>
           Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
           {/* <Button onClick={() => Object.keys(nodes).forEach(cur))}>REMOVE ALL</Button> */}
+          Map mapHovered: {mapHovered ? 'T' : 'F'}
         </Box>
         <Box>
           <Button onClick={() => console.log(nodes)}>nodes</Button>
@@ -1966,42 +1990,48 @@ const Dashboard = ({ }: DashboardProps) => {
       </Box>
 
       {/* end Data from map */}
-      <MapInteractionCSS>
-        {/* show clusters */}
+      <Box
+        id="MapContent"
+        className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
+        onMouseOver={mapContentMouseOver}
+      >
+        <MapInteractionCSS textIsHovered={mapHovered}>
+          {/* show clusters */}
 
-        <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
-        <NodesList
-          nodes={nodes}
-          nodeChanged={nodeChanged}
-          bookmark={bookmark}
-          markStudied={markStudied}
-          chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
-          referenceLabelChange={() => { console.log("referenceLabel change"); }}
-          deleteLink={() => { console.log("delete link"); }}
-          openLinkedNode={openLinkedNode}
-          openAllChildren={() => { console.log("open all children"); }}
-          hideNodeHandler={hideNodeHandler}
-          hideOffsprings={hideOffsprings}
-          toggleNode={toggleNode}
-          openNodePart={openNodePart}
-          selectNode={selectNode}
-          nodeClicked={() => { console.log("nodeClicked"); }}
-          correctNode={correctNode}
-          wrongNode={wrongNode}
-          uploadNodeImage={() => { console.log("uploadNodeImage"); }}
-          removeImage={() => { console.log("removeImage"); }}
-          changeChoice={() => { console.log("changeChoice"); }}
-          changeFeedback={() => { console.log("changeFeedback"); }}
-          switchChoice={() => { console.log("switchChoice"); }}
-          deleteChoice={() => { console.log("deleteChoice"); }}
-          addChoice={() => { console.log("addChoice"); }}
-          onNodeTitleBlur={() => { console.log("onNodeTitleBlur"); }}
-          saveProposedChildNode={() => { console.log("saveProposedChildNod"); }}
-          saveProposedImprovement={() => { console.log("saveProposedImprovemny"); }}
-          closeSideBar={() => { console.log("closeSideBar"); }}
-          reloadPermanentGrpah={() => { console.log("reloadPermanentGrpah"); }}
-        />
-      </MapInteractionCSS>
+          <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
+          <NodesList
+            nodes={nodes}
+            nodeChanged={nodeChanged}
+            bookmark={bookmark}
+            markStudied={markStudied}
+            chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
+            referenceLabelChange={() => { console.log("referenceLabel change"); }}
+            deleteLink={() => { console.log("delete link"); }}
+            openLinkedNode={openLinkedNode}
+            openAllChildren={() => { console.log("open all children"); }}
+            hideNodeHandler={hideNodeHandler}
+            hideOffsprings={hideOffsprings}
+            toggleNode={toggleNode}
+            openNodePart={openNodePart}
+            selectNode={selectNode}
+            nodeClicked={() => { console.log("nodeClicked"); }}
+            correctNode={correctNode}
+            wrongNode={wrongNode}
+            uploadNodeImage={() => { console.log("uploadNodeImage"); }}
+            removeImage={() => { console.log("removeImage"); }}
+            changeChoice={() => { console.log("changeChoice"); }}
+            changeFeedback={() => { console.log("changeFeedback"); }}
+            switchChoice={() => { console.log("switchChoice"); }}
+            deleteChoice={() => { console.log("deleteChoice"); }}
+            addChoice={() => { console.log("addChoice"); }}
+            onNodeTitleBlur={() => { console.log("onNodeTitleBlur"); }}
+            saveProposedChildNode={() => { console.log("saveProposedChildNod"); }}
+            saveProposedImprovement={() => { console.log("saveProposedImprovemny"); }}
+            closeSideBar={() => { console.log("closeSideBar"); }}
+            reloadPermanentGrpah={() => { console.log("reloadPermanentGrpah"); }}
+          />
+        </MapInteractionCSS>
+      </Box>
     </Box>
   );
 };
