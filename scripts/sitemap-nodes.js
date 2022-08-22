@@ -77,5 +77,5 @@ const encodeTitle = (title) => {
 
   const formattedSitemap = [formatted(generatedSitemap)];
 
-  fs.writeFileSync("../public/sitemap-posts.xml", formattedSitemap, "utf8");
+  fs.writeFileSync("../public/sitemap-nodes.xml", formattedSitemap, "utf8");
 })();
