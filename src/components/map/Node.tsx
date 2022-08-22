@@ -388,6 +388,7 @@ const Node = ({
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
+      data-hoverable={true}
       className={
         "Node card" +
         (activeNode
@@ -430,7 +431,7 @@ const Node = ({
       {open ? (
         <>
           <div className="card-content">
-            <div className="card-title">
+            <div className="card-title" data-hoverable={true}>
               {editable &&
                 (isNew ? (
                   <>
@@ -456,6 +457,7 @@ const Node = ({
                   <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
                 ))}
               {/* CHECK: I commented this */}
+              <Editor label='Please enter the node title below:' content={title} onChangeContent={setReason} />
               {/* <HyperEditor
                  readOnly={!editable}
                  onChange={titleChange}
@@ -484,8 +486,9 @@ const Node = ({
                 // />
               )}
             </div>
-            <div className="NodeContent">
+            <div className="NodeContent" data-hoverable={true}>
               {editable && <p>Please edit the node content below:</p>}
+              <Editor label='Please edit the node content below:' content={content} onChangeContent={setReason} />
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
                  readOnly={!editable}
@@ -493,7 +496,7 @@ const Node = ({
                  content={content}
                  width={width}
                /> */}
-              {content}
+              {/* {content} */}
               {nodeImage !== "" && (
                 <>
                   {editable && (
@@ -563,9 +566,8 @@ const Node = ({
                   </p>
                   {/* CHECK: I commented this */}
                   {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
-                  <Editor />
-                  <input type="text" />
-                  {reason}
+                  <Editor label='Reason' content={reason} onChangeContent={setReason} />
+                  {/* {reason} */}
                   {/* <p className="ProposalTitle">
                        Please write a few words to summarize what you've proposed
                        in this version:

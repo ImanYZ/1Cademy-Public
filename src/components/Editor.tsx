@@ -2,14 +2,23 @@ import { Button, TextField } from '@mui/material'
 import { Box } from '@mui/system';
 import React, { useState } from 'react'
 
-export const Editor = () => {
+import MarkdownRender from './Markdown/MarkdownRender';
 
-  const [value, setValue] = React.useState('Controlled');
+type EditorProps = {
+  label: string,
+  content: string,
+  onChangeContent: (content: string) => void,
+  readonly?: boolean,
+}
+
+export const Editor = ({ label, content, onChangeContent, readonly = true }: EditorProps) => {
+
+  // const [value, setValue] = React.useState<string>('');
   const [canEdit, setCanEdit] = useState(true)
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
-  };
+  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setValue(event.target.value);
+  // };
 
   const handleMouseDown = (event: any) => {
     console.log('click in input', event)
@@ -31,20 +40,24 @@ export const Editor = () => {
   }
 
   return (
-    <div>
-      <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-        <Button>Preview</Button>
+    <Box sx={{ with: '100%', border: 'solid 2px royalBlue' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'end', border: 'dashed 2px royalBlue' }}>
+        {!readonly && <Button onClick={() => setCanEdit(!canEdit)}>Preview/Edit</Button>}
       </Box>
-      <TextField
-        id="outlined-multiline-flexible"
-        label="Multiline"
-        multiline
-        maxRows={4}
-        value={value}
-        onChange={handleChange}
-        onMouseDown={handleMouseDown}
-      // onClick="this.select()"
-      />
-    </div>
+      {
+        (canEdit && !readonly)
+          ? <TextField
+            id="editor-text-field"
+            label={label}
+            fullWidth
+            multiline
+            maxRows={4}
+            value={content}
+            onChange={e => onChangeContent(e.target.value)}
+            onMouseDown={handleMouseDown}
+          />
+          : <MarkdownRender fontSize="30px" text={content} />
+      }
+    </Box>
   )
 }

@@ -1928,16 +1928,19 @@ const Dashboard = ({ }: DashboardProps) => {
   // Inner functions
 
   const mapContentMouseOver = useCallback((event: any) => {
+    console.log(event.target, '-', event.target?.parentNode.id)
     if (
-      event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
-      event.target.tagName.toLowerCase() === "textarea"  // CHECK <-- this was commented
+      // event.target.getAttribute('data-hoverable') ||
+      // event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
+      // event.target.tagName.toLowerCase() === "textarea" ||  // CHECK <-- this was commented
       // event.target.className.includes("EditableTextarea") ||
       // event.target.className.includes("HyperEditor") ||
       // event.target.className.includes("CodeMirror") ||
       // event.target.className.includes("cm-math") ||
       // event.target.parentNode.className.includes("CodeMirror")
       // event.target.className === "ClusterSection" || // CHECK <-- this was uncommented
-      // event.target.parentNode.parentNode.id === "MapContent" // CHECK <-- this was uncommented
+      event.target?.parentNode.id !== "xd"
+      // event.currentTarget.id !== "MapContent" // CHECK <-- this was uncommented
     ) {
       setMapHovered(true);
     } else {
@@ -1958,14 +1961,11 @@ const Dashboard = ({ }: DashboardProps) => {
         closeSideBar={closeSideBar}
         proposeNewChild={proposeNewChild}
         selectionType={nodeBookState.selectionType}
-
       />
       <Box sx={{ position: 'fixed', right: '10px', zIndex: '1300', background: '#123' }}>
         {/* Data from map, DONT REMOVE */}
         <Box>
           Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-          {/* <Button onClick={() => Object.keys(nodes).forEach(cur))}>REMOVE ALL</Button> */}
-          Map mapHovered: {mapHovered ? 'T' : 'F'}
         </Box>
         <Box>
           <Button onClick={() => console.log(nodes)}>nodes</Button>
@@ -1993,8 +1993,9 @@ const Dashboard = ({ }: DashboardProps) => {
         id="MapContent"
         className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
         onMouseOver={mapContentMouseOver}
+        style={{ background: 'gray' }}
       >
-        <MapInteractionCSS textIsHovered={mapHovered}>
+        <MapInteractionCSS textIsHovered={mapHovered} innerProps={{ id: 'xd' }}>
           {/* show clusters */}
 
           <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
