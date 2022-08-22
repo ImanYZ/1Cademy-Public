@@ -1928,17 +1928,16 @@ const Dashboard = ({ }: DashboardProps) => {
   // Inner functions
 
   const mapContentMouseOver = useCallback((event: any) => {
-    console.log('mapContentMouseOver', event)
     if (
-      event.target.tagName.toLowerCase() === "input" ||
-      event.target.tagName.toLowerCase() === "textarea" ||
+      event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
+      event.target.tagName.toLowerCase() === "textarea"  // CHECK <-- this was commented
       // event.target.className.includes("EditableTextarea") ||
       // event.target.className.includes("HyperEditor") ||
       // event.target.className.includes("CodeMirror") ||
       // event.target.className.includes("cm-math") ||
       // event.target.parentNode.className.includes("CodeMirror")
-      event.target.className === "ClusterSection" ||
-      event.target.parentNode.parentNode.id === "MapContent"
+      // event.target.className === "ClusterSection" || // CHECK <-- this was uncommented
+      // event.target.parentNode.parentNode.id === "MapContent" // CHECK <-- this was uncommented
     ) {
       setMapHovered(true);
     } else {
