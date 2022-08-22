@@ -9,22 +9,6 @@ export const COLUMN_GAP = 190; // The minimum gap between the node columns.
 export const XOFFSET = 580; // Default X offset to shift all the nodes and relations.
 export const YOFFSET = 160; // Default Y offset to shift all the nodes and relations.
 
-// // dagre object
-// // list so that the reference can be modified throughout project
-// export let dag1: dagre.graphlib.Graph[] = [];
-// // Using dagre for calculating location of nodes and arrows on map
-// dag1[0] = new dagre.graphlib.Graph({ compound: true, directed: true })
-//   .setGraph({
-//     // directed: true,
-//     rankdir: "LR",
-//     nodesep: NODE_GAP,
-//     ranksep: COLUMN_GAP
-//   })
-//   .setDefaultEdgeLabel(function () {
-//     // Default to assigning a new object as a label for each new edge.
-//     return {};
-//   });
-
 // export const visibleNodes = new Set();
 // set of ids of changedNodes: for example (proposal nodes)
 export const tempNodes = new Set<string>();
@@ -295,63 +279,6 @@ export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: an
   return oldNodes;
 };
 
-
-// same as setDagNode, with dag1 argument
-export const setNodeInDagger = (dag: any, nodeId: string, node: any, oldNodes: any, allTags: any, callback: any) => {
-  let newNode: any = {};
-  // 10
-  // unde
-  // 0
-  node.width ? node.width : NODE_WIDTH; // 10 // NODE_ // NODE
-  if ("width" in node) {
-    newNode.width = node.width;
-  } else {
-    newNode.width = NODE_WIDTH;
-  }
-  if ("height" in node) {
-    newNode.height = node.height;
-  } else {
-    newNode.height = NODE_HEIGHT;
-  }
-  if ("left" in node) {
-    newNode.left = node.left;
-  }
-  if ("top" in node) {
-    newNode.top = node.top;
-  }
-  if ("x" in node) {
-    newNode.x = node.x;
-  }
-  if ("y" in node) {
-    newNode.y = node.y;
-  }
-  // add newNode data to dagre object with the id: nodeId
-  dag.setNode(nodeId, newNode);
-  // if the node has at least one tag, check if the nodeId of the tag is in allTags
-  // (clusters are based on nodes' first tags)
-  if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
-    // setParent sets a cluster for the node with node Id
-    // node.tags[0].node: node Id of the first tag from the node data
-    // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
-  }
-  if (callback) {
-    callback();
-  }
-  // ***************************************************************
-  // Candidate for removal!
-  // copyNode: creates copy of the object
-  // copies the other attributes of the node (attributes not necessary for dagre object)
-  newNode = copyNode(node);
-  // ***************************************************************
-  // id is deleted because nodeId will be used as key in oldNodes
-  if ("id" in newNode) {
-    delete newNode.id;
-  }
-  // adding the newNode to oldNodes
-  oldNodes[nodeId] = newNode;
-  return oldNodes;
-};
-
 // removes a node from the map
 export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any) => {
   // removes nodeId from dagre object
@@ -373,19 +300,6 @@ export const setDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: string
     const edgeId = from + "-" + to;
     const newEdge = { ...edge };
     g.setEdge(from, to, newEdge);
-    // adds newEdge to oldEdges
-    oldEdges[edgeId] = newEdge;
-  }
-  return oldEdges;
-};
-
-// same as setDagEdge, with dag1 argument
-export const setEdgeInDag = (dag1: any, from: string, to: string, edge: any, oldEdges: any) => {
-  // checks that the from and to nodes exist in map
-  if (dag1.hasNode(from) && dag1.hasNode(to)) {
-    const edgeId = from + "-" + to;
-    const newEdge = { ...edge };
-    dag1.setEdge(from, to, newEdge);
     // adds newEdge to oldEdges
     oldEdges[edgeId] = newEdge;
   }

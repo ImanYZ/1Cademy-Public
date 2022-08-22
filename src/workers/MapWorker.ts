@@ -2,8 +2,7 @@
 import dagre from "dagre";
 
 import { dagreUtils } from "../lib/utils/dagre.util";
-import { JSONfn } from "../lib/utils/jsonFn";
-import { setDagNode, setEdgeInDag, setNodeInDagger } from '../lib/utils/Map.utils'
+import { setDagEdge, setDagNode } from '../lib/utils/Map.utils'
 
 const layoutHandler = (
   mapChangedFlag: boolean,
@@ -13,14 +12,11 @@ const layoutHandler = (
   oldNodes: { [x: string]: any; },
   oldEdges: { [x: string]: any; },
   allTags: any,
-  dag1: dagre.graphlib.Graph<{}>,
   XOFFSET: number,
   YOFFSET: number,
   MIN_CHANGE: number,
   MAP_RIGHT_GAP: number,
   NODE_WIDTH: number,
-  setDagNodex: any,
-  setDagEdge: any,
   g: dagre.graphlib.Graph<{}>,
 ) => {
   console.log('{ WORKER }')
@@ -72,7 +68,6 @@ const layoutHandler = (
         }
       }
     }
-    // console.log(' --X', clusterRegions)
 
     // Update OldClusterNodes
     for (let cNode in clusterRegions) {
@@ -110,8 +105,7 @@ const layoutHandler = (
           Math.abs(thisNode.left - newLeft) >= MIN_CHANGE ||
           Math.abs(thisNode.top - newTop) >= MIN_CHANGE
         ) {
-          // oldNodes = setNodeInDagger(dag1, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
-          oldNodes = setNodeInDagger(g, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
+          oldNodes = setDagNode(g, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
 
           mapNewWidth = newLeft + nodeN.width + MAP_RIGHT_GAP;
           if (oldMapWidth < mapNewWidth) {
@@ -128,12 +122,7 @@ const layoutHandler = (
     });
 
     // ITERATE EDGES and calculate the new positions
-    // dag1.edges().map((e: any) => {
     g.edges().map((e: any) => {
-      console.log(' -- ---- ----> dag1: edges')
-      // debugger
-      // const fromNode = dag1.node(e.v) as any;
-      // const toNode = dag1.node(e.w) as any;
       const fromNode = g.node(e.v) as any;
       const toNode = g.node(e.w) as any;
       console.log({
@@ -146,7 +135,6 @@ const layoutHandler = (
           "height" in fromNode &&
           "height" in toNode
       })
-      // debugger
       if (
         "left" in fromNode &&
         "top" in fromNode &&
@@ -179,43 +167,16 @@ const layoutHandler = (
           Math.abs(thisEdge.toY - newToY) >= MIN_CHANGE
         ) {
 
-          // oldEdges = setEdgeInDag(
-          //   dag1,
-          //   e.v,
-          //   e.w,
-          //   {
-          //     ...thisEdge,
-          //     fromX: newFromX,
-          //     fromY: newFromY,
-          //     toX: newToX,
-          //     toY: newToY,
-          //   },
-          //   oldEdges
-          // );
-          oldEdges = setEdgeInDag(
-            g,
-            e.v,
-            e.w,
-            {
-              ...thisEdge,
-              fromX: newFromX,
-              fromY: newFromY,
-              toX: newToX,
-              toY: newToY,
-            },
-            oldEdges
-          );
-          // console.log('dag1', dag1)
-          console.log('dag1', g)
+          const tmpEdge = { ...thisEdge, fromX: newFromX, fromY: newFromY, toX: newToX, toY: newToY }
+          oldEdges = setDagEdge(g, e.v, e.w, tmpEdge, oldEdges);
           mapChangedFlag = true;
         }
         return null;
       }
     });
   }
-  const dag = JSONfn.stringify(dag1)
   const graph = dagreUtils.mapGraphToObject(g)
-  return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, dag, graph };
+  return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
 };
 
 onmessage = (e) => {
@@ -227,18 +188,13 @@ onmessage = (e) => {
     oldNodes,
     oldEdges,
     allTags,
-    dag1,
     XOFFSET,
     YOFFSET,
     MIN_CHANGE,
     MAP_RIGHT_GAP,
     NODE_WIDTH,
-    setDagNode,
-    setDagEdge,
     graph,
   } = e.data;
-  let dagreObject = JSONfn.parse(dag1)
-  dagreObject.__proto__ = dagre.graphlib.Graph.prototype;
 
   const g = dagreUtils.mapObjectToGraph(graph)
 
@@ -250,14 +206,11 @@ onmessage = (e) => {
     oldNodes,
     oldEdges,
     allTags,
-    dagreObject,
     XOFFSET,
     YOFFSET,
     MIN_CHANGE,
     MAP_RIGHT_GAP,
     NODE_WIDTH,
-    JSONfn.parse(setDagNode),
-    JSONfn.parse(setDagEdge),
     g
   );
   postMessage(workerResults);

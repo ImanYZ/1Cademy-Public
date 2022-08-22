@@ -3,13 +3,10 @@ import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 import dagre from "dagre";
 import {
-  addDoc,
   collection,
-  deleteDoc,
   doc,
   DocumentChange,
   DocumentData,
-  DocumentReference,
   getDoc,
   getDocs,
   getFirestore,
@@ -17,7 +14,6 @@ import {
   onSnapshot,
   Query,
   query,
-  QuerySnapshot,
   setDoc,
   Timestamp,
   updateDoc,
@@ -71,29 +67,6 @@ import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../note
 import { NodeType } from "../types";
 
 type DashboardProps = {};
-
-/**
- * The dashboard will execute some functions in the next order before the user interact with nodes
- *  1. GET USER NODES - SNAPSHOT
- *      Type: useEffect
- *
- *  2. SYNCHRONIZATION:
- *      Type: useEffect
- *      Flag: nodeChanges || userNodeChanges
- *      Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
- * 
- *  --- render nodes, every node will call NODE CHANGED
- *
- *  4. NODE CHANGED: (n)
- *      Type: function
- * 
- *  3. WORKER: (n)
- *      Type: useEffect
- *      Flag: mapChanged
- *      Description: will calculate the [nodes] and [edges] positions
- *
- *  --- render nodes, every node will call NODE CHANGED
- */
 
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
@@ -971,27 +944,21 @@ const Dashboard = ({ }: DashboardProps) => {
         oldNodes,
         oldEdges,
         allTags,
-        dag1: JSONfn.stringify(g.current),
         XOFFSET,
         YOFFSET,
         MIN_CHANGE,
         MAP_RIGHT_GAP,
         NODE_WIDTH,
-        setDagNode: JSONfn.stringify(setDagNode),
-        setDagEdge: JSONfn.stringify(setDagEdge),
         graph: dagreUtils.mapGraphToObject(g.current)
       });
       // worker.onerror = (err) => err;
       worker.onmessage = e => {
-        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, dag, graph } = e.data;
-        let dagreObject = JSONfn.parse(dag)
-        dagreObject.__proto__ = dagre.graphlib.Graph.prototype;
+        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
         const gg = dagreUtils.mapObjectToGraph(graph)
-        console.log(' -- Dager updated by worker:', dagreObject, gg)
+        console.log(' -- Dager updated by worker:', gg)
 
         worker.terminate();
         g.current = gg
-        // setG(gg)
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
         setClusterNodes(oldClusterNodes);
