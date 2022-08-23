@@ -1,3 +1,5 @@
+@import url('./styles/app.css');
+
 :root {
   --navbar-height: 70px;
   --footer-height: 309px;
@@ -1707,3 +1709,112 @@ button.MuiTab-textColorInherit:focus {
   width: 49px;
   line-height: 49px;
 }
+
+
+/* ------------------------------------------ */
+/* hyper editor styles */
+/* .CodeMirror {
+  height: auto;
+  background-color: rgb(31, 31, 31);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-weight: 400;
+}
+.LightMode .CodeMirror {
+  color: #454545;
+  background-color: #f0f0f0;
+}
+
+.LightMode .cm-s-hypermd-light {
+  color: #454545;
+  background: #f0f0f0;
+}
+
+.CodeMirror-scroll {
+  filter: invert(76%);
+}
+.LightMode .CodeMirror-scroll {
+  filter: none;
+}
+
+.HyperEditor {
+  word-wrap: break-word;
+}
+
+.HyperEditor ul,
+.HyperEditor li {
+  padding-left: 19px;
+  list-style-type: initial !important;
+}
+.HyperEditor ul,
+.HyperEditor ol {
+  padding-left: 19px;
+}
+.HyperEditor li {
+  padding-left: 0px;
+}
+
+.CodeMirror-vscrollbar {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.CodeMirror-gutters {
+  display: none;
+}
+
+.ReadOnlyEditor .CodeMirror-cursor {
+  display: none;
+}
+
+.HyperEditor-textarea,
+.EditableTextarea {
+  color: rgb(223, 223, 223);
+  resize: none;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background-color: rgb(31, 31, 31);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-weight: 250;
+  line-height: inherit;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "calt";
+  font-variant-ligatures: contextual;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+.LightMode .HyperEditor-textarea,
+.LightMode .EditableTextarea {
+  color: #454545;
+  background-color: #f0f0f0;
+}
+
+.HyperEditor-textarea {
+  line-height: 22px;
+  border: 0;
+  border-style: none;
+  border-color: Transparent;
+}
+
+.HyperEditor-textarea:focus {
+  outline-width: 0;
+}
+
+.toggleRichTextButton {
+  float: right;
+  margin-top: -10px;
+  margin-bottom: -4px;
+  font-size: 16px;
+}
+
+.MathIcon {
+  font-weight: bold;
+}
+
+.OverLine {
+  text-decoration: overline;
+} */

@@ -1,6 +1,7 @@
 // import "./LinkingWords.css";
 
 // import Button from "@material-ui/core/Button";
+import { Button } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -295,15 +296,19 @@ const LinkingWords = (props: LinkingWordsProps) => {
               )
             )}
             <div className="ProposalCommentSubmitButton">
-              <span
+              <Button
+                color="error"
+                variant="contained"
                 className="btn waves-effect waves-light hoverable red"
                 onClick={props.closeSideBar}
               // tooltip="Click to cancel this proposal."
               // tooltipPosition="bottom"
               >
                 Cancel
-              </span>
-              <span
+              </Button>
+              <Button
+                color="success"
+                variant="contained"
                 className="btn waves-effect waves-light hoverable green"
                 onClick={proposalSubmit}
               // tooltip="Click to submit this proposed node."
@@ -312,7 +317,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 {/* <i className="material-icons grey-text">send</i> */}
                 {/* Propose {props.isNew ? "Node" : "Version"} */}
                 Propose
-              </span>
+              </Button>
             </div>
           </>
         )}

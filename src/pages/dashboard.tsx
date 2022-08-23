@@ -1928,7 +1928,6 @@ const Dashboard = ({ }: DashboardProps) => {
   // Inner functions
 
   const mapContentMouseOver = useCallback((event: any) => {
-    console.log(event.target, '-', event.target?.parentNode.getAttribute('id'))
     if (
       // event.target.getAttribute('data-hoverable') ||
       // event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented

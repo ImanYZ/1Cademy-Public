@@ -190,9 +190,16 @@ const Node = ({
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   // const [summary, setSummary] = useState("");
+  const [titleCopy, setTitleCopy] = useState(title);
+  const [contentCopy, setContentCopy] = useState(content);
   const [reason, setReason] = useState("");
 
   const nodeRef = useRef(null);
+
+  // useEffect(()=>{
+  //   setTitleCopy(title)
+  //   setContentCopy(content)
+  // },[])
 
   const nodeClickHandler = useCallback(
     (event: any) => {
@@ -305,22 +312,19 @@ const Node = ({
     [deleteLink, identifier]
   );
 
-  // const titleChange = useCallback(
-  //   value => {
-  //     nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart);
-  //   },
-  //   [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
-  // );
+  const titleChange = useCallback(
+    (value: string) => {
+      nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart);
+    },
+    [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+  );
 
-  // const contentChange = useCallback(
-  //   value => {
-  //     nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
-  //   },
-  //   [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
-  // );
-  ///::::::::::::::::::::::::::::::::::::::::::added by sam:::::::::::::::::::://////
-
-
+  const contentChange = useCallback(
+    (value: string) => {
+      nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+    },
+    [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+  );
 
   const locationSizeChange = useCallback(() => {
     console.log('[NODE]: will call nodeChanged')
@@ -457,7 +461,14 @@ const Node = ({
                   <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
                 ))}
               {/* CHECK: I commented this */}
-              <Editor label='Please enter the node title below:' content={title} onChangeContent={setReason} />
+              <Editor
+                label='Please enter the node title below:'
+                value={titleCopy}
+                // onChangeContent={setReason}
+                // onChangeContent={titleChange}
+                setValue={setTitleCopy}
+                readOnly={!editable}
+              />
               {/* <HyperEditor
                  readOnly={!editable}
                  onChange={titleChange}
@@ -465,7 +476,7 @@ const Node = ({
                  content={title}
                  width={width}
                /> */}
-              {title}
+              {/* {title} */}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
                 <MemoizedNodeHeader
                   open={open}
@@ -488,7 +499,13 @@ const Node = ({
             </div>
             <div className="NodeContent" data-hoverable={true}>
               {editable && <p>Please edit the node content below:</p>}
-              <Editor label='Please edit the node content below:' content={content} onChangeContent={setReason} />
+              <Editor
+                label='Please edit the node content below:'
+                value={contentCopy}
+                // onChangeContent={contentChange}
+                setValue={setContentCopy}
+                readOnly={!editable}
+              />
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
                  readOnly={!editable}
@@ -566,7 +583,12 @@ const Node = ({
                   </p>
                   {/* CHECK: I commented this */}
                   {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
-                  <Editor label='Reason' content={reason} onChangeContent={setReason} />
+                  <Editor
+                    label='Reason'
+                    value={reason}
+                    setValue={setReason}
+                    readOnly={false}
+                  />
                   {/* {reason} */}
                   {/* <p className="ProposalTitle">
                        Please write a few words to summarize what you've proposed
@@ -713,7 +735,14 @@ const Node = ({
                  content={title}
                  width={width}
                /> */}
-              {title}
+              {/* {title} */}
+              <Editor
+                label='title'
+                value={titleCopy}
+                // onChangeContent={titleChange}
+                setValue={setTitleCopy}
+                readOnly={true}
+              />
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (
               <MemoizedNodeHeader
