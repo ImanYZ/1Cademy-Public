@@ -1928,7 +1928,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // Inner functions
 
   const mapContentMouseOver = useCallback((event: any) => {
-    console.log(event.target, '-', event.target?.parentNode.id)
+    console.log(event.target, '-', event.target?.parentNode.getAttribute('id'))
     if (
       // event.target.getAttribute('data-hoverable') ||
       // event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
@@ -1939,7 +1939,7 @@ const Dashboard = ({ }: DashboardProps) => {
       // event.target.className.includes("cm-math") ||
       // event.target.parentNode.className.includes("CodeMirror")
       // event.target.className === "ClusterSection" || // CHECK <-- this was uncommented
-      event.target?.parentNode.id !== "xd"
+      event.target?.parentNode?.parentNode?.getAttribute('id') !== "MapContent"
       // event.currentTarget.id !== "MapContent" // CHECK <-- this was uncommented
     ) {
       setMapHovered(true);
@@ -1995,7 +1995,7 @@ const Dashboard = ({ }: DashboardProps) => {
         onMouseOver={mapContentMouseOver}
         style={{ background: 'gray' }}
       >
-        <MapInteractionCSS textIsHovered={mapHovered} innerProps={{ id: 'xd' }}>
+        <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
           {/* show clusters */}
 
           <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
@@ -2032,7 +2032,7 @@ const Dashboard = ({ }: DashboardProps) => {
           />
         </MapInteractionCSS>
       </Box>
-    </Box>
+    </Box >
   );
 };
 
