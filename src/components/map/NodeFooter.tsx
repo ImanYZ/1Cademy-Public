@@ -169,7 +169,7 @@ const NodeFooter = ({ open,
   );
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: '10px' }}>
       <Box className="NodeFooter Left" sx={{ display: 'flex', alignItems: 'center' }}>
         {open &&
           (isNew ? (
@@ -216,7 +216,7 @@ const NodeFooter = ({ open,
               reloadPermanentGrpah={reloadPermanentGrpah}
             />
           ))}
-        <div className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}>
+        <div className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"} style={{ display: 'flex', alignItems: 'center' }}>
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
           <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} />
           {/* <span

@@ -1,4 +1,4 @@
-@import url('./styles/app.css');
+@import url("./styles/app.css");
 
 :root {
   --navbar-height: 70px;
@@ -16,7 +16,6 @@
 .home-search-input::placeholder {
   font-size: 21px;
 }
-
 
 /* --------------------------------------------- */
 /* map styles */
@@ -114,7 +113,6 @@
   color: #4caf50;
   font-weight: bold;
 }
-
 
 /* ------------------------------------------ */
 /* styles from nodes */
@@ -274,7 +272,7 @@
 }
 
 .card .card-action {
-  padding: 10px 2.5px;
+  padding: 10px 13px;
 }
 .card .card-action .LearnBefore {
   border-right: 1px solid #ececec;
@@ -282,6 +280,7 @@
 }
 .card .card-action .LearnAfter {
   border-left: 1px solid #ececec;
+  padding-left: 11px; /*CHECK I add this to fix separation in vertical line*/
 }
 .card .card-action .row {
   margin: 0px;
@@ -407,22 +406,12 @@
 
 .MetaButton .CloseButton {
   background: rgb(34, 34, 34);
-  background: radial-gradient(
-    circle,
-    rgba(34, 34, 34, 1) 0%,
-    rgba(69, 69, 69, 1) 4%,
-    rgba(0, 212, 255, 0) 70%
-  );
+  background: radial-gradient(circle, rgba(34, 34, 34, 1) 0%, rgba(69, 69, 69, 1) 4%, rgba(0, 212, 255, 0) 70%);
 }
 
 .LightMode .MetaButton .CloseButton {
   background: rgb(255, 255, 255);
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 4%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 4%, rgba(255, 255, 255, 0) 70%);
 }
 
 .LightMode .MetaButton .CloseButton i {
@@ -476,7 +465,6 @@
   margin-top: -9.1px;
   margin-right: -1px;
 }
-
 
 /* ------------------------------------------- */
 /* styles from nodeFooter */
@@ -565,7 +553,6 @@
   margin-right: 0px !important;
   margin-top: 1px !important;
 }
-
 
 /* --------------------------------------------- */
 /* styles from user status icon */
@@ -732,7 +719,6 @@
   float: left;
   margin-top: 4px !important;
 }
-
 
 /* --------------------------------------------- */
 /* sidebar styles */
@@ -1169,7 +1155,7 @@
 .SidebarButton {
   display: block;
   position: relative;
-  padding-bottom: 16px;
+  /* padding-bottom: 16px; */ /*CHECK: I commented this to use in Node Footer*/
   margin-top: 0px;
 }
 .SidebarButton.Tooltip {
@@ -1374,7 +1360,6 @@ button.MuiTab-textColorInherit:focus {
   height: 31px;
 }
 
-
 /* ---------------------------------------- */
 /* metabutton styles */
 .card-title .header {
@@ -1478,22 +1463,12 @@ button.MuiTab-textColorInherit:focus {
 
 .MetaButton .CloseButton {
   background: rgb(34, 34, 34);
-  background: radial-gradient(
-    circle,
-    rgba(34, 34, 34, 1) 0%,
-    rgba(69, 69, 69, 1) 4%,
-    rgba(0, 212, 255, 0) 70%
-  );
+  background: radial-gradient(circle, rgba(34, 34, 34, 1) 0%, rgba(69, 69, 69, 1) 4%, rgba(0, 212, 255, 0) 70%);
 }
 
 .LightMode .MetaButton .CloseButton {
   background: rgb(255, 255, 255);
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 4%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 4%, rgba(255, 255, 255, 0) 70%);
 }
 
 .LightMode .MetaButton .CloseButton i {
@@ -1515,7 +1490,6 @@ button.MuiTab-textColorInherit:focus {
 .MetaButton span {
   padding-left: 4px;
 }
-
 
 /* ------------------------------------------ */
 /* styles from sidebar wrapper */
@@ -1607,7 +1581,6 @@ button.MuiTab-textColorInherit:focus {
   margin: 0 auto;
 }
 
-
 /* --------------------------------------- */
 /* styles from newChild proposal */
 
@@ -1627,7 +1600,6 @@ button.MuiTab-textColorInherit:focus {
 .NewProposalIcons i {
   margin-right: 4px;
 }
-
 
 /* ------------------------------------------- */
 /* proposal list styles */
@@ -1682,7 +1654,6 @@ button.MuiTab-textColorInherit:focus {
   margin-left: 10px;
 }
 
-
 /* ------------------------- */
 /* siteBar tabs styles */
 #SidebarTabsContainer {
@@ -1696,7 +1667,6 @@ button.MuiTab-textColorInherit:focus {
   overflow-y: auto;
 }
 
-
 /* ------------------------------- */
 /* userHeader styles */
 
@@ -1709,7 +1679,6 @@ button.MuiTab-textColorInherit:focus {
   width: 49px;
   line-height: 49px;
 }
-
 
 /* ------------------------------------------ */
 /* hyper editor styles */

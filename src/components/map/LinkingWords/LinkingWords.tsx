@@ -1,7 +1,11 @@
 // import "./LinkingWords.css";
 
 // import Button from "@material-ui/core/Button";
-import { Button } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { Button, Tooltip } from "@mui/material";
+import { Box } from '@mui/system';
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -149,7 +153,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
   return props.openPart === "LinkingWords" ||
     props.openPart === "Tags" ||
     props.openPart === "References" ? (
-    <div className="LinkingWordsContainer">
+    <div className="LinkingWordsContainer card-action">
       <div className="LearnBefore">
         {props.openPart === "LinkingWords" && (
           <div>
@@ -284,7 +288,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
               // </MetaButton>
             ) : (
               props.openPart === "References" && (
-                <div>Link to a reference node.</div>
+                <Tooltip title="Link to a reference node.">
+                  <Button sx={{ display: 'flex', alignItems: 'center' }}>
+                    <MenuBookIcon sx={{ color: '#f9a825' }} />
+                    <AddIcon sx={{ color: '#00E676' }} />
+                    <span>Cite an existing Reference</span>
+                  </Button>
+                </Tooltip>
                 // <MetaButton
                 //   onClick={choosingNewLinkedNode("Reference")}
                 //   tooltip="Link to a reference node."
@@ -341,7 +351,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   />
                   {props.editable && (
                     <div className="LinkDeleteButton">
-                      <div>{"Delete the link to this tag."}</div>
+                      <Tooltip title="Delete the link to this tag." placement='right'>
+                        <DeleteForeverIcon />
+                      </Tooltip>
                       {/* CHECK */}
                       {/* <MetaButton
                         onClick={deleteLink(idx, "Tag")}
@@ -356,9 +368,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
               );
             })}
             {props.editable && props.openPart === "References" && (
-              <div>
-                Delete the link to this child.
-              </div>
+              <Tooltip title="Delete the link to this child." placement='right'>
+                <DeleteForeverIcon />
+              </Tooltip>
               // CHECK
               // <MetaButton
               //   onClick={choosingNewLinkedNode("Tag")}
@@ -390,7 +402,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   {props.editable && (
                     <div className="LinkDeleteButton">
                       {/* // CHECKED */}
-                      <div>{"Delete the link to this child."}</div>
+                      <Tooltip title={"Delete the link to this child."}>
+                        <DeleteForeverIcon />
+                      </Tooltip>
                       {/* <MetaButton
                         onClick={deleteLink(idx, "Child")}
                         tooltip="Delete the link to this child."

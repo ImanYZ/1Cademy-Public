@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import SearchIcon from '@mui/icons-material/Search';
 import { Box, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
@@ -441,9 +442,10 @@ const Node = ({
                   <>
                     {/* New Node with inputs */}
                     <p className="NewChildProposalWarning">Before proposing,</p>
-                    <p className="NewChildProposalWarning">
-                      - Search <i className="material-icons EditingNodeSearchIcon">search</i> to
-                      ensure the node does not exist.
+                    <p className="NewChildProposalWarning" style={{ display: 'flex', alignItems: 'center' }}>
+                      <span>- Search </span>
+                      <SearchIcon fontSize='small' sx={{ color: 'white', mx: '5px' }} />
+                      <span> to ensure the node does not exist.</span>
                     </p>
                     {(nodeType === "Concept" ||
                       nodeType === "Relation" ||
@@ -696,6 +698,7 @@ const Node = ({
                /> */}
             </div>
           </div>
+          {/* <div className="card-action"> */}
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             // CHECK: I commented this
             <LinkingWords
@@ -723,6 +726,7 @@ const Node = ({
             //   <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nobis earum adipisci aliquam praesentium, suscipit in quisquam error autem? Illum, quia quod veritatis praesentium voluptatem at voluptatum temporibus in corrupti porro.</p>
             // </div>
           )}
+          {/* </div> */}
         </>
       ) : (
         <div className="card-content">

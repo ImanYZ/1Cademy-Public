@@ -125,14 +125,14 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   }
 
   return (
-    <Tooltip title={getTooltipTitle()}>
+    <Tooltip title={getTooltipTitle()} placement='top'>
       <div
-        className={"SidebarButton Tooltip" + (props.inUserBar ? " inUserBar" : "")}
+        className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
         onClick={openUserInfo}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
           {/* <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" /> */}
-          <OptimizedAvatar imageUrl={props.imageUrl} renderAsAvatar={true} contained={false} sx={{ border: 'none' }} />
+          <OptimizedAvatar imageUrl={props.imageUrl} renderAsAvatar={true} contained={false} sx={{ border: 'none', width: '28px', height: '28px' }} />
         </div>
         {!props.inNodeFooter && (
           <>

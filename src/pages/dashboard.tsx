@@ -1992,7 +1992,6 @@ const Dashboard = ({ }: DashboardProps) => {
         id="MapContent"
         className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
         onMouseOver={mapContentMouseOver}
-        style={{ background: 'gray' }}
       >
         <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
           {/* show clusters */}
