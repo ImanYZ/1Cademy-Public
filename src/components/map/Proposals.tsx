@@ -4,6 +4,7 @@
 // import { Box, Tab, Tabs } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
+import { useNodeBook } from "../../context/NodeBookContext";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import {
 //   openProposalState,
@@ -37,26 +38,31 @@ type ProposalsProps = {
 }
 
 const Proposals = (props: ProposalsProps) => {
+
+  const { nodeBookState, nodeBookDispatch } = useNodeBook()
   const [selectedNode] = useState();
   const [selectionType] = useState();
-  const [openProposal, setOpenProposal] = useState();
+  const [openProposal, setOpenProposal] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(false);
-  const [proposals, setProposals] = useState([]);
+  const [proposals, setProposals] = useState<any[]>([]);
 
   useEffect(() => {
+    console.log('userEffect: fetch proposals')
     props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
   }, []);
 
   useEffect(() => {
+    console.log('userEffect: fetch proposals')
     setOpenProposal(false);
-    if (selectedNode) {
+    if (nodeBookState.selectedNode) {
       props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     }
-  }, [selectedNode]);
+  }, [nodeBookState.selectedNode]);
 
   useEffect(() => {
+    console.log('useEffect: setOpenProposal')
     setOpenProposal(false);
   }, [selectionType]);
 

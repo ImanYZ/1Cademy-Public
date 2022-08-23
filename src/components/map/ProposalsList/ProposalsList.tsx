@@ -2,15 +2,14 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
+// import { useRecoilValue } from "recoil";
+import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { useAuth } from "../../../context/AuthContext";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import MetaButton from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
 import UserHeader from "./UserHeader/UserHeader";
-// import { useRecoilValue } from "recoil";
-
-// import LoadingImg from "../../../../../assets/1Cademy_Loading_Dots.gif";
 // import { usernameState } from "../../../../../store/AuthAtoms";
 // import shortenNumber from "../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";

@@ -38,6 +38,7 @@ import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { NodeChanges } from "../knowledgeTypes";
 import { postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
+import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import { JSONfn } from "../lib/utils/jsonFn";
 import {
   changedNodes,
@@ -157,7 +158,7 @@ const Dashboard = ({ }: DashboardProps) => {
   const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
 
   // node type that is currently selected
-  const [selectedNodeType, setSelectedNodeType] = useState(null);
+  const [selectedNodeType, setSelectedNodeType] = useState<NodeType | null>(null);
 
   // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leaderboard or on nodes)
   const [selectedUser, setSelectedUser] = useState(null);
@@ -1924,6 +1925,183 @@ const Dashboard = ({ }: DashboardProps) => {
     [user, nodeBookState.selectedNode, allTags, reloadPermanentGrpah]
   );
 
+  const fetchProposals = useCallback(
+    async (
+      setIsAdmin: (value: boolean) => void,
+      setIsRetrieving: (value: boolean) => void,
+      setProposals: (value: any) => void,
+    ) => {
+
+      console.log('[FETCH PROPOSALS]')
+      if (!user) return
+      if (!selectedNodeType) return
+      console.log('[fetch proposals]')
+      // console.log("In fetchProposals");
+      setIsRetrieving(true);
+      setNodes((oldNodes) => {
+        // if (selectedNode && "selectedNode" in oldNodes) {
+        if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
+          // setIsAdmin(oldNodes[selectedNode].admin === username);
+          setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
+        }
+        return oldNodes;
+      });
+      const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } =
+        getTypedCollections(db, selectedNodeType);
+      // getTypedCollections(firebase.db, selectedNodeType);
+
+      if (
+        !versionsColl ||
+        !userVersionsColl ||
+        !versionsCommentsColl ||
+        !userVersionsCommentsColl
+      ) return
+
+      // const versionsQuery = versionsColl
+      //   .where("node", "==", selectedNode)
+      //   .where("deleted", "==", false);
+
+      const versionsQuery = query(
+        versionsColl,
+        where("node", "==", nodeBookState.selectedNode),
+        where("deleted", "==", false)
+      )
+
+      // const versionsData = await versionsQuery.get();
+      const versionsData = await getDocs(versionsQuery)
+      const versions: any = {};
+      let versionId;
+      const versionIds: string[] = [];
+      const comments: any = {};
+      const userVersionsRefs: Query<DocumentData>[] = [];
+      const versionsCommentsRefs: Query<DocumentData>[] = [];
+      const userVersionsCommentsRefs: Query<DocumentData>[] = [];
+      versionsData.forEach((versionDoc) => {
+        versionIds.push(versionDoc.id);
+        const versionData = versionDoc.data();
+        versions[versionDoc.id] = {
+          ...versionData,
+          id: versionDoc.id,
+          createdAt: versionData.createdAt.toDate(),
+          award: false,
+          correct: false,
+          wrong: false,
+          comments: [],
+        };
+        delete versions[versionDoc.id].deleted;
+        delete versions[versionDoc.id].updatedAt;
+        delete versions[versionDoc.id].node;
+        const userVersionsQuery = query(
+          userVersionsColl,
+          where("version", "==", versionDoc.id),
+          where("user", "==", user.uname)
+        )
+        userVersionsRefs.push(userVersionsQuery);
+        // userVersionsRefs.push(
+        //   userVersionsColl
+        //   .where("version", "==", versionDoc.id)
+        //   .where("user", "==", username)
+        // );
+        const versionsCommentsQuery = query(
+          versionsCommentsColl,
+          where("version", "==", versionDoc.id),
+          where("deleted", "==", false)
+        )
+        versionsCommentsRefs.push(versionsCommentsQuery);
+        // versionsCommentsRefs.push(
+        //   versionsCommentsColl
+        //.where("version", "==", versionDoc.id)
+        //.where("deleted", "==", false)
+        // );
+      });
+      if (userVersionsRefs.length > 0) {
+        await Promise.all(
+          userVersionsRefs.map(async (userVersionsRef) => {
+            // const userVersionsDocs = await userVersionsRef.get();
+            const userVersionsDocs = await getDocs(userVersionsRef)
+            userVersionsDocs.forEach((userVersionsDoc) => {
+              const userVersion = userVersionsDoc.data();
+              versionId = userVersion.version;
+              delete userVersion.version;
+              delete userVersion.updatedAt;
+              delete userVersion.createdAt;
+              delete userVersion.user;
+              versions[versionId] = {
+                ...versions[versionId],
+                ...userVersion,
+              };
+            });
+          })
+        );
+      }
+      if (versionsCommentsRefs.length > 0) {
+        await Promise.all(
+          versionsCommentsRefs.map(async (versionsCommentsRef) => {
+            // const versionsCommentsDocs = await versionsCommentsRef.get();
+            const versionsCommentsDocs = await getDocs(versionsCommentsRef)
+            versionsCommentsDocs.forEach((versionsCommentsDoc) => {
+              const versionsComment = versionsCommentsDoc.data();
+              delete versionsComment.updatedAt;
+              comments[versionsCommentsDoc.id] = {
+                ...versionsComment,
+                id: versionsCommentsDoc.id,
+                createdAt: versionsComment.createdAt.toDate(),
+              };
+              const userVersionsCommentsQuery = query(userVersionsCommentsColl,
+                where("versionComment", "==", versionsCommentsDoc.id),
+                where("user", "==", user.uname))
+
+              userVersionsCommentsRefs.push(userVersionsCommentsQuery)
+
+              // userVersionsCommentsRefs.push(
+              //   userVersionsCommentsColl
+              //     .where("versionComment", "==", versionsCommentsDoc.id)
+              //     .where("user", "==", username)
+              // );
+            });
+          })
+        );
+        if (userVersionsCommentsRefs.length > 0) {
+          await Promise.all(
+            userVersionsCommentsRefs.map(async (userVersionsCommentsRef) => {
+              // const userVersionsCommentsDocs = await userVersionsCommentsRef.get();
+              const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef)
+              userVersionsCommentsDocs.forEach((userVersionsCommentsDoc) => {
+                const userVersionsComment = userVersionsCommentsDoc.data();
+                const versionCommentId = userVersionsComment.versionComment;
+                delete userVersionsComment.versionComment;
+                delete userVersionsComment.updatedAt;
+                delete userVersionsComment.createdAt;
+                delete userVersionsComment.user;
+                comments[versionCommentId] = {
+                  ...comments[versionCommentId],
+                  ...userVersionsComment,
+                };
+              });
+            })
+          );
+        }
+      }
+      // for (let comment of Object.values(comments)) {
+      //   versionId = comment.version;
+      //   delete comment.version;
+      //   versions[versionId].comments.push(comment);
+      // }
+      Object.values(comments).forEach((comment: any) => {
+        versionId = comment.version;
+        delete comment.version;
+        versions[versionId].comments.push(comment);
+      });
+      const proposalsTemp = Object.values(versions);
+      const orderredProposals = proposalsTemp.sort(
+        (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+      );
+      setProposals(orderredProposals);
+      setIsRetrieving(false);
+    },
+    [user?.uname, nodeBookState.selectedNode, selectedNodeType]
+  );
+
   /////////////////////////////////////////////////////
   // Inner functions
 
@@ -1953,7 +2131,7 @@ const Dashboard = ({ }: DashboardProps) => {
     <Box sx={{ width: "100vw", height: "100vh" }}>
       <MemoizedSidebar
         proposeNodeImprovement={() => console.log('proposeNodeImprovement')}
-        fetchProposals={() => console.log('fetchProposals')}
+        fetchProposals={fetchProposals}
         rateProposal={() => console.log('rateProposal')}
         selectProposal={() => console.log('selectProposal')}
         deleteProposal={() => console.log('deleteProposal')}

@@ -211,7 +211,7 @@ const Sidebar = (props: ProposalSidebar) => {
           <MemoizedSidebarWrapper
             headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
             title="Proposals"
-            scrollToTop={console.log('scrollToTop')}
+            scrollToTop={() => console.log('scrollToTop')}
             closeSideBar={props.closeSideBar}
           >
             <Proposals
