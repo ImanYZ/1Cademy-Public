@@ -70,8 +70,7 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Pending Proposals",
       content: (
-        <>
-          pending proposals here
+        <ul className="collection">
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
@@ -86,14 +85,13 @@ const Proposals = (props: ProposalsProps) => {
             isAdmin={isAdmin}
             isRetrieving={isRetrieving}
           />
-        </>
+        </ul>
       ),
     },
     {
       title: "Approved Proposals",
       content: (
-        <>
-          Aproved proposals here
+        <ul className="collection">
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
@@ -108,24 +106,25 @@ const Proposals = (props: ProposalsProps) => {
             isAdmin={isAdmin}
             isRetrieving={isRetrieving}
           />
-        </>
+        </ul>
       ),
     },
   ];
 
   return (
-    <div id="ProposalsContainer" style={{ border: 'dashed 2px yellow' }}>
+    // CHECK: I addedd overflow in y
+    <div id="ProposalsContainer" >
       {/* <div id="ProposeNewChildImprovementTitle">
         <strong>Propose New Child / Improvement</strong>
       </div> */}
       <div id="ProposalButtonsCollection">
-        <h6>Here Edit proposal component</h6>
+        <h6 style={{ margin: '0px' }}>Here Edit proposal component</h6>
         {/* CHECK: I commented this */}
         {/* <EditProposal
           openProposal={openProposal}
           proposeNodeImprovement={props.proposeNodeImprovement}
         /> */}
-        <div id="ProposalButtonsRow" style={{ border: 'solid 0px pink' }}>
+        <div id="ProposalButtonsRow" style={{ border: 'solid 0px pink', display: 'flex', justifyContent: 'space-around' }}>
           {Object.keys(proposedChildTypesIcons).map((childNodeType) => {
             return (
               <NewChildProposal
@@ -140,7 +139,6 @@ const Proposals = (props: ProposalsProps) => {
           })}
         </div>
       </div>
-      <br />
       <MemoizedSidebarTabs tabsTitle="Proposals tabs" tabsItems={tabsItems} />
 
     </div>

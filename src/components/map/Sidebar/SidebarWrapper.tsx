@@ -21,7 +21,7 @@ type SidebarWrapperProps = {
 const SidebarWrapper = (props: SidebarWrapperProps) => {
   return (
     <>
-      <Box id="SidebarContainer" className={props.noHeader ? "MiniUserProfileSidebar" : ""} sx={{ border: 'dashed 2px royalBlue', position: 'relative' }}>
+      <div id="SidebarContainer" className={props.noHeader ? "MiniUserProfileSidebar" : ""} style={{ position: 'relative' }}>
         <Box id="SideBarClose" sx={{ position: 'absolute', top: '10px', right: '10px' }}>
           <MetaButton
             onClick={props.closeSideBar}
@@ -51,7 +51,7 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
         ) : (
           props.children
         )}
-      </Box>
+      </div>
       {/* <div id="ScrollToTop">
         <MetaButton onClick={props.scrollToTop} tooltip="Back to top." tooltipPosition="Left">
           <i className="material-icons gray-text">arrow_upward</i>

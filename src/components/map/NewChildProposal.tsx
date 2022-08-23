@@ -26,7 +26,7 @@ const NewChildProposal = (props: NewChildProposalProps) => {
   );
 
   return (
-    <span style={{ border: 'dashed 0px pink' }}>
+    <span >
       <MetaButton
         onClick={
           props.openProposal !== "ProposeNew" + props.childNodeType + "ChildNode"

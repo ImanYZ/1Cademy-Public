@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Image from "next/image";
 import React, { useCallback } from "react";
 
 // import { useRecoilValue } from "recoil";
@@ -32,7 +33,7 @@ type ProposalsListProps = {
   rateProposal: any,
   selectProposal: any,
   deleteProposal: any,
-  editHistory: any,
+  editHistory: boolean,
   proposeNewChild: any,
   openProposal: any,
   isAdmin: any,
@@ -65,6 +66,8 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
+  console.log(' ---> props.proposals', props.proposals)
+
   return !props.isRetrieving ? (
     props.proposals.map((proposal: any, proposalIdx: any) => {
       const proposalSummaries = proposalSummariesGenerator(proposal);
@@ -73,7 +76,7 @@ const ProposalsList = (props: ProposalsListProps) => {
           let adminTooltip = "# of 1Admins who have awarded this proposal.";
           if (!props.isAdmin) {
             adminTooltip +=
-              " You cannot give this proposal an award, beccause you are not the 1Admin of this node.";
+              " You cannot give this proposal an award, because you are not the 1Admin of this node.";
           } else {
             if (proposal.proposer === username) {
               adminTooltip += " You cannot give your own proposal an award!";
@@ -176,7 +179,9 @@ const ProposalsList = (props: ProposalsListProps) => {
     })
   ) : (
     <div className="CenterredLoadingImageSidebar">
-      <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
+      {/* <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" /> */}
+      <Image src={LoadingImg} alt="Loading" />
+      {/* CHECK: this is not working */}
       {/* <div className="preloader-wrapper active big">
         <div className="spinner-layer spinner-yellow-only">
           <div className="circle-clipper left">

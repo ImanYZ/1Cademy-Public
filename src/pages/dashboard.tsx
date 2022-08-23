@@ -2128,87 +2128,91 @@ const Dashboard = ({ }: DashboardProps) => {
   const edgeIds = Object.keys(edges);
 
   return (
-    <Box sx={{ width: "100vw", height: "100vh" }}>
-      <MemoizedSidebar
-        proposeNodeImprovement={() => console.log('proposeNodeImprovement')}
-        fetchProposals={fetchProposals}
-        rateProposal={() => console.log('rateProposal')}
-        selectProposal={() => console.log('selectProposal')}
-        deleteProposal={() => console.log('deleteProposal')}
-        closeSideBar={closeSideBar}
-        proposeNewChild={proposeNewChild}
-        selectionType={nodeBookState.selectionType}
-      />
-      <Box sx={{ position: 'fixed', right: '10px', zIndex: '1300', background: '#123' }}>
-        {/* Data from map, DONT REMOVE */}
-        <Box>
-          Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-        </Box>
-        <Box>
-          <Button onClick={() => console.log(nodes)}>nodes</Button>
-          <Button onClick={() => console.log(edges)}>edges</Button>
-          <Button onClick={() => console.log(allTags)}>allTags</Button>
-          <Button onClick={() => console.log('DAGGER', g)}>Dager</Button>
-          <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-          <Button onClick={() => console.log(user)}>user</Button>
-        </Box>
-        <Box>
-          <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-          <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-          <Button onClick={() => console.log(mapChanged)}>map changed</Button>
-          <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-          <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-        </Box>
-        <Box>
-          <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
-          <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
-        </Box>
-      </Box>
-
-      {/* end Data from map */}
-      <Box
-        id="MapContent"
-        className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
-        onMouseOver={mapContentMouseOver}
-      >
-        <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
-          {/* show clusters */}
-
-          <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
-          <NodesList
-            nodes={nodes}
-            nodeChanged={nodeChanged}
-            bookmark={bookmark}
-            markStudied={markStudied}
-            chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
-            referenceLabelChange={() => { console.log("referenceLabel change"); }}
-            deleteLink={() => { console.log("delete link"); }}
-            openLinkedNode={openLinkedNode}
-            openAllChildren={() => { console.log("open all children"); }}
-            hideNodeHandler={hideNodeHandler}
-            hideOffsprings={hideOffsprings}
-            toggleNode={toggleNode}
-            openNodePart={openNodePart}
-            selectNode={selectNode}
-            nodeClicked={() => { console.log("nodeClicked"); }}
-            correctNode={correctNode}
-            wrongNode={wrongNode}
-            uploadNodeImage={() => { console.log("uploadNodeImage"); }}
-            removeImage={() => { console.log("removeImage"); }}
-            changeChoice={() => { console.log("changeChoice"); }}
-            changeFeedback={() => { console.log("changeFeedback"); }}
-            switchChoice={() => { console.log("switchChoice"); }}
-            deleteChoice={() => { console.log("deleteChoice"); }}
-            addChoice={() => { console.log("addChoice"); }}
-            onNodeTitleBlur={() => { console.log("onNodeTitleBlur"); }}
-            saveProposedChildNode={() => { console.log("saveProposedChildNod"); }}
-            saveProposedImprovement={() => { console.log("saveProposedImprovemny"); }}
-            closeSideBar={() => { console.log("closeSideBar"); }}
-            reloadPermanentGrpah={() => { console.log("reloadPermanentGrpah"); }}
+    <div className="MapContainer">
+      <div id="Map">
+        <Box sx={{ width: "100vw", height: "100vh" }}>
+          <MemoizedSidebar
+            proposeNodeImprovement={() => console.log('proposeNodeImprovement')}
+            fetchProposals={fetchProposals}
+            rateProposal={() => console.log('rateProposal')}
+            selectProposal={() => console.log('selectProposal')}
+            deleteProposal={() => console.log('deleteProposal')}
+            closeSideBar={closeSideBar}
+            proposeNewChild={proposeNewChild}
+            selectionType={nodeBookState.selectionType}
           />
-        </MapInteractionCSS>
-      </Box>
-    </Box >
+          <Box sx={{ position: 'fixed', right: '10px', zIndex: '1300', background: '#123' }}>
+            {/* Data from map, DONT REMOVE */}
+            <Box>
+              Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(nodes)}>nodes</Button>
+              <Button onClick={() => console.log(edges)}>edges</Button>
+              <Button onClick={() => console.log(allTags)}>allTags</Button>
+              <Button onClick={() => console.log('DAGGER', g)}>Dager</Button>
+              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+              <Button onClick={() => console.log(user)}>user</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+              <Button onClick={() => console.log(mapChanged)}>map changed</Button>
+              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
+              <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
+            </Box>
+          </Box>
+
+          {/* end Data from map */}
+          <Box
+            id="MapContent"
+            className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
+            onMouseOver={mapContentMouseOver}
+          >
+            <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
+              {/* show clusters */}
+
+              <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
+              <NodesList
+                nodes={nodes}
+                nodeChanged={nodeChanged}
+                bookmark={bookmark}
+                markStudied={markStudied}
+                chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
+                referenceLabelChange={() => { console.log("referenceLabel change"); }}
+                deleteLink={() => { console.log("delete link"); }}
+                openLinkedNode={openLinkedNode}
+                openAllChildren={() => { console.log("open all children"); }}
+                hideNodeHandler={hideNodeHandler}
+                hideOffsprings={hideOffsprings}
+                toggleNode={toggleNode}
+                openNodePart={openNodePart}
+                selectNode={selectNode}
+                nodeClicked={() => { console.log("nodeClicked"); }}
+                correctNode={correctNode}
+                wrongNode={wrongNode}
+                uploadNodeImage={() => { console.log("uploadNodeImage"); }}
+                removeImage={() => { console.log("removeImage"); }}
+                changeChoice={() => { console.log("changeChoice"); }}
+                changeFeedback={() => { console.log("changeFeedback"); }}
+                switchChoice={() => { console.log("switchChoice"); }}
+                deleteChoice={() => { console.log("deleteChoice"); }}
+                addChoice={() => { console.log("addChoice"); }}
+                onNodeTitleBlur={() => { console.log("onNodeTitleBlur"); }}
+                saveProposedChildNode={() => { console.log("saveProposedChildNod"); }}
+                saveProposedImprovement={() => { console.log("saveProposedImprovemny"); }}
+                closeSideBar={() => { console.log("closeSideBar"); }}
+                reloadPermanentGrpah={() => { console.log("reloadPermanentGrpah"); }}
+              />
+            </MapInteractionCSS>
+          </Box>
+        </Box >
+      </div>
+    </div>
   );
 };
 

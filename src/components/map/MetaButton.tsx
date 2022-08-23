@@ -48,7 +48,7 @@ const MetaButton = (props: MetaButtonProps) => {
   if ("onClick" in props && props.onClick) {
     return (
       <Tooltip title={props.tooltip || ''} placement={props.tooltipPosition}>
-        <Button
+        <button
           className={
             // (isSubmitting
             //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
@@ -71,7 +71,7 @@ const MetaButton = (props: MetaButtonProps) => {
             {props.tooltip}
           </span>
         )} */}
-        </Button>
+        </button>
       </Tooltip>
     );
   } else {
