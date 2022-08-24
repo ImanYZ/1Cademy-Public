@@ -39,8 +39,8 @@ type ProposalsProps = {
 
 const Proposals = (props: ProposalsProps) => {
 
-  const { nodeBookState, nodeBookDispatch } = useNodeBook()
-  const [selectedNode] = useState();
+  const { nodeBookState } = useNodeBook()
+  // const [selectedNode] = useState();
   const [selectionType] = useState();
   const [openProposal, setOpenProposal] = useState(false);
 
@@ -51,6 +51,9 @@ const Proposals = (props: ProposalsProps) => {
   useEffect(() => {
     console.log('userEffect: fetch proposals')
     props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
+    // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
+    // Try to solve adding await
+    // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
   }, []);
 
   useEffect(() => {
@@ -59,6 +62,9 @@ const Proposals = (props: ProposalsProps) => {
     if (nodeBookState.selectedNode) {
       props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     }
+    // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
+    // Try to solve adding await
+    // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
   }, [nodeBookState.selectedNode]);
 
   useEffect(() => {
@@ -66,6 +72,7 @@ const Proposals = (props: ProposalsProps) => {
     setOpenProposal(false);
   }, [selectionType]);
 
+  console.log('------------------------- render proposal')
   const tabsItems = [
     {
       title: "Pending Proposals",
