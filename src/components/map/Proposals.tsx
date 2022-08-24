@@ -70,7 +70,7 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Pending Proposals",
       content: (
-        <ul className="collection">
+        <ul className="collection" style={{ padding: '0px', margin: '0px' }}>
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
@@ -91,7 +91,7 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Approved Proposals",
       content: (
-        <ul className="collection">
+        <ul className="collection" style={{ padding: '0px', margin: '0px' }}>
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}

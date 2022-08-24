@@ -66,11 +66,11 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
-  console.log(' ---> props.proposals', props.proposals)
 
   return !props.isRetrieving ? (
-    props.proposals.map((proposal: any, proposalIdx: any) => {
+    props.proposals.map((proposal: any, proposalIdx: number) => {
       const proposalSummaries = proposalSummariesGenerator(proposal);
+
       if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
         if (props.openProposal === proposal.id) {
           let adminTooltip = "# of 1Admins who have awarded this proposal.";
@@ -85,8 +85,9 @@ const ProposalsList = (props: ProposalsListProps) => {
                 " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
             }
           }
+          console.warn('CHECK THIS PLEASE, WHERE IS USED')
           return (
-            <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
+            <li className="collection-item avatar" key={`Proposal${proposal.id}`} style={{ border: 'solid 2px pink' }}>
               <UserHeader imageUrl={proposal.imageUrl} />
               <div className="title Username">{proposal.proposer}</div>
               <div className="title Time">{dayjs(proposal.createdAt).fromNow()}</div>
@@ -165,6 +166,7 @@ const ProposalsList = (props: ProposalsListProps) => {
             </li>
           );
         } else {
+          // THIS Show pending proposal and aproved proposals
           return (
             <ProposalItem
               proposal={proposal}

@@ -125,16 +125,7 @@ const layoutHandler = (
     g.edges().map((e: any) => {
       const fromNode = g.node(e.v) as any;
       const toNode = g.node(e.w) as any;
-      console.log({
-        fromNode,
-        toNode,
-        exist: "left" in fromNode &&
-          "top" in fromNode &&
-          "left" in toNode &&
-          "top" in toNode &&
-          "height" in fromNode &&
-          "height" in toNode
-      })
+
       if (
         "left" in fromNode &&
         "top" in fromNode &&
@@ -149,13 +140,6 @@ const layoutHandler = (
         const newToY = toNode.top + Math.floor(toNode.height / 2);
         const thisEdge = oldEdges[e.v + "-" + e.w];
 
-        console.log({
-          newFromX,
-          newFromY,
-          newToX,
-          newToY,
-          thisEdge
-        })
         if (
           !("fromX" in thisEdge) ||
           !("fromY" in thisEdge) ||

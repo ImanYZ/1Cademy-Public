@@ -40,6 +40,7 @@ const ProposalItem = (props: any) => {
   } else {
     proposalSummaries = proposalSummariesGenerator(props.proposal);
   }
+
   return (
     <li
       className="CollapsedProposal collection-item avatar"

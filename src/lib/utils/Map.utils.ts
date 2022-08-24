@@ -647,10 +647,13 @@ export const copyNode = (node: any) => {
     newNode.references.push(reference)
   }
   newNode.referenceLabels = [];
-  for (let referenceLabel of node.referenceLabels) {
-    // newNode.referenceLabels.push({ ...referenceLabel });
-    newNode.referenceLabels.push(referenceLabel)
+  if (node.referenceLabels) {
+    for (let referenceLabel of node.referenceLabels) {
+      // newNode.referenceLabels.push({ ...referenceLabel });
+      newNode.referenceLabels.push(referenceLabel)
+    }
   }
+
   if (newNode.nodeType === "Question") {
     newNode.choices = [];
     for (let choice of node.choices) {

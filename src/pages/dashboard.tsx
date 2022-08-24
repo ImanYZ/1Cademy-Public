@@ -1976,9 +1976,12 @@ const Dashboard = ({ }: DashboardProps) => {
       const userVersionsRefs: Query<DocumentData>[] = [];
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
+
+      console.log('[fetch proposals]: versionsData, userVersionsRefs, versionsCommentsRefs')
       versionsData.forEach((versionDoc) => {
         versionIds.push(versionDoc.id);
         const versionData = versionDoc.data();
+        console.log('version data', versionData)
         versions[versionDoc.id] = {
           ...versionData,
           id: versionDoc.id,
@@ -2014,6 +2017,9 @@ const Dashboard = ({ }: DashboardProps) => {
         //.where("deleted", "==", false)
         // );
       });
+
+      console.log('[fetch proposals]: get userVersionsRefs')
+
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async (userVersionsRef) => {
@@ -2034,6 +2040,9 @@ const Dashboard = ({ }: DashboardProps) => {
           })
         );
       }
+
+      console.log('[fetch proposals]: get versionsCommentsRefs')
+
       if (versionsCommentsRefs.length > 0) {
         await Promise.all(
           versionsCommentsRefs.map(async (versionsCommentsRef) => {
@@ -2061,6 +2070,9 @@ const Dashboard = ({ }: DashboardProps) => {
             });
           })
         );
+
+        console.log('[fetch proposals]: get userVersionsCommentsRefs')
+
         if (userVersionsCommentsRefs.length > 0) {
           await Promise.all(
             userVersionsCommentsRefs.map(async (userVersionsCommentsRef) => {
@@ -2096,6 +2108,8 @@ const Dashboard = ({ }: DashboardProps) => {
       const orderredProposals = proposalsTemp.sort(
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
       );
+
+      console.log('orderredProposals', orderredProposals)
       setProposals(orderredProposals);
       setIsRetrieving(false);
     },
@@ -2163,7 +2177,7 @@ const Dashboard = ({ }: DashboardProps) => {
             </Box>
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
-              <Button onClick={() => openNodeHandler('rWYUNisPIVMBoQEYXgNj')}>Open Node Handler</Button>
+              <Button onClick={() => openNodeHandler('JvMjw4kbgeqNA7sRQjfZ')}>Open Node Handler</Button>
             </Box>
           </Box>
 
