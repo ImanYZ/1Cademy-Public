@@ -1549,6 +1549,26 @@ const Dashboard = ({ }: DashboardProps) => {
     [user, choosingNode, /*selectionType*/]
   );
 
+  const referenceLabelChange = useCallback(
+    (event, nodeId, referenceIdx) => {
+      console.log("[REFERENCE_LABLE_CHANGE]");
+      event.persist();
+      setNodes((oldNodes) => {
+        const thisNode = { ...oldNodes[nodeId] };
+        thisNode.references = [...thisNode.references];
+        thisNode.references[referenceIdx] = {
+          // ...thisNode.references[referenceIdx],
+          label: event.target.value,
+        };
+        return {
+          ...oldNodes,
+          [nodeId]: { ...thisNode },
+        };
+      });
+    },
+    [setNodeParts]
+  );
+
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
       if (!choosingNode) {
@@ -1787,6 +1807,37 @@ const Dashboard = ({ }: DashboardProps) => {
 
   /////////////////////////////////////////////////////
   // Proposals Functions
+
+  const proposeNodeImprovement = useCallback(
+    (event: any) => {
+      console.log("[PROPOSE_NODE_IMPROVEMENT]");
+      event.preventDefault();
+      if (!nodeBookState.selectedNode) return
+
+      setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
+      reloadPermanentGrpah();
+
+      // CHECK: Improve this making the operations out of setNode, when have nodes with new data
+      // update with setNodes
+      setNodes((oldNodes) => {
+        if (!nodeBookState.selectedNode) return oldNodes
+
+        if (!(nodeBookState.selectedNode in changedNodes)) {
+          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+        }
+        const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
+        thisNode.editable = true;
+        setMapChanged(true);
+        return {
+          ...oldNodes,
+          [nodeBookState.selectedNode]: thisNode,
+        };
+      });
+      scrollToNode(nodeBookState.selectedNode);
+    },
+    [nodeBookState.selectedNode, reloadPermanentGrpah]
+  );
+
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
@@ -2146,7 +2197,7 @@ const Dashboard = ({ }: DashboardProps) => {
       <div id="Map">
         <Box sx={{ width: "100vw", height: "100vh" }}>
           <MemoizedSidebar
-            proposeNodeImprovement={() => console.log('proposeNodeImprovement')}
+            proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
             rateProposal={() => console.log('rateProposal')}
             selectProposal={() => console.log('selectProposal')}

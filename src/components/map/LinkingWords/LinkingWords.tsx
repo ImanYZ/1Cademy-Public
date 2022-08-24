@@ -4,8 +4,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { Button, Tooltip } from "@mui/material";
-import { Box } from '@mui/system';
+import { Button, Link, TextField, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -24,6 +23,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import LinkingButton from "./LinkingButton";
 
 const separateURL = (text: string): [boolean, any] => {
+  console.log('separateURL:text', text)
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex);
   if (matches && matches.length > 0) {
@@ -31,9 +31,9 @@ const separateURL = (text: string): [boolean, any] => {
       true,
       // eslint-disable-next-line react/jsx-key
       <p>
-        <a href={matches[0]} target="_blank" rel="noreferrer">
+        <Link href={matches[0]} target="_blank" rel="noreferrer">
           Open the URL in new tab.
-        </a>
+        </Link>
       </p>,
     ];
   } else {
@@ -246,7 +246,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   {urlRefLabel[0] && urlRefLabel[1]}
                   {props.editable && (
                     <>
-                      <div>ValidatedInput Editable</div>
+                      {/* <div>ValidatedInput Editable</div> */}
                       {/* <ValidatedInput
                         key={props.identifier + "LinkTo" + reference.node + "Label"}
                         id={props.identifier + "LinkTo" + reference.node + "Label"}
@@ -256,6 +256,14 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         value={reference.label}
                         label="Enter page # or voice/video time"
                       /> */}
+                      <TextField
+                        key={props.identifier + "LinkTo" + reference.node + "Label"}
+                        id={props.identifier + "LinkTo" + reference.node + "Label"}
+                        name={props.identifier + "LinkTo" + reference.node + "Label"}
+                        type="text"
+                        value={reference.label}
+                        onChange={referenceLabelChangeHandler(idx)}
+                        label="Enter page # or voice/video time" />
                       <div className="LinkDeleteButton">
                         {/* <MetaButton
                           onClick={deleteLink(idx, "Reference")}
