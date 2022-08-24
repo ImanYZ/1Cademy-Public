@@ -12,10 +12,11 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
+import ImageIcon from '@mui/icons-material/Image';
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState,useRef } from "react";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
@@ -123,6 +124,9 @@ const NodeFooter = ({
   user
 }: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [percentageUploaded, setPercentageUploaded] = useState(0);
+  const inputEl = useRef(null);
 
   const selectReferences = useCallback(
     (event: any) => {
@@ -137,7 +141,16 @@ const NodeFooter = ({
     },
     [selectNode]
   );
-
+const uploadNodeImageHandler = useCallback(
+    (event:any) =>
+    uploadNodeImage(
+        event,
+        isUploading,
+        setIsUploading,
+        setPercentageUploaded
+      ),
+    [uploadNodeImage, isUploading]
+  );
   const selectLinkingWords = useCallback(
     (event: any) => {
       openNodePart(event, "LinkingWords");
@@ -161,6 +174,13 @@ const NodeFooter = ({
     },
     [title, content]
   );
+  const uploadImageClicked = useCallback(
+    (event:any) => {
+      inputEl.current.click();
+    },
+    [inputEl]
+  );
+
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "10px" }}>
@@ -287,20 +307,19 @@ const NodeFooter = ({
 
               // {/* CHECK: I commented this, please uncomented when work in proposal */}
               <>
-                {/* <input
+                <input
                   type="file"
                   ref={inputEl}
                   onChange={uploadNodeImageHandler}
-                  hidden="hidden"
+                  // hidden="hidden"
                 />
                 <MemoizedMetaButton
                   onClick={uploadImageClicked}
                   tooltip="Upload an image for this node."
-                  tooltipPosition="Top"
+                  tooltipPosition="top"
                 >
-                  <i className="material-icons grey-text ImageUploadButton">
-                    photo_size_select_actual
-                  </i>
+                  <>
+                <ImageIcon/>
                   {isUploading && (
                     <>
                       <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
@@ -313,7 +332,9 @@ const NodeFooter = ({
                       <span className="ImageUploadPercentage">{percentageUploaded + "%"}</span>
                     </>
                   )}
-                </MemoizedMetaButton> */}
+                  </>
+                </MemoizedMetaButton>
+
               </>
             )}
             {!editable && !unaccepted && nodeType === "Reference" ? (

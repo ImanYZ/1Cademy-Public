@@ -10,7 +10,8 @@ import React, { useCallback } from "react";
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { Editor } from "../../../Editor";
-import MetaButton from "../../MetaButton";
+import { MemoizedMetaButton } from "../../MetaButton";
+
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
