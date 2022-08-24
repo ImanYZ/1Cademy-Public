@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import SearchIcon from '@mui/icons-material/Search';
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import SearchIcon from "@mui/icons-material/Search";
 import { Box, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
-import { useAuth } from '../../context/AuthContext';
-import { Editor } from '../Editor';
-import LinkingWords from './LinkingWords/LinkingWords';
+import { useAuth } from "../../context/AuthContext";
+import { Editor } from "../Editor";
+import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 
@@ -19,7 +19,6 @@ import { MemoizedNodeHeader } from "./NodeHeader";
 // import NodeFooter from "./NodeFooter/NodeFooter";
 // import LinkingWords from "./LinkingWords/LinkingWords";
 // import QuestionChoices from "./QuestionChoices/QuestionChoices";
-// import MetaButton from "../MetaButton/MetaButton";
 // import { admin } from "@/lib/firestoreServer/admin";
 // import { Draft } from "../../Editor";
 // import { compareLinks, compareChoices, compareImages } from "../MapUtils";
@@ -29,28 +28,28 @@ import { MemoizedNodeHeader } from "./NodeHeader";
 
 type NodeProps = {
   identifier: string;
-  activeNode: any;//organize this i a better forme
-  citationsSelected: any;//
-  proposalsSelected: any;//
-  acceptedProposalsSelected: any;//
+  activeNode: any; //organize this i a better forme
+  citationsSelected: any; //
+  proposalsSelected: any; //
+  acceptedProposalsSelected: any; //
   commentsSelected: any;
   open: boolean;
   left: number;
   top: number;
   width: number;
   editable: boolean;
-  unaccepted: any;//
+  unaccepted: any; //
   nodeType: string;
   isTag: boolean;
-  isNew: any;//
+  isNew: any; //
   title: string;
   content: string;
   nodeImage: string;
   viewers: number;
-  correctNum: any;//
-  markedCorrect: any;//
-  wrongNum: any;//
-  markedWrong: any;//
+  correctNum: any; //
+  markedCorrect: any; //
+  wrongNum: any; //
+  markedWrong: any; //
   references: string[];
   tags: string[] | { node: string; title?: string; label?: string }[];
   parents: string[];
@@ -65,12 +64,12 @@ type NodeProps = {
   lastVisit: string;
   studied: number;
   isStudied: boolean;
-  changed: any;//
+  changed: any; //
   changedAt: string;
   bookmarked: boolean;
-  bookmarks: any;//
-  bookmark: any;//
-  markStudied: any;//
+  bookmarks: any; //
+  bookmark: any; //
+  markStudied: any; //
   nodeChanged: (
     nodeRef: any,
     nodeId: string,
@@ -79,31 +78,31 @@ type NodeProps = {
     imageLoaded: boolean,
     openPart: OpenPart
   ) => void;
-  chosenNodeChanged: any;//
-  referenceLabelChange: any;//
-  deleteLink: any;//
-  openLinkedNode: any;//
-  openAllChildren: any;//
-  onHideNode: any;//
-  hideOffsprings: any;//
-  toggleNode: (event: any, id: string) => void;//
-  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void;//
-  selectNode: any;//
-  nodeClicked: any;//
-  correctNode: any;//
-  wrongNode: any;//
-  uploadNodeImage: any;//
-  removeImage: any;//
-  changeChoice: any;//
-  changeFeedback: any;//
-  switchChoice: any;//
-  deleteChoice: any;//
-  addChoice: any;//
-  onNodeTitleBLur: any;//
-  saveProposedChildNode: any;//
-  saveProposedImprovement: any;//
-  closeSideBar: any;//
-  reloadPermanentGrpah: any;//
+  chosenNodeChanged: any; //
+  referenceLabelChange: any; //
+  deleteLink: any; //
+  openLinkedNode: any; //
+  openAllChildren: any; //
+  onHideNode: any; //
+  hideOffsprings: any; //
+  toggleNode: (event: any, id: string) => void; //
+  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
+  selectNode: any; //
+  nodeClicked: any; //
+  correctNode: any; //
+  wrongNode: any; //
+  uploadNodeImage: any; //
+  removeImage: any; //
+  changeChoice: any; //
+  changeFeedback: any; //
+  switchChoice: any; //
+  deleteChoice: any; //
+  addChoice: any; //
+  onNodeTitleBLur: any; //
+  saveProposedChildNode: any; //
+  saveProposedImprovement: any; //
+  closeSideBar: any; //
+  reloadPermanentGrpah: any; //
 };
 const Node = ({
   identifier,
@@ -174,9 +173,8 @@ const Node = ({
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
-  reloadPermanentGrpah,
+  reloadPermanentGrpah
 }: NodeProps) => {
-
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
   // const setChosenNode = useSetRecoilState(chosenNodeState);
@@ -185,7 +183,6 @@ const Node = ({
 
   const [{ user }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-
 
   const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
@@ -221,23 +218,20 @@ const Node = ({
 
   const hideNodeHandler = useCallback(
     (event: any) => {
-      console.log('Hide Node Handler is called', event.target)
+      console.log("Hide Node Handler is called", event.target);
       event.preventDefault();
-      event.stopPropagation()
-      onHideNode(identifier, setIsHiding)
+      event.stopPropagation();
+      onHideNode(identifier, setIsHiding);
     },
     [onHideNode, identifier]
   );
 
-  const hideOffspringsHandler = useCallback(
-    () => onHideOffsprings(identifier),
-    [onHideOffsprings, identifier]
-  );
+  const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
       // event.persist();
-      toggleNode(event, identifier, /*open*/);
+      toggleNode(event, identifier /*open*/);
     },
     [toggleNode, identifier, open]
   );
@@ -263,10 +257,7 @@ const Node = ({
     [markStudied, identifier]
   );
 
-  const bookmarkHandler = useCallback(
-    (event: any) => bookmark(event, identifier),
-    [bookmark, identifier]
-  );
+  const bookmarkHandler = useCallback((event: any) => bookmark(event, identifier), [bookmark, identifier]);
 
   const openNodePartHandler = useCallback(
     (event: any, partType: any) => {
@@ -289,15 +280,15 @@ const Node = ({
     [correctNode, identifier, nodeType]
   );
 
-  const wrongNodeHandler = useCallback((event: any) =>
-    wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
+  const wrongNodeHandler = useCallback(
+    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
     [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
   );
 
   const uploadNodeImageHandler = useCallback(
     // (event:any, isUploading:boolean, setIsUploading:any, setPercentageUploaded:any) =>
     //   uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded)
-    () => console.log('uploadNodeImageHandler'),
+    () => console.log("uploadNodeImageHandler"),
     [uploadNodeImage, nodeRef, identifier]
   );
 
@@ -328,7 +319,7 @@ const Node = ({
   );
 
   const locationSizeChange = useCallback(() => {
-    console.log('[NODE]: will call nodeChanged')
+    console.log("[NODE]: will call nodeChanged");
     nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
   }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
 
@@ -384,8 +375,9 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
-  if (!user) { return null }
-
+  if (!user) {
+    return null;
+  }
 
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
@@ -398,15 +390,15 @@ const Node = ({
         "Node card" +
         (activeNode
           ? //   &&
-          // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
-          " active"
+            // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
+            " active"
           : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
         (nodeBookState.choosingNode /*choosingNode*/ &&
-          nodeBookState.choosingNode.id/*choosingNode*/ !== identifier &&
-          !activeNode &&
-          (nodeBookState.choosingNode.type/*choosingType*/ !== "Reference" || nodeType === "Reference")
+        nodeBookState.choosingNode.id /*choosingNode*/ !== identifier &&
+        !activeNode &&
+        (nodeBookState.choosingNode.type /*choosingType*/ !== "Reference" || nodeType === "Reference")
           ? " Choosable"
           : "")
       }
@@ -414,25 +406,26 @@ const Node = ({
         left: left ? left : 1000,
         top: top ? top : 1000,
         width: width,
-        transition: '0.5s',
+        transition: "0.5s"
       }}
-    // style={
-    //   activeNode
-    //     ? {
-    //         left: left,
-    //         top: top,
-    //         width: width,
-    //         WebkitBoxShadow: boxShadowCSS,
-    //         MozBoxShadow: boxShadowCSS,
-    //         boxShadow: boxShadowCSS
-    //       }
-    //     : {
-    //         left: left,
-    //         top: top,
-    //         width: width
-    //       }
-    // }
-    >{identifier}
+      // style={
+      //   activeNode
+      //     ? {
+      //         left: left,
+      //         top: top,
+      //         width: width,
+      //         WebkitBoxShadow: boxShadowCSS,
+      //         MozBoxShadow: boxShadowCSS,
+      //         boxShadow: boxShadowCSS
+      //       }
+      //     : {
+      //         left: left,
+      //         top: top,
+      //         width: width
+      //       }
+      // }
+    >
+      {identifier}
       {open ? (
         <>
           <div className="card-content">
@@ -442,9 +435,9 @@ const Node = ({
                   <>
                     {/* New Node with inputs */}
                     <p className="NewChildProposalWarning">Before proposing,</p>
-                    <p className="NewChildProposalWarning" style={{ display: 'flex', alignItems: 'center' }}>
+                    <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
                       <span>- Search </span>
-                      <SearchIcon fontSize='small' sx={{ color: 'white', mx: '5px' }} />
+                      <SearchIcon fontSize="small" sx={{ color: "white", mx: "5px" }} />
                       <span> to ensure the node does not exist.</span>
                     </p>
                     {(nodeType === "Concept" ||
@@ -453,8 +446,7 @@ const Node = ({
                       nodeType === "News") &&
                       references.length === 0 && (
                         <p className="NewChildProposalWarning">
-                          - Make the reference nodes that you'd like to cite, visible on your map
-                          view.
+                          - Make the reference nodes that you'd like to cite, visible on your map view.
                         </p>
                       )}
                     <p id="NewChildProposalTitleHint">Please enter the node title below:</p>
@@ -464,7 +456,7 @@ const Node = ({
                 ))}
               {/* CHECK: I commented this */}
               <Editor
-                label='Please enter the node title below:'
+                label="Please enter the node title below:"
                 value={titleCopy}
                 // onChangeContent={setReason}
                 // onChangeContent={titleChange}
@@ -472,11 +464,11 @@ const Node = ({
                 readOnly={!editable}
               />
               {/* <HyperEditor
-                 readOnly={!editable}
-                 onChange={titleChange}
-                 onBlur={onNodeTitleBLur(title)}
-                 content={title}
-                 width={width}
+                readOnly={!editable}
+                onChange={titleChange}
+                onBlur={onNodeTitleBLur(title)}
+                content={title}
+                width={width}
                /> */}
               {/* {title} */}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
@@ -485,7 +477,7 @@ const Node = ({
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={hideOffspringsHandler}
                   onHideNodeHandler={hideNodeHandler}
-                  sx={{ position: 'absolute', right: '0px', top: '0px' }}
+                  sx={{ position: "absolute", right: "0px", top: "0px" }}
                 />
                 // <NodeHeader
                 //   identifier={identifier}
@@ -502,7 +494,7 @@ const Node = ({
             <div className="NodeContent" data-hoverable={true}>
               {editable && <p>Please edit the node content below:</p>}
               <Editor
-                label='Please edit the node content below:'
+                label="Please edit the node content below:"
                 value={contentCopy}
                 // onChangeContent={contentChange}
                 setValue={setContentCopy}
@@ -510,24 +502,22 @@ const Node = ({
               />
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
-                 readOnly={!editable}
-                 onChange={contentChange}
-                 content={content}
-                 width={width}
+                readOnly={!editable}
+                onChange={contentChange}
+                content={content}
+                width={width}
                /> */}
               {/* {content} */}
               {nodeImage !== "" && (
                 <>
                   {editable && (
                     <div className="RemoveImageDIV">
-                      {/* <MetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                         <div className="CloseButton">
-                           <i className="material-icons orange-text">delete_forever</i>
-                         </div>
-                       </MetaButton> */}
-                      <Tooltip onClick={() => console.log('removeImageHandler')} title={"Click to remove the image."}>
+                      <MemoizedMetaButton
+                        onClick={() => console.log("removeImageHandler")}
+                        tooltip="Click to remove the image."
+                      >
                         <DeleteForeverIcon />
-                      </Tooltip>
+                      </MemoizedMetaButton>
                     </div>
                   )}
                   {/* <a href={nodeImage} target="_blank"> */}
@@ -536,46 +526,46 @@ const Node = ({
                     alt="Node image"
                     className="responsive-img NodeImage"
                     onLoad={onImageLoad}
-                    onClick={() => console.log('onImageClick')}
+                    onClick={() => console.log("onImageClick")}
                   />
                   {/* </a> */}
                 </>
               )}
               {/* CHECK: I commented this */}
               {/* {nodeType === "Question" && "choices" in props && (
-                 <>
-                   <ul className="collapsible">
-                     {choices.map((choice, idx) => {
-                       return (
-                         <QuestionChoices
-                           key={identifier + "Choice" + idx}
-                           identifier={identifier}
-                           nodeRef={nodeRef}
-                           editable={editable}
-                           choices={choices}
-                           idx={idx}
-                           choicesNum={choices.length}
-                           choice={choice}
-                           deleteChoice={deleteChoice}
-                           switchChoice={switchChoice}
-                           changeChoice={changeChoice}
-                           changeFeedback={changeFeedback}
-                           nodeChanged={locationSizeChange}
-                         />
-                       );
-                     })}
-                   </ul>
-                   {editable && (
-                     <div className="QuestionAddChoice">
-                       <MetaButton
-                         onClick={addChoiceHandler}
-                         tooltip="Click to add a new choice to this question."
-                       >
-                         <i className="material-icons green-text">add</i> Add Choice
-                       </MetaButton>
-                     </div>
-                   )}
-                 </>
+                <>
+                  <ul className="collapsible">
+                    {choices.map((choice, idx) => {
+                      return (
+                        <QuestionChoices
+                          key={identifier + "Choice" + idx}
+                          identifier={identifier}
+                          nodeRef={nodeRef}
+                          editable={editable}
+                          choices={choices}
+                          idx={idx}
+                          choicesNum={choices.length}
+                          choice={choice}
+                          deleteChoice={deleteChoice}
+                          switchChoice={switchChoice}
+                          changeChoice={changeChoice}
+                          changeFeedback={changeFeedback}
+                          nodeChanged={locationSizeChange}
+                        />
+                      );
+                    })}
+                  </ul>
+                  {editable && (
+                    <div className="QuestionAddChoice">
+                      <MemoizedMetaButton
+                        onClick={addChoiceHandler}
+                        tooltip="Click to add a new choice to this question."
+                      >
+                        <i className="material-icons green-text">add</i> Add Choice
+                      </MemoizedMetaButton>
+                    </div>
+                  )}
+                </>
                )} */}
               {editable && (
                 <>
@@ -585,12 +575,7 @@ const Node = ({
                   </p>
                   {/* CHECK: I commented this */}
                   {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
-                  <Editor
-                    label='Reason'
-                    value={reason}
-                    setValue={setReason}
-                    readOnly={false}
-                  />
+                  <Editor label="Reason" value={reason} setValue={setReason} readOnly={false} />
                   {/* {reason} */}
                   {/* <p className="ProposalTitle">
                        Please write a few words to summarize what you've proposed
@@ -604,6 +589,53 @@ const Node = ({
                 </>
               )}
               <MemoizedNodeFooter
+                open={true}
+                identifier={identifier}
+                activeNode={activeNode}
+                citationsSelected={citationsSelected}
+                proposalsSelected={proposalsSelected}
+                acceptedProposalsSelected={acceptedProposalsSelected}
+                commentsSelected={commentsSelected}
+                editable={editable}
+                title={title} // x
+                content={content} // x
+                unaccepted={unaccepted}
+                openPart={openPart}
+                nodeType={nodeType}
+                isNew={isNew} // x
+                admin={admin}
+                aImgUrl={aImgUrl}
+                aFullname={aFullname}
+                aChooseUname={aChooseUname}
+                viewers={viewers}
+                correctNum={correctNum}
+                markedCorrect={markedCorrect}
+                wrongNum={wrongNum}
+                markedWrong={markedWrong}
+                references={references}
+                tags={tags}
+                parents={parents}
+                nodesChildren={nodesChildren}
+                commentsNum={commentsNum}
+                proposalsNum={proposalsNum}
+                studied={studied}
+                isStudied={isStudied}
+                changed={changed} // x
+                changedAt={changedAt}
+                bookmarked={bookmarked}
+                bookmarks={bookmarks}
+                reloadPermanentGrpah={reloadPermanentGrpah}
+                markStudied={markStudiedHandler} // x
+                bookmark={bookmarkHandler} // x
+                nodeChanged={locationSizeChange}
+                openNodePart={openNodePartHandler}
+                selectNode={selectNodeHandler}
+                correctNode={correctNodeHandler}
+                wrongNode={wrongNodeHandler}
+                uploadNodeImage={uploadNodeImageHandler}
+                user={user}
+              />
+              {/* <NodeFooter
                 open={true}
                 identifier={identifier}
                 activeNode={activeNode}
@@ -630,7 +662,7 @@ const Node = ({
                 references={references}
                 tags={tags}
                 parents={parents}
-                nodesChildren={nodesChildren}
+                children={children}
                 commentsNum={commentsNum}
                 proposalsNum={proposalsNum}
                 studied={studied}
@@ -648,53 +680,6 @@ const Node = ({
                 correctNode={correctNodeHandler}
                 wrongNode={wrongNodeHandler}
                 uploadNodeImage={uploadNodeImageHandler}
-                user={user}
-              />
-              {/* <NodeFooter
-                 open={true}
-                 identifier={identifier}
-                 activeNode={activeNode}
-                 citationsSelected={citationsSelected}
-                 proposalsSelected={proposalsSelected}
-                 acceptedProposalsSelected={acceptedProposalsSelected}
-                 commentsSelected={commentsSelected}
-                 editable={editable}
-                 title={title}                  // x
-                 content={content}              // x
-                 unaccepted={unaccepted}
-                 openPart={openPart}
-                 nodeType={nodeType}
-                 isNew={isNew}                  // x
-                 admin={admin}
-                 aImgUrl={aImgUrl}
-                 aFullname={aFullname}
-                 aChooseUname={aChooseUname}
-                 viewers={viewers}
-                 correctNum={correctNum}
-                 markedCorrect={markedCorrect}
-                 wrongNum={wrongNum}
-                 markedWrong={markedWrong}
-                 references={references}
-                 tags={tags}
-                 parents={parents}
-                 children={children}
-                 commentsNum={commentsNum}
-                 proposalsNum={proposalsNum}
-                 studied={studied}
-                 isStudied={isStudied}
-                 changed={changed}              // x
-                 changedAt={changedAt}
-                 bookmarked={bookmarked}
-                 bookmarks={bookmarks}
-                 reloadPermanentGrpah={reloadPermanentGrpah}
-                 markStudied={markStudiedHandler}     // x
-                 bookmark={bookmarkHandler}           // x
-                 nodeChanged={locationSizeChange}
-                 openNodePart={openNodePartHandler}
-                 selectNode={selectNodeHandler}
-                 correctNode={correctNodeHandler}
-                 wrongNode={wrongNodeHandler}
-                 uploadNodeImage={uploadNodeImageHandler}
                /> */}
             </div>
           </div>
@@ -734,14 +719,14 @@ const Node = ({
             <div className="NodeTitleClosed">
               {/* CHECK: I commented this */}
               {/* <HyperEditor
-                 readOnly={true}
-                 onChange={titleChange}
-                 content={title}
-                 width={width}
+                readOnly={true}
+                onChange={titleChange}
+                content={title}
+                width={width}
                /> */}
               {/* {title} */}
               <Editor
-                label='title'
+                label="title"
                 value={titleCopy}
                 // onChangeContent={titleChange}
                 setValue={setTitleCopy}
@@ -754,7 +739,7 @@ const Node = ({
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
                 onHideNodeHandler={hideNodeHandler}
-                sx={{ position: 'absolute', right: '0px', top: '0px' }}
+                sx={{ position: "absolute", right: "0px", top: "0px" }}
               />
               // <NodeHeader
               //   identifier={identifier}
@@ -777,12 +762,12 @@ const Node = ({
                 acceptedProposalsSelected={acceptedProposalsSelected}
                 commentsSelected={commentsSelected}
                 editable={editable}
-                title={title}                  // x
-                content={content}              // x
+                title={title} // x
+                content={content} // x
                 unaccepted={unaccepted}
                 openPart={openPart}
                 nodeType={nodeType}
-                isNew={isNew}                  // x
+                isNew={isNew} // x
                 admin={admin}
                 aImgUrl={aImgUrl}
                 aFullname={aFullname}
@@ -800,13 +785,13 @@ const Node = ({
                 proposalsNum={proposalsNum}
                 studied={studied}
                 isStudied={isStudied}
-                changed={changed}              // x
+                changed={changed} // x
                 changedAt={changedAt}
                 bookmarked={bookmarked}
                 bookmarks={bookmarks}
                 reloadPermanentGrpah={reloadPermanentGrpah}
-                markStudied={markStudiedHandler}     // x
-                bookmark={bookmarkHandler}           // x
+                markStudied={markStudiedHandler} // x
+                bookmark={bookmarkHandler} // x
                 nodeChanged={locationSizeChange}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
@@ -816,44 +801,44 @@ const Node = ({
                 user={user}
               />
               {/* <NodeFooter
-                 open={false}
-                 identifier={identifier}
-                 activeNode={activeNode}
-                 citationsSelected={citationsSelected}
-                 proposalsSelected={proposalsSelected}
-                 acceptedProposalsSelected={acceptedProposalsSelected}
-                 commentsSelected={commentsSelected}
-                 editable={editable}
-                 unaccepted={unaccepted}
-                 openPart={openPart}
-                 nodeType={nodeType}
-                 admin={admin}
-                 aImgUrl={aImgUrl}
-                 aFullname={aFullname}
-                 aChooseUname={aChooseUname}
-                 viewers={viewers}
-                 correctNum={correctNum}
-                 markedCorrect={markedCorrect}
-                 wrongNum={wrongNum}
-                 markedWrong={markedWrong}
-                 references={references}
-                 tags={tags}
-                 parents={parents}
-                 children={children}
-                 commentsNum={commentsNum}
-                 proposalsNum={proposalsNum}
-                 studied={studied}
-                 isStudied={isStudied}
-                 changedAt={changedAt}
-                 bookmarked={bookmarked}
-                 bookmarks={bookmarks}
-                 reloadPermanentGrpah={reloadPermanentGrpah}
-                 nodeChanged={locationSizeChange}
-                 openNodePart={openNodePartHandler}
-                 selectNode={selectNodeHandler}
-                 correctNode={correctNodeHandler}
-                 wrongNode={wrongNodeHandler}
-                 uploadNodeImage={uploadNodeImageHandler}
+                open={false}
+                identifier={identifier}
+                activeNode={activeNode}
+                citationsSelected={citationsSelected}
+                proposalsSelected={proposalsSelected}
+                acceptedProposalsSelected={acceptedProposalsSelected}
+                commentsSelected={commentsSelected}
+                editable={editable}
+                unaccepted={unaccepted}
+                openPart={openPart}
+                nodeType={nodeType}
+                admin={admin}
+                aImgUrl={aImgUrl}
+                aFullname={aFullname}
+                aChooseUname={aChooseUname}
+                viewers={viewers}
+                correctNum={correctNum}
+                markedCorrect={markedCorrect}
+                wrongNum={wrongNum}
+                markedWrong={markedWrong}
+                references={references}
+                tags={tags}
+                parents={parents}
+                children={children}
+                commentsNum={commentsNum}
+                proposalsNum={proposalsNum}
+                studied={studied}
+                isStudied={isStudied}
+                changedAt={changedAt}
+                bookmarked={bookmarked}
+                bookmarks={bookmarks}
+                reloadPermanentGrpah={reloadPermanentGrpah}
+                nodeChanged={locationSizeChange}
+                openNodePart={openNodePartHandler}
+                selectNode={selectNodeHandler}
+                correctNode={correctNodeHandler}
+                wrongNode={wrongNodeHandler}
+                uploadNodeImage={uploadNodeImageHandler}
                /> */}
             </div>
           </div>
@@ -861,7 +846,7 @@ const Node = ({
       )}
     </div>
   );
-}
+};
 
 export const MemoizedNode = React.memo(Node);
 

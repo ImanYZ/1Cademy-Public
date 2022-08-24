@@ -1,31 +1,30 @@
-import React, { Suspense, useRef } from 'react'
+import React, { Suspense, useRef } from "react";
 
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
-import { SelectionType } from '../../../nodeBookTypes';
-import Proposals from '../Proposals';
-import { MemoizedSidebarWrapper } from './SidebarWrapper';
+import { SelectionType } from "../../../nodeBookTypes";
+import Proposals from "../Proposals";
+import { MemoizedSidebarWrapper } from "./SidebarWrapper";
 
 type ProposalSidebar = {
   // reputationsLoaded: any,
   // reputationsWeeklyLoaded: any,
   // reputationsMonthlyLoaded: any,
   // openLinkedNode: any,
-  proposeNodeImprovement: any,
-  fetchProposals: any,
-  rateProposal: any,
-  selectProposal: any,
-  deleteProposal: any,
-  closeSideBar: any,
-  proposeNewChild: any,
+  proposeNodeImprovement: any;
+  fetchProposals: any;
+  rateProposal: any;
+  selectProposal: any;
+  deleteProposal: any;
+  closeSideBar: any;
+  proposeNewChild: any;
   // reloadPermanentGrpah: any,
   // openPractice: any,
   // setOpenPractice: any,
-  selectionType: SelectionType
-}
+  selectionType: SelectionType;
+};
 
 const Sidebar = (props: ProposalSidebar) => {
-
   // const [openPresentations, setOpenPresentations] = useState(false);
   // const [selectionType] = useState(null);
 
@@ -38,7 +37,7 @@ const Sidebar = (props: ProposalSidebar) => {
   // const [openBookmarks] = useState(false)
   const sidebarRef = useRef(null);
 
-  const theme = 'Dark'
+  const theme = "Dark";
   return (
     // <Drawer
     //   // sx={{
@@ -78,7 +77,7 @@ const Sidebar = (props: ProposalSidebar) => {
         >
           <div id="SidebarButtons">
             <div className="Logo">
-              <MetaButton
+              <MemoizedMetaButton
                 onClick={openSideBarClick("Trends")}
               // tooltip="Click to open the trends in proposals."
               // tooltipPosition="Right"
@@ -88,7 +87,7 @@ const Sidebar = (props: ProposalSidebar) => {
                   alt="1Logo"
                   width="61px"
                 />
-              </MetaButton>
+              </MemoizedMetaButton>
             </div>
             <UserStatusIcon
               uname={username}
@@ -112,18 +111,18 @@ const Sidebar = (props: ProposalSidebar) => {
             <PendingProposalsButton openSideBar={openSideBar} />
             
             <PresentationsButton openSideBar={openSideBar} />
-            <MetaButton
+            <MemoizedMetaButton
               onClick={openSideBarClick("Chat")}
             // tooltip="Click to open the chat room."
             // tooltipPosition="Right"
             >
               <i className="material-icons material-icons--outlined">forum</i>
               <span className="SidebarDescription">Chat</span>
-            </MetaButton>
+            </MemoizedMetaButton>
             {tag && (
               <>
                 
-                <MetaButton
+                <MemoizedMetaButton
                   onClick={leaderboardTypesToggle}
                 // tooltip={
                 //   "Click to " +
@@ -154,7 +153,7 @@ const Sidebar = (props: ProposalSidebar) => {
                       {leaderboardType ? leaderboardType : "Leaderboard"}
                     </div>
                   </div>
-                </MetaButton>
+                </MemoizedMetaButton>
                 {leaderboardTypeOpen && (
                   <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />
                 )}
@@ -177,40 +176,39 @@ const Sidebar = (props: ProposalSidebar) => {
         // className="active"
         className={
           props.selectionType === "Proposals" ||
-            props.selectionType === "AcceptedProposals" ||
-            props.selectionType === "Comments" ||
-            props.selectionType === "Citations" ||
-            props.selectionType === "UserInfo" //||
-            // CHECK: I commented this
-            // openPendingProposals ||
-            // openChat ||
-            // openNotifications ||
-            // openPresentations ||
-            // openToolbar ||
-            // openSearch ||
-            // openBookmarks ||
-            // openRecentNodes
-            ? //  ||
-            // openTrends
-            "active"
+          props.selectionType === "AcceptedProposals" ||
+          props.selectionType === "Comments" ||
+          props.selectionType === "Citations" ||
+          props.selectionType === "UserInfo" //||
+            ? // CHECK: I commented this
+              // openPendingProposals ||
+              // openChat ||
+              // openNotifications ||
+              // openPresentations ||
+              // openToolbar ||
+              // openSearch ||
+              // openBookmarks ||
+              // openRecentNodes
+              //  ||
+              // openTrends
+              "active"
             : ""
         }
-      // style={
-      //   selectedNode
-      //     ? {
-      //         WebkitBoxShadow: boxShadowCSS,
-      //         MozBoxShadow: boxShadowCSS,
-      //         boxShadow: boxShadowCSS
-      //       }
-      //     : {}
-      // }
+        // style={
+        //   selectedNode
+        //     ? {
+        //         WebkitBoxShadow: boxShadowCSS,
+        //         MozBoxShadow: boxShadowCSS,
+        //         boxShadow: boxShadowCSS
+        //       }
+        //     : {}
+        // }
       >
         <Suspense fallback={<div></div>}>
-
           <MemoizedSidebarWrapper
             headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
             title="Proposals"
-            scrollToTop={() => console.log('scrollToTop')}
+            scrollToTop={() => console.log("scrollToTop")}
             closeSideBar={props.closeSideBar}
           >
             <Proposals
@@ -376,9 +374,7 @@ const Sidebar = (props: ProposalSidebar) => {
       </div>
     </>
     // </Drawer>
-  )
-}
+  );
+};
 
 export const MemoizedSidebar = React.memo(Sidebar);
-
-

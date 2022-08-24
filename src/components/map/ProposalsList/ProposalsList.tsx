@@ -21,42 +21,33 @@ import UserHeader from "./UserHeader/UserHeader";
 
 // import "./ProposalsList.css";
 
-const doNothing = () => { };
+const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
 type ProposalsListProps = {
-  proposals: any,
-  setProposals: any,
-  proposeNodeImprovement: any,
-  fetchProposals: any,
-  rateProposal: any,
-  selectProposal: any,
-  deleteProposal: any,
-  editHistory: boolean,
-  proposeNewChild: any,
-  openProposal: any,
-  isAdmin: any,
-  isRetrieving: any,
-}
+  proposals: any;
+  setProposals: any;
+  proposeNodeImprovement: any;
+  fetchProposals: any;
+  rateProposal: any;
+  selectProposal: any;
+  deleteProposal: any;
+  editHistory: boolean;
+  proposeNewChild: any;
+  openProposal: any;
+  isAdmin: any;
+  isRetrieving: any;
+};
 
 const ProposalsList = (props: ProposalsListProps) => {
   const [user] = useAuth();
 
-  const username = user.user?.uname
+  const username = user.user?.uname;
 
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
-      props.rateProposal(
-        event,
-        props.proposals,
-        props.setProposals,
-        proposal.id,
-        proposalIdx,
-        correct,
-        wrong,
-        award
-      ),
+      props.rateProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx, correct, wrong, award),
     [props.rateProposal, props.proposals]
   );
 
@@ -66,7 +57,6 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
-
   return !props.isRetrieving ? (
     props.proposals.map((proposal: any, proposalIdx: number) => {
       const proposalSummaries = proposalSummariesGenerator(proposal);
@@ -75,8 +65,7 @@ const ProposalsList = (props: ProposalsListProps) => {
         if (props.openProposal === proposal.id) {
           let adminTooltip = "# of 1Admins who have awarded this proposal.";
           if (!props.isAdmin) {
-            adminTooltip +=
-              " You cannot give this proposal an award, because you are not the 1Admin of this node.";
+            adminTooltip += " You cannot give this proposal an award, because you are not the 1Admin of this node.";
           } else {
             if (proposal.proposer === username) {
               adminTooltip += " You cannot give your own proposal an award!";
@@ -85,9 +74,9 @@ const ProposalsList = (props: ProposalsListProps) => {
                 " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
             }
           }
-          console.warn('CHECK THIS PLEASE, WHERE IS USED')
+          console.warn("CHECK THIS PLEASE, WHERE IS USED");
           return (
-            <li className="collection-item avatar" key={`Proposal${proposal.id}`} style={{ border: 'solid 2px pink' }}>
+            <li className="collection-item avatar" key={`Proposal${proposal.id}`} style={{ border: "solid 2px pink" }}>
               <UserHeader imageUrl={proposal.imageUrl} />
               <div className="title Username">{proposal.proposer}</div>
               <div className="title Time">{dayjs(proposal.createdAt).fromNow()}</div>
@@ -108,34 +97,33 @@ const ProposalsList = (props: ProposalsListProps) => {
                 <p>{proposal.proposal}</p>
               </div>
               <div className="secondary-content">
-                <MetaButton
+                <MemoizedMetaButton
                   onClick={rateProposalClick(proposal, proposalIdx, false, true, false)}
                   tooltip="Click if you find this proposal Unhelpful."
                   tooltipPosition="bottom-start"
                 >
                   <>
-                    <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>
-                      close
-                    </i>
+                    <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>close</i>
                     <span>{shortenNumber(proposal.wrongs, 2, false)}</span>
                   </>
-                </MetaButton>
-                <MetaButton
+                </MemoizedMetaButton>
+                <MemoizedMetaButton
                   onClick={rateProposalClick(proposal, proposalIdx, true, false, false)}
                   tooltip="Click if you find this proposal helpful."
                   tooltipPosition="bottom-start"
                 >
                   <>
-                    <i className={proposal.correct
-                      ? "material-icons DoneIcon green-text"
-                      : "material-icons DoneIcon grey-text"
-                    }>
+                    <i
+                      className={
+                        proposal.correct ? "material-icons DoneIcon green-text" : "material-icons DoneIcon grey-text"
+                      }
+                    >
                       done
                     </i>
                     <span>{shortenNumber(proposal.corrects, 2, false)}</span>
                   </>
-                </MetaButton>
-                <MetaButton
+                </MemoizedMetaButton>
+                <MemoizedMetaButton
                   onClick={
                     !props.isAdmin || proposal.proposer === username
                       ? false
@@ -145,20 +133,18 @@ const ProposalsList = (props: ProposalsListProps) => {
                   tooltipPosition="bottom-start"
                 >
                   <>
-                    <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>
-                      grade
-                    </i>
+                    <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>grade</i>
                     <span>{shortenNumber(proposal.awards, 2, false)}</span>
                   </>
-                </MetaButton>
+                </MemoizedMetaButton>
                 {!proposal.accepted && proposal.proposer === username && (
-                  <MetaButton
+                  <MemoizedMetaButton
                     onClick={deleteProposalClick(proposal, proposalIdx)}
                     tooltip="Delete your proposal."
                     tooltipPosition="bottom-start"
                   >
                     <i className="material-icons grey-text">delete_forever</i>
-                  </MetaButton>
+                  </MemoizedMetaButton>
                 )}
               </div>
 

@@ -175,22 +175,21 @@ const Sidebar = (props: any) => {
 
   const [selectionType] = useState("Proposals");
   const [openPresentations] = useState(false);
-  const [openPendingProposals] = useState(false)
-  const [openChat] = useState(false)
-  const [openNotifications] = useState(false)
-  const [openToolbar] = useState(false)
-  const [tag] = useState(false)
-  const [openSearch] = useState(false)
-  const [openBookmarks] = useState(false)
+  const [openPendingProposals] = useState(false);
+  const [openChat] = useState(false);
+  const [openNotifications] = useState(false);
+  const [openToolbar] = useState(false);
+  const [tag] = useState(false);
+  const [openSearch] = useState(false);
+  const [openBookmarks] = useState(false);
   // const [leaderboardType, setLeaderboardType] = useState("Weekly");
   // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
 
   const sidebarRef = useRef<any | null>(null);
 
-  const scrollToTop = useCallback(
-    () => { sidebarRef.current.scrollTop = 0; },
-    [sidebarRef]
-  );
+  const scrollToTop = useCallback(() => {
+    sidebarRef.current.scrollTop = 0;
+  }, [sidebarRef]);
 
   // const openSideBar = useCallback(
   //   (sidebarType) => {
@@ -290,7 +289,7 @@ const Sidebar = (props: any) => {
 
   // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
 
-  const theme = 'Dark'
+  const theme = "Dark";
 
   return (
     <>
@@ -305,19 +304,20 @@ const Sidebar = (props: any) => {
         ref={sidebarRef}
         className={
           props.selectionType === "Proposals" ||
-            props.selectionType === "AcceptedProposals" ||
-            props.selectionType === "Comments" ||
-            props.selectionType === "Citations" ||
-            props.selectionType === "UserInfo" //||
-            // openPendingProposals ||
-            // openChat ||
-            // openNotifications ||
-            // openPresentations ||
-            // openToolbar ||
-            // openSearch ||
-            // openBookmarks ||
-            // openRecentNodes
-            ? "active" : ""
+          props.selectionType === "AcceptedProposals" ||
+          props.selectionType === "Comments" ||
+          props.selectionType === "Citations" ||
+          props.selectionType === "UserInfo" //||
+            ? // openPendingProposals ||
+              // openChat ||
+              // openNotifications ||
+              // openPresentations ||
+              // openToolbar ||
+              // openSearch ||
+              // openBookmarks ||
+              // openRecentNodes
+              "active"
+            : ""
         }
       >
         {/* side bar options */}
@@ -341,7 +341,7 @@ const Sidebar = (props: any) => {
               closeSideBar={props.closeSideBar}
             >
               <>
-                <h4 style={{ textAlign: 'center' }}>-- Proposals Sidebar --</h4>
+                <h4 style={{ textAlign: "center" }}>-- Proposals Sidebar --</h4>
                 <Proposals
                   proposeNodeImprovement={props.proposeNodeImprovement}
                   fetchProposals={props.fetchProposals}
@@ -363,7 +363,7 @@ const Sidebar = (props: any) => {
               closeSideBar={props.closeSideBar}
             >
               <>
-                <h4 style={{ textAlign: 'center' }}>-- Pending Proposals Sidebar --</h4>
+                <h4 style={{ textAlign: "center" }}>-- Pending Proposals Sidebar --</h4>
                 {/* <PendingProposalList openLinkedNode={props.openLinkedNode} /> */}
               </>
             </MemoizedSidebarWrapper>
@@ -463,11 +463,10 @@ const Sidebar = (props: any) => {
 
 export const MemoizedSidebar = React.memo(Sidebar);
 
-
-
 // --------------- side bar menu
 
-{/* <div
+{
+  /* <div
         id="SidebarButtonsContainer"
         style={
           selectionType ||
@@ -487,7 +486,7 @@ export const MemoizedSidebar = React.memo(Sidebar);
       >
         <div id="SidebarButtons">
           <div className="Logo">
-            <MetaButton
+            <MemoizedMetaButton
               onClick={openSideBarClick("Trends")}
             // tooltip="Click to open the trends in proposals."
             // tooltipPosition="Right"
@@ -497,7 +496,7 @@ export const MemoizedSidebar = React.memo(Sidebar);
                 alt="1Logo"
                 width="61px"
               />
-            </MetaButton>
+            </MemoizedMetaButton>
           </div>
           <UserStatusIcon
             uname={username}
@@ -524,17 +523,17 @@ export const MemoizedSidebar = React.memo(Sidebar);
           <PendingProposalsButton openSideBar={openSideBar} />
           
           <PresentationsButton openSideBar={openSideBar} />
-          <MetaButton
+          <MemoizedMetaButton
             onClick={openSideBarClick("Chat")}
           // tooltip="Click to open the chat room."
           // tooltipPosition="Right"
           >
             <i className="material-icons material-icons--outlined">forum</i>
             <span className="SidebarDescription">Chat</span>
-          </MetaButton>
+          </MemoizedMetaButton>
           {tag && (
             <>
-              <MetaButton
+              <MemoizedMetaButton
                 onClick={leaderboardTypesToggle}
               // tooltip={
               //   "Click to " +
@@ -566,7 +565,7 @@ export const MemoizedSidebar = React.memo(Sidebar);
                     {leaderboardType ? leaderboardType : "Leaderboard"}
                   </div>
                 </div>
-              </MetaButton>
+              </MemoizedMetaButton>
               {leaderboardTypeOpen && (
                 <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />
               )}
@@ -582,4 +581,5 @@ export const MemoizedSidebar = React.memo(Sidebar);
             </>
           )}
         </div>
-      </div> */}
+      </div> */
+}
