@@ -2204,6 +2204,9 @@ const Dashboard = ({ }: DashboardProps) => {
   return (
     <div className="MapContainer">
       <div id="Map">
+        {nodeBookState.chosenNode && (
+          <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>
+        )}
         <Box sx={{ width: "100vw", height: "100vh" }}>
           <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
@@ -2217,7 +2220,7 @@ const Dashboard = ({ }: DashboardProps) => {
           />
           <Box sx={{ position: 'fixed', right: '10px', zIndex: '1300', background: '#123' }}>
             {/* Data from map, DONT REMOVE */}
-            <Box>
+            {/* <Box>
               Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
             </Box>
             <Box>
@@ -2238,7 +2241,7 @@ const Dashboard = ({ }: DashboardProps) => {
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
               <Button onClick={() => openNodeHandler('JvMjw4kbgeqNA7sRQjfZ')}>Open Node Handler</Button>
-            </Box>
+            </Box> */}
           </Box>
 
           {/* end Data from map */}
@@ -2279,7 +2282,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 onNodeTitleBlur={() => { console.log("onNodeTitleBlur"); }}
                 saveProposedChildNode={() => { console.log("saveProposedChildNod"); }}
                 saveProposedImprovement={() => { console.log("saveProposedImprovemny"); }}
-                closeSideBar={() => { console.log("closeSideBar"); }}
+                closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => { console.log("reloadPermanentGrpah"); }}
               />
             </MapInteractionCSS>

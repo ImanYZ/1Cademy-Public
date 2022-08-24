@@ -116,8 +116,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
-      nodeBookDispatch({ 'type': 'setChoosingNode', payload: { id: props.identifier, type: linkType } })
       nodeBookDispatch({ type: 'setChosenNode', payload: null })
+      nodeBookDispatch({ 'type': 'setChoosingNode', payload: { id: props.identifier, type: linkType } })
       // setChoosingNode(props.identifier);
       // }
     },

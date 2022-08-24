@@ -204,6 +204,7 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
+      console.log('Node Clicked Handler', nodeBookState)
       if (nodeBookState.choosingNode) {
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
@@ -213,6 +214,7 @@ const Node = ({
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
+        console.log('will node clicked')
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
     },
