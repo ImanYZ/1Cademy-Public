@@ -1794,3 +1794,29 @@ button.MuiTab-textColorInherit:focus {
 .OverLine {
   text-decoration: overline;
 } */
+
+/* ------------------------------------------- */
+/* Edit proposal styles */
+
+#ProposeImprovementContainer {
+  text-align: center;
+  margin: 0 auto;
+}
+
+#ProposeImprovementButton {
+  /* padding: 7px 145px; */
+  /* CHECK: I improved this */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* #ProposeImprovementButton i {
+  margin-right: 4px;
+} */
+
+#ProposalReasoningDIV {
+  margin-left: -58px;
+  margin-top: 7px;
+}

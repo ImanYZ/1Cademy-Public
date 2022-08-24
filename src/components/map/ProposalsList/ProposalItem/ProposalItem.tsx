@@ -24,7 +24,6 @@ dayjs.extend(relativeTime);
 const ProposalItem = (props: any) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
-      console.log({ shouldSelectProposal: props.shouldSelectProposal, proposal });
       if (props.shouldSelectProposal) {
         props.selectProposal(event, proposal);
       } else {

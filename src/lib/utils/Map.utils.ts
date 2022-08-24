@@ -222,7 +222,6 @@ export const getDependentNodes = (dependents: any[], necessaryNodeIds: string[],
 // oldNodes: current value of nodesState in Map.js
 // callback: called after oldNodes is updated and the new node is added to the dagre object
 export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: any, oldNodes: any, allTags: any, callback?: any) => {
-  console.log('---> set Dag Node')
   let newNode: any = {};
   // 10
   // unde

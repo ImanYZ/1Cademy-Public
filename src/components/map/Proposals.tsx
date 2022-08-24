@@ -5,6 +5,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useNodeBook } from "../../context/NodeBookContext";
+import EditProposal from "./EditProposal";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import {
 //   openProposalState,
@@ -49,7 +50,6 @@ const Proposals = (props: ProposalsProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log('userEffect: fetch proposals')
     props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
     // Try to solve adding await
@@ -57,7 +57,6 @@ const Proposals = (props: ProposalsProps) => {
   }, []);
 
   useEffect(() => {
-    console.log('userEffect: fetch proposals')
     setOpenProposal(false);
     if (nodeBookState.selectedNode) {
       props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
@@ -68,11 +67,9 @@ const Proposals = (props: ProposalsProps) => {
   }, [nodeBookState.selectedNode]);
 
   useEffect(() => {
-    console.log('useEffect: setOpenProposal')
     setOpenProposal(false);
   }, [selectionType]);
 
-  console.log('------------------------- render proposal')
   const tabsItems = [
     {
       title: "Pending Proposals",
@@ -125,12 +122,13 @@ const Proposals = (props: ProposalsProps) => {
         <strong>Propose New Child / Improvement</strong>
       </div> */}
       <div id="ProposalButtonsCollection">
-        <h6 style={{ margin: '0px' }}>Here Edit proposal component</h6>
+        {/* <h6 style={{ margin: '0px' }}>Here Edit proposal component</h6> */}
         {/* CHECK: I commented this */}
-        {/* <EditProposal
+        <EditProposal
           openProposal={openProposal}
           proposeNodeImprovement={props.proposeNodeImprovement}
-        /> */}
+          selectedNode={nodeBookState.selectedNode}
+        />
         <div id="ProposalButtonsRow" style={{ border: 'solid 0px pink', display: 'flex', justifyContent: 'space-around' }}>
           {Object.keys(proposedChildTypesIcons).map((childNodeType) => {
             return (
