@@ -1049,8 +1049,7 @@ const Dashboard = ({ }: DashboardProps) => {
           if (nodeRef.current) {
             const { current } = nodeRef;
             newHeight = current.offsetHeight;
-            console.log({ offsetHeight: current.offsetHeight })
-            // debugger
+
             if ("height" in node && Number(node.height)) {
               currentHeight = Number(node.height);
             }
@@ -1072,7 +1071,7 @@ const Dashboard = ({ }: DashboardProps) => {
             }
           }
           if (nodesChanged) {
-            console.log('node added in dag', { node })
+            // console.log('node added in dag', { node })
             return setDagNode(g.current, nodeId, node, { ...oldNodes }, () => setMapChanged(true));
           } else {
             return oldNodes;
@@ -1549,24 +1548,34 @@ const Dashboard = ({ }: DashboardProps) => {
     [user, choosingNode, /*selectionType*/]
   );
 
+  /**
+   * This will update reference label and will update the required node
+   * without call sync or worker (thats good)
+   */
   const referenceLabelChange = useCallback(
-    (event, nodeId, referenceIdx) => {
-      console.log("[REFERENCE_LABLE_CHANGE]");
+    (event: any, nodeId: string, referenceIdx: number) => {
+      console.log("[REFERENCE_LABEL_CHANGE]", { event, nodeId, referenceIdx });
       event.persist();
-      setNodes((oldNodes) => {
-        const thisNode = { ...oldNodes[nodeId] };
-        thisNode.references = [...thisNode.references];
-        thisNode.references[referenceIdx] = {
-          // ...thisNode.references[referenceIdx],
-          label: event.target.value,
-        };
-        return {
-          ...oldNodes,
-          [nodeId]: { ...thisNode },
-        };
-      });
+      const thisNode = { ...nodes[nodeId] };
+      let referenceLabelsCopy = [...thisNode.referenceLabels]
+      referenceLabelsCopy[referenceIdx] = event.target.value
+      thisNode.referenceLabels = referenceLabelsCopy
+      setNodes({ ...nodes, nodeId: thisNode })
+
+      // setNodes((oldNodes) => {
+      //   const thisNode = { ...oldNodes[nodeId] };
+      //   thisNode.references = [...thisNode.references];
+      //   thisNode.references[referenceIdx] = {
+      //     // ...thisNode.references[referenceIdx],
+      //     label: event.target.value,
+      //   };
+      //   return {
+      //     ...oldNodes,
+      //     [nodeId]: { ...thisNode },
+      //   };
+      // });
     },
-    [setNodeParts]
+    [nodes/*setNodeParts*/]
   );
 
   const markStudied = useCallback(
@@ -2248,7 +2257,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 bookmark={bookmark}
                 markStudied={markStudied}
                 chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
-                referenceLabelChange={() => { console.log("referenceLabel change"); }}
+                referenceLabelChange={referenceLabelChange}
                 deleteLink={() => { console.log("delete link"); }}
                 openLinkedNode={openLinkedNode}
                 openAllChildren={() => { console.log("open all children"); }}

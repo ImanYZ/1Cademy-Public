@@ -303,6 +303,7 @@ const Node = ({
 
   const referenceLabelChangeHandler = useCallback(
     (event: any, referenceIdx: string) => {
+      console.log('referenceLabelChangeHandler', { event, identifier, referenceIdx })
       return referenceLabelChange(event, identifier, referenceIdx);
     },
     [referenceLabelChange, identifier]

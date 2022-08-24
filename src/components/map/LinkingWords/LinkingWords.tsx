@@ -1,8 +1,11 @@
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 // import "./LinkingWords.css";
 
 // import Button from "@material-ui/core/Button";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { Button, Link, TextField, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
@@ -23,7 +26,6 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import LinkingButton from "./LinkingButton";
 
 const separateURL = (text: string): [boolean, any] => {
-  console.log('separateURL:text', text)
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex);
   if (matches && matches.length > 0) {
@@ -272,6 +274,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         >
                           <i className="material-icons grey-text">delete_forever</i>
                         </MetaButton> */}
+                        <Button onClick={deleteLink(idx, "Reference")} color={'error'}>--> ADD A METABUTTON TO REMOVE REFERENCES</Button>
                       </div>
                     </>
                   )}
@@ -285,7 +288,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
             {props.openPart === "LinkingWords" &&
               !props.isNew &&
               nodeBookState.selectedNode === props.identifier ? (
-              <div>Link to an existing parent node.</div>
+              // <div>Link to an existing parent node.</div>
+              <Button onClick={choosingNewLinkedNode("Parent")} color={'error'}>
+                <ArrowBackIcon fontSize='small' sx={{ color: '#00E676' }} />
+                <AddIcon fontSize='small' sx={{ color: '#00E676' }} />
+                --> ADD A METABUTTON TO Link to an existing parent node.
+
+              </Button>
               // <MetaButton
               //   onClick={choosingNewLinkedNode("Parent")}
               //   tooltip="Link to an existing parent node."
@@ -297,10 +306,10 @@ const LinkingWords = (props: LinkingWordsProps) => {
             ) : (
               props.openPart === "References" && (
                 <Tooltip title="Link to a reference node.">
-                  <Button sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Button sx={{ display: 'flex', alignItems: 'center' }} onClick={choosingNewLinkedNode("Parent")}>
                     <MenuBookIcon sx={{ color: '#f9a825' }} />
                     <AddIcon sx={{ color: '#00E676' }} />
-                    <span>Cite an existing Reference</span>
+                    <span> Cite an existing Reference</span>
                   </Button>
                 </Tooltip>
                 // <MetaButton
@@ -359,9 +368,10 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   />
                   {props.editable && (
                     <div className="LinkDeleteButton">
-                      <Tooltip title="Delete the link to this tag." placement='right'>
+                      {/* <Tooltip title="Delete the link to this tag." placement='right'>
                         <DeleteForeverIcon />
-                      </Tooltip>
+                      </Tooltip> */}
+                      <Button onClick={deleteLink(idx, "Tag")} color={'error'}>--> ADD A METABUTTON TO REMOVE TAGS</Button>
                       {/* CHECK */}
                       {/* <MetaButton
                         onClick={deleteLink(idx, "Tag")}
@@ -376,9 +386,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
               );
             })}
             {props.editable && props.openPart === "References" && (
-              <Tooltip title="Delete the link to this child." placement='right'>
-                <DeleteForeverIcon />
-              </Tooltip>
+              // <Tooltip title="Delete the link to this child." placement='right'>
+              //   <DeleteForeverIcon />
+              // </Tooltip>
               // CHECK
               // <MetaButton
               //   onClick={choosingNewLinkedNode("Tag")}
@@ -388,6 +398,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
               //   <i className="material-icons orange-text">local_offer</i>{" "}
               //   <i className="material-icons green-text">add</i> Add an existing Tag
               // </MetaButton>
+              <Tooltip title="Link to a node.">
+                <Button sx={{ display: 'flex', alignItems: 'center' }} onClick={choosingNewLinkedNode("Tag")}>
+                  <LocalOfferIcon sx={{ color: '#f9a825' }} />
+                  <AddIcon sx={{ color: '#00E676' }} />
+                  <span> Add an existing Tag</span>
+                </Button>
+              </Tooltip>
             )}
           </>
         )}
@@ -441,7 +458,12 @@ const LinkingWords = (props: LinkingWordsProps) => {
           !props.isNew &&
           nodeBookState.selectedNode === props.identifier &&
           props.openPart === "LinkingWords" && (
-            <div>LinkingWords</div>
+            <Button onClick={choosingNewLinkedNode("Child")} color={'error'}>
+                --> ADD A METABUTTON TO Link to an existing parent node.
+              <AddIcon fontSize='small' sx={{ color: '#00E676' }} />
+              <ArrowForwardIcon fontSize='small' sx={{ color: '#00E676' }} />
+
+            </Button>
             // CHECKED
             // <MetaButton
             //   onClick={choosingNewLinkedNode("Child")}
