@@ -1105,23 +1105,19 @@ const Dashboard = ({ }: DashboardProps) => {
 
         const thisNode = copyNode(oldNodes[nodeId]);
         const chosenNodeObj = copyNode(oldNodes[nodeBookState.chosenNode.id]);
-        let validLink = false;
-        if (
-          (nodeBookState.choosingNode.type === "Reference" &&
-            thisNode.references.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0 &&
-            nodeBookState.chosenNode.id !== nodeId &&
-            chosenNodeObj.nodeType === nodeBookState.choosingNode.type) ||
+
+        const validLink = (nodeBookState.choosingNode.type === "Reference" &&
+          thisNode.referenceIds.filter((l) => l === nodeBookState.chosenNode?.id).length === 0 &&
+          nodeBookState.chosenNode.id !== nodeId &&
+          chosenNodeObj.nodeType === nodeBookState.choosingNode.type) ||
           (nodeBookState.choosingNode.type === "Tag" &&
-            thisNode.tags.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0) ||
+            thisNode.tagIds.filter((l) => l === nodeBookState.chosenNode?.id).length === 0) ||
           (nodeBookState.choosingNode.type === "Parent" &&
             nodeBookState.choosingNode.id !== nodeBookState.chosenNode.id &&
-            thisNode.parents.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0) ||
+            thisNode.parents.filter((l: any) => l.node === nodeBookState.chosenNode?.id).length === 0) ||
           (nodeBookState.choosingNode.type === "Child" &&
             nodeBookState.choosingNode.id !== nodeBookState.chosenNode.id &&
-            thisNode.children.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0)
-        ) {
-          validLink = true;
-        }
+            thisNode.children.filter((l: any) => l.node === nodeBookState.chosenNode?.id).length === 0)
 
         if (validLink) {
           if (nodeBookState.choosingNode.type === "Reference") {
