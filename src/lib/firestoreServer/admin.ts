@@ -23,6 +23,7 @@ if (!admin.apps.length) {
   getFirestore().settings({ ignoreUndefinedProperties: true });
 }
 const MAX_TRANSACTION_WRITES = 499;
+const MIN_ACCEPTED_VERSION_POINT_WEIGHT = 0.1;
 const db = getFirestore();
 
 const makeCommitBatch = async (batch: WriteBatch) => {
@@ -67,4 +68,4 @@ const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: numb
   return [batch, writeCounts];
 };
 
-export { admin, db, checkRestartBatchWriteCounts };
+export { admin, db, checkRestartBatchWriteCounts, MIN_ACCEPTED_VERSION_POINT_WEIGHT };
