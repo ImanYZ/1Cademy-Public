@@ -1302,6 +1302,8 @@ const Dashboard = ({ }: DashboardProps) => {
         } else if (linkType === "Reference") {
           thisNode.references = [...thisNode.references];
           thisNode.references.splice(linkIdx, 1);
+          thisNode.referenceIds.splice(linkIdx, 1);
+          thisNode.referenceLabels.splice(linkIdx, 1);
         } else if (linkType === "Tag") {
           thisNode.tags = [...thisNode.tags];
           thisNode.tags.splice(linkIdx, 1);
