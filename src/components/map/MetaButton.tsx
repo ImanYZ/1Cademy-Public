@@ -90,4 +90,4 @@ const MetaButton = (props: MetaButtonProps) => {
   }
 };
 
-export default React.memo(MetaButton);
+export const MemoizedMetaButton =React.memo(MetaButton);

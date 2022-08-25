@@ -1,29 +1,28 @@
+import { Editor } from "@/components/Editor";
 import { Button, Tooltip } from "@mui/material";
 import React, { useCallback } from "react";
 
 // import HyperEditor from "../../../Editor/HyperEditor/HyperEditorWrapper";
 import { NodeType } from "../../../types";
 import NodeTypeIcon from "../../NodeTypeIcon2";
+import MetaButton, { MemoizedMetaButton } from "../MetaButton";
 // import MetaButton from "../../MetaButton/MetaButton";
 
-const doNothing = () => { };
+const doNothing = () => {};
 
 type LinkingButtonProps = {
-  onClick: any,
+  onClick: any;
   // nodeID: any,
-  linkedNodeID: any,
-  linkedNodeTitle: string,
-  linkedNodeType: "child" | "children" | "tag" | "parent" | "reference",
-  nodeType?: NodeType,
-  visible?: boolean,
-  iClassName?: string,
-}
+  linkedNodeID: any;
+  linkedNodeTitle: string;
+  linkedNodeType: "child" | "children" | "tag" | "parent" | "reference";
+  nodeType?: NodeType;
+  visible?: boolean;
+  iClassName?: string;
+};
 
 const LinkingButton = (props: LinkingButtonProps) => {
-  const linkedNodeClick = useCallback(
-    (event) => props.onClick(props.linkedNodeID),
-    [props.onClick, props.linkedNodeID]
-  );
+  const linkedNodeClick = useCallback(() => props.onClick(props.linkedNodeID), [props.onClick, props.linkedNodeID]);
 
   let iClassName = "material-icons LinkingButtonIcon ";
   if (props.linkedNodeType !== "children") {
@@ -36,41 +35,27 @@ const LinkingButton = (props: LinkingButtonProps) => {
     iClassName += "gray-text";
   }
   return (
-    <Tooltip
-      title={`${props.visible ? "Navigate to" : "Open"} ${props.linkedNodeType === "children"
-        ? " all the children."
-        : " this " + props.linkedNodeType + " node."
-        }`}
-      placement={
-        props.linkedNodeType === "child" ||
-          props.linkedNodeType === "children" ||
-          props.linkedNodeType === "tag"
+    <MemoizedMetaButton
+      onClick={linkedNodeClick}
+      tooltip={`${props.visible ? "Navigate to" : "Open"} ${
+        props.linkedNodeType === "children" ? " all the children." : " this " + props.linkedNodeType + " node."
+      }`}
+      tooltipPosition={
+        props.linkedNodeType === "child" || props.linkedNodeType === "children" || props.linkedNodeType === "tag"
           ? "right"
           : "left"
       }
     >
-      <Button onClick={linkedNodeClick}>
-
-
-        {/* // <MetaButton
-          //   onClick={linkedNodeClick}
-          //   tooltip={`${props.visible ? "Navigate to" : "Open"} ${props.linkedNodeType === "children"
-          //     ? " all the children."
-          //     : " this " + props.linkedNodeType + " node."
-          //     }`}
-          //   tooltipPosition={
-          //     props.linkedNodeType === "child" ||
-          //       props.linkedNodeType === "children" ||
-          //       props.linkedNodeType === "tag"
-          //       ? "Right"
-          //       : "Left"
-          //   }
-          // > */}
+      <>
         <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
         {/* CHECK: I commented this, please uncomment this */}
         {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
-        <p>{props.linkedNodeTitle}</p>
-
+        {/* <HyperEditor
+        readOnly={true}
+        onChange={doNothing}
+        content={props.linkedNodeTitle}
+      /> */}
+        <Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTitle} />
         {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
         <div className="preloader-wrapper active small right">
           <div className="spinner-layer spinner-yellow-only">
@@ -80,11 +65,8 @@ const LinkingButton = (props: LinkingButtonProps) => {
           </div>
         </div>
       )} */}
-        {/* // </MetaButton> */}
-
-
-      </Button>
-    </Tooltip >
+      </>
+    </MemoizedMetaButton>
   );
 };
 

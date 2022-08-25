@@ -1,7 +1,7 @@
 // import "./ProposalItem.css";
-import CloseIcon from '@mui/icons-material/Close';
-import DoneIcon from '@mui/icons-material/Done';
-import GradeIcon from '@mui/icons-material/Grade';
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
+import GradeIcon from "@mui/icons-material/Grade";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { AnyARecord } from "dns";
@@ -10,14 +10,15 @@ import React, { useCallback } from "react";
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { Editor } from "../../../Editor";
-import MetaButton from "../../MetaButton";
+import { MemoizedMetaButton } from "../../MetaButton";
+
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
 // import MetaButton from "../../../../MetaButton/MetaButton";
 // import proposalSummariesGenerator from "../../proposalSummariesGenerator";
 
-const doNothing = () => { };
+const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
@@ -45,28 +46,28 @@ const ProposalItem = (props: any) => {
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
       onClick={openLinkedNodeClick(props.proposal)}
-      style={{ display: 'flex', flexDirection: 'column', padding: '10px 20px' }}
+      style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time">{dayjs(props.proposal.createdAt).fromNow()}</div>
-        <div className="secondary-content" style={{ display: 'flex', alignItems: 'center' }}>
-          <MetaButton
+        <div className="secondary-content" style={{ display: "flex", alignItems: "center" }}>
+          <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal unhelpful."
             tooltipPosition="bottom-start"
           >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
               {/* <i className={"material-icons " + (props.proposal.wrong ? "red-text" : "grey-text")}>
                 close
               </i> */}
-              <CloseIcon fontSize='small' />
+              <CloseIcon fontSize="small" />
               <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
             </div>
-          </MetaButton>
-          <MetaButton
+          </MemoizedMetaButton>
+          <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal helpful."
             tooltipPosition="bottom-start"
           >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
               {/* <i
                 className={
                   "material-icons DoneIcon " + (props.proposal.correct ? "green-text" : "grey-text")
@@ -74,22 +75,19 @@ const ProposalItem = (props: any) => {
               >
                 done
               </i> */}
-              <DoneIcon fontSize='small' />
+              <DoneIcon fontSize="small" />
               <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
             </div>
-          </MetaButton>
-          <MetaButton
-            tooltip="# of 1Admins who have awarded this proposal."
-            tooltipPosition="bottom-start"
-          >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+          </MemoizedMetaButton>
+          <MemoizedMetaButton tooltip="# of 1Admins who have awarded this proposal." tooltipPosition="bottom-start">
+            <div style={{ display: "flex", alignItems: "center" }}>
               {/* <i className={"material-icons " + (props.proposal.award ? "amber-text" : "grey-text")}>
                 grade
               </i> */}
-              <GradeIcon fontSize='small' />
+              <GradeIcon fontSize="small" />
               <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
             </div>
-          </MetaButton>
+          </MemoizedMetaButton>
         </div>
       </div>
       <div>
@@ -104,14 +102,18 @@ const ProposalItem = (props: any) => {
           {/* <p>Proposal Summary:</p> */}
           {proposalSummaries.length > 0
             ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
-              return <p style={{ margin: '0px' }} key={"Summary" + props.proposal.id + prSummaryIdx}>{prSummary}</p>;
-            })
+                return (
+                  <p style={{ margin: "0px" }} key={"Summary" + props.proposal.id + prSummaryIdx}>
+                    {prSummary}
+                  </p>
+                );
+              })
             : props.proposal.summary && (
-              // CHECK: I commented this
-              // <HyperEditor readOnl={true} onChange={doNothing} content={props.proposal.summary} />
-              <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
-              // <p>{props.proposal.summary}</p>
-            )}
+                // CHECK: I commented this
+                // <HyperEditor readOnl={true} onChange={doNothing} content={props.proposal.summary} />
+                <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
+                // <p>{props.proposal.summary}</p>
+              )}
         </div>
       </div>
     </li>
