@@ -1,5 +1,5 @@
 
-import { Button } from "@mui/material";
+import { Button, Drawer } from "@mui/material";
 import { Box } from "@mui/system";
 import dagre from "dagre";
 import {
@@ -180,6 +180,8 @@ const Dashboard = ({ }: DashboardProps) => {
   // FLAGS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
+
+  const [openDeveloperMenu, setOpenDeveloperMenu] = useState(false)
 
   // flag for whether cursor is not on text
   // for determining whether the map should move if the user clicks and drags
@@ -1788,7 +1790,7 @@ const Dashboard = ({ }: DashboardProps) => {
       let referenceLabelsCopy = [...thisNode.referenceLabels]
       referenceLabelsCopy[referenceIdx] = event.target.value
       thisNode.referenceLabels = referenceLabelsCopy
-      setNodes({ ...nodes, nodeId: thisNode })
+      setNodes({ ...nodes, [nodeId]: thisNode })
 
       // setNodes((oldNodes) => {
       //   const thisNode = { ...oldNodes[nodeId] };
@@ -2436,6 +2438,39 @@ const Dashboard = ({ }: DashboardProps) => {
           <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>
         )}
         <Box sx={{ width: "100vw", height: "100vh" }}>
+          <Drawer
+            anchor={'right'}
+            open={openDeveloperMenu}
+            onClose={() => setOpenDeveloperMenu(false)}
+          >
+            {/* Data from map, DONT REMOVE */}
+            <Box>
+              Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(nodes)}>nodes</Button>
+              <Button onClick={() => console.log(edges)}>edges</Button>
+              <Button onClick={() => console.log(allTags)}>allTags</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log('DAGGER', g)}>Dager</Button>
+              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+              <Button onClick={() => console.log(user)}>user</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+              <Button onClick={() => console.log(mapChanged)}>map changed</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
+              <Button onClick={() => openNodeHandler('JvMjw4kbgeqNA7sRQjfZ')}>Open Node Handler</Button>
+            </Box>
+          </Drawer>
           <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -2446,30 +2481,8 @@ const Dashboard = ({ }: DashboardProps) => {
             proposeNewChild={proposeNewChild}
             selectionType={nodeBookState.selectionType}
           />
-          <Box sx={{ position: 'fixed', right: '10px', zIndex: '1300', background: '#123' }}>
-            {/* Data from map, DONT REMOVE */}
-            {/* <Box>
-              Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(nodes)}>nodes</Button>
-              <Button onClick={() => console.log(edges)}>edges</Button>
-              <Button onClick={() => console.log(allTags)}>allTags</Button>
-              <Button onClick={() => console.log('DAGGER', g)}>Dager</Button>
-              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-              <Button onClick={() => console.log(user)}>user</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-              <Button onClick={() => console.log(mapChanged)}>map changed</Button>
-              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => nodeBookDispatch({ type: 'setSelectionType', payload: 'Proposals' })}>Toggle Open proposals</Button>
-              <Button onClick={() => openNodeHandler('JvMjw4kbgeqNA7sRQjfZ')}>Open Node Handler</Button>
-            </Box> */}
+          <Box sx={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '1300', background: '#123' }}>
+            <Button variant="contained" onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>{'X'}</Button>
           </Box>
 
           {/* end Data from map */}
