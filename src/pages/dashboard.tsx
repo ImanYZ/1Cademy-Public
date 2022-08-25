@@ -106,7 +106,7 @@ const Dashboard = ({ }: DashboardProps) => {
   // node that user is currently selected (node will be highlighted)
   const [sNode, setSNode] = useState(null); //<--- this was with recoil
   // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
-  const [choosingNode, setChoosingNode] = useState(null); //<--- this was with recoil
+  // const [choosingNode, setChoosingNode] = useState(null); //<--- this was with recoil
   // // node that is in focus (highlighted)
   // const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
@@ -167,10 +167,10 @@ const Dashboard = ({ }: DashboardProps) => {
   const [openProposal, setOpenProposal] = useState<string | boolean>(false);
 
   // when proposing improvements, lists of added/removed parent/child links
-  const [addedParents, setAddedParents] = useState([]);
-  const [addedChildren, setAddedChildren] = useState([]);
-  const [removedParents, setRemovedParents] = useState([]);
-  const [removedChildren, setRemovedChildren] = useState([]);
+  const [addedParents, setAddedParents] = useState<string[]>([]);
+  const [addedChildren, setAddedChildren] = useState<string[]>([]);
+  const [removedParents, setRemovedParents] = useState<string[]>([]);
+  const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
   const g = useRef(dagreUtils.createGraph())
 
@@ -1089,6 +1089,165 @@ const Dashboard = ({ }: DashboardProps) => {
     [/*mapRendered*/, allTags]
   );
 
+  const chosenNodeChanged = useCallback(
+    (nodeId: string) => {
+      // if (!nodeBookState.choosingNode) return
+
+      // if (nodeId === nodeBookState.choosingNode?.id && nodeBookState.chosenNode) {
+      console.log('[CHOSEN_NODE_CHANGED]')
+      setNodes((oldNodes) => {
+        // debugger
+        if (!nodeBookState.choosingNode || !nodeBookState.chosenNode) return oldNodes
+        if (nodeId !== nodeBookState.choosingNode.id) return oldNodes
+
+        const thisNode = copyNode(oldNodes[nodeId]);
+        const chosenNodeObj = copyNode(oldNodes[nodeBookState.chosenNode.id]);
+        let validLink = false;
+        if (
+          (nodeBookState.choosingNode.type === "Reference" &&
+            thisNode.references.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0 &&
+            nodeBookState.chosenNode.id !== nodeId &&
+            chosenNodeObj.nodeType === nodeBookState.choosingNode.type) ||
+          (nodeBookState.choosingNode.type === "Tag" &&
+            thisNode.tags.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0) ||
+          (nodeBookState.choosingNode.type === "Parent" &&
+            nodeBookState.choosingNode.id !== nodeBookState.chosenNode.id &&
+            thisNode.parents.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0) ||
+          (nodeBookState.choosingNode.type === "Child" &&
+            nodeBookState.choosingNode.id !== nodeBookState.chosenNode.id &&
+            thisNode.children.filter((l: any) => l.node === nodeBookState.chosenNode).length === 0)
+        ) {
+          validLink = true;
+        }
+
+        if (validLink) {
+          if (nodeBookState.choosingNode.type === "Reference") {
+            thisNode.references = [...thisNode.references, chosenNodeObj.title]
+            thisNode.referenceIds = [...thisNode.referenceIds, nodeBookState.chosenNode.id]
+            thisNode.referenceLabels = [...thisNode.referenceLabels, ""]
+            // thisNode.references = [
+            //   ...thisNode.references,
+            //   {
+            //     node: nodeBookState.chosenNode.id,
+            //     title: chosenNodeObj.title,
+            //     label: "",
+            //   },
+            // ];
+          } else if (nodeBookState.choosingNode.type === "Tag") {
+            thisNode.tags = [...thisNode.tags, chosenNodeObj.title]
+            thisNode.tagIds = [...thisNode.tagIds, nodeBookState.chosenNode.id]
+            // thisNode.tags = [
+            //   ...thisNode.tags,
+            //   {
+            //     node: nodeBookState.chosenNode.id,
+            //     title: chosenNodeObj.title,
+            //   },
+            // ];
+          } else if (nodeBookState.choosingNode.type === "Parent") {
+            thisNode.parents = [
+              ...thisNode.parents,
+              {
+                node: nodeBookState.chosenNode.id,
+                title: chosenNodeObj.title,
+                label: "",
+              },
+            ];
+            if (!(nodeBookState.chosenNode.id in changedNodes)) {
+              changedNodes[nodeBookState.chosenNode.id] = copyNode(oldNodes[nodeBookState.chosenNode.id]);
+            }
+            chosenNodeObj.children = [
+              ...chosenNodeObj.children,
+              {
+                node: nodeBookState.choosingNode.id,
+                title: thisNode.title,
+                label: "",
+              },
+            ];
+            if (removedParents.includes(nodeBookState.chosenNode.id)) {
+              const chosenNodeId = nodeBookState.chosenNode.id
+              setRemovedParents(removedParents.filter((nId: string) => nId !== chosenNodeId));
+            } else {
+              const choosingNodeId = nodeBookState.choosingNode.id
+              setAddedParents((oldAddedParents) => [...oldAddedParents, choosingNodeId]);
+            }
+            setEdges((oldEdges) => {
+              if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges
+              return setDagEdge(g.current, nodeBookState.chosenNode.id, nodeBookState.choosingNode.id, { label: "" }, { ...oldEdges });
+            });
+          } else if (nodeBookState.choosingNode.type === "Child") {
+            thisNode.children = [
+              ...thisNode.children,
+              {
+                node: nodeBookState.chosenNode.id,
+                title: chosenNodeObj.title,
+                label: "",
+              },
+            ];
+            if (!(nodeBookState.chosenNode.id in changedNodes)) {
+              changedNodes[nodeBookState.chosenNode.id] = copyNode(oldNodes[nodeBookState.chosenNode.id]);
+            }
+            chosenNodeObj.parents = [
+              ...chosenNodeObj.parents,
+              {
+                node: nodeBookState.choosingNode.id,
+                title: thisNode.title,
+                label: "",
+              },
+            ];
+            setEdges((oldEdges) => {
+              if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges
+              return setDagEdge(g.current, nodeBookState.choosingNode.id, nodeBookState.chosenNode.id, { label: "" }, { ...oldEdges });
+            });
+            if (removedChildren.includes(nodeBookState.chosenNode.id)) {
+              const chosenNodeId = nodeBookState.choosingNode.id
+              setRemovedChildren(removedChildren.filter((nId) => nId !== chosenNodeId));
+            } else {
+              setAddedChildren([...addedChildren, nodeBookState.chosenNode.id]);
+            }
+          }
+
+          const chosenNode = nodeBookState.chosenNode.id
+          nodeBookDispatch({ type: 'setChoosingNode', payload: null })
+          nodeBookDispatch({ type: 'setChosenNode', payload: null })
+          // nodeBookDispatch({ type: 'setChoosingType', payload: null })
+          // setChoosingNode(false);
+          // setChosenNode(null);
+          // setChosenNodeTitle(null);
+          // setChoosingType(null);
+          scrollToNode(nodeId);
+          setMapChanged(true);
+
+          const res = {
+            ...oldNodes,
+            [nodeId]: thisNode,
+            [chosenNode]: chosenNodeObj,
+          }
+          console.log('===>', { oldNodes, thisNode, chosenNodeObj, res })
+          return {
+            ...oldNodes,
+            [nodeId]: thisNode,
+            [chosenNode]: chosenNodeObj,
+          };
+        } else {
+          return oldNodes;
+        }
+      });
+
+    },
+    [
+      nodeBookState.choosingNode,
+      nodeBookState.chosenNode,
+      // nodeBookState.choosingType,
+      // choosingNode,
+      // chosenNode,
+      // choosingType,
+      removedParents,
+      addedParents,
+      removedChildren,
+      addedChildren,
+    ]
+  );
+
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
@@ -1169,7 +1328,7 @@ const Dashboard = ({ }: DashboardProps) => {
         setIsSubmitting(false);
       }
     },
-    [choosingNode, nodes, recursiveOffsprings]
+    [nodeBookState.choosingNode, nodes, recursiveOffsprings]
   );
 
   const openNodeHandler = useMemoizedCallback(
@@ -1326,7 +1485,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID);
         if (linkedNode) {
           scrollToNode(linkedNodeID);
@@ -1339,7 +1498,7 @@ const Dashboard = ({ }: DashboardProps) => {
         }
       }
     },
-    [choosingNode, openNodeHandler]
+    [nodeBookState.choosingNode, openNodeHandler]
   );
 
   const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
@@ -1385,7 +1544,7 @@ const Dashboard = ({ }: DashboardProps) => {
        */
       const batch = writeBatch(db);
       const username = user?.uname;
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         // setIsHiding(true);
         // navigateToFirstParent(nodeId);
         if (username) {
@@ -1449,7 +1608,7 @@ const Dashboard = ({ }: DashboardProps) => {
         }
       }
     },
-    [choosingNode, user, nodes, edges, initNodeStatusChange, /*navigateToFirstParent*/]
+    [nodeBookState.choosingNode, user, nodes, edges, initNodeStatusChange, /*navigateToFirstParent*/]
   );
 
 
@@ -1458,7 +1617,7 @@ const Dashboard = ({ }: DashboardProps) => {
       console.log('[TOGGLE_NODE]')
 
       // debugger
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
           console.log('[TOGGLE_NODE]', thisNode)
@@ -1513,12 +1672,12 @@ const Dashboard = ({ }: DashboardProps) => {
         event.currentTarget.blur();
       }
     },
-    [choosingNode, user, initNodeStatusChange]
+    [nodeBookState.choosingNode, user, initNodeStatusChange]
   );
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags: any) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (openPart === partType) {
           setOpenPart(null);
           event.currentTarget.blur();
@@ -1545,7 +1704,7 @@ const Dashboard = ({ }: DashboardProps) => {
         }
       }
     },
-    [user, choosingNode, /*selectionType*/]
+    [user, nodeBookState.choosingNode, /*selectionType*/]
   );
 
   /**
@@ -1580,7 +1739,7 @@ const Dashboard = ({ }: DashboardProps) => {
 
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
@@ -1630,12 +1789,12 @@ const Dashboard = ({ }: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
-    [choosingNode, user, initNodeStatusChange]
+    [nodeBookState.choosingNode, user, initNodeStatusChange]
   );
 
   const bookmark = useCallback(
     (event: any, nodeId: string) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         setNodes((oldNodes) => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
@@ -1683,12 +1842,12 @@ const Dashboard = ({ }: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
-    [choosingNode, user, initNodeStatusChange]
+    [nodeBookState.choosingNode, user, initNodeStatusChange]
   );
 
   const correctNode = useCallback(
     (event: any, nodeId: string, nodeType: NodeType) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         // setSelectedNode(nodeId);
         nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
         // setSelectedNodeType(nodeType);
@@ -1697,12 +1856,12 @@ const Dashboard = ({ }: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
-    [choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, getMapGraph]
   );
 
   const wrongNode = useCallback(
     (event: any, nodeId: string, nodeType: NodeType, wrong: any, correct: any, wrongs: number, corrects: number) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         let deleteOK = true;
         // setSelectedNode(nodeId);
         nodeBookDispatch({ type: 'setSelectedNode', payload: nodeId })
@@ -1719,7 +1878,7 @@ const Dashboard = ({ }: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
-    [choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, getMapGraph]
   );
 
   /////////////////////////////////////////////////////
@@ -1851,7 +2010,7 @@ const Dashboard = ({ }: DashboardProps) => {
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       console.log("[SELECT_NODE]");
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           console.log('[select node]: will call reload permanet graph')
           reloadPermanentGrpah();
@@ -1883,7 +2042,7 @@ const Dashboard = ({ }: DashboardProps) => {
       }
     },
     [
-      choosingNode,
+      nodeBookState.choosingNode,
       nodeBookState.selectionType,
       nodeBookState.selectedNode,
       // selectedNode,
@@ -2204,7 +2363,7 @@ const Dashboard = ({ }: DashboardProps) => {
   return (
     <div className="MapContainer">
       <div id="Map">
-        {nodeBookState.chosenNode && (
+        {nodeBookState.choosingNode && (
           <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>
         )}
         <Box sx={{ width: "100vw", height: "100vh" }}>
@@ -2259,7 +2418,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 nodeChanged={nodeChanged}
                 bookmark={bookmark}
                 markStudied={markStudied}
-                chosenNodeChanged={() => { console.log("chosenNodeChanged"); }}
+                chosenNodeChanged={chosenNodeChanged}
                 referenceLabelChange={referenceLabelChange}
                 deleteLink={() => { console.log("delete link"); }}
                 openLinkedNode={openLinkedNode}

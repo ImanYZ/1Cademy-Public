@@ -1,4 +1,5 @@
 import dagre from "dagre";
+import { FullNodeData } from "../../noteBookTypes";
 
 export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setstate.
 export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.
@@ -613,7 +614,7 @@ export const createOrUpdateNode = (g: dagre.graphlib.Graph<{}>, newNode: any, no
 // but need to be modified to work with new arrays
 // this works correctly in dashboard with array but,
 // dont work in worker
-export const copyNode = (node: any) => {
+export const copyNode = (node: FullNodeData): FullNodeData => {
   let newNode = { ...node };
   newNode.parents = [];
   for (let parent of node.parents) {

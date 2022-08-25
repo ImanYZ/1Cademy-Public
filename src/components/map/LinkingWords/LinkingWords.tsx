@@ -80,7 +80,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
-  }, [nodeBookState.choosingNode]);
+  }, [nodeBookState.chosenNode]);
 
   const referenceLabelChangeHandler = useCallback(
     (idx: any) => {

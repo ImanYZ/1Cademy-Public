@@ -1,13 +1,15 @@
 import { Timestamp } from "firebase/firestore";
 import { Dispatch } from "react";
 
-import { NodeType } from "./types";
+// import { NodeType } from "./types";
 
 export type OpenPart = 'LinkingWords' | 'Tags' | 'References' | null
 
+export type ChoosingType = 'Reference' | 'Tag' | 'Parent' | 'Child' | null
+
 export type ChoosingNode = {
   id: string,
-  type: NodeType
+  type: ChoosingType
 }
 
 export type ChosenNode = {
@@ -17,6 +19,7 @@ export type ChosenNode = {
 
 export type SelectionType = 'AcceptedProposals' | 'Proposals' | 'Citations' | 'Comments' | null
 
+
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
  * - isSubmitting: flag set to true when sending request to server
@@ -25,6 +28,7 @@ export type SelectionType = 'AcceptedProposals' | 'Proposals' | 'Citations' | 'C
  * - selectedNode: node that is in focus (highlighted)
  * - selectionType: will result in pending proposals sidebar or accepted propsals sidebar opening
  * - selectedTags: list of tags used for searching
+ * - choosingType: type of the selected option on choosing Node
  */
 export interface NodeBookState {
   readonly sNode: string | null;
@@ -34,6 +38,7 @@ export interface NodeBookState {
   readonly selectedNode: string | null;
   readonly selectionType: SelectionType;
   readonly selectedTags: string[];
+  // readonly choosingType: ChoosingType;
 }
 
 export type SetSNodeAction = {
@@ -71,6 +76,11 @@ export type SetSelectedTagsAction = {
   payload: string[]
 }
 
+// export type SetChoosingTypeAction = {
+//   type: "setChoosingType",
+//   payload: ChoosingType
+// }
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -79,6 +89,7 @@ export type DispatchNodeBookActions =
   | SetSelectedNodeAction
   | SetSelectionTypeAction
   | SetSelectedTagsAction
+// | SetChoosingTypeAction
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>

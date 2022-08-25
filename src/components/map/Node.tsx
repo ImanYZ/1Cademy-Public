@@ -206,6 +206,7 @@ const Node = ({
     (event: any) => {
       console.log('Node Clicked Handler', nodeBookState)
       if (nodeBookState.choosingNode) {
+        console.log('has chosing node')
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
@@ -213,8 +214,8 @@ const Node = ({
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
-      ) {
-        console.log('will node clicked')
+        ) {
+        console.log('dont have choosing Node')
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
     },
