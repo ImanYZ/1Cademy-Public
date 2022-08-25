@@ -54,6 +54,7 @@ import {
   NODE_HEIGHT,
   NODE_WIDTH,
   removeDagAllEdges,
+  removeDagEdge,
   removeDagNode,
   setDagEdge,
   setDagNode,
@@ -63,7 +64,7 @@ import {
   YOFFSET
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
-import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
+import { ChoosingType, OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../noteBookTypes";
 import { NodeType } from "../types";
 
@@ -1248,6 +1249,72 @@ const Dashboard = ({ }: DashboardProps) => {
     ]
   );
 
+  const deleteLink = useCallback(
+    (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
+      console.log("[DELETE LINK]");
+      setNodes((oNodes) => {
+        let oldNodes = { ...oNodes };
+        const thisNode = copyNode(oldNodes[nodeId]);
+        console.log('thisNode', thisNode)
+        // debugger
+        if (linkType === "Parent") {
+          let parentNode = null;
+          const parentId = thisNode.parents[linkIdx].node;
+          thisNode.parents = [...thisNode.parents];
+          thisNode.parents.splice(linkIdx, 1);
+          if (addedParents.includes(parentId)) {
+            setAddedParents(addedParents.filter((nId) => nId !== parentId));
+          } else {
+            setRemovedParents((oldRemovedParents) => [...oldRemovedParents, parentId]);
+          }
+          if (parentId in oldNodes) {
+            parentNode = copyNode(oldNodes[parentId]);
+            setEdges((oldEdges) => {
+              return removeDagEdge(g.current, parentId, nodeId, { ...oldEdges });
+            });
+            if (!(parentId in changedNodes)) {
+              changedNodes[parentId] = copyNode(oldNodes[parentId]);
+            }
+            parentNode.children = parentNode.children.filter((l) => l.node !== nodeId);
+            oldNodes[parentId] = parentNode;
+          }
+        } else if (linkType === "Child") {
+          let childNode = null;
+          const childId = thisNode.children[linkIdx].node;
+          thisNode.children = [...thisNode.children];
+          thisNode.children.splice(linkIdx, 1);
+          if (addedChildren.includes(childId)) {
+            setAddedChildren(addedChildren.filter((nId) => nId !== childId));
+          } else {
+            setRemovedChildren([...removedChildren, childId]);
+          }
+          if (childId in oldNodes) {
+            childNode = oldNodes[childId];
+            setEdges((oldEdges) => {
+              return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
+            });
+            if (!(childId in changedNodes)) {
+              changedNodes[childId] = copyNode(oldNodes[childId]);
+            }
+            childNode.parents = childNode.parents.filter((l) => l.node !== nodeId);
+            oldNodes[childId] = childNode;
+          }
+        } else if (linkType === "Reference") {
+          thisNode.references = [...thisNode.references];
+          thisNode.references.splice(linkIdx, 1);
+        } else if (linkType === "Tag") {
+          thisNode.tags = [...thisNode.tags];
+          thisNode.tags.splice(linkIdx, 1);
+          thisNode.tagIds.splice(linkIdx, 1);
+        }
+        scrollToNode(nodeId);
+        oldNodes[nodeId] = thisNode;
+        return oldNodes;
+      });
+    },
+    [addedParents, removedParents, addedChildren, removedChildren]
+  );
+
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
@@ -2420,7 +2487,7 @@ const Dashboard = ({ }: DashboardProps) => {
                 markStudied={markStudied}
                 chosenNodeChanged={chosenNodeChanged}
                 referenceLabelChange={referenceLabelChange}
-                deleteLink={() => { console.log("delete link"); }}
+                deleteLink={deleteLink}
                 openLinkedNode={openLinkedNode}
                 openAllChildren={() => { console.log("open all children"); }}
                 hideNodeHandler={hideNodeHandler}
