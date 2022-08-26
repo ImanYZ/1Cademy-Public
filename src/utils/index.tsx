@@ -9,3 +9,29 @@ export { getTypedCollections } from './getTypedCollections';
 export { signalAllUserNodesChanges } from './signalAllUserNodesChanges';
 export { deleteTagCommunityAndTagsOfTags } from './deleteTagCommunityAndTagsOfTags';
 export { retrieveAndsignalAllUserNodesChanges } from './retrieveAndsignalAllUserNodesChanges';
+export {
+  reputationTypes,
+  NODE_TYPES,
+  improvementTypes,
+  setOrIncrementNotificationNums,
+  compareChoices,
+  addToPendingPropsNums,
+  proposalNotification,
+  compareFlatLinks,
+  createPractice,
+  getTagRefData,
+  getDirectTags,
+  changeTagTitleInCollection,
+  changeNodeTitle,
+  addTagCommunityAndTagsOfTags,
+  deleteTagFromNodeTagCommunityAndTagsOfTags,
+  hasCycle,
+  generateTagsOfTags,
+  generateTagsData,
+  getUserVersion,
+  isVersionApproved,
+  updateProposersReputationsOnNode,
+  getCumulativeProposerVersionRatingsOnNode,
+  createUpdateUserVersion,
+  versionCreateUpdate,
+} from './version-helpers';
