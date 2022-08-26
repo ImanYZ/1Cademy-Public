@@ -4,6 +4,7 @@
   "rules": {
     "semi": ["warn", "never"],
     "simple-import-sort/imports": "warn",
+    "comma-dangle": ["warn", "always-multiline"],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error"],
     "react/no-unescaped-entities": 0

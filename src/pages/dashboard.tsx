@@ -17,7 +17,7 @@ import {
   Timestamp,
   updateDoc,
   where,
-  writeBatch
+  writeBatch,
 } from "firebase/firestore"
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -59,7 +59,7 @@ import {
   setNewParentChildrenEdges,
   tempNodes,
   XOFFSET,
-  YOFFSET
+  YOFFSET,
 } from "../lib/utils/Map.utils"
 import { newId } from "../lib/utils/newid"
 import { ChoosingType, OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes"
@@ -144,7 +144,7 @@ const Dashboard = ({}: DashboardProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mapInteractionValue, setMapInteractionValue] = useState({
     scale: 1,
-    translation: { x: 0, y: 0 }
+    translation: { x: 0, y: 0 },
   })
 
   // object of cluster boundaries
@@ -261,7 +261,7 @@ const Dashboard = ({}: DashboardProps) => {
           return {
             cType: change.type,
             uNodeId: change.doc.id,
-            uNodeData: userNodeData
+            uNodeData: userNodeData,
           }
         })
       }
@@ -284,7 +284,7 @@ const Dashboard = ({}: DashboardProps) => {
           return {
             cType: "added",
             nId: nodeDoc.id,
-            nData
+            nData,
           }
         })
       }
@@ -316,7 +316,7 @@ const Dashboard = ({}: DashboardProps) => {
               referenceIds: nodeDataFound.nData.referenceIds || [],
               referenceLabels: nodeDataFound.nData.referenceLabels || [],
               tags: nodeDataFound.nData.tags || [],
-              tagIds: nodeDataFound.nData.tagIds || []
+              tagIds: nodeDataFound.nData.tagIds || [],
             }
             if (nodeDataFound.nData.nodeType !== "Question") {
               fullNodeData.choices = []
@@ -350,7 +350,7 @@ const Dashboard = ({}: DashboardProps) => {
               const currentNode = {
                 ...cur,
                 left: node.left,
-                top: node.top
+                top: node.top,
               } // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
               // console.log('currentNode', currentNode)
               if (!compare2Nodes(cur, node)) {
@@ -374,7 +374,7 @@ const Dashboard = ({}: DashboardProps) => {
               // newNodes: { ...acu.newNodes, ...tmpNodes },
               // newEdges: { ...acu.newEdges, ...tmpEdges },
               newNodes: { ...tmpNodes },
-              newEdges: { ...tmpEdges }
+              newEdges: { ...tmpEdges },
             }
           },
           { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
@@ -555,8 +555,8 @@ const Dashboard = ({}: DashboardProps) => {
                 scale: 0.94,
                 translation: {
                   x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
-                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94
-                }
+                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
+                },
               }
             })
           } else {
@@ -959,7 +959,7 @@ const Dashboard = ({}: DashboardProps) => {
         MIN_CHANGE,
         MAP_RIGHT_GAP,
         NODE_WIDTH,
-        graph: dagreUtils.mapGraphToObject(g.current)
+        graph: dagreUtils.mapGraphToObject(g.current),
       })
       // worker.onerror = (err) => err;
       worker.onmessage = e => {
@@ -1015,7 +1015,7 @@ const Dashboard = ({}: DashboardProps) => {
     mapWidth,
     mapHeight,
     userNodeChanges,
-    nodeChanges
+    nodeChanges,
   ])
 
   // ---------------------------------------------------------------------
@@ -1151,8 +1151,8 @@ const Dashboard = ({}: DashboardProps) => {
               {
                 node: nodeBookState.chosenNode.id,
                 title: chosenNodeObj.title,
-                label: ""
-              }
+                label: "",
+              },
             ]
             if (!(nodeBookState.chosenNode.id in changedNodes)) {
               changedNodes[nodeBookState.chosenNode.id] = copyNode(oldNodes[nodeBookState.chosenNode.id])
@@ -1162,8 +1162,8 @@ const Dashboard = ({}: DashboardProps) => {
               {
                 node: nodeBookState.choosingNode.id,
                 title: thisNode.title,
-                label: ""
-              }
+                label: "",
+              },
             ]
             if (removedParents.includes(nodeBookState.chosenNode.id)) {
               const chosenNodeId = nodeBookState.chosenNode.id
@@ -1188,8 +1188,8 @@ const Dashboard = ({}: DashboardProps) => {
               {
                 node: nodeBookState.chosenNode.id,
                 title: chosenNodeObj.title,
-                label: ""
-              }
+                label: "",
+              },
             ]
             if (!(nodeBookState.chosenNode.id in changedNodes)) {
               changedNodes[nodeBookState.chosenNode.id] = copyNode(oldNodes[nodeBookState.chosenNode.id])
@@ -1199,8 +1199,8 @@ const Dashboard = ({}: DashboardProps) => {
               {
                 node: nodeBookState.choosingNode.id,
                 title: thisNode.title,
-                label: ""
-              }
+                label: "",
+              },
             ]
             setEdges(oldEdges => {
               if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges
@@ -1234,13 +1234,13 @@ const Dashboard = ({}: DashboardProps) => {
           const res = {
             ...oldNodes,
             [nodeId]: thisNode,
-            [chosenNode]: chosenNodeObj
+            [chosenNode]: chosenNodeObj,
           }
           console.log("===>", { oldNodes, thisNode, chosenNodeObj, res })
           return {
             ...oldNodes,
             [nodeId]: thisNode,
-            [chosenNode]: chosenNodeObj
+            [chosenNode]: chosenNodeObj,
           }
         } else {
           return oldNodes
@@ -1257,7 +1257,7 @@ const Dashboard = ({}: DashboardProps) => {
       removedParents,
       addedParents,
       removedChildren,
-      addedChildren
+      addedChildren,
     ]
   )
 
@@ -1367,17 +1367,17 @@ const Dashboard = ({}: DashboardProps) => {
               open: thisNode.open,
               user: user.uname,
               visible: false,
-              wrong: thisNode.wrong
+              wrong: thisNode.wrong,
             }
 
             userNodeRef ? batch.set(userNodeRef, userNodeData) : null
             const userNodeLogData: any = {
               ...userNodeData,
-              createdAt: Timestamp.fromDate(new Date())
+              createdAt: Timestamp.fromDate(new Date()),
             }
             const changeNode: any = {
               viewers: thisNode.viewers - 1,
-              updatedAt: Timestamp.fromDate(new Date())
+              updatedAt: Timestamp.fromDate(new Date()),
             }
             if (userNodeData.open && "openHeight" in thisNode) {
               changeNode.height = thisNode.openHeight
@@ -1479,7 +1479,7 @@ const Dashboard = ({}: DashboardProps) => {
               open: true,
               user: user.uname,
               visible: true,
-              wrong: false
+              wrong: false,
             }
             batch.set(doc(userNodeRef), userNodeData) // CHECK: changed with batch
             // const docRef = await addDoc(userNodeRef, userNodeData);
@@ -1487,13 +1487,13 @@ const Dashboard = ({}: DashboardProps) => {
           }
           batch.update(nodeRef, {
             viewers: thisNode.viewers + 1,
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           })
           const userNodeLogRef = collection(db, "userNodesLog")
 
           const userNodeLogData = {
             ...userNodeData,
-            createdAt: Timestamp.fromDate(new Date())
+            createdAt: Timestamp.fromDate(new Date()),
           }
 
           // const id = userNodeLogRef.id
@@ -1509,7 +1509,7 @@ const Dashboard = ({}: DashboardProps) => {
             ...nodes[nodeId],
             ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
             ...userNodeData,
-            open: true
+            open: true,
           }
 
           uNodeData[userNodeId] = userNodeId
@@ -1643,19 +1643,19 @@ const Dashboard = ({}: DashboardProps) => {
             open: false,
             user: username,
             visible: false,
-            wrong: thisNode.wrongs
+            wrong: thisNode.wrongs,
           }
           if (userNodeRef) {
             batch.set(userNodeRef, userNodeData)
           }
           const userNodeLogData: any = {
             ...userNodeData,
-            createdAt: Timestamp.fromDate(new Date())
+            createdAt: Timestamp.fromDate(new Date()),
           }
 
           const changeNode: any = {
             viewers: thisNode.viewers - 1,
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           }
           if (userNodeData.open && "openHeight" in thisNode) {
             changeNode.height = thisNode.openHeight
@@ -1699,7 +1699,7 @@ const Dashboard = ({}: DashboardProps) => {
           console.log("[TOGGLE_NODE]", thisNode)
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId)
           const changeNode: any = {
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           }
           if (thisNode.open && "openHeight" in thisNode) {
             changeNode.height = thisNode.openHeight
@@ -1712,7 +1712,7 @@ const Dashboard = ({}: DashboardProps) => {
           console.log("update user node")
           updateDoc(userNodeRef, {
             open: !thisNode.open,
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           })
           // userNodeRef.update({
           //   open: !thisNode.open,
@@ -1732,7 +1732,7 @@ const Dashboard = ({}: DashboardProps) => {
             open: !thisNode.open,
             user: user?.uname,
             visible: true,
-            wrong: thisNode.wrong
+            wrong: thisNode.wrong,
           }
           if ("openHeight" in thisNode) {
             userNodeLogData.height = thisNode.openHeight
@@ -1765,7 +1765,7 @@ const Dashboard = ({}: DashboardProps) => {
               nodeId,
               uname: user?.uname,
               partType,
-              createdAt: Timestamp.fromDate(new Date())
+              createdAt: Timestamp.fromDate(new Date()),
             })
           }
           // if (
@@ -1825,7 +1825,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           const changeNode: any = {
             studied: studiedNum + (thisNode.isStudied ? -1 : 1),
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           }
           if (thisNode.open && "openHeight" in thisNode) {
             changeNode.height = thisNode.openHeight
@@ -1836,7 +1836,7 @@ const Dashboard = ({}: DashboardProps) => {
           updateDoc(userNodeRef, {
             changed: thisNode.isStudied ? thisNode.changed : false,
             isStudied: !thisNode.isStudied,
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           })
           const userNodeLogRef = collection(db, "userNodesLog")
           // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
@@ -1852,7 +1852,7 @@ const Dashboard = ({}: DashboardProps) => {
             open: !thisNode.open,
             user: user?.uname,
             visible: true,
-            wrong: thisNode.wrong
+            wrong: thisNode.wrong,
           }
           if ("openHeight" in thisNode) {
             userNodeLogData.height = thisNode.openHeight
@@ -1880,7 +1880,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           const changeNode: any = {
             bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           }
           if (thisNode.open && "openHeight" in thisNode) {
             changeNode.height = thisNode.openHeight
@@ -1890,7 +1890,7 @@ const Dashboard = ({}: DashboardProps) => {
           updateDoc(nodeRef, changeNode)
           updateDoc(userNodeRef, {
             bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
           })
           const userNodeLogRef = collection(db, "userNodesLog")
           const userNodeLogData: any = {
@@ -1905,7 +1905,7 @@ const Dashboard = ({}: DashboardProps) => {
             open: !thisNode.open,
             user: user?.uname,
             visible: true,
-            wrong: thisNode.wrong
+            wrong: thisNode.wrong,
           }
           if ("openHeight" in thisNode) {
             userNodeLogData.height = thisNode.openHeight
@@ -2045,7 +2045,7 @@ const Dashboard = ({}: DashboardProps) => {
     openRecentNodes,
     openTrends,
     openMedia,
-    reloadPermanentGrpah
+    reloadPermanentGrpah,
   ])
 
   /////////////////////////////////////////////////////
@@ -2073,7 +2073,7 @@ const Dashboard = ({}: DashboardProps) => {
         setMapChanged(true)
         return {
           ...oldNodes,
-          [nodeBookState.selectedNode]: thisNode
+          [nodeBookState.selectedNode]: thisNode,
         }
       })
       scrollToNode(nodeBookState.selectedNode)
@@ -2123,7 +2123,7 @@ const Dashboard = ({}: DashboardProps) => {
       // selectionType,
       reloadPermanentGrpah,
       // proposeNodeImprovement,
-      resetAddedRemovedParentsChildren
+      resetAddedRemovedParentsChildren,
     ]
   )
 
@@ -2185,15 +2185,15 @@ const Dashboard = ({}: DashboardProps) => {
           referenceLabels: [], // CHECK: I added this
           choices: [],
           editable: true,
-          width: NODE_WIDTH
+          width: NODE_WIDTH,
         }
         if (childNodeType === "Question") {
           newChildNode.choices = [
             {
               choice: "Replace this with the choice.",
               correct: true,
-              feedback: "Replace this with the choice-specific feedback."
-            }
+              feedback: "Replace this with the choice-specific feedback.",
+            },
           ]
         }
 
@@ -2274,7 +2274,7 @@ const Dashboard = ({}: DashboardProps) => {
           award: false,
           correct: false,
           wrong: false,
-          comments: []
+          comments: [],
         }
         delete versions[versionDoc.id].deleted
         delete versions[versionDoc.id].updatedAt
@@ -2319,7 +2319,7 @@ const Dashboard = ({}: DashboardProps) => {
               delete userVersion.user
               versions[versionId] = {
                 ...versions[versionId],
-                ...userVersion
+                ...userVersion,
               }
             })
           })
@@ -2339,7 +2339,7 @@ const Dashboard = ({}: DashboardProps) => {
               comments[versionsCommentsDoc.id] = {
                 ...versionsComment,
                 id: versionsCommentsDoc.id,
-                createdAt: versionsComment.createdAt.toDate()
+                createdAt: versionsComment.createdAt.toDate(),
               }
               const userVersionsCommentsQuery = query(
                 userVersionsCommentsColl,
@@ -2374,7 +2374,7 @@ const Dashboard = ({}: DashboardProps) => {
                 delete userVersionsComment.user
                 comments[versionCommentId] = {
                   ...comments[versionCommentId],
-                  ...userVersionsComment
+                  ...userVersionsComment,
                 }
               })
             })
@@ -2434,7 +2434,7 @@ const Dashboard = ({}: DashboardProps) => {
       const thisNode = { ...oldNodes[nodeId] }
       return {
         ...oldNodes,
-        [nodeId]: innerFunc(thisNode)
+        [nodeId]: innerFunc(thisNode),
       }
     })
   }, [])
