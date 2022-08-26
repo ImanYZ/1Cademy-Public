@@ -1,4 +1,4 @@
-import { Button, Drawer } from "@mui/material"
+import { Button, Drawer, Modal } from "@mui/material"
 import { Box } from "@mui/system"
 import dagre from "dagre"
 import {
@@ -24,6 +24,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 /* eslint-disable */
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction"
+import { boolean } from "yup"
 
 /* eslint-enable */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -224,7 +225,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openTrends, setOpenTrends] = useState(false)
 
   // flag for whether media is full-screen
-  const [openMedia, setOpenMedia] = useState(false)
+  const [openMedia, setOpenMedia] = useState<string | boolean>(false)
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -2604,7 +2605,11 @@ const Dashboard = ({}: DashboardProps) => {
                 correctNode={correctNode}
                 wrongNode={wrongNode}
                 uploadNodeImage={uploadNodeImage}
-                removeImage={() => console.log("removeImage")}
+                removeImage={removeImage}
+                setOpenMedia={(imgUrl: string | boolean) => {
+                  console.log("first", imgUrl)
+                  setOpenMedia(imgUrl)
+                }}
                 changeChoice={() => console.log("changeChoice")}
                 changeFeedback={() => console.log("changeFeedback")}
                 switchChoice={() => console.log("switchChoice")}
@@ -2617,6 +2622,21 @@ const Dashboard = ({}: DashboardProps) => {
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
               />
             </MapInteractionCSS>
+
+            <Modal
+              open={Boolean(openMedia)}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <MapInteractionCSS>
+                <img src={openMedia} alt="Node image" className="responsive-img" />
+              </MapInteractionCSS>
+            </Modal>
+            {/* // <Modal onClick={closedSidebarClick("Media")}>
+              //   <MapInteractionCSS>
+              //     <img src={openMedia} alt="Node image" className="responsive-img" />
+              //   </MapInteractionCSS>
+            </Modal> */}
           </Box>
         </Box>
       </div>

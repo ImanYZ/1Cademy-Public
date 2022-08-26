@@ -1,17 +1,17 @@
-import React from "react";
-import { OpenPart } from "src/nodeBookTypes";
+import React from "react"
+import { OpenPart } from "src/nodeBookTypes"
 
-import { useNodeBook } from "@/context/NodeBookContext";
-import { NODE_WIDTH } from "@/lib/utils/Map.utils";
+import { useNodeBook } from "@/context/NodeBookContext"
+import { NODE_WIDTH } from "@/lib/utils/Map.utils"
 
-import { MemoizedNode } from "./Node";
+import { MemoizedNode } from "./Node"
 
 type NodeListProps = {
-  nodes: any;
+  nodes: any
   // selectionType: any,
   // NODE_WIDTH: number,
-  bookmark: any;
-  markStudied: any;
+  bookmark: any
+  markStudied: any
   nodeChanged: (
     nodeRef: any,
     nodeId: string,
@@ -19,33 +19,34 @@ type NodeListProps = {
     title: string | null,
     imageLoaded: boolean,
     openPart: OpenPart
-  ) => void;
-  chosenNodeChanged: any;
-  referenceLabelChange: any;
-  deleteLink: any;
-  openLinkedNode: any;
-  openAllChildren: any;
-  hideNodeHandler: any;
-  hideOffsprings: any;
-  toggleNode: (event: any, id: string) => void;
-  openNodePart: any;
-  selectNode: any;
-  nodeClicked: any;
-  correctNode: any;
-  wrongNode: any;
-  uploadNodeImage: any;
-  removeImage: any;
-  changeChoice: any;
-  changeFeedback: any;
-  switchChoice: any;
-  deleteChoice: any;
-  addChoice: any;
-  onNodeTitleBlur: any;
-  saveProposedChildNode: any;
-  saveProposedImprovement: any;
-  closeSideBar: any;
-  reloadPermanentGrpah: any;
-};
+  ) => void
+  chosenNodeChanged: any
+  referenceLabelChange: any
+  deleteLink: any
+  openLinkedNode: any
+  openAllChildren: any
+  hideNodeHandler: any
+  hideOffsprings: any
+  toggleNode: (event: any, id: string) => void
+  openNodePart: any
+  selectNode: any
+  nodeClicked: any
+  correctNode: any
+  wrongNode: any
+  uploadNodeImage: any
+  removeImage: any
+  changeChoice: any
+  changeFeedback: any
+  switchChoice: any
+  deleteChoice: any
+  addChoice: any
+  onNodeTitleBlur: any
+  saveProposedChildNode: any
+  saveProposedImprovement: any
+  closeSideBar: any
+  reloadPermanentGrpah: any
+  setOpenMedia: (imagUrl: string) => void
+}
 
 const NodesList = ({
   nodes,
@@ -76,44 +77,45 @@ const NodesList = ({
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
-  reloadPermanentGrpah
+  reloadPermanentGrpah,
+  setOpenMedia,
 }: NodeListProps) => {
-  const { nodeBookState } = useNodeBook();
+  const { nodeBookState } = useNodeBook()
 
-  return (<>
-    {
-      Object.keys(nodes).map(nId => {
-        let unaccepted = false;
+  return (
+    <>
+      {Object.keys(nodes).map(nId => {
+        let unaccepted = false
         if ("unaccepted" in nodes[nId]) {
-          unaccepted = nodes[nId].unaccepted;
+          unaccepted = nodes[nId].unaccepted
         }
-        let bookmarks = 0;
+        let bookmarks = 0
         if ("bookmarks" in nodes[nId] && Number(nodes[nId].bookmarks)) {
-          bookmarks = nodes[nId].bookmarks;
+          bookmarks = nodes[nId].bookmarks
         }
-        let bookmarked = false;
+        let bookmarked = false
         if ("bookmarked" in nodes[nId]) {
-          bookmarked = nodes[nId].bookmarked;
+          bookmarked = nodes[nId].bookmarked
         }
-        let activeNode = false;
+        let activeNode = false
         if (nodeBookState.selectedNode === nId) {
-          activeNode = true;
+          activeNode = true
         }
-        let citationsSelected = false;
+        let citationsSelected = false
         if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Citations") {
-          citationsSelected = true;
+          citationsSelected = true
         }
-        let proposalsSelected = false;
+        let proposalsSelected = false
         if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Proposals") {
-          proposalsSelected = true;
+          proposalsSelected = true
         }
-        let acceptedProposalsSelected = false;
+        let acceptedProposalsSelected = false
         if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "AcceptedProposals") {
-          acceptedProposalsSelected = true;
+          acceptedProposalsSelected = true
         }
-        let commentsSelected = false;
+        let commentsSelected = false
         if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Comments") {
-          commentsSelected = true;
+          commentsSelected = true
         }
 
         return (
@@ -145,11 +147,11 @@ const NodesList = ({
             references={nodes[nId].references.map((cur: string, idx: number) => ({
               title: cur,
               node: nodes[nId].referenceIds[idx],
-              label: nodes[nId].referenceLabels[idx]
+              label: nodes[nId].referenceLabels[idx],
             }))}
             tags={nodes[nId].tags.map((cur: string, idx: number) => ({
               node: nodes[nId].tagIds[idx],
-              title: cur
+              title: cur,
             }))} // CHECK: I added this because we need id and title
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
@@ -195,13 +197,14 @@ const NodesList = ({
             saveProposedImprovement={saveProposedImprovement}
             closeSideBar={closeSideBar}
             reloadPermanentGrpah={reloadPermanentGrpah}
+            setOpenMedia={setOpenMedia}
           />
-        );
-      })
-    }
-  </>);
-};
-export default NodesList;
+        )
+      })}
+    </>
+  )
+}
+export default NodesList
 
 // import React from "react";
 // import { useRecoilValue } from "recoil";
