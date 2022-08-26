@@ -2,6 +2,8 @@ import admin from "firebase-admin";
 import { cert, initializeApp } from "firebase-admin/app";
 import { getFirestore, WriteBatch } from "firebase-admin/firestore";
 
+export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
+
 require("dotenv").config();
 if (!admin.apps.length) {
   initializeApp({

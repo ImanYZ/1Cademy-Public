@@ -245,3 +245,23 @@ export const ToUpperCaseEveryWord = (text: string) => {
     .map(cur => cur.charAt(0).toLocaleUpperCase() + cur.slice(1))
     .join(" ");
 };
+
+
+export const validURL = (myURL: string) => {
+  const pattern = new RegExp(
+    "^(https?:\\/\\/)?" + // protocol
+    "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+    "((\\d{1,3}\\.){3}\\d{1,3}))" + // ip (v4) address
+    "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + //port
+    "(\\?[;&amp;a-z\\d%_.~+=-]*)?" + // query string
+    "(\\#[-a-z\\d_]*)?$",
+    "i"
+  );
+  return pattern.test(myURL);
+};
+
+export const validPNG = (myURL: string) => {
+  const pattern1 = new RegExp(".+\\.png$");
+  const pattern2 = new RegExp(".+\\.PNG$");
+  return pattern1.test(myURL) || pattern2.test(myURL);
+};
