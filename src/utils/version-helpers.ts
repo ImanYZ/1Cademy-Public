@@ -61,6 +61,14 @@ export const improvementTypes = [
   "removedChildren",
 ];
 
+export const getVersion = async ({ versionId, nodeType }: any) => {
+  const { versionsColl }: any = getTypedCollections(nodeType);
+  const versionRef = versionsColl.doc(versionId);
+  const versionDoc = await versionRef.get();
+  const versionData = { ...versionDoc.data(), id: versionId };
+  return { versionData, versionRef };
+};
+
 export const setOrIncrementNotificationNums = async ({ batch, proposer, writeCounts }: any) => {
   let newBatch = batch;
   const notificationNumRef = db.collection("notificationNums").doc(proposer);
@@ -1412,5 +1420,31 @@ export const versionCreateUpdate = async ({
       }
     }
   }
+  return [newBatch, writeCounts];
+};
+
+export const addToPendingPropsNumsExcludingVoters = async ({
+  batch,
+  nodeType,
+  versionId,
+  tagIds,
+  value,
+  writeCounts
+}: any) => {
+  let newBatch = batch;
+  const { userVersionsColl }: any = getTypedCollections(nodeType);
+  const userVersionsDocs = await userVersionsColl.where("version", "==", versionId).get();
+  const voters = [];
+  for (let userVersionDoc of userVersionsDocs.docs) {
+    const userVersionData = userVersionDoc.data();
+    voters.push(userVersionData.user);
+  }
+  [newBatch, writeCounts] = await addToPendingPropsNums({
+    batch: newBatch,
+    tagIds,
+    value,
+    voters,
+    writeCounts
+  });
   return [newBatch, writeCounts];
 };

@@ -10,9 +10,10 @@ export { signalAllUserNodesChanges } from './signalAllUserNodesChanges';
 export { deleteTagCommunityAndTagsOfTags } from './deleteTagCommunityAndTagsOfTags';
 export { retrieveAndsignalAllUserNodesChanges } from './retrieveAndsignalAllUserNodesChanges';
 export {
-  reputationTypes,
   NODE_TYPES,
+  reputationTypes,
   improvementTypes,
+  getVersion,
   setOrIncrementNotificationNums,
   compareChoices,
   addToPendingPropsNums,
@@ -34,4 +35,5 @@ export {
   getCumulativeProposerVersionRatingsOnNode,
   createUpdateUserVersion,
   versionCreateUpdate,
+  addToPendingPropsNumsExcludingVoters
 } from './version-helpers';
