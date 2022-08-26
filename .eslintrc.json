@@ -2,6 +2,7 @@
   "extends": ["next/core-web-vitals", "prettier"],
   "root": true,
   "rules": {
+    "semi": ["warn", "never"],
     "simple-import-sort/imports": "warn",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error"],

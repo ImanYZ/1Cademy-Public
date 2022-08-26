@@ -1,5 +1,6 @@
-import { Button } from "@mui/material"
+import { Button, Drawer } from "@mui/material"
 import { Box } from "@mui/system"
+import dagre from "dagre"
 import {
   collection,
   doc,
@@ -61,7 +62,7 @@ import {
   YOFFSET
 } from "../lib/utils/Map.utils"
 import { newId } from "../lib/utils/newid"
-import { OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes"
+import { ChoosingType, OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes"
 import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../noteBookTypes"
 import { NodeType } from "../types"
 type DashboardProps = {}
@@ -165,10 +166,10 @@ const Dashboard = ({}: DashboardProps) => {
   const [openProposal, setOpenProposal] = useState<string | boolean>(false)
 
   // when proposing improvements, lists of added/removed parent/child links
-  const [addedParents, setAddedParents] = useState([])
-  const [addedChildren, setAddedChildren] = useState([])
-  const [removedParents, setRemovedParents] = useState([])
-  const [removedChildren, setRemovedChildren] = useState([])
+  const [addedParents, setAddedParents] = useState<string[]>([])
+  const [addedChildren, setAddedChildren] = useState<string[]>([])
+  const [removedParents, setRemovedParents] = useState<string[]>([])
+  const [removedChildren, setRemovedChildren] = useState<string[]>([])
 
   const g = useRef(dagreUtils.createGraph())
 
@@ -1408,7 +1409,7 @@ const Dashboard = ({}: DashboardProps) => {
         setIsSubmitting(false)
       }
     },
-    [choosingNode, nodes, recursiveOffsprings]
+    [nodeBookState.choosingNode, nodes, recursiveOffsprings]
   )
 
   const openNodeHandler = useMemoizedCallback(
@@ -1563,7 +1564,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID)
         if (linkedNode) {
           scrollToNode(linkedNodeID)
@@ -1576,7 +1577,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [choosingNode, openNodeHandler]
+    [nodeBookState.choosingNode, openNodeHandler]
   )
 
   const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
@@ -1621,7 +1622,7 @@ const Dashboard = ({}: DashboardProps) => {
        */
       const batch = writeBatch(db)
       const username = user?.uname
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         // setIsHiding(true);
         // navigateToFirstParent(nodeId);
         if (username) {
@@ -1684,7 +1685,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [choosingNode, user, nodes, edges, initNodeStatusChange /*navigateToFirstParent*/]
+    [nodeBookState.choosingNode, user, nodes, edges, initNodeStatusChange /*navigateToFirstParent*/]
   )
 
   const toggleNode = useCallback(
@@ -1692,7 +1693,7 @@ const Dashboard = ({}: DashboardProps) => {
       console.log("[TOGGLE_NODE]")
 
       // debugger
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         setNodes(oldNodes => {
           const thisNode = oldNodes[nodeId]
           console.log("[TOGGLE_NODE]", thisNode)
@@ -1747,7 +1748,7 @@ const Dashboard = ({}: DashboardProps) => {
         event.currentTarget.blur()
       }
     },
-    [choosingNode, user, initNodeStatusChange]
+    [nodeBookState.choosingNode, user, initNodeStatusChange]
   )
 
   const openNodePart = useCallback(
@@ -1779,12 +1780,42 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, choosingNode /*selectionType*/]
+    [user, nodeBookState.choosingNode /*selectionType*/]
+  )
+
+  /**
+   * This will update reference label and will update the required node
+   * without call sync or worker (thats good)
+   */
+  const referenceLabelChange = useCallback(
+    (event: any, nodeId: string, referenceIdx: number) => {
+      console.log("[REFERENCE_LABEL_CHANGE]", { event, nodeId, referenceIdx })
+      event.persist()
+      const thisNode = { ...nodes[nodeId] }
+      let referenceLabelsCopy = [...thisNode.referenceLabels]
+      referenceLabelsCopy[referenceIdx] = event.target.value
+      thisNode.referenceLabels = referenceLabelsCopy
+      setNodes({ ...nodes, [nodeId]: thisNode })
+
+      // setNodes((oldNodes) => {
+      //   const thisNode = { ...oldNodes[nodeId] };
+      //   thisNode.references = [...thisNode.references];
+      //   thisNode.references[referenceIdx] = {
+      //     // ...thisNode.references[referenceIdx],
+      //     label: event.target.value,
+      //   };
+      //   return {
+      //     ...oldNodes,
+      //     [nodeId]: { ...thisNode },
+      //   };
+      // });
+    },
+    [nodes /*setNodeParts*/]
   )
 
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         setNodes(oldNodes => {
           const thisNode = oldNodes[nodeId]
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId)
@@ -1834,12 +1865,12 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur()
     },
-    [choosingNode, user, initNodeStatusChange]
+    [nodeBookState.choosingNode, user, initNodeStatusChange]
   )
 
   const bookmark = useCallback(
     (event: any, nodeId: string) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         setNodes(oldNodes => {
           const thisNode = oldNodes[nodeId]
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId)
@@ -1887,7 +1918,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur()
     },
-    [choosingNode, user, initNodeStatusChange]
+    [nodeBookState.choosingNode, user, initNodeStatusChange]
   )
 
   const correctNode = useCallback(
@@ -1901,12 +1932,12 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur()
     },
-    [choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, getMapGraph]
   )
 
   const wrongNode = useCallback(
     (event: any, nodeId: string, nodeType: NodeType, wrong: any, correct: any, wrongs: number, corrects: number) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         let deleteOK = true
         // setSelectedNode(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId })
@@ -1921,7 +1952,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur()
     },
-    [choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, getMapGraph]
   )
 
   /////////////////////////////////////////////////////
@@ -2020,10 +2051,40 @@ const Dashboard = ({}: DashboardProps) => {
   /////////////////////////////////////////////////////
   // Proposals Functions
 
+  const proposeNodeImprovement = useCallback(
+    (event: any) => {
+      console.log("[PROPOSE_NODE_IMPROVEMENT]")
+      event.preventDefault()
+      if (!nodeBookState.selectedNode) return
+
+      setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode)
+      reloadPermanentGrpah()
+
+      // CHECK: Improve this making the operations out of setNode, when have nodes with new data
+      // update with setNodes
+      setNodes(oldNodes => {
+        if (!nodeBookState.selectedNode) return oldNodes
+
+        if (!(nodeBookState.selectedNode in changedNodes)) {
+          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode])
+        }
+        const thisNode = { ...oldNodes[nodeBookState.selectedNode] }
+        thisNode.editable = true
+        setMapChanged(true)
+        return {
+          ...oldNodes,
+          [nodeBookState.selectedNode]: thisNode
+        }
+      })
+      scrollToNode(nodeBookState.selectedNode)
+    },
+    [nodeBookState.selectedNode, reloadPermanentGrpah]
+  )
+
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       console.log("[SELECT_NODE]")
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           console.log("[select node]: will call reload permanet graph")
           reloadPermanentGrpah()
@@ -2463,18 +2524,9 @@ const Dashboard = ({}: DashboardProps) => {
   return (
     <div className="MapContainer">
       <div id="Map">
+        {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
-          <MemoizedSidebar
-            proposeNodeImprovement={() => console.log("proposeNodeImprovement")}
-            fetchProposals={fetchProposals}
-            rateProposal={() => console.log("rateProposal")}
-            selectProposal={() => console.log("selectProposal")}
-            deleteProposal={() => console.log("deleteProposal")}
-            closeSideBar={closeSideBar}
-            proposeNewChild={proposeNewChild}
-            selectionType={nodeBookState.selectionType}
-          />
-          <Box sx={{ position: "fixed", right: "10px", zIndex: "1300", background: "#123" }}>
+          <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
             {/* Data from map, DONT REMOVE */}
             <Box>
               Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
@@ -2483,6 +2535,8 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => console.log(nodes)}>nodes</Button>
               <Button onClick={() => console.log(edges)}>edges</Button>
               <Button onClick={() => console.log(allTags)}>allTags</Button>
+            </Box>
+            <Box>
               <Button onClick={() => console.log("DAGGER", g)}>Dager</Button>
               <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
               <Button onClick={() => console.log(user)}>user</Button>
@@ -2500,6 +2554,21 @@ const Dashboard = ({}: DashboardProps) => {
               </Button>
               <Button onClick={() => openNodeHandler("JvMjw4kbgeqNA7sRQjfZ")}>Open Node Handler</Button>
             </Box>
+          </Drawer>
+          <MemoizedSidebar
+            proposeNodeImprovement={proposeNodeImprovement}
+            fetchProposals={fetchProposals}
+            rateProposal={() => console.log("rateProposal")}
+            selectProposal={() => console.log("selectProposal")}
+            deleteProposal={() => console.log("deleteProposal")}
+            closeSideBar={closeSideBar}
+            proposeNewChild={proposeNewChild}
+            selectionType={nodeBookState.selectionType}
+          />
+          <Box sx={{ position: "fixed", bottom: "10px", right: "10px", zIndex: "1300", background: "#123" }}>
+            <Button variant="contained" onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+              {"X"}
+            </Button>
           </Box>
 
           {/* end Data from map */}
@@ -2541,7 +2610,9 @@ const Dashboard = ({}: DashboardProps) => {
                 correctNode={correctNode}
                 wrongNode={wrongNode}
                 uploadNodeImage={uploadNodeImage}
-                removeImage={removeImage}
+                removeImage={() => {
+                  console.log("removeImage")
+                }}
                 changeChoice={() => {
                   console.log("changeChoice")
                 }}
@@ -2566,9 +2637,7 @@ const Dashboard = ({}: DashboardProps) => {
                 saveProposedImprovement={() => {
                   console.log("saveProposedImprovemny")
                 }}
-                closeSideBar={() => {
-                  console.log("closeSideBar")
-                }}
+                closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => {
                   console.log("reloadPermanentGrpah")
                 }}
