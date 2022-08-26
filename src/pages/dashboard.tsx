@@ -2214,6 +2214,16 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [user, choosingNode, setNodeParts]
   );
+  const removeImage = useCallback(
+    (nodeRef:any, nodeId:string) => {
+      // console.log("In removeImage");
+      setNodeParts(nodeId, (thisNode:any) => {
+        thisNode.nodeImage = "";
+        return { ...thisNode };
+      });
+    },
+    [setNodeParts]
+  );
 
   const edgeIds = Object.keys(edges);
 
@@ -2298,9 +2308,7 @@ const Dashboard = ({}: DashboardProps) => {
                 correctNode={correctNode}
                 wrongNode={wrongNode}
                 uploadNodeImage={uploadNodeImage}
-                removeImage={() => {
-                  console.log("removeImage");
-                }}
+                removeImage={removeImage}
                 changeChoice={() => {
                   console.log("changeChoice");
                 }}

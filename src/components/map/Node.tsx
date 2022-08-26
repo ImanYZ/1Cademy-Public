@@ -239,9 +239,9 @@ const Node = ({
     },
     [toggleNode, identifier, open]
   );
-  // const removeImageHandler = useCallback(() => {
-  //   removeImage(nodeRef, identifier);
-  // }, [nodeRef, removeImage, identifier]);
+  const removeImageHandler = useCallback(() => {
+    removeImage(nodeRef, identifier);
+  }, [nodeRef, removeImage, identifier]);
 
   const onImageLoad = useCallback(() => setImageLoaded(true), []);
 
@@ -518,7 +518,7 @@ const Node = ({
                   {editable && (
                     <div className="RemoveImageDIV">
                       <MemoizedMetaButton
-                        onClick={() => console.log("removeImageHandler")}
+                        onClick={removeImageHandler}
                         tooltip="Click to remove the image."
                       >
                         <DeleteForeverIcon />
