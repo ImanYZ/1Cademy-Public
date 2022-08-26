@@ -10,7 +10,8 @@ export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCoun
   let newBatch = batch;
   // Delete the corresponding tag document from the tags collection.
   await tagsAndCommPoints({
-    nodeId, callback: async ({ tagRef, tagDoc, tagData }: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    nodeId, callback: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
       if (tagDoc && !tagData.deleted) {
         newBatch.update(tagRef, { deleted: true });
         [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);

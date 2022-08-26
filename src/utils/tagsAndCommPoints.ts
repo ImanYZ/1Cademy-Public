@@ -11,11 +11,11 @@ const comPointTypes = [
   "comOthWeekPoints",
 ];
 
-const tagCommunityFunctionOrPromise = async ({ tagRef, tagDoc, tagData, callBack }: any) => {
+const tagCommunityFunctionOrPromise = async ({ collectionName, tagRef, tagDoc, tagData, callBack }: any) => {
   if (typeof callBack.then === "function") {
-    await callBack({ tagRef, tagDoc, tagData });
+    await callBack({ collectionName, tagRef, tagDoc, tagData });
   } else {
-    callBack({ tagRef, tagDoc, tagData });
+    callBack({ collectionName, tagRef, tagDoc, tagData });
   }
 };
 
@@ -30,11 +30,11 @@ export const tagsAndCommPoints = async ({ nodeId, callBack }: any) => {
     for (let tagDoc of tagDocs.docs) {
       const tagData = tagDoc.data();
       const tagRef = db.collection(collectionName).doc(tagDoc.id);
-      await tagCommunityFunctionOrPromise({ tagRef, tagDoc, tagData, callBack });
+      await tagCommunityFunctionOrPromise({ collectionName, tagRef, tagDoc, tagData, callBack });
     }
     if (tagDocs.docs.length === 0) {
       const tagRef = db.collection(collectionName).doc();
-      await tagCommunityFunctionOrPromise({ tagRef, tagDoc: null, tagData: null, callBack });
+      await tagCommunityFunctionOrPromise({ collectionName, tagRef, tagDoc: null, tagData: null, callBack });
     }
   }
 };

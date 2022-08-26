@@ -1,7 +1,8 @@
 export { getNode } from './getNode';
 export { getUserNode } from './getUserNode';
-export { updateReputation } from './reputations';
+export { updateReputation, initializeNewReputationData } from './reputations';
 export { UpDownVoteNode } from './upDownVoteNode';
+export { firstWeekMonthDays } from './helpers';
 export { getAllUserNodes } from './getAllUserNodes';
 export { tagsAndCommPoints } from './tagsAndCommPoints';
 export { getTypedCollections } from './getTypedCollections';
