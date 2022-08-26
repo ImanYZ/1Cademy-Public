@@ -311,7 +311,7 @@ const uploadNodeImageHandler = useCallback(
                   type="file"
                   ref={inputEl}
                   onChange={uploadNodeImageHandler}
-                  // hidden="hidden"
+                  hidden
                 />
                 <MemoizedMetaButton
                   onClick={uploadImageClicked}
@@ -319,7 +319,7 @@ const uploadNodeImageHandler = useCallback(
                   tooltipPosition="top"
                 >
                   <>
-                <ImageIcon/>
+                <ImageIcon fontSize="small"/>
                   {isUploading && (
                     <>
                       <div className="preloader-wrapper active inherit ImageUploadButtonLoader">

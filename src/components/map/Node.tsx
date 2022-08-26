@@ -13,6 +13,7 @@ import { Editor } from "../Editor";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
+import { MemoizedMetaButton } from "./MetaButton";
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -289,9 +290,9 @@ const Node = ({
   );
 
   const uploadNodeImageHandler = useCallback(
-    // (event:any, isUploading:boolean, setIsUploading:any, setPercentageUploaded:any) =>
-    //   uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded)
-    () => console.log("uploadNodeImageHandler"),
+    (event: any, isUploading: boolean, setIsUploading: any, setPercentageUploaded: any) => {
+      uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded);
+    },
     [uploadNodeImage, nodeRef, identifier]
   );
 
@@ -582,13 +583,13 @@ const Node = ({
                   <Editor label="Reason" value={reason} setValue={setReason} readOnly={false} />
                   {/* {reason} */}
                   {/* <p className="ProposalTitle">
-                       Please write a few words to summarize what you've proposed
-                       in this version:
-                     </p>
-                     <HyperEditor
-                       content={summary}
-                       readOnly={false}
-                       onChange={setSummary}
+                      Please write a few words to summarize what you've proposed
+                      in this version:
+                    </p>
+                    <HyperEditor
+                      content={summary}
+                      readOnly={false}
+                      onChange={setSummary}
                      /> */}
                 </>
               )}
