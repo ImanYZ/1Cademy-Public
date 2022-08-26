@@ -178,7 +178,7 @@ const Dashboard = ({}: DashboardProps) => {
   // FLAGS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
-
+  const [openDeveloperMenu, setOpenDeveloperMenu] = useState(false)
   // flag for whether cursor is not on text
   // for determining whether the map should move if the user clicks and drags
   const [mapHovered, setMapHovered] = useState(false)
