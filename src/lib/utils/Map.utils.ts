@@ -1,20 +1,21 @@
-import dagre from "dagre";
-import { FullNodeData } from "../../noteBookTypes";
+import dagre from "dagre"
 
-export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setstate.
-export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.
-export const NODE_WIDTH = 580; // Default node width
-export const NODE_HEIGHT = 97; // Default node height
-export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
-export const COLUMN_GAP = 190; // The minimum gap between the node columns.
-export const XOFFSET = 580; // Default X offset to shift all the nodes and relations.
-export const YOFFSET = 160; // Default Y offset to shift all the nodes and relations.
+import { FullNodeData } from "../../noteBookTypes"
+
+export const MIN_CHANGE = 4 // The minimum change on the map to initiate a setstate.
+export const MAP_RIGHT_GAP = 730 // The gap on the right side of the map for the sidebar area.
+export const NODE_WIDTH = 580 // Default node width
+export const NODE_HEIGHT = 97 // Default node height
+export const NODE_GAP = 19 // The minimum gap between the stacked nodes.
+export const COLUMN_GAP = 190 // The minimum gap between the node columns.
+export const XOFFSET = 580 // Default X offset to shift all the nodes and relations.
+export const YOFFSET = 160 // Default Y offset to shift all the nodes and relations.
 
 // export const visibleNodes = new Set();
 // set of ids of changedNodes: for example (proposal nodes)
-export const tempNodes = new Set<string>();
+export const tempNodes = new Set<string>()
 // all nodes that have been modified
-export const changedNodes: any = {};
+export const changedNodes: any = {}
 // object of sets
 // keys: reference node ids
 // values: set of node ids that are citing this reference
@@ -22,22 +23,22 @@ export const changedNodes: any = {};
 // set of all ids of allTags nodes
 
 const firstWeekDay = (thisDate?: any) => {
-  let today = new Date();
+  let today = new Date()
   if (thisDate) {
-    today = new Date(thisDate.getTime());
+    today = new Date(thisDate.getTime())
   }
-  const daysDiff = today.getDate() - today.getDay();
-  let firstWeekDay = new Date(today.setDate(daysDiff));
-  return firstWeekDay.getMonth() + 1 + "-" + firstWeekDay.getDate() + "-" + firstWeekDay.getFullYear();
-};
+  const daysDiff = today.getDate() - today.getDay()
+  let firstWeekDay = new Date(today.setDate(daysDiff))
+  return firstWeekDay.getMonth() + 1 + "-" + firstWeekDay.getDate() + "-" + firstWeekDay.getFullYear()
+}
 
 const firstMonthDay = (thisDate?: any) => {
-  let today = new Date();
+  let today = new Date()
   if (thisDate) {
-    today = new Date(thisDate.getTime());
+    today = new Date(thisDate.getTime())
   }
-  return today.getMonth() + 1 + "-" + 1 + "-" + today.getFullYear();
-};
+  return today.getMonth() + 1 + "-" + 1 + "-" + today.getFullYear()
+}
 
 export const loadReputationsData = (
   db: any,
@@ -47,66 +48,66 @@ export const loadReputationsData = (
   setReputationsDict: any,
   setReputationsLoaded: any
 ) => {
-  const reputationsDictTemp: any = {};
-  let reputationsQuery;
+  const reputationsDictTemp: any = {}
+  let reputationsQuery
 
   if (isCommunity) {
     if (reputationType === "All Time") {
-      reputationsQuery = db.collection("comPoints");
+      reputationsQuery = db.collection("comPoints")
     } else if (reputationType === "Monthly") {
-      reputationsQuery = db.collection("comMonthlyPoints").where("firstMonthDay", "==", firstMonthDay());
+      reputationsQuery = db.collection("comMonthlyPoints").where("firstMonthDay", "==", firstMonthDay())
     } else if (reputationType === "Weekly") {
-      reputationsQuery = db.collection("comWeeklyPoints").where("firstWeekDay", "==", firstWeekDay());
+      reputationsQuery = db.collection("comWeeklyPoints").where("firstWeekDay", "==", firstWeekDay())
     } else if (reputationType === "Others") {
-      reputationsQuery = db.collection("comOthersPoints");
+      reputationsQuery = db.collection("comOthersPoints")
     } else if (reputationType === "Others Monthly") {
-      reputationsQuery = db.collection("comOthMonPoints").where("firstMonthDay", "==", firstMonthDay());
+      reputationsQuery = db.collection("comOthMonPoints").where("firstMonthDay", "==", firstMonthDay())
     }
   } else {
     if (reputationType === "All Time") {
-      reputationsQuery = db.collection("reputations").where("tagId", "==", tagId);
+      reputationsQuery = db.collection("reputations").where("tagId", "==", tagId)
     } else if (reputationType === "Monthly") {
       reputationsQuery = db
         .collection("monthlyReputations")
         .where("tagId", "==", tagId)
-        .where("firstMonthDay", "==", firstMonthDay());
+        .where("firstMonthDay", "==", firstMonthDay())
     } else if (reputationType === "Weekly") {
       //  return here and change tag to tagId, after updating values in database
       reputationsQuery = db
         .collection("weeklyReputations")
         .where("tagId", "==", tagId)
-        .where("firstWeekDay", "==", firstWeekDay());
+        .where("firstWeekDay", "==", firstWeekDay())
     } else if (reputationType === "Others") {
-      reputationsQuery = db.collection("othersReputations").where("tagId", "==", tagId);
+      reputationsQuery = db.collection("othersReputations").where("tagId", "==", tagId)
     } else if (reputationType === "Others Monthly") {
       reputationsQuery = db
         .collection("othMonReputations")
         .where("tagId", "==", tagId)
-        .where("firstMonthDay", "==", firstMonthDay());
+        .where("firstMonthDay", "==", firstMonthDay())
     }
   }
   const reputationsSnapshot = reputationsQuery.onSnapshot(function (snapshot: any) {
-    const docChanges = snapshot.docChanges();
+    const docChanges = snapshot.docChanges()
     if (docChanges.length > 0) {
       for (let change of docChanges) {
-        const reputationData = change.doc.data();
-        let uname, isAdmin, admin, adminPoints, aImgUrl, aFullname, aChooseUname;
+        const reputationData = change.doc.data()
+        let uname, isAdmin, admin, adminPoints, aImgUrl, aFullname, aChooseUname
         if (isCommunity) {
-          admin = reputationData.admin;
-          adminPoints = reputationData.adminPoints;
-          aImgUrl = reputationData.aImgUrl;
-          aFullname = reputationData.aFullname;
-          aChooseUname = reputationData.aChooseUname;
-          delete reputationData.admin;
-          delete reputationData.adminPoints;
-          delete reputationData.aImgUrl;
-          delete reputationData.aFullname;
-          delete reputationData.aChooseUname;
+          admin = reputationData.admin
+          adminPoints = reputationData.adminPoints
+          aImgUrl = reputationData.aImgUrl
+          aFullname = reputationData.aFullname
+          aChooseUname = reputationData.aChooseUname
+          delete reputationData.admin
+          delete reputationData.adminPoints
+          delete reputationData.aImgUrl
+          delete reputationData.aFullname
+          delete reputationData.aChooseUname
         } else {
-          uname = reputationData.uname;
-          isAdmin = reputationData.isAdmin;
-          delete reputationData.uname;
-          delete reputationData.isAdmin;
+          uname = reputationData.uname
+          isAdmin = reputationData.isAdmin
+          delete reputationData.uname
+          delete reputationData.isAdmin
         }
 
         if (change.type === "added" || change.type === "modified") {
@@ -118,22 +119,22 @@ export const loadReputationsData = (
               adminPoints,
               aImgUrl,
               aFullname,
-              aChooseUname
-            };
+              aChooseUname,
+            }
           } else {
             reputationsDictTemp[uname] = {
               ...reputationData,
-              isAdmin
-            };
+              isAdmin,
+            }
           }
         }
       }
-      setReputationsDict({ ...reputationsDictTemp });
+      setReputationsDict({ ...reputationsDictTemp })
     }
-    setReputationsLoaded(true);
-  });
-  return () => reputationsSnapshot();
-};
+    setReputationsLoaded(true)
+  })
+  return () => reputationsSnapshot()
+}
 
 // setting the node type and visibility of a parent node inside a child
 export const setTypeVisibilityOfParentInsideChild = (oldNodes: any, nodeId: string, childId: string) => {
@@ -141,22 +142,22 @@ export const setTypeVisibilityOfParentInsideChild = (oldNodes: any, nodeId: stri
     // signal to React that something has changed in oldNodes[childId]
     oldNodes[childId] = {
       ...oldNodes[childId],
-      parents: [...oldNodes[childId].parents]
-    };
-    const parentIdx = oldNodes[childId].parents.findIndex((p: any) => p.node === nodeId);
+      parents: [...oldNodes[childId].parents],
+    }
+    const parentIdx = oldNodes[childId].parents.findIndex((p: any) => p.node === nodeId)
     oldNodes[childId].parents[parentIdx] = {
       ...oldNodes[childId].parents[parentIdx],
-      visible: true
-    };
+      visible: true,
+    }
   }
-};
+}
 
 // setting the node type and visibility of a child node inside a parent
 export const setTypeVisibilityOfChildInsideParent2 = (nodeParent: any, oldNodes: any, nodeId: string, parentId: string) => {
   // const oldNodesCopy = { ...oldNodes }
   let parentCopy = copyNode(nodeParent)
   // parentCopy = { ...parentCopy, children: [...parentCopy.children] }
-  const childIdx = parentCopy.children.findIndex((c: any) => c.node === nodeId);
+  const childIdx = parentCopy.children.findIndex((c: any) => c.node === nodeId)
   parentCopy.children[childIdx] = { ...parentCopy.children[childIdx], visible: true }
   return parentCopy
 
@@ -171,22 +172,22 @@ export const setTypeVisibilityOfChildInsideParent2 = (nodeParent: any, oldNodes:
   //     visible: true
   //   };
   // }
-};
+}
 
 // setting the node type and visibility of a child node inside a parent
 export const setTypeVisibilityOfChildInsideParent = (oldNodes: any, nodeId: string, parentId: string) => {
   if (parentId in oldNodes) {
     oldNodes[parentId] = {
       ...oldNodes[parentId],
-      children: [...oldNodes[parentId].children]
-    };
-    const childIdx = oldNodes[parentId].children.findIndex((c: any) => c.node === nodeId);
+      children: [...oldNodes[parentId].children],
+    }
+    const childIdx = oldNodes[parentId].children.findIndex((c: any) => c.node === nodeId)
     oldNodes[parentId].children[childIdx] = {
       ...oldNodes[parentId].children[childIdx],
-      visible: true
-    };
+      visible: true,
+    }
   }
-};
+}
 
 // for every node downloaded from the database
 // export const addReference = (nodeId, nodeData) => {
@@ -211,10 +212,10 @@ export const setTypeVisibilityOfChildInsideParent = (oldNodes: any, nodeId: stri
 export const getDependentNodes = (dependents: any[], necessaryNodeIds: string[], dependentNodeIds: string[]) => {
   for (let dependent of dependents) {
     if (!necessaryNodeIds.includes(dependent.node) && !dependentNodeIds.includes(dependent.node)) {
-      dependentNodeIds.push(dependent.node);
+      dependentNodeIds.push(dependent.node)
     }
   }
-};
+}
 
 // adds a node to the dagre object and the list of nodes that should be visible on the map (oldNodes is updated)
 // used for adding new nodes to map
@@ -223,35 +224,35 @@ export const getDependentNodes = (dependents: any[], necessaryNodeIds: string[],
 // oldNodes: current value of nodesState in Map.js
 // callback: called after oldNodes is updated and the new node is added to the dagre object
 export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: any, oldNodes: any, allTags: any, callback?: any) => {
-  let newNode: any = {};
+  let newNode: any = {}
   // 10
   // unde
   // 0
-  node.width ? node.width : NODE_WIDTH; // 10 // NODE_ // NODE
+  node.width ? node.width : NODE_WIDTH // 10 // NODE_ // NODE
   if ("width" in node) {
-    newNode.width = node.width;
+    newNode.width = node.width
   } else {
-    newNode.width = NODE_WIDTH;
+    newNode.width = NODE_WIDTH
   }
   if ("height" in node) {
-    newNode.height = node.height;
+    newNode.height = node.height
   } else {
-    newNode.height = NODE_HEIGHT;
+    newNode.height = NODE_HEIGHT
   }
   if ("left" in node) {
-    newNode.left = node.left;
+    newNode.left = node.left
   }
   if ("top" in node) {
-    newNode.top = node.top;
+    newNode.top = node.top
   }
   if ("x" in node) {
-    newNode.x = node.x;
+    newNode.x = node.x
   }
   if ("y" in node) {
-    newNode.y = node.y;
+    newNode.y = node.y
   }
   // add newNode data to dagre object with the id: nodeId
-  g.setNode(nodeId, newNode);
+  g.setNode(nodeId, newNode)
   // if the node has at least one tag, check if the nodeId of the tag is in allTags
   // (clusters are based on nodes' first tags)
   if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
@@ -262,33 +263,33 @@ export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: an
   console.log(' --> before callback')
   if (callback) {
     console.log(' ----------------> execute callback')
-    callback();
+    callback()
   }
   // ***************************************************************
   // Candidate for removal!
   // copyNode: creates copy of the object
   // copies the other attributes of the node (attributes not necessary for dagre object)
-  newNode = copyNode(node);
+  newNode = copyNode(node)
   // ***************************************************************
   // id is deleted because nodeId will be used as key in oldNodes
   if ("id" in newNode) {
-    delete newNode.id;
+    delete newNode.id
   }
   // adding the newNode to oldNodes
-  oldNodes[nodeId] = newNode;
-  return oldNodes;
-};
+  oldNodes[nodeId] = newNode
+  return oldNodes
+}
 
 // removes a node from the map
 export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any) => {
   // removes nodeId from dagre object
-  g.removeNode(nodeId);
+  g.removeNode(nodeId)
   // removes nodeId from oldNodes
   if (nodeId in oldNodes) {
-    delete oldNodes[nodeId];
+    delete oldNodes[nodeId]
   }
-  return oldNodes;
-};
+  return oldNodes
+}
 
 // adds edge to dagre object and oldEdges
 // from: node id of source of the new edge
@@ -297,24 +298,24 @@ export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNo
 export const setDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: string, edge: any, oldEdges: any) => {
   // checks that the from and to nodes exist in map
   if (g.hasNode(from) && g.hasNode(to)) {
-    const edgeId = from + "-" + to;
-    const newEdge = { ...edge };
-    g.setEdge(from, to, newEdge);
+    const edgeId = from + "-" + to
+    const newEdge = { ...edge }
+    g.setEdge(from, to, newEdge)
     // adds newEdge to oldEdges
-    oldEdges[edgeId] = newEdge;
+    oldEdges[edgeId] = newEdge
   }
-  return oldEdges;
-};
+  return oldEdges
+}
 
 // removes edge from dagre object and oldEdges
 export const removeDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: string, oldEdges: any) => {
-  g.removeEdge(from, to);
-  const edgeId = from + "-" + to;
+  g.removeEdge(from, to)
+  const edgeId = from + "-" + to
   if (edgeId in oldEdges) {
-    delete oldEdges[edgeId];
+    delete oldEdges[edgeId]
   }
-  return oldEdges;
-};
+  return oldEdges
+}
 
 // hides all edges for the node with nodeId
 export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, edges: any) => {
@@ -335,16 +336,16 @@ export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, e
     for (let edge of nodeEdges) {
       // remove edge from dagre object
       // from: edge.v, to: edge.w
-      g.removeEdge(edge.v, edge.w);
-      const edgeId = edge.v + "-" + edge.w;
+      g.removeEdge(edge.v, edge.w)
+      const edgeId = edge.v + "-" + edge.w
       // removes edge from oldEdges
       if (edgeId in oldEdges) {
-        delete oldEdges[edgeId];
+        delete oldEdges[edgeId]
       }
     }
   }
-  return oldEdges;
-};
+  return oldEdges
+}
 
 // for hiding nodes in the map
 export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any, oldEdges: any) => {
@@ -353,18 +354,18 @@ export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string,
     // if parent is visible on map
     if (parent.node in oldNodes) {
       // find index of nodeId in list of children of parent
-      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === nodeId);
+      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === nodeId)
       // copy list of children for parent node in oldNodes
       oldNodes[parent.node] = {
         ...oldNodes[parent.node],
-        children: [...oldNodes[parent.node].children]
-      };
+        children: [...oldNodes[parent.node].children],
+      }
       // update the child node of the parent node and make its visibility false
       oldNodes[parent.node].children[childIdx] = {
         ...oldNodes[parent.node].children[childIdx],
         visible: false,
-        nodeType: oldNodes[nodeId].nodeType
-      };
+        nodeType: oldNodes[nodeId].nodeType,
+      }
     }
   }
   // for every child
@@ -372,72 +373,72 @@ export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string,
     // if child is visible on map
     if (child.node in oldNodes) {
       // find index of nodeId in list of parents of child
-      const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === nodeId);
+      const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === nodeId)
       // copy list of parents for child node in oldNodes
       oldNodes[child.node] = {
         ...oldNodes[child.node],
-        parents: [...oldNodes[child.node].parents]
-      };
+        parents: [...oldNodes[child.node].parents],
+      }
       // update the parent node of the child node and make its visibility false
       oldNodes[child.node].parents[parentIdx] = {
         ...oldNodes[child.node].parents[parentIdx],
         visible: false,
-        nodeType: oldNodes[nodeId].nodeType
-      };
+        nodeType: oldNodes[nodeId].nodeType,
+      }
     }
   }
 
   // remove edges from this node to every other node
-  oldEdges = removeDagAllEdges(g, nodeId, { ...oldEdges });
+  oldEdges = removeDagAllEdges(g, nodeId, { ...oldEdges })
   // removes the node itself
-  oldNodes = removeDagNode(g, nodeId, oldNodes);
-  return { oldNodes, oldEdges };
-};
+  oldNodes = removeDagNode(g, nodeId, oldNodes)
+  return { oldNodes, oldEdges }
+}
 
 // for showing a hidden node
 export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdges: any/*, oldAllNodes: any*/) => {
   // copy list of the node's children to modify userNode object
-  uNodeData.children = [...uNodeData.children];
+  uNodeData.children = [...uNodeData.children]
   // for each child
   for (let childIdx = 0; childIdx < uNodeData.children.length; childIdx++) {
     // determines whether children are shown or hidden on map for setting child icons green or orange
-    const child = uNodeData.children[childIdx];
+    const child = uNodeData.children[childIdx]
     // change the visible attribute for each child node
     uNodeData.children[childIdx] = {
       ...uNodeData.children[childIdx],
       // whether the child is currently visible on the map
       // visible: child.node in oldAllNodes && "visible" in oldAllNodes[child.node] && oldAllNodes[child.node].visible
-      visible: child.node in oldNodes && "visible" in oldNodes[child.node] && oldNodes[child.node].visible
-    };
+      visible: child.node in oldNodes && "visible" in oldNodes[child.node] && oldNodes[child.node].visible,
+    }
   }
-  uNodeData.parents = [...uNodeData.parents];
+  uNodeData.parents = [...uNodeData.parents]
   for (let parentIdx = 0; parentIdx < uNodeData.parents.length; parentIdx++) {
     // determines whether parents are shown or hidden on map for setting parent icons green or orange
-    const parent = uNodeData.parents[parentIdx];
+    const parent = uNodeData.parents[parentIdx]
     // change the visible attribute for each parent node
     uNodeData.parents[parentIdx] = {
       ...uNodeData.parents[parentIdx],
       // whether the parent is currently visible on the map
-      visible: parent.node in oldNodes && "visible" in oldNodes[parent.node] && oldNodes[parent.node].visible
-    };
+      visible: parent.node in oldNodes && "visible" in oldNodes[parent.node] && oldNodes[parent.node].visible,
+    }
   }
   // for every child
   for (let child of uNodeData.children) {
     // if child is visible on map
     if (child.node in oldNodes) {
       // find index of nodeId in list of parents of child
-      const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === uNodeData.id);
+      const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === uNodeData.id)
       // copy list of parents for child node in oldNodes
       oldNodes[child.node] = {
         ...oldNodes[child.node],
-        parents: [...oldNodes[child.node].parents]
-      };
+        parents: [...oldNodes[child.node].parents],
+      }
       // update the parent node of the child node and make its visibility true
       oldNodes[child.node].parents[parentIdx] = {
         ...oldNodes[child.node].parents[parentIdx],
         visible: true,
-        nodeType: uNodeData.nodeType
-      };
+        nodeType: uNodeData.nodeType,
+      }
     }
   }
   // for every parent
@@ -445,22 +446,22 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
     // if parent is visible on map
     if (parent.node in oldNodes) {
       // find index of nodeId in list of children of parent
-      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === uNodeData.id);
+      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === uNodeData.id)
       // copy list of children for parent node in oldNodes
       oldNodes[parent.node] = {
         ...oldNodes[parent.node],
-        children: [...oldNodes[parent.node].children]
-      };
+        children: [...oldNodes[parent.node].children],
+      }
       // update the child node of the parent node and make its visibility true
       oldNodes[parent.node].children[childIdx] = {
         ...oldNodes[parent.node].children[childIdx],
         visible: true,
-        nodeType: uNodeData.nodeType
-      };
+        nodeType: uNodeData.nodeType,
+      }
     }
   }
-  return { uNodeData, oldNodes, oldEdges };
-};
+  return { uNodeData, oldNodes, oldEdges }
+}
 
 // for proposing links to existing parent/child nodes or creating new child nodes
 // or the database signals that new parent/child links are added to a node
@@ -473,7 +474,7 @@ export const setNewParentChildrenEdges = (g: dagre.graphlib.Graph<{}>, nodeId: s
     // should not add another edge if edge already exists
     if (!g.hasEdge(nodeId, child.node)) {
       // adds edge from nodeId to child to oldEdges
-      oldEdges = setDagEdge(g, nodeId, child.node, { label: child.label }, oldEdges);
+      oldEdges = setDagEdge(g, nodeId, child.node, { label: child.label }, oldEdges)
     }
   }
   for (let parent of newNode.parents) {
@@ -481,11 +482,11 @@ export const setNewParentChildrenEdges = (g: dagre.graphlib.Graph<{}>, nodeId: s
     // should not add another edge if edge already exists
     if (!g.hasEdge(parent.node, nodeId)) {
       // adds edge from nodeId to parent to oldEdges
-      oldEdges = setDagEdge(g, parent.node, nodeId, { label: parent.label }, oldEdges);
+      oldEdges = setDagEdge(g, parent.node, nodeId, { label: parent.label }, oldEdges)
     }
   }
-  return oldEdges;
-};
+  return oldEdges
+}
 
 // node: data of the node that is visible on the map
 // newNode: the updated data of the node that should be changed on the map
@@ -496,60 +497,60 @@ export const compareAndUpdateNodeLinks = (g: dagre.graphlib.Graph<{}>, node: any
   // for each child of node on the map
   for (let child of node.children) {
     // check whether child of node is a child of newNode
-    const newLink = linkExists(newNode.children, child);
+    const newLink = linkExists(newNode.children, child)
     // if false, this child link is on the map but in updated data from database, it doesn't exist anymore
     if (newLink === false) {
       // child link should be removed from map
-      oldEdges = removeDagEdge(g, nodeId, child.node, oldEdges);
+      oldEdges = removeDagEdge(g, nodeId, child.node, oldEdges)
       // indicates that some properties of the child link need to be updated
     } else if (newLink !== true) {
-      oldEdges = setDagEdge(g, nodeId, child.node, newLink, oldEdges);
+      oldEdges = setDagEdge(g, nodeId, child.node, newLink, oldEdges)
     }
   }
   // for each parent of node on the map
   for (let parent of node.parents) {
     // check whether parent of node is a parent of newNode
-    const newLink = linkExists(newNode.parents, parent);
+    const newLink = linkExists(newNode.parents, parent)
     // if false, this parent link is on the map but in updated data from database, it doesn't exist anymore
     if (newLink === false) {
       // parent link should be removed from map
-      oldEdges = removeDagEdge(g, parent.node, nodeId, oldEdges);
+      oldEdges = removeDagEdge(g, parent.node, nodeId, oldEdges)
       // indicates that some properties of the parent link need to be updated
     } else if (newLink !== true) {
-      oldEdges = setDagEdge(g, parent.node, nodeId, newLink, oldEdges);
+      oldEdges = setDagEdge(g, parent.node, nodeId, newLink, oldEdges)
     }
   }
   // looks at new parent/child links that never existed before to node with nodeId
-  return setNewParentChildrenEdges(g, nodeId, newNode, oldEdges);
-};
+  return setNewParentChildrenEdges(g, nodeId, newNode, oldEdges)
+}
 
 export const createOrUpdateNode = (g: dagre.graphlib.Graph<{}>, newNode: any, nodeId: string, oldNodes: any, oldEdges: any, allTags: any) => {
 
   // CHECK: object.children was node by I changed with newNode
   for (let childIdx = 0; childIdx < newNode.children.length; childIdx++) {
-    const child = newNode.children[childIdx];
+    const child = newNode.children[childIdx]
     // specify the visibility and type of the child nodes
     if (oldNodes[nodeId]) {
       // CHECK: this condition was added to ensure can access to oldNodes
       oldNodes[nodeId].children[childIdx] = {
         ...oldNodes[nodeId].children[childIdx],
-        visible: child.node in oldNodes
-      };
-      setTypeVisibilityOfParentInsideChild(oldNodes, nodeId, child.node);
+        visible: child.node in oldNodes,
+      }
+      setTypeVisibilityOfParentInsideChild(oldNodes, nodeId, child.node)
     }
   }
   // CHECK: object.parents was node by I changed with newNode
   for (let parentIdx = 0; parentIdx < newNode.parents.length; parentIdx++) {
-    const parent = newNode.parents[parentIdx];
+    const parent = newNode.parents[parentIdx]
     if (oldNodes[nodeId]) {
       oldNodes[nodeId].parents[parentIdx] = {
         ...oldNodes[nodeId].parents[parentIdx],
-        visible: parent.node in oldNodes
-      };
+        visible: parent.node in oldNodes,
+      }
     }
-    setTypeVisibilityOfChildInsideParent(oldNodes, nodeId, parent.node);
+    setTypeVisibilityOfChildInsideParent(oldNodes, nodeId, parent.node)
   }
-  let newNodeData;
+  let newNodeData
   // set height to default node height
   // let height = NODE_HEIGHT;
   // height needs to continually be set to account for variation in node title, content, and image
@@ -557,28 +558,28 @@ export const createOrUpdateNode = (g: dagre.graphlib.Graph<{}>, newNode: any, no
   if (!(nodeId in oldNodes)) {
     newNodeData = {
       ...newNode,
-      editable: false
+      editable: false,
       // width: NODE_WIDTH,
       // height,
-    };
+    }
     // adds newNode to dagre object and to oldNodes
     // null: no callback
-    oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
+    oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null)
     // creates edges from newNode to children nodes
     for (let child of newNode.children) {
-      oldEdges = setDagEdge(g, nodeId, child.node, { label: child.label }, oldEdges);
+      oldEdges = setDagEdge(g, nodeId, child.node, { label: child.label }, oldEdges)
     }
     // creates edges from parent nodes to newNode
     for (let parent of newNode.parents) {
-      oldEdges = setDagEdge(g, parent.node, nodeId, { label: parent.label }, oldEdges);
+      oldEdges = setDagEdge(g, parent.node, nodeId, { label: parent.label }, oldEdges)
     }
     // if node is currently visible
   } else {
-    const node = oldNodes[nodeId];
+    const node = oldNodes[nodeId]
     // check whether any attributes of node from the map has changed from the attributes of the node stored in the database
     if (!compare2Nodes(newNode, node)) {
       // updates node links
-      oldEdges = compareAndUpdateNodeLinks(g, node, nodeId, newNode, oldEdges);
+      oldEdges = compareAndUpdateNodeLinks(g, node, nodeId, newNode, oldEdges)
       // if (
       //   "open" in newNode &&
       //   newNode.open &&
@@ -597,56 +598,56 @@ export const createOrUpdateNode = (g: dagre.graphlib.Graph<{}>, newNode: any, no
       newNodeData = {
         ...node,
         ...newNode,
-        editable: false
+        editable: false,
         // width: NODE_WIDTH,
         // height,
-      };
+      }
       // if ("height" in newNode && newNode.height) {
       //   newNodeData.openHeight = newNode.height;
       // }
-      oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
+      oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null)
     }
   }
-  return { oldNodes, oldEdges };
-};
+  return { oldNodes, oldEdges }
+}
 
 // CHECK: this function is was working with objects
 // but need to be modified to work with new arrays
 // this works correctly in dashboard with array but,
 // dont work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
-  let newNode = { ...node };
-  newNode.parents = [];
+  let newNode = { ...node }
+  newNode.parents = []
   for (let parent of node.parents) {
-    newNode.parents.push({ ...parent });
+    newNode.parents.push({ ...parent })
   }
-  newNode.children = [];
+  newNode.children = []
   for (let child of node.children) {
-    newNode.children.push({ ...child });
+    newNode.children.push({ ...child })
   }
   // newNode.tagIds = [...node.tagIds];
   // newNode.tags = [...node.tags];
-  newNode.tagIds = [];
+  newNode.tagIds = []
   for (let tagId of node.tagIds) {
     // newNode.tagIds.push({ ...tagId });
     newNode.tagIds.push(tagId)
   }
-  newNode.tags = [];
+  newNode.tags = []
   for (let tag of node.tags) {
     // newNode.tags.push({ ...tag });
     newNode.tags.push(tag)
   }
-  newNode.referenceIds = [];
+  newNode.referenceIds = []
   for (let referenceId of node.referenceIds) {
     // newNode.referenceIds.push({ ...referenceId });
     newNode.referenceIds.push(referenceId)
   }
-  newNode.references = [];
+  newNode.references = []
   for (let reference of node.references) {
     // newNode.references.push({ ...reference });
     newNode.references.push(reference)
   }
-  newNode.referenceLabels = [];
+  newNode.referenceLabels = []
   if (node.referenceLabels) {
     for (let referenceLabel of node.referenceLabels) {
       // newNode.referenceLabels.push({ ...referenceLabel });
@@ -655,74 +656,74 @@ export const copyNode = (node: FullNodeData): FullNodeData => {
   }
 
   if (newNode.nodeType === "Question") {
-    newNode.choices = [];
+    newNode.choices = []
     for (let choice of node.choices) {
-      newNode.choices.push({ ...choice });
+      newNode.choices.push({ ...choice })
     }
   }
-  return newNode;
-};
+  return newNode
+}
 
 export const copyGraph = (graph: any) => {
-  let nodes = [];
-  let edges = [];
+  let nodes = []
+  let edges = []
   for (let node of graph.nodes) {
-    let nod = { ...node };
-    nod.parents = [];
+    let nod = { ...node }
+    nod.parents = []
     for (let parent of node.parents) {
-      nod.parents.push({ ...parent });
+      nod.parents.push({ ...parent })
     }
-    nod.children = [];
+    nod.children = []
     for (let child of node.children) {
-      nod.children.push({ ...child });
+      nod.children.push({ ...child })
     }
-    nod.tags = [];
+    nod.tags = []
     for (let tag of node.tags) {
-      nod.tags.push({ ...tag });
+      nod.tags.push({ ...tag })
     }
-    nod.references = [];
+    nod.references = []
     for (let reference of node.references) {
-      nod.references.push({ ...reference });
+      nod.references.push({ ...reference })
     }
     if (nod.nodeType === "Question") {
-      nod.choices = [];
+      nod.choices = []
       for (let choice of node.choices) {
-        nod.choices.push({ ...choice });
+        nod.choices.push({ ...choice })
       }
     }
-    nodes.push(nod);
+    nodes.push(nod)
   }
   for (let edge of graph.edges) {
-    edges.push({ ...edge });
+    edges.push({ ...edge })
   }
-  return { nodes, edges };
-};
+  return { nodes, edges }
+}
 
 export const compareProperty = (obj1: any, obj2: any, propName: string) => {
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
-    return false;
+    return false
   }
   if (!(propName in obj1) && !(propName in obj2)) {
-    return true;
+    return true
   }
   if (obj1[propName] !== obj2[propName]) {
-    return false;
+    return false
   }
-  return true;
-};
+  return true
+}
 
 export const compareFirestoreTimestamp = (obj1: any, obj2: any, propName: string) => {
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
-    return false;
+    return false
   }
   if (!(propName in obj1) && !(propName in obj2)) {
-    return true;
+    return true
   }
   if (obj1[propName].getTime() !== obj2[propName].getTime()) {
-    return false;
+    return false
   }
-  return true;
-};
+  return true
+}
 
 export const compareLinks = (
   links1: any,
@@ -732,7 +733,7 @@ export const compareLinks = (
   checkTypesVisibility: boolean
 ) => {
   if (links1.length !== links2.length) {
-    return false;
+    return false
   }
   // iterating through and comparing each of the links
   for (let i = 0; i < links1.length && isTheSame; i++) {
@@ -743,33 +744,33 @@ export const compareLinks = (
       (checkTypesVisibility &&
         (!compareProperty(links1[i], links2[i], "type") || !compareProperty(links1[i], links2[i], "visible")))
     ) {
-      return false;
+      return false
     }
   }
-  return isTheSame;
-};
+  return isTheSame
+}
 
 export const compareFlatLinks = (links1: any, links2: any, isTheSame: boolean) => {
   if (links1.length !== links2.length) {
-    return false;
+    return false
   }
   for (let i = 0; i < links1.length; i++) {
     if (links1[i] !== links2[i]) {
-      return false;
+      return false
     }
   }
-  return isTheSame;
-};
+  return isTheSame
+}
 
 export const compareChoices = (node1: any, node2: any, isTheSame: boolean) => {
   if (!("choices" in node1) && !("choices" in node2)) {
-    return isTheSame;
+    return isTheSame
   }
   if (("choices" in node1 && !("choices" in node2)) || (!("choices" in node1) && "choices" in node2)) {
-    return false;
+    return false
   }
   if (node1.choices.length !== node2.choices.length) {
-    return false;
+    return false
   }
   for (let i = 0; i < node1.choices.length && isTheSame; i++) {
     if (
@@ -777,15 +778,15 @@ export const compareChoices = (node1: any, node2: any, isTheSame: boolean) => {
       node1.choices[i].correct !== node2.choices[i].correct ||
       node1.choices[i].feedback !== node2.choices[i].feedback
     ) {
-      return false;
+      return false
     }
   }
-  return isTheSame;
-};
+  return isTheSame
+}
 
 export const compare2Nodes = (node1: any, node2: any) => {
   if (Object.keys(node1).length !== Object.keys(node2).length) {
-    return false;
+    return false
   }
   if (
     node1.identifier !== node2.identifier ||
@@ -855,38 +856,38 @@ export const compare2Nodes = (node1: any, node2: any) => {
     node1.deleteChoice !== node2.deleteChoice ||
     node1.addChoice !== node2.addChoice
   ) {
-    return false;
+    return false
   }
-  return true;
-};
+  return true
+}
 
 export const compareNodes = (nodes1: any, nodes2: any) => {
   if (Object.keys(nodes1).length !== Object.keys(nodes2).length) {
-    return false;
+    return false
   }
   for (let nId of Object.keys(nodes1)) {
     if (!compare2Nodes(nodes1[nId], nodes2[nId])) {
-      return false;
+      return false
     }
   }
-  return true;
-};
+  return true
+}
 
 export const compareEdgeIds = (EdgeIds1: string[], EdgeIds2: string[]) => {
   if (EdgeIds1.length !== EdgeIds2.length) {
-    return false;
+    return false
   }
   for (let idx = 0; idx < EdgeIds1.length; idx++) {
     if (EdgeIds1[idx] !== EdgeIds2[idx]) {
-      return false;
+      return false
     }
   }
-  return true;
-};
+  return true
+}
 
 export const compareEdges = (edges1: any, edges2: any) => {
   if (Object.keys(edges1).length !== Object.keys(edges2).length) {
-    return false;
+    return false
   }
   for (let eId of Object.keys(edges1)) {
     if (
@@ -896,15 +897,15 @@ export const compareEdges = (edges1: any, edges2: any) => {
       edges1[eId].toX !== edges2[eId].toX ||
       edges1[eId].toY !== edges2[eId].toY
     ) {
-      return false;
+      return false
     }
   }
-  return true;
-};
+  return true
+}
 
 export const compareClusters = (clusters1: any, clusters2: any) => {
   if (Object.keys(clusters1).length !== Object.keys(clusters1).length) {
-    return false;
+    return false
   }
   for (let cId of Object.keys(clusters1)) {
     if (
@@ -914,24 +915,24 @@ export const compareClusters = (clusters1: any, clusters2: any) => {
       clusters1[cId].height !== clusters2[cId].height ||
       clusters1[cId].title !== clusters2[cId].title
     ) {
-      return false;
+      return false
     }
   }
-  return true;
-};
+  return true
+}
 
 export const sortedEdgeIndex = (edges: any, newEdge: any) => {
   let low = 0,
-    high = edges.length;
+    high = edges.length
 
   while (low < high) {
-    let mid = (low + high) >>> 1;
+    let mid = (low + high) >>> 1
     if (edges[mid].from < newEdge.from || (edges[mid].from === newEdge.from && edges[mid].to < newEdge.to))
-      low = mid + 1;
-    else high = mid;
+      low = mid + 1
+    else high = mid
   }
-  return low;
-};
+  return low
+}
 
 export const addNewEdge = (edges: any, from: string, to: string, label: string) => {
   const newEdge = {
@@ -941,12 +942,12 @@ export const addNewEdge = (edges: any, from: string, to: string, label: string) 
     fromX: 0,
     fromY: 0,
     toX: 0,
-    toY: 0
-  };
-  const newEdgeIndex = sortedEdgeIndex(edges, newEdge);
-  edges.splice(newEdgeIndex, 0, newEdge);
-  return newEdge;
-};
+    toY: 0,
+  }
+  const newEdgeIndex = sortedEdgeIndex(edges, newEdge)
+  edges.splice(newEdgeIndex, 0, newEdge)
+  return newEdge
+}
 
 // verifies whether newLink exists in links array
 export const linkExists = (links: any, newLink: any) => {
@@ -957,22 +958,22 @@ export const linkExists = (links: any, newLink: any) => {
         // if that property does not exist in link or its value is different than in link
         if (!(key in link) || link[key] !== newLink[key]) {
           // indicates newLink exists in links but some of its properties are updated
-          return newLink;
+          return newLink
         }
       }
       // indicates newLink is in links
-      return true;
+      return true
     }
   }
   // indicates that no link in links has same node Id as the node Id for newLink
-  return false;
-};
+  return false
+}
 
 // CHECK: this function was validated to execute build
 export const getSelectionText = () => {
-  var text = "";
-  var activeEl = document.activeElement as HTMLInputElement;
-  var activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
+  var text = ""
+  var activeEl = document.activeElement as HTMLInputElement
+  var activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null
   if (
     activeElTagName == "textarea" ||
     (
@@ -982,48 +983,48 @@ export const getSelectionText = () => {
       typeof activeEl.selectionStart == "number"
     )
   ) {
-    text = activeEl.value.slice(activeEl.selectionStart || undefined, activeEl.selectionEnd || undefined);
+    text = activeEl.value.slice(activeEl.selectionStart || undefined, activeEl.selectionEnd || undefined)
   } else if (window?.getSelection) {
-    text = (window.getSelection() || '').toString();
+    text = (window.getSelection() || '').toString()
   }
-  return text;
-};
+  return text
+}
 
 const applyTagRemove = (g: dagre.graphlib.Graph<{}>, oldAllTags: any, nodeId: string, dagreLoaded: boolean) => {
   if (nodeId in oldAllTags) {
     for (let parentTagId of oldAllTags[nodeId].tagIds) {
-      oldAllTags[parentTagId].children = oldAllTags[parentTagId].children.filter((tgId: string) => tgId !== nodeId);
+      oldAllTags[parentTagId].children = oldAllTags[parentTagId].children.filter((tgId: string) => tgId !== nodeId)
     }
     for (let childTagId of oldAllTags[nodeId].children) {
-      oldAllTags[childTagId].tagIds = oldAllTags[childTagId].tagIds.filter((tgId: string) => tgId !== nodeId);
+      oldAllTags[childTagId].tagIds = oldAllTags[childTagId].tagIds.filter((tgId: string) => tgId !== nodeId)
     }
-    delete oldAllTags[nodeId];
+    delete oldAllTags[nodeId]
     if (dagreLoaded && g.hasNode("Tag" + nodeId)) {
-      g.removeNode("Tag" + nodeId);
+      g.removeNode("Tag" + nodeId)
     }
   }
-};
+}
 
 export const applyAllTagChanges = (g: dagre.graphlib.Graph<{}>, oAllTags: any, docChanges: any, dagreLoaded: boolean) => {
-  let oldAllTags = { ...oAllTags };
+  let oldAllTags = { ...oAllTags }
   for (let change of docChanges) {
-    const cType = change.type;
-    const tagData = change.doc.data();
-    const nodeId = tagData.node;
+    const cType = change.type
+    const tagData = change.doc.data()
+    const nodeId = tagData.node
     if (tagData.deleted || cType === "removed") {
-      applyTagRemove(g, oldAllTags, nodeId, dagreLoaded);
+      applyTagRemove(g, oldAllTags, nodeId, dagreLoaded)
     } else {
       if (nodeId in oldAllTags) {
-        oldAllTags[nodeId].title = tagData.title;
+        oldAllTags[nodeId].title = tagData.title
         // Handle tags change. UPDATE
         for (let tagIdx = 0; tagIdx < tagData.tagIds.length; tagIdx++) {
-          const tagId = tagData.tagIds[tagIdx];
-          const tag = tagData.tags[tagIdx];
+          const tagId = tagData.tagIds[tagIdx]
+          const tag = tagData.tags[tagIdx]
           if (!oldAllTags[nodeId].tagIds.includes(tagId)) {
-            oldAllTags[nodeId].tagIds.push(tagId);
-            oldAllTags[nodeId].tags.push(tag);
+            oldAllTags[nodeId].tagIds.push(tagId)
+            oldAllTags[nodeId].tags.push(tag)
             if (tagId in oldAllTags) {
-              oldAllTags[tagId].children.push(nodeId);
+              oldAllTags[tagId].children.push(nodeId)
             } else {
               // if not exist parent add in oldTags
               oldAllTags[tagId] = {
@@ -1031,15 +1032,15 @@ export const applyAllTagChanges = (g: dagre.graphlib.Graph<{}>, oAllTags: any, d
                 title: tag,
                 children: [nodeId],
                 checked: false,
-                tags: []
-              };
+                tags: [],
+              }
             }
           }
         }
         for (let oldTagId of oldAllTags[nodeId].tagIds) {
           if (!tagData.tagIds.includes(oldTagId)) {
-            oldAllTags[nodeId].tagIds = oldAllTags[nodeId].tagIds.filter((tgId: string) => tgId !== oldTagId);
-            oldAllTags[oldTagId].children = oldAllTags[oldTagId].children.filter((tgId: string) => tgId !== nodeId);
+            oldAllTags[nodeId].tagIds = oldAllTags[nodeId].tagIds.filter((tgId: string) => tgId !== oldTagId)
+            oldAllTags[oldTagId].children = oldAllTags[oldTagId].children.filter((tgId: string) => tgId !== nodeId)
           }
         }
       } else {
@@ -1049,15 +1050,15 @@ export const applyAllTagChanges = (g: dagre.graphlib.Graph<{}>, oAllTags: any, d
           checked: false,
           nodeId,
           tagIds: tagData.tagIds,
-          children: []
-        };
+          children: [],
+        }
         // iterate every parent
         for (let parentTagIdx = 0; parentTagIdx < tagData.tagIds.length; parentTagIdx++) {
-          const parentTagId = tagData.tagIds[parentTagIdx];
-          const parentTag = tagData.tags[parentTagIdx];
+          const parentTagId = tagData.tagIds[parentTagIdx]
+          const parentTag = tagData.tags[parentTagIdx]
           if (parentTagId in oldAllTags) {
             // if exist parent add the child
-            oldAllTags[parentTagId].children.push(nodeId);
+            oldAllTags[parentTagId].children.push(nodeId)
           } else {
             // if not exist parent, add parent
             oldAllTags[parentTagId] = {
@@ -1065,15 +1066,15 @@ export const applyAllTagChanges = (g: dagre.graphlib.Graph<{}>, oAllTags: any, d
               title: parentTag,
               checked: false,
               tags: [],
-              children: [nodeId]
-            };
+              children: [nodeId],
+            }
           }
         }
       }
     }
   }
-  return oldAllTags;
-};
+  return oldAllTags
+}
 
 {
   // const sortedNodeIndex = (nodes, newNode, attr) => {
