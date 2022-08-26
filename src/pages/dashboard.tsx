@@ -2468,8 +2468,8 @@ const Dashboard = ({}: DashboardProps) => {
             const picturesFolder = "UploadedImages/"
             const imageNameSplit = image.name.split(".")
             const imageExtension = imageNameSplit[imageNameSplit.length - 1]
-            // let imageFileName = user.userId + "/" + new Date().toUTCString() + "." + imageExtension
-            let imageFileName = "jjjj" + imageExtension
+            let imageFileName = user.userId + "/" + Number(new Date()) + "." + imageExtension
+            // let imageFileName = "jjjj" + imageExtension
 
             console.log("picturesFolder + imageFileName", picturesFolder + imageFileName)
             const storageRef = ref(storage, picturesFolder + imageFileName)
@@ -2490,7 +2490,11 @@ const Dashboard = ({}: DashboardProps) => {
               },
               async function complete() {
                 console.log("storageRef", storageRef)
-                const imageGeneratedUrl = await getDownloadURL(storageRef)
+                console.log("task.snapshot.ref", task.snapshot.ref, task.snapshot.ref.toString())
+                // task.snapshot.g
+                // task.snapshot.metadata.ref.
+                const imageGeneratedUrl = await getDownloadURL(task.snapshot.ref)
+                // const imageGeneratedUrl = await getDownloadURL(storageRef)
                 console.log("---> imageGeneratedUrl", imageGeneratedUrl)
                 setIsSubmitting(false)
                 setIsUploading(false)

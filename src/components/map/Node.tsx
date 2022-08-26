@@ -515,6 +515,7 @@ const Node = ({
                 width={width}
                /> */}
               {/* {content} */}
+              <h5>IMAGE URL:{nodeImage}</h5>
               {nodeImage !== "" && (
                 <>
                   {editable && (
