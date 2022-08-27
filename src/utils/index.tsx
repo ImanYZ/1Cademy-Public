@@ -12,10 +12,15 @@ export { EDITED_UNIVERSITIES } from './edited_universities';
 export { rewriteComPointsDocs } from './rewriteComPointsDocs';
 export { rewriteReputationDocs } from './rewriteReputationDocs';
 export { signalAllUserNodesChanges } from './signalAllUserNodesChanges';
-export { updateReputation, initializeNewReputationData } from './reputations';
+export { updateUserImageEverywhere } from './updateUserImageEverywhere';
+export { updateUserImageInCollection } from './updateUserImageInCollection';
 export { deleteTagCommunityAndTagsOfTags } from './deleteTagCommunityAndTagsOfTags';
 export { fetchGoogleMapsGeolocationWrapper } from './fetchGoogleMapsGeolocationWrapper';
 export { retrieveAndsignalAllUserNodesChanges } from './retrieveAndsignalAllUserNodesChanges';
+export {
+  updateReputation,
+  initializeNewReputationData
+} from './reputations';
 export {
   hasCycle,
   NODE_TYPES,
