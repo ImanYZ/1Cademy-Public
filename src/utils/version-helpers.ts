@@ -12,6 +12,23 @@ import {
   updateReputation
 } from '.';
 
+export const comPointTypes = [
+  "comPoints",
+  "comMonthlyPoints",
+  "comWeeklyPoints",
+  "comOthersPoints",
+  "comOthMonPoints",
+  "comOthWeekPoints",
+];
+
+export const schoolPointTypes = [
+  "schoolPoints",
+  "schoolMonthlyPoints",
+  "schoolWeeklyPoints",
+  "schoolOthersPoints",
+  "schoolOthMonPoints",
+  "schoolOthWeekPoints",
+];
 export const reputationTypes = [
   "reputations",
   "monthlyReputations",

@@ -1,39 +1,48 @@
 export { getNode } from './getNode';
 export { getUserNode } from './getUserNode';
-export { updateReputation, initializeNewReputationData } from './reputations';
-export { UpDownVoteNode } from './upDownVoteNode';
 export { firstWeekMonthDays } from './helpers';
+export { UpDownVoteNode } from './upDownVoteNode';
 export { getAllUserNodes } from './getAllUserNodes';
+export { replaceUsername } from './replaceUsername';
+export { baseReputationObj } from './baseReputationObj';
 export { tagsAndCommPoints } from './tagsAndCommPoints';
+export { doRemoveUnusedTags } from './doRemoveUnusedTags';
 export { getTypedCollections } from './getTypedCollections';
+export { EDITED_UNIVERSITIES } from './edited_universities';
+export { rewriteComPointsDocs } from './rewriteComPointsDocs';
+export { rewriteReputationDocs } from './rewriteReputationDocs';
 export { signalAllUserNodesChanges } from './signalAllUserNodesChanges';
+export { updateReputation, initializeNewReputationData } from './reputations';
 export { deleteTagCommunityAndTagsOfTags } from './deleteTagCommunityAndTagsOfTags';
+export { fetchGoogleMapsGeolocationWrapper } from './fetchGoogleMapsGeolocationWrapper';
 export { retrieveAndsignalAllUserNodesChanges } from './retrieveAndsignalAllUserNodesChanges';
 export {
+  hasCycle,
   NODE_TYPES,
-  reputationTypes,
-  improvementTypes,
   getVersion,
-  setOrIncrementNotificationNums,
-  compareChoices,
-  addToPendingPropsNums,
-  proposalNotification,
-  compareFlatLinks,
-  createPractice,
+  comPointTypes,
   getTagRefData,
   getDirectTags,
-  changeTagTitleInCollection,
-  changeNodeTitle,
-  addTagCommunityAndTagsOfTags,
-  deleteTagFromNodeTagCommunityAndTagsOfTags,
-  hasCycle,
-  generateTagsOfTags,
-  generateTagsData,
   getUserVersion,
+  createPractice,
+  compareChoices,
+  changeNodeTitle,
+  reputationTypes,
+  improvementTypes,
+  compareFlatLinks,
+  schoolPointTypes,
+  generateTagsData,
   isVersionApproved,
-  updateProposersReputationsOnNode,
-  getCumulativeProposerVersionRatingsOnNode,
-  createUpdateUserVersion,
+  generateTagsOfTags,
   versionCreateUpdate,
-  addToPendingPropsNumsExcludingVoters
+  proposalNotification,
+  addToPendingPropsNums,
+  createUpdateUserVersion,
+  changeTagTitleInCollection,
+  addTagCommunityAndTagsOfTags,
+  setOrIncrementNotificationNums,
+  updateProposersReputationsOnNode,
+  addToPendingPropsNumsExcludingVoters,
+  getCumulativeProposerVersionRatingsOnNode,
+  deleteTagFromNodeTagCommunityAndTagsOfTags,
 } from './version-helpers';

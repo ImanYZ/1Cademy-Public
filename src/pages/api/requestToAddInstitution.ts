@@ -8,6 +8,7 @@ import {
   db,
   publicStorageBucket
 } from "../../lib/firestoreServer/admin";
+import { fetchGoogleMapsGeolocationWrapper } from '../../utils';
 
 const validateInstitutionRequestForm = (values: any) => {
   let errors: any = {};
@@ -36,40 +37,6 @@ const validateInstitutionRequestForm = (values: any) => {
     valid: Object.keys(errors).length === 0 ? true : false,
   };
 };
-
-const fetchGoogleMapsGeolocation = async (institution: any) => {
-  try {
-    const response = await axios.get(
-      encodeURI(
-        `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDdW02hAK8Y2_2SWMwLGV9RJr4wm17IZUc&address=${institution}`
-      )
-    );
-    return response.data.results[0].geometry.location;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-};
-
-
-const fetchGoogleMapsGeolocationWrapper = async (institution: any) => {
-  let geoLoc,
-    errorNum = 0;
-  //  attempt to obtain geoLoc until the api returns a value
-  geoLoc = await fetchGoogleMapsGeolocation(institution);
-  while (!geoLoc && errorNum < 10) {
-    errorNum += 1;
-    geoLoc = setTimeout(async () => {
-      await fetchGoogleMapsGeolocation(institution);
-    }, 400);
-  }
-  //  if geoLoc still doesn't exist, create temp values for it
-  if (!geoLoc) {
-    geoLoc = { lng: -1, lat: -1 };
-  }
-  return geoLoc;
-};
-
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

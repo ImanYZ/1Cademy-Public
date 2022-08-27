@@ -69,9 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const userNodeData = userNodeDocs.docs[0].data();
     theNode = {
       id: fCard.node,
-      choices: theNode.choices.map((c: any) => {
-        return { choice: c.choice };
-      }),
+      choices: theNode.choices.map((c: any) => ({ choice: c.choice })),
       content: theNode.content,
       corrects: theNode.corrects,
       nodeImage: theNode.nodeImage,
