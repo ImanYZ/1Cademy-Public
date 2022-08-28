@@ -1,16 +1,16 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import Image from "next/image";
-import React, { useCallback } from "react";
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
+import Image from "next/image"
+import React, { useCallback } from "react"
 
 // import { useRecoilValue } from "recoil";
-import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
-import { useAuth } from "../../../context/AuthContext";
-import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
-import shortenNumber from "../../../lib/utils/shortenNumber";
-import MetaButton from "../MetaButton";
-import ProposalItem from "./ProposalItem/ProposalItem";
-import UserHeader from "./UserHeader/UserHeader";
+import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif"
+import { useAuth } from "../../../context/AuthContext"
+import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator"
+import shortenNumber from "../../../lib/utils/shortenNumber"
+import { MemoizedMetaButton } from "../MetaButton"
+import ProposalItem from "./ProposalItem/ProposalItem"
+import UserHeader from "./UserHeader/UserHeader"
 // import { usernameState } from "../../../../../store/AuthAtoms";
 // import shortenNumber from "../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
@@ -21,60 +21,60 @@ import UserHeader from "./UserHeader/UserHeader";
 
 // import "./ProposalsList.css";
 
-const doNothing = () => {};
+const doNothing = () => {}
 
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTime)
 
 type ProposalsListProps = {
-  proposals: any;
-  setProposals: any;
-  proposeNodeImprovement: any;
-  fetchProposals: any;
-  rateProposal: any;
-  selectProposal: any;
-  deleteProposal: any;
-  editHistory: boolean;
-  proposeNewChild: any;
-  openProposal: any;
-  isAdmin: any;
-  isRetrieving: any;
-};
+  proposals: any
+  setProposals: any
+  proposeNodeImprovement: any
+  fetchProposals: any
+  rateProposal: any
+  selectProposal: any
+  deleteProposal: any
+  editHistory: boolean
+  proposeNewChild: any
+  openProposal: any
+  isAdmin: any
+  isRetrieving: any
+}
 
 const ProposalsList = (props: ProposalsListProps) => {
-  const [user] = useAuth();
+  const [user] = useAuth()
 
-  const username = user.user?.uname;
+  const username = user.user?.uname
 
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
       props.rateProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx, correct, wrong, award),
     [props.rateProposal, props.proposals]
-  );
+  )
 
   const deleteProposalClick = useCallback(
     (proposal: any, proposalIdx: any) => (event: any) =>
       props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
     [props.deleteProposal, props.proposals]
-  );
+  )
 
   return !props.isRetrieving ? (
     props.proposals.map((proposal: any, proposalIdx: number) => {
-      const proposalSummaries = proposalSummariesGenerator(proposal);
+      const proposalSummaries = proposalSummariesGenerator(proposal)
 
       if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
         if (props.openProposal === proposal.id) {
-          let adminTooltip = "# of 1Admins who have awarded this proposal.";
+          let adminTooltip = "# of 1Admins who have awarded this proposal."
           if (!props.isAdmin) {
-            adminTooltip += " You cannot give this proposal an award, because you are not the 1Admin of this node.";
+            adminTooltip += " You cannot give this proposal an award, because you are not the 1Admin of this node."
           } else {
             if (proposal.proposer === username) {
-              adminTooltip += " You cannot give your own proposal an award!";
+              adminTooltip += " You cannot give your own proposal an award!"
             } else {
               adminTooltip +=
-                " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
+                " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful."
             }
           }
-          console.warn("CHECK THIS PLEASE, WHERE IS USED");
+          console.warn("CHECK THIS PLEASE, WHERE IS USED")
           return (
             <li className="collection-item avatar" key={`Proposal${proposal.id}`} style={{ border: "solid 2px pink" }}>
               <UserHeader imageUrl={proposal.imageUrl} />
@@ -83,7 +83,7 @@ const ProposalsList = (props: ProposalsListProps) => {
               <div className="ProposalTitle">
                 {proposalSummaries.length > 0 ? (
                   proposalSummaries.map((prSummary: any, sIdx: number) => {
-                    return <p key={"Summary" + proposal.id + sIdx}>{prSummary}</p>;
+                    return <p key={"Summary" + proposal.id + sIdx}>{prSummary}</p>
                   })
                 ) : (
                   <p>{proposal.summary}</p>
@@ -150,7 +150,7 @@ const ProposalsList = (props: ProposalsListProps) => {
 
               {/* <CommentsList proposal={proposal} /> */}
             </li>
-          );
+          )
         } else {
           // THIS Show pending proposal and aproved proposals
           return (
@@ -160,8 +160,9 @@ const ProposalsList = (props: ProposalsListProps) => {
               proposalSummaries={proposalSummaries}
               shouldSelectProposal={true}
               showTitle={true}
+              rateProposal={rateProposalClick(proposal, proposalIdx, true, false, false)}
             />
-          );
+          )
         }
       }
     })
@@ -178,7 +179,7 @@ const ProposalsList = (props: ProposalsListProps) => {
         </div>
       </div> */}
     </div>
-  );
-};
+  )
+}
 
-export default React.memo(ProposalsList);
+export default React.memo(ProposalsList)

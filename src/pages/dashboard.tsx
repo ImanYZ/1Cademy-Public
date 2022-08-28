@@ -1,5 +1,6 @@
 import { Button, Drawer, Modal } from "@mui/material"
 import { Box } from "@mui/system"
+import axios from "axios"
 import dagre from "dagre"
 import {
   collection,
@@ -37,6 +38,7 @@ import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar"
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext"
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback"
 import { NodeChanges } from "../knowledgeTypes"
+import { idToken } from "../lib/firestoreClient/auth"
 import { postWithToken } from "../lib/mapApi"
 import { dagreUtils } from "../lib/utils/dagre.util"
 import { getTypedCollections } from "../lib/utils/getTypedCollections"
@@ -2513,6 +2515,64 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [user, choosingNode, setNodeParts]
   )
+
+  const rateProposal = useCallback(
+    async (event, proposals, setProposals, proposalId, proposalIdx, correct, wrong, award) => {
+      if (!choosingNode) {
+        // reloadPermanentGrpah();
+        const proposalsTemp = [...proposals]
+        if (correct) {
+          proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 0
+          proposalsTemp[proposalIdx].wrong = false
+          proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 1
+          proposalsTemp[proposalIdx].correct = !proposalsTemp[proposalIdx].correct
+        } else if (wrong) {
+          proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 0
+          proposalsTemp[proposalIdx].correct = false
+          proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 1
+          proposalsTemp[proposalIdx].wrong = !proposalsTemp[proposalIdx].wrong
+        } else if (award) {
+          proposalsTemp[proposalIdx].awards += proposalsTemp[proposalIdx].award ? -1 : 1
+          proposalsTemp[proposalIdx].award = !proposalsTemp[proposalIdx].award
+        }
+        const postData = {
+          versionId: proposalId,
+          nodeType: selectedNodeType,
+          nodeId: nodeBookState.selectedNode,
+          correct,
+          wrong,
+          award,
+          uname: user.uname,
+        }
+        setIsSubmitting(true)
+        let responseObj
+        try {
+          await idToken()
+          responseObj = await axios.post("/api/rateVersion", postData)
+        } catch (err) {
+          console.error(err)
+          // window.location.reload();
+        }
+        // setNodes(oldNodes => {
+        //   if (
+        //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
+        //     (oldNodes[sNode.id].corrects - oldNodes[sNode].wrongs) / 2
+        //   ) {
+        //     proposalsTemp[proposalIdx].accepted = true
+        //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
+        //       reloadPermanentGrpah()
+        //     }
+        //   }
+        //   setProposals(proposalsTemp)
+        //   return oldNodes
+        // })
+        // setIsSubmitting(false)
+        // scrollToNode(sNode)
+      }
+      // event.currentTarget.blur();
+    },
+    [choosingNode, selectedNodeType, sNode, reloadPermanentGrpah]
+  )
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
       // console.log("In removeImage");
@@ -2563,12 +2623,13 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
-            rateProposal={() => console.log("rateProposal")}
+            rateProposal={rateProposal}
             selectProposal={() => console.log("selectProposal")}
             deleteProposal={() => console.log("deleteProposal")}
             closeSideBar={closeSideBar}
             proposeNewChild={proposeNewChild}
             selectionType={nodeBookState.selectionType}
+            setSNode={setSNode}
           />
           <Box sx={{ position: "fixed", bottom: "10px", right: "10px", zIndex: "1300", background: "#123" }}>
             <Button variant="contained" onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
