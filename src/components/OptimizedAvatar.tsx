@@ -1,4 +1,5 @@
 import { Avatar, Box } from "@mui/material";
+import { SxProps, Theme } from "@mui/system";
 import Image from "next/image";
 import React, { FC } from "react";
 
@@ -7,16 +8,18 @@ type Props = {
   imageUrl?: string;
   renderAsAvatar?: boolean;
   contained?: boolean;
+  sx?: SxProps<Theme>;
 };
 
-const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false }) => {
+const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
   // render an Avatar with the firth Letter
   if (!imageUrl) {
     return (
       <Avatar
         sx={{
           width: "50px",
-          height: "50px"
+          height: "50px",
+          ...sx,
         }}
       >
         {name.charAt(0)}
@@ -38,7 +41,8 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: theme => theme.palette.common.white
+          background: theme => theme.palette.common.white,
+          ...sx,
         }}
       >
         <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
@@ -57,7 +61,8 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           borderRadius: "30px",
           border: "solid 2px",
           borderColor: theme => theme.palette.common.gray,
-          color: theme => theme.palette.common.gray
+          color: theme => theme.palette.common.gray,
+          ...sx,
         }}
       >
         <Image
@@ -77,7 +82,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
 
   // render an image without border
   return (
-    <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center", ...sx, }}>
       <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
     </Box>
   );

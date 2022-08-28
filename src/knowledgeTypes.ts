@@ -501,3 +501,26 @@ export type Major = {
   Major: string;
   Major_Category: string;
 };
+
+export type NodeUser = {
+  title: string;
+  content: string;
+  left: number;
+  top: number;
+  width?: number;
+  height?: number;
+  x?: number;
+  y?: number;
+};
+
+export type Point = {
+  x: number;
+  y: number;
+};
+
+
+export type NodeChanges = {
+  cType: string,
+  nId: string,
+  nData: NodeFireStore
+}

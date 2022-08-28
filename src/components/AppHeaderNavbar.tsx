@@ -5,6 +5,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import { styled } from "@mui/system";
+import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { FC } from "react";
@@ -23,6 +24,11 @@ type Props = {
 };
 const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch = false, onCloseMenu, onShowMenu }) => {
   const router = useRouter();
+
+  const handleSignout = () => {
+    //TODO: Remove thhis button before deploying
+    getAuth().signOut();
+  };
 
   const getTabSelected = () => {
     const tabSelected = SECTIONS.findIndex(cur => cur.route === router.route);
@@ -93,6 +99,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
               <AppHeaderSearchBar />
             </Box>
           )}
+          <Button onClick={handleSignout}>TEMP: Sign out button </Button>
           {showApply && (
             <LightTooltip title="Apply to join 1Cademy">
               <Button
