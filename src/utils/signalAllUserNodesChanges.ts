@@ -1,6 +1,7 @@
 import { deleteField } from "firebase/firestore";
 
 import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { convertToTGet } from "./";
 
 export const signalAllUserNodesChanges = async ({
   batch,
@@ -10,7 +11,9 @@ export const signalAllUserNodesChanges = async ({
   major,
   deleted,
   currentTimestamp,
-  writeCounts
+  writeCounts,
+  t,
+  tWriteOperations
 }: any) => {
   let newBatch = batch;
   //  change / isStudied determine the color border of a node
@@ -19,13 +22,10 @@ export const signalAllUserNodesChanges = async ({
     const userNodeData = userNodesData[userNodeIdx];
     const uname = userNodeData.user;
     const changedUserNode: any = {};
-    const userStatus = await db.collection("status").doc(uname).get();
+    const userStatus = await convertToTGet(db.collection("status").doc(uname), t);
     const userStatusData: any = userStatus.data();
     const last_online = new Date(userStatusData.last_online);
-    if (
-      userStatusData.state === "online" ||
-      last_online.getTime() + 24 * 60 * 60 > new Date().getTime()
-    ) {
+    if (userStatusData.state === "online" || last_online.getTime() + 24 * 60 * 60 > new Date().getTime()) {
       changedUserNode.nodeChanges = nodeChanges;
     } else if ("nodeChanges" in changedUserNode) {
       changedUserNode.nodeChanges = deleteField();
@@ -38,9 +38,17 @@ export const signalAllUserNodesChanges = async ({
     }
     if (Object.keys(changedUserNode).length > 0) {
       changedUserNode.updatedAt = currentTimestamp;
-      newBatch.update(userNodeRef, changedUserNode);
+      if (t) {
+        tWriteOperations.push({
+          doc: userNodeRef,
+          data: changedUserNode,
+          operationType: "update"
+        });
+      } else {
+        newBatch.update(userNodeRef, changedUserNode);
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      }
     }
-    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
   return [newBatch, writeCounts];
 };

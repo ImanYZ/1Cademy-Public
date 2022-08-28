@@ -1,5 +1,6 @@
 import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
-import { firstWeekMonthDays } from '.';
+import { firstWeekMonthDays } from ".";
+import { convertToTGet } from "./";
 
 export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, createdAt }: any) => ({
   // for Concept nodes
@@ -54,7 +55,7 @@ export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, create
   tagId,
   tag,
   updatedAt,
-  createdAt,
+  createdAt
 });
 
 //  calculate positives, negatives, and total. If they do not exist then create them
@@ -140,7 +141,9 @@ const updateReputationIncrement = async ({
   firstMonthDay,
   createdAt,
   updatedAt,
-  writeCounts
+  writeCounts,
+  t,
+  tWriteOperations
 }: any) => {
   let newBatch = batch;
 
@@ -194,20 +197,19 @@ const updateReputationIncrement = async ({
   }
   reputationsQueryBaseWhere = reputationsQueryBase;
   comPointsQueryBaseWhere = comPointsQueryBase;
-  if (["monthlyReputations", "othMonReputations"].includes(reputationType)) {
+  if (["Monthly", "Others Monthly"].includes(reputationType)) {
     reputationsQueryBaseWhere = reputationsQueryBase.where("firstMonthDay", "==", firstMonthDay);
     comPointsQueryBaseWhere = comPointsQueryBase.where("firstMonthDay", "==", firstMonthDay);
   } else {
-    if (["weeklyReputations", "othWeekReputations"].includes(reputationType)) {
+    if (["Weekly", "Others Weekly"].includes(reputationType)) {
       reputationsQueryBaseWhere = reputationsQueryBase.where("firstWeekDay", "==", firstWeekDay);
       comPointsQueryBaseWhere = comPointsQueryBase.where("firstWeekDay", "==", firstWeekDay);
     }
   }
-  reputationsQuery = (reputationsQueryBaseWhere as any)
-    .where("uname", "==", uname)
-    .where("tagId", "==", tagId);
+  reputationsQuery = (reputationsQueryBaseWhere as any).where("uname", "==", uname).where("tagId", "==", tagId);
 
-  let reputationsDoc = await reputationsQuery.limit(1).get();
+  let reputationsDoc = await convertToTGet(reputationsQuery.limit(1), t);
+
   //  if reputationsQuery returns a doc
   if (reputationsDoc.docs.length > 0) {
     //  define reputationDoc reference
@@ -226,7 +228,8 @@ const updateReputationIncrement = async ({
   //  query community points
   comPointsQuery = comPointsQueryBaseWhere.where("tagId", "==", tagId);
 
-  let comPointsDoc = await comPointsQuery.limit(1).get();
+  let comPointsDoc = await convertToTGet(comPointsQuery.limit(1), t);
+
   //  if comPointsQuery returns a doc
   if (comPointsDoc.docs.length > 0) {
     comPointDoc = comPointsQueryBase.doc(comPointsDoc.docs[0].id);
@@ -237,7 +240,7 @@ const updateReputationIncrement = async ({
   } else {
     //  else comPointsQuery did not return a doc, create a reference
     comPointDoc = comPointsQueryBase.doc();
-    com_reputationsDoc = await reputationsQueryBaseWhere.where("tagId", "==", tagId).get();
+    com_reputationsDoc = await convertToTGet(reputationsQueryBaseWhere.where("tagId", "==", tagId), t);
 
     //  iterate through community reputations docs to calculate totals
     //  each user has unique com_reputationDoc
@@ -483,7 +486,7 @@ const updateReputationIncrement = async ({
     ltermDay: parseFloat(rep_Points.ltermDay.toFixed(3)),
     positives: parseFloat(rep_Points.positives.toFixed(3)),
     negatives: parseFloat(rep_Points.negatives.toFixed(3)),
-    totalPoints: parseFloat(rep_Points.totalPoints.toFixed(3)),
+    totalPoints: parseFloat(rep_Points.totalPoints.toFixed(3))
   };
   if (reputationType === "Monthly" || reputationType === "Others Monthly") {
     reputationDoc_Obj.firstMonthDay = firstMonthDay;
@@ -491,13 +494,21 @@ const updateReputationIncrement = async ({
     reputationDoc_Obj.firstWeekDay = firstWeekDay;
   }
 
-  newBatch.update(reputationDoc, reputationDoc_Obj);
-  [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+  if (t) {
+    tWriteOperations.push({
+      doc: reputationDoc,
+      data: reputationDoc_Obj,
+      operationType: "update"
+    });
+  } else {
+    newBatch.update(reputationDoc, reputationDoc_Obj);
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+  }
 
   //  if the admin exists, but it doesn't have a profile picture or
   // fullname in the corresponding comPoints document, retrieve it from users collection.
   if (com_Points.admin && (!com_Points.aImgUrl || !com_Points.aFullname)) {
-    const userDoc = await db.collection("users").doc(com_Points.admin).get();
+    const userDoc = await convertToTGet(db.collection("users").doc(com_Points.admin), t);
     const userData: any = userDoc.data();
     com_Points.aImgUrl = userData.imageUrl;
     com_Points.aFullname = `${userData.fName} ${userData.lName}`;
@@ -552,7 +563,7 @@ const updateReputationIncrement = async ({
     positives: parseFloat(com_Points.positives.toFixed(3)),
     negatives: parseFloat(com_Points.negatives.toFixed(3)),
     totalPoints: parseFloat(com_Points.totalPoints.toFixed(3)),
-    adminPoints: parseFloat(com_Points.adminPoints.toFixed(3)),
+    adminPoints: parseFloat(com_Points.adminPoints.toFixed(3))
   };
   if (reputationType === "Monthly" || reputationType === "Others Monthly") {
     reputationDoc_Obj.firstMonthDay = firstMonthDay;
@@ -560,8 +571,16 @@ const updateReputationIncrement = async ({
     reputationDoc_Obj.firstWeekDay = firstWeekDay;
   }
 
-  newBatch.update(comPointDoc, com_PointsDoc_Obj);
-  [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+  if (t) {
+    tWriteOperations.push({
+      doc: comPointDoc,
+      data: com_PointsDoc_Obj,
+      operationType: "update"
+    });
+  } else {
+    newBatch.update(comPointDoc, com_PointsDoc_Obj);
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+  }
 
   return [newBatch, writeCounts];
 };
@@ -582,7 +601,9 @@ export const updateReputation = async ({
   ltermVal,
   ltermDayVal,
   voter,
-  writeCounts
+  writeCounts,
+  t,
+  tWriteOperations
 }: any) => {
   let createdAt = admin.firestore.Timestamp.fromDate(new Date());
   let updatedAt = admin.firestore.Timestamp.fromDate(new Date());
@@ -620,7 +641,9 @@ export const updateReputation = async ({
         firstMonthDay,
         createdAt,
         updatedAt,
-        writeCounts
+        writeCounts,
+        t,
+        tWriteOperations
       });
     }
 
@@ -646,7 +669,9 @@ export const updateReputation = async ({
           firstMonthDay,
           createdAt,
           updatedAt,
-          writeCounts
+          writeCounts,
+          t,
+          tWriteOperations
         });
       }
     }
