@@ -19,7 +19,8 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore"
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage"
+import { getDownloadURL, getMetadata, getStorage, ref, uploadBytesResumable } from "firebase/storage"
+import { auth } from "firebase-admin"
 import { useCallback, useEffect, useRef, useState } from "react"
 /* eslint-disable */
 // @ts-ignore
@@ -2465,12 +2466,13 @@ const Dashboard = ({}: DashboardProps) => {
             setIsSubmitting(true)
             setIsUploading(true)
             // const rootURL = "https://storage.googleapis.com/onecademy-dev.appspot.com/"
+
             const picturesFolder = "UploadedImages/"
             const imageNameSplit = image.name.split(".")
             const imageExtension = imageNameSplit[imageNameSplit.length - 1]
-            let imageFileName = user.userId + "/" + Number(new Date()) + "." + imageExtension
-            // let imageFileName = "jjjj" + imageExtension
-
+            const imageName = Number(new Date())
+            let imageFileName = user.userId + "/" + imageName + "." + imageExtension
+            // const otherName = user.userId + "/" + Number(new Date()) + "_430x1300" + "." + imageExtension
             console.log("picturesFolder + imageFileName", picturesFolder + imageFileName)
             const storageRef = ref(storage, picturesFolder + imageFileName)
 
@@ -2489,13 +2491,22 @@ const Dashboard = ({}: DashboardProps) => {
                 )
               },
               async function complete() {
-                console.log("storageRef", storageRef)
-                console.log("task.snapshot.ref", task.snapshot.ref, task.snapshot.ref.toString())
-                // task.snapshot.g
-                // task.snapshot.metadata.ref.
-                const imageGeneratedUrl = await getDownloadURL(task.snapshot.ref)
+                // const metadata = await getMetadata(task.snapshot.ref)
+                // const metadata = await getMetadata(storageRef)
+                // console.log("metadata", metadata)
+
+                // const [name, extension] = metadata.fullPath.split(".")
+                const fullPath = encodeURIComponent(
+                  `${picturesFolder}${user.userId}/${imageName}_430x1300.${imageExtension}`
+                )
+                const bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET
+
+                const imageGeneratedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${fullPath}?alt=media`
+
+                // const imageGeneratedUrl = await getDownloadURL(task.snapshot.ref)
+
                 // const imageGeneratedUrl = await getDownloadURL(storageRef)
-                console.log("---> imageGeneratedUrl", imageGeneratedUrl)
+                // console.log("---> imageGeneratedUrl", imageGeneratedUrl)
                 setIsSubmitting(false)
                 setIsUploading(false)
                 if (imageGeneratedUrl && imageGeneratedUrl !== "") {
@@ -2633,7 +2644,10 @@ const Dashboard = ({}: DashboardProps) => {
               aria-describedby="modal-modal-description"
             >
               <MapInteractionCSS>
-                <img src={openMedia} alt="Node image" className="responsive-img" />
+                <>
+                  <h1>{openMedia}</h1>
+                  <img src={openMedia} alt="Node image" className="responsive-img" />
+                </>
               </MapInteractionCSS>
             </Modal>
             {/* // <Modal onClick={closedSidebarClick("Media")}>
