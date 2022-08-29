@@ -25,6 +25,16 @@ describe("getNode", () => {
     expect(result.nodeData).toMatchObject(mockData)
   })
 
+  it("Should use the transactional get if the transaction object has passed", async () => {
+    // mocking the transaction get object
+    const t = {
+      get: jest.fn(async x => await x.get()),
+    }
+
+    await getNode({ nodeId, t })
+    expect(t.get).toHaveBeenCalled()
+  })
+
   // after each test suite
   afterEach(async () => {
     await dropCollection("nodes")
