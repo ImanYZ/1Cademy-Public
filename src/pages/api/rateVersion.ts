@@ -4,6 +4,7 @@ import { admin, db } from "../../lib/firestoreServer/admin"
 import fbAuth from "../../middlewares/fbAuth"
 import {
   addToPendingPropsNumsExcludingVoters,
+  arrayToChunks,
   createUpdateUserVersion,
   getNode,
   getUserVersion,
@@ -51,6 +52,8 @@ import {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const tWriteOperations: { objRef: any; data: any; operationType: string }[] = []
+
     await db.runTransaction(async t => {
       let writeCounts = 0
       let nodeData, nodeRef, versionData, versionRef, correct, wrong, award
@@ -59,8 +62,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const removedParents = []
       const removedChildren = []
       const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date())
-
-      const tWriteOperations: { doc: any; data: any; operationType: string }[] = []
 
       ;({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }))
       ;({ versionData, versionRef } = await getVersion({
@@ -179,7 +180,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         userVersionData.deleted = true
       }
 
-      tWriteOperations.push({ doc: versionRef, data: versionUpdates, operationType: "update" })
+      tWriteOperations.push({ objRef: versionRef, data: versionUpdates, operationType: "update" })
 
       // Even if this is a child proposal that is being accepted, there were previously
       // a version and its corresponding userVersion on the parent node that the voter is
@@ -247,7 +248,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const notificationRef = db.collection("notifications").doc()
 
         tWriteOperations.push({
-          doc: notificationRef,
+          objRef: notificationRef,
           data: notificationData,
           operationType: "set",
         })
@@ -259,22 +260,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           tWriteOperations,
         })
       }
-
-      for (let operation of tWriteOperations) {
-        const { doc, data, operationType } = operation
-        switch (operationType) {
-          case "update":
-            t.update(doc, data)
-            break
-          case "set":
-            t.set(doc, data)
-            break
-          case "delete":
-            t.delete(doc)
-            break
-        }
-      }
     })
+
+    const chunkedArray = arrayToChunks(tWriteOperations)
+
+    for (let chunk of chunkedArray) {
+      await db.runTransaction(async t => {
+        for (let operation of chunk) {
+          const { objRef, data, operationType } = operation
+          switch (operationType) {
+            case "update":
+              t.update(objRef, data)
+              break
+            case "set":
+              t.set(objRef, data)
+              break
+            case "delete":
+              t.delete(objRef)
+              break
+          }
+        }
+      })
+    }
 
     return res.status(200).json({ success: true })
   } catch (err) {

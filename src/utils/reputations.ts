@@ -499,7 +499,7 @@ const updateReputationIncrement = async ({
 
   if (t) {
     tWriteOperations.push({
-      doc: reputationDoc,
+      objRef: reputationDoc,
       data: reputationDoc_Obj,
       operationType: updateTheReputationDoc ? "update" : "set",
     })
@@ -578,7 +578,7 @@ const updateReputationIncrement = async ({
 
   if (t) {
     tWriteOperations.push({
-      doc: comPointDoc,
+      objRef: comPointDoc,
       data: com_PointsDoc_Obj,
       operationType: updateTheCommunityDoc ? "update" : "set",
     })

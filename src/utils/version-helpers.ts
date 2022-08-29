@@ -91,7 +91,7 @@ export const setOrIncrementNotificationNums = async ({ batch, proposer, writeCou
     const notificationUpdate = { nNum: admin.firestore.FieldValue.increment(1) }
     if (t) {
       tWriteOperations.push({
-        doc: notificationNumRef,
+        objRef: notificationNumRef,
         data: notificationUpdate,
         operationType: "update",
       })
@@ -102,7 +102,7 @@ export const setOrIncrementNotificationNums = async ({ batch, proposer, writeCou
     const notificationData = { nNum: 1 }
     if (t) {
       tWriteOperations.push({
-        doc: notificationNumRef,
+        objRef: notificationNumRef,
         data: notificationData,
         operationType: "set",
       })
@@ -166,7 +166,7 @@ export const addToPendingPropsNums = async ({
           }
           if (t) {
             tWriteOperations.push({
-              doc: pendingPropsNumsRef,
+              objRef: pendingPropsNumsRef,
               data: pendingPropsUpdate,
               operationType: "update",
             })
@@ -184,7 +184,7 @@ export const addToPendingPropsNums = async ({
           }
           if (t) {
             tWriteOperations.push({
-              doc: pendingPropsNumsRef,
+              objRef: pendingPropsNumsRef,
               data: pendingProposalData,
               opertaionType: "set",
             })
@@ -294,7 +294,7 @@ export const createPractice = async ({
       }
       if (t) {
         tWriteOperations.push({
-          doc: practiceRef,
+          objRef: practiceRef,
           data: practiceData,
           operationType: "set",
         })
@@ -368,7 +368,7 @@ export const changeTagTitleInCollection = async ({
     const linkedUpdate = { tag: newTitle }
     if (t) {
       tWriteOperations.push({
-        doc: linkedRef,
+        objRef: linkedRef,
         data: linkedUpdate,
         operationType: "update",
       })
@@ -405,7 +405,7 @@ export const changeNodeTitle = async ({
     }
     if (t) {
       tWriteOperations.push({
-        doc: linkedRef,
+        objRef: linkedRef,
         data: linkedDataChanges,
         operationType: "update",
       })
@@ -439,7 +439,7 @@ export const changeNodeTitle = async ({
 
     if (t) {
       tWriteOperations.push({
-        doc: linkedRef,
+        objRef: linkedRef,
         data: linkedDataChanges,
         operationType: "update",
       })
@@ -473,7 +473,7 @@ export const changeNodeTitle = async ({
 
       if (t) {
         tWriteOperations.push({
-          doc: linkedRef,
+          objRef: linkedRef,
           data: linkedDataChanges,
           operationType: "update",
         })
@@ -509,7 +509,7 @@ export const changeNodeTitle = async ({
           }
           if (t) {
             tWriteOperations.push({
-              doc: tagRef,
+              objRef: tagRef,
               data: tagUpdates,
               operationType: "update",
             })
@@ -557,7 +557,7 @@ export const changeNodeTitle = async ({
         }
         if (t) {
           tWriteOperations.push({
-            doc: linkedRef,
+            objRef: linkedRef,
             data: linkedDataChanges,
             operationType: "update",
           })
@@ -584,7 +584,7 @@ export const changeNodeTitle = async ({
       }
       if (t) {
         tWriteOperations.push({
-          doc: linkedRef,
+          objRef: linkedRef,
           data: linkedDataChanges,
           operationType: "update",
         })
@@ -610,7 +610,7 @@ export const changeNodeTitle = async ({
     const notificationUpdates = { title: newTitle }
     if (t) {
       tWriteOperations.push({
-        doc: notificationRef,
+        objRef: notificationRef,
         data: notificationUpdates,
         operationType: "updates",
       })
@@ -724,7 +724,7 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
         }
         if (t) {
           tWriteOperations.push({
-            doc: tagRef,
+            objRef: tagRef,
             data: tagUpdates,
             operationType: "update",
           })
@@ -1080,7 +1080,7 @@ export const createUpdateUserVersion = async ({
   let newBatch = batch
   if (t) {
     tWriteOperations.push({
-      doc: userVersionRef,
+      objRef: userVersionRef,
       data: userVersionData,
       operationType: "set",
     })
@@ -1095,7 +1095,7 @@ export const createUpdateUserVersion = async ({
 
   if (t) {
     tWriteOperations.push({
-      doc: userVersionLogRef,
+      objRef: userVersionLogRef,
       data: userVersionData,
       operationType: "set",
     })
@@ -1247,7 +1247,7 @@ export const versionCreateUpdate = async ({
         ) {
           if (t) {
             tWriteOperations.push({
-              doc: nodeRef,
+              objRef: nodeRef,
               data: nodeUpdates,
               operationType: "update",
             })
@@ -1331,7 +1331,7 @@ export const versionCreateUpdate = async ({
 
           if (t) {
             tWriteOperations.push({
-              doc: nodeRef,
+              objRef: nodeRef,
               data: nodeUpdates,
               operationType: "update",
             })
@@ -1365,7 +1365,7 @@ export const versionCreateUpdate = async ({
 
             if (t) {
               tWriteOperations.push({
-                doc: linkedNode.nodeRef,
+                objRef: linkedNode.nodeRef,
                 data: linkedNodeChanges,
                 operationType: "update",
               })
@@ -1395,7 +1395,7 @@ export const versionCreateUpdate = async ({
             }
             if (t) {
               tWriteOperations.push({
-                doc: linkedNode.nodeRef,
+                objRef: linkedNode.nodeRef,
                 data: linkedNodeChanges,
                 operationType: "update",
               })
@@ -1425,7 +1425,7 @@ export const versionCreateUpdate = async ({
 
             if (t) {
               tWriteOperations.push({
-                doc: linkedNode.nodeRef,
+                objRef: linkedNode.nodeRef,
                 data: linkedNodeChanges,
                 operationType: "update",
               })
@@ -1455,7 +1455,7 @@ export const versionCreateUpdate = async ({
             }
             if (t) {
               tWriteOperations.push({
-                doc: linkedNode.nodeRef,
+                objRef: linkedNode.nodeRef,
                 data: linkedNodeChanges,
                 operationType: "update",
               })
@@ -1520,7 +1520,7 @@ export const versionCreateUpdate = async ({
           }
           if (t) {
             tWriteOperations.push({
-              doc: versionRef,
+              objRef: versionRef,
               data: childVersion,
               operationType: "set",
             })
@@ -1585,7 +1585,7 @@ export const versionCreateUpdate = async ({
             }
             if (t) {
               tWriteOperations.push({
-                doc: versionsCommentsRef,
+                objRef: versionsCommentsRef,
                 data: versionCommentUpdate,
                 operatoinType: "set",
               })
@@ -1636,7 +1636,7 @@ export const versionCreateUpdate = async ({
 
           if (t) {
             tWriteOperations.push({
-              doc: childNodeRef,
+              objRef: childNodeRef,
               data: childNode,
               operationType: "set",
             })
@@ -1656,7 +1656,7 @@ export const versionCreateUpdate = async ({
 
           if (t) {
             tWriteOperations.push({
-              doc: nodeRef,
+              objRef: nodeRef,
               data: nodeUpdates,
               operationType: "update",
             })
