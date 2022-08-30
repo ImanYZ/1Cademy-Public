@@ -45,6 +45,10 @@ import {
   changedNodes,
   compare2Nodes,
   compareAndUpdateNodeLinks,
+  compareChoices,
+  compareFlatLinks,
+  compareLinks,
+  compareProperty,
   copyNode,
   createOrUpdateNode,
   // dag1,
@@ -227,8 +231,7 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false)
 
-  // flag to adjust height
-  // const [nodeHasChanges,setNodeHasChanges] = useState(false)
+  const [nodeToImprove,setNodeToImprove] = useState<FullNodeData|null>(null)
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -2077,6 +2080,8 @@ console.log('[WORKER]',{
 
     if (!user) return
 
+    setNodeToImprove(null) // CHECK: I added this to compare then
+
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
       nodeBookState.selectionType === "Proposals" ||
@@ -2180,6 +2185,7 @@ console.log('[WORKER]',{
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode])
         }
         const thisNode = { ...oldNodes[nodeBookState.selectedNode] }
+        setNodeToImprove(thisNode) // CHECK: I added this to compare then
         thisNode.editable = true
         setMapChanged(true)
         return {
@@ -2235,6 +2241,120 @@ console.log('[WORKER]',{
       reloadPermanentGrpah,
       // proposeNodeImprovement,
       resetAddedRemovedParentsChildren,
+    ]
+  )
+
+  const saveProposedImprovement = useMemoizedCallback(
+    (summary:any, reason:any) => {
+      if(!nodeBookState.selectedNode) return
+
+      nodeBookDispatch({type:'setChosenNode',payload:null})
+      nodeBookDispatch({type:'setChoosingNode',payload:null})
+      // setChoosingNode(false)
+      // setChosenNode(null)
+      // setChosenNodeTitle(null)
+      // console.log("In saveProposedImprovement");
+      let referencesOK = true
+
+      if (
+        (nodes[nodeBookState.selectedNode].nodeType === "Concept" ||
+          nodes[nodeBookState.selectedNode].nodeType === "Relation" ||
+          nodes[nodeBookState.selectedNode].nodeType === "Question" ||
+          nodes[nodeBookState.selectedNode].nodeType === "News") &&
+        nodes[nodeBookState.selectedNode].references.length === 0
+      ) {
+        referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?")
+      }
+      if (referencesOK) {
+        const newNode = { ...nodes[nodeBookState.selectedNode] }
+        if (newNode.children.length > 0) {
+          const newChildren = []
+          for (let child of newNode.children) {
+            newChildren.push({
+              node: child.node,
+              title: child.title,
+              label: child.label,
+              // type: child.nodeType, // CHECK: I commented this
+            })
+          }
+          newNode.children = newChildren
+          const newParents = []
+          for (let parent of newNode.parents) {
+            newParents.push({
+              node: parent.node,
+              title: parent.title,
+              label: parent.label,
+              // type: parent.nodeType, // CHECK: I commented this
+            })
+          }
+          newNode.parents = newParents
+        }
+        // const oldNode = allNodes[nodeBookState.selectedNode]
+        const oldNode = {...nodeToImprove}
+        console.log({newNode,oldNode})
+        let isTheSame =
+          newNode.title === oldNode.title &&
+          newNode.content === oldNode.content &&
+          newNode.nodeType === oldNode.nodeType
+        // isTheSame = compareImages(oldNode, newNode, isTheSame);
+        isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage")
+        // isTheSame = compareLinks(oldNode.tags, newNode.tags, isTheSame, false)
+        // isTheSame = compareLinks(oldNode.references, newNode.references, isTheSame, false)
+        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame)  // CHECK: O checked only ID changes
+        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame)  // CHECK: O checked only ID changes
+        isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false)
+        isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false)
+
+        isTheSame = compareChoices(oldNode, newNode, isTheSame)
+        if (isTheSame) {
+          window.alert("You've not changed anything yet!")
+        } else {
+          setIsSubmitting(true)
+          const postData:any = {
+            ...newNode,
+            id: nodeBookState.selectedNode,
+            summary: summary,
+            proposal: reason,
+            addedParents,
+            addedChildren,
+            removedParents,
+            removedChildren,
+          }
+          delete postData.isStudied
+          delete postData.bookmarked
+          delete postData.correct
+          delete postData.updatedAt
+          delete postData.open
+          delete postData.visible
+          delete postData.deleted
+          delete postData.wrong
+          delete postData.createdAt
+          delete postData.firstVisit
+          delete postData.lastVisit
+          delete postData.versions
+          delete postData.viewers
+          delete postData.comments
+          delete postData.wrongs
+          delete postData.corrects
+          delete postData.studied
+          delete postData.editable
+          delete postData.left
+          delete postData.top
+          delete postData.height
+          getMapGraph("/proposeNodeImprovement", postData)
+          scrollToNode(nodeBookState.selectedNode)
+        }
+      }
+    },
+    [
+      nodes,
+      // allNodes,
+      nodeBookState.selectedNode,
+      addedParents,
+      addedChildren,
+      removedParents,
+      removedChildren,
+      getMapGraph,
     ]
   )
 
@@ -2653,6 +2773,9 @@ console.log('[WORKER]',{
               <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
             </Box>
             <Box>
+              <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button>
+            </Box>
+            <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Toggle Open proposals
               </Button>
@@ -2716,7 +2839,7 @@ console.log('[WORKER]',{
                 addChoice={addChoice}
                 onNodeTitleBlur={() => console.log("onNodeTitleBlur")}
                 saveProposedChildNode={() => console.log("saveProposedChildNod")}
-                saveProposedImprovement={() => console.log("saveProposedImprovemny")}
+                saveProposedImprovement={saveProposedImprovement}
                 closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
               />

@@ -700,6 +700,7 @@ export const copyGraph = (graph: any) => {
 }
 
 export const compareProperty = (obj1: any, obj2: any, propName: string) => {
+  console.log(' ----> --> compareProperty', { obj1, obj2, propName })
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
     return false
   }
@@ -711,6 +712,19 @@ export const compareProperty = (obj1: any, obj2: any, propName: string) => {
   }
   return true
 }
+
+// export const compareProperty = (obj1: any, obj2: any, propName: string) => {
+//   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
+//     return false
+//   }
+//   if (!(propName in obj1) && !(propName in obj2)) {
+//     return true
+//   }
+//   if (obj1[propName] !== obj2[propName]) {
+//     return false
+//   }
+//   return true
+// }
 
 export const compareFirestoreTimestamp = (obj1: any, obj2: any, propName: string) => {
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
@@ -732,6 +746,8 @@ export const compareLinks = (
   // if true, check type and visibility
   checkTypesVisibility: boolean
 ) => {
+  console.log('-----> compareLinks', { links1, links2, isTheSame })
+  // debugger
   if (links1.length !== links2.length) {
     return false
   }
@@ -741,8 +757,11 @@ export const compareLinks = (
       links1[i].node !== links2[i].node ||
       links1[i].title !== links2[i].title ||
       !compareProperty(links1[i], links2[i], "label") ||
-      (checkTypesVisibility &&
-        (!compareProperty(links1[i], links2[i], "type") || !compareProperty(links1[i], links2[i], "visible")))
+      (
+        checkTypesVisibility &&
+        (!compareProperty(links1[i], links2[i], "type") ||
+          !compareProperty(links1[i], links2[i], "visible"))
+      )
     ) {
       return false
     }
