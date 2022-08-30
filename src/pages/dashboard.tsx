@@ -1971,6 +1971,42 @@ const Dashboard = ({}: DashboardProps) => {
   /////////////////////////////////////////////////////
   // Node Improvement Functions
 
+  const changeChoice = useCallback(
+    (nodeRef:any, nodeId:string, value:string, choiceIdx:number) => {
+      console.log("[CHANGE CHOICE]")
+      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+        const choices = [...thisNode.choices]
+        const choice = { ...choices[choiceIdx] }
+        choice.choice = value
+        choices[choiceIdx] = choice
+        thisNode.choices = choices
+        return { ...thisNode }
+      })
+      // TODO: find a way to call worker in use effect in NODE, 
+      // when change size of Node
+      // adjustNodeHeight(nodeRef, nodeId)
+    },
+    [setNodeParts/*, adjustNodeHeight*/]
+  )
+
+  const changeFeedback = useCallback(
+    (nodeRef:any, nodeId:string, value:string, choiceIdx:number) => {
+      console.log("[CHANGE FEEDBACK]")
+      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+        const choices = [...thisNode.choices]
+        const choice = { ...choices[choiceIdx] }
+        choice.feedback = value
+        choices[choiceIdx] = choice
+        thisNode.choices = choices
+        return { ...thisNode }
+      })
+      // TODO: find a way to call worker in use effect in NODE, 
+      // when change size of Node
+      // adjustNodeHeight(nodeRef, nodeId)
+    },
+    [setNodeParts/*, adjustNodeHeight*/]
+  )
+
   const switchChoice = useCallback(
     (nodeId:string, choiceIdx:number) => {
       console.log("[SWITCH CHOICE]")
@@ -2662,8 +2698,8 @@ const Dashboard = ({}: DashboardProps) => {
                   console.log("first", imgUrl)
                   setOpenMedia(imgUrl)
                 }}
-                changeChoice={() => console.log("changeChoice")}
-                changeFeedback={() => console.log("changeFeedback")}
+                changeChoice={changeChoice}
+                changeFeedback={changeFeedback}
                 switchChoice={switchChoice}
                 deleteChoice={deleteChoice}
                 addChoice={addChoice}
