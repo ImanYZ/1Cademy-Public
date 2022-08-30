@@ -929,7 +929,13 @@ const Dashboard = ({}: DashboardProps) => {
       //   return null;
       // })
     }
-
+console.log('[WORKER]',{
+  mapChanged ,
+  nodeChanges:nodeChanges.length === 0 ,
+  userNodeChanges:userNodeChanges.length === 0 ,
+  userNodesLoaded ,
+  EdgesSync:Object.keys(edges).length === g.current.edgeCount(),
+})
     if (
       mapChanged &&
       nodeChanges.length === 0 &&
@@ -1968,6 +1974,53 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookState.choosingNode, getMapGraph]
   )
 
+  // const adjustNodeHeight = useCallback(
+  //   (nodeRef, nodeId) => {
+  //     // console.log("In adjustNodeHeight");
+  //     setTimeout(() => {
+  //       if (nodeRef.current) {
+  //         setNodeParts(nodeId, (thisNode) => {
+  //           const { current } = nodeRef;
+  //           const newHeight = current.offsetHeight;
+  //           let currentHeight = NODE_HEIGHT;
+  //           if ("height" in thisNode) {
+  //             currentHeight = thisNode.height;
+  //           }
+  //           if (Math.abs(currentHeight - newHeight) >= MIN_CHANGE) {
+  //             thisNode.height = newHeight;
+  //           }
+  //           return { ...thisNode };
+  //         });
+  //       }
+  //     }, 700);
+  //   },
+  //   [setNodeParts]
+  // );
+
+  const adjustNodeHeight = useCallback(
+    (nodeRef:any, nodeId:string) => {
+      // console.log("In adjustNodeHeight");
+      setTimeout(() => {
+        if (nodeRef.current) {
+          setNodeParts(nodeId, (thisNode:FullNodeData) => {
+            const { current } = nodeRef
+            const newHeight = current.offsetHeight
+            let currentHeight = NODE_HEIGHT
+            if ("height" in thisNode) {
+              currentHeight = thisNode.height
+            }
+            if (Math.abs(currentHeight - newHeight) >= MIN_CHANGE) {
+              thisNode.height = newHeight
+            }
+            setMapChanged(true)
+            return { ...thisNode }
+          })
+        }
+      }, 700)
+    },
+    [setNodeParts]
+  )
+
   /////////////////////////////////////////////////////
   // Node Improvement Functions
 
@@ -2053,6 +2106,7 @@ const Dashboard = ({}: DashboardProps) => {
       })
       // TODO: find a way to call worker in use effect in NODE, 
       // when change size of Node
+      // setMapChanged(true)
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts/*, adjustNodeHeight*/]
