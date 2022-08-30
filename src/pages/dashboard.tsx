@@ -1986,6 +1986,42 @@ const Dashboard = ({}: DashboardProps) => {
     [setNodeParts]
   )
 
+  const deleteChoice = useCallback(
+    (nodeRef:any, nodeId:string, choiceIdx:number) => {
+      console.log("[DELETE CHOICE]")
+      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+        const choices = [...thisNode.choices]
+        choices.splice(choiceIdx, 1)
+        thisNode.choices = choices
+        return { ...thisNode }
+      })
+      // TODO: find a way to call worker in use effect in NODE, 
+      // when change size of Node
+      // adjustNodeHeight(nodeRef, nodeId)
+    },
+    [setNodeParts/* adjustNodeHeight*/]
+  )
+
+  const addChoice = useCallback(
+    (nodeRef:any, nodeId:string) => {
+      console.log("[ADD CHOICE]")
+      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+        const choices = [...thisNode.choices]
+        choices.push({
+          choice: "Replace this with the choice.",
+          correct: true,
+          feedback: "Replace this with the choice-specific feedback.",
+        })
+        thisNode.choices = choices
+        return { ...thisNode }
+      })
+      // TODO: find a way to call worker in use effect in NODE, 
+      // when change size of Node
+      // adjustNodeHeight(nodeRef, nodeId)
+    },
+    [setNodeParts/*, adjustNodeHeight*/]
+  )
+
   /////////////////////////////////////////////////////
   // Sidebar Functions
 
@@ -2629,8 +2665,8 @@ const Dashboard = ({}: DashboardProps) => {
                 changeChoice={() => console.log("changeChoice")}
                 changeFeedback={() => console.log("changeFeedback")}
                 switchChoice={switchChoice}
-                deleteChoice={() => console.log("deleteChoice")}
-                addChoice={() => console.log("addChoice")}
+                deleteChoice={deleteChoice}
+                addChoice={addChoice}
                 onNodeTitleBlur={() => console.log("onNodeTitleBlur")}
                 saveProposedChildNode={() => console.log("saveProposedChildNod")}
                 saveProposedImprovement={() => console.log("saveProposedImprovemny")}

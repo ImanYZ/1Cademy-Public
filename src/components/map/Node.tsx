@@ -10,13 +10,13 @@ import { OpenPart } from "src/nodeBookTypes"
 import { useNodeBook } from "@/context/NodeBookContext"
 
 import { useAuth } from "../../context/AuthContext"
+import { KnowledgeChoice } from "../../knowledgeTypes"
 import { Editor } from "../Editor"
 import LinkingWords from "./LinkingWords/LinkingWords"
 import { MemoizedMetaButton } from "./MetaButton"
 import { MemoizedNodeFooter } from "./NodeFooter"
 import { MemoizedNodeHeader } from "./NodeHeader"
 import QuestionChoices from "./QuestionChoices"
-import { KnowledgeChoice } from "../../knowledgeTypes"
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -252,10 +252,10 @@ const Node = ({
 
   const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage])
 
-  // const addChoiceHandler = useCallback(
-  //   () => addChoice(nodeRef, identifier),
-  //   [addChoice, nodeRef, identifier]
-  // );
+  const addChoiceHandler = useCallback(
+    () => addChoice(nodeRef, identifier),
+    [addChoice, nodeRef, identifier]
+  )
 
   const markStudiedHandler = useCallback(
     (event: any) => {
@@ -564,7 +564,7 @@ const Node = ({
                   {editable && (
                     <div className="QuestionAddChoice">
                       <MemoizedMetaButton
-                        onClick={() => console.log("addChoiceHandler")}
+                        onClick={addChoiceHandler}
                         tooltip="Click to add a new choice to this question."
                       >
                         <>
