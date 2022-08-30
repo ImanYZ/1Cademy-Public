@@ -1,28 +1,28 @@
-import { NextApiHandler, NextApiRequest, NextApiResponse } from "next"
+import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
-import { admin, db } from "../lib/firestoreServer/admin"
+import { admin, db } from "../lib/firestoreServer/admin";
 
 interface AuthenticatedRequest extends NextApiRequest {
-  user: any
+  user: any;
 }
 
 const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null; uid: string }) => {
   try {
-    let userData: any = {}
-    let query: any
-    let errorMessage = ""
+    let userData: any = {};
+    let query: any;
+    let errorMessage = "";
     if (uname) {
-      query = db.doc(`/users/${uname}`)
+      query = db.doc(`/users/${uname}`);
     } else if (uid) {
-      query = db.collection("users").where("userId", "==", uid).limit(1)
+      query = db.collection("users").where("userId", "==", uid).limit(1);
     }
-    const userDoc = await query.get()
-    let creditsData, reputationsData
+    const userDoc = await query.get();
+    let creditsData, reputationsData;
     if ((uname && userDoc.exists) || (uid && userDoc.docs.length !== 0)) {
       if (uname) {
-        userData = userDoc.data()
+        userData = userDoc.data();
       } else if (uid) {
-        userData = userDoc.docs[0].data()
+        userData = userDoc.docs[0].data();
       }
       userData = {
         uid,
@@ -45,89 +45,96 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
         clickedPP: userData.clickedPP,
         clickedCP: userData.clickedCP,
         createdAt: userData.createdAt.toDate(),
-      }
+      };
       try {
         creditsData = await db
           .collection("credits")
           .where("credits", "==", userData.deCredits)
           .where("tagId", "==", userData.tagId)
           .limit(1)
-          .get()
+          .get();
       } catch (err) {
-        errorMessage = "The credits object does not exist!"
-        console.error(errorMessage)
-        return { status: 500, data: errorMessage }
+        errorMessage = "The credits object does not exist!";
+        console.error(errorMessage);
+        return { status: 500, data: errorMessage };
       }
     } else {
-      errorMessage = "The user does not exist!"
-      console.error(errorMessage)
-      return { status: 500, data: errorMessage }
+      errorMessage = "The user does not exist!";
+      console.error(errorMessage);
+      return { status: 500, data: errorMessage };
     }
     if (creditsData.docs.length !== 0) {
-      const credits = creditsData.docs[0].data()
-      delete credits.createdAt
-      delete credits.credits
-      delete credits.tag
+      const credits = creditsData.docs[0].data();
+      delete credits.createdAt;
+      delete credits.credits;
+      delete credits.tag;
       userData = {
         ...userData,
         ...credits,
-      }
+      };
       try {
         reputationsData = await db
           .collection("reputations")
           .where("uname", "==", userData.uname)
           .where("tagId", "==", userData.tagId)
           .limit(1)
-          .get()
+          .get();
       } catch (err) {
-        errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag
-        console.error(errorMessage)
-        return { status: 500, data: errorMessage }
+        errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag;
+        console.error(errorMessage);
+        return { status: 500, data: errorMessage };
       }
     } else {
-      errorMessage = "The credits object does not exist!"
-      console.error(errorMessage)
-      return { status: 500, data: errorMessage }
+      errorMessage = "The credits object does not exist!";
+      console.error(errorMessage);
+      return { status: 500, data: errorMessage };
     }
     if (reputationsData.docs.length !== 0) {
-      const reputations = reputationsData.docs[0].data()
-      delete reputations.createdAt
-      delete reputations.updatedAt
-      delete reputations.tag
-      delete reputations.uname
+      const reputations = reputationsData.docs[0].data();
+      delete reputations.createdAt;
+      delete reputations.updatedAt;
+      delete reputations.tag;
+      delete reputations.uname;
       userData = {
         ...userData,
         ...reputations,
-      }
-      return { status: 200, data: userData }
+      };
+      return { status: 200, data: userData };
     }
-    errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag.title
-    console.error(errorMessage)
-    return { status: 500, data: errorMessage }
+    errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag.title;
+    console.error(errorMessage);
+    return { status: 500, data: errorMessage };
   } catch (err: any) {
-    console.error(err)
-    return { status: 500, data: err.code }
+    console.error(err);
+    return { status: 500, data: err.code };
   }
-}
+};
 
 const fbAuth = (handler: NextApiHandler) => {
   return async (req: AuthenticatedRequest, res: NextApiResponse) => {
+    console.log("req.body", req.body);
     try {
-      const decodedToken = await admin.auth().verifyIdToken(req.headers.authorization!)
-      if (!decodedToken) return res.status(401).send({ error: "UnAuthorized" })
-      req.user = decodedToken
+      let token = (req.headers.authorization || req.headers.Authorization || "") as string;
+      token = token.replace("Bearer ", "");
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      if (!decodedToken) return res.status(401).send({ error: "UnAuthorized" });
 
-      const { status, data } = await retrieveAuthenticatedUser({ uname: null, uid: req.user.uid })
+      const user = decodedToken;
 
-      if (status !== 200) return res.status(status).send({ error: data })
-
+      const { status, data } = await retrieveAuthenticatedUser({ uname: null, uid: user.uid });
+      if (status !== 200) return res.status(status).send({ error: data });
       //authenticated
-      req.user.userData = data
-      await handler(req, res)
-    } catch (error) {
-      return res.status(500).json({ error })
-    }
-  }
-}
 
-export default fbAuth
+      if (!req.body) req.body = {};
+      if (!req.body.data) req.body.data = { ...req.body };
+
+      req.body.data.user = user;
+      req.body.data.user.userData = data;
+      await handler(req, res);
+    } catch (error) {
+      return res.status(500).json({ error });
+    }
+  };
+};
+
+export default fbAuth;

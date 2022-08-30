@@ -2,6 +2,7 @@ import "../global.css";
 
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
+import axios from "axios";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
 import { useState } from "react";
@@ -16,6 +17,8 @@ import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 
 const clientSideEmotionCache = createEmotionCache();
 
+axios.defaults.baseURL = "/api";
+
 initFirebaseClientSDK();
 
 const App = (props: AppPropsWithLayout) => {
@@ -26,9 +29,9 @@ const App = (props: AppPropsWithLayout) => {
         defaultOptions: {
           queries: {
             refetchOnWindowFocus: false,
-            retry: false
-          }
-        }
+            retry: false,
+          },
+        },
       })
   );
 
@@ -45,7 +48,7 @@ const App = (props: AppPropsWithLayout) => {
             <SnackbarProvider
               anchorOrigin={{
                 vertical: "top",
-                horizontal: "center"
+                horizontal: "center",
               }}
               maxSnack={3}
             >

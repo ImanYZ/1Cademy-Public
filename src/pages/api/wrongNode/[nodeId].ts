@@ -1,11 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { UpDownVoteNode } from '../../../utils';
+import fbAuth from "../../../middlewares/fbAuth";
+import { UpDownVoteNode } from "../../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { user } = req.body.data as any;
-    const fullname = `${user.userData.fName} ${user.userData.lName}`
+    const fullname = `${user.userData.fName} ${user.userData.lName}`;
 
     await UpDownVoteNode({
       fullname,
@@ -13,7 +14,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       imageUrl: user.userData.imageUrl,
       chooseUname: user.userData.chooseUname,
       nodeId: req.query.nodeId,
-      actionType: "Wrong"
+      actionType: "Wrong",
     });
     return res.status(200).json({ success: true });
   } catch (err) {
@@ -22,4 +23,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);
