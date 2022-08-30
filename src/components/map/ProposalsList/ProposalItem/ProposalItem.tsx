@@ -1,44 +1,42 @@
 // import "./ProposalItem.css";
-import CloseIcon from "@mui/icons-material/Close"
-import DoneIcon from "@mui/icons-material/Done"
-import GradeIcon from "@mui/icons-material/Grade"
-import dayjs from "dayjs"
-import relativeTime from "dayjs/plugin/relativeTime"
-import { AnyARecord } from "dns"
-import React, { useCallback } from "react"
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
+import GradeIcon from "@mui/icons-material/Grade";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import React, { useCallback } from "react";
 
-import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator"
-import shortenNumber from "../../../../lib/utils/shortenNumber"
-import { Editor } from "../../../Editor"
-import { MemoizedMetaButton } from "../../MetaButton"
-
+import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
+import shortenNumber from "../../../../lib/utils/shortenNumber";
+import { Editor } from "../../../Editor";
+import { MemoizedMetaButton } from "../../MetaButton";
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
 // import MetaButton from "../../../../MetaButton/MetaButton";
 // import proposalSummariesGenerator from "../../proposalSummariesGenerator";
 
-const doNothing = () => {}
+const doNothing = () => {};
 
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 const ProposalItem = (props: any) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
-        props.selectProposal(event, proposal)
+        props.selectProposal(event, proposal);
       } else {
-        props.openLinkedNode(proposal.node)
+        props.openLinkedNode(proposal.node);
       }
     },
     [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
-  )
+  );
 
-  let proposalSummaries
+  let proposalSummaries;
   if (props.proposalSummaries) {
-    proposalSummaries = props.proposalSummaries
+    proposalSummaries = props.proposalSummaries;
   } else {
-    proposalSummaries = proposalSummariesGenerator(props.proposal)
+    proposalSummaries = proposalSummariesGenerator(props.proposal);
   }
 
   return (
@@ -54,6 +52,7 @@ const ProposalItem = (props: any) => {
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal unhelpful."
             tooltipPosition="bottom-start"
+            onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <CloseIcon fontSize="small" className={props.proposal.wrong ? "red-text" : "grey-text"}/>
@@ -63,13 +62,18 @@ const ProposalItem = (props: any) => {
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal helpful."
             tooltipPosition="bottom-start"
+            onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <DoneIcon fontSize="small" className={props.proposal.correct ? "green-text" : "grey-text"}/>
               <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
-          <MemoizedMetaButton tooltip="# of 1Admins who have awarded this proposal." tooltipPosition="bottom-start">
+          <MemoizedMetaButton
+            tooltip="# of 1Admins who have awarded this proposal."
+            tooltipPosition="bottom-start"
+            onClick={props.rateProposal}
+          >
             <div style={{ display: "flex", alignItems: "center" }}>
               <GradeIcon fontSize="small" className={props.proposal.award ? "amber-text" : "grey-text"}/>
               <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
@@ -89,7 +93,7 @@ const ProposalItem = (props: any) => {
                   <p style={{ margin: "0px" }} key={"Summary" + props.proposal.id + prSummaryIdx}>
                     {prSummary}
                   </p>
-                )
+                );
               })
             : props.proposal.summary && (
                 <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
@@ -97,7 +101,7 @@ const ProposalItem = (props: any) => {
         </div>
       </div>
     </li>
-  )
-}
+  );
+};
 
-export default React.memo(ProposalItem)
+export default React.memo(ProposalItem);

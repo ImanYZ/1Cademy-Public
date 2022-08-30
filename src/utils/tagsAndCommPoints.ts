@@ -1,14 +1,12 @@
-import {
-  db,
-} from "../lib/firestoreServer/admin";
-
+import { db } from "../lib/firestoreServer/admin";
+import { convertToTGet } from "./";
 const comPointTypes = [
   "comPoints",
   "comMonthlyPoints",
   "comWeeklyPoints",
   "comOthersPoints",
   "comOthMonPoints",
-  "comOthWeekPoints",
+  "comOthWeekPoints"
 ];
 
 const tagCommunityFunctionOrPromise = async ({ collectionName, tagRef, tagDoc, tagData, callBack }: any) => {
@@ -19,14 +17,14 @@ const tagCommunityFunctionOrPromise = async ({ collectionName, tagRef, tagDoc, t
   }
 };
 
-export const tagsAndCommPoints = async ({ nodeId, callBack }: any) => {
+export const tagsAndCommPoints = async ({ nodeId, callBack, t }: any) => {
   // Names of the collections to itterate through.
   const collectionNames = ["tags", ...comPointTypes];
   for (let collectionName of collectionNames) {
-    const tagDocs = await db
-      .collection(collectionName)
-      .where(collectionName === "tags" ? "node" : "tagId", "==", nodeId)
-      .get();
+    const tagDocs = await convertToTGet(
+      db.collection(collectionName).where(collectionName === "tags" ? "node" : "tagId", "==", nodeId),
+      t
+    );
     for (let tagDoc of tagDocs.docs) {
       const tagData = tagDoc.data();
       const tagRef = db.collection(collectionName).doc(tagDoc.id);

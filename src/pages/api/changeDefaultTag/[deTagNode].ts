@@ -6,16 +6,8 @@ import {
   commitBatch,
   db,
 } from "../../../lib/firestoreServer/admin";
-import { firstWeekMonthDays, initializeNewReputationData } from '../../../utils';
+import { firstWeekMonthDays, initializeNewReputationData, reputationTypes } from '../../../utils';
 
-const reputationTypes = [
-  "reputations",
-  "monthlyReputations",
-  "weeklyReputations",
-  "othersReputations",
-  "othMonReputations",
-  "othWeekReputations",
-];
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

@@ -1,4 +1,4 @@
-import { getAllUserNodes, signalAllUserNodesChanges } from '.';
+import { getAllUserNodes, signalAllUserNodesChanges } from ".";
 
 export const retrieveAndsignalAllUserNodesChanges = async ({
   batch,
@@ -6,10 +6,12 @@ export const retrieveAndsignalAllUserNodesChanges = async ({
   nodeChanges,
   major,
   currentTimestamp,
-  writeCounts
+  writeCounts,
+  t,
+  tWriteOperations
 }: any) => {
   let newBatch = batch;
-  const { userNodesRefs, userNodesData } = await getAllUserNodes({ linkedId });
+  const { userNodesRefs, userNodesData } = await getAllUserNodes({ linkedId, t });
   //  update adminsList, we need every admin of every node in userLinkedData
   [newBatch, writeCounts] = await signalAllUserNodesChanges({
     newBatch,
@@ -19,7 +21,9 @@ export const retrieveAndsignalAllUserNodesChanges = async ({
     major,
     deleted: false,
     currentTimestamp,
-    writeCounts
+    writeCounts,
+    t,
+    tWriteOperations
   });
 
   return [newBatch, writeCounts];

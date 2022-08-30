@@ -2,9 +2,12 @@ import admin from "firebase-admin";
 import { cert, initializeApp } from "firebase-admin/app";
 import { getFirestore, WriteBatch } from "firebase-admin/firestore";
 
+export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
+
 require("dotenv").config();
+
 if (!admin.apps.length) {
-  initializeApp({
+  let initializationConfigs: any = {
     credential: cert({
       type: process.env.ONECADEMYCRED_TYPE,
       project_id: process.env.NEXT_PUBLIC_PROJECT_ID,
@@ -17,9 +20,17 @@ if (!admin.apps.length) {
       auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
       client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
       storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
-      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL
-    } as any)
-  });
+      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
+    } as any),
+  };
+
+  if (process.env.NODE_ENV === "test") {
+    initializationConfigs = {
+      projectId: "test",
+      credential: admin.credential.applicationDefault(),
+    };
+  }
+  initializeApp(initializationConfigs);
   getFirestore().settings({ ignoreUndefinedProperties: true });
 }
 const MAX_TRANSACTION_WRITES = 499;

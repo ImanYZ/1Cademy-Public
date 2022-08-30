@@ -2,7 +2,7 @@
   "extends": ["next/core-web-vitals", "prettier"],
   "root": true,
   "rules": {
-    "semi": ["warn", "never"],
+    "semi": ["warn"],
     "comma-dangle": ["warn", "always-multiline"],
     "simple-import-sort/imports": "warn",
     "no-unused-vars": "off",

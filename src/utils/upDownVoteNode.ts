@@ -3,7 +3,7 @@ import {
   checkRestartBatchWriteCounts,
   commitBatch,
   db,
-  MIN_ACCEPTED_VERSION_POINT_WEIGHT
+  MIN_ACCEPTED_VERSION_POINT_WEIGHT,
 } from "../lib/firestoreServer/admin";
 import {
   deleteTagCommunityAndTagsOfTags,
@@ -13,8 +13,8 @@ import {
   getUserNode,
   retrieveAndsignalAllUserNodesChanges,
   signalAllUserNodesChanges,
-  updateReputation
-} from '.';
+  updateReputation,
+} from ".";
 
 const setOrIncrementNotificationNums = async ({ batch, proposer, notificationRef, writeCounts }: any) => {
   let newBatch = batch;
@@ -30,14 +30,7 @@ const setOrIncrementNotificationNums = async ({ batch, proposer, notificationRef
 };
 
 //  Up/down-votes nodes
-export const UpDownVoteNode = async ({
-  uname,
-  nodeId,
-  fullname,
-  imageUrl,
-  actionType,
-  chooseUname,
-}: any) => {
+export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, actionType, chooseUname }: any) => {
   // let nodeData, nodeRef, versionsDocs, versionsColl, userNodesRefs, userNodesData;
   // let userNodeData = null;
   // let userNodeRef = null;
@@ -80,7 +73,7 @@ export const UpDownVoteNode = async ({
       major: true,
       deleted: deleteNode,
       currentTimestamp,
-      writeCounts
+      writeCounts,
     });
     // Delete the node from the list of children of each parent node
     for (let parentLink of nodeData.parents) {
@@ -101,7 +94,7 @@ export const UpDownVoteNode = async ({
         nodeChanges,
         major: true,
         currentTimestamp,
-        writeCounts
+        writeCounts,
       });
     }
     // Delete the node from the list of parents of each child node
@@ -123,7 +116,7 @@ export const UpDownVoteNode = async ({
         nodeChanges,
         major: true,
         currentTimestamp,
-        writeCounts
+        writeCounts,
       });
     }
     //  retrieve all the nodes that are tagging this current node, then remove current node from their list of tags
@@ -153,7 +146,7 @@ export const UpDownVoteNode = async ({
             nodeChanges,
             major: true,
             currentTimestamp,
-            writeCounts
+            writeCounts,
           });
         }
       }
@@ -176,9 +169,7 @@ export const UpDownVoteNode = async ({
     }
     //  query all the nodes that are referencing current node with nodeId
     if (nodeData.nodeType === "Reference") {
-      const citingNodesRefs = db
-        .collection("nodes")
-        .where("referenceIds", "array-contains", nodeId);
+      const citingNodesRefs = db.collection("nodes").where("referenceIds", "array-contains", nodeId);
       const citingNodesDocs = await citingNodesRefs.get();
 
       for (let citingNodeDoc of citingNodesDocs.docs) {
@@ -204,14 +195,14 @@ export const UpDownVoteNode = async ({
             nodeChanges,
             major: true,
             currentTimestamp,
-            writeCounts
+            writeCounts,
           });
         }
       }
     }
   }
   //  query versions in order to update the upvotes / downvotes in addition to reputations
-  const { versionsColl }: any = getTypedCollections(nodeData.nodeType);
+  const { versionsColl }: any = getTypedCollections({ nodeData: nodeData.nodeType });
   const versionsQuery = versionsColl
     .where("node", "==", nodeId)
     .where("accepted", "==", true)
@@ -229,10 +220,8 @@ export const UpDownVoteNode = async ({
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
     const versionRatingChange =
-      Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, versionData.corrects - versionData.wrongs) /
-      maxVersionNetVotes;
-    const correctVal =
-      Math.round((correctChange * versionRatingChange + Number.EPSILON) * 100) / 100;
+      Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, versionData.corrects - versionData.wrongs) / maxVersionNetVotes;
+    const correctVal = Math.round((correctChange * versionRatingChange + Number.EPSILON) * 100) / 100;
     const wrongVal = Math.round((wrongChange * versionRatingChange + Number.EPSILON) * 100) / 100;
 
     // Updating the accepted version points.
@@ -294,7 +283,7 @@ export const UpDownVoteNode = async ({
       ltermVal: 0,
       ltermDayVal: 0,
       voter: uname,
-      writeCounts
+      writeCounts,
     });
     // Notifying the proposer about gaining or losing a point.
     const notificationRef = db.collection("notifications").doc();
@@ -355,7 +344,7 @@ export const UpDownVoteNode = async ({
       major: false,
       deleted: false,
       currentTimestamp,
-      writeCounts
+      writeCounts,
     });
   }
   batch.update(nodeRef, nodeChanges);
