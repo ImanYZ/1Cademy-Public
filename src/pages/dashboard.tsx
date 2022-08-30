@@ -1329,6 +1329,19 @@ const Dashboard = ({}: DashboardProps) => {
     [addedParents, removedParents, addedChildren, removedChildren]
   )
 
+  const setNodeParts = useMemoizedCallback((nodeId, innerFunc:(thisNode:FullNodeData)=>FullNodeData) => {
+    // console.log("In setNodeParts");
+    setNodes(oldNodes => {
+      // setSelectedNode(nodeId);
+      setSelectedNodeType(oldNodes[nodeId].nodeType)
+      const thisNode = { ...oldNodes[nodeId] }
+      return {
+        ...oldNodes,
+        [nodeId]: innerFunc(thisNode),
+      }
+    })
+  }, [])
+
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
@@ -1958,6 +1971,21 @@ const Dashboard = ({}: DashboardProps) => {
   /////////////////////////////////////////////////////
   // Node Improvement Functions
 
+  const switchChoice = useCallback(
+    (nodeId:string, choiceIdx:number) => {
+      console.log("[SWITCH CHOICE]")
+      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+        const choices = [...thisNode.choices]
+        const choice = { ...choices[choiceIdx] }
+        choice.correct = !choice.correct
+        choices[choiceIdx] = choice
+        thisNode.choices = choices
+        return { ...thisNode }
+      })
+    },
+    [setNodeParts]
+  )
+
   /////////////////////////////////////////////////////
   // Sidebar Functions
 
@@ -2426,18 +2454,6 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [])
 
-  const setNodeParts = useMemoizedCallback((nodeId, innerFunc) => {
-    // console.log("In setNodeParts");
-    setNodes(oldNodes => {
-      // setSelectedNode(nodeId);
-      setSelectedNodeType(oldNodes[nodeId].nodeType)
-      const thisNode = { ...oldNodes[nodeId] }
-      return {
-        ...oldNodes,
-        [nodeId]: innerFunc(thisNode),
-      }
-    })
-  }, [])
   const uploadNodeImage = useCallback(
     (
       event: any,
@@ -2557,7 +2573,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Toggle Open proposals
               </Button>
-              <Button onClick={() => openNodeHandler("JvMjw4kbgeqNA7sRQjfZ")}>Open Node Handler</Button>
+              <Button onClick={() => openNodeHandler("0FQjO6yByNeXOiYlRMvN")}>Open Node Handler</Button>
             </Box>
           </Drawer>
           <MemoizedSidebar
@@ -2612,7 +2628,7 @@ const Dashboard = ({}: DashboardProps) => {
                 }}
                 changeChoice={() => console.log("changeChoice")}
                 changeFeedback={() => console.log("changeFeedback")}
-                switchChoice={() => console.log("switchChoice")}
+                switchChoice={switchChoice}
                 deleteChoice={() => console.log("deleteChoice")}
                 addChoice={() => console.log("addChoice")}
                 onNodeTitleBlur={() => console.log("onNodeTitleBlur")}

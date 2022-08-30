@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add"
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever"
@@ -14,6 +15,8 @@ import LinkingWords from "./LinkingWords/LinkingWords"
 import { MemoizedMetaButton } from "./MetaButton"
 import { MemoizedNodeFooter } from "./NodeFooter"
 import { MemoizedNodeHeader } from "./NodeHeader"
+import QuestionChoices from "./QuestionChoices"
+import { KnowledgeChoice } from "../../knowledgeTypes"
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -55,7 +58,7 @@ type NodeProps = {
   tags: string[] | { node: string; title?: string; label?: string }[]
   parents: string[]
   nodesChildren: string[] | { node: string; title?: string; label?: string }[]
-  choices: string[]
+  choices: KnowledgeChoice[]
   commentsNum: number
   proposalsNum: number
   admin: string
@@ -535,10 +538,9 @@ const Node = ({
                   {/* </a> */}
                 </>
               )}
-              {/* CHECK: I commented this */}
-              {/* {nodeType === "Question" && "choices" in props && (
+              {nodeType === "Question" /*&& "choices" in props*/ && (
                 <>
-                  <ul className="collapsible">
+                  <ul className="collapsible" style={{padding:'0px'}}>
                     {choices.map((choice, idx) => {
                       return (
                         <QuestionChoices
@@ -556,40 +558,37 @@ const Node = ({
                           changeFeedback={changeFeedback}
                           nodeChanged={locationSizeChange}
                         />
-                      );
+                      )
                     })}
                   </ul>
                   {editable && (
                     <div className="QuestionAddChoice">
                       <MemoizedMetaButton
-                        onClick={addChoiceHandler}
+                        onClick={() => console.log("addChoiceHandler")}
                         tooltip="Click to add a new choice to this question."
                       >
-                        <i className="material-icons green-text">add</i> Add Choice
+                        <>
+                          <AddIcon className="green-text" />
+                          <span>Add Choice</span>
+                        </>
                       </MemoizedMetaButton>
                     </div>
                   )}
                 </>
-               )} */}
+              )}
               {editable && (
                 <>
                   <p className="ProposalTitle">
                     {"To expedite your proposal review, explain why you propose this " +
                       (isNew ? nodeType + " child node:" : "new version:")}
                   </p>
-                  {/* CHECK: I commented this */}
-                  {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
-                  <Editor label="Reason" value={reason} setValue={setReason} readOnly={false} />
-                  {/* {reason} */}
-                  {/* <p className="ProposalTitle">
-                      Please write a few words to summarize what you've proposed
-                      in this version:
-                    </p>
-                    <HyperEditor
-                      content={summary}
-                      readOnly={false}
-                      onChange={setSummary}
-                     /> */}
+                  <Editor
+                    label="Please write a few words to summarize what you've proposed
+                      in this version:"
+                    value={reason}
+                    setValue={setReason}
+                    readOnly={false}
+                  />
                 </>
               )}
               <MemoizedNodeFooter

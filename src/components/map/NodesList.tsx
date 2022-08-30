@@ -7,7 +7,7 @@ import { NODE_WIDTH } from "@/lib/utils/Map.utils"
 import { MemoizedNode } from "./Node"
 
 type NodeListProps = {
-  nodes: any
+  nodes: { [key: string]: any }
   // selectionType: any,
   // NODE_WIDTH: number,
   bookmark: any
