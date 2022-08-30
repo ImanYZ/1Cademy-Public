@@ -118,6 +118,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const [tt, setTt] = useState<string | null>(null)
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges, setUserNodeChanges] = useState<UserNodes[]>([])
   const [nodeChanges, setNodeChanges] = useState<NodeChanges[]>([])
@@ -2502,6 +2503,7 @@ const Dashboard = ({}: DashboardProps) => {
                 const bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET
 
                 const imageGeneratedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${fullPath}?alt=media`
+                setTt(imageGeneratedUrl)
 
                 // const imageGeneratedUrl = await getDownloadURL(task.snapshot.ref)
 
@@ -2589,6 +2591,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Button variant="contained" onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
               {"X"}
             </Button>
+            {tt && <img src={tt} alt="test" />}
           </Box>
 
           {/* end Data from map */}

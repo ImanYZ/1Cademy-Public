@@ -14,6 +14,7 @@ import LinkingWords from "./LinkingWords/LinkingWords"
 import { MemoizedMetaButton } from "./MetaButton"
 import { MemoizedNodeFooter } from "./NodeFooter"
 import { MemoizedNodeHeader } from "./NodeHeader"
+import { PreviewImage } from "./PreviewImage"
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -516,10 +517,10 @@ const Node = ({
                /> */}
               {/* {content} */}
               <h5>IMAGE URL:{nodeImage}</h5>
-              <img
+              {/* <img
                 src="https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/UploadedImages%2FvAVBs5PTWkXdV7FnfnCO6bEuG4E3%2F1661795930257_430x1300.png?alt=media"
                 alt="sss"
-              />
+              /> */}
               {nodeImage !== "" && (
                 <>
                   {editable && (
@@ -529,9 +530,9 @@ const Node = ({
                       </MemoizedMetaButton>
                     </div>
                   )}
-                  <div style={{ border: "solid 2px royalBlue" }}>
+                  {/* <div style={{ border: "solid 2px royalBlue" }}>
                     <img src={nodeImage} alt="Node image" className="responsive-img" />
-                  </div>
+                  </div> */}
                   {/* <img
                     src={nodeImage}
                     alt="Node image"
@@ -541,8 +542,11 @@ const Node = ({
                   /> */}
                   {/* <a href={nodeImage} target="_blank"> */}
                   <h1 onClick={onImageClick}>{nodeImage}</h1>
-                  {/* <img src={nodeImage} alt="ss" />
-
+                  {/* <PreviewImage src={nodeImage} /> */}
+                  ---
+                  {/* {nodeImage && <img src={nodeImage} alt="test" />} */}
+                  <img src={nodeImage} alt="ss" />
+                  ---
                   <img
                     src={nodeImage}
                     alt="Node image"
@@ -551,7 +555,7 @@ const Node = ({
                     onClick={onImageClick}
                     // crossOrigin={"anonymous"}
                     // referrerPolicy={"no-referrer"}
-                  /> */}
+                  />
                   {/* </a> */}
                 </>
               )}
