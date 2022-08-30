@@ -56,7 +56,9 @@ export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps)
           // onMouseDown={handleMouseDown}
         />
       ) : (
-        <MarkdownRender fontSize="16px" text={value} />
+        <Box sx={{p: canEdit?'0px':'16px 14px'}}>
+          <MarkdownRender fontSize="16px" text={value} />
+        </Box>
       )}
     </Box>
   )

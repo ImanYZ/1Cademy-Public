@@ -5,8 +5,8 @@ import DoneIcon from "@mui/icons-material/Done"
 import { Button, IconButton } from "@mui/material"
 // import "./QuestionChoices.css"
 import React, { useCallback, useEffect, useState } from "react"
-import { KnowledgeChoice } from "../../knowledgeTypes"
 
+import { KnowledgeChoice } from "../../knowledgeTypes"
 import { Editor } from "../Editor"
 import { MemoizedMetaButton } from "./MetaButton"
 
@@ -111,7 +111,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
   } else {
     return (
       <li className="QuestionChoices">
-        <div className="collapsible-header" onClick={choiceClick} style={{ border: "solid 2px royalBlue" }}>
+        <div className="collapsible-header" onClick={choiceClick} style={{ display:'flex',cursor:'pointer',border:'solid 1px white' }}>
           {choicesOpen[props.idx] ? (
             props.choice.correct ? (
               <DoneIcon className="green-text" />
@@ -119,16 +119,12 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
               <CloseIcon className="red-text" />
             )
           ) : (
-            // <i className={"material-icons " + (props.choice.correct ? "green-text DoneIcon" : "red-text")}>
-            //   {props.choice.correct ? "done" : "close"}
-            // </i>
             <CheckBoxOutlineBlankIcon />
-            // <i className={"material-icons"}>check_box_outline_blank</i>
           )}
           <Editor label="" readOnly={true} value={props.choice.choice} setValue={doNothing} />
         </div>
         {choicesOpen[props.idx] && (
-          <div className="collapsible-body" style={{ display: "block" }}>
+          <div className="collapsible-body" style={{ display: "block",border:'solid 1px white' }}>
             <Editor label="" readOnly={true} value={props.choice.feedback} setValue={doNothing} />
           </div>
         )}
