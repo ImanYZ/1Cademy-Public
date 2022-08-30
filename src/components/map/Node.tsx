@@ -355,6 +355,7 @@ const Node = ({
     nodesChildren.length,
     title,
     content,
+    choices.length,
     // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
     // nodeChanged,
     // markedCorrect,

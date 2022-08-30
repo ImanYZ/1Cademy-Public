@@ -227,6 +227,9 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false)
 
+  // flag to adjust height
+  // const [nodeHasChanges,setNodeHasChanges] = useState(false)
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -983,6 +986,7 @@ console.log('[WORKER]',{
         setNodes(oldNodes)
         setEdges(oldEdges)
         setMapChanged(mapChangedFlag)
+        // setMapChanged(false)
         if (!mapRendered) {
           setTimeout(() => {
             let nodeToNavigateTo = null
@@ -1008,6 +1012,7 @@ console.log('[WORKER]',{
               scrollToNode(Object.keys(nodes)[0])
             }
             setMapRendered(true)
+            // setMap
           }, 10)
         }
       }
@@ -1044,7 +1049,7 @@ console.log('[WORKER]',{
       imageLoaded: boolean,
       openPart: OpenPart
     ) => {
-      console.log("[NODE_CHANGED]")
+      console.log("[NODE_CHANGED]",nodeId)
       let currentHeight = NODE_HEIGHT
       let newHeight = NODE_HEIGHT
       let nodesChanged = false
@@ -1974,53 +1979,6 @@ console.log('[WORKER]',{
     [nodeBookState.choosingNode, getMapGraph]
   )
 
-  // const adjustNodeHeight = useCallback(
-  //   (nodeRef, nodeId) => {
-  //     // console.log("In adjustNodeHeight");
-  //     setTimeout(() => {
-  //       if (nodeRef.current) {
-  //         setNodeParts(nodeId, (thisNode) => {
-  //           const { current } = nodeRef;
-  //           const newHeight = current.offsetHeight;
-  //           let currentHeight = NODE_HEIGHT;
-  //           if ("height" in thisNode) {
-  //             currentHeight = thisNode.height;
-  //           }
-  //           if (Math.abs(currentHeight - newHeight) >= MIN_CHANGE) {
-  //             thisNode.height = newHeight;
-  //           }
-  //           return { ...thisNode };
-  //         });
-  //       }
-  //     }, 700);
-  //   },
-  //   [setNodeParts]
-  // );
-
-  const adjustNodeHeight = useCallback(
-    (nodeRef:any, nodeId:string) => {
-      // console.log("In adjustNodeHeight");
-      setTimeout(() => {
-        if (nodeRef.current) {
-          setNodeParts(nodeId, (thisNode:FullNodeData) => {
-            const { current } = nodeRef
-            const newHeight = current.offsetHeight
-            let currentHeight = NODE_HEIGHT
-            if ("height" in thisNode) {
-              currentHeight = thisNode.height
-            }
-            if (Math.abs(currentHeight - newHeight) >= MIN_CHANGE) {
-              thisNode.height = newHeight
-            }
-            setMapChanged(true)
-            return { ...thisNode }
-          })
-        }
-      }, 700)
-    },
-    [setNodeParts]
-  )
-
   /////////////////////////////////////////////////////
   // Node Improvement Functions
 
@@ -2035,8 +1993,8 @@ console.log('[WORKER]',{
         thisNode.choices = choices
         return { ...thisNode }
       })
-      // TODO: find a way to call worker in use effect in NODE, 
-      // when change size of Node
+      // CHECK: I commented this and 
+      // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts/*, adjustNodeHeight*/]
@@ -2053,8 +2011,8 @@ console.log('[WORKER]',{
         thisNode.choices = choices
         return { ...thisNode }
       })
-      // TODO: find a way to call worker in use effect in NODE, 
-      // when change size of Node
+      // CHECK: I commented this and 
+      // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts/*, adjustNodeHeight*/]
@@ -2084,8 +2042,8 @@ console.log('[WORKER]',{
         thisNode.choices = choices
         return { ...thisNode }
       })
-      // TODO: find a way to call worker in use effect in NODE, 
-      // when change size of Node
+      // CHECK: I commented this and 
+      // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts/* adjustNodeHeight*/]
@@ -2104,9 +2062,8 @@ console.log('[WORKER]',{
         thisNode.choices = choices
         return { ...thisNode }
       })
-      // TODO: find a way to call worker in use effect in NODE, 
-      // when change size of Node
-      // setMapChanged(true)
+      // CHECK: I commented this and 
+      // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts/*, adjustNodeHeight*/]
