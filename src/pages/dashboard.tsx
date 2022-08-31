@@ -1989,13 +1989,32 @@ console.log('[WORKER]',{
           getMapGraph(`/wrongNode/${nodeId}`);
         }
       }
-      event.currentTarget.blur();
+      // console.log('---------------> Event:',event);
+      // event.currentTarget.blur(); // CHECK: I comment this, the current target is null
     },
     [nodeBookState.choosingNode, getMapGraph]
   );
 
   /////////////////////////////////////////////////////
   // Node Improvement Functions
+
+  const changeTitle = useCallback(
+    (nodeRef:any, nodeId:string, value:string) => {
+      console.log("[CHANGE CHOICE]");
+      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+        // const choices = [...thisNode.choices];
+        // const choice = { ...choices[choiceIdx] };
+        // choice.choice = value;
+        // choices[choiceIdx] = choice;
+        thisNode.title = value;
+        return { ...thisNode };
+      });
+      // CHECK: I commented this and 
+      // add dependency choices.length in Node to recall worker
+      // adjustNodeHeight(nodeRef, nodeId)
+    },
+    [setNodeParts/*, adjustNodeHeight*/]
+  );
 
   const changeChoice = useCallback(
     (nodeRef:any, nodeId:string, value:string, choiceIdx:number) => {
@@ -2916,6 +2935,7 @@ console.log('[WORKER]',{
                   console.log("first", imgUrl);
                   setOpenMedia(imgUrl);
                 }}
+                changeTitle={changeTitle}
                 changeChoice={changeChoice}
                 changeFeedback={changeFeedback}
                 switchChoice={switchChoice}

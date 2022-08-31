@@ -35,6 +35,7 @@ type NodeListProps = {
   wrongNode: any
   uploadNodeImage: any
   removeImage: any
+  changeTitle:any,
   changeChoice: any
   changeFeedback: any
   switchChoice: any
@@ -68,6 +69,7 @@ const NodesList = ({
   wrongNode,
   uploadNodeImage,
   removeImage,
+  changeTitle,
   changeChoice,
   changeFeedback,
   switchChoice,
@@ -187,6 +189,7 @@ const NodesList = ({
             wrongNode={wrongNode}
             uploadNodeImage={uploadNodeImage}
             removeImage={removeImage}
+            changeTitle={changeTitle}
             changeChoice={changeChoice}
             changeFeedback={changeFeedback}
             switchChoice={switchChoice}

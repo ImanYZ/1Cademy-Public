@@ -97,6 +97,7 @@ type NodeProps = {
   wrongNode: any //
   uploadNodeImage: any //
   removeImage: any //
+  changeTitle:any,
   changeChoice: any //
   changeFeedback: any //
   switchChoice: any //
@@ -169,6 +170,7 @@ const Node = ({
   wrongNode,
   uploadNodeImage,
   removeImage,
+  changeTitle,
   changeChoice,
   changeFeedback,
   switchChoice,
@@ -316,7 +318,8 @@ const Node = ({
 
   const titleChange = useCallback(
     (value: string) => {
-      nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
+      // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
+      changeTitle(nodeRef,identifier,value)
     },
     [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
   )
@@ -468,10 +471,10 @@ const Node = ({
               {/* CHECK: I commented this */}
               <Editor
                 label="Please enter the node title below:"
-                value={titleCopy}
+                value={title}
                 // onChangeContent={setReason}
-                // onChangeContent={titleChange}
-                setValue={setTitleCopy}
+                setValue={titleChange}
+                // setValue={setTitleCopy}
                 readOnly={!editable}
               />
               {/* <HyperEditor
@@ -731,9 +734,9 @@ const Node = ({
               {/* {title} */}
               <Editor
                 label="title"
-                value={titleCopy}
-                // onChangeContent={titleChange}
-                setValue={setTitleCopy}
+                value={title}
+                setValue={titleChange}
+                // setValue={setTitleCopy}
                 readOnly={true}
               />
             </div>
