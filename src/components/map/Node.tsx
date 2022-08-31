@@ -1,22 +1,24 @@
-import AddIcon from "@mui/icons-material/Add"
+import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever"
-import SearchIcon from "@mui/icons-material/Search"
-import { Box, Tooltip } from "@mui/material"
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { OpenPart } from "src/nodeBookTypes"
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import SearchIcon from "@mui/icons-material/Search";
+import { Box, Tooltip } from "@mui/material";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { OpenPart } from "src/nodeBookTypes";
 
-import { useNodeBook } from "@/context/NodeBookContext"
+import { useNodeBook } from "@/context/NodeBookContext";
 
-import { useAuth } from "../../context/AuthContext"
-import { KnowledgeChoice } from "../../knowledgeTypes"
-import { Editor } from "../Editor"
-import LinkingWords from "./LinkingWords/LinkingWords"
-import { MemoizedMetaButton } from "./MetaButton"
-import { MemoizedNodeFooter } from "./NodeFooter"
-import { MemoizedNodeHeader } from "./NodeHeader"
-import QuestionChoices from "./QuestionChoices"
+import { useAuth } from "../../context/AuthContext";
+import { useCallbackByHeightChange } from "../../hooks/useCallbackByHeightChange3";
+import { useHeightElement } from "../../hooks/useHeightNode";
+import { KnowledgeChoice } from "../../knowledgeTypes";
+import { Editor } from "../Editor";
+import LinkingWords from "./LinkingWords/LinkingWords";
+import { MemoizedMetaButton } from "./MetaButton";
+import { MemoizedNodeFooter } from "./NodeFooter";
+import { MemoizedNodeHeader } from "./NodeHeader";
+import QuestionChoices from "./QuestionChoices";
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -31,49 +33,49 @@ import QuestionChoices from "./QuestionChoices"
 // import "./Node.css";
 
 type NodeProps = {
-  identifier: string
-  activeNode: any //organize this i a better forme
-  citationsSelected: any //
-  proposalsSelected: any //
-  acceptedProposalsSelected: any //
-  commentsSelected: any
-  open: boolean
-  left: number
-  top: number
-  width: number
-  editable: boolean
-  unaccepted: any //
-  nodeType: string
-  isTag: boolean
-  isNew: any //
-  title: string
-  content: string
-  nodeImage: string
-  viewers: number
-  correctNum: any //
-  markedCorrect: any //
-  wrongNum: any //
-  markedWrong: any //
-  references: string[]
-  tags: string[] | { node: string; title?: string; label?: string }[]
-  parents: string[]
-  nodesChildren: string[] | { node: string; title?: string; label?: string }[]
-  choices: KnowledgeChoice[]
-  commentsNum: number
-  proposalsNum: number
-  admin: string
-  aImgUrl: string
-  aFullname: string
-  aChooseUname: boolean
-  lastVisit: string
-  studied: number
-  isStudied: boolean
-  changed: any //
-  changedAt: string
-  bookmarked: boolean
-  bookmarks: any //
-  bookmark: any //
-  markStudied: any //
+  identifier: string;
+  activeNode: any; //organize this i a better forme
+  citationsSelected: any; //
+  proposalsSelected: any; //
+  acceptedProposalsSelected: any; //
+  commentsSelected: any;
+  open: boolean;
+  left: number;
+  top: number;
+  width: number;
+  editable: boolean;
+  unaccepted: any; //
+  nodeType: string;
+  isTag: boolean;
+  isNew: any; //
+  title: string;
+  content: string;
+  nodeImage: string;
+  viewers: number;
+  correctNum: any; //
+  markedCorrect: any; //
+  wrongNum: any; //
+  markedWrong: any; //
+  references: string[];
+  tags: string[] | { node: string; title?: string; label?: string }[];
+  parents: string[];
+  nodesChildren: string[] | { node: string; title?: string; label?: string }[];
+  choices: KnowledgeChoice[];
+  commentsNum: number;
+  proposalsNum: number;
+  admin: string;
+  aImgUrl: string;
+  aFullname: string;
+  aChooseUname: boolean;
+  lastVisit: string;
+  studied: number;
+  isStudied: boolean;
+  changed: any; //
+  changedAt: string;
+  bookmarked: boolean;
+  bookmarks: any; //
+  bookmark: any; //
+  markStudied: any; //
   nodeChanged: (
     nodeRef: any,
     nodeId: string,
@@ -81,35 +83,35 @@ type NodeProps = {
     title: string | null,
     imageLoaded: boolean,
     openPart: OpenPart
-  ) => void
-  chosenNodeChanged: any //
-  referenceLabelChange: any //
-  deleteLink: any //
-  openLinkedNode: any //
-  openAllChildren: any //
-  onHideNode: any //
-  hideOffsprings: any //
-  toggleNode: (event: any, id: string) => void //
-  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void //
-  selectNode: any //
-  nodeClicked: any //
-  correctNode: any //
-  wrongNode: any //
-  uploadNodeImage: any //
-  removeImage: any //
-  changeTitle:any,
-  changeChoice: any //
-  changeFeedback: any //
-  switchChoice: any //
-  deleteChoice: any //
-  addChoice: any //
-  onNodeTitleBLur: any //
-  saveProposedChildNode: any //
-  saveProposedImprovement: any //
-  closeSideBar: any //
-  reloadPermanentGrpah: any //
-  setOpenMedia: (imagUrl: string) => void
-}
+  ) => void;
+  chosenNodeChanged: any; //
+  referenceLabelChange: any; //
+  deleteLink: any; //
+  openLinkedNode: any; //
+  openAllChildren: any; //
+  onHideNode: any; //
+  hideOffsprings: any; //
+  toggleNode: (event: any, id: string) => void; //
+  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
+  selectNode: any; //
+  nodeClicked: any; //
+  correctNode: any; //
+  wrongNode: any; //
+  uploadNodeImage: any; //
+  removeImage: any; //
+  changeTitle: any;
+  changeChoice: any; //
+  changeFeedback: any; //
+  switchChoice: any; //
+  deleteChoice: any; //
+  addChoice: any; //
+  onNodeTitleBLur: any; //
+  saveProposedChildNode: any; //
+  saveProposedImprovement: any; //
+  closeSideBar: any; //
+  reloadPermanentGrpah: any; //
+  setOpenMedia: (imagUrl: string) => void;
+};
 const Node = ({
   identifier,
   activeNode,
@@ -189,30 +191,58 @@ const Node = ({
   // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
   // const setOpenMedia = useSetRecoilState(openMediaState);
 
-  const [{ user }] = useAuth()
-  const { nodeBookState, nodeBookDispatch } = useNodeBook()
+  const [{ user }] = useAuth();
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
-  const [openPart, setOpenPart] = useState<OpenPart>(null)
-  const [isHiding, setIsHiding] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
+  const [openPart, setOpenPart] = useState<OpenPart>(null);
+  const [isHiding, setIsHiding] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   // const [summary, setSummary] = useState("");
-  const [titleCopy, setTitleCopy] = useState(title)
-  const [contentCopy, setContentCopy] = useState(content)
-  const [reason, setReason] = useState("")
+  const [titleCopy, setTitleCopy] = useState(title);
+  const [contentCopy, setContentCopy] = useState(content);
+  const [reason, setReason] = useState("");
 
-  const nodeRef = useRef(null)
+  const nodeRef = useRef(null);
 
   // useEffect(()=>{
   //   setTitleCopy(title)
   //   setContentCopy(content)
   // },[])
 
+  // const { height } = useHeightElement(nodeRef);
+  // const { setRef } = useCallbackByHeightChange(h => console.log(" -> call worker with", h));
+  // const { divRef } = useCallbackByHeightChange(h => console.log(" -> call worker with", h));
+
+  const observer = React.useRef(
+    new ResizeObserver(entries => {
+      // Only care about the first element, we expect one element ot be watched
+      const { height } = entries[0].contentRect;
+
+      console.log("-------------->> ", identifier, ":", height);
+    })
+  );
+
+  React.useEffect(() => {
+    if (nodeRef.current) {
+      observer.current.observe(nodeRef.current);
+    }
+
+    return () => {
+      // observer.current.unobserve();
+      observer.current.disconnect();
+    };
+  }, [nodeRef, observer]);
+
+  // useEffect(() => {
+  //   console.log(" -- -- height changed, call worker!!");
+  // }, [height]);
+
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log("Node Clicked Handler", nodeBookState)
+      console.log("Node Clicked Handler", nodeBookState);
       if (nodeBookState.choosingNode) {
-        console.log("has chosing node")
-        nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } })
+        console.log("has chosing node");
+        nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
       } else if (
@@ -220,126 +250,123 @@ const Node = ({
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
-        console.log("dont have choosing Node")
-        nodeClicked(event, identifier, nodeType, setOpenPart)
+        console.log("dont have choosing Node");
+        nodeClicked(event, identifier, nodeType, setOpenPart);
       }
     },
     [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
-  )
+  );
 
   const hideNodeHandler = useCallback(
     (event: any) => {
-      console.log("Hide Node Handler is called", event.target)
-      event.preventDefault()
-      event.stopPropagation()
-      onHideNode(identifier, setIsHiding)
+      console.log("Hide Node Handler is called", event.target);
+      event.preventDefault();
+      event.stopPropagation();
+      onHideNode(identifier, setIsHiding);
     },
     [onHideNode, identifier]
-  )
+  );
 
-  const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier])
+  const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
       // event.persist();
-      toggleNode(event, identifier /*open*/)
+      toggleNode(event, identifier /*open*/);
     },
     [toggleNode, identifier, open]
-  )
+  );
   const removeImageHandler = useCallback(() => {
-    removeImage(nodeRef, identifier)
-  }, [nodeRef, removeImage, identifier])
+    removeImage(nodeRef, identifier);
+  }, [nodeRef, removeImage, identifier]);
 
-  const onImageLoad = useCallback(() => setImageLoaded(true), [])
+  const onImageLoad = useCallback(() => setImageLoaded(true), []);
 
-  const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage])
+  const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
-  const addChoiceHandler = useCallback(
-    () => addChoice(nodeRef, identifier),
-    [addChoice, nodeRef, identifier]
-  )
+  const addChoiceHandler = useCallback(() => addChoice(nodeRef, identifier), [addChoice, nodeRef, identifier]);
 
   const markStudiedHandler = useCallback(
     (event: any) => {
-      console.log("first")
-      markStudied(event, identifier)
+      console.log("first");
+      markStudied(event, identifier);
     },
 
     [markStudied, identifier]
-  )
+  );
 
-  const bookmarkHandler = useCallback((event: any) => bookmark(event, identifier), [bookmark, identifier])
+  const bookmarkHandler = useCallback((event: any) => bookmark(event, identifier), [bookmark, identifier]);
 
   const openNodePartHandler = useCallback(
     (event: any, partType: any) => {
-      console.log("openNodePartHandler")
-      openNodePart(event, identifier, partType, openPart, setOpenPart, tags)
+      console.log("openNodePartHandler");
+      openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
     },
 
     [identifier, openPart, tags]
-  )
+  );
 
   const selectNodeHandler = useCallback(
     (event: any, chosenType: any) => selectNode(event, identifier, chosenType, nodeType),
     // () => console.log('uploadNodeImageHandler'),
     [selectNode, identifier, nodeType]
-  )
+  );
 
   const correctNodeHandler = useCallback(
     (event: any) => correctNode(event, identifier, nodeType),
     // () => console.log('uploadNodeImageHandler'),
     [correctNode, identifier, nodeType]
-  )
+  );
 
   const wrongNodeHandler = useCallback(
     (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
     [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
-  )
+  );
 
   const uploadNodeImageHandler = useCallback(
     (event: any, isUploading: boolean, setIsUploading: any, setPercentageUploaded: any) => {
-      uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded)
+      uploadNodeImage(event, nodeRef, identifier, isUploading, setIsUploading, setPercentageUploaded);
     },
     [uploadNodeImage, nodeRef, identifier]
-  )
+  );
 
   const referenceLabelChangeHandler = useCallback(
     (event: any, referenceIdx: string) => {
-      console.log("referenceLabelChangeHandler", { event, identifier, referenceIdx })
-      return referenceLabelChange(event, identifier, referenceIdx)
+      console.log("referenceLabelChangeHandler", { event, identifier, referenceIdx });
+      return referenceLabelChange(event, identifier, referenceIdx);
     },
     [referenceLabelChange, identifier]
-  )
+  );
 
   const deleteLinkHandler = useCallback(
     (linkIdx: any, linkType: any) => deleteLink(identifier, linkIdx, linkType),
     [deleteLink, identifier]
-  )
+  );
 
   const titleChange = useCallback(
     (value: string) => {
       // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
-      changeTitle(nodeRef,identifier,value)
+      changeTitle(nodeRef, identifier, value);
     },
     [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
-  )
+  );
 
   const contentChange = useCallback(
     (value: string) => {
-      nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart)
+      nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
     },
     [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
-  )
+  );
 
   const locationSizeChange = useCallback(() => {
-    console.log("[NODE]: will call nodeChanged")
-    nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart)
-  }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart])
+    console.log("[NODE]: will call nodeChanged");
+    nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
+  }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
 
   useEffect(() => {
     setTimeout(() => {
-      locationSizeChange()
-    }, 700)
+      locationSizeChange();
+    }, 700);
   }, [
     locationSizeChange,
     openPart,
@@ -375,28 +402,29 @@ const Node = ({
     // changedAt,
     // bookmarked,
     // bookmarks,
-  ])
+  ]);
 
   useEffect(() => {
     if (editable) {
-      setOpenPart("References")
+      setOpenPart("References");
     }
-  }, [editable])
+  }, [editable]);
 
   useEffect(() => {
     if (!editable && !activeNode) {
-      setOpenPart(null)
+      setOpenPart(null);
     }
-  }, [editable, activeNode])
+  }, [editable, activeNode]);
 
   if (!user) {
-    return null
+    return null;
   }
 
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
     <div
       ref={nodeRef}
+      // ref={divRef}
       id={identifier}
       onClick={nodeClickHandler}
       data-hoverable={true}
@@ -544,7 +572,7 @@ const Node = ({
               )}
               {nodeType === "Question" /*&& "choices" in props*/ && (
                 <>
-                  <ul className="collapsible" style={{padding:'0px'}}>
+                  <ul className="collapsible" style={{ padding: "0px" }}>
                     {choices.map((choice, idx) => {
                       return (
                         <QuestionChoices
@@ -562,7 +590,7 @@ const Node = ({
                           changeFeedback={changeFeedback}
                           nodeChanged={locationSizeChange}
                         />
-                      )
+                      );
                     })}
                   </ul>
                   {editable && (
@@ -852,10 +880,10 @@ const Node = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export const MemoizedNode = React.memo(Node)
+export const MemoizedNode = React.memo(Node);
 
 // export default React.memo(Node);
 // export default React.memo(Node, (prevProps, nextProps) => {
