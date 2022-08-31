@@ -914,30 +914,15 @@ const Dashboard = ({}: DashboardProps) => {
   // ]);
 
   // fire if map changed; responsible for laying out the knowledge map
+
+  const recalculateGraphWithWorker = ()=>{
+    new Promise((resolve,reject)=>{
+      
+    })
+  }
+
   useEffect(() => {
-    {
-      // g.edges().map((e, idx) => {
-      //   const edgeE = g.edge(e);
-      //   const from = edgeE.points[0];
-      //   const to = edgeE.points[2];
-      //   const edgeIndex = edges.findIndex(edge => edge.from === e.v && edge.to === e.w);
-      //   const newFromX = from.x + XOFFSET;
-      //   const newFromY = from.y + YOFFSET;
-      //   const newToX = to.x + XOFFSET;
-      //   const newToY = to.y + YOFFSET;
-      //   if (Math.abs(edges[edgeIndex].fromX - newFromX) >= MIN_CHANGE ||
-      //       Math.abs(edges[edgeIndex].fromY - newFromY) >= MIN_CHANGE ||
-      //       Math.abs(edges[edgeIndex].toX - newToX) >= MIN_CHANGE ||
-      //       Math.abs(edges[edgeIndex].toY - newToY) >= MIN_CHANGE) {
-      //     somethingChanged = true;
-      //   }
-      //   edges[edgeIndex].fromX = newFromX;
-      //   edges[edgeIndex].fromY = newFromY;
-      //   edges[edgeIndex].toX = newToX;
-      //   edges[edgeIndex].toY = newToY;
-      //   return null;
-      // })
-    }
+   
 console.log('[WORKER]',{
   mapChanged ,
   nodeChanges:nodeChanges.length === 0 ,
