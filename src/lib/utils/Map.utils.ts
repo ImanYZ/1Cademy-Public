@@ -550,6 +550,7 @@ export const createOrUpdateNode = (g: dagre.graphlib.Graph<{}>, newNode: any, no
     }
     setTypeVisibilityOfChildInsideParent(oldNodes, nodeId, parent.node)
   }
+  // debugger
   let newNodeData
   // set height to default node height
   // let height = NODE_HEIGHT;

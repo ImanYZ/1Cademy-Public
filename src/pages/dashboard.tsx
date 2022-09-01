@@ -233,7 +233,7 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
 
-  const [nodeToImprove,setNodeToImprove] = useState<FullNodeData|null>(null);
+  const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -915,37 +915,15 @@ const Dashboard = ({}: DashboardProps) => {
 
   // fire if map changed; responsible for laying out the knowledge map
 
-  const recalculateGraphWithWorker = ()=>{
-    new Promise((resolve,reject)=>{
-      
-    })
-  }
-
-  useEffect(() => {
-   
-console.log('[WORKER]',{
-  mapChanged ,
-  nodeChanges:nodeChanges.length === 0 ,
-  userNodeChanges:userNodeChanges.length === 0 ,
-  userNodesLoaded ,
-  EdgesSync:Object.keys(edges).length === g.current.edgeCount(),
-});
-    if (
-      mapChanged &&
-      nodeChanges.length === 0 &&
-      userNodeChanges.length === 0 &&
-      // nodeTypeVisibilityChanges.length === 0 &&
-      // (necessaryNodesLoaded && !mapRendered) ||
-      userNodesLoaded &&
-      // Object.keys(nodes).length + Object.keys(allTags).length === g.current.nodeCount() &&
-      Object.keys(edges).length === g.current.edgeCount()
-    ) {
+  const recalculateGraphWithWorker = useCallback(
+    (nodesToRecalculate: any, edgesToRecalculate: any) => {
+      console.log("recalculateGraphWithWorker", { nodesToRecalculate, edgesToRecalculate });
       let mapChangedFlag = true;
       const oldClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
-      let oldNodes = { ...nodes };
-      let oldEdges = { ...edges };
+      let oldNodes = { ...nodesToRecalculate };
+      let oldEdges = { ...edgesToRecalculate };
 
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
       worker.postMessage({
@@ -978,35 +956,58 @@ console.log('[WORKER]',{
         setEdges(oldEdges);
         setMapChanged(mapChangedFlag);
         // setMapChanged(false)
-        if (!mapRendered) {
-          setTimeout(() => {
-            let nodeToNavigateTo = null;
-            if (
-              "location" in window &&
-              "pathname" in window.location &&
-              window.location.pathname.length > 1 &&
-              window.location.pathname[0] === "/"
-            ) {
-              const pathParts = window.location.pathname.split("/");
-              if (pathParts.length === 4) {
-                nodeToNavigateTo = pathParts[3];
-              }
-            }
-            // navigate to node that is identified in the URL
-            if (nodeToNavigateTo) {
-              openLinkedNode(nodeToNavigateTo);
-              // Navigate to node that the user interacted with the last time they used 1Cademy.
-            } else if (sNode) {
-              openLinkedNode(sNode);
-            } else {
-              //  redirect to the very first node that is loaded
-              scrollToNode(Object.keys(nodes)[0]);
-            }
-            setMapRendered(true);
-            // setMap
-          }, 10);
-        }
+        // // if (!mapRendered) {
+        // //   setTimeout(() => {
+        // //     let nodeToNavigateTo = null;
+        // //     if (
+        // //       "location" in window &&
+        // //       "pathname" in window.location &&
+        // //       window.location.pathname.length > 1 &&
+        // //       window.location.pathname[0] === "/"
+        // //     ) {
+        // //       const pathParts = window.location.pathname.split("/");
+        // //       if (pathParts.length === 4) {
+        // //         nodeToNavigateTo = pathParts[3];
+        // //       }
+        // //     }
+        // //     // navigate to node that is identified in the URL
+        // //     if (nodeToNavigateTo) {
+        // //       openLinkedNode(nodeToNavigateTo);
+        // //       // Navigate to node that the user interacted with the last time they used 1Cademy.
+        // //     } else if (sNode) {
+        // //       openLinkedNode(sNode);
+        // //     } else {
+        // //       //  redirect to the very first node that is loaded
+        // //       scrollToNode(Object.keys(nodes)[0]);
+        // //     }
+        // //     setMapRendered(true);
+        // //     // setMap
+        // //   }, 10);
+        // // }
       };
+    },
+    [allTags, mapHeight, mapWidth]
+  );
+
+  useEffect(() => {
+    console.log("[WORKER]", {
+      mapChanged,
+      nodeChanges: nodeChanges.length === 0,
+      userNodeChanges: userNodeChanges.length === 0,
+      userNodesLoaded,
+      EdgesSync: Object.keys(edges).length === g.current.edgeCount(),
+    });
+    if (
+      mapChanged &&
+      nodeChanges.length === 0 &&
+      userNodeChanges.length === 0 &&
+      // nodeTypeVisibilityChanges.length === 0 &&
+      // (necessaryNodesLoaded && !mapRendered) ||
+      userNodesLoaded &&
+      // Object.keys(nodes).length + Object.keys(allTags).length === g.current.nodeCount() &&
+      Object.keys(edges).length === g.current.edgeCount()
+    ) {
+      recalculateGraphWithWorker(nodes, edges);
     }
   }, [
     // necessaryNodesLoaded,
@@ -1020,6 +1021,7 @@ console.log('[WORKER]',{
     mapHeight,
     userNodeChanges,
     nodeChanges,
+    recalculateGraphWithWorker,
   ]);
 
   // ---------------------------------------------------------------------
@@ -1040,7 +1042,7 @@ console.log('[WORKER]',{
       imageLoaded: boolean,
       openPart: OpenPart
     ) => {
-      console.log("[NODE_CHANGED]",nodeId);
+      console.log("[NODE_CHANGED]", nodeId);
       let currentHeight = NODE_HEIGHT;
       let newHeight = NODE_HEIGHT;
       let nodesChanged = false;
@@ -1331,7 +1333,7 @@ console.log('[WORKER]',{
     [addedParents, removedParents, addedChildren, removedChildren]
   );
 
-  const setNodeParts = useMemoizedCallback((nodeId, innerFunc:(thisNode:FullNodeData)=>FullNodeData) => {
+  const setNodeParts = useMemoizedCallback((nodeId, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
     // console.log("In setNodeParts");
     setNodes(oldNodes => {
       // setSelectedNode(nodeId);
@@ -1983,28 +1985,76 @@ console.log('[WORKER]',{
   /////////////////////////////////////////////////////
   // Node Improvement Functions
 
-  const changeTitle = useCallback(
-    (nodeRef:any, nodeId:string, value:string) => {
-      console.log("[CHANGE CHOICE]");
-      setNodeParts(nodeId, (thisNode:FullNodeData) => {
-        // const choices = [...thisNode.choices];
-        // const choice = { ...choices[choiceIdx] };
-        // choice.choice = value;
-        // choices[choiceIdx] = choice;
-        thisNode.title = value;
-        return { ...thisNode };
-      });
-      // CHECK: I commented this and 
+  const updateNodeByWorker = useCallback(
+    (identifier: string, nodeChanged: FullNodeData) => {
+      console.log("[UPDATE NODE BY WORKER]");
+
+      const newNodes = { ...nodes, [identifier]: nodeChanged };
+
+      recalculateGraphWithWorker(newNodes, edges);
+
+      // setNodes(oldNodes=>oldNodes.)
+      // setNodeParts(nodeId, (thisNode: FullNodeData) => {
+      //   // const choices = [...thisNode.choices];
+      //   // const choice = { ...choices[choiceIdx] };
+      //   // choice.choice = value;
+      //   // choices[choiceIdx] = choice;
+      //   thisNode.title = value;
+      //   return { ...thisNode };
+      // });
+      // CHECK: I commented this and
       // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts/*, adjustNodeHeight*/]
+    [edges, nodes, recalculateGraphWithWorker]
+  );
+
+  const changeTitle = useCallback(
+    (nodeId: string, value: string, height: number) => {
+      console.log("[CHANGE TITLE]", value, nodes[nodeId].title);
+
+      if (value === nodes[nodeId].title) return;
+
+      const nodeChanged: FullNodeData = {
+        ...nodes[nodeId],
+        title: value,
+        height,
+        editable: true,
+      };
+      console.log("nodeChanges", { nodeId, nodeChanged, nodes: { ...nodes } });
+      // const newNodes = { ...nodes, [nodeId]: nodeChanged };
+
+      // const { oldNodes, oldEdges } = createOrUpdateNode(
+      //   g.current,
+      //   nodeChanged,
+      //   nodeId,
+      //   { ...nodes },
+      //   { ...edges },
+      //   { ...allTags }
+      // );
+      const oldNodes = setDagNode(g.current, nodeId, nodeChanged, { ...nodes }, { ...allTags }, null);
+      console.log("oldNodes", oldNodes);
+      recalculateGraphWithWorker(oldNodes, edges);
+
+      // setNodeParts(nodeId, (thisNode: FullNodeData) => {
+      //   // const choices = [...thisNode.choices];
+      //   // const choice = { ...choices[choiceIdx] };
+      //   // choice.choice = value;
+      //   // choices[choiceIdx] = choice;
+      //   thisNode.title = value;
+      //   return { ...thisNode };
+      // });
+      // CHECK: I commented this and
+      // add dependency choices.length in Node to recall worker
+      // adjustNodeHeight(nodeRef, nodeId)
+    },
+    [edges, nodes, recalculateGraphWithWorker]
   );
 
   const changeChoice = useCallback(
-    (nodeRef:any, nodeId:string, value:string, choiceIdx:number) => {
+    (nodeRef: any, nodeId: string, value: string, choiceIdx: number) => {
       console.log("[CHANGE CHOICE]");
-      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+      setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         const choice = { ...choices[choiceIdx] };
         choice.choice = value;
@@ -2012,17 +2062,17 @@ console.log('[WORKER]',{
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and 
+      // CHECK: I commented this and
       // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts/*, adjustNodeHeight*/]
+    [setNodeParts /*, adjustNodeHeight*/]
   );
 
   const changeFeedback = useCallback(
-    (nodeRef:any, nodeId:string, value:string, choiceIdx:number) => {
+    (nodeRef: any, nodeId: string, value: string, choiceIdx: number) => {
       console.log("[CHANGE FEEDBACK]");
-      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+      setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         const choice = { ...choices[choiceIdx] };
         choice.feedback = value;
@@ -2030,17 +2080,17 @@ console.log('[WORKER]',{
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and 
+      // CHECK: I commented this and
       // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts/*, adjustNodeHeight*/]
+    [setNodeParts /*, adjustNodeHeight*/]
   );
 
   const switchChoice = useCallback(
-    (nodeId:string, choiceIdx:number) => {
+    (nodeId: string, choiceIdx: number) => {
       console.log("[SWITCH CHOICE]");
-      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+      setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         const choice = { ...choices[choiceIdx] };
         choice.correct = !choice.correct;
@@ -2053,25 +2103,25 @@ console.log('[WORKER]',{
   );
 
   const deleteChoice = useCallback(
-    (nodeRef:any, nodeId:string, choiceIdx:number) => {
+    (nodeRef: any, nodeId: string, choiceIdx: number) => {
       console.log("[DELETE CHOICE]");
-      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+      setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         choices.splice(choiceIdx, 1);
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and 
+      // CHECK: I commented this and
       // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts/* adjustNodeHeight*/]
+    [setNodeParts /* adjustNodeHeight*/]
   );
 
   const addChoice = useCallback(
-    (nodeRef:any, nodeId:string) => {
+    (nodeRef: any, nodeId: string) => {
       console.log("[ADD CHOICE]");
-      setNodeParts(nodeId, (thisNode:FullNodeData) => {
+      setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         choices.push({
           choice: "Replace this with the choice.",
@@ -2081,11 +2131,11 @@ console.log('[WORKER]',{
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and 
+      // CHECK: I commented this and
       // add dependency choices.length in Node to recall worker
       // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts/*, adjustNodeHeight*/]
+    [setNodeParts /*, adjustNodeHeight*/]
   );
 
   /////////////////////////////////////////////////////
@@ -2190,7 +2240,7 @@ console.log('[WORKER]',{
       if (!nodeBookState.selectedNode) return;
 
       setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
-      reloadPermanentGrpah();
+      // reloadPermanentGrpah();
 
       // CHECK: Improve this making the operations out of setNode, when have nodes with new data
       // update with setNodes
@@ -2261,11 +2311,11 @@ console.log('[WORKER]',{
   );
 
   const saveProposedImprovement = useMemoizedCallback(
-    (summary:any, reason:any) => {
-      if(!nodeBookState.selectedNode) return;
+    (summary: any, reason: any) => {
+      if (!nodeBookState.selectedNode) return;
 
-      nodeBookDispatch({type:'setChosenNode',payload:null});
-      nodeBookDispatch({type:'setChoosingNode',payload:null});
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      nodeBookDispatch({ type: "setChoosingNode", payload: null });
       // setChoosingNode(false)
       // setChosenNode(null)
       // setChosenNodeTitle(null)
@@ -2306,8 +2356,8 @@ console.log('[WORKER]',{
           newNode.parents = newParents;
         }
         // const oldNode = allNodes[nodeBookState.selectedNode]
-        const oldNode = {...nodeToImprove};
-        console.log({newNode,oldNode});
+        const oldNode = { ...nodeToImprove };
+        console.log({ newNode, oldNode });
         let isTheSame =
           newNode.title === oldNode.title &&
           newNode.content === oldNode.content &&
@@ -2316,8 +2366,8 @@ console.log('[WORKER]',{
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
         // isTheSame = compareLinks(oldNode.tags, newNode.tags, isTheSame, false)
         // isTheSame = compareLinks(oldNode.references, newNode.references, isTheSame, false)
-        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame);  // CHECK: O checked only ID changes
-        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame);  // CHECK: O checked only ID changes
+        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
         isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
 
@@ -2326,7 +2376,7 @@ console.log('[WORKER]',{
           window.alert("You've not changed anything yet!");
         } else {
           setIsSubmitting(true);
-          const postData:any = {
+          const postData: any = {
             ...newNode,
             id: nodeBookState.selectedNode,
             summary: summary,
@@ -2763,7 +2813,7 @@ console.log('[WORKER]',{
 
   const rateProposal = useCallback(
     async (event, proposals, setProposals, proposalId, proposalIdx, correct, wrong, award) => {
-      console.log('[RATE PROPOSAL]');
+      console.log("[RATE PROPOSAL]");
       if (!choosingNode) {
         // reloadPermanentGrpah();
         const proposalsTemp = [...proposals];
@@ -2931,6 +2981,7 @@ console.log('[WORKER]',{
                 saveProposedImprovement={saveProposedImprovement}
                 closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
+                updateNodeByWorker={updateNodeByWorker}
               />
             </MapInteractionCSS>
 

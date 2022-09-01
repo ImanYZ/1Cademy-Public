@@ -111,6 +111,7 @@ type NodeProps = {
   closeSideBar: any; //
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
+  updateNodeByWorker: any;
 };
 const Node = ({
   identifier,
@@ -184,6 +185,7 @@ const Node = ({
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
+  updateNodeByWorker,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -203,39 +205,33 @@ const Node = ({
   const [reason, setReason] = useState("");
 
   const nodeRef = useRef(null);
+  const previousRef = useRef<number>(0);
+  const observer = useRef<ResizeObserver | null>(null);
 
-  // useEffect(()=>{
-  //   setTitleCopy(title)
-  //   setContentCopy(content)
-  // },[])
+  useEffect(() => {
+    observer.current = new ResizeObserver(entries => {
+      try {
+        const { blockSize } = entries[0].borderBoxSize[0];
+        console.log(previousRef.current, blockSize);
+        if (blockSize === previousRef.current) return;
 
-  // const { height } = useHeightElement(nodeRef);
-  // const { setRef } = useCallbackByHeightChange(h => console.log(" -> call worker with", h));
-  // const { divRef } = useCallbackByHeightChange(h => console.log(" -> call worker with", h));
+        previousRef.current = blockSize;
+        changeTitle(identifier, titleCopy, blockSize);
+      } catch (err) {
+        console.warn("invalid entry", err);
+      }
+    });
 
-  const observer = React.useRef(
-    new ResizeObserver(entries => {
-      // Only care about the first element, we expect one element ot be watched
-      const { height } = entries[0].contentRect;
+    if (!nodeRef.current) return;
 
-      console.log("-------------->> ", identifier, ":", height);
-    })
-  );
+    observer.current.observe(nodeRef.current);
 
-  React.useEffect(() => {
-    if (nodeRef.current) {
-      observer.current.observe(nodeRef.current);
-    }
-
+    // observer.current.unobserve();
     return () => {
-      // observer.current.unobserve();
-      observer.current.disconnect();
+      if (!observer.current) return;
+      return observer.current.disconnect();
     };
-  }, [nodeRef, observer]);
-
-  // useEffect(() => {
-  //   console.log(" -- -- height changed, call worker!!");
-  // }, [height]);
+  }, [titleCopy]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
@@ -346,7 +342,8 @@ const Node = ({
   const titleChange = useCallback(
     (value: string) => {
       // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
-      changeTitle(nodeRef, identifier, value);
+      // changeTitle(nodeRef, identifier, value);
+      setTitleCopy(title);
     },
     [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
   );
@@ -383,8 +380,8 @@ const Node = ({
     tags.length,
     parents.length,
     nodesChildren.length,
-    title,
-    content,
+    // title,
+    // content,
     choices.length,
     // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
     // nodeChanged,
@@ -498,11 +495,13 @@ const Node = ({
                 ))}
               {/* CHECK: I commented this */}
               <Editor
-                label="Please enter the node title below:"
-                value={title}
+                // label="Please enter the node title below:"
+                label={titleCopy}
+                // value={title}
+                value={titleCopy}
                 // onChangeContent={setReason}
-                setValue={titleChange}
-                // setValue={setTitleCopy}
+                // setValue={titleChange}
+                setValue={setTitleCopy}
                 readOnly={!editable}
               />
               {/* <HyperEditor
@@ -762,9 +761,9 @@ const Node = ({
               {/* {title} */}
               <Editor
                 label="title"
-                value={title}
-                setValue={titleChange}
-                // setValue={setTitleCopy}
+                value={titleCopy}
+                // setValue={titleChange}
+                setValue={setTitleCopy}
                 readOnly={true}
               />
             </div>
