@@ -20,7 +20,7 @@ const layoutHandler = (
   g: dagre.graphlib.Graph<{}>,
 ) => {
   // debugger
-  console.log('{ WORKER }', oldNodes, oldEdges)
+  console.log('{ WORKER }', { oldNodes, oldEdges })
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;

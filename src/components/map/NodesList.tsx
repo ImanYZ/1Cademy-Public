@@ -5,6 +5,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
 
 import { MemoizedNode } from "./Node";
+import { FullNodeData } from "../../noteBookTypes";
 
 type NodeListProps = {
   nodes: { [key: string]: any };
@@ -48,6 +49,7 @@ type NodeListProps = {
   reloadPermanentGrpah: any;
   setOpenMedia: (imagUrl: string) => void;
   updateNodeByWorker: any;
+  setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
 };
 
 const NodesList = ({
@@ -83,6 +85,7 @@ const NodesList = ({
   reloadPermanentGrpah,
   setOpenMedia,
   updateNodeByWorker,
+  setNodeParts,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -204,6 +207,7 @@ const NodesList = ({
             reloadPermanentGrpah={reloadPermanentGrpah}
             setOpenMedia={setOpenMedia}
             updateNodeByWorker={updateNodeByWorker}
+            setNodeParts={setNodeParts}
           />
         );
       })}

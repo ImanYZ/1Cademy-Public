@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCallbackByHeightChange } from "../../hooks/useCallbackByHeightChange3";
 import { useHeightElement } from "../../hooks/useHeightNode";
 import { KnowledgeChoice } from "../../knowledgeTypes";
+import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -32,6 +33,9 @@ import QuestionChoices from "./QuestionChoices";
 
 // import "./Node.css";
 
+// CHECK: Improve this passing Full Node Data
+// this Node need to become testeable
+// also split the in Node and FormNode to reduce the complexity
 type NodeProps = {
   identifier: string;
   activeNode: any; //organize this i a better forme
@@ -112,6 +116,7 @@ type NodeProps = {
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
   updateNodeByWorker: any;
+  setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
 };
 const Node = ({
   identifier,
@@ -186,6 +191,7 @@ const Node = ({
   reloadPermanentGrpah,
   setOpenMedia,
   updateNodeByWorker,
+  setNodeParts,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -200,8 +206,8 @@ const Node = ({
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   // const [summary, setSummary] = useState("");
-  const [titleCopy, setTitleCopy] = useState(title);
-  const [contentCopy, setContentCopy] = useState(content);
+  // const [titleCopy, setTitleCopy] = useState(title);
+  // const [contentCopy, setContentCopy] = useState(content);
   const [reason, setReason] = useState("");
 
   const nodeRef = useRef(null);
@@ -212,11 +218,12 @@ const Node = ({
     observer.current = new ResizeObserver(entries => {
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
-        console.log(previousRef.current, blockSize);
-        if (blockSize === previousRef.current) return;
-
+        // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
+        const heightChange = blockSize === previousRef.current;
         previousRef.current = blockSize;
-        changeTitle(identifier, titleCopy, blockSize);
+        if (heightChange) return;
+
+        changeTitle(identifier, blockSize);
       } catch (err) {
         console.warn("invalid entry", err);
       }
@@ -231,13 +238,12 @@ const Node = ({
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [titleCopy]);
+  }, [title, content, tags, editable]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log("Node Clicked Handler", nodeBookState);
       if (nodeBookState.choosingNode) {
-        console.log("has chosing node");
+        // The first Nodes exist, Now is clicking the Chosen Node
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
@@ -246,7 +252,6 @@ const Node = ({
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
-        console.log("dont have choosing Node");
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
     },
@@ -339,20 +344,24 @@ const Node = ({
     [deleteLink, identifier]
   );
 
+  // CHECK: I think we can improve the other function to update content
+  // if only update nodes, because the observer will update the positions
   const titleChange = useCallback(
     (value: string) => {
       // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
       // changeTitle(nodeRef, identifier, value);
-      setTitleCopy(title);
+      // setTitleCopy(title);
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }));
     },
-    [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
   );
 
   const contentChange = useCallback(
     (value: string) => {
-      nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+      // nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+      setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }));
     },
-    [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
   );
 
   const locationSizeChange = useCallback(() => {
@@ -360,46 +369,46 @@ const Node = ({
     nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
   }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      locationSizeChange();
-    }, 700);
-  }, [
-    locationSizeChange,
-    openPart,
-    imageLoaded,
-    // left,
-    // top,
-    nodeImage,
-    open,
-    editable,
-    unaccepted,
-    isNew,
-    isTag,
-    references.length,
-    tags.length,
-    parents.length,
-    nodesChildren.length,
-    // title,
-    // content,
-    choices.length,
-    // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
-    // nodeChanged,
-    // markedCorrect,
-    // markedWrong,
-    // viewers,
-    // correctNum,
-    // wrongNum,
-    // commentsNum,
-    // proposalsNum,
-    // lastVisit,
-    // studied,
-    // isStudied,
-    // changed,
-    // changedAt,
-    // bookmarked,
-    // bookmarks,
-  ]);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     locationSizeChange();
+  //   }, 700);
+  // }, [
+  //   locationSizeChange,
+  //   openPart,
+  //   imageLoaded,
+  //   // left,
+  //   // top,
+  //   nodeImage,
+  //   open,
+  //   editable,
+  //   unaccepted,
+  //   isNew,
+  //   isTag,
+  //   references.length,
+  //   tags.length,
+  //   parents.length,
+  //   nodesChildren.length,
+  //   // title,
+  //   // content,
+  //   choices.length,
+  //   // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
+  //   // nodeChanged,
+  //   // markedCorrect,
+  //   // markedWrong,
+  //   // viewers,
+  //   // correctNum,
+  //   // wrongNum,
+  //   // commentsNum,
+  //   // proposalsNum,
+  //   // lastVisit,
+  //   // studied,
+  //   // isStudied,
+  //   // changed,
+  //   // changedAt,
+  //   // bookmarked,
+  //   // bookmarks,
+  // ]);
 
   useEffect(() => {
     if (editable) {
@@ -495,13 +504,13 @@ const Node = ({
                 ))}
               {/* CHECK: I commented this */}
               <Editor
-                // label="Please enter the node title below:"
-                label={titleCopy}
-                // value={title}
-                value={titleCopy}
+                label="Please enter the node title below:"
+                // label={titleCopy}
+                value={title}
+                // value={titleCopy}
                 // onChangeContent={setReason}
-                // setValue={titleChange}
-                setValue={setTitleCopy}
+                setValue={titleChange}
+                // setValue={setTitleCopy}
                 readOnly={!editable}
               />
               {/* <HyperEditor
@@ -536,9 +545,9 @@ const Node = ({
               {editable && <p>Please edit the node content below:</p>}
               <Editor
                 label="Please edit the node content below:"
-                value={contentCopy}
-                // onChangeContent={contentChange}
-                setValue={setContentCopy}
+                value={content}
+                setValue={contentChange}
+                // setValue={setContentCopy}
                 readOnly={!editable}
               />
               {/* CHECK: I commmented this */}
@@ -761,9 +770,9 @@ const Node = ({
               {/* {title} */}
               <Editor
                 label="title"
-                value={titleCopy}
-                // setValue={titleChange}
-                setValue={setTitleCopy}
+                value={title}
+                setValue={titleChange}
+                // setValue={setTitleCopy}
                 readOnly={true}
               />
             </div>

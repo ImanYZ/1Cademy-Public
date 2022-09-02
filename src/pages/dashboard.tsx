@@ -61,6 +61,7 @@ import {
   NODE_HEIGHT,
   NODE_WIDTH,
   removeDagAllEdges,
+  removeDagEdge,
   removeDagNode,
   setDagEdge,
   setDagNode,
@@ -233,6 +234,9 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
 
+  // temporal state with value from node to improve
+  // when click in improve Node the copy of original Node is here
+  // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
   const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
   // ---------------------------------------------------------------------
@@ -418,7 +422,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]");
-    // debugger
+    debugger;
     let oldNodes = nodes;
     let oldEdges = edges;
     if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
@@ -1034,57 +1038,52 @@ const Dashboard = ({}: DashboardProps) => {
   //  allows for function memoization and most updated values
   // CHECK: mapRendered removed as flag
   const nodeChanged = useMemoizedCallback(
-    (
-      nodeRef: any,
-      nodeId: string,
-      content: string | null,
-      title: string | null,
-      imageLoaded: boolean,
-      openPart: OpenPart
-    ) => {
+    (newHeight: number, nodeId: string, content: string, title: string, imageLoaded: boolean, openPart: OpenPart) => {
       console.log("[NODE_CHANGED]", nodeId);
       let currentHeight = NODE_HEIGHT;
-      let newHeight = NODE_HEIGHT;
+      // let newHeight = NODE_HEIGHT;
       let nodesChanged = false;
       if (/*mapRendered &&*/ nodeRef.current || content !== null || title !== null) {
         setNodes(oldNodes => {
-          const node: any = { ...oldNodes[nodeId] };
-          if (content !== null && node.content !== content) {
-            node.content = content;
-            nodesChanged = true;
+          const node: FullNodeData = { ...oldNodes[nodeId] };
+          node.content = content;
+          node.title = title;
+          // if (node.content !== content) {
+          // }
+          // if (node.title !== title) {
+          // }
+          // if (nodeRef.current) {
+          //   const { current } = nodeRef;
+          //   // newHeight = current.offsetHeight;
+
+          // }
+
+          if ("height" in node && Number(node.height)) {
+            currentHeight = Number(node.height);
           }
-          if (title !== null && node.title !== title) {
-            node.title = title;
-            nodesChanged = true;
-          }
-          if (nodeRef.current) {
-            const { current } = nodeRef;
-            newHeight = current.offsetHeight;
-            if ("height" in node && Number(node.height)) {
-              currentHeight = Number(node.height);
-            }
-            if (
-              (Math.abs(currentHeight - newHeight) >= MIN_CHANGE && (node.nodeImage === "" || imageLoaded)) ||
-              ("open" in node && node.open && !node.openHeight) ||
-              ("open" in node && !node.open && !node.closedHeight)
-            ) {
-              if (node.open) {
-                node.height = newHeight;
-                if (openPart === null) {
-                  node.openHeight = newHeight;
-                }
-              } else {
-                node.height = newHeight;
-                node.closedHeight = newHeight;
+
+          if (
+            (Math.abs(currentHeight - newHeight) >= MIN_CHANGE && (node.nodeImage === "" || imageLoaded)) ||
+            ("open" in node && node.open && !node.openHeight) ||
+            ("open" in node && !node.open && !node.closedHeight)
+          ) {
+            if (node.open) {
+              node.height = newHeight;
+              if (openPart === null) {
+                node.openHeight = newHeight;
               }
-              nodesChanged = true;
+            } else {
+              node.height = newHeight;
+              node.closedHeight = newHeight;
             }
+            nodesChanged = true;
           }
+
+          return oldNodes;
           if (nodesChanged) {
             // console.log('node added in dag', { node })
             return setDagNode(g.current, nodeId, node, { ...oldNodes }, () => setMapChanged(true));
           } else {
-            return oldNodes;
           }
         });
         setMapChanged(true);
@@ -1097,6 +1096,71 @@ const Dashboard = ({}: DashboardProps) => {
     //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
     [, /*mapRendered*/ allTags]
   );
+
+  // const nodeChanged = useMemoizedCallback(
+  //   (
+  //     nodeRef: any,
+  //     nodeId: string,
+  //     content: string | null,
+  //     title: string | null,
+  //     imageLoaded: boolean,
+  //     openPart: OpenPart
+  //   ) => {
+  //     console.log("[NODE_CHANGED]", nodeId);
+  //     let currentHeight = NODE_HEIGHT;
+  //     let newHeight = NODE_HEIGHT;
+  //     let nodesChanged = false;
+  //     if (/*mapRendered &&*/ nodeRef.current || content !== null || title !== null) {
+  //       setNodes(oldNodes => {
+  //         const node: any = { ...oldNodes[nodeId] };
+  //         if (content !== null && node.content !== content) {
+  //           node.content = content;
+  //           nodesChanged = true;
+  //         }
+  //         if (title !== null && node.title !== title) {
+  //           node.title = title;
+  //           nodesChanged = true;
+  //         }
+  //         if (nodeRef.current) {
+  //           const { current } = nodeRef;
+  //           newHeight = current.offsetHeight;
+  //           if ("height" in node && Number(node.height)) {
+  //             currentHeight = Number(node.height);
+  //           }
+  //           if (
+  //             (Math.abs(currentHeight - newHeight) >= MIN_CHANGE && (node.nodeImage === "" || imageLoaded)) ||
+  //             ("open" in node && node.open && !node.openHeight) ||
+  //             ("open" in node && !node.open && !node.closedHeight)
+  //           ) {
+  //             if (node.open) {
+  //               node.height = newHeight;
+  //               if (openPart === null) {
+  //                 node.openHeight = newHeight;
+  //               }
+  //             } else {
+  //               node.height = newHeight;
+  //               node.closedHeight = newHeight;
+  //             }
+  //             nodesChanged = true;
+  //           }
+  //         }
+  //         if (nodesChanged) {
+  //           // console.log('node added in dag', { node })
+  //           return setDagNode(g.current, nodeId, node, { ...oldNodes }, () => setMapChanged(true));
+  //         } else {
+  //           return oldNodes;
+  //         }
+  //       });
+  //       setMapChanged(true);
+
+  //       // CHECK
+  //       // READ: the mapChangedFlag dont guaranty the worker execution execution
+  //       // if some worker dont finish dont will change the
+  //     }
+  //   },
+  //   //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
+  //   [, /*mapRendered*/ allTags]
+  // );
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
@@ -1306,7 +1370,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           if (childId in oldNodes) {
             childNode = oldNodes[childId];
-            setEdges(oldEdges => {
+            setEdges((oldEdges: any) => {
               return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
             });
             if (!(childId in changedNodes)) {
@@ -2009,47 +2073,42 @@ const Dashboard = ({}: DashboardProps) => {
     [edges, nodes, recalculateGraphWithWorker]
   );
 
-  const changeTitle = useCallback(
-    (nodeId: string, value: string, height: number) => {
-      console.log("[CHANGE TITLE]", value, nodes[nodeId].title);
+  /**
+   * This function is called only when NODE HIGHT was changed
+   * - editable values: values changed in proposal form
+   */
+  const changeEditableValuesFromNode = useCallback(
+    (nodeId: string, height: number) => {
+      console.log("[CHANGE EditableValuesFromNode]", { node: nodes[nodeId], height });
 
-      if (value === nodes[nodeId].title) return;
+      // if (value === nodes[nodeId].title) return;
 
-      const nodeChanged: FullNodeData = {
-        ...nodes[nodeId],
-        title: value,
-        height,
-        editable: true,
-      };
+      const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
       console.log("nodeChanges", { nodeId, nodeChanged, nodes: { ...nodes } });
-      // const newNodes = { ...nodes, [nodeId]: nodeChanged };
-
-      // const { oldNodes, oldEdges } = createOrUpdateNode(
-      //   g.current,
-      //   nodeChanged,
-      //   nodeId,
-      //   { ...nodes },
-      //   { ...edges },
-      //   { ...allTags }
-      // );
       const oldNodes = setDagNode(g.current, nodeId, nodeChanged, { ...nodes }, { ...allTags }, null);
-      console.log("oldNodes", oldNodes);
       recalculateGraphWithWorker(oldNodes, edges);
-
-      // setNodeParts(nodeId, (thisNode: FullNodeData) => {
-      //   // const choices = [...thisNode.choices];
-      //   // const choice = { ...choices[choiceIdx] };
-      //   // choice.choice = value;
-      //   // choices[choiceIdx] = choice;
-      //   thisNode.title = value;
-      //   return { ...thisNode };
-      // });
-      // CHECK: I commented this and
-      // add dependency choices.length in Node to recall worker
-      // adjustNodeHeight(nodeRef, nodeId)
     },
-    [edges, nodes, recalculateGraphWithWorker]
+    [allTags, edges, nodes, recalculateGraphWithWorker]
   );
+
+  // const changeContent = useCallback(
+  //   (nodeId: string, value: string) => {
+  //     console.log("[CHANGE CONTENT]");
+
+  //     setNodeParts(nodeId, (thisNode: FullNodeData) => {
+  //       // const choices = [...thisNode.choices];
+  //       // const choice = { ...choices[choiceIdx] };
+  //       // choice.choice = value;
+  //       // choices[choiceIdx] = choice;
+  //       // thisNode.choices = choices;
+  //       return { ...thisNode, title: value };
+  //     });
+  //     // CHECK: I commented this and
+  //     // add dependency choices.length in Node to recall worker
+  //     // adjustNodeHeight(nodeRef, nodeId)
+  //   },
+  //   [setNodeParts /*, adjustNodeHeight*/]
+  // );
 
   const changeChoice = useCallback(
     (nodeRef: any, nodeId: string, value: string, choiceIdx: number) => {
@@ -2242,8 +2301,10 @@ const Dashboard = ({}: DashboardProps) => {
       setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
       // reloadPermanentGrpah();
 
-      // CHECK: Improve this making the operations out of setNode, when have nodes with new data
+      // CHECK: Improve this making the operations out of setNode,
+      // when have nodes with new data
       // update with setNodes
+      console.log("set Nodes and change editable to true");
       setNodes(oldNodes => {
         if (!nodeBookState.selectedNode) return oldNodes;
 
@@ -2253,7 +2314,7 @@ const Dashboard = ({}: DashboardProps) => {
         const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
         setNodeToImprove(thisNode); // CHECK: I added this to compare then
         thisNode.editable = true;
-        setMapChanged(true);
+        // setMapChanged(true);
         return {
           ...oldNodes,
           [nodeBookState.selectedNode]: thisNode,
@@ -2970,7 +3031,7 @@ const Dashboard = ({}: DashboardProps) => {
                   console.log("first", imgUrl);
                   setOpenMedia(imgUrl);
                 }}
-                changeTitle={changeTitle}
+                changeTitle={changeEditableValuesFromNode}
                 changeChoice={changeChoice}
                 changeFeedback={changeFeedback}
                 switchChoice={switchChoice}
@@ -2982,6 +3043,7 @@ const Dashboard = ({}: DashboardProps) => {
                 closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
                 updateNodeByWorker={updateNodeByWorker}
+                setNodeParts={setNodeParts}
               />
             </MapInteractionCSS>
 
