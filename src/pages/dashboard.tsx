@@ -418,7 +418,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const reloadPermanentGrpah = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]");
-    debugger;
+    // debugger;
     let oldNodes = nodes;
     let oldEdges = edges;
     if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
