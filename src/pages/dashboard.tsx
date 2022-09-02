@@ -162,7 +162,7 @@ const Dashboard = ({}: DashboardProps) => {
   // node type that is currently selected
   const [selectedNodeType, setSelectedNodeType] = useState<NodeType | null>(null);
 
-  // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leaderboard or on nodes)
+  // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leader board or on nodes)
   const [, /*selectedUser*/ setSelectedUser] = useState(null);
 
   // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
@@ -376,7 +376,7 @@ const Dashboard = ({}: DashboardProps) => {
               if (g.current.hasNode(cur.node)) {
                 g.current.nodes().forEach(function () {});
                 g.current.edges().forEach(function () {});
-                // PROBABLIY yoou need to add hideNodeAndItsLinks, to update children and parents nodes
+                // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
 
                 // !IMPORTANT, Don't change the order, first remove edges then nodes
                 tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
@@ -419,7 +419,7 @@ const Dashboard = ({}: DashboardProps) => {
     edgesRef.current = edges;
   }, [edges]);
 
-  const reloadPermanentGrpah = useMemoizedCallback(() => {
+  const reloadPermanentGraph = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]");
     // debugger;
     let oldNodes = nodes;
@@ -464,7 +464,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const getMapGraph = useCallback(
     async (mapURL: string, postData: any = false) => {
-      reloadPermanentGrpah();
+      reloadPermanentGraph();
 
       try {
         await postWithToken(mapURL, postData);
@@ -622,7 +622,7 @@ const Dashboard = ({}: DashboardProps) => {
       worker.onmessage = e => {
         const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
         const gg = dagreUtils.mapObjectToGraph(graph);
-        console.log(" -- Dager updated by worker:", gg);
+        console.log(" -- Dagre updated by worker:", gg);
 
         worker.terminate();
         g.current = gg;
@@ -980,9 +980,9 @@ const Dashboard = ({}: DashboardProps) => {
         // debugger
         const batch = writeBatch(db);
         try {
-          for (let offsp of offsprings) {
-            const thisNode = nodes[offsp];
-            const { nodeRef, userNodeRef } = initNodeStatusChange(offsp, thisNode.userNodeId);
+          for (let offspring of offsprings) {
+            const thisNode = nodes[offspring];
+            const { nodeRef, userNodeRef } = initNodeStatusChange(offspring, thisNode.userNodeId);
             const userNodeData = {
               changed: thisNode.changed,
               correct: thisNode.correct,
@@ -991,7 +991,7 @@ const Dashboard = ({}: DashboardProps) => {
               deleted: false,
               isStudied: thisNode.isStudied,
               bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-              node: offsp,
+              node: offspring,
               open: thisNode.open,
               user: user.uname,
               visible: false,
@@ -1024,8 +1024,8 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
           let oldNodes = { ...nodes };
           let oldEdges = edges;
-          for (let offsp of offsprings) {
-            ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offsp, oldNodes, oldEdges));
+          for (let offspring of offsprings) {
+            ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges));
           }
           // CHECK: I commented this because in the SYNC function it will update nodes and edges
           // setNodes(oldNodes);
@@ -1133,7 +1133,7 @@ const Dashboard = ({}: DashboardProps) => {
           // let oldAllUserNodes: any = { ...nodeChanges };
           // if data for the node is loaded
           let uNodeData = {
-            // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+            // load all data corresponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
             ...nodes[nodeId],
             ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
             ...userNodeData,
@@ -1213,15 +1213,18 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookState.choosingNode, openNodeHandler]
   );
 
-  const getNodeUserNode = useCallback((nodeId: string, userNodeId: string) => {
-    const nodeRef = doc(db, "nodes", nodeId);
-    // const userNodeRef = doc(db, "userNodes", userNodeId);
-    // let userNodeRef: DocumentReference<DocumentData> | null = null
-    const userNodeRef = doc(db, "userNodes", userNodeId);
-    // if (userNodeId) {
-    // }//CHECK:We commented this
-    return { nodeRef, userNodeRef };
-  }, []);
+  const getNodeUserNode = useCallback(
+    (nodeId: string, userNodeId: string) => {
+      const nodeRef = doc(db, "nodes", nodeId);
+      // const userNodeRef = doc(db, "userNodes", userNodeId);
+      // let userNodeRef: DocumentReference<DocumentData> | null = null
+      const userNodeRef = doc(db, "userNodes", userNodeId);
+      // if (userNodeId) {
+      // }//CHECK:We commented this
+      return { nodeRef, userNodeRef };
+    },
+    [db]
+  );
 
   const initNodeStatusChange = useCallback(
     (nodeId: string, userNodeId: string) => {
@@ -1239,12 +1242,12 @@ const Dashboard = ({}: DashboardProps) => {
       // setOpenTrends(false);
       // setOpenMedia(false);
       // resetAddedRemovedParentsChildren();
-      // reloadPermanentGrpah();
+      // reloadPermanentGraph();
       return getNodeUserNode(nodeId, userNodeId);
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [/*resetAddedRemovedParentsChildren, reloadPermanentGrpah,*/ getNodeUserNode]
+    [/*resetAddedRemovedParentsChildren, reloadPermanentGraph,*/ getNodeUserNode]
   );
 
   const hideNodeHandler = useCallback(
@@ -1305,7 +1308,6 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
-          // dagerInfo()
           // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
           // setNodes(newNodes);
           // setEdges(newEdges);
@@ -1409,7 +1411,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           // if (
           //   partType === "Tags" &&
-          //   //i commented this two line untile we define the right states
+          //   //i commented this two line until we define the right states
           //   // selectionType !== "AcceptedProposals" &&
           //   // selectionType !== "Proposals"
           // ) {
@@ -1734,9 +1736,9 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookState.selectionType === "Proposals" ||
       (nodeBookState.selectedNode && "selectedNode" in nodes && nodes[nodeBookState.selectedNode].editable)
     ) {
-      reloadPermanentGrpah();
+      reloadPermanentGraph();
     }
-    console.log("After reloadPermanentGrpah");
+    console.log("After reloadPermanentGraph");
     // let sidebarType: any = nodeBookState.selectionType;
     // if (openPendingProposals) {
     //   sidebarType = "PendingProposals";
@@ -1808,7 +1810,7 @@ const Dashboard = ({}: DashboardProps) => {
     openRecentNodes,
     openTrends,
     openMedia,
-    reloadPermanentGrpah,
+    reloadPermanentGraph,
   ]);
 
   /////////////////////////////////////////////////////
@@ -1821,7 +1823,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.selectedNode) return;
 
       setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
-      // reloadPermanentGrpah();
+      // reloadPermanentGraph();
 
       // CHECK: Improve this making the operations out of setNode,
       // when have nodes with new data
@@ -1846,7 +1848,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.selectedNode, reloadPermanentGrpah]
+    [nodeBookState.selectedNode, reloadPermanentGraph]
   );
 
   const selectNode = useCallback(
@@ -1854,8 +1856,8 @@ const Dashboard = ({}: DashboardProps) => {
       console.log("[SELECT_NODE]");
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
-          console.log("[select node]: will call reload permanet graph");
-          reloadPermanentGrpah();
+          console.log("[select node]: will call reload permanent graph");
+          reloadPermanentGraph();
         }
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           console.log("[select node]: reset all");
@@ -1891,7 +1893,7 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookState.selectedNode,
       // selectedNode,
       // selectionType,
-      reloadPermanentGrpah,
+      reloadPermanentGraph,
       // proposeNodeImprovement,
       resetAddedRemovedParentsChildren,
     ]
@@ -2018,7 +2020,7 @@ const Dashboard = ({}: DashboardProps) => {
       console.log("[PROPOSE_NEW_CHILD]");
       event.preventDefault();
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
-      reloadPermanentGrpah();
+      reloadPermanentGraph();
       const newNodeId = newId();
 
       setNodes(oldNodes => {
@@ -2089,7 +2091,7 @@ const Dashboard = ({}: DashboardProps) => {
         });
       });
     },
-    [user, nodeBookState.selectedNode, allTags, reloadPermanentGrpah]
+    [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
   );
 
   const fetchProposals = useCallback(
@@ -2267,12 +2269,12 @@ const Dashboard = ({}: DashboardProps) => {
         versions[versionId].comments.push(comment);
       });
       const proposalsTemp = Object.values(versions);
-      const orderredProposals = proposalsTemp.sort(
+      const orderedProposals = proposalsTemp.sort(
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
       );
 
-      console.log("orderredProposals", orderredProposals);
-      setProposals(orderredProposals);
+      console.log("orderedProposals", orderedProposals);
+      setProposals(orderedProposals);
       setIsRetrieving(false);
     },
     // TODO: CHECK dependencies
@@ -2285,7 +2287,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const mapContentMouseOver = useCallback((event: any) => {
     if (
-      // event.target.getAttribute('data-hoverable') ||
       // event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
       // event.target.tagName.toLowerCase() === "textarea" ||  // CHECK <-- this was commented
       // event.target.className.includes("EditableTextarea") ||
@@ -2405,7 +2406,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!user) return;
 
       if (!choosingNode) {
-        // reloadPermanentGrpah();
+        // reloadPermanentGraph();
         const proposalsTemp = [...proposals];
         if (correct) {
           proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 0;
@@ -2446,7 +2447,7 @@ const Dashboard = ({}: DashboardProps) => {
         //   ) {
         //     proposalsTemp[proposalIdx].accepted = true
         //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
-        //       reloadPermanentGrpah()
+        //       reloadPermanentGraph()
         //     }
         //   }
         //   setProposals(proposalsTemp)
@@ -2459,7 +2460,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, choosingNode, selectedNodeType, sNode, reloadPermanentGrpah]
+    [user, choosingNode, selectedNodeType, sNode, reloadPermanentGraph]
   );
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
@@ -2480,7 +2481,7 @@ const Dashboard = ({}: DashboardProps) => {
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
           <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
-            {/* Data from map, DONT REMOVE */}
+            {/* Data from map, don't REMOVE */}
             <Box>
               Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
             </Box>
@@ -2490,7 +2491,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => console.log(allTags)}>allTags</Button>
             </Box>
             <Box>
-              <Button onClick={() => console.log("DAGGER", g)}>Dager</Button>
+              <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
               <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
               <Button onClick={() => console.log(user)}>user</Button>
             </Box>
@@ -2584,9 +2585,14 @@ const Dashboard = ({}: DashboardProps) => {
               aria-describedby="modal-modal-description"
             >
               <MapInteractionCSS>
-                {/* TODO: change to Next Image */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={openMedia} alt="Node image" className="responsive-img" />
+                {/* TODO: change open Media variable to string to not validate */}
+                {typeof openMedia === "string" && (
+                  <>
+                    {/* TODO: change to Next Image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={openMedia} alt="Node image" className="responsive-img" />
+                  </>
+                )}
               </MapInteractionCSS>
             </Modal>
             {/* // <Modal onClick={closedSidebarClick("Media")}>
