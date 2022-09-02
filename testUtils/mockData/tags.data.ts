@@ -1,6 +1,6 @@
 const collection = "tags";
 interface Tag {
-  id?: string;
+  documentId?: string;
   title: string;
   tags: string[];
   tagIds: string[];
@@ -10,7 +10,7 @@ interface Tag {
 }
 const data: Tag[] = [
   {
-    id: "C7L3gNbNp5reFjQf8vAb",
+    documentId: "C7L3gNbNp5reFjQf8vAb",
     title: "1Cademy",
     tags: [],
     tagIds: [],

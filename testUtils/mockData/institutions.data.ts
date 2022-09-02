@@ -1,7 +1,7 @@
 export const collection = "institutions";
 
 interface Institution {
-  id?: string;
+  documentId?: string;
   country: string;
   domains: string[];
   lat: number;
@@ -12,7 +12,7 @@ interface Institution {
 }
 const data: Institution[] = [
   {
-    id: "07nb61GQAMYEtkSwZXrd",
+    documentId: "07nb61GQAMYEtkSwZXrd",
     country: "United States",
     domains: ["@usf.edu"],
     lat: 28.0587031,

@@ -1,8 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
+import fbAuth from "../../../middlewares/fbAuth";
 import { UpDownVoteNode } from "../../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log("CORRECT NODE CALLED");
   try {
     const { user } = req.body.data as any;
     const fullname = `${user.userData.fName} ${user.userData.lName}`;
@@ -22,4 +24,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

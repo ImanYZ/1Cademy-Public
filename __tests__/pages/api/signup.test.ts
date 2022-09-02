@@ -1,6 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
 
-import {  db } from "../../../src/lib/firestoreServer/admin";
+import { db } from "../../../src/lib/firestoreServer/admin";
 import handler from "../../../src/pages/api/signup";
 import createPostReq from "../../../testUtils/helpers/createPostReq";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
@@ -63,12 +63,11 @@ describe("/signup", () => {
     // it should create a user in the firebase Auth.
     const createdUser = await getAuth().getUserByEmail(body.data.email);
     expect(createdUser).toEqual(
-        expect.objectContaining({
+      expect.objectContaining({
         email: body.data.email,
         displayName: body.data.uname,
       })
     );
-
 
     // it should create a user document in the firestore database.
     const userDocument = await db.collection("users").doc(body.data.uname).get();

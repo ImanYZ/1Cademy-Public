@@ -17,8 +17,8 @@
     "prepare": "husky install .husky",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
-    "test": "jest --watch",
-    "test:coverage": "jest --watch --coverage --all",
+    "test": "jest --watch --runInBand",
+    "test:coverage": "jest --watch --coverage --all --runInBand",
     "test:ci": "jest --ci",
     "run-emulator": "firebase emulators:start --project test --only auth,firestore"
   },

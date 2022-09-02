@@ -1,7 +1,7 @@
 const collection = "credits";
 
 interface Credits {
-  id?: string;
+  documentId?: string;
   createdAt: Date;
   credits: number;
   deepA: number;
@@ -17,7 +17,7 @@ interface Credits {
 
 const data: Credits[] = [
   {
-    id: "0kq7suqGr8RLQMMjuKs9",
+    documentId: "0kq7suqGr8RLQMMjuKs9",
     createdAt: new Date(),
     credits: 3,
     deepA: 760,
