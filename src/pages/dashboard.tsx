@@ -2313,8 +2313,7 @@ const Dashboard = ({}: DashboardProps) => {
             const picturesFolder = "UploadedImages/";
             const imageNameSplit = image.name.split(".");
             const imageExtension = imageNameSplit[imageNameSplit.length - 1];
-            // let imageFileName = user.userId + "/" + new Date().toUTCString() + "." + imageExtension
-            let imageFileName = "jjjj" + imageExtension;
+            let imageFileName = user.userId + "/" + new Date().toUTCString() + "." + imageExtension;
 
             console.log("picturesFolder + imageFileName", picturesFolder + imageFileName);
             const storageRef = ref(storage, picturesFolder + imageFileName);
