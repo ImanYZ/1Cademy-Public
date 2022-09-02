@@ -21,12 +21,11 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { useCallback, useEffect, useRef, useState } from "react";
-/* eslint-disable */
+/* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 
 /* eslint-enable */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
@@ -54,7 +53,6 @@ import {
   makeNodeVisibleInItsLinks,
   MAP_RIGHT_GAP,
   MIN_CHANGE,
-  NODE_HEIGHT,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -67,7 +65,7 @@ import {
   YOFFSET,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
-import { ChoosingType, OpenPart, UserNodes, UserNodesData } from "../nodeBookTypes";
+import { ChoosingType, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../noteBookTypes";
 import { NodeType } from "../types";
 
@@ -110,7 +108,7 @@ const Dashboard = ({}: DashboardProps) => {
   // node that user is currently selected (node will be highlighted)
   const [sNode, setSNode] = useState(null); //<--- this was with recoil
   // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
-  const [choosingNode, setChoosingNode] = useState(null); //<--- this was with recoil
+  const [choosingNode] = useState(null); //<--- this was with recoil
   // // node that is in focus (highlighted)
   // const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
@@ -121,8 +119,8 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   // used for triggering useEffect after nodes or usernodes change
-  const [userNodeChanges, setUserNodeChanges] = useState<UserNodes[]>([]);
-  const [nodeChanges, setNodeChanges] = useState<NodeChanges[]>([]);
+  const [userNodeChanges /*setUserNodeChanges*/] = useState<UserNodes[]>([]);
+  const [nodeChanges /*setNodeChanges*/] = useState<NodeChanges[]>([]);
   const [mapChanged, setMapChanged] = useState(false);
   // two collections (tables) in database, nodes and usernodes
   // nodes: collection of all data of each node
@@ -134,7 +132,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
-  const nodeRef = useRef<{ [key: string]: FullNodeData } | null>(null);
+  const nodeRef = useRef<{ [key: string]: FullNodeData }>({});
   const edgesRef = useRef<{ [key: string]: any } | null>(null);
 
   // as map grows, width and height grows based on the nodes shown on the map
@@ -153,7 +151,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   // object of cluster boundaries
-  const [clusterNodes, setClusterNodes] = useState({});
+  const [, /*clusterNodes*/ setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -165,10 +163,10 @@ const Dashboard = ({}: DashboardProps) => {
   const [selectedNodeType, setSelectedNodeType] = useState<NodeType | null>(null);
 
   // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leaderboard or on nodes)
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [, /*selectedUser*/ setSelectedUser] = useState(null);
 
   // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
-  const [openProposal, setOpenProposal] = useState<string | boolean>(false);
+  const [, /*openProposal*/ setOpenProposal] = useState<string | boolean>(false);
 
   // when proposing improvements, lists of added/removed parent/child links
   const [addedParents, setAddedParents] = useState<string[]>([]);
@@ -195,10 +193,10 @@ const Dashboard = ({}: DashboardProps) => {
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, /*isSubmitting*/ setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
-  const [openProposals, setOpenProposals] = useState(false);
+  // const [openProposals, setOpenProposals] = useState(false);
 
   // flag for if pending proposals for a selected node is open
   const [openPendingProposals, setOpenPendingProposals] = useState(false);
@@ -241,27 +239,32 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  useEffect(() => {
-    if (!db) return;
-    if (!user) return;
-    if (!allTagsLoaded) return;
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user) return;
+      if (!allTagsLoaded) return;
 
-    const userNodesRef = collection(db, "userNodes");
-    const q = query(
-      userNodesRef,
-      where("user", "==", user.uname),
-      where("visible", "==", true),
-      where("deleted", "==", false)
-    );
+      const userNodesRef = collection(db, "userNodes");
+      const q = query(
+        userNodesRef,
+        where("user", "==", user.uname),
+        where("visible", "==", true),
+        where("deleted", "==", false)
+      );
 
-    const killSnapshot = snapshot(q, nodes);
-    return () => {
-      killSnapshot();
-    };
-  }, [allTags, allTagsLoaded, db, user]);
+      const killSnapshot = snapshot(q);
+      return () => {
+        killSnapshot();
+      };
+    },
+    // TODO: check dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allTags, allTagsLoaded, db, user]
+  );
 
   const snapshot = useCallback(
-    (q: Query<DocumentData>, node: any) => {
+    (q: Query<DocumentData>) => {
       const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
         // const docChanges = snapshot.docChanges();
         // if (!docChanges.length) return null
@@ -278,7 +281,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const getNodes = async (nodeIds: string[]): Promise<NodesData[]> => {
         console.log("[GET NODES]");
-        const nodeDocsPromises = nodeIds.map((nodeId, idx) => {
+        const nodeDocsPromises = nodeIds.map(nodeId => {
           const nodeRef = doc(db, "nodes", nodeId);
           return getDoc(nodeRef);
         });
@@ -341,11 +344,11 @@ const Dashboard = ({}: DashboardProps) => {
         return res;
       };
 
-      const fillDagre = (fullNodes: FullNodeData[], currentNodes: FullNodeData, currentEdges: any) => {
+      const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
         console.log("[FILL DAGRE]", { currentNodes, currentEdges });
         // debugger
         return fullNodes.reduce(
-          (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur, idx) => {
+          (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
             let tmpNodes = {};
             let tmpEdges = {};
 
@@ -371,8 +374,8 @@ const Dashboard = ({}: DashboardProps) => {
             }
             if (cur.nodeChangeType === "removed") {
               if (g.current.hasNode(cur.node)) {
-                g.current.nodes().forEach(function (v) {});
-                g.current.edges().forEach(function (e) {});
+                g.current.nodes().forEach(function () {});
+                g.current.edges().forEach(function () {});
                 // PROBABLIY yoou need to add hideNodeAndItsLinks, to update children and parents nodes
 
                 // !IMPORTANT, Don't change the order, first remove edges then nodes
@@ -504,6 +507,8 @@ const Dashboard = ({}: DashboardProps) => {
       resetAddedRemovedParentsChildren();
       setIsSubmitting(false);
     },
+    // TODO: check dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [resetAddedRemovedParentsChildren]
   );
 
@@ -557,7 +562,7 @@ const Dashboard = ({}: DashboardProps) => {
             }, 1300);
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            setMapInteractionValue(oldValue => {
+            setMapInteractionValue(() => {
               // const translateLeft =
               //   (XOFFSET - originalNode.offsetLeft) * oldValue.scale;
               // const translateTop =
@@ -842,12 +847,6 @@ const Dashboard = ({}: DashboardProps) => {
           scrollToNode(nodeId);
           setMapChanged(true);
 
-          const res = {
-            ...oldNodes,
-            [nodeId]: thisNode,
-            [chosenNode]: chosenNodeObj,
-          };
-
           return {
             ...oldNodes,
             [nodeId]: thisNode,
@@ -858,6 +857,8 @@ const Dashboard = ({}: DashboardProps) => {
         }
       });
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       nodeBookState.choosingNode,
       nodeBookState.chosenNode,
@@ -937,6 +938,8 @@ const Dashboard = ({}: DashboardProps) => {
         return oldNodes;
       });
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [addedParents, removedParents, addedChildren, removedChildren]
   );
 
@@ -957,7 +960,8 @@ const Dashboard = ({}: DashboardProps) => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
     // debugger
-    const children = g.current.successors(nodeId);
+    // TODO: check type of children
+    const children: any = g.current.successors(nodeId);
     let offsprings: any[] = [];
     if (children && children.length > 0) {
       for (let child of children) {
@@ -1000,7 +1004,7 @@ const Dashboard = ({}: DashboardProps) => {
               createdAt: Timestamp.fromDate(new Date()),
             };
             const changeNode: any = {
-              viewers: thisNode.viewers - 1,
+              viewers: (thisNode.viewers || 0) - 1, // CHECK I add 0
               updatedAt: Timestamp.fromDate(new Date()),
             };
             if (userNodeData.open && "openHeight" in thisNode) {
@@ -1136,7 +1140,10 @@ const Dashboard = ({}: DashboardProps) => {
             open: true,
           };
 
-          uNodeData[userNodeId] = userNodeId;
+          if (userNodeId) {
+            // TODO: I added this validation
+            uNodeData[userNodeId] = userNodeId;
+          }
           ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
             // modify nodes and edges
             uNodeData,
@@ -1201,6 +1208,8 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, openNodeHandler]
   );
 
@@ -1233,6 +1242,8 @@ const Dashboard = ({}: DashboardProps) => {
       // reloadPermanentGrpah();
       return getNodeUserNode(nodeId, userNodeId);
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [/*resetAddedRemovedParentsChildren, reloadPermanentGrpah,*/ getNodeUserNode]
   );
 
@@ -1309,6 +1320,8 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, user, nodes, edges, initNodeStatusChange /*navigateToFirstParent*/]
   );
 
@@ -1372,11 +1385,13 @@ const Dashboard = ({}: DashboardProps) => {
         event.currentTarget.blur();
       }
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, user, initNodeStatusChange]
   );
 
   const openNodePart = useCallback(
-    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags: any) => {
+    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
       if (!choosingNode) {
         if (openPart === partType) {
           setOpenPart(null);
@@ -1404,6 +1419,8 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, nodeBookState.choosingNode /*selectionType*/]
   );
 
@@ -1489,6 +1506,8 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, user, initNodeStatusChange]
   );
 
@@ -1498,10 +1517,11 @@ const Dashboard = ({}: DashboardProps) => {
         setNodes(oldNodes => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-          let bookmarks = 0;
-          if ("bookmarks" in thisNode) {
-            bookmarks = thisNode.bookmarks;
-          }
+          // let bookmarks = 0;
+          // if ("bookmarks" in thisNode) {
+          //   bookmarks = thisNode.bookmarks;
+          // }
+          const bookmarks = thisNode.bookmarks || 0;
           const changeNode: any = {
             bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
             updatedAt: Timestamp.fromDate(new Date()),
@@ -1542,11 +1562,13 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, user, initNodeStatusChange]
   );
 
   const correctNode = useCallback(
-    (event: any, nodeId: string, nodeType: NodeType) => {
+    (event: any, nodeId: string) => {
       if (!choosingNode) {
         // setSelectedNode(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -1556,6 +1578,8 @@ const Dashboard = ({}: DashboardProps) => {
       }
       event.currentTarget.blur();
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, getMapGraph]
   );
 
@@ -1586,6 +1610,8 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log('---------------> Event:',event);
       // event.currentTarget.blur(); // CHECK: I comment this, the current target is null
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, getMapGraph]
   );
 
@@ -1706,33 +1732,33 @@ const Dashboard = ({}: DashboardProps) => {
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
       nodeBookState.selectionType === "Proposals" ||
-      (nodeBookState.selectedNode && "selectedNode" in nodes && nodes[selectedNode].editable)
+      (nodeBookState.selectedNode && "selectedNode" in nodes && nodes[nodeBookState.selectedNode].editable)
     ) {
       reloadPermanentGrpah();
     }
     console.log("After reloadPermanentGrpah");
-    let sidebarType: any = nodeBookState.selectionType;
-    if (openPendingProposals) {
-      sidebarType = "PendingProposals";
-    } else if (openChat) {
-      sidebarType = "Chat";
-    } else if (openNotifications) {
-      sidebarType = "Notifications";
-    } else if (openPresentations) {
-      sidebarType = "Presentations";
-    } else if (openToolbar) {
-      sidebarType = "UserSettings";
-    } else if (openSearch) {
-      sidebarType = "Search";
-    } else if (openBookmarks) {
-      sidebarType = "Bookmarks";
-    } else if (openRecentNodes) {
-      sidebarType = "RecentNodes";
-    } else if (openTrends) {
-      sidebarType = "Trends";
-    } else if (openMedia) {
-      sidebarType = "Media";
-    }
+    // let sidebarType: any = nodeBookState.selectionType;
+    // if (openPendingProposals) {
+    //   sidebarType = "PendingProposals";
+    // } else if (openChat) {
+    //   sidebarType = "Chat";
+    // } else if (openNotifications) {
+    //   sidebarType = "Notifications";
+    // } else if (openPresentations) {
+    //   sidebarType = "Presentations";
+    // } else if (openToolbar) {
+    //   sidebarType = "UserSettings";
+    // } else if (openSearch) {
+    //   sidebarType = "Search";
+    // } else if (openBookmarks) {
+    //   sidebarType = "Bookmarks";
+    // } else if (openRecentNodes) {
+    //   sidebarType = "RecentNodes";
+    // } else if (openTrends) {
+    //   sidebarType = "Trends";
+    // } else if (openMedia) {
+    //   sidebarType = "Media";
+    // }
 
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
@@ -1818,6 +1844,8 @@ const Dashboard = ({}: DashboardProps) => {
       });
       scrollToNode(nodeBookState.selectedNode);
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.selectedNode, reloadPermanentGrpah]
   );
 
@@ -1855,6 +1883,8 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       choosingNode,
       nodeBookState.selectionType,
@@ -2245,6 +2275,8 @@ const Dashboard = ({}: DashboardProps) => {
       setProposals(orderredProposals);
       setIsRetrieving(false);
     },
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [user?.uname, nodeBookState.selectedNode, selectedNodeType]
   );
 
@@ -2359,8 +2391,19 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const rateProposal = useCallback(
-    async (event, proposals, setProposals, proposalId, proposalIdx, correct, wrong, award) => {
+    async (
+      event: any,
+      proposals: any,
+      setProposals: any,
+      proposalId: string,
+      proposalIdx: number,
+      correct: any,
+      wrong: any,
+      award: any
+    ) => {
       console.log("[RATE PROPOSAL]");
+      if (!user) return;
+
       if (!choosingNode) {
         // reloadPermanentGrpah();
         const proposalsTemp = [...proposals];
@@ -2388,10 +2431,10 @@ const Dashboard = ({}: DashboardProps) => {
           uname: user.uname,
         };
         setIsSubmitting(true);
-        let responseObj;
+        // let responseObj;
         try {
           await idToken();
-          responseObj = await axios.post("/rateVersion", postData);
+          /*responseObj = */ await axios.post("/rateVersion", postData);
         } catch (err) {
           console.error(err);
           // window.location.reload();
@@ -2414,7 +2457,9 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // event.currentTarget.blur();
     },
-    [choosingNode, selectedNodeType, sNode, reloadPermanentGrpah]
+    // TODO: CHECK dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, choosingNode, selectedNodeType, sNode, reloadPermanentGrpah]
   );
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
@@ -2539,6 +2584,8 @@ const Dashboard = ({}: DashboardProps) => {
               aria-describedby="modal-modal-description"
             >
               <MapInteractionCSS>
+                {/* TODO: change to Next Image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={openMedia} alt="Node image" className="responsive-img" />
               </MapInteractionCSS>
             </Modal>
