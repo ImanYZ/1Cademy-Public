@@ -3,19 +3,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { isEmail, isEmpty, validPNG, validURL } from "@/lib/utils/utils";
 
-import {
-  admin,
-  db,
-  publicStorageBucket
-} from "../../lib/firestoreServer/admin";
-import { fetchGoogleMapsGeolocationWrapper } from '../../utils';
+import { admin, db, publicStorageBucket } from "../../lib/firestoreServer/admin";
+import { fetchGoogleMapsGeolocationWrapper } from "../../utils";
 
 const validateInstitutionRequestForm = (values: any) => {
   let errors: any = {};
 
   if (isEmpty(values.email)) {
-    errors.email =
-      "Your email address provided by your academic/research institutions is required!";
+    errors.email = "Your email address provided by your academic/research institutions is required!";
   } else if (!isEmail(values.email)) {
     errors.email = "Invalid email address!";
   }
@@ -52,11 +47,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       console.error({ errors });
       return res.status(400).json(errors);
     } else {
-      const instDoc = await db
-        .collection("institutions")
-        .where("name", "==", instName)
-        .limit(1)
-        .get();
+      const instDoc = await db.collection("institutions").where("name", "==", instName).limit(1).get();
       if (instDoc.docs.length > 0) {
         return res.status(400).json({ exists: "The institution already exists!" });
       } else {
@@ -86,11 +77,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 lat: geoLoc.lat,
                 domains: [domainName],
                 logoURL: encodeURI(
-                  "https://storage.googleapis.com/" +
-                  publicStorageBucket +
-                  "/Logos/" +
-                  instName +
-                  ".png"
+                  "https://storage.googleapis.com/" + publicStorageBucket + "/Logos/" + instName + ".png"
                 ),
                 name: instName,
                 usersNum: 0,

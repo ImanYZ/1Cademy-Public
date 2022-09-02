@@ -33,7 +33,7 @@ const addPracticeQuestions = async (
       q: 0,
       tag,
       tagId,
-      user
+      user,
     });
     [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
@@ -96,7 +96,7 @@ const validateSignupData = (data: SignUpData) => {
 
   return {
     errors: errors.join(" "),
-    valid: errors.length === 0 ? true : false
+    valid: errors.length === 0 ? true : false,
   };
 };
 
@@ -137,7 +137,7 @@ const initializeReputationObj = () => {
     positives: 0,
     negatives: 0,
     totalPoints: 0,
-    isAdmin: false
+    isAdmin: false,
   };
 };
 
@@ -166,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (institution === "Not Found") {
       return res.status(400).json({
         errorMessage:
-          "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu"
+          "At this point, only members of academic/research institutions can join us. If you've enterred the email address provided by your academic/research institution, but you see this message, contact oneweb@umich.edu",
       });
     }
 
@@ -184,7 +184,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const userRecord = await getAuth().createUser({
       email: data.email,
       displayName: data.uname,
-      password: data.password
+      password: data.password,
     });
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     userData = {
@@ -223,7 +223,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       background: data.background,
       practicing: false,
       userId: userRecord.uid,
-      consented: data.consented
+      consented: data.consented,
     };
 
     batch.set(userRef, userData);
@@ -244,7 +244,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           tagId: rootId,
           tag: rootTitles[rootId],
           createdAt: currentTimestamp,
-          updatedAt: currentTimestamp
+          updatedAt: currentTimestamp,
         };
         const reputationsRef = db.collection("reputations").doc();
         batch.set(reputationsRef, reputations);
@@ -267,14 +267,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             deleted: false,
             open: true,
             visible: true,
-            updatedAt: currentTimestamp
+            updatedAt: currentTimestamp,
           };
           batch.update(userNodeRef, userNodeUpdates);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           userNodeLogRef = db.collection("userNodesLog").doc();
           batch.set(userNodeLogRef, {
             ...userNodeData,
-            ...userNodeUpdates
+            ...userNodeUpdates,
           });
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         }
@@ -292,7 +292,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           visible: true,
           wrong: false,
           createdAt: currentTimestamp,
-          updatedAt: currentTimestamp
+          updatedAt: currentTimestamp,
         };
         userNodeRef = db.collection("userNodes").doc();
         batch.set(userNodeRef, userNodeData);
@@ -329,7 +329,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     batch.set(pendingPropsNumsRef, {
       uname: data.uname,
       tagId,
-      pNum: 0
+      pNum: 0,
     });
 
     const bookmarkNumsRef = db.collection("bookmarkNums").doc(data.uname);
@@ -363,7 +363,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       theme: "theme" in userData ? userData.theme : "Dark",
       background: "background" in userData ? userData.background : "Image",
       practicing: userData.practicing,
-      createdAt: userData.createdAt.toDate()
+      createdAt: userData.createdAt.toDate(),
     };
     return res.status(201).json({ user: userData });
   } catch (error: any) {

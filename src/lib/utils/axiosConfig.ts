@@ -18,7 +18,7 @@ function getErrorMessage(error: any) {
 const adapter = axios.create({
   headers: {
     Accept: "application/json",
-  }
+  },
 });
 
 adapter.interceptors.response.use(

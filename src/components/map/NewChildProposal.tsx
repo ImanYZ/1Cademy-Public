@@ -22,6 +22,8 @@ type NewChildProposalProps = {
 const NewChildProposal = (props: NewChildProposalProps) => {
   const proposeNewChildClick = useCallback(
     (event: any) => props.proposeNewChild(event, props.childNodeType, props.setOpenProposal),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.proposeNewChild, props.childNodeType, props.setOpenProposal]
   );
 

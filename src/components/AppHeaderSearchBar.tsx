@@ -32,12 +32,12 @@ const AppHeaderSearchBar = () => {
         color: theme => theme.palette.common.white,
         ":hover": {
           borderColor: theme => theme.palette.common.white,
-          color: theme => theme.palette.common.white
+          color: theme => theme.palette.common.white,
         },
         ":focus-within": {
           background: theme => theme.palette.common.white,
-          color: theme => theme.palette.common.black
-        }
+          color: theme => theme.palette.common.black,
+        },
       }}
     >
       <StyledInputBase
@@ -57,18 +57,18 @@ const AppHeaderSearchBar = () => {
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
     padding: 0,
-    width: "100%"
+    width: "100%",
   },
   "& .MuiInputBase-input::placeholder": {
     opacity: 1,
     color: theme.palette.common.white,
-    fontWeight: "400"
+    fontWeight: "400",
   },
   "& .MuiInputBase-input:focus": {
     color: theme.palette.common.black,
     background: theme.palette.common.white,
-    fontWeight: "400"
-  }
+    fontWeight: "400",
+  },
 }));
 
 export default AppHeaderSearchBar;

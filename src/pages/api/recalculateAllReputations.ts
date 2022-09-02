@@ -9,11 +9,10 @@ import {
   reputationTypes,
   rewriteComPointsDocs,
   rewriteReputationDocs,
-} from '../../utils';
+} from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-
     //  dictionary of dictionary -> reputations[tag.node][proposer]
     const reputations: any = {};
     //  dictionary of dictionary of dictionary -> monthlyReputations[tag.node][proposer][month]
@@ -118,7 +117,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 tagId,
                 tag,
                 updatedAt,
-                createdAt
+                createdAt,
               });
             }
             if (!(tagId in monthlyReputations)) {
@@ -136,7 +135,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 tagId,
                 tag,
                 updatedAt,
-                createdAt
+                createdAt,
               });
             }
             if (!(tagId in weeklyReputations)) {
@@ -154,7 +153,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 tagId,
                 tag,
                 updatedAt,
-                createdAt
+                createdAt,
               });
             }
             //  if the user did not self-vote
@@ -168,7 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                   tagId,
                   tag,
                   updatedAt,
-                  createdAt
+                  createdAt,
                 });
               }
               if (!(tagId in othMonReputations)) {
@@ -186,7 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                   tagId,
                   tag,
                   updatedAt,
-                  createdAt
+                  createdAt,
                 });
               }
               if (!(tagId in othWeekReputations)) {
@@ -204,7 +203,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                   tagId,
                   tag,
                   updatedAt,
-                  createdAt
+                  createdAt,
                 });
               }
 
@@ -216,7 +215,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                   tagId,
                   tag,
                   updatedAt,
-                  createdAt
+                  createdAt,
                 });
                 comOthersPoints[tagId].adminPoints = 0;
               }
@@ -230,7 +229,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                   tagId,
                   tag,
                   updatedAt,
-                  createdAt
+                  createdAt,
                 });
                 comOthMonPoints[tagId][firstMonthDay].adminPoints = 0;
               }
@@ -244,7 +243,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                   tagId,
                   tag,
                   updatedAt,
-                  createdAt
+                  createdAt,
                 });
                 comOthWeekPoints[tagId][firstWeekDay].adminPoints = 0;
               }
@@ -267,7 +266,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 tagId,
                 tag,
                 updatedAt,
-                createdAt
+                createdAt,
               });
               comMonthlyPoints[tagId][firstMonthDay].adminPoints = 0;
             }
@@ -281,7 +280,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 tagId,
                 tag,
                 updatedAt,
-                createdAt
+                createdAt,
               });
               comWeeklyPoints[tagId][firstWeekDay].adminPoints = 0;
             }
@@ -423,11 +422,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               // Every time a vote is cast the corresponding reputation points and community points should be updated.
               // updatedAt in both reputations and comPoints should always indicate the last date and time that a vote was cast affecting that document.
               // So, we take the most recent updatedAt value for each reputions or comPoints document.
-              proposerPoints.createdAt =
-                proposerPoints.createdAt > createdAt ? createdAt : proposerPoints.createdAt;
+              proposerPoints.createdAt = proposerPoints.createdAt > createdAt ? createdAt : proposerPoints.createdAt;
               cPoints.createdAt = cPoints.createdAt > createdAt ? createdAt : cPoints.createdAt;
-              proposerPoints.updatedAt =
-                proposerPoints.updatedAt < updatedAt ? updatedAt : proposerPoints.updatedAt;
+              proposerPoints.updatedAt = proposerPoints.updatedAt < updatedAt ? updatedAt : proposerPoints.updatedAt;
               cPoints.updatedAt = cPoints.updatedAt < updatedAt ? updatedAt : cPoints.updatedAt;
               // if (
               //   proposer === "catgrillo" &&
@@ -484,7 +481,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         batch,
         reputationsType,
         reputationsDict,
-        writeCounts
+        writeCounts,
       });
     }
     for (let comPointsType of comPointTypes) {
@@ -512,7 +509,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         batch,
         comPointsType,
         comPointsDict,
-        writeCounts
+        writeCounts,
       });
     }
     await commitBatch(batch);

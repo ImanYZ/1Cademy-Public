@@ -1,10 +1,12 @@
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import {
-  admin,
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db,
-} from "../lib/firestoreServer/admin";
-import { comPointTypes, getTypedCollections, NODE_TYPES, reputationTypes, retrieveAndsignalAllUserNodesChanges, schoolPointTypes } from '.';
+  comPointTypes,
+  getTypedCollections,
+  NODE_TYPES,
+  reputationTypes,
+  retrieveAndsignalAllUserNodesChanges,
+  schoolPointTypes,
+} from ".";
 
 const replaceUnameInCollection = async ({
   batch,
@@ -13,7 +15,7 @@ const replaceUnameInCollection = async ({
   columnName,
   oldUname,
   newUname,
-  writeCounts
+  writeCounts,
 }: any) => {
   let newBatch = batch;
   let docsQuery;
@@ -52,8 +54,9 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
   console.log(uname + " to " + newUsername);
 
   for (let nodeType of NODE_TYPES) {
-    const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } =
-      getTypedCollections({ nodeType });
+    const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections({
+      nodeType,
+    });
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
       collQuery: versionsColl,
@@ -61,7 +64,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "proposer",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts
+      writeCounts,
     });
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
@@ -70,7 +73,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "user",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts
+      writeCounts,
     });
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
@@ -79,7 +82,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "author",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts
+      writeCounts,
     });
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
@@ -88,7 +91,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "user",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts
+      writeCounts,
     });
   }
 
@@ -107,7 +110,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "user",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts: writeCounts
+      writeCounts: writeCounts,
     });
   }
   const collNamesWithAdmin = [...comPointTypes, ...schoolPointTypes];
@@ -119,7 +122,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "admin",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts
+      writeCounts,
     });
   }
   const collNamesWithUname = [
@@ -148,7 +151,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       columnName: "uname",
       oldUname: uname,
       newUname: newUsername,
-      writeCounts
+      writeCounts,
     });
   }
   [batch, writeCounts] = await replaceUnameInCollection({
@@ -158,7 +161,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     columnName: "username",
     oldUname: uname,
     newUname: newUsername,
-    writeCounts
+    writeCounts,
   });
   [batch, writeCounts] = await replaceUnameInCollection({
     batch,
@@ -167,7 +170,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     columnName: "proposer",
     oldUname: uname,
     newUname: newUsername,
-    writeCounts
+    writeCounts,
   });
   [batch, writeCounts] = await replaceUnameInCollection({
     batch,
@@ -176,7 +179,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     columnName: "uInfo",
     oldUname: uname,
     newUname: newUsername,
-    writeCounts
+    writeCounts,
   });
 
   try {
@@ -196,7 +199,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
         nodeChanges,
         major: false,
         currentTimestamp,
-        writeCounts
+        writeCounts,
       });
     }
   } catch (err) {

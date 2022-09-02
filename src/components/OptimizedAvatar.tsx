@@ -73,7 +73,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           quality={40}
           objectFit="cover"
           style={{
-            borderRadius: "30px"
+            borderRadius: "30px",
           }}
         />
       </Box>
@@ -82,7 +82,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
 
   // render an image without border
   return (
-    <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center", ...sx, }}>
+    <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center", ...sx }}>
       <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
     </Box>
   );

@@ -13,7 +13,7 @@ const FullPageLogoLoading = () => {
           flexDirection: "column",
           textAlign: "center",
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
         }}
       >
         <Image src={LogoDarkMode.src} alt="logo" width="200px" height="200px" />

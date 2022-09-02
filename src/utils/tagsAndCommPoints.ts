@@ -6,7 +6,7 @@ const comPointTypes = [
   "comWeeklyPoints",
   "comOthersPoints",
   "comOthMonPoints",
-  "comOthWeekPoints"
+  "comOthWeekPoints",
 ];
 
 const tagCommunityFunctionOrPromise = async ({ collectionName, tagRef, tagDoc, tagData, callBack }: any) => {

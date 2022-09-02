@@ -11,7 +11,7 @@ const RightArrow = (color: string) => {
         borderLeft: `10px solid ${color}`,
         float: "right",
         marginTop: "-9.1px",
-        marginRight: "-1px"
+        marginRight: "-1px",
       }}
     ></div>
   );

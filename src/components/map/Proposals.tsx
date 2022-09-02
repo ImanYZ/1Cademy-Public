@@ -20,7 +20,9 @@ import NewChildProposal from "./NewChildProposal";
 import ProposalsList from "./ProposalsList/ProposalsList";
 import { MemoizedSidebarTabs } from "./SidebarTabs/SidebarTabs";
 
-const proposedChildTypesIcons = {
+type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
+
+const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
   Concept: "local_library",
   Relation: "share",
   Question: "help_outline",
@@ -30,17 +32,16 @@ const proposedChildTypesIcons = {
 };
 
 type ProposalsProps = {
-  proposeNodeImprovement: any,
-  fetchProposals: any,
-  rateProposal: any,
-  selectProposal: any,
-  deleteProposal: any,
-  proposeNewChild: any,
-}
+  proposeNodeImprovement: any;
+  fetchProposals: any;
+  rateProposal: any;
+  selectProposal: any;
+  deleteProposal: any;
+  proposeNewChild: any;
+};
 
 const Proposals = (props: ProposalsProps) => {
-
-  const { nodeBookState } = useNodeBook()
+  const { nodeBookState } = useNodeBook();
   // const [selectedNode] = useState();
   const [selectionType] = useState();
   const [openProposal, setOpenProposal] = useState(false);
@@ -54,6 +55,8 @@ const Proposals = (props: ProposalsProps) => {
     // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
     // Try to solve adding await
     // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -64,6 +67,8 @@ const Proposals = (props: ProposalsProps) => {
     // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
     // Try to solve adding await
     // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.selectedNode]);
 
   useEffect(() => {
@@ -74,7 +79,7 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Pending Proposals",
       content: (
-        <ul className="collection" style={{ padding: '0px', margin: '0px' }}>
+        <ul className="collection" style={{ padding: "0px", margin: "0px" }}>
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
@@ -95,7 +100,7 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Approved Proposals",
       content: (
-        <ul className="collection" style={{ padding: '0px', margin: '0px' }}>
+        <ul className="collection" style={{ padding: "0px", margin: "0px" }}>
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
@@ -117,7 +122,7 @@ const Proposals = (props: ProposalsProps) => {
 
   return (
     // CHECK: I addedd overflow in y
-    <div id="ProposalsContainer" >
+    <div id="ProposalsContainer">
       {/* <div id="ProposeNewChildImprovementTitle">
         <strong>Propose New Child / Improvement</strong>
       </div> */}
@@ -129,23 +134,27 @@ const Proposals = (props: ProposalsProps) => {
           proposeNodeImprovement={props.proposeNodeImprovement}
           selectedNode={nodeBookState.selectedNode}
         />
-        <div id="ProposalButtonsRow" style={{ border: 'solid 0px pink', display: 'flex', justifyContent: 'space-around' }}>
-          {Object.keys(proposedChildTypesIcons).map((childNodeType) => {
-            return (
-              <NewChildProposal
-                key={childNodeType}
-                childNodeType={childNodeType}
-                icon={proposedChildTypesIcons[childNodeType]}
-                openProposal={openProposal}
-                setOpenProposal={setOpenProposal}
-                proposeNewChild={props.proposeNewChild}
-              />
-            );
-          })}
+        <div
+          id="ProposalButtonsRow"
+          style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+        >
+          {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+            (childNodeType: ProposedChildTypesIcons) => {
+              return (
+                <NewChildProposal
+                  key={childNodeType}
+                  childNodeType={childNodeType}
+                  icon={proposedChildTypesIcons[childNodeType]}
+                  openProposal={openProposal}
+                  setOpenProposal={setOpenProposal}
+                  proposeNewChild={props.proposeNewChild}
+                />
+              );
+            }
+          )}
         </div>
       </div>
       <MemoizedSidebarTabs tabsTitle="Proposals tabs" tabsItems={tabsItems} />
-
     </div>
   );
 };

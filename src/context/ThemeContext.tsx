@@ -20,8 +20,8 @@ const ThemeProvider: FC<Props> = ({ children }) => {
       ...brandingDesignTokens,
       palette: {
         ...brandingDesignTokens.palette,
-        mode: themeMode
-      }
+        mode: themeMode,
+      },
     });
 
     nextTheme = deepmerge(nextTheme, getThemedComponents(nextTheme));

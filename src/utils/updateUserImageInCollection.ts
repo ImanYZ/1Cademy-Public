@@ -11,7 +11,7 @@ export const updateUserImageInCollection = async ({
   fullname,
   chooseUname,
   currentTimestamp,
-  writeCounts
+  writeCounts,
 }: any) => {
   let newBatch = batch;
   let cQuery;

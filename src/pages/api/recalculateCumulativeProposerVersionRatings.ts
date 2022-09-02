@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
-import { getCumulativeProposerVersionRatingsOnNode } from '../../utils';
+import { getCumulativeProposerVersionRatingsOnNode } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -17,7 +17,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           nodeDataAdmin: nodeData.admin,
           aImgUrl: nodeData.aImgUrl,
           aFullname: nodeData.aFullname,
-          aChooseUname: nodeData.aChooseUname
+          aChooseUname: nodeData.aChooseUname,
         });
       const nodeRef = db.collection("nodes").doc(nodeDoc.id);
       batch.update(nodeRef, {

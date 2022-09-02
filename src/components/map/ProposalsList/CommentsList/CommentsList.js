@@ -1,20 +1,18 @@
-import React from "react";
+import "./CommentsList.css";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
-import MetaButton from "../../../../MetaButton/MetaButton";
-import UserHeader from "../UserHeader/UserHeader";
+import React from "react";
 
 import shortenNumber from "../../../../../../utils/shortenNumber";
-
-import "./CommentsList.css";
+import MetaButton from "../../../../MetaButton/MetaButton";
+import UserHeader from "../UserHeader/UserHeader";
 
 const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
-const CommentsList = (props) => {
+const CommentsList = props => {
   return (
     <>
       <div className="CommentOnProposal">
@@ -24,9 +22,7 @@ const CommentsList = (props) => {
             name={`Proposal${props.proposal.id}NewComment`}
             className="materialize-textarea"
           />
-          <label htmlFor={`Proposal${props.proposal.id}NewComment`}>
-            Write comment/Q&amp;A on this proposal.
-          </label>
+          <label htmlFor={`Proposal${props.proposal.id}NewComment`}>Write comment/Q&amp;A on this proposal.</label>
           <div className="ProposalCommentSubmitButton">
             <MetaButton onClick={doNothing} tooltip="Submit your comment." tooltipPosition="Left">
               <i className="material-icons grey-text">send</i>
@@ -48,7 +44,7 @@ const CommentsList = (props) => {
       </div>
       <ul className="collection ProposalComments">
         {props.proposal.comments.length !== 0 ? (
-          props.proposal.comments.map((comment) => {
+          props.proposal.comments.map(comment => {
             return (
               <li className="collection-item avatar" key={`Comment${comment.id}`}>
                 <UserHeader imageUrl={comment.imageUrl} />
@@ -61,9 +57,7 @@ const CommentsList = (props) => {
                     tooltip="Click if you find this comment Unhelpful."
                     tooltipPosition="BottomLeft"
                   >
-                    <i className={"material-icons " + (comment.wrong ? "red-text" : "grey-text")}>
-                      close
-                    </i>
+                    <i className={"material-icons " + (comment.wrong ? "red-text" : "grey-text")}>close</i>
                     <span>{shortenNumber(comment.wrongs, 2, false)}</span>
                   </MetaButton>
                   <MetaButton
@@ -73,9 +67,7 @@ const CommentsList = (props) => {
                   >
                     <i
                       className={
-                        comment.correct
-                          ? "material-icons DoneIcon green-text"
-                          : "material-icons DoneIcon grey-text"
+                        comment.correct ? "material-icons DoneIcon green-text" : "material-icons DoneIcon grey-text"
                       }
                     >
                       done

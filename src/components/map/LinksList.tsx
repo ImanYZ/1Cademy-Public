@@ -1,28 +1,30 @@
-import React from 'react'
+import React from "react";
 
-import Line from './Line/Line'
+import Line from "./Line/Line";
 
 type LinkListProps = {
-  edgeIds: string[],
-  edges: any,
-  selectedRelation: string | null,
-}
+  edgeIds: string[];
+  edges: any;
+  selectedRelation: string | null;
+};
 
-export const LinksList = ({ edgeIds, edges, selectedRelation }: LinkListProps) => {
-  return <>
-    {edgeIds.map((eId) => {
-      return (
-        <Line
-          key={eId}
-          label={edges[eId].label}
-          from={{ x: edges[eId].fromX, y: edges[eId].fromY - 1 }}
-          to={{ x: edges[eId].toX, y: edges[eId].toY - 1 }}
-          color="#01d36a"
-        />
-      )
-    })}
-  </>
-}
+export const LinksList = ({ edgeIds, edges }: LinkListProps) => {
+  return (
+    <>
+      {edgeIds.map(eId => {
+        return (
+          <Line
+            key={eId}
+            label={edges[eId].label}
+            from={{ x: edges[eId].fromX, y: edges[eId].fromY - 1 }}
+            to={{ x: edges[eId].toX, y: edges[eId].toY - 1 }}
+            color="#01d36a"
+          />
+        );
+      })}
+    </>
+  );
+};
 
 // import React from "react";
 

@@ -8,7 +8,7 @@ export const retrieveAndsignalAllUserNodesChanges = async ({
   currentTimestamp,
   writeCounts,
   t,
-  tWriteOperations
+  tWriteOperations,
 }: any) => {
   let newBatch = batch;
   const { userNodesRefs, userNodesData } = await getAllUserNodes({ linkedId, t });
@@ -23,7 +23,7 @@ export const retrieveAndsignalAllUserNodesChanges = async ({
     currentTimestamp,
     writeCounts,
     t,
-    tWriteOperations
+    tWriteOperations,
   });
 
   return [newBatch, writeCounts];

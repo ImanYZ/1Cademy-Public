@@ -1,12 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  admin,
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db
-} from "../../lib/firestoreServer/admin";
-import { addToPendingPropsNumsExcludingVoters, getNode, getVersion } from '../../utils';
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
+import { addToPendingPropsNumsExcludingVoters, getNode, getVersion } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -14,7 +9,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let writeCounts = 0;
     let nodeData, nodeRef, versionData, versionRef;
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-    ({ versionData, versionRef } = await getVersion({ versionId: req.body.data.versionId, nodeType: req.body.data.nodeType }));
+    ({ versionData, versionRef } = await getVersion({
+      versionId: req.body.data.versionId,
+      nodeType: req.body.data.nodeType,
+    }));
     if (req.body.data.user.userData.uname === versionData.proposer && !versionData.accepted) {
       ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.nodeId }));
       batch.update(versionRef, {
@@ -34,7 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           versionId: req.body.data.versionId,
           tagIds: versionData.tagIds,
           value: -1,
-          writeCounts
+          writeCounts,
         });
       }
     }

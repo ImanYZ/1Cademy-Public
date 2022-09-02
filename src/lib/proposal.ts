@@ -12,7 +12,7 @@ export const buildProposal = ({
   summary,
   tagIds,
   tags,
-  title
+  title,
 }: ProposalInput) => {
   return {
     accepted: false,
@@ -42,6 +42,6 @@ export const buildProposal = ({
     title, // FORM
     updatedAt: new Date(),
     viewers: 0,
-    wrongs: 0
+    wrongs: 0,
   };
 };

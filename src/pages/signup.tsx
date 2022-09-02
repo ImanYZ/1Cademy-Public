@@ -37,7 +37,7 @@ const SignUpPage: NextPageWithLayout = () => {
           "We have sent an email with a confirmation link to your email address. Please verify it to start contributing.",
           {
             variant: "success",
-            autoHideDuration: 10000
+            autoHideDuration: 10000,
           }
         );
       } catch (error) {
@@ -51,7 +51,7 @@ const SignUpPage: NextPageWithLayout = () => {
         return;
       }
       handleError({ error, errorMessage: error as string });
-    }
+    },
   });
 
   const [activeStep, setActiveStep] = useState(1);
@@ -89,7 +89,7 @@ const SignUpPage: NextPageWithLayout = () => {
     clickedConsent: false,
     clickedTOS: false,
     clickedPP: false,
-    clickedCP: false
+    clickedCP: false,
   };
 
   const validationSchema = yup.object({
@@ -119,7 +119,7 @@ const SignUpPage: NextPageWithLayout = () => {
     gender: yup.string().required("Please enter your gender").nullable(true),
     genderOtherValue: yup.string().when("gender", {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
-      then: yup.string().required("Required")
+      then: yup.string().required("Required"),
     }),
     ethnicity: yup
       .array()
@@ -127,7 +127,7 @@ const SignUpPage: NextPageWithLayout = () => {
       .of(yup.string().required("Please enter your ethnicity")),
     ethnicityOtherValue: yup.string().when("ethnicity", {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
-      then: yup.string().required("Required")
+      then: yup.string().required("Required"),
     }),
     country: yup.string().required("Please enter your country").nullable(true),
     state: yup.string().required("Please enter your state").nullable(true),
@@ -136,14 +136,14 @@ const SignUpPage: NextPageWithLayout = () => {
     foundFrom: yup.string().required("Please enter how you heard about us").nullable(true),
     foundFromOtherValue: yup.string().when("foundFrom", {
       is: (foundFromValue: string) => foundFromValue === "Not listed (Please specify)",
-      then: yup.string().required("Required")
+      then: yup.string().required("Required"),
     }),
     occupation: yup.string().required("Please enter your occupation"),
     education: yup.string().required("Please enter your educational status").nullable(true),
     institution: yup.string().required("Please enter your institution").nullable(),
     major: yup.string().required("Please enter your major").nullable(),
     fieldOfInterest: yup.string().required("Please enter your field of interest"),
-    signUpAgreement: yup.boolean().isTrue("Please accept the Informed Consent to continue")
+    signUpAgreement: yup.boolean().isTrue("Please accept the Informed Consent to continue"),
   });
 
   const handleSignUp = async (values: SignUpFormValues) => {
@@ -175,7 +175,7 @@ const SignUpPage: NextPageWithLayout = () => {
       deInstit: values.institution as string,
       theme: values.theme,
       background: values.background as string,
-      consented: values.signUpAgreement
+      consented: values.signUpAgreement,
     };
     mutateSignUp.mutate(user);
   };
@@ -269,7 +269,7 @@ const SignUpPage: NextPageWithLayout = () => {
       email: true,
       username: true,
       password: true,
-      passwordConfirmation: true
+      passwordConfirmation: true,
     });
   };
 
@@ -287,7 +287,7 @@ const SignUpPage: NextPageWithLayout = () => {
       city: true,
       reason: true,
       foundFrom: true,
-      foundFromOtherValue: true
+      foundFromOtherValue: true,
     });
   };
 

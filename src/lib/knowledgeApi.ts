@@ -19,7 +19,7 @@ import {
   SearchNodesResponse,
   SignUpValidation,
   StatsSchema,
-  User
+  User,
 } from "../knowledgeTypes";
 
 export const getTagsAutocomplete = async (tagName: string): Promise<ResponseAutocompleteTags> => {
@@ -57,21 +57,21 @@ export const getSearchNodes = async (options: SearchNodesParams) => {
   const { q, upvotes, mostRecent, timeWindow, tags, contributors, reference, label, nodeTypes, page, institutions } =
     options;
   const response = await API.get<SearchNodesResponse>("/api/searchNodes", {
-    params: { q, upvotes, mostRecent, timeWindow, tags, contributors, reference, label, nodeTypes, page, institutions }
+    params: { q, upvotes, mostRecent, timeWindow, tags, contributors, reference, label, nodeTypes, page, institutions },
   });
   return response.data;
 };
 
 export const getSelectedContributors = async (users: string) => {
   const response = await API.get<FilterValue[]>("/api/getSelectedContributors", {
-    params: { users }
+    params: { users },
   });
   return response.data;
 };
 
 export const getSelectedInstitutions = async (institutions: string) => {
   const response = await API.get<FilterValue[]>("/api/getSelectedInstitutions", {
-    params: { institutions }
+    params: { institutions },
   });
   return response.data;
 };
@@ -109,7 +109,7 @@ export const getFullNodeAutocomplete = async (searchText: string): Promise<Respo
 
 export const addProposal = async ({
   data,
-  nodeType
+  nodeType,
 }: {
   data: ProposalInput;
   nodeType: NodeType;
@@ -120,7 +120,7 @@ export const addProposal = async ({
 
 export const validateSignUp = async ({
   email,
-  uname
+  uname,
 }: {
   email: string;
   uname: string;

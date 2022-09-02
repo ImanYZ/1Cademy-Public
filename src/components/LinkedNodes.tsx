@@ -48,7 +48,7 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
       <CardHeader
         sx={{
           backgroundColor: theme => theme.palette.common.darkGrayBackground,
-          color: theme => theme.palette.common.white
+          color: theme => theme.palette.common.white,
         }}
         title={
           <Box sx={{ textAlign: "center" }}>

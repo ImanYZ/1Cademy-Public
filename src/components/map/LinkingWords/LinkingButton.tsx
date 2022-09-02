@@ -1,12 +1,10 @@
-import { Editor } from "@/components/Editor";
-import { Button, Tooltip } from "@mui/material";
 import React, { useCallback } from "react";
 
-// import HyperEditor from "../../../Editor/HyperEditor/HyperEditorWrapper";
+import { Editor } from "@/components/Editor";
+
 import { NodeType } from "../../../types";
 import NodeTypeIcon from "../../NodeTypeIcon2";
-import MetaButton, { MemoizedMetaButton } from "../MetaButton";
-// import MetaButton from "../../MetaButton/MetaButton";
+import { MemoizedMetaButton } from "../MetaButton";
 
 const doNothing = () => {};
 
@@ -22,18 +20,20 @@ type LinkingButtonProps = {
 };
 
 const LinkingButton = (props: LinkingButtonProps) => {
+  // TODO: check dependencies to remove eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const linkedNodeClick = useCallback(() => props.onClick(props.linkedNodeID), [props.onClick, props.linkedNodeID]);
 
-  let iClassName = "material-icons LinkingButtonIcon ";
-  if (props.linkedNodeType !== "children") {
-    if (props.visible) {
-      iClassName += "green-text";
-    } else {
-      iClassName += "orange-text text-lighten-2";
-    }
-  } else {
-    iClassName += "gray-text";
-  }
+  // let iClassName = "material-icons LinkingButtonIcon ";
+  // if (props.linkedNodeType !== "children") {
+  //   if (props.visible) {
+  //     iClassName += "green-text";
+  //   } else {
+  //     iClassName += "orange-text text-lighten-2";
+  //   }
+  // } else {
+  //   iClassName += "gray-text";
+  // }
   return (
     <MemoizedMetaButton
       onClick={linkedNodeClick}

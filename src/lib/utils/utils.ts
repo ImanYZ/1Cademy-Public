@@ -11,7 +11,7 @@ import {
   ReferencesArray,
   SortTypeWindowOption,
   TagsArray,
-  TimeWindowOption
+  TimeWindowOption,
 } from "../../knowledgeTypes";
 
 export const isValidHttpUrl = (possibleUrl?: string) => {
@@ -70,7 +70,7 @@ export const SortedByTimeOptions: TimeWindowOption[] = [
   TimeWindowOption.AnyTime,
   TimeWindowOption.ThisWeek,
   TimeWindowOption.ThisMonth,
-  TimeWindowOption.ThisYear
+  TimeWindowOption.ThisYear,
 ];
 
 export const getNodePageURLTitle = (title: string | undefined, id: string) => {
@@ -96,7 +96,7 @@ export const homePageSortByDefaults = {
   upvotes: true,
   mostRecent: false,
   timeWindow: SortedByTimeOptions[0],
-  perPage: 10
+  perPage: 10,
 };
 
 export const getDefaultSortedByType = (filtersSelected: { mostRecent: boolean; upvotes: boolean }) => {
@@ -172,7 +172,7 @@ export const mapLinkedKnowledgeNodeToReferencesArrays = (nodeReferences: LinkedK
       return {
         referenceIds: [...acu.referenceIds, cur.node],
         referenceLabels: [...acu.referenceLabels, cur.label || ""],
-        references: [...acu.references, cur.title || ""]
+        references: [...acu.references, cur.title || ""],
       };
     },
     { referenceIds: [], referenceLabels: [], references: [] }
@@ -184,7 +184,7 @@ export const mapLinkedKnowledgeNodeToLinkedNodeObject = (nodeReferences: LinkedK
     return {
       node: cur.node,
       title: cur.title || "",
-      label: cur.label || ""
+      label: cur.label || "",
     };
   });
 };
@@ -194,7 +194,7 @@ export const mapReferencesNodeToTagsArrays = (nodeReferences: LinkedKnowledgeNod
     (acu: TagsArray, cur) => {
       return {
         tagIds: [...acu.tagIds, cur.node],
-        tags: [...acu.tags, cur.title || ""]
+        tags: [...acu.tags, cur.title || ""],
       };
     },
     { tagIds: [], tags: [] }
@@ -205,7 +205,7 @@ export const mapLinkedKnowledgeNodeToLinkedNodeTag = (nodeTags: LinkedKnowledgeN
   return nodeTags.map(cur => {
     return {
       node: cur.node,
-      title: cur.title || ""
+      title: cur.title || "",
     };
   });
 };
@@ -246,15 +246,14 @@ export const ToUpperCaseEveryWord = (text: string) => {
     .join(" ");
 };
 
-
 export const validURL = (myURL: string) => {
   const pattern = new RegExp(
     "^(https?:\\/\\/)?" + // protocol
-    "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-    "((\\d{1,3}\\.){3}\\d{1,3}))" + // ip (v4) address
-    "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + //port
-    "(\\?[;&amp;a-z\\d%_.~+=-]*)?" + // query string
-    "(\\#[-a-z\\d_]*)?$",
+      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+      "((\\d{1,3}\\.){3}\\d{1,3}))" + // ip (v4) address
+      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + //port
+      "(\\?[;&amp;a-z\\d%_.~+=-]*)?" + // query string
+      "(\\#[-a-z\\d_]*)?$",
     "i"
   );
   return pattern.test(myURL);

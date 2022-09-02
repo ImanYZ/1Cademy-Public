@@ -1,4 +1,4 @@
-const shortenNumber = function (number: number, maxPlaces, forcePlaces, forceLetter?: any) {
+const shortenNumber = function (number: number, maxPlaces: any, forcePlaces: any, forceLetter?: any) {
   number = Number(number);
   forceLetter = forceLetter || false;
   if (forceLetter !== false) {
@@ -15,9 +15,9 @@ const shortenNumber = function (number: number, maxPlaces, forcePlaces, forceLet
     abbr = "K";
   }
   return annotate(number, maxPlaces, forcePlaces, abbr);
-}
+};
 
-function annotate(number: number, maxPlaces, forcePlaces, abbr: string): string {
+function annotate(number: number, maxPlaces: any, forcePlaces: any, abbr: string): string {
   // set places to false to not round
   let rounded: number = 0;
   switch (abbr) {
@@ -43,14 +43,14 @@ function annotate(number: number, maxPlaces, forcePlaces, abbr: string): string 
     } else {
       const test = new RegExp("\\.\\d{" + (maxPlaces + 1) + ",}$");
       if (test.test("" + rounded)) {
-        rounded = Number(rounded.toFixed(maxPlaces))
+        rounded = Number(rounded.toFixed(maxPlaces));
       }
     }
   }
   if (forcePlaces !== false) {
-    rounded = Number(Number(rounded).toFixed(forcePlaces))
+    rounded = Number(Number(rounded).toFixed(forcePlaces));
   }
   return rounded + abbr;
 }
 
-export default shortenNumber
+export default shortenNumber;

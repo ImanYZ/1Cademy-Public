@@ -14,14 +14,14 @@ const initializeTagsTreeView = (tags: string[]): AllTagsTreeView => {
         children: [],
         tags: [],
         tagIds: [],
-        checked: true
-      }
+        checked: true,
+      },
     };
   }, {});
 };
 
 export const useTagsTreeView = (chosenTags: string[] = []) => {
-  const [allTagsLoaded, setAllTagsLoaded] = useState(false)
+  const [allTagsLoaded, setAllTagsLoaded] = useState(false);
   const [tagsTreeView, setTagsTreeView] = useState<AllTagsTreeView>(initializeTagsTreeView(chosenTags));
 
   const applyTagsTreeViewChanges = (
@@ -57,7 +57,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
       if (!docChanges.length) return;
       const newTagsTreeView = applyTagsTreeViewChanges(tagsTreeView, docChanges);
       setTagsTreeView(newTagsTreeView);
-      setAllTagsLoaded(true)
+      setAllTagsLoaded(true);
     });
 
     return () => unsubscribe();
@@ -65,7 +65,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return [tagsTreeView, setTagsTreeView,allTagsLoaded] as const;
+  return [tagsTreeView, setTagsTreeView, allTagsLoaded] as const;
 };
 
 export const applyTagRemove = (oldAllTags: AllTagsTreeView, nodeId: string /*, dagreLoaded*/) => {
@@ -110,7 +110,7 @@ export const applyTagUpdate = (oldAllTags: AllTagsTreeView, nodeId: string, tagD
           children: [nodeId],
           checked: false,
           tags: [],
-          tagIds: []
+          tagIds: [],
         };
       }
     }
@@ -130,7 +130,7 @@ export const applyTagAdd = (oldAllTags: AllTagsTreeView, nodeId: string, tagData
     nodeId,
     tagIds: tagData.tagIds,
     tags: tagData.tags,
-    children: []
+    children: [],
   };
   for (let parentTagIdx = 0; parentTagIdx < tagData.tagIds.length; parentTagIdx++) {
     const parentTagId = tagData.tagIds[parentTagIdx];
@@ -144,7 +144,7 @@ export const applyTagAdd = (oldAllTags: AllTagsTreeView, nodeId: string, tagData
         checked: false,
         tags: [],
         tagIds: [],
-        children: [nodeId]
+        children: [nodeId],
       };
     }
   }

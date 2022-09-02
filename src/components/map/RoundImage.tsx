@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from "react";
 
 type RoundImageProps = {
-  imageUrl: string,
-  alt: string,
-}
+  imageUrl: string;
+  alt: string;
+};
 
 const RoundImage = (props: RoundImageProps) => {
   const [imageWidth, setImageWidth] = useState("100%");
@@ -21,6 +21,8 @@ const RoundImage = (props: RoundImageProps) => {
 
   return (
     <div className="UserAvatar UserStatusIcon">
+      {/* TODO: change to Next Image */}
+      {/* eslint-disable @next/next/no-img-element */}
       <img
         src={props.imageUrl}
         style={{ width: imageWidth, height: imageHeight }}

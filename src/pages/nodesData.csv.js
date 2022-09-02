@@ -44,8 +44,8 @@ export async function getServerSideProps({ res }) {
           { id: "updatedAt", title: "updatedAt" },
           { id: "versions", title: "versions" },
           { id: "viewers", title: "viewers" },
-          { id: "wrongs", title: "wrongs" }
-        ]
+          { id: "wrongs", title: "wrongs" },
+        ],
       });
       const data = [];
       for (let nodeDoc of nodesDocs.docs) {
@@ -105,7 +105,7 @@ export async function getServerSideProps({ res }) {
     }
   }
   return {
-    props: {}
+    props: {},
   };
 }
 

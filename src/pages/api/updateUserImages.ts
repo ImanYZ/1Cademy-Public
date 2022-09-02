@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { admin, commitBatch, db } from "../../lib/firestoreServer/admin";
-import { updateUserImageEverywhere } from '../../utils';
+import { updateUserImageEverywhere } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -24,7 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         fullname: userData.fName + " " + userData.lName,
         chooseUname,
         currentTimestamp,
-        writeCounts
+        writeCounts,
       });
     }
     await commitBatch(batch);

@@ -19,7 +19,7 @@ import {
   SelectChangeEvent,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import dayjs from "dayjs";
@@ -59,7 +59,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
     content: node.content || "",
     reasons: "",
     nodeType: node.nodeType || NodeType.Advertisement,
-    questions: node.choices ? [...node.choices] : []
+    questions: node.choices ? [...node.choices] : [],
   };
 
   const validate = (values: ProposalFormValues) => {
@@ -97,7 +97,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
     setSubmitting(true);
     setTouched({
       title: true,
-      questions: values.questions.map(() => ({ choice: true, feedback: true }))
+      questions: values.questions.map(() => ({ choice: true, feedback: true })),
     });
 
     await onSubmit(values);
@@ -116,8 +116,8 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
         sx={{
           p: { xs: 5, md: 10 },
           "&:last-child": {
-            paddingBottom: { xs: 4, md: 10 }
-          }
+            paddingBottom: { xs: 4, md: 10 },
+          },
         }}
       >
         <Formik initialValues={initialValues} validate={validate} onSubmit={onSubmitForm}>
@@ -218,7 +218,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                                       position: "absolute",
                                       color: grey[600],
                                       right: "0px",
-                                      top: "0px"
+                                      top: "0px",
                                     }}
                                   >
                                     <IconButton onClick={() => remove(idx)}>
@@ -333,7 +333,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                     sx={{
                       color: theme => theme.palette.common.black,
                       lineHeight: 2,
-                      fontSize: "1.2rem"
+                      fontSize: "1.2rem",
                     }}
                   >
                     <MarkdownRender text={values.content} />

@@ -1,13 +1,12 @@
 // import "./LinkingWords.css";
 // import Button from "@material-ui/core/Button";
-import AddIcon from '@mui/icons-material/Add';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { Button, Link, TextField, Tooltip } from "@mui/material";
-import { Box } from "@mui/system";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { Button, Link, TextField } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -81,6 +80,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.chosenNode]);
 
   const referenceLabelChangeHandler = useCallback(
@@ -89,11 +90,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
         return props.referenceLabelChange(event, idx);
       };
     },
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.referenceLabelChange]
   );
 
   const choosingNewLinkedNode = useCallback(
-    (linkType: any) => (event: any) => {
+    (linkType: any) => (/*event: any*/) => {
       // if (!props.isSubmitting) {
       // setChoosingType(linkType);
       {
@@ -122,11 +125,15 @@ const LinkingWords = (props: LinkingWordsProps) => {
       // setChoosingNode(props.identifier);
       // }
     },
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.identifier]
   );
 
   const deleteLink = useCallback(
-    (idx: any, linkType: any) => (event: any) => props.deleteLink(idx, linkType),
+    (idx: any, linkType: any) => (/*event: any*/) => props.deleteLink(idx, linkType),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteLink]
   );
 
@@ -134,16 +141,18 @@ const LinkingWords = (props: LinkingWordsProps) => {
     () =>
       props.isNew
         ? props.saveProposedChildNode(
-          props.identifier,
-          // summary,
-          "",
-          props.reason
-        )
+            props.identifier,
+            // summary,
+            "",
+            props.reason
+          )
         : props.saveProposedImprovement(
-          // summary,
-          "",
-          props.reason
-        ),
+            // summary,
+            "",
+            props.reason
+          ),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.isNew, props.identifier, props.reason, props.saveProposedChildNode, props.saveProposedImprovement]
   );
 
@@ -218,7 +227,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         type="text"
                         value={reference.label}
                         onChange={referenceLabelChangeHandler(idx)}
-                        label="Enter page # or voice/video time" />
+                        label="Enter page # or voice/video time"
+                      />
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
                           onClick={deleteLink(idx, "Reference")}
@@ -237,36 +247,33 @@ const LinkingWords = (props: LinkingWordsProps) => {
         )}
         {props.editable && (
           <>
-            {
-              props.openPart === "LinkingWords" &&
-                !props.isNew &&
-                nodeBookState.selectedNode === props.identifier ? (
+            {props.openPart === "LinkingWords" && !props.isNew && nodeBookState.selectedNode === props.identifier ? (
+              <MemoizedMetaButton
+                onClick={choosingNewLinkedNode("Parent")}
+                tooltip="Link to an existing parent node."
+                tooltipPosition="left"
+              >
+                <>
+                  <ArrowBackIcon fontSize="small" sx={{ color: "#00E676" }} />
+                  <AddIcon fontSize="small" sx={{ color: "#00E676" }} />
+                  <span>Link to an existing Parent</span>
+                </>
+              </MemoizedMetaButton>
+            ) : (
+              props.openPart === "References" && (
                 <MemoizedMetaButton
-                  onClick={choosingNewLinkedNode("Parent")}
-                  tooltip="Link to an existing parent node."
+                  onClick={choosingNewLinkedNode("Reference")}
+                  tooltip="Link to a reference node."
                   tooltipPosition="left"
                 >
                   <>
-                    <ArrowBackIcon fontSize='small' sx={{ color: '#00E676' }} />
-                    <AddIcon fontSize='small' sx={{ color: '#00E676' }} />
-                    <span>Link to an existing Parent</span>
+                    <MenuBookIcon sx={{ color: "#f9a825" }} />
+                    <AddIcon sx={{ color: "#00E676" }} />
+                    <span> Cite an existing Reference</span>
                   </>
                 </MemoizedMetaButton>
-              ) : (
-                props.openPart === "References" && (
-                  <MemoizedMetaButton
-                    onClick={choosingNewLinkedNode("Reference")}
-                    tooltip="Link to a reference node."
-                    tooltipPosition="left"
-                  >
-                    <>
-                      <MenuBookIcon sx={{ color: '#f9a825' }} />
-                      <AddIcon sx={{ color: '#00E676' }} />
-                      <span> Cite an existing Reference</span>
-                    </>
-                  </MemoizedMetaButton>
-                )
-              )}
+              )
+            )}
             <div className="ProposalCommentSubmitButton">
               <Button
                 color="error"
@@ -287,7 +294,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
             </div>
           </>
         )}
-      </div >
+      </div>
       <div className="LearnAfter">
         {props.openPart === "References" && (
           <>
@@ -307,79 +314,74 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     <div className="LinkDeleteButton">
                       <MemoizedMetaButton
                         onClick={deleteLink(idx, "Tag")}
-                        tooltip='Delete the link to this tag.'
-                        tooltipPosition='right'
+                        tooltip="Delete the link to this tag."
+                        tooltipPosition="right"
                       >
                         <DeleteForeverIcon />
                       </MemoizedMetaButton>
-                    </div >
+                    </div>
                   )}
-                </div >
+                </div>
               );
             })}
-            {
-              props.editable && props.openPart === "References" && (
-                <MemoizedMetaButton
-                  onClick={choosingNewLinkedNode("Tag")}
-                  tooltip='Link to a node.'
-                  tooltipPosition='left'
-                >
-                  <>
-                    <LocalOfferIcon sx={{ color: '#f9a825' }} />
-                    <AddIcon sx={{ color: '#00E676' }} />
-                    <span> Add an existing Tag</span>
-                  </>
-                </MemoizedMetaButton>
-              )
-            }
+            {props.editable && props.openPart === "References" && (
+              <MemoizedMetaButton
+                onClick={choosingNewLinkedNode("Tag")}
+                tooltip="Link to a node."
+                tooltipPosition="left"
+              >
+                <>
+                  <LocalOfferIcon sx={{ color: "#f9a825" }} />
+                  <AddIcon sx={{ color: "#00E676" }} />
+                  <span> Add an existing Tag</span>
+                </>
+              </MemoizedMetaButton>
+            )}
           </>
         )}
-        {
-          props.openPart === "LinkingWords" && (
-            <>
-              <strong>Children (Follow-ups)</strong>
-              {props.nodesChildren.map((child: any, idx: number) => {
-                return (
-                  <div key={props.identifier + "LinkTo" + child.node + "DIV"}>
-                    <LinkingButton
-                      key={props.identifier + "LinkTo" + child.node}
-                      onClick={props.openLinkedNode}
-                      // nodeID={props.identifier}
-                      linkedNodeID={child.node}
-                      linkedNodeTitle={child.title}
-                      linkedNodeType="child"
-                      nodeType={child.nodeType}
-                      visible={child.visible}
-                    />
-                    {props.editable && (
-                      <div className="LinkDeleteButton">
-                        <MemoizedMetaButton
-                          onClick={deleteLink(idx, "Child")}
-                          tooltip="Delete the link to this child."
-                          tooltipPosition="right"
-                        >
-                          <DeleteForeverIcon />
-                        </MemoizedMetaButton>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              <LinkingButton
-                key={props.identifier + "LinkToAllChildren"}
-                onClick={props.openAllChildren}
-                // nodeID={props.identifier}
-                linkedNodeID={props.identifier}
-                linkedNodeTitle={"All Children"}
-                linkedNodeType="children"
-                nodeType={"Relation"}
-                visible={false}
-              />
-            </>
-          )
-        }
-        {
-          props.editable &&
+        {props.openPart === "LinkingWords" && (
+          <>
+            <strong>Children (Follow-ups)</strong>
+            {props.nodesChildren.map((child: any, idx: number) => {
+              return (
+                <div key={props.identifier + "LinkTo" + child.node + "DIV"}>
+                  <LinkingButton
+                    key={props.identifier + "LinkTo" + child.node}
+                    onClick={props.openLinkedNode}
+                    // nodeID={props.identifier}
+                    linkedNodeID={child.node}
+                    linkedNodeTitle={child.title}
+                    linkedNodeType="child"
+                    nodeType={child.nodeType}
+                    visible={child.visible}
+                  />
+                  {props.editable && (
+                    <div className="LinkDeleteButton">
+                      <MemoizedMetaButton
+                        onClick={deleteLink(idx, "Child")}
+                        tooltip="Delete the link to this child."
+                        tooltipPosition="right"
+                      >
+                        <DeleteForeverIcon />
+                      </MemoizedMetaButton>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <LinkingButton
+              key={props.identifier + "LinkToAllChildren"}
+              onClick={props.openAllChildren}
+              // nodeID={props.identifier}
+              linkedNodeID={props.identifier}
+              linkedNodeTitle={"All Children"}
+              linkedNodeType="children"
+              nodeType={"Relation"}
+              visible={false}
+            />
+          </>
+        )}
+        {props.editable &&
           !props.isNew &&
           nodeBookState.selectedNode === props.identifier &&
           props.openPart === "LinkingWords" && (
@@ -390,14 +392,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
             >
               <>
                 <span>Link to an existing Child node</span>
-                <AddIcon fontSize='small' sx={{ color: '#00E676' }} />
-                <ArrowForwardIcon fontSize='small' sx={{ color: '#00E676' }} />
+                <AddIcon fontSize="small" sx={{ color: "#00E676" }} />
+                <ArrowForwardIcon fontSize="small" sx={{ color: "#00E676" }} />
               </>
             </MemoizedMetaButton>
-          )
-        }
-      </div >
-    </div >
+          )}
+      </div>
+    </div>
   ) : null;
 };
 

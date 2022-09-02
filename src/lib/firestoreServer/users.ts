@@ -16,7 +16,7 @@ export const getContributorsForAutocomplete = async (users: string[]) => {
     response.push({
       id: user,
       imageUrl: userData?.imageUrl,
-      name: `${userData?.fName || ""} ${userData?.lName || ""}`
+      name: `${userData?.fName || ""} ${userData?.lName || ""}`,
     });
   }
 

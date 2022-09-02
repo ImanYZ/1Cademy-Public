@@ -1,19 +1,19 @@
-import { Button, TextField } from "@mui/material"
-import { Box } from "@mui/system"
-import React, { useState } from "react"
+import { Button, TextField } from "@mui/material";
+import { Box } from "@mui/system";
+import React, { useState } from "react";
 
-import MarkdownRender from "./Markdown/MarkdownRender"
+import MarkdownRender from "./Markdown/MarkdownRender";
 
 type EditorProps = {
-  label: string
-  value: string
-  setValue: (value: string) => void
-  readOnly?: boolean
-}
+  label: string;
+  value: string;
+  setValue: (value: string) => void;
+  readOnly?: boolean;
+};
 
 export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
-  const [canEdit, setCanEdit] = useState(true)
+  const [canEdit, setCanEdit] = useState(true);
 
   // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   setValue(event.target.value);
@@ -56,13 +56,13 @@ export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps)
           // onMouseDown={handleMouseDown}
         />
       ) : (
-        <Box sx={{p: canEdit?'0px':'16px 14px'}}>
+        <Box sx={{ p: canEdit ? "0px" : "16px 14px" }}>
           <MarkdownRender fontSize="16px" text={value} />
         </Box>
       )}
     </Box>
-  )
-}
+  );
+};
 
 // CHECK: we can improve this, to only recalculate his size
 // if previous height is different from current height,

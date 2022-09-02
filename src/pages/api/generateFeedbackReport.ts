@@ -15,7 +15,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     res.writeHead(200, {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Length": stat.size
+      "Content-Length": stat.size,
     });
 
     const readStream = fs.createReadStream(filePath);

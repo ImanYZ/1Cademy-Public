@@ -14,10 +14,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
       {
         host: process.env.ONECADEMYCRED_TYPESENSE_HOST as string,
         port: parseInt(process.env.ONECADEMYCRED_TYPESENSE_PORT as string),
-        protocol: process.env.ONECADEMYCRED_TYPESENSE_PROTOCOL as string
-      }
+        protocol: process.env.ONECADEMYCRED_TYPESENSE_PROTOCOL as string,
+      },
     ],
-    apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string
+    apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string,
   });
 
   if (q.length === 0) {
@@ -27,7 +27,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
         : require("@/lib/datasets/defaultInstitutions.dev.json");
 
     const response: ResponseAutocompleteFilter = {
-      results: defaultInstitutions
+      results: defaultInstitutions,
     };
     res.status(200).json(response);
     return;
@@ -42,10 +42,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
     const results: FilterValue[] | undefined = searchResults.hits?.map(el => ({
       id: el.document.id,
       name: el.document.name,
-      imageUrl: el.document.logoURL
+      imageUrl: el.document.logoURL,
     }));
     const response: ResponseAutocompleteFilter = {
-      results: results || []
+      results: results || [],
     };
     res.status(200).json(response);
   } catch (error) {

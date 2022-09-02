@@ -4,7 +4,6 @@ import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import EventIcon from "@mui/icons-material/Event";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -17,7 +16,7 @@ import { FC } from "react";
 import { NodeType } from "../types";
 
 type Props = {
-  tooltipPlacement: TooltipProps['placement'];
+  tooltipPlacement: TooltipProps["placement"];
   nodeType?: NodeType;
 } & SvgIconProps;
 
@@ -51,9 +50,13 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement, color = "primary"
     }
   };
 
-  if (!nodeType) return null
+  if (!nodeType) return null;
 
-  return <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>{renderIcon()}</Tooltip>;
+  return (
+    <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
+      {renderIcon()}
+    </Tooltip>
+  );
 };
 
 export default NodeTypeIcon;

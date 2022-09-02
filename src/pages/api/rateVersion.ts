@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next"
+import { NextApiRequest, NextApiResponse } from "next";
 
-import { admin, db } from "../../lib/firestoreServer/admin"
-import fbAuth from "../../middlewares/fbAuth"
+import { admin, db } from "../../lib/firestoreServer/admin";
+import fbAuth from "../../middlewares/fbAuth";
 import {
   addToPendingPropsNumsExcludingVoters,
   arrayToChunks,
@@ -11,7 +11,7 @@ import {
   getVersion,
   setOrIncrementNotificationNums,
   versionCreateUpdate,
-} from "../../utils"
+} from "../../utils";
 
 /*
   This function gets invoked when the user clicks on the 
@@ -52,30 +52,30 @@ import {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const tWriteOperations: { objRef: any; data: any; operationType: string }[] = []
+    const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
 
     await db.runTransaction(async t => {
-      let writeCounts = 0
-      let nodeData, nodeRef, versionData, versionRef, correct, wrong, award
-      const addedParents = []
-      const addedChildren = []
-      const removedParents = []
-      const removedChildren = []
-      const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date())
+      let writeCounts = 0;
+      let nodeData, nodeRef, versionData, versionRef, correct, wrong, award;
+      const addedParents = [];
+      const addedChildren = [];
+      const removedParents = [];
+      const removedChildren = [];
+      const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
 
-      ;({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }))
-      ;({ versionData, versionRef } = await getVersion({
+      ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }));
+      ({ versionData, versionRef } = await getVersion({
         versionId: req.body.versionId,
         nodeType: req.body.nodeType,
         t,
-      }))
+      }));
 
-      const previouslyAccepted = versionData.accepted
-      let childType = "childType" in versionData ? versionData.childType : false
+      const previouslyAccepted = versionData.accepted;
+      let childType = "childType" in versionData ? versionData.childType : false;
 
       for (let parent of versionData.parents) {
         if (!nodeData.parents.some((p: any) => p.node === parent.node)) {
-          addedParents.push(parent.node)
+          addedParents.push(parent.node);
         }
       }
 
@@ -84,18 +84,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // In this function, we have to manually generate them.
       for (let parent of nodeData.parents) {
         if (!versionData.parents.some((p: any) => p.node === parent.node)) {
-          removedParents.push(parent.node)
+          removedParents.push(parent.node);
         }
       }
 
       for (let child of versionData.children) {
         if (!nodeData.children.some((c: any) => c.node === child.node)) {
-          addedChildren.push(child.node)
+          addedChildren.push(child.node);
         }
       }
       for (let child of nodeData.children) {
         if (!versionData.children.some((c: any) => c.node === child.node)) {
-          removedChildren.push(child.node)
+          removedChildren.push(child.node);
         }
       }
 
@@ -104,12 +104,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeType: req.body.nodeType,
         uname: req.body.uname,
         t,
-      })
+      });
 
-      correct = req.body.correct ? 1 : 0
-      wrong = req.body.wrong ? 1 : 0
+      correct = req.body.correct ? 1 : 0;
+      wrong = req.body.wrong ? 1 : 0;
 
-      award = nodeData.admin === req.body.uname && versionData.proposer !== req.body.uname && req.body.award ? 1 : 0
+      award = nodeData.admin === req.body.uname && versionData.proposer !== req.body.uname && req.body.award ? 1 : 0;
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
@@ -133,7 +133,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         writeCounts,
         t,
         tWriteOperations,
-      })
+      });
 
       // let choices: any[] = [];
       // if ((!childType && req.body.nodeType === "Question") || childType === "Question") {
@@ -145,7 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: versionData.wrongs + wrong,
         awards: versionData.awards + award,
         updatedAt: currentTimestamp,
-      }
+      };
 
       // If the userVersion document does not already exist in the database,
       // i.e., if the user has not had previous interactions, like votes, on the version.
@@ -158,7 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           version: req.body.versionId,
           user: req.body.uname,
           wrong: wrong === 1,
-        }
+        };
       } else {
         userVersionData = {
           ...userVersionData,
@@ -166,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           wrong: wrong === 1 ? true : wrong === 0 ? userVersionData.wrong : false,
           award: award === 1 ? true : award === 0 ? userVersionData.award : false,
           updatedAt: currentTimestamp,
-        }
+        };
       }
 
       /*
@@ -176,11 +176,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       we should do the same thing for the user version.
     */
       if (versionData.accepted && childType) {
-        versionUpdates.deleted = true
-        userVersionData.deleted = true
+        versionUpdates.deleted = true;
+        userVersionData.deleted = true;
       }
 
-      tWriteOperations.push({ objRef: versionRef, data: versionUpdates, operationType: "update" })
+      tWriteOperations.push({ objRef: versionRef, data: versionUpdates, operationType: "update" });
 
       // Even if this is a child proposal that is being accepted, there were previously
       // a version and its corresponding userVersion on the parent node that the voter is
@@ -193,7 +193,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         writeCounts,
         t,
         tWriteOperations,
-      })
+      });
 
       let notificationData = {
         proposer: versionData.proposer,
@@ -208,30 +208,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         aType: "",
         checked: false,
         createdAt: currentTimestamp,
-      }
+      };
 
       if (previouslyAccepted || !versionData.accepted) {
         if (previouslyAccepted) {
-          notificationData.oType = "AccProposal"
+          notificationData.oType = "AccProposal";
         }
         // Action type
-        notificationData.aType = ""
+        notificationData.aType = "";
         if (correct === 1) {
-          notificationData.aType = "Correct"
+          notificationData.aType = "Correct";
         } else if (correct === -1) {
-          notificationData.aType = "CorrectRM"
+          notificationData.aType = "CorrectRM";
         } else if (wrong === 1) {
-          notificationData.aType = "Wrong"
+          notificationData.aType = "Wrong";
         } else if (wrong === -1) {
-          notificationData.aType = "WrongRM"
+          notificationData.aType = "WrongRM";
         } else if (award === 1) {
-          notificationData.aType = "Award"
+          notificationData.aType = "Award";
         } else if (award === -1) {
-          notificationData.aType = "AwardRM"
+          notificationData.aType = "AwardRM";
         }
       } else {
         // A proposal that is just getting accepted.
-        notificationData.aType = "Accept"
+        notificationData.aType = "Accept";
         // This was a pending proposal for a child/improvement that just got accepted. So, we need to decrement the number of pending proposals for all the members of this community.
         await addToPendingPropsNumsExcludingVoters({
           nodeType: childType ? childType : req.body.nodeType,
@@ -241,53 +241,53 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           writeCounts,
           t,
           tWriteOperations,
-        })
+        });
       }
 
       if (notificationData.aType !== "") {
-        const notificationRef = db.collection("notifications").doc()
+        const notificationRef = db.collection("notifications").doc();
 
         tWriteOperations.push({
           objRef: notificationRef,
           data: notificationData,
           operationType: "set",
-        })
+        });
 
         await setOrIncrementNotificationNums({
           proposer: versionData.proposer,
           writeCounts,
           t,
           tWriteOperations,
-        })
+        });
       }
-    })
+    });
 
-    const chunkedArray = arrayToChunks(tWriteOperations)
+    const chunkedArray = arrayToChunks(tWriteOperations);
 
     for (let chunk of chunkedArray) {
       await db.runTransaction(async t => {
         for (let operation of chunk) {
-          const { objRef, data, operationType } = operation
+          const { objRef, data, operationType } = operation;
           switch (operationType) {
             case "update":
-              t.update(objRef, data)
-              break
+              t.update(objRef, data);
+              break;
             case "set":
-              t.set(objRef, data)
-              break
+              t.set(objRef, data);
+              break;
             case "delete":
-              t.delete(objRef)
-              break
+              t.delete(objRef);
+              break;
           }
         }
-      })
+      });
     }
 
-    return res.status(200).json({ success: true })
+    return res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err)
-    return res.status(500).json({ err, success: false })
+    console.error(err);
+    return res.status(500).json({ err, success: false });
   }
 }
 
-export default fbAuth(handler)
+export default fbAuth(handler);

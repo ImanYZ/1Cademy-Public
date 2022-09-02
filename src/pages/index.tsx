@@ -14,7 +14,7 @@ import {
   getQueryParameter,
   getQueryParameterAsBoolean,
   getQueryParameterAsNumber,
-  homePageSortByDefaults
+  homePageSortByDefaults,
 } from "@/lib/utils/utils";
 
 import { useOnScreen } from "../hooks/useOnScreen";
@@ -22,18 +22,18 @@ import { FilterValue, SortTypeWindowOption, TimeWindowOption } from "../knowledg
 import { brandingLightTheme } from "../lib/theme/brandingTheme";
 
 export const PagesNavbar: ComponentType<any> = dynamic(() => import("@/components/PagesNavbar").then(m => m.default), {
-  ssr: false
+  ssr: false,
 });
 
 export const SortByFilters: ComponentType<any> = dynamic(
   () => import("@/components/SortByFilters").then(m => m.default),
   {
-    ssr: false
+    ssr: false,
   }
 );
 
 const MasonryNodes: ComponentType<any> = dynamic(() => import("@/components/MasonryNodes").then(m => m.MasonryNodes), {
-  ssr: false
+  ssr: false,
 });
 
 const HomePage: NextPage = () => {
@@ -72,7 +72,7 @@ const HomePage: NextPage = () => {
     reference,
     label,
     page,
-    nodeTypes
+    nodeTypes,
   };
 
   const { data, isLoading } = useQuery(["nodesSearch", nodeSearchKeys], () => getSearchNodes(nodeSearchKeys));

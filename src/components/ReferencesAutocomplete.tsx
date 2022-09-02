@@ -6,7 +6,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  TextField
+  TextField,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
@@ -31,7 +31,7 @@ export const ReferencesAutocomplete = ({ onReferencesChange }: ReferencesAutocom
 
   const [referenceSelected, setReferenceSelected] = useState<{ title: string; label: string }>({
     title: "",
-    label: ""
+    label: "",
   });
 
   const getReferenceData = (reference: string): FilterProcessedReferences | null => {
@@ -93,7 +93,7 @@ export const ReferencesAutocomplete = ({ onReferencesChange }: ReferencesAutocom
           fontWeight: "400",
           color: "black",
           background: theme => theme.palette.grey[200],
-          borderRadius: "20px"
+          borderRadius: "20px",
         }}
       >
         Book/Paper
@@ -122,7 +122,7 @@ export const ReferencesAutocomplete = ({ onReferencesChange }: ReferencesAutocom
                   {referenceAdornment()}
                   {params.InputProps.startAdornment}
                 </>
-              ) : undefined
+              ) : undefined,
             }}
           />
         )}

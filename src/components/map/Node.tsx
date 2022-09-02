@@ -563,6 +563,9 @@ const Node = ({
                     </div>
                   )}
                   {/* <a href={nodeImage} target="_blank"> */}
+
+                  {/* TODO: change to Next Image */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={nodeImage}
                     alt="Node image"

@@ -6,24 +6,23 @@ import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import DraftsIcon from "@mui/icons-material/Drafts";
 import HeightIcon from "@mui/icons-material/Height";
+import ImageIcon from "@mui/icons-material/Image";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MailIcon from "@mui/icons-material/Mail";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
-import ImageIcon from '@mui/icons-material/Image';
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useState,useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { OpenPart } from "../../nodeBookTypes";
 import NodeTypeIcon from "../NodeTypeIcon";
 import { MemoizedMetaButton } from "./MetaButton";
-
 import { MemoizedUserStatusIcon } from "./UserStatusIcon";
 
 dayjs.extend(relativeTime);
@@ -78,24 +77,17 @@ type NodeFooterProps = {
 
 const NodeFooter = ({
   open,
-  identifier,
-  activeNode,
   citationsSelected,
-  proposalsSelected,
-  acceptedProposalsSelected,
-  commentsSelected,
   editable,
   title,
   content,
   unaccepted,
-  openPart,
   nodeType,
   isNew,
   admin,
   aImgUrl,
   aFullname,
   aChooseUname,
-  viewers,
   correctNum,
   markedCorrect,
   wrongNum,
@@ -104,11 +96,8 @@ const NodeFooter = ({
   tags,
   parents,
   nodesChildren,
-  commentsNum,
-  proposalsNum,
   studied,
   isStudied,
-  changed,
   changedAt,
   bookmarked,
   bookmarks,
@@ -121,12 +110,12 @@ const NodeFooter = ({
   correctNode,
   wrongNode,
   uploadNodeImage,
-  user
+  user,
 }: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
-  const inputEl = useRef(null);
+  const inputEl = useRef<HTMLInputElement>(null);
 
   const selectReferences = useCallback(
     (event: any) => {
@@ -141,14 +130,8 @@ const NodeFooter = ({
     },
     [selectNode]
   );
-const uploadNodeImageHandler = useCallback(
-    (event:any) =>
-    uploadNodeImage(
-        event,
-        isUploading,
-        setIsUploading,
-        setPercentageUploaded
-      ),
+  const uploadNodeImageHandler = useCallback(
+    (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
     [uploadNodeImage, isUploading]
   );
   const selectLinkingWords = useCallback(
@@ -158,29 +141,24 @@ const uploadNodeImageHandler = useCallback(
     [openNodePart]
   );
 
-  const narrateNode = useCallback(
-    (event: any) => {
-      if (!window.speechSynthesis.speaking) {
-        const msg = new SpeechSynthesisUtterance("Node title: " + title + " \n " + "Node content: " + content);
-        window.speechSynthesis.speak(msg);
-        setIsSpeaking(true);
-        window.speechSynthesis.onend = () => {
-          setIsSpeaking(false);
-        };
-      } else {
-        window.speechSynthesis.cancel();
-        setIsSpeaking(false);
-      }
-    },
-    [title, content]
-  );
-  const uploadImageClicked = useCallback(
-    (event:any) => {
-      inputEl.current.click();
-    },
-    [inputEl]
-  );
+  const narrateNode = useCallback(() => {
+    if (!window.speechSynthesis.speaking) {
+      const msg = new SpeechSynthesisUtterance("Node title: " + title + " \n " + "Node content: " + content);
+      window.speechSynthesis.speak(msg);
+      setIsSpeaking(true);
+      //   window.speechSynthesis.onend = () => {
+      //   setIsSpeaking(false);
+      // };
+    } else {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, [title, content]);
+  const uploadImageClicked = useCallback(() => {
+    if (!inputEl?.current) return;
 
+    inputEl.current.click();
+  }, [inputEl]);
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "10px" }}>
@@ -307,34 +285,28 @@ const uploadNodeImageHandler = useCallback(
 
               // {/* CHECK: I commented this, please uncomented when work in proposal */}
               <>
-                <input
-                  type="file"
-                  ref={inputEl}
-                  onChange={uploadNodeImageHandler}
-                  hidden
-                />
+                <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
                 <MemoizedMetaButton
                   onClick={uploadImageClicked}
                   tooltip="Upload an image for this node."
                   tooltipPosition="top"
                 >
                   <>
-                <ImageIcon fontSize="small"/>
-                  {isUploading && (
-                    <>
-                      <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
-                        <div className="spinner-layer spinner-yellow-only">
-                          <div className="circle-clipper left">
-                            <div className="circle"></div>
+                    <ImageIcon fontSize="small" />
+                    {isUploading && (
+                      <>
+                        <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
+                          <div className="spinner-layer spinner-yellow-only">
+                            <div className="circle-clipper left">
+                              <div className="circle"></div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <span className="ImageUploadPercentage">{percentageUploaded + "%"}</span>
-                    </>
-                  )}
+                        <span className="ImageUploadPercentage">{percentageUploaded + "%"}</span>
+                      </>
+                    )}
                   </>
                 </MemoizedMetaButton>
-
               </>
             )}
             {!editable && !unaccepted && nodeType === "Reference" ? (

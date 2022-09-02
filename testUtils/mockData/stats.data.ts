@@ -5,5 +5,5 @@ export const statsData: StatsSchema = {
   users: "1,436",
   proposals: "79,044",
   nodes: "39,050",
-  links: "113,646"
+  links: "113,646",
 };

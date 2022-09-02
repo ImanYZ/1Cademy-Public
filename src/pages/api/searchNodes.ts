@@ -9,7 +9,7 @@ import {
   getQueryParameter,
   getQueryParameterAsBoolean,
   getQueryParameterAsNumber,
-  homePageSortByDefaults
+  homePageSortByDefaults,
 } from "@/lib/utils/utils";
 
 import { SearchNodesResponse, SimpleNode, TimeWindowOption, TypesenseNodesSchema } from "../../knowledgeTypes";
@@ -39,7 +39,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       sort_by: buildSortBy(upvotes, mostRecent),
       per_page: homePageSortByDefaults.perPage,
       page,
-      filter_by: buildFilterBy(timeWindow, tags, institutionNames, contributors, nodeTypes, reference, label)
+      filter_by: buildFilterBy(timeWindow, tags, institutionNames, contributors, nodeTypes, reference, label),
     };
 
     const searchResults = await client.collections<TypesenseNodesSchema>("nodes").documents().search(searchParameters);
@@ -57,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
         tags: el.document.tags,
         contributors: el.document.contributors,
         institutions: el.document.institutions,
-        choices: el.document.choices || []
+        choices: el.document.choices || [],
       })
     );
 
@@ -65,7 +65,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       data: allPostsData || [],
       page: searchResults.page,
       numResults: searchResults.found,
-      perPage: homePageSortByDefaults.perPage
+      perPage: homePageSortByDefaults.perPage,
     });
   } catch (error) {
     console.error(error);

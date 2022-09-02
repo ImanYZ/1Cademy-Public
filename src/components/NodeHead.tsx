@@ -25,7 +25,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     wrongs = 0,
     children = [],
     tags = [],
-    changedAt
+    changedAt,
   } = node;
 
   const jsonObj: any = {
@@ -40,7 +40,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     nodeType: nodeType,
     author: {
       "@type": "Organization",
-      name: "1Cademy"
+      name: "1Cademy",
     },
     datePublished: createdStr,
     dateModified: updatedStr,
@@ -50,16 +50,16 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
       sameAs: APP_DOMAIN,
       logo: {
         "@type": "ImageObject",
-        url: `${APP_DOMAIN}_next/static/media/DarkModeLogo.528aaaa6.svg`
-      }
+        url: `${APP_DOMAIN}_next/static/media/DarkModeLogo.528aaaa6.svg`,
+      },
     },
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "" + (corrects - wrongs),
       bestRating: "" + (corrects + wrongs),
       worstRating: "" + -(corrects + wrongs),
-      ratingCount: "" + (corrects + wrongs)
-    }
+      ratingCount: "" + (corrects + wrongs),
+    },
   };
   if (nodeImage) {
     jsonObj["image"] = nodeImage;
@@ -69,7 +69,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     jsonObj["prerequisites"].push({
       "@type": "parent",
       link: `${getNodePageWithDomain(parent.title || "", parent.node)}`,
-      title: "1Cademy - " + escapeBreaksQuotes(parent.title)
+      title: "1Cademy - " + escapeBreaksQuotes(parent.title),
     });
   }
   jsonObj["followUps"] = [];
@@ -77,7 +77,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     jsonObj["followUps"].push({
       "@type": "child",
       link: `${getNodePageWithDomain(child.title || "", child.node)}`,
-      title: "1Cademy - " + escapeBreaksQuotes(child.title)
+      title: "1Cademy - " + escapeBreaksQuotes(child.title),
     });
   }
   jsonObj["tags"] = [];
@@ -85,7 +85,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     jsonObj["tags"].push({
       "@type": "tag",
       link: `${getNodePageWithDomain(tag.title || "", tag.node)}`,
-      title: "1Cademy - " + escapeBreaksQuotes(tag.title)
+      title: "1Cademy - " + escapeBreaksQuotes(tag.title),
     });
   }
   jsonObj["references"] = [];
@@ -94,7 +94,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
       "@type": "reference",
       link: `${getNodePageWithDomain(reference.title || "", reference.node)}`,
       title: "1Cademy - " + escapeBreaksQuotes(reference.title),
-      label: reference.label
+      label: reference.label,
     });
   }
 
@@ -117,7 +117,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonObj)
+          __html: JSON.stringify(jsonObj),
         }}
       />
     </Head>

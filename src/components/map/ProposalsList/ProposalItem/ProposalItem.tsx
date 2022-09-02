@@ -29,6 +29,8 @@ const ProposalItem = (props: any) => {
         props.openLinkedNode(proposal.node);
       }
     },
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
   );
 
@@ -55,7 +57,7 @@ const ProposalItem = (props: any) => {
             onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              <CloseIcon fontSize="small" className={props.proposal.wrong ? "red-text" : "grey-text"}/>
+              <CloseIcon fontSize="small" className={props.proposal.wrong ? "red-text" : "grey-text"} />
               <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
@@ -65,7 +67,7 @@ const ProposalItem = (props: any) => {
             onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              <DoneIcon fontSize="small" className={props.proposal.correct ? "green-text" : "grey-text"}/>
+              <DoneIcon fontSize="small" className={props.proposal.correct ? "green-text" : "grey-text"} />
               <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
@@ -75,7 +77,7 @@ const ProposalItem = (props: any) => {
             onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              <GradeIcon fontSize="small" className={props.proposal.award ? "amber-text" : "grey-text"}/>
+              <GradeIcon fontSize="small" className={props.proposal.award ? "amber-text" : "grey-text"} />
               <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
@@ -83,9 +85,7 @@ const ProposalItem = (props: any) => {
       </div>
       <div>
         <div className="ProposalTitle">
-          {props.showTitle && (
-            <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />
-          )}
+          {props.showTitle && <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />}
           {/* <p>Proposal Summary:</p> */}
           {proposalSummaries.length > 0
             ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {

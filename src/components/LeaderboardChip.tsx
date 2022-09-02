@@ -23,7 +23,7 @@ const LeaderboardChip: FC<Props> = ({ href, name = "", imageUrl, reputation, isC
         sx={{
           height: 60,
           borderRadius: 28,
-          padding: "6px"
+          padding: "6px",
         }}
         icon={<OptimizedAvatar name={name} imageUrl={imageUrl} renderAsAvatar={renderAsAvatar} />}
         variant="outlined"

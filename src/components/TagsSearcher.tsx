@@ -8,7 +8,7 @@ import {
   AutocompleteRenderOptionState,
   Checkbox,
   FormControlLabel,
-  TextField
+  TextField,
 } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React, { useCallback } from "react";
@@ -70,7 +70,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
         setAllTags(oldAllTags => {
           const newAllTags: AllTagsTreeView = {
             ...oldAllTags,
-            [targetTag]: { ...oldAllTags[targetTag], checked: true }
+            [targetTag]: { ...oldAllTags[targetTag], checked: true },
           };
           if (!multiple) {
             // if not multiple, set all checked to false except the targetTag
@@ -118,7 +118,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
       setAllTags(oldAllTags => {
         const newAllTags = {
           ...oldAllTags,
-          [event.target.name]: { ...oldAllTags[event.target.name], checked: event.target.checked }
+          [event.target.name]: { ...oldAllTags[event.target.name], checked: event.target.checked },
         };
         if (!multiple) {
           for (let aTag in newAllTags) {
@@ -148,7 +148,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
             />
           }
           sx={{
-            color: theme => (theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white)
+            color: theme => (theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white),
           }}
         >
           {tag.children ? tag.children.map(nodeId => tagsTreeView(allTags[nodeId])) : null}
@@ -189,7 +189,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
             borderStyle: "solid",
             borderRadius: theme => `${theme.shape.borderRadius}px`,
             borderTopWidth: "0px",
-            ...sx
+            ...sx,
           }}
         >
           {Object.keys(allTags).map((nodeId: string) => {

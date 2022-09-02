@@ -22,7 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
         title: el.title,
         content: el.content,
         nodeImage: el.nodeImage,
-        nodeType: el.nodeType
+        nodeType: el.nodeType,
       }));
 
     res.status(200).json({ results: fullNodes });

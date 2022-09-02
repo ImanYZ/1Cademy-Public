@@ -1,4 +1,4 @@
-import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin"
+import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
 import {
   comPointTypes,
   getTypedCollections,
@@ -6,7 +6,7 @@ import {
   retrieveAndsignalAllUserNodesChanges,
   schoolPointTypes,
   updateUserImageInCollection,
-} from "."
+} from ".";
 
 export const updateUserImageEverywhere = async ({
   batch,
@@ -17,9 +17,9 @@ export const updateUserImageEverywhere = async ({
   currentTimestamp,
   writeCounts,
 }: any) => {
-  let newBatch = batch
+  let newBatch = batch;
 
-  ;[newBatch, writeCounts] = await updateUserImageInCollection({
+  [newBatch, writeCounts] = await updateUserImageInCollection({
     batch: newBatch,
     collQuery: false,
     collectionName: "nodeComments",
@@ -31,8 +31,8 @@ export const updateUserImageEverywhere = async ({
     chooseUname,
     currentTimestamp,
     writeCounts,
-  })
-  ;[newBatch, writeCounts] = await updateUserImageInCollection({
+  });
+  [newBatch, writeCounts] = await updateUserImageInCollection({
     batch: newBatch,
     collQuery: false,
     collectionName: "messages",
@@ -44,8 +44,8 @@ export const updateUserImageEverywhere = async ({
     chooseUname,
     currentTimestamp,
     writeCounts,
-  })
-  ;[newBatch, writeCounts] = await updateUserImageInCollection({
+  });
+  [newBatch, writeCounts] = await updateUserImageInCollection({
     batch: newBatch,
     collQuery: false,
     collectionName: "notifications",
@@ -57,8 +57,8 @@ export const updateUserImageEverywhere = async ({
     chooseUname,
     currentTimestamp,
     writeCounts,
-  })
-  ;[newBatch, writeCounts] = await updateUserImageInCollection({
+  });
+  [newBatch, writeCounts] = await updateUserImageInCollection({
     batch: newBatch,
     collQuery: false,
     collectionName: "presentations",
@@ -70,9 +70,9 @@ export const updateUserImageEverywhere = async ({
     chooseUname,
     currentTimestamp,
     writeCounts,
-  })
+  });
   for (let comType of comPointTypes) {
-    ;[newBatch, writeCounts] = await updateUserImageInCollection({
+    [newBatch, writeCounts] = await updateUserImageInCollection({
       batch: newBatch,
       collQuery: false,
       collectionName: comType,
@@ -84,10 +84,10 @@ export const updateUserImageEverywhere = async ({
       chooseUname,
       currentTimestamp,
       writeCounts: writeCounts,
-    })
+    });
   }
   for (let schoolType of schoolPointTypes) {
-    ;[newBatch, writeCounts] = await updateUserImageInCollection({
+    [newBatch, writeCounts] = await updateUserImageInCollection({
       batch: newBatch,
       collQuery: false,
       collectionName: schoolType,
@@ -99,11 +99,11 @@ export const updateUserImageEverywhere = async ({
       chooseUname,
       currentTimestamp,
       writeCounts,
-    })
+    });
   }
   for (let nodeType of NODE_TYPES) {
-    const { versionsColl, versionsCommentsColl } = getTypedCollections({ nodeType })
-    ;[newBatch, writeCounts] = await updateUserImageInCollection({
+    const { versionsColl, versionsCommentsColl } = getTypedCollections({ nodeType });
+    [newBatch, writeCounts] = await updateUserImageInCollection({
       batch: newBatch,
       collQuery: versionsColl,
       collectionName: nodeType + "Versions",
@@ -115,8 +115,8 @@ export const updateUserImageEverywhere = async ({
       chooseUname,
       currentTimestamp,
       writeCounts,
-    })
-    ;[newBatch, writeCounts] = await updateUserImageInCollection({
+    });
+    [newBatch, writeCounts] = await updateUserImageInCollection({
       batch: newBatch,
       collQuery: versionsCommentsColl,
       collectionName: nodeType + "versionComments",
@@ -128,27 +128,27 @@ export const updateUserImageEverywhere = async ({
       chooseUname,
       currentTimestamp,
       writeCounts,
-    })
+    });
   }
-  const nodesDocs = await db.collection("nodes").where("admin", "==", uname).get()
+  const nodesDocs = await db.collection("nodes").where("admin", "==", uname).get();
   for (let nodeDoc of nodesDocs.docs) {
-    const nodeRef = db.collection("nodes").doc(nodeDoc.id)
+    const nodeRef = db.collection("nodes").doc(nodeDoc.id);
     const nodeChanges = {
       aImgUrl: imageUrl,
       aFullname: fullname,
       aChooseUname: chooseUname,
       updatedAt: currentTimestamp,
-    }
-    newBatch.update(nodeRef, nodeChanges)
-    ;[newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts)
-    ;[newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+    };
+    newBatch.update(nodeRef, nodeChanges);
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+    [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
       batch: newBatch,
       linkedId: nodeDoc.id,
       nodeChanges,
       major: false,
       currentTimestamp,
       writeCounts,
-    })
+    });
   }
-  return [newBatch, writeCounts]
-}
+  return [newBatch, writeCounts];
+};

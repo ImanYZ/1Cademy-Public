@@ -18,7 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
 
     const references: FilterProcessedReferences[] = searchResults.hits?.map(el => el.document) || [];
     const response: ResponseAutocompleteProcessedReferencesFilter = {
-      results: references
+      results: references,
     };
     res.status(200).json(response);
   } catch (error) {

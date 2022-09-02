@@ -1,8 +1,5 @@
-import {
-  checkRestartBatchWriteCounts,
-  db,
-} from "../lib/firestoreServer/admin";
-import { tagsAndCommPoints } from '.';
+import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { tagsAndCommPoints } from ".";
 
 // A tag should be deleted. So, in addition to deleting the document from the tags collection,
 // we need to also delete its corresponding comPoints documents and tags of tags.
@@ -11,12 +8,13 @@ export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCoun
   // Delete the corresponding tag document from the tags collection.
   await tagsAndCommPoints({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    nodeId, callback: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
+    nodeId,
+    callback: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
       if (tagDoc && !tagData.deleted) {
         newBatch.update(tagRef, { deleted: true });
         [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
       }
-    }
+    },
   });
 
   // Delete the corresponding tag of tags documents from the tags collection.

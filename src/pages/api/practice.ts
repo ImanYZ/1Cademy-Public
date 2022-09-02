@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  admin,
-  db
-} from "../../lib/firestoreServer/admin";
+import { admin, db } from "../../lib/firestoreServer/admin";
 
 const get_ancestors = ({ nodeId, nodes, ancestors }: any) => {
   if (nodeId in ancestors) {
@@ -47,7 +44,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodes.push({ ...node.data(), id: node.id });
     }
     const question_ids = [];
-    flashcardsDocs.forEach((flashcard) => {
+    flashcardsDocs.forEach(flashcard => {
       // Select only those where enough time has passed since last presentation.
       const fData: any = { ...flashcard.data(), id: flashcard.id };
       if (new Date() >= fData.nextDate.toDate()) {
@@ -93,7 +90,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       flashcardId: fCard.id,
       question: theNode,
     });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({ err, success: false });

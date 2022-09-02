@@ -3,9 +3,7 @@ export const proposalSummariesGenerator = (proposal: any) => {
   if (proposal.newChild) {
     proposalSummaries.push(
       "- Proposed new child node" +
-      ("childType" in proposal && proposal.childType
-        ? " of type " + proposal.childType + "."
-        : ".")
+        ("childType" in proposal && proposal.childType ? " of type " + proposal.childType + "." : ".")
     );
   }
   if (proposal.addedChoices) {
@@ -63,6 +61,6 @@ export const proposalSummariesGenerator = (proposal: any) => {
     proposalSummaries.push("- Deleted Children.");
   }
   return proposalSummaries;
-}
+};
 
 // TEST: implement test to this function

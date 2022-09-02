@@ -39,6 +39,8 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
       choices[i] = false;
     }
     setChoicesOpen(choices);
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const choiceClick = useCallback(() => {
@@ -53,21 +55,29 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
 
   const deleteChoiceHandler = useCallback(
     () => props.deleteChoice(props.nodeRef, props.identifier, props.idx),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteChoice, props.nodeRef, props.identifier, props.idx]
   );
 
   const switchChoiceHandler = useCallback(
     () => props.switchChoice(props.identifier, props.idx),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.switchChoice, props.identifier, props.idx]
   );
 
   const changeChoiceHandler = useCallback(
     (value: any) => props.changeChoice(props.nodeRef, props.identifier, value, props.idx),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.changeChoice, props.nodeRef, props.identifier, props.idx]
   );
 
   const changeFeedbackHandler = useCallback(
     (value: any) => props.changeFeedback(props.nodeRef, props.identifier, value, props.idx),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.changeFeedback, props.nodeRef, props.identifier, props.idx]
   );
 
