@@ -1,3 +1,6 @@
+import { getAuth } from "firebase-admin/auth";
+
+import {  db } from "../../../src/lib/firestoreServer/admin";
 import handler from "../../../src/pages/api/signup";
 import createPostReq from "../../../testUtils/helpers/createPostReq";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
@@ -57,7 +60,27 @@ describe("/signup", () => {
     const { req, res } = createPostReq(body);
     await handler(req, res);
 
-    console.log(res._getData());
+    // it should create a user in the firebase Auth.
+    const createdUser = await getAuth().getUserByEmail(body.data.email);
+    expect(createdUser).toEqual(
+        expect.objectContaining({
+        email: body.data.email,
+        displayName: body.data.uname,
+      })
+    );
+
+
+    // it should create a user document in the firestore database.
+    const userDocument = await db.collection("users").doc(body.data.uname).get();
+    expect(userDocument.exists).toBeTruthy();
+    expect(userDocument.data()).toEqual(
+      expect.objectContaining({
+        email: body.data.email,
+        uname: body.data.uname,
+      })
+    );
+
+    //it should return 201 response code.
     expect(res._getStatusCode()).toBe(201);
   });
 
