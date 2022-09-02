@@ -1,88 +1,89 @@
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank"
-import CloseIcon from "@mui/icons-material/Close"
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever"
-import DoneIcon from "@mui/icons-material/Done"
-import { Button, IconButton } from "@mui/material"
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DoneIcon from "@mui/icons-material/Done";
+import { IconButton } from "@mui/material";
 // import "./QuestionChoices.css"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react";
 
-import { KnowledgeChoice } from "../../knowledgeTypes"
-import { Editor } from "../Editor"
-import { MemoizedMetaButton } from "./MetaButton"
+import { KnowledgeChoice } from "../../knowledgeTypes";
+import { Editor } from "../Editor";
+import { MemoizedMetaButton } from "./MetaButton";
 
 // import HyperEditor from "../../../Editor/HyperEditor/HyperEditorWrapper"
 // import MetaButton from "../../MetaButton/MetaButton"
 
-const doNothing = () => {}
+const doNothing = () => {};
 
 type QuestionChoicesProps = {
-  identifier: string
-  nodeRef: any
-  editable: any
-  choices: KnowledgeChoice[]
-  idx: number
-  choicesNum: any
-  choice: KnowledgeChoice
-  deleteChoice: any
-  switchChoice: any
-  changeChoice: any
-  changeFeedback: any
-  nodeChanged: any
-}
+  identifier: string;
+  nodeRef: any;
+  editable: any;
+  choices: KnowledgeChoice[];
+  idx: number;
+  choicesNum: any;
+  choice: KnowledgeChoice;
+  deleteChoice: any;
+  switchChoice: any;
+  changeChoice: any;
+  changeFeedback: any;
+  // nodeChanged: any;
+};
 
 const QuestionChoices = (props: QuestionChoicesProps) => {
-  const [choicesOpen, setChoicesOpen] = useState<boolean[]>([])
+  const [choicesOpen, setChoicesOpen] = useState<boolean[]>([]);
 
   useEffect(() => {
-    const choices: boolean[] = []
+    const choices: boolean[] = [];
     for (let i = 0; i < props.choices.length; i++) {
-      choices[i] = false
+      choices[i] = false;
     }
-    setChoicesOpen(choices)
-  }, [])
+    setChoicesOpen(choices);
+  }, []);
 
   const choiceClick = useCallback(() => {
-    const choices = [...choicesOpen]
-    choices[props.idx] = !choices[props.idx]
-    setChoicesOpen(choices)
-    setTimeout(() => {
-      props.nodeChanged()
-    }, 400)
-  }, [props.idx, choicesOpen, props.nodeChanged])
+    // console.log("choiceClick");
+    const choices = [...choicesOpen];
+    choices[props.idx] = !choices[props.idx];
+    setChoicesOpen(choices);
+    // setTimeout(() => {
+    //   props.nodeChanged();
+    // }, 400);
+  }, [props.idx, choicesOpen /*, props.nodeChanged*/]);
 
   const deleteChoiceHandler = useCallback(
     () => props.deleteChoice(props.nodeRef, props.identifier, props.idx),
     [props.deleteChoice, props.nodeRef, props.identifier, props.idx]
-  )
+  );
 
   const switchChoiceHandler = useCallback(
     () => props.switchChoice(props.identifier, props.idx),
     [props.switchChoice, props.identifier, props.idx]
-  )
+  );
 
   const changeChoiceHandler = useCallback(
     (value: any) => props.changeChoice(props.nodeRef, props.identifier, value, props.idx),
     [props.changeChoice, props.nodeRef, props.identifier, props.idx]
-  )
+  );
 
   const changeFeedbackHandler = useCallback(
     (value: any) => props.changeFeedback(props.nodeRef, props.identifier, value, props.idx),
     [props.changeFeedback, props.nodeRef, props.identifier, props.idx]
-  )
+  );
 
   if (props.editable) {
     return (
-      <li className="QuestionChoices" style={{border: "solid 1px white"}}>
+      <li className="QuestionChoices" style={{ border: "solid 1px white" }}>
         <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center"}}>
+          <div style={{ display: "flex", alignItems: "center" }}>
             {props.choice.correct ? (
               <IconButton onClick={switchChoiceHandler}>
                 <DoneIcon className="green-text" />
               </IconButton>
             ) : (
-                <IconButton onClick={switchChoiceHandler}>
-                  <CloseIcon className="red-text" />
-                </IconButton>
+              <IconButton onClick={switchChoiceHandler}>
+                <CloseIcon className="red-text" />
+              </IconButton>
             )}
           </div>
           {/* <i
@@ -107,11 +108,15 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <Editor label="" readOnly={false} setValue={changeFeedbackHandler} value={props.choice.feedback} />
         </div>
       </li>
-    )
+    );
   } else {
     return (
       <li className="QuestionChoices">
-        <div className="collapsible-header" onClick={choiceClick} style={{ display:'flex',cursor:'pointer',border:'solid 1px white' }}>
+        <div
+          className="collapsible-header"
+          onClick={choiceClick}
+          style={{ display: "flex", cursor: "pointer", border: "solid 1px white" }}
+        >
           {choicesOpen[props.idx] ? (
             props.choice.correct ? (
               <DoneIcon className="green-text" />
@@ -124,13 +129,13 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <Editor label="" readOnly={true} value={props.choice.choice} setValue={doNothing} />
         </div>
         {choicesOpen[props.idx] && (
-          <div className="collapsible-body" style={{ display: "block",border:'solid 1px white' }}>
+          <div className="collapsible-body" style={{ display: "block", border: "solid 1px white" }}>
             <Editor label="" readOnly={true} value={props.choice.feedback} setValue={doNothing} />
           </div>
         )}
       </li>
-    )
+    );
   }
-}
+};
 
-export default React.memo(QuestionChoices)
+export default React.memo(QuestionChoices);

@@ -4,8 +4,8 @@ import { OpenPart } from "src/nodeBookTypes";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
 
-import { MemoizedNode } from "./Node";
 import { FullNodeData } from "../../noteBookTypes";
+import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
   nodes: { [key: string]: any };
@@ -36,7 +36,7 @@ type NodeListProps = {
   wrongNode: any;
   uploadNodeImage: any;
   removeImage: any;
-  changeTitle: any;
+  changeNodeHight: any;
   changeChoice: any;
   changeFeedback: any;
   switchChoice: any;
@@ -48,7 +48,6 @@ type NodeListProps = {
   closeSideBar: any;
   reloadPermanentGrpah: any;
   setOpenMedia: (imagUrl: string) => void;
-  updateNodeByWorker: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
 };
 
@@ -72,7 +71,7 @@ const NodesList = ({
   wrongNode,
   uploadNodeImage,
   removeImage,
-  changeTitle,
+  changeNodeHight,
   changeChoice,
   changeFeedback,
   switchChoice,
@@ -84,7 +83,6 @@ const NodesList = ({
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
-  updateNodeByWorker,
   setNodeParts,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
@@ -194,7 +192,7 @@ const NodesList = ({
             wrongNode={wrongNode}
             uploadNodeImage={uploadNodeImage}
             removeImage={removeImage}
-            changeTitle={changeTitle}
+            changeNodeHight={changeNodeHight}
             changeChoice={changeChoice}
             changeFeedback={changeFeedback}
             switchChoice={switchChoice}
@@ -206,7 +204,6 @@ const NodesList = ({
             closeSideBar={closeSideBar}
             reloadPermanentGrpah={reloadPermanentGrpah}
             setOpenMedia={setOpenMedia}
-            updateNodeByWorker={updateNodeByWorker}
             setNodeParts={setNodeParts}
           />
         );

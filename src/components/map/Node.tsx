@@ -3,15 +3,12 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from "../../context/AuthContext";
-import { useCallbackByHeightChange } from "../../hooks/useCallbackByHeightChange3";
-import { useHeightElement } from "../../hooks/useHeightNode";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
@@ -35,7 +32,7 @@ import QuestionChoices from "./QuestionChoices";
 
 // CHECK: Improve this passing Full Node Data
 // this Node need to become testeable
-// also split the in Node and FormNode to reduce the complexity
+// also split the in (Node and FormNode) to reduce the complexity
 type NodeProps = {
   identifier: string;
   activeNode: any; //organize this i a better forme
@@ -103,7 +100,7 @@ type NodeProps = {
   wrongNode: any; //
   uploadNodeImage: any; //
   removeImage: any; //
-  changeTitle: any;
+  changeNodeHight: any;
   changeChoice: any; //
   changeFeedback: any; //
   switchChoice: any; //
@@ -115,7 +112,6 @@ type NodeProps = {
   closeSideBar: any; //
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
-  updateNodeByWorker: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
 };
 const Node = ({
@@ -178,7 +174,7 @@ const Node = ({
   wrongNode,
   uploadNodeImage,
   removeImage,
-  changeTitle,
+  changeNodeHight,
   changeChoice,
   changeFeedback,
   switchChoice,
@@ -190,7 +186,6 @@ const Node = ({
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
-  updateNodeByWorker,
   setNodeParts,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
@@ -223,7 +218,7 @@ const Node = ({
         previousRef.current = blockSize;
         if (heightChange) return;
 
-        changeTitle(identifier, blockSize);
+        changeNodeHight(identifier, blockSize);
       } catch (err) {
         console.warn("invalid entry", err);
       }
@@ -364,10 +359,10 @@ const Node = ({
     [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
   );
 
-  const locationSizeChange = useCallback(() => {
-    console.log("[NODE]: will call nodeChanged");
-    nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
-  }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
+  // const locationSizeChange = useCallback(() => {
+  //   console.log("[NODE]: will call nodeChanged");
+  //   nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
+  // }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
 
   // useEffect(() => {
   //   setTimeout(() => {
@@ -596,7 +591,7 @@ const Node = ({
                           switchChoice={switchChoice}
                           changeChoice={changeChoice}
                           changeFeedback={changeFeedback}
-                          nodeChanged={locationSizeChange}
+                          // nodeChanged={locationSizeChange}
                         />
                       );
                     })}
@@ -670,7 +665,8 @@ const Node = ({
                 reloadPermanentGrpah={reloadPermanentGrpah}
                 markStudied={markStudiedHandler} // x
                 bookmark={bookmarkHandler} // x
-                nodeChanged={locationSizeChange}
+                nodeChanged={nodeChanged}
+                // nodeChanged={locationSizeChange}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}
@@ -835,7 +831,8 @@ const Node = ({
                 reloadPermanentGrpah={reloadPermanentGrpah}
                 markStudied={markStudiedHandler} // x
                 bookmark={bookmarkHandler} // x
-                nodeChanged={locationSizeChange}
+                // nodeChanged={locationSizeChange}
+                nodeChanged={nodeChanged}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}

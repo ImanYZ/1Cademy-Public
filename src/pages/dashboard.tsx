@@ -1,7 +1,6 @@
 import { Button, Drawer, Modal } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
-import dagre from "dagre";
 import {
   collection,
   doc,
@@ -25,7 +24,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
-import { boolean } from "yup";
 
 /* eslint-enable */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -42,7 +40,6 @@ import { idToken } from "../lib/firestoreClient/auth";
 import { postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
-import { JSONfn } from "../lib/utils/jsonFn";
 import {
   changedNodes,
   compare2Nodes,
@@ -53,7 +50,6 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
-  // dag1,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
   MAP_RIGHT_GAP,
@@ -90,7 +86,7 @@ type DashboardProps = {};
  *
  *  --- render nodes, every node will call NODE CHANGED
  *
- *  4. NODE CHANGED: (n)
+ *  4. recalculateGraphWithWorker: (only when change Height) (n)
  *      Type: function
  *
  *  3. WORKER: (n)
@@ -583,345 +579,17 @@ const Dashboard = ({}: DashboardProps) => {
     [scrollToNodeInitialized]
   );
 
-  // // loads user nodes
-  // // downloads all records of userNodes collection where user is authenticated user
-  // // sets userNodeChanges
-  // useEffect(() => {
-  //   // if (firebase && allTagsLoaded && username) {
-  //   const username = user?.uname;
-  //   if (db && allTagsLoaded && username) {
-  //     // Create the query to load the userNodes and listen for modifications.
-  //     // const nodeRef = doc(db, "userNodes");
+  // DEPRECATED: LOAD USER NODES, check new improvement flow, please
+  // useEffect(() => {})
 
-  //     const userNodesRef = collection(db, "userNodes");
-  //     const q = query(
-  //       userNodesRef,
-  //       where("user", "==", username),
-  //       where("visible", "==", true),
-  //       where("deleted", "==", false)
-  //     );
-
-  //     const userNodesSnapshot = onSnapshot(q, snapshot => {
-  //       setUserNodeChanges(oldUserNodeChanges => {
-  //         let newUserNodeChanges: UserNodes[] = [...oldUserNodeChanges];
-  //         const docChanges = snapshot.docChanges();
-  //         if (docChanges.length > 0) {
-  //           for (let change of docChanges) {
-
-  //             const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-  //             // only used for useEffect above
-  //             newUserNodeChanges = [
-  //               ...newUserNodeChanges,
-  //               {
-  //                 cType: change.type,
-  //                 uNodeId: change.doc.id,
-  //                 uNodeData: userNodeData
-  //               }
-  //             ];
-  //           }
-  //         }
-  //         return newUserNodeChanges;
-  //       });
-  //     });
-
-  //     // const userNodesQuery = db
-  //     //   .collection("userNodes")
-  //     //   .where("user", "==", username)
-  //     //   .where("visible", "==", true)
-  //     //   .where("deleted", "==", false);
-
-  //     // // called whenever something changes and downloads the changes between the database and query
-  //     // const userNodesSnapshot = userNodesQuery.onSnapshot(function (snapshot) {
-  //     //   setUserNodeChanges((oldUserNodeChanges) => {
-  //     //     const docChanges = snapshot.docChanges();
-  //     //     if (docChanges.length > 0) {
-  //     //       let newUserNodeChanges = [...oldUserNodeChanges];
-  //     //       for (let change of docChanges) {
-  //     //         const userNodeData = change.doc.data();
-  //     //         // only used for useEffect above
-  //     //         newUserNodeChanges.push({
-  //     //           cType: change.type,
-  //     //           uNodeId: change.doc.id,
-  //     //           uNodeData: userNodeData,
-  //     //         });
-  //     //       }
-  //     //     }
-  //     //     return oldUserNodeChanges;
-  //     //   });
-  //     // });
-  //     // before calling useEffect again or exiting useEffect
-  //     return () => userNodesSnapshot();
-  //   }
-  //   // }, [allTagsLoaded, username]);
-  // }, [allTagsLoaded, user]);
-
-  // // SYNC NODES FUNCTION
-  // // READ THIS!!!
-  // // nodeChanges, userNodeChanges useEffect
-  // useEffect(() => {
-
-  //   const nodeUserNodeChangesFunc = async () => {
-  //     // dictionary of all nodes visible on the user's map view
-  //     let oldNodes: any = { ...nodes };
-  //     // dictionary of all links/edges on the user's map view
-  //     let oldEdges: any = { ...edges };
-  //     // let typeVisibilityChanges = nodeTypeVisibilityChanges;
-  //     // flag for if there are any changes to map
-  //     let oldMapChanged = mapChanged;
-  //     if (nodeChanges.length > 0) {
-  //       for (let change of nodeChanges) {
-  //         const nodeId = change.nId;
-  //         let nodeData = change.nData;
-  //         delete nodeData.deleted;
-  //         if (nodeData.nodeType !== "Question") {
-  //           nodeData.choices = [];
-  //         }
-  //         // addReference(nodeId, nodeData);
-  //         if (change.cType === "added") {
-  //           // debugger
-  //           ({ oldNodes, oldEdges } = createOrUpdateNode(nodeData, nodeId, oldNodes, oldEdges, allTags));
-  //           oldMapChanged = true;
-  //         } else if (change.cType === "modified") {
-  //           const node = oldNodes[nodeId];
-  //           {
-  //             // let isTheSame =
-  //             //   node.changedAt.getTime() === nodeData.changedAt.toDate().getTime() &&
-  //             //   node.admin === nodeData.admin &&
-  //             //   node.aImgUrl === nodeData.aImgUrl &&
-  //             //   node.fullname === nodeData.fullname &&
-  //             //   node.chooseUname === nodeData.chooseUname &&
-  //             //   node.comments === nodeData.comments &&
-  //             //   node.title === nodeData.title &&
-  //             //   node.content === nodeData.content &&
-  //             //   node.corrects === nodeData.corrects &&
-  //             //   node.maxVersionRating === nodeData.maxVersionRating &&
-  //             //   node.nodeType === nodeData.nodeType &&
-  //             //   node.studied === nodeData.studied &&
-  //             //   node.bookmarks === nodeData.bookmarks &&
-  //             //   node.versions === nodeData.versions &&
-  //             //   node.viewers === nodeData.viewers &&
-  //             //   node.wrongs === nodeData.wrongs;
-  //             // // isTheSame = compareImages(nodeData, node, isTheSame);
-  //             // isTheSame = isTheSame && compareProperty(nodeData, node, "nodeImage");
-  //             // isTheSame = compareLinks(nodeData.tags, node.tags, isTheSame, false);
-  //             // isTheSame = compareLinks(nodeData.references, node.references, isTheSame, false);
-  //             // const childrenComparison = compareLinks(
-  //             //   nodeData.children,
-  //             //   node.children,
-  //             //   true,
-  //             //   false
-  //             // );
-  //             // const parentsComparison = compareLinks(nodeData.parents, node.parents, true, false);
-  //             // isTheSame =
-  //             //   childrenComparison &&
-  //             //   parentsComparison &&
-  //             //   compareChoices(nodeData, node, isTheSame);
-  //           }
-  //           if (!compare2Nodes(nodeData, node)) {
-  //             nodeData = {
-  //               ...node,
-  //               ...nodeData,
-  //               id: nodeId,
-  //               createdAt: nodeData?.createdAt?.toDate(), //CHECK: I added thios vailadtion
-  //               changedAt: nodeData.changedAt.toDate(),
-  //               updatedAt: nodeData.updatedAt.toDate()
-  //             };
-  //             ({ oldNodes, oldEdges } = createOrUpdateNode(nodeData, nodeId, oldNodes, oldEdges, allTags));
-  //             oldMapChanged = true;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     // We can take care of some userNodes from userNodeChanges,
-  //     // but we should postpone some others to
-  //     // handle them after we retrieve their corresponding node documents.
-  //     // We store those that we handle in this round in this array.
-  //     const handledUserNodeChangesIds: string[] = [];
-  //     const nodeIds: string[] = [];
-
-  //     if (userNodeChanges && userNodeChanges.length > 0) {
-  //       let userNodeData: UserNodesData;
-  //       // iterating through every change
-  //       for (let userNodeChange of userNodeChanges) {
-  //         // data of the userNode that is changed
-  //         userNodeData = userNodeChange.uNodeData;
-  //         // nodeId of userNode that is changed
-  //         const nodeId = userNodeData.node;
-  //         // debugger
-  //         if (!userNodesLoaded) {
-  //           nodeIds.push(nodeId);
-  //         } else {
-  //           handledUserNodeChangesIds.push(userNodeChange.uNodeId); // CHECK: move this line
-  //           // if row is removed
-  //           if (userNodeChange.cType === "removed") {
-  //             // if graph includes nodeId, remove it
-  //             if (g.current.hasNode(nodeId)) {
-  //               oldEdges = removeDagAllEdges(nodeId, oldEdges);
-  //               oldNodes = removeDagNode(nodeId, oldNodes);
-  //               oldMapChanged = true;
-  //             }
-  //           } else {
-
-  //             // change can be addition or modification (not removal) of document for the query on userNode table
-  //             // modify change for allUserNodes
-  //             userNodeData = {
-  //               ...userNodeData, // CHECK: I Added this to complete all fields
-  //               userNodeId: userNodeChange.uNodeId,
-  //               correct: userNodeData.correct,
-  //               wrong: userNodeData.wrong,
-  //               isStudied: userNodeData.isStudied,
-  //               // bookmarks were added later, so check if "bookmarked" exists
-  //               bookmarked: "bookmarked" in userNodeData ? userNodeData.bookmarked : false,
-  //               open: userNodeData.open,
-  //               nodeChanges: "nodeChanges" in userNodeData ? userNodeData.nodeChanges : null,
-  //               // toDate() converts firestore timestamp to JavaScript date object
-  //               firstVisit: userNodeData.createdAt.toDate(),
-  //               lastVisit: userNodeData.updatedAt.toDate(),
-  //             };
-  //             // specific for addition (in addition to code from 617-632)
-  //             if (userNodeChange.cType === "added") {
-  //               {
-  //                 // if nodeId is already in allUserNodes but not in database
-  //                 // for deleting duplicates
-  //                 // ********************************************************
-  //                 // An issue here needs to be investigated with deleting all userNodes or duplicating nodes.
-  //                 // ********************************************************
-  //                 // if (!realoadingAll && nodeId in oldAllUserNodes) {
-  //                 //   // document just added to database
-  //                 //   const userNodeDocs = await firebase.db
-  //                 //     .collection("userNodes")
-  //                 //     .where("node", "==", nodeId)
-  //                 //     .where("user", "==", username)
-  //                 //     .get();
-  //                 //   if (userNodeDocs.docs.length > 1) {
-  //                 //     let userNodeRef = firebase.db
-  //                 //       .collection("userNodes")
-  //                 //       .doc(userNodeDocs.docs[0].id);
-  //                 //     // checks if "userNodeId" is already in allUserNodes, it would be a duplicate and deletes in the database
-  //                 //     if (
-  //                 //       "userNodeId" in oldAllUserNodes[nodeId] &&
-  //                 //       oldAllUserNodes[nodeId].userNodeId &&
-  //                 //       userNodeDocs.docs[0].id !== oldAllUserNodes[nodeId].userNodeId
-  //                 //     ) {
-  //                 //       // (older) document in database referring to same nodeId
-  //                 //       userNodeRef = firebase.db
-  //                 //         .collection("userNodes")
-  //                 //         .doc(oldAllUserNodes[nodeId].userNodeId);
-  //                 //       oldAllUserNodes = { ...oldAllUserNodes };
-  //                 //     }
-  //                 //     userNodeRef.delete();
-  //                 //   }
-  //                 //   // if added but not a duplicate
-  //                 // } else {
-  //               }
-  //               // checks whether map is loaded then make changes
-  //               if (mapRendered && g.current.hasNode(nodeId)) {
-  //                 setTimeout(() => {
-  //                   // scrolls to node if map is loaded
-  //                   scrollToNode(nodeId);
-  //                 }, 1000);
-  //               }
-  //               // }
-  //             }
-
-  //             // for both addition and modifications
-  //             if (userNodeChange.cType === "added" || userNodeChange.cType === "modified") {
-  //               // if data for the node is not loaded yet, do nothing
-  //               if (!(nodeId in oldNodes)) {
-  //                 nodeIds.push(nodeId);
-  //                 continue;
-  //               }
-  //               // Compare the updatedAt attribute of this node in nodes state with updatedAt in nodeChanges,
-  //               // and if the latter is greater, update nodeChanges.
-  //               if (userNodeData.nodeChanges && userNodeData.nodeChanges.updatedAt > oldNodes[nodeId].updatedAt) {
-  //                 setNodeChanges(oldNodeChanges => {
-  //                   let newNodeChanges = [...oldNodeChanges];
-  //                   newNodeChanges.push({
-  //                     cType: "modified",
-  //                     nId: userNodeData.node,
-  //                     nData: userNodeData.nodeChanges
-  //                   });
-  //                   return newNodeChanges;
-  //                 });
-  //               }
-  //               if (
-  //                 // left: current state of userNode
-  //                 // right: new state of userNode from the database
-  //                 // checks whether any userNode attributes on map are different from corresponding userNode attributes from database
-  //                 oldNodes[nodeId].correct !== userNodeData.correct ||
-  //                 oldNodes[nodeId].wrong !== userNodeData.wrong ||
-  //                 oldNodes[nodeId].isStudied !== userNodeData.isStudied ||
-  //                 oldNodes[nodeId].bookmarked !== userNodeData.bookmarked ||
-  //                 oldNodes[nodeId].open !== userNodeData.open
-  //                 // oldNodes[nodeId].firstVisit !== userNodeData.firstVisit || // CHECK: I commented this
-  //                 // oldNodes[nodeId].lastVisit !== userNodeData.lastVisit // CHECK: I commented this
-  //               ) {
-  //                 oldNodes[nodeId] = {
-  //                   // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
-  //                   ...oldNodes[nodeId],
-  //                   ...userNodeData
-  //                 };
-  //                 oldMapChanged = true;
-  //               }
-  //             }
-  //           }
-  //           // handledUserNodeChangesIds.push(userNodeChange.uNodeId);
-  //         }
-  //       }
-  //     }
-  //     // debugger
-  //     if (!userNodesLoaded) {
-  //       await getNodesData(nodeIds);
-  //       // setTimeout is used for when the user proposes a child node and the proposal gets accepted, data for the created node and userNode come from the database to the client at the same time
-  //       // setTimeout(() => {
-  //       setUserNodesLoaded(true);
-  //       // }, 400);
-  //     } else {
-  //       if (nodeIds.length > 0) {
-  //         // Get the data for the nodes that are not loaded yet but their corresponding userNodes are loaded.
-  //         // update nodeChanges (collection: nodes)-> it calls the worker -> it call the dagre -> we update the nodes
-  //         await getNodesData(nodeIds);
-  //       }
-  //       if (handledUserNodeChangesIds.length > 0) {
-  //         let oldUserNodeChanges = userNodeChanges.filter(uNObj => !handledUserNodeChangesIds.includes(uNObj.uNodeId));
-  //         setUserNodeChanges(oldUserNodeChanges);
-  //       }
-  //       if (nodeChanges.length > 0 || handledUserNodeChangesIds.length > 0) {
-  //         setNodes(oldNodes);
-  //         setEdges(oldEdges);
-  //         //  map changed fires another use effect that calls dagr
-  //         //  which calculates the new location of nodes and errors
-  //         // setMapChanged(oldMapChanged); // CHECK: I commented this to not call worker after render
-  //         if (nodeChanges.length > 0) {
-  //           // setNodeTypeVisibilityChanges(typeVisibilityChanges);
-  //           setNodeChanges([]);
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   if (nodeChanges.length > 0 || (userNodeChanges && userNodeChanges.length > 0)) {
-  //     nodeUserNodeChangesFunc();
-  //   }
-  // }, [
-  //   nodeChanges,
-  //   userNodeChanges,
-  //   // allNodes,
-  //   allTags,
-  //   // allUserNodes,
-  //   user,
-  //   userNodesLoaded,
-  //   nodes,
-  //   edges,
-  //   // nodeTypeVisibilityChanges, // this was comment in iman code
-  //   mapChanged
-  // ]);
+  // DEPRECATED: SYNC NODES FUNCTION, check new improvement flow, please
+  // useEffect(() => {})
 
   // fire if map changed; responsible for laying out the knowledge map
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: any, edgesToRecalculate: any) => {
-      console.log("recalculateGraphWithWorker", { nodesToRecalculate, edgesToRecalculate });
+      console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
       let mapChangedFlag = true;
       const oldClusterNodes = {};
       let oldMapWidth = mapWidth;
@@ -1034,133 +702,8 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  //  useMemoizedCallback is used to solve nested setStates in react.
-  //  allows for function memoization and most updated values
-  // CHECK: mapRendered removed as flag
-  const nodeChanged = useMemoizedCallback(
-    (newHeight: number, nodeId: string, content: string, title: string, imageLoaded: boolean, openPart: OpenPart) => {
-      console.log("[NODE_CHANGED]", nodeId);
-      let currentHeight = NODE_HEIGHT;
-      // let newHeight = NODE_HEIGHT;
-      let nodesChanged = false;
-      if (/*mapRendered &&*/ nodeRef.current || content !== null || title !== null) {
-        setNodes(oldNodes => {
-          const node: FullNodeData = { ...oldNodes[nodeId] };
-          node.content = content;
-          node.title = title;
-          // if (node.content !== content) {
-          // }
-          // if (node.title !== title) {
-          // }
-          // if (nodeRef.current) {
-          //   const { current } = nodeRef;
-          //   // newHeight = current.offsetHeight;
-
-          // }
-
-          if ("height" in node && Number(node.height)) {
-            currentHeight = Number(node.height);
-          }
-
-          if (
-            (Math.abs(currentHeight - newHeight) >= MIN_CHANGE && (node.nodeImage === "" || imageLoaded)) ||
-            ("open" in node && node.open && !node.openHeight) ||
-            ("open" in node && !node.open && !node.closedHeight)
-          ) {
-            if (node.open) {
-              node.height = newHeight;
-              if (openPart === null) {
-                node.openHeight = newHeight;
-              }
-            } else {
-              node.height = newHeight;
-              node.closedHeight = newHeight;
-            }
-            nodesChanged = true;
-          }
-
-          return oldNodes;
-          if (nodesChanged) {
-            // console.log('node added in dag', { node })
-            return setDagNode(g.current, nodeId, node, { ...oldNodes }, () => setMapChanged(true));
-          } else {
-          }
-        });
-        setMapChanged(true);
-
-        // CHECK
-        // READ: the mapChangedFlag dont guaranty the worker execution execution
-        // if some worker dont finish dont will change the
-      }
-    },
-    //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
-    [, /*mapRendered*/ allTags]
-  );
-
-  // const nodeChanged = useMemoizedCallback(
-  //   (
-  //     nodeRef: any,
-  //     nodeId: string,
-  //     content: string | null,
-  //     title: string | null,
-  //     imageLoaded: boolean,
-  //     openPart: OpenPart
-  //   ) => {
-  //     console.log("[NODE_CHANGED]", nodeId);
-  //     let currentHeight = NODE_HEIGHT;
-  //     let newHeight = NODE_HEIGHT;
-  //     let nodesChanged = false;
-  //     if (/*mapRendered &&*/ nodeRef.current || content !== null || title !== null) {
-  //       setNodes(oldNodes => {
-  //         const node: any = { ...oldNodes[nodeId] };
-  //         if (content !== null && node.content !== content) {
-  //           node.content = content;
-  //           nodesChanged = true;
-  //         }
-  //         if (title !== null && node.title !== title) {
-  //           node.title = title;
-  //           nodesChanged = true;
-  //         }
-  //         if (nodeRef.current) {
-  //           const { current } = nodeRef;
-  //           newHeight = current.offsetHeight;
-  //           if ("height" in node && Number(node.height)) {
-  //             currentHeight = Number(node.height);
-  //           }
-  //           if (
-  //             (Math.abs(currentHeight - newHeight) >= MIN_CHANGE && (node.nodeImage === "" || imageLoaded)) ||
-  //             ("open" in node && node.open && !node.openHeight) ||
-  //             ("open" in node && !node.open && !node.closedHeight)
-  //           ) {
-  //             if (node.open) {
-  //               node.height = newHeight;
-  //               if (openPart === null) {
-  //                 node.openHeight = newHeight;
-  //               }
-  //             } else {
-  //               node.height = newHeight;
-  //               node.closedHeight = newHeight;
-  //             }
-  //             nodesChanged = true;
-  //           }
-  //         }
-  //         if (nodesChanged) {
-  //           // console.log('node added in dag', { node })
-  //           return setDagNode(g.current, nodeId, node, { ...oldNodes }, () => setMapChanged(true));
-  //         } else {
-  //           return oldNodes;
-  //         }
-  //       });
-  //       setMapChanged(true);
-
-  //       // CHECK
-  //       // READ: the mapChangedFlag dont guaranty the worker execution execution
-  //       // if some worker dont finish dont will change the
-  //     }
-  //   },
-  //   //  referenced by pointer, so when these variables change, it will be updated without having to redefine the function
-  //   [, /*mapRendered*/ allTags]
-  // );
+  // DEPRECATED: nodeChanged, check improvement flow please
+  // const nodeChanged = useMemoizedCallback()=>{}
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
@@ -1304,7 +847,7 @@ const Dashboard = ({}: DashboardProps) => {
             [nodeId]: thisNode,
             [chosenNode]: chosenNodeObj,
           };
-          console.log("===>", { oldNodes, thisNode, chosenNodeObj, res });
+
           return {
             ...oldNodes,
             [nodeId]: thisNode,
@@ -1787,10 +1330,10 @@ const Dashboard = ({}: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             changeNode.closedHeight = thisNode.closedHeight;
           }
-          console.log("update node");
+
           updateDoc(nodeRef, changeNode);
           // nodeRef.update(changeNode);
-          console.log("update user node");
+
           updateDoc(userNodeRef, {
             open: !thisNode.open,
             updatedAt: Timestamp.fromDate(new Date()),
@@ -2049,37 +1592,13 @@ const Dashboard = ({}: DashboardProps) => {
   /////////////////////////////////////////////////////
   // Node Improvement Functions
 
-  const updateNodeByWorker = useCallback(
-    (identifier: string, nodeChanged: FullNodeData) => {
-      console.log("[UPDATE NODE BY WORKER]");
-
-      const newNodes = { ...nodes, [identifier]: nodeChanged };
-
-      recalculateGraphWithWorker(newNodes, edges);
-
-      // setNodes(oldNodes=>oldNodes.)
-      // setNodeParts(nodeId, (thisNode: FullNodeData) => {
-      //   // const choices = [...thisNode.choices];
-      //   // const choice = { ...choices[choiceIdx] };
-      //   // choice.choice = value;
-      //   // choices[choiceIdx] = choice;
-      //   thisNode.title = value;
-      //   return { ...thisNode };
-      // });
-      // CHECK: I commented this and
-      // add dependency choices.length in Node to recall worker
-      // adjustNodeHeight(nodeRef, nodeId)
-    },
-    [edges, nodes, recalculateGraphWithWorker]
-  );
-
   /**
    * This function is called only when NODE HIGHT was changed
    * - editable values: values changed in proposal form
    */
-  const changeEditableValuesFromNode = useCallback(
+  const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      console.log("[CHANGE EditableValuesFromNode]", { node: nodes[nodeId], height });
+      console.log("[CHANGE NODE HIGHT]", { node: nodes[nodeId], height });
 
       // if (value === nodes[nodeId].title) return;
 
@@ -2090,25 +1609,6 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [allTags, edges, nodes, recalculateGraphWithWorker]
   );
-
-  // const changeContent = useCallback(
-  //   (nodeId: string, value: string) => {
-  //     console.log("[CHANGE CONTENT]");
-
-  //     setNodeParts(nodeId, (thisNode: FullNodeData) => {
-  //       // const choices = [...thisNode.choices];
-  //       // const choice = { ...choices[choiceIdx] };
-  //       // choice.choice = value;
-  //       // choices[choiceIdx] = choice;
-  //       // thisNode.choices = choices;
-  //       return { ...thisNode, title: value };
-  //     });
-  //     // CHECK: I commented this and
-  //     // add dependency choices.length in Node to recall worker
-  //     // adjustNodeHeight(nodeRef, nodeId)
-  //   },
-  //   [setNodeParts /*, adjustNodeHeight*/]
-  // );
 
   const changeChoice = useCallback(
     (nodeRef: any, nodeId: string, value: string, choiceIdx: number) => {
@@ -2121,8 +1621,7 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and
-      // add dependency choices.length in Node to recall worker
+      // CHECK: We are using changeNodeHight and is called automatically when Height change
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts /*, adjustNodeHeight*/]
@@ -2139,8 +1638,7 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and
-      // add dependency choices.length in Node to recall worker
+      // CHECK: We are using changeNodeHight and is called automatically when Height change
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts /*, adjustNodeHeight*/]
@@ -2170,8 +1668,7 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and
-      // add dependency choices.length in Node to recall worker
+      // CHECK: We are using changeNodeHight and is called automatically when Height change
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts /* adjustNodeHeight*/]
@@ -2190,8 +1687,7 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: I commented this and
-      // add dependency choices.length in Node to recall worker
+      // CHECK: We are using changeNodeHight and is called automatically when Height change
       // adjustNodeHeight(nodeRef, nodeId)
     },
     [setNodeParts /*, adjustNodeHeight*/]
@@ -2494,9 +1990,8 @@ const Dashboard = ({}: DashboardProps) => {
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGrpah();
       const newNodeId = newId();
-      console.log("[propose new child]:", 0);
+
       setNodes(oldNodes => {
-        console.log("set Nodes", nodeBookState.selectedNode);
         if (!nodeBookState.selectedNode) return oldNodes; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
@@ -2506,9 +2001,8 @@ const Dashboard = ({}: DashboardProps) => {
           tempNodes.add(newNodeId);
         }
 
-        console.log("[propose new child]:", 1);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
-        console.log("[propose new child]:", 2);
+
         const newChildNode: any = {
           isStudied: true,
           bookmarked: false,
@@ -2555,12 +2049,8 @@ const Dashboard = ({}: DashboardProps) => {
           ];
         }
 
-        console.log("[propose new child]:", 3, newChildNode);
-        // debugger
         return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
-          // console.log('setDagNode')
           setEdges(oldEdges => {
-            // console.log('setEdges')
             if (!nodeBookState.selectedNode) return oldEdges; //CHECK: I add this to validate
             return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
           });
@@ -2578,11 +2068,9 @@ const Dashboard = ({}: DashboardProps) => {
       setIsRetrieving: (value: boolean) => void,
       setProposals: (value: any) => void
     ) => {
-      console.log("[FETCH PROPOSALS]");
       if (!user) return;
       if (!selectedNodeType) return;
-      console.log("[fetch proposals]");
-      // console.log("In fetchProposals");
+
       setIsRetrieving(true);
       setNodes(oldNodes => {
         // if (selectedNode && "selectedNode" in oldNodes) {
@@ -2620,11 +2108,10 @@ const Dashboard = ({}: DashboardProps) => {
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
 
-      console.log("[fetch proposals]: versionsData, userVersionsRefs, versionsCommentsRefs");
       versionsData.forEach(versionDoc => {
         versionIds.push(versionDoc.id);
         const versionData = versionDoc.data();
-        console.log("version data", versionData);
+
         versions[versionDoc.id] = {
           ...versionData,
           id: versionDoc.id,
@@ -3009,7 +2496,8 @@ const Dashboard = ({}: DashboardProps) => {
               <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
               <NodesList
                 nodes={nodes}
-                nodeChanged={nodeChanged}
+                // nodeChanged={nodeChanged}
+                nodeChanged={() => recalculateGraphWithWorker(nodes, edges)}
                 bookmark={bookmark}
                 markStudied={markStudied}
                 chosenNodeChanged={chosenNodeChanged}
@@ -3031,7 +2519,7 @@ const Dashboard = ({}: DashboardProps) => {
                   console.log("first", imgUrl);
                   setOpenMedia(imgUrl);
                 }}
-                changeTitle={changeEditableValuesFromNode}
+                changeNodeHight={changeNodeHight}
                 changeChoice={changeChoice}
                 changeFeedback={changeFeedback}
                 switchChoice={switchChoice}
@@ -3042,7 +2530,6 @@ const Dashboard = ({}: DashboardProps) => {
                 saveProposedImprovement={saveProposedImprovement}
                 closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
-                updateNodeByWorker={updateNodeByWorker}
                 setNodeParts={setNodeParts}
               />
             </MapInteractionCSS>

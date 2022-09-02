@@ -260,9 +260,8 @@ export const setDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, node: an
     // node.tags[0].node: node Id of the first tag from the node data
     // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
   }
-  console.log(' --> before callback')
+  
   if (callback) {
-    console.log(' ----------------> execute callback')
     callback()
   }
   // ***************************************************************
