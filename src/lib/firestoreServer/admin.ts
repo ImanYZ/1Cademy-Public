@@ -1,6 +1,8 @@
 import admin from "firebase-admin";
 import { cert, initializeApp } from "firebase-admin/app";
-import { getFirestore, WriteBatch } from "firebase-admin/firestore";
+import { DocumentReference, getFirestore, WriteBatch } from "firebase-admin/firestore";
+
+import { arrayToChunks } from "../../utils";
 
 export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 
@@ -79,4 +81,43 @@ const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: numb
   return [batch, writeCounts];
 };
 
-export { admin, db, checkRestartBatchWriteCounts, MIN_ACCEPTED_VERSION_POINT_WEIGHT };
+//////////
+interface TWriteOperation {
+  objRef: DocumentReference;
+  data?: { [key: string]: any };
+
+  operationType: "set" | "update" | "delete";
+}
+const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
+  const chunked = arrayToChunks(tWriteOperations);
+
+  await db.runTransaction(async t => {
+    for (let chunk of chunked) {
+      for (let op of chunk) {
+        const { operationType, objRef, data } = op;
+        switch (operationType) {
+          case "set":
+            t.set(objRef, data);
+            break;
+
+          case "update":
+            t.update(objRef, data);
+            break;
+
+          case "delete":
+            t.delete(objRef);
+            break;
+        }
+      }
+    }
+  });
+};
+
+export {
+  admin,
+  db,
+  writeTransaction,
+  type TWriteOperation,
+  checkRestartBatchWriteCounts,
+  MIN_ACCEPTED_VERSION_POINT_WEIGHT,
+};
