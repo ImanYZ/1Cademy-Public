@@ -1,6 +1,6 @@
 import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
 import { deleteTagCommunityAndTagsOfTags } from "../../src/utils/deleteTagCommunityAndTagsOfTags";
-import { tagsData } from "../../testUtils/mockData";
+import { tagsData } from "../../testUtils/mockCollections";
 
 describe("deleteTagCommunityAndTagsOfTags", () => {
   const nodeId = "r98BjyFDCe4YyLA3U8ZE";

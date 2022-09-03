@@ -1,7 +1,7 @@
 import { commitBatch, db, TWriteOperation, writeTransaction } from "../../src/lib/firestoreServer/admin";
 import { getAllUserNodes } from "../../src/utils/getAllUserNodes";
 import { signalAllUserNodesChanges } from "../../src/utils/signalAllUserNodesChanges";
-import { statusData, userNodesData as userNodesMockData, usersData } from "../../testUtils/mockData";
+import { statusData, userNodesData as userNodesMockData, usersData } from "../../testUtils/mockCollections";
 
 describe("signalAllUserNodesChanges", () => {
   const nodeId = "FJfzAX7zbgQS8jU5XcEk";

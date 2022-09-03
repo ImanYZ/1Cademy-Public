@@ -1,5 +1,5 @@
 import { UpDownVoteNode } from "../../src/utils/upDownVoteNode";
-import { nodesData, userNodesData, usersData } from "../../testUtils/mockData";
+import { nodesData, userNodesData, usersData } from "../../testUtils/mockCollections";
 
 describe("UpDownVoteNode", () => {
   beforeEach(async () => {

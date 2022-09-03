@@ -8,7 +8,7 @@ import {
   comPointsData,
   comWeeklyPointsData,
   tagsData,
-} from "../../testUtils/mockData";
+} from "../../testUtils/mockCollections";
 
 describe("tagsAndCommPoints", () => {
   const nodeId = "r98BjyFDCe4YyLA3U8ZE";
