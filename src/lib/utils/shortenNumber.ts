@@ -15,7 +15,7 @@ const shortenNumber = function (number: number, maxPlaces, forcePlaces, forceLet
     abbr = "K";
   }
   return annotate(number, maxPlaces, forcePlaces, abbr);
-}
+};
 
 function annotate(number: number, maxPlaces, forcePlaces, abbr: string): string {
   // set places to false to not round
@@ -43,14 +43,14 @@ function annotate(number: number, maxPlaces, forcePlaces, abbr: string): string 
     } else {
       const test = new RegExp("\\.\\d{" + (maxPlaces + 1) + ",}$");
       if (test.test("" + rounded)) {
-        rounded = Number(rounded.toFixed(maxPlaces))
+        rounded = Number(rounded.toFixed(maxPlaces));
       }
     }
   }
   if (forcePlaces !== false) {
-    rounded = Number(Number(rounded).toFixed(forcePlaces))
+    rounded = Number(Number(rounded).toFixed(forcePlaces));
   }
   return rounded + abbr;
 }
 
-export default shortenNumber
+export default shortenNumber;

@@ -1,11 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  admin,
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db,
-} from "../../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import {
   addToPendingPropsNums,
   createPractice,
@@ -16,8 +11,8 @@ import {
   isVersionApproved,
   proposalNotification,
   signalAllUserNodesChanges,
-  updateReputation
-} from '../../utils';
+  updateReputation,
+} from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   let nodeRef, nodeData, userNodesData, userNodesRefs;
@@ -62,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const parentNodeData = await isVersionApproved({
       corrects: newVersion.corrects,
       wrongs: newVersion.wrongs,
-      nodeData
+      nodeData,
     });
     if (!parentNodeData) {
       [batch, writeCounts] = await updateReputation({
@@ -80,7 +75,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ltermVal: 0,
         ltermDayVal: 0,
         voter: req.body.data.user.userData.uname,
-        writeCounts
+        writeCounts,
       });
       newVersion.childType = req.body.data.nodeType;
       newVersion.node = req.body.data.parentId;
@@ -98,7 +93,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tagIds: nodeData.tagIds,
         value: 1,
         voters: [req.body.data.user.userData.uname],
-        writeCounts
+        writeCounts,
       });
     } else {
       [batch, writeCounts] = await updateReputation({
@@ -116,7 +111,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ltermVal: 0,
         ltermDayVal: 0,
         voter: req.body.data.user.userData.uname,
-        writeCounts
+        writeCounts,
       });
       nodeRef = db.collection("nodes").doc();
       newVersion.node = nodeRef.id;
@@ -163,7 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           tagIds: req.body.data.tagIds,
           nodeId: nodeRef.id,
           currentTimestamp,
-          writeCounts
+          writeCounts,
         });
       }
       // A child node is being created. So, based on the tags on the node, we should make
@@ -184,7 +179,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
         aChooseUname: req.body.data.user.userData.chooseUname,
         currentTimestamp,
-        writeCounts
+        writeCounts,
       });
       batch.set(nodeRef, newNode);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
@@ -211,7 +206,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         major: true,
         deleted: false,
         currentTimestamp,
-        writeCounts
+        writeCounts,
       });
 
       const newUserNodeObj: any = {
@@ -268,7 +263,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       uname: req.body.data.user.userData.uname,
       versionData: newVersion,
       currentTimestamp,
-      writeCounts
+      writeCounts,
     });
     await commitBatch(batch);
     return res.status(200).json({ success: true });

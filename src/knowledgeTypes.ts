@@ -16,7 +16,7 @@ export enum NodeType {
   "Advertisement" = "Advertisement",
   "News" = "News",
   "Private" = "Private",
-  "Tag" = "Tag"
+  "Tag" = "Tag",
 }
 
 export type KnowledgeNodeContributor = {
@@ -249,13 +249,13 @@ export enum TimeWindowOption {
   "AnyTime" = "Any Time",
   "ThisWeek" = "This Week",
   "ThisMonth" = "This Month",
-  "ThisYear" = "This Year"
+  "ThisYear" = "This Year",
 }
 
 export enum SortTypeWindowOption {
   "MOST_RECENT" = "MOST_RECENT",
   "UPVOTES_DOWNVOTES" = "UPVOTES_DOWNVOTES",
-  "NONE" = "NONE"
+  "NONE" = "NONE",
 }
 
 export type FilterValue = {
@@ -518,9 +518,8 @@ export type Point = {
   y: number;
 };
 
-
 export type NodeChanges = {
-  cType: string,
-  nId: string,
-  nData: NodeFireStore
-}
+  cType: string;
+  nId: string;
+  nData: NodeFireStore;
+};

@@ -9,6 +9,6 @@ export const getFeedback = async (): Promise<Feedback[]> => {
     email: cur.email,
     name: cur.name,
     feedback: cur.feedback,
-    createdAt: new Date(cur.createdAt._seconds * 1000).toLocaleString()
+    createdAt: new Date(cur.createdAt._seconds * 1000).toLocaleString(),
   }));
 };

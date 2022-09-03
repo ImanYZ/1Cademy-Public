@@ -1,4 +1,4 @@
-export const preventEventPropagation = (event) => {
+export const preventEventPropagation = event => {
   event.preventDefault();
   event.stopPropagation();
 };

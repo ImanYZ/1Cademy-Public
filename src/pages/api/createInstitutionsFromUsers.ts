@@ -1,12 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db,
-  publicStorageBucket
-} from "../../lib/firestoreServer/admin";
-import { EDITED_UNIVERSITIES, fetchGoogleMapsGeolocationWrapper } from '../../utils';
+import { checkRestartBatchWriteCounts, commitBatch, db, publicStorageBucket } from "../../lib/firestoreServer/admin";
+import { EDITED_UNIVERSITIES, fetchGoogleMapsGeolocationWrapper } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -37,11 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log({ username: userData.uname, instObj });
           const userRef = db.collection("users").doc(userDoc.id);
           await userRef.update({ deInstit: instObj.name });
-          instDocs = await db
-            .collection("institutions")
-            .where("name", "==", instObj.name)
-            .limit(1)
-            .get();
+          instDocs = await db.collection("institutions").where("name", "==", instObj.name).limit(1).get();
           if (instDocs.docs.length > 0) {
             instRef = db.collection("institutions").doc(instDocs.docs[0].id);
             const institData = instDocs.docs[0].data();
@@ -62,9 +53,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 lng: geoLoc.lng,
                 lat: geoLoc.lat,
                 domains: [domainName],
-                logoURL: encodeURI(
-                  `https://storage.googleapis.com/${publicStorageBucket}/Logos/${instObj.name}.png`
-                ),
+                logoURL: encodeURI(`https://storage.googleapis.com/${publicStorageBucket}/Logos/${instObj.name}.png`),
                 name: instObj.name,
                 usersNum: 1,
               });

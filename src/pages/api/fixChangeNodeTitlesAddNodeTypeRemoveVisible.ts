@@ -1,10 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  checkRestartBatchWriteCounts,
-  db,
-} from "../../lib/firestoreServer/admin";
-import { getTypedCollections, NODE_TYPES, reputationTypes, tagsAndCommPoints } from '../../utils';
+import { checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin";
+import { getTypedCollections, NODE_TYPES, reputationTypes, tagsAndCommPoints } from "../../utils";
 
 const changeTagTitleInAllDocs = async ({ batch, collName, allDocs, nodeId, newTitle, writeCounts }: any) => {
   let newBatch = batch;
@@ -65,10 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         linkedData = linkedDoc.data();
         const pChildren = linkedData.children;
         for (let idx = 0; idx < pChildren.length; idx++) {
-          if (
-            pChildren[idx].node === nodeId &&
-            (pChildren[idx].title !== newTitle || !pChildren[idx].type)
-          ) {
+          if (pChildren[idx].node === nodeId && (pChildren[idx].title !== newTitle || !pChildren[idx].type)) {
             pChildren[idx] = { title: newTitle, node: nodeId, label: "", type: nodeData.nodeType };
             batch.update(linkedRef, {
               children: pChildren,
@@ -94,10 +88,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         linkedData = linkedDoc.data();
         const cParents = linkedData.parents;
         for (let idx = 0; idx < cParents.length; idx++) {
-          if (
-            cParents[idx].node === nodeId &&
-            (cParents[idx].title !== newTitle || !cParents[idx].type)
-          ) {
+          if (cParents[idx].node === nodeId && (cParents[idx].title !== newTitle || !cParents[idx].type)) {
             cParents[idx] = { title: newTitle, node: nodeId, label: "", type: nodeData.nodeType };
             batch.update(linkedRef, {
               parents: cParents,
@@ -141,7 +132,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         console.log("Done with tagging nodes.");
         await tagsAndCommPoints({
-          nodeId, callBack: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
+          nodeId,
+          callBack: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
             if (tagDoc) {
               if (
                 (collectionName === "tags" && tagData.title !== newTitle) ||
@@ -156,7 +148,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               }
             }
             console.log("Done with tags and communities: " + collectionName);
-          }
+          },
         });
 
         [batch, writeCounts] = await changeTagTitleInAllDocs({
@@ -165,7 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           allDocs: allMessagesDocs,
           nodeId,
           newTitle,
-          writeCounts
+          writeCounts,
         });
         // { batch, collName, allDocs, nodeId, newTitle, writeCounts }
         [batch, writeCounts] = await changeTagTitleInAllDocs({
@@ -174,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           allDocs: allPracticesDocs,
           nodeId,
           newTitle,
-          writeCounts
+          writeCounts,
         });
         [batch, writeCounts] = await changeTagTitleInAllDocs({
           batch: batch,
@@ -182,7 +174,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           allDocs: allUsersDocs,
           nodeId,
           newTitle,
-          writeCounts
+          writeCounts,
         });
         for (let { collectionName, reputationDocs } of allReputationDocs) {
           [batch, writeCounts] = await changeTagTitleInAllDocs({
@@ -191,7 +183,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             allDocs: reputationDocs,
             nodeId,
             newTitle,
-            writeCounts
+            writeCounts,
           });
         }
 
@@ -209,9 +201,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       }
       if (nodeData.nodeType === "Reference") {
-        const citingNodesRefs = db
-          .collection("nodes")
-          .where("referenceIds", "array-contains", nodeId);
+        const citingNodesRefs = db.collection("nodes").where("referenceIds", "array-contains", nodeId);
         const citingNodesDocs = await citingNodesRefs.get();
 
         for (let citingNodeDoc of citingNodesDocs.docs) {

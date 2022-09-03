@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { db } from "../../lib/firestoreServer/admin";
-import { replaceUsername } from '../../utils';
+import { replaceUsername } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

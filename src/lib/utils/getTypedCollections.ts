@@ -3,10 +3,10 @@ import { collection, Firestore } from "firebase/firestore";
 import { NodeType } from "../../types";
 
 export const getTypedCollections = (db: Firestore, nodeType: NodeType) => {
-  let versionsColl
-  let userVersionsColl
-  let versionsCommentsColl
-  let userVersionsCommentsColl
+  let versionsColl;
+  let userVersionsColl;
+  let versionsCommentsColl;
+  let userVersionsCommentsColl;
 
   if (nodeType === "Concept") {
     versionsColl = collection(db, "conceptVersions");
@@ -52,9 +52,7 @@ export const getTypedCollections = (db: Firestore, nodeType: NodeType) => {
     versionsColl = collection(db, "advertisementVersions");
     userVersionsColl = collection(db, "userAdvertisementVersions");
     versionsCommentsColl = collection(db, "advertisementVersionComments");
-    userVersionsCommentsColl = collection(db,
-      "userAdvertisementVersionComments"
-    );
+    userVersionsCommentsColl = collection(db, "userAdvertisementVersionComments");
   } else if (nodeType === "News") {
     versionsColl = collection(db, "newsVersions");
     userVersionsColl = collection(db, "userNewsVersions");
@@ -73,7 +71,6 @@ export const getTypedCollections = (db: Firestore, nodeType: NodeType) => {
     userVersionsCommentsColl,
   };
 };
-
 
 // export const getTypedCollections = (db, nodeType) => {
 //   let versionsColl,

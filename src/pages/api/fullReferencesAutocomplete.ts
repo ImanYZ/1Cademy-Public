@@ -22,7 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
       nodeType: el.document.nodeType,
       content: el.document.content,
       label: "",
-      nodeImage: el.document.nodeImage
+      nodeImage: el.document.nodeImage,
     }));
     res.status(200).json({ results: references });
   } catch (error) {

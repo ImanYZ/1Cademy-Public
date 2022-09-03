@@ -1,13 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  admin,
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db,
-} from "../../../lib/firestoreServer/admin";
-import { firstWeekMonthDays, initializeNewReputationData, reputationTypes } from '../../../utils';
-
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../../lib/firestoreServer/admin";
+import { firstWeekMonthDays, initializeNewReputationData, reputationTypes } from "../../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

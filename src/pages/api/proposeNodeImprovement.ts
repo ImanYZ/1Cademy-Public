@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next"
+import { NextApiRequest, NextApiResponse } from "next";
 
-import { admin, checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin"
+import { admin, checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin";
 import {
   addToPendingPropsNums,
   compareChoices,
@@ -10,11 +10,11 @@ import {
   getTypedCollections,
   proposalNotification,
   versionCreateUpdate,
-} from "../../utils"
+} from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { data } = req.body || {}
+    const { data } = req.body || {};
     const {
       id,
       user,
@@ -39,15 +39,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       addedChildren,
       removedParents,
       removedChildren,
-    } = data || {}
-    const { userData } = user || {}
-    let batch = db.batch()
-    let writeCounts = 0
+    } = data || {};
+    const { userData } = user || {};
+    let batch = db.batch();
+    let writeCounts = 0;
 
-    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date())
-    const { nodeData, nodeRef } = await getNode(id)
-    const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType })
-    const versionRef = versionsColl.doc()
+    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
+    const { nodeData, nodeRef } = await getNode(id);
+    const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
+    const versionRef = versionsColl.doc();
     const versionData: any = {
       node: id,
       title,
@@ -77,11 +77,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       awards: 0,
       deleted: false,
       accepted: false,
-    }
+    };
     if (nodeType === "Question") {
-      versionData.choices = choices
+      versionData.choices = choices;
     }
-    ;[batch, writeCounts] = await versionCreateUpdate({
+    [batch, writeCounts] = await versionCreateUpdate({
       batch,
       nodeId: id,
       nodeData,
@@ -101,81 +101,81 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       removedChildren,
       currentTimestamp,
       writeCounts,
-    })
+    });
     // From here on, we specify the type of the changes that the user is proposing on this node
     // using some boolean fields to be added to the version.
     if (nodeType === "Question") {
       if (versionData.choices.length > nodeData.choices.length) {
-        versionData.addedChoices = true
+        versionData.addedChoices = true;
       } else if (versionData.choices.length < nodeData.choices.length) {
-        versionData.deletedChoices = true
+        versionData.deletedChoices = true;
       }
       if (!compareChoices({ node1: data, node2: nodeData })) {
-        versionData.changedChoices = true
+        versionData.changedChoices = true;
       }
     }
     if (title !== nodeData.title) {
-      versionData.changedTitle = true
+      versionData.changedTitle = true;
     }
     if (content !== nodeData.content) {
-      versionData.changedContent = true
+      versionData.changedContent = true;
     }
     if (nodeImage !== "" && nodeData.nodeImage === "") {
-      versionData.addedImage = true
+      versionData.addedImage = true;
     } else if (nodeImage === "" && nodeData.nodeImage !== "") {
-      versionData.deletedImage = true
+      versionData.deletedImage = true;
     } else if (nodeImage !== nodeData.nodeImage) {
-      versionData.changedImage = true
+      versionData.changedImage = true;
     }
     if (nodeVideo !== "" && nodeData.nodeVideo === "") {
-      versionData.addedVideo = true
+      versionData.addedVideo = true;
     } else if (nodeVideo === "" && nodeData.nodeVideo !== "") {
-      versionData.deletedVideo = true
+      versionData.deletedVideo = true;
     } else if (nodeVideo !== nodeData.nodeVideo) {
-      versionData.changedVideo = true
+      versionData.changedVideo = true;
     }
     if (nodeAudio !== "" && nodeData.nodeAudio === "") {
-      versionData.addedAudio = true
+      versionData.addedAudio = true;
     } else if (nodeAudio === "" && nodeData.nodeAudio !== "") {
-      versionData.deletedAudio = true
+      versionData.deletedAudio = true;
     } else if (nodeAudio !== nodeData.nodeAudio) {
-      versionData.changedAudio = true
+      versionData.changedAudio = true;
     }
     if (versionData.referenceIds.length > nodeData.referenceIds.length) {
-      versionData.addedReferences = true
+      versionData.addedReferences = true;
     } else if (versionData.referenceIds.length < nodeData.referenceIds.length) {
-      versionData.deletedReferences = true
+      versionData.deletedReferences = true;
     }
     if (
       !compareFlatLinks({ links1: referenceIds, links2: nodeData.referenceIds }) ||
       !compareFlatLinks({ links1: referenceLabels, links2: nodeData.referenceLabels })
     ) {
-      versionData.changedReferences = true
+      versionData.changedReferences = true;
     }
     if (versionData.tagIds.length > nodeData.tagIds.length) {
-      versionData.addedTags = true
+      versionData.addedTags = true;
     } else if (versionData.tagIds.length < nodeData.tagIds.length) {
-      versionData.deletedTags = true
+      versionData.deletedTags = true;
     }
     if (!compareFlatLinks({ links1: tagIds, links2: nodeData.tagIds })) {
-      versionData.changedTags = true
+      versionData.changedTags = true;
     }
     if (addedParents.length > 0) {
-      versionData.addedParents = true
+      versionData.addedParents = true;
     }
     if (addedChildren.length > 0) {
-      versionData.addedChildren = true
+      versionData.addedChildren = true;
     }
     if (removedParents.length > 0) {
-      versionData.removedParents = true
+      versionData.removedParents = true;
     }
     if (removedChildren.length > 0) {
-      versionData.removedChildren = true
+      versionData.removedChildren = true;
     }
-    batch.set(versionRef, versionData)
-    ;[batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts)
+    batch.set(versionRef, versionData);
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
-    const userVersionRef = userVersionsColl.doc()
+    const userVersionRef = userVersionsColl.doc();
     const userVersionData = {
       award: false,
       correct: true,
@@ -184,14 +184,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       version: versionRef.id,
       user: userData.uname,
       wrong: false,
-    }
-    ;[batch, writeCounts] = await createUpdateUserVersion({
+    };
+    [batch, writeCounts] = await createUpdateUserVersion({
       batch,
       userVersionRef,
       userVersionData,
       nodeType,
       writeCounts,
-    })
+    });
 
     //  If the proposal is not approved, we do not directly update the node document inside versionCreateUpdate function,
     //  so we have to set nodeData.versions + 1 here
@@ -199,19 +199,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       batch.update(nodeRef, {
         versions: nodeData.versions + 1,
         updatedAt: currentTimestamp,
-      })
-      ;[batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts)
-
-      ;[batch, writeCounts] = await addToPendingPropsNums({
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      [batch, writeCounts] = await addToPendingPropsNums({
         batch,
         tagIds: nodeData.tagIds,
         value: 1,
         voters: [userData.uname],
         writeCounts,
-      })
+      });
     }
 
-    ;[batch, writeCounts] = await proposalNotification({
+    [batch, writeCounts] = await proposalNotification({
       batch,
       nodeId: id,
       nodeTitle: versionData.accepted ? title : nodeData.title,
@@ -219,13 +218,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       versionData,
       currentTimestamp,
       writeCounts,
-    })
+    });
 
-    return res.status(200).json({ success: true })
+    return res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err)
-    return res.status(500).json({ err, success: false })
+    console.error(err);
+    return res.status(500).json({ err, success: false });
   }
 }
 
-export default handler
+export default handler;

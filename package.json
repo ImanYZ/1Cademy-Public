@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"src/**/*.ts\" \"__test__/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
     "deploy": "firebase deploy",
     "deploy:hosting": "firebase deploy --only hosting",
     "deploy:database": "firebase deploy --only database",

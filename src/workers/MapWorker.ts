@@ -2,24 +2,24 @@
 import dagre from "dagre";
 
 import { dagreUtils } from "../lib/utils/dagre.util";
-import { setDagEdge, setDagNode } from '../lib/utils/Map.utils'
+import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
 
 const layoutHandler = (
   mapChangedFlag: boolean,
-  oldClusterNodes: { [x: string]: { id: string; x: any; y: any; width: number; height: number; title: any; }; },
+  oldClusterNodes: { [x: string]: { id: string; x: any; y: any; width: number; height: number; title: any } },
   oldMapWidth: number,
   oldMapHeight: any,
-  oldNodes: { [x: string]: any; },
-  oldEdges: { [x: string]: any; },
+  oldNodes: { [x: string]: any },
+  oldEdges: { [x: string]: any },
   allTags: any,
   XOFFSET: number,
   YOFFSET: number,
   MIN_CHANGE: number,
   MAP_RIGHT_GAP: number,
   NODE_WIDTH: number,
-  g: dagre.graphlib.Graph<{}>,
+  g: dagre.graphlib.Graph<{}>
 ) => {
-  console.log('{ WORKER }')
+  console.log("{ WORKER }");
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;
@@ -34,11 +34,7 @@ const layoutHandler = (
     // if not existe create the cluster
     for (let nId in oldNodes) {
       //  if the node belongs to a cluster
-      if (
-        "tagIds" in oldNodes[nId] &&
-        oldNodes[nId].tagIds.length > 0 &&
-        oldNodes[nId].tagIds[0] in allTags
-      ) {
+      if ("tagIds" in oldNodes[nId] && oldNodes[nId].tagIds.length > 0 && oldNodes[nId].tagIds[0] in allTags) {
         //  nodeN is the object corresponding to this node in dagr
         // const nodeN = dag1.node(nId);
         const nodeN = g.node(nId);
@@ -63,7 +59,7 @@ const layoutHandler = (
             yMax: nodeN.y + nodeN.height / 2,
             xMin: nodeN.x - nodeN.width / 2,
             xMax: nodeN.x + nodeN.width / 2,
-            title: oldNodes[nId].tags[0] // CHECK I added this
+            title: oldNodes[nId].tags[0], // CHECK I added this
           };
         }
       }
@@ -89,7 +85,7 @@ const layoutHandler = (
     // calculate OFFSETs
     // update with setDagNode
     // calculate map
-    Object.keys(oldNodes).map((n) => {
+    Object.keys(oldNodes).map(n => {
       // const nodeN = dag1.node(n);
       const nodeN = g.node(n);
       // If there is an object (label) assigned to the node in dag1[0], otherwise it'd be undefined:
@@ -150,8 +146,7 @@ const layoutHandler = (
           Math.abs(thisEdge.toX - newToX) >= MIN_CHANGE ||
           Math.abs(thisEdge.toY - newToY) >= MIN_CHANGE
         ) {
-
-          const tmpEdge = { ...thisEdge, fromX: newFromX, fromY: newFromY, toX: newToX, toY: newToY }
+          const tmpEdge = { ...thisEdge, fromX: newFromX, fromY: newFromY, toX: newToX, toY: newToY };
           oldEdges = setDagEdge(g, e.v, e.w, tmpEdge, oldEdges);
           mapChangedFlag = true;
         }
@@ -159,11 +154,11 @@ const layoutHandler = (
       }
     });
   }
-  const graph = dagreUtils.mapGraphToObject(g)
+  const graph = dagreUtils.mapGraphToObject(g);
   return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
 };
 
-onmessage = (e) => {
+onmessage = e => {
   const {
     mapChangedFlag,
     oldClusterNodes,
@@ -180,7 +175,7 @@ onmessage = (e) => {
     graph,
   } = e.data;
 
-  const g = dagreUtils.mapObjectToGraph(graph)
+  const g = dagreUtils.mapObjectToGraph(graph);
 
   const workerResults = layoutHandler(
     mapChangedFlag,

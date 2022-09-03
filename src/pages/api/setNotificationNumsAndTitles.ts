@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
-import { setOrIncrementNotificationNums } from '../../utils';
+import { setOrIncrementNotificationNums } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -24,7 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       [batch, writeCounts] = await setOrIncrementNotificationNums({
         batch,
         proposer: notificationData.proposer,
-        writeCounts
+        writeCounts,
       });
     }
 

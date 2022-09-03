@@ -38,8 +38,7 @@ const addTagIdToSingleCollection = async ({ batch, collectionName, nodeIds, writ
         title = "Psychological Effects of COVID-19 Pandemic";
         break;
       case " Diabetes & Metabolic Syndrome: Clinical Research & Reviews Papers for Virology":
-        title =
-          " Diabetes & Metabolic Syndrome: Clinical Research & Reviews Papers for COVID-19 Virology";
+        title = " Diabetes & Metabolic Syndrome: Clinical Research & Reviews Papers for COVID-19 Virology";
         break;
     }
     if (
@@ -76,10 +75,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-
     const collNames = ["credits", "practiceCompletion", "practiceLog", "presentations"];
     for (let collName of collNames) {
-      [batch, writeCounts] = await addTagIdToSingleCollection({ batch, collectionName: collName, nodeIds, writeCounts });
+      [batch, writeCounts] = await addTagIdToSingleCollection({
+        batch,
+        collectionName: collName,
+        nodeIds,
+        writeCounts,
+      });
     }
 
     await commitBatch(batch);

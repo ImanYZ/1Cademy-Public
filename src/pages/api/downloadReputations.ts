@@ -76,12 +76,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const dateToBegin = new Date("1-5-2020");
         firstWeekDay = new Date(dateToBegin.setDate(Math.floor(daysDiff)));
         firstWeekDaysList.push(
-          firstWeekDay.getMonth() +
-          1 +
-          "-" +
-          firstWeekDay.getDate() +
-          "-" +
-          firstWeekDay.getFullYear()
+          firstWeekDay.getMonth() + 1 + "-" + firstWeekDay.getDate() + "-" + firstWeekDay.getFullYear()
         );
         daysDiff += 7;
       }
@@ -115,11 +110,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         `;
       for (let firstWeekDayStr of firstWeekDaysList) {
         htmlContent += "<option value='" + firstWeekDayStr + "'";
-        if (
-          "firstWeekDay" in req.query &&
-          req.query.firstWeekDay &&
-          req.query.firstWeekDay === firstWeekDayStr
-        ) {
+        if ("firstWeekDay" in req.query && req.query.firstWeekDay && req.query.firstWeekDay === firstWeekDayStr) {
           htmlContent += " selected";
         }
         htmlContent += ">" + firstWeekDayStr + "</option>";

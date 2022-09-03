@@ -1,11 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db,
-} from "../../lib/firestoreServer/admin";
-import { fetchGoogleMapsGeolocationWrapper } from '../../utils';
+import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
+import { fetchGoogleMapsGeolocationWrapper } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
