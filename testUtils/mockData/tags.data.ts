@@ -18,6 +18,16 @@ const data: Tag[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+
+  {
+    documentId: "kAyByld1ou6YNfv36K6a",
+    title: "Cocaine",
+    tags: ["Data Science & something", "slkdjflsdjf"],
+    tagIds: ["r98BjyFDCe4YyLA3U8ZE", "a random id"],
+    node: "00NwvYhgES9mjNQ9LRhG",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ];
 
 const tagsData = { data, collection };
