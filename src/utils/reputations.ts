@@ -1,6 +1,6 @@
-import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin"
-import { firstWeekMonthDays } from "."
-import { convertToTGet } from "./"
+import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { firstWeekMonthDays } from ".";
+import { convertToTGet } from "./";
 
 export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, createdAt }: any) => ({
   // for Concept nodes
@@ -56,10 +56,10 @@ export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, create
   tag,
   updatedAt,
   createdAt,
-})
+});
 
 //  calculate positives, negatives, and total. If they do not exist then create them
-const calculatePositivesNegativesTotals = (rep_Points: any) => {
+export const calculatePositivesNegativesTotals = (rep_Points: any) => {
   if (!("positives" in rep_Points)) {
     rep_Points.positives =
       // for Concept nodes
@@ -92,7 +92,7 @@ const calculatePositivesNegativesTotals = (rep_Points: any) => {
       //  for Relation nodes
       rep_Points.mCorrects +
       rep_Points.mInst +
-      rep_Points.lterm
+      rep_Points.lterm;
   }
   if (!("negatives" in rep_Points)) {
     rep_Points.negatives =
@@ -115,14 +115,14 @@ const calculatePositivesNegativesTotals = (rep_Points: any) => {
       //  for Idea nodes
       rep_Points.iWrongs +
       //  for Relation nodes
-      rep_Points.mWrongs
+      rep_Points.mWrongs;
   }
   if (!("totalPoints" in rep_Points)) {
-    rep_Points.totalPoints = rep_Points.positives - rep_Points.negatives
+    rep_Points.totalPoints = rep_Points.positives - rep_Points.negatives;
   }
-}
+};
 
-const updateReputationIncrement = async ({
+export const updateReputationIncrement = async ({
   batch,
   uname,
   imageUrl,
@@ -145,16 +145,16 @@ const updateReputationIncrement = async ({
   t,
   tWriteOperations,
 }: any) => {
-  let newBatch = batch
+  let newBatch = batch;
 
-  let rep_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt })
-  let com_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt })
-  delete com_Points.isAdmin
-  com_Points.admin = null
-  com_Points.aImgUrl = null
-  com_Points.aFullname = null
-  com_Points.aChooseUname = false
-  com_Points.adminPoints = 0
+  let rep_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt });
+  let com_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt });
+  delete com_Points.isAdmin;
+  com_Points.admin = null;
+  com_Points.aImgUrl = null;
+  com_Points.aFullname = null;
+  com_Points.aChooseUname = false;
+  com_Points.adminPoints = 0;
 
   let reputationsQuery,
     reputationsQueryBase,
@@ -164,92 +164,92 @@ const updateReputationIncrement = async ({
     comPointsQueryBase,
     comPointsQueryBaseWhere,
     comPointDoc,
-    com_reputationsDoc
+    com_reputationsDoc;
 
   let updateTheCommunityDoc = false,
-    updateTheReputationDoc = false
+    updateTheReputationDoc = false;
   //    query user reputations
   switch (reputationType) {
     case "All Time":
-      reputationsQueryBase = db.collection("reputations") as any
-      comPointsQueryBase = db.collection("comPoints") as any
-      break
+      reputationsQueryBase = db.collection("reputations") as any;
+      comPointsQueryBase = db.collection("comPoints") as any;
+      break;
     case "Monthly":
-      reputationsQueryBase = db.collection("monthlyReputations") as any
-      comPointsQueryBase = db.collection("comMonthlyPoints") as any
-      break
+      reputationsQueryBase = db.collection("monthlyReputations") as any;
+      comPointsQueryBase = db.collection("comMonthlyPoints") as any;
+      break;
     case "Weekly":
-      reputationsQueryBase = db.collection("weeklyReputations") as any
-      comPointsQueryBase = db.collection("comWeeklyPoints") as any
-      break
+      reputationsQueryBase = db.collection("weeklyReputations") as any;
+      comPointsQueryBase = db.collection("comWeeklyPoints") as any;
+      break;
     case "Others":
-      reputationsQueryBase = db.collection("othersReputations") as any
-      comPointsQueryBase = db.collection("comOthersPoints") as any
-      break
+      reputationsQueryBase = db.collection("othersReputations") as any;
+      comPointsQueryBase = db.collection("comOthersPoints") as any;
+      break;
     case "Others Monthly":
-      reputationsQueryBase = db.collection("othMonReputations") as any
-      comPointsQueryBase = db.collection("comOthMonPoints") as any
-      break
+      reputationsQueryBase = db.collection("othMonReputations") as any;
+      comPointsQueryBase = db.collection("comOthMonPoints") as any;
+      break;
     case "Others Weekly":
-      reputationsQueryBase = db.collection("othWeekReputations") as any
-      comPointsQueryBase = db.collection("comOthWeekPoints") as any
-      break
+      reputationsQueryBase = db.collection("othWeekReputations") as any;
+      comPointsQueryBase = db.collection("comOthWeekPoints") as any;
+      break;
     default:
-      console.log("[updateReputationIncrement]: Strange reputationType: " + reputationType)
+      console.log("[updateReputationIncrement]: Strange reputationType: " + reputationType);
   }
-  reputationsQueryBaseWhere = reputationsQueryBase
-  comPointsQueryBaseWhere = comPointsQueryBase
+  reputationsQueryBaseWhere = reputationsQueryBase;
+  comPointsQueryBaseWhere = comPointsQueryBase;
   if (["Monthly", "Others Monthly"].includes(reputationType)) {
-    reputationsQueryBaseWhere = reputationsQueryBase.where("firstMonthDay", "==", firstMonthDay)
-    comPointsQueryBaseWhere = comPointsQueryBase.where("firstMonthDay", "==", firstMonthDay)
+    reputationsQueryBaseWhere = reputationsQueryBase.where("firstMonthDay", "==", firstMonthDay);
+    comPointsQueryBaseWhere = comPointsQueryBase.where("firstMonthDay", "==", firstMonthDay);
   } else {
     if (["Weekly", "Others Weekly"].includes(reputationType)) {
-      reputationsQueryBaseWhere = reputationsQueryBase.where("firstWeekDay", "==", firstWeekDay)
-      comPointsQueryBaseWhere = comPointsQueryBase.where("firstWeekDay", "==", firstWeekDay)
+      reputationsQueryBaseWhere = reputationsQueryBase.where("firstWeekDay", "==", firstWeekDay);
+      comPointsQueryBaseWhere = comPointsQueryBase.where("firstWeekDay", "==", firstWeekDay);
     }
   }
-  reputationsQuery = (reputationsQueryBaseWhere as any).where("uname", "==", uname).where("tagId", "==", tagId)
+  reputationsQuery = (reputationsQueryBaseWhere as any).where("uname", "==", uname).where("tagId", "==", tagId);
 
-  let reputationsDoc = await convertToTGet(reputationsQuery.limit(1), t)
+  let reputationsDoc = await convertToTGet(reputationsQuery.limit(1), t);
   //  if reputationsQuery returns a doc
   if (reputationsDoc.docs.length > 0) {
     //  define reputationDoc reference
-    reputationDoc = reputationsQueryBase.doc(reputationsDoc.docs[0].id)
+    reputationDoc = reputationsQueryBase.doc(reputationsDoc.docs[0].id);
 
     //  obtain all data in the given document
-    rep_Points = (await convertToTGet(reputationDoc, t)).data()
+    rep_Points = (await convertToTGet(reputationDoc, t)).data();
     //  calculate positives, negatives, and total. If they do not exist then create them
-    calculatePositivesNegativesTotals(rep_Points)
-    updateTheReputationDoc = true
+    calculatePositivesNegativesTotals(rep_Points);
+    updateTheReputationDoc = true;
   } else {
     //else, reputationsQuery did not return a doc, have to create a reference
-    reputationDoc = reputationsQueryBase.doc()
+    reputationDoc = reputationsQueryBase.doc();
   }
 
   //  query community points
-  comPointsQuery = comPointsQueryBaseWhere.where("tagId", "==", tagId)
+  comPointsQuery = comPointsQueryBaseWhere.where("tagId", "==", tagId);
 
-  let comPointsDoc = await convertToTGet(comPointsQuery.limit(1), t)
+  let comPointsDoc = await convertToTGet(comPointsQuery.limit(1), t);
 
   //  if comPointsQuery returns a doc
   if (comPointsDoc.docs.length > 0) {
-    comPointDoc = comPointsQueryBase.doc(comPointsDoc.docs[0].id)
-    com_Points = comPointsDoc.docs[0].data()
+    comPointDoc = comPointsQueryBase.doc(comPointsDoc.docs[0].id);
+    com_Points = comPointsDoc.docs[0].data();
 
     //  calculate positives, negatives. and all time, if they do not exist create them
-    calculatePositivesNegativesTotals(com_Points)
-    updateTheCommunityDoc = true
+    calculatePositivesNegativesTotals(com_Points);
+    updateTheCommunityDoc = true;
   } else {
     //  else comPointsQuery did not return a doc, create a reference
-    comPointDoc = comPointsQueryBase.doc()
-    com_reputationsDoc = await convertToTGet(reputationsQueryBaseWhere.where("tagId", "==", tagId), t)
+    comPointDoc = comPointsQueryBase.doc();
+    com_reputationsDoc = await convertToTGet(reputationsQueryBaseWhere.where("tagId", "==", tagId), t);
 
     //  iterate through community reputations docs to calculate totals
     //  each user has unique com_reputationDoc
     for (let com_reputationDoc of com_reputationsDoc.docs) {
-      const rData = com_reputationDoc.data()
+      const rData = com_reputationDoc.data();
       // Total reputation points that this specific user has earned so far in this community.
-      calculatePositivesNegativesTotals(rData)
+      calculatePositivesNegativesTotals(rData);
 
       // if the current user's points are greater than the admin's points,
       // make the current user the admin
@@ -257,58 +257,58 @@ const updateReputationIncrement = async ({
       // after updating the com-Admin over and over again, at the end of the day
       // on line 861, we fetch them from the users collection and update them.
       if (rData.totalPoints > com_Points.adminPoints) {
-        com_Points.admin = rData.uname
-        com_Points.adminPoints = rData.totalPoints
+        com_Points.admin = rData.uname;
+        com_Points.adminPoints = rData.totalPoints;
       }
 
       // add current community reputation doc values to total
       // for Concept nodes
-      com_Points.cnCorrects += rData.cnCorrects
-      com_Points.cnInst += rData.cnInst
-      com_Points.cnWrongs += rData.cnWrongs
+      com_Points.cnCorrects += rData.cnCorrects;
+      com_Points.cnInst += rData.cnInst;
+      com_Points.cnWrongs += rData.cnWrongs;
       // for Code nodes
-      com_Points.cdCorrects += rData.cdCorrects
-      com_Points.cdInst += rData.cdInst
-      com_Points.cdWrongs += rData.cdWrongs
+      com_Points.cdCorrects += rData.cdCorrects;
+      com_Points.cdInst += rData.cdInst;
+      com_Points.cdWrongs += rData.cdWrongs;
       // for Question nodes
-      com_Points.qCorrects += rData.qCorrects
-      com_Points.qInst += rData.qInst
-      com_Points.qWrongs += rData.qWrongs
+      com_Points.qCorrects += rData.qCorrects;
+      com_Points.qInst += rData.qInst;
+      com_Points.qWrongs += rData.qWrongs;
       //  for Profile nodes
-      com_Points.pCorrects += rData.pCorrects
-      com_Points.pInst += rData.pInst
-      com_Points.pWrongs += rData.pWrongs
+      com_Points.pCorrects += rData.pCorrects;
+      com_Points.pInst += rData.pInst;
+      com_Points.pWrongs += rData.pWrongs;
       //  for Sequel nodes
-      com_Points.sCorrects += rData.sCorrects
-      com_Points.sInst += rData.sInst
-      com_Points.sWrongs += rData.sWrongs
+      com_Points.sCorrects += rData.sCorrects;
+      com_Points.sInst += rData.sInst;
+      com_Points.sWrongs += rData.sWrongs;
       //  for Advertisement nodes
-      com_Points.aCorrects += rData.aCorrects
-      com_Points.aInst += rData.aInst
-      com_Points.aWrongs += rData.aWrongs
+      com_Points.aCorrects += rData.aCorrects;
+      com_Points.aInst += rData.aInst;
+      com_Points.aWrongs += rData.aWrongs;
       //  for Reference nodes
-      com_Points.rfCorrects += rData.rfCorrects
-      com_Points.rfInst += rData.rfInst
-      com_Points.rfWrongs += rData.rfWrongs
+      com_Points.rfCorrects += rData.rfCorrects;
+      com_Points.rfInst += rData.rfInst;
+      com_Points.rfWrongs += rData.rfWrongs;
       //  for News nodes
-      com_Points.nCorrects += rData.nCorrects
-      com_Points.nInst += rData.nInst
-      com_Points.nWrongs += rData.nWrongs
+      com_Points.nCorrects += rData.nCorrects;
+      com_Points.nInst += rData.nInst;
+      com_Points.nWrongs += rData.nWrongs;
       //  for Idea nodes
-      com_Points.iCorrects += rData.iCorrects
-      com_Points.iInst += rData.iInst
-      com_Points.iWrongs += rData.iWrongs
-      com_Points.mCorrects += rData.mCorrects
+      com_Points.iCorrects += rData.iCorrects;
+      com_Points.iInst += rData.iInst;
+      com_Points.iWrongs += rData.iWrongs;
+      com_Points.mCorrects += rData.mCorrects;
       //  for Relation nodes
-      com_Points.mInst += rData.mInst
-      com_Points.mWrongs += rData.mWrongs
-      com_Points.lterm += rData.lterm
-      com_Points.ltermDay += rData.ltermDay
+      com_Points.mInst += rData.mInst;
+      com_Points.mWrongs += rData.mWrongs;
+      com_Points.lterm += rData.lterm;
+      com_Points.ltermDay += rData.ltermDay;
 
       //  similar to above, if positives, negatives, or total do not exist, calculate them and add them to total
-      com_Points.positives += rData.positives
-      com_Points.negatives += rData.negatives
-      com_Points.totalPoints += rData.totalPoints
+      com_Points.positives += rData.positives;
+      com_Points.negatives += rData.negatives;
+      com_Points.totalPoints += rData.totalPoints;
     }
 
     //  iterate through dictionary userReputations
@@ -326,120 +326,120 @@ const updateReputationIncrement = async ({
   switch (nodeType) {
     case "Concept":
       // for Concept nodes
-      rep_Points.cnCorrects += correctVal
-      rep_Points.cnInst += instVal
-      rep_Points.cnWrongs += wrongVal
-      com_Points.cnCorrects += correctVal
-      com_Points.cnInst += instVal
-      com_Points.cnWrongs += wrongVal
-      break
+      rep_Points.cnCorrects += correctVal;
+      rep_Points.cnInst += instVal;
+      rep_Points.cnWrongs += wrongVal;
+      com_Points.cnCorrects += correctVal;
+      com_Points.cnInst += instVal;
+      com_Points.cnWrongs += wrongVal;
+      break;
     case "Code":
       // for Code nodes
-      rep_Points.cdCorrects += correctVal
-      rep_Points.cdInst += instVal
-      rep_Points.cdWrongs += wrongVal
-      com_Points.cdCorrects += correctVal
-      com_Points.cdInst += instVal
-      com_Points.cdWrongs += wrongVal
-      break
+      rep_Points.cdCorrects += correctVal;
+      rep_Points.cdInst += instVal;
+      rep_Points.cdWrongs += wrongVal;
+      com_Points.cdCorrects += correctVal;
+      com_Points.cdInst += instVal;
+      com_Points.cdWrongs += wrongVal;
+      break;
     case "Question":
       // for Question nodes
-      rep_Points.qCorrects += correctVal
-      rep_Points.qInst += instVal
-      rep_Points.qWrongs += wrongVal
-      com_Points.qCorrects += correctVal
-      com_Points.qInst += instVal
-      com_Points.qWrongs += wrongVal
-      break
+      rep_Points.qCorrects += correctVal;
+      rep_Points.qInst += instVal;
+      rep_Points.qWrongs += wrongVal;
+      com_Points.qCorrects += correctVal;
+      com_Points.qInst += instVal;
+      com_Points.qWrongs += wrongVal;
+      break;
     case "Profile":
       //  for Profile nodes
-      rep_Points.pCorrects += correctVal
-      rep_Points.pInst += instVal
-      rep_Points.pWrongs += wrongVal
-      com_Points.pCorrects += correctVal
-      com_Points.pInst += instVal
-      com_Points.pWrongs += wrongVal
-      break
+      rep_Points.pCorrects += correctVal;
+      rep_Points.pInst += instVal;
+      rep_Points.pWrongs += wrongVal;
+      com_Points.pCorrects += correctVal;
+      com_Points.pInst += instVal;
+      com_Points.pWrongs += wrongVal;
+      break;
     case "Sequel":
       //  for Sequel nodes
-      rep_Points.sCorrects += correctVal
-      rep_Points.sInst += instVal
-      rep_Points.sWrongs += wrongVal
-      com_Points.sCorrects += correctVal
-      com_Points.sInst += instVal
-      com_Points.sWrongs += wrongVal
-      break
+      rep_Points.sCorrects += correctVal;
+      rep_Points.sInst += instVal;
+      rep_Points.sWrongs += wrongVal;
+      com_Points.sCorrects += correctVal;
+      com_Points.sInst += instVal;
+      com_Points.sWrongs += wrongVal;
+      break;
     case "Advertisement":
       //  for Advertisement nodes
-      rep_Points.aCorrects += correctVal
-      rep_Points.aInst += instVal
-      rep_Points.aWrongs += wrongVal
-      com_Points.aCorrects += correctVal
-      com_Points.aInst += instVal
-      com_Points.aWrongs += wrongVal
-      break
+      rep_Points.aCorrects += correctVal;
+      rep_Points.aInst += instVal;
+      rep_Points.aWrongs += wrongVal;
+      com_Points.aCorrects += correctVal;
+      com_Points.aInst += instVal;
+      com_Points.aWrongs += wrongVal;
+      break;
     case "Reference":
       //  for Reference nodes
-      rep_Points.rfCorrects += correctVal
-      rep_Points.rfInst += instVal
-      rep_Points.rfWrongs += wrongVal
-      com_Points.rfCorrects += correctVal
-      com_Points.rfInst += instVal
-      com_Points.rfWrongs += wrongVal
-      break
+      rep_Points.rfCorrects += correctVal;
+      rep_Points.rfInst += instVal;
+      rep_Points.rfWrongs += wrongVal;
+      com_Points.rfCorrects += correctVal;
+      com_Points.rfInst += instVal;
+      com_Points.rfWrongs += wrongVal;
+      break;
     case "News":
       //  for News nodes
-      rep_Points.nCorrects += correctVal
-      rep_Points.nInst += instVal
-      rep_Points.nWrongs += wrongVal
-      com_Points.nCorrects += correctVal
-      com_Points.nInst += instVal
-      com_Points.nWrongs += wrongVal
-      break
+      rep_Points.nCorrects += correctVal;
+      rep_Points.nInst += instVal;
+      rep_Points.nWrongs += wrongVal;
+      com_Points.nCorrects += correctVal;
+      com_Points.nInst += instVal;
+      com_Points.nWrongs += wrongVal;
+      break;
     case "Idea":
       //  for Idea nodes
-      rep_Points.iCorrects += correctVal
-      rep_Points.iInst += instVal
-      rep_Points.iWrongs += wrongVal
-      com_Points.iCorrects += correctVal
-      com_Points.iInst += instVal
-      com_Points.iWrongs += wrongVal
-      break
+      rep_Points.iCorrects += correctVal;
+      rep_Points.iInst += instVal;
+      rep_Points.iWrongs += wrongVal;
+      com_Points.iCorrects += correctVal;
+      com_Points.iInst += instVal;
+      com_Points.iWrongs += wrongVal;
+      break;
     case "Relation":
       //  for Relation nodes
-      rep_Points.mCorrects += correctVal
-      rep_Points.mInst += instVal
-      rep_Points.mWrongs += wrongVal
-      com_Points.mCorrects += correctVal
-      com_Points.mInst += instVal
-      com_Points.mWrongs += wrongVal
-      break
+      rep_Points.mCorrects += correctVal;
+      rep_Points.mInst += instVal;
+      rep_Points.mWrongs += wrongVal;
+      com_Points.mCorrects += correctVal;
+      com_Points.mInst += instVal;
+      com_Points.mWrongs += wrongVal;
+      break;
     default:
-      console.log("[updateReputationIncrement]: Strange nodeType: " + nodeType)
+      console.log("[updateReputationIncrement]: Strange nodeType: " + nodeType);
   }
-  const positivePointsChange = correctVal + instVal + ltermVal
-  const totalPointsChange = positivePointsChange - wrongVal
-  rep_Points.lterm += ltermVal
-  rep_Points.ltermDay += ltermDayVal
-  com_Points.lterm += ltermVal
-  com_Points.ltermDay += ltermDayVal
-  rep_Points.positives += positivePointsChange
-  rep_Points.negatives += wrongVal
-  rep_Points.totalPoints += totalPointsChange
-  com_Points.positives += positivePointsChange
-  com_Points.negatives += wrongVal
-  com_Points.totalPoints += totalPointsChange
+  const positivePointsChange = correctVal + instVal + ltermVal;
+  const totalPointsChange = positivePointsChange - wrongVal;
+  rep_Points.lterm += ltermVal;
+  rep_Points.ltermDay += ltermDayVal;
+  com_Points.lterm += ltermVal;
+  com_Points.ltermDay += ltermDayVal;
+  rep_Points.positives += positivePointsChange;
+  rep_Points.negatives += wrongVal;
+  rep_Points.totalPoints += totalPointsChange;
+  com_Points.positives += positivePointsChange;
+  com_Points.negatives += wrongVal;
+  com_Points.totalPoints += totalPointsChange;
 
   //  if the user's updated total points is greater than the community admin's total points,
   //  make the user the community admin
   if (rep_Points.totalPoints > com_Points.adminPoints) {
-    com_Points.admin = uname
-    com_Points.aImgUrl = imageUrl
-    com_Points.aFullname = fullname
-    com_Points.aChooseUname = chooseUname
-    com_Points.adminPoints = rep_Points.totalPoints
+    com_Points.admin = uname;
+    com_Points.aImgUrl = imageUrl;
+    com_Points.aFullname = fullname;
+    com_Points.aChooseUname = chooseUname;
+    com_Points.adminPoints = rep_Points.totalPoints;
   }
-  rep_Points.isAdmin = uname === com_Points.admin
+  rep_Points.isAdmin = uname === com_Points.admin;
 
   //  create a new user object with the updated reputation values
 
@@ -490,11 +490,11 @@ const updateReputationIncrement = async ({
     positives: parseFloat(rep_Points?.positives?.toFixed(3) || 0),
     negatives: parseFloat(rep_Points?.negatives?.toFixed(3) || 0),
     totalPoints: parseFloat(rep_Points?.totalPoints?.toFixed(3) || 0),
-  }
+  };
   if (reputationType === "Monthly" || reputationType === "Others Monthly") {
-    reputationDoc_Obj.firstMonthDay = firstMonthDay
+    reputationDoc_Obj.firstMonthDay = firstMonthDay;
   } else if (reputationType === "Weekly" || reputationType === "Others Weekly") {
-    reputationDoc_Obj.firstWeekDay = firstWeekDay
+    reputationDoc_Obj.firstWeekDay = firstWeekDay;
   }
 
   if (t) {
@@ -502,22 +502,22 @@ const updateReputationIncrement = async ({
       objRef: reputationDoc,
       data: reputationDoc_Obj,
       operationType: updateTheReputationDoc ? "update" : "set",
-    })
+    });
   } else {
     updateTheReputationDoc
       ? newBatch.update(reputationDoc, reputationDoc_Obj)
-      : newBatch.set(reputationDoc, reputationDoc_Obj)
-    ;[newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts)
+      : newBatch.set(reputationDoc, reputationDoc_Obj);
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
 
   //  if the admin exists, but it doesn't have a profile picture or
   // fullname in the corresponding comPoints document, retrieve it from users collection.
   if (com_Points.admin && (!com_Points.aImgUrl || !com_Points.aFullname)) {
-    const userDoc = await convertToTGet(db.collection("users").doc(com_Points.admin), t)
-    const userData: any = userDoc.data()
-    com_Points.aImgUrl = userData.imageUrl
-    com_Points.aFullname = `${userData.fName} ${userData.lName}`
-    com_Points.aChooseUname = userData.chooseUname
+    const userDoc = await convertToTGet(db.collection("users").doc(com_Points.admin), t);
+    const userData: any = userDoc.data();
+    com_Points.aImgUrl = userData.imageUrl;
+    com_Points.aFullname = `${userData.fName} ${userData.lName}`;
+    com_Points.aChooseUname = userData.chooseUname;
   }
 
   //  create a new community reputation object
@@ -569,11 +569,11 @@ const updateReputationIncrement = async ({
     negatives: parseFloat(com_Points.negatives.toFixed(3)),
     totalPoints: parseFloat(com_Points.totalPoints.toFixed(3)),
     adminPoints: parseFloat(com_Points.adminPoints.toFixed(3)),
-  }
+  };
   if (reputationType === "Monthly" || reputationType === "Others Monthly") {
-    reputationDoc_Obj.firstMonthDay = firstMonthDay
+    reputationDoc_Obj.firstMonthDay = firstMonthDay;
   } else if (reputationType === "Weekly" || reputationType === "Others Weekly") {
-    reputationDoc_Obj.firstWeekDay = firstWeekDay
+    reputationDoc_Obj.firstWeekDay = firstWeekDay;
   }
 
   if (t) {
@@ -581,16 +581,16 @@ const updateReputationIncrement = async ({
       objRef: comPointDoc,
       data: com_PointsDoc_Obj,
       operationType: updateTheCommunityDoc ? "update" : "set",
-    })
+    });
   } else {
     updateTheCommunityDoc
       ? newBatch.update(comPointDoc, com_PointsDoc_Obj)
-      : newBatch.set(comPointDoc, com_PointsDoc_Obj)
-    ;[newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts)
+      : newBatch.set(comPointDoc, com_PointsDoc_Obj);
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
 
-  return [newBatch, writeCounts]
-}
+  return [newBatch, writeCounts];
+};
 
 // Called if someone upvotes or downvotes a proposal. Call this for the proposer.
 export const updateReputation = async ({
@@ -612,24 +612,24 @@ export const updateReputation = async ({
   t,
   tWriteOperations,
 }: any) => {
-  let createdAt = admin.firestore.Timestamp.fromDate(new Date())
-  let updatedAt = admin.firestore.Timestamp.fromDate(new Date())
-  const { firstWeekDay, firstMonthDay } = firstWeekMonthDays()
-  const tempTagIds = [...tagIds]
-  const tempTags = [...tags]
+  let createdAt = admin.firestore.Timestamp.fromDate(new Date());
+  let updatedAt = admin.firestore.Timestamp.fromDate(new Date());
+  const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
+  const tempTagIds = [...tagIds];
+  const tempTags = [...tags];
 
   //  if not 1Cademy tag, add to list of tempTags
   if (!tempTagIds.includes("r98BjyFDCe4YyLA3U8ZE")) {
-    tempTagIds.push("r98BjyFDCe4YyLA3U8ZE")
-    tempTags.push("1Cademy")
+    tempTagIds.push("r98BjyFDCe4YyLA3U8ZE");
+    tempTags.push("1Cademy");
   }
 
-  let newBatch = batch
+  let newBatch = batch;
   //  update each tagId's all time, monthly, weekly values
   // populate data in reputationDoc_lst
   for (let tagIdx = 0; tagIdx < tempTagIds.length; tagIdx++) {
     for (let reputationType of ["All Time", "Monthly", "Weekly"]) {
-      ;[newBatch, writeCounts] = await updateReputationIncrement({
+      [newBatch, writeCounts] = await updateReputationIncrement({
         batch: newBatch,
         uname,
         imageUrl,
@@ -651,13 +651,13 @@ export const updateReputation = async ({
         writeCounts,
         t,
         tWriteOperations,
-      })
+      });
     }
 
     //  if not a self-vote, update all times, monthly, and weekly for others
     if (voter !== uname) {
       for (let reputationType of ["Others", "Others Monthly", "Others Weekly"]) {
-        ;[newBatch, writeCounts] = await updateReputationIncrement({
+        [newBatch, writeCounts] = await updateReputationIncrement({
           batch: newBatch,
           uname,
           imageUrl,
@@ -679,9 +679,9 @@ export const updateReputation = async ({
           writeCounts,
           t,
           tWriteOperations,
-        })
+        });
       }
     }
   }
-  return [newBatch, writeCounts]
-}
+  return [newBatch, writeCounts];
+};
