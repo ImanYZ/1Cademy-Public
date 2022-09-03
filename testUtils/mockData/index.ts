@@ -1,6 +1,12 @@
-import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
+import { db } from "../../src/lib/firestoreServer/admin";
 import dropCollection from "../helpers/dropCollection";
-import bookmarkNums from "./bookMarkNums.data";
+import bookmarkNums from "./bookmarkNums.data";
+import comMonthlyPoints from "./comMonthlyPoints.data";
+import comOthersPoints from "./comOthersPoints.data";
+import comOthMonPoints from "./comOthMonPoints.data";
+import comOthWeekPoints from "./comOthWeekPoints.data";
+import comPoints from "./comPoints.data";
+import comWeeklyPoints from "./comWeeklyPoints.data";
 import credits from "./credits.data";
 import institutions from "./institutions.data";
 import nodes from "./nodes.data";
@@ -17,6 +23,7 @@ class MockData {
   constructor(private data: any[], private collecion: string) {}
 
   public getData = () => this.data;
+  public getCollection = () => this.collecion;
 
   public populate = async () => {
     await db.runTransaction(async t => {
@@ -49,3 +56,9 @@ export const userNodesData = new MockData(userNodes.data, userNodes.collection);
 export const userNodesLogData = new MockData(userNodesLog.data, userNodesLog.collection);
 export const nodesData = new MockData(nodes.data, nodes.collection);
 export const statusData = new MockData(status.data, status.collection);
+export const comPointsData = new MockData(comPoints.data, comPoints.collection);
+export const comMonthlyPointsData = new MockData(comMonthlyPoints.data, comMonthlyPoints.collection);
+export const comWeeklyPointsData = new MockData(comWeeklyPoints.data, comWeeklyPoints.collection);
+export const comOthersPointsData = new MockData(comOthersPoints.data, comOthersPoints.collection);
+export const comOthMonPointsData = new MockData(comOthMonPoints.data, comOthMonPoints.collection);
+export const comOthWeekPointsData = new MockData(comOthWeekPoints.data, comOthWeekPoints.collection);
