@@ -21,7 +21,7 @@ type Props = {
   nodeType?: NodeType;
 } & SvgIconProps;
 
-const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "bottom", color = "primary", ...rest }) => {
+const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "top", color = "primary", ...rest }) => {
   const renderIcon = () => {
     switch (nodeType) {
       case "Code":

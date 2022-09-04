@@ -24,7 +24,7 @@ export const LinkedNodeEditor = ({ nodesSelected, setNodesSelected, header, sx }
   const [searchText, setSearchText] = useState("");
   const [searchTextDebounce] = useDebounce(searchText, 250);
   const { data } = useQuery(["fullLinkedNode", searchTextDebounce], () => getFullNodeAutocomplete(searchTextDebounce), {
-    enabled: Boolean(searchTextDebounce)
+    enabled: Boolean(searchTextDebounce),
   });
   // const [nodesSelected, setNodesSelected] = useState<LinkedKnowledgeNode[]>(initialNodes)
 
@@ -73,7 +73,7 @@ export const LinkedNodeEditor = ({ nodesSelected, setNodesSelected, header, sx }
       <CardHeader
         sx={{
           backgroundColor: theme => theme.palette.common.darkGrayBackground,
-          color: theme => theme.palette.common.white
+          color: theme => theme.palette.common.white,
         }}
         title={
           <Box sx={{ textAlign: "center" }}>

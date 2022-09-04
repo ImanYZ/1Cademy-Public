@@ -30,7 +30,7 @@ const MarkdownRender: FC<Props> = ({ text, fontSize = "inherit" }) => {
               {children || ""}
             </code>
           );
-        }
+        },
       }}
     >
       {text}

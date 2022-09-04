@@ -32,7 +32,7 @@ export const LinkedReference: FC<Props> = ({
   label,
   sx,
   secondaryAction = null,
-  openInNewTab = false
+  openInNewTab = false,
 }) => {
   return (
     <HtmlTooltip
@@ -43,7 +43,9 @@ export const LinkedReference: FC<Props> = ({
           </Typography>
           {nodeImageUrl && (
             <Box>
-              <img src={nodeImageUrl} width="100%" height="100%" />
+              {/* TODO: Change to Next Image */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={nodeImageUrl} alt={title} width="100%" height="100%" />
             </Box>
           )}
         </Box>
@@ -67,7 +69,7 @@ export const LinkedReference: FC<Props> = ({
                     display: "flex",
                     direction: "row",
                     justifyContent: "center",
-                    color: theme => theme.palette.common.darkGrayBackground
+                    color: theme => theme.palette.common.darkGrayBackground,
                   }}
                 >
                   <LinkIcon />

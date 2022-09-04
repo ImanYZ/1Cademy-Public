@@ -20,6 +20,8 @@ const RoundImage = (props: RoundImageProps) => {
 
   return (
     <div className="UserAvatar UserStatusIcon">
+      {/* TODO: change to Next Image */}
+      {/* eslint-disable @next/next/no-img-element */}
       <img
         src={props.imageUrl}
         style={{ width: imageWidth, height: imageHeight }}

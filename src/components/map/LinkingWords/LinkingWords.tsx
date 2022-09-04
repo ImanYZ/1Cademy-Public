@@ -80,6 +80,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.chosenNode]);
 
   const referenceLabelChangeHandler = useCallback(
@@ -88,11 +90,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
         return props.referenceLabelChange(event, idx);
       };
     },
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.referenceLabelChange]
   );
 
   const choosingNewLinkedNode = useCallback(
-    (linkType: any) => () => {
+    (linkType: any) => (/*event: any*/) => {
       // if (!props.isSubmitting) {
       // setChoosingType(linkType);
       {
@@ -121,11 +125,15 @@ const LinkingWords = (props: LinkingWordsProps) => {
       // setChoosingNode(props.identifier);
       // }
     },
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.identifier]
   );
 
   const deleteLink = useCallback(
-    (idx: any, linkType: any) => () => props.deleteLink(idx, linkType),
+    (idx: any, linkType: any) => (/*event: any*/) => props.deleteLink(idx, linkType),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteLink]
   );
 
@@ -143,6 +151,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
             "",
             props.reason
           ),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.isNew, props.identifier, props.reason, props.saveProposedChildNode, props.saveProposedImprovement]
   );
 

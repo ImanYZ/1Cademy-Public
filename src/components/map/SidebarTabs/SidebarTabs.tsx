@@ -4,8 +4,8 @@
 // import Tab from "@material-ui/core/Tab";
 // import Tabs from "@material-ui/core/Tabs";
 // import { TabPanelProps } from "@mui/lab";
-import { Box, Tab, Tabs /* Typography */ } from "@mui/material";
-import React /* useCallback ,*/ /* useState */ from "react";
+import { Box, Tab, Tabs } from "@mui/material";
+import React from "react";
 
 // import { a11yProps, TabPanel } from "./TabPanel/TabPanel";
 

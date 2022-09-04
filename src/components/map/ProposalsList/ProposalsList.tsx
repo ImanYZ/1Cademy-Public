@@ -48,12 +48,16 @@ const ProposalsList = (props: ProposalsListProps) => {
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
       props.rateProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx, correct, wrong, award),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.rateProposal, props.proposals]
   );
 
   const deleteProposalClick = useCallback(
     (proposal: any, proposalIdx: any) => (event: any) =>
       props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteProposal, props.proposals]
   );
 

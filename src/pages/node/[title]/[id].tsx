@@ -36,7 +36,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({ params }) 
   if (!nodeData) {
     return {
       // returns the default 404 page with a status code of 404
-      notFound: true
+      notFound: true,
     };
   }
   let keywords = "";
@@ -52,9 +52,9 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({ params }) 
       node: nodeData,
       keywords,
       updatedStr,
-      createdStr
+      createdStr,
     },
-    revalidate: 20
+    revalidate: 20,
   };
 };
 

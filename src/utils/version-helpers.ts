@@ -781,7 +781,7 @@ export const generateTagsOfTags = async ({ nodeId, tagIds, tags, nodeUpdates }: 
   let tagsChanged = false;
   for (let tagId of tagIds) {
     if (tagId !== nodeId && tagIds.length !== 0 && !hasCycle({ tagsOfNodes: tagIds, nodeId, path: [] })) {
-      const { tagData } = await getTagRefData(tagId, t);
+      const { tagData } = await getTagRefData(tagId);
       const generatedTags = await generateTagsOfTags({
         nodeId: tagId,
         tagIds: tagData.tagIds,

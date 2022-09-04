@@ -254,6 +254,7 @@
   background-color: rgba(0, 0, 0, 0) !important;
   padding-top: 10px;
   padding-bottom: 10px;
+  /* display: flex; */
 }
 
 .card-content .NodeContent .collapsible-body {
@@ -1819,4 +1820,20 @@ button.MuiTab-textColorInherit:focus {
 #ProposalReasoningDIV {
   margin-left: -58px;
   margin-top: 7px;
+}
+
+/* -------------------- */
+/* questions styles */
+.DeleteChoice {
+  text-align: right;
+  margin-left: auto;
+}
+.QuestionChoices {
+  list-style-type: none;
+}
+.QuestionChoices:hover {
+  background-color: rgba(255, 255, 255, 0.13);
+}
+.QuestionChoices i {
+  margin-right: 0px;
 }

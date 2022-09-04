@@ -1,25 +1,24 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Collapse, Typography } from '@mui/material'
-import { Box } from '@mui/system'
-import React, { useState } from 'react'
+import { Collapse, Typography } from "@mui/material";
+import { Box } from "@mui/system";
+import React, { useState } from "react";
 
 export const MarkdownHelper = () => {
-
   const [showHelper, setShowHelper] = useState(false);
 
   return (
     <Box
       sx={{
         background: "#EE7E2A12",
-        p: "8px 16px"
+        p: "8px 16px",
       }}
     >
       <Box onClick={() => setShowHelper(!showHelper)} sx={{ display: "flex", cursor: "pointer" }}>
         <AddIcon
           sx={{
-            mr: '24px',
+            mr: "24px",
             transform: `rotate(${showHelper ? "45deg" : "0deg"})`,
-            transition: "0.2s"
+            transition: "0.2s",
           }}
         />
         <Typography>Click to see how to format your text</Typography>
@@ -35,7 +34,7 @@ export const MarkdownHelper = () => {
                 lineHeight: "35px",
                 background: theme => theme.palette.common.darkGrayBackground,
                 color: theme => theme.palette.common.white,
-                borderRadius: "5px"
+                borderRadius: "5px",
               }}
             >
               <code>```</code>
@@ -55,7 +54,7 @@ export const MarkdownHelper = () => {
                 lineHeight: "35px",
                 background: theme => theme.palette.common.white,
                 color: theme => theme.palette.common.black,
-                borderRadius: "5px"
+                borderRadius: "5px",
               }}
             >
               <code>{"<https://example.com>"}</code>
@@ -77,5 +76,5 @@ export const MarkdownHelper = () => {
         </ul>
       </Collapse>
     </Box>
-  )
-}
+  );
+};

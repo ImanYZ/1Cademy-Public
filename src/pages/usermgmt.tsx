@@ -32,7 +32,7 @@ const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email })
           height: "100vh",
           position: "fixed",
           filter: "brightness(0.25)",
-          zIndex: -2
+          zIndex: -2,
         }}
       >
         <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" priority />
@@ -98,8 +98,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       return {
         redirect: {
           permanent: false,
-          destination: "/"
-        }
+          destination: "/",
+        },
       };
   }
 

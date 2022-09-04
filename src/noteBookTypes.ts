@@ -51,7 +51,7 @@ export type NodeFireStore = {
   title: string;
   updatedAt: Timestamp;
   versions?: number;
-  viewers?: number;
+  viewers: number;
   wrongs: number;
 };
 

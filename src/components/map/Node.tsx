@@ -1,19 +1,22 @@
+import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from "../../context/AuthContext";
+import { KnowledgeChoice } from "../../knowledgeTypes";
+import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
+import QuestionChoices from "./QuestionChoices";
 
 // import HyperEditor from "../../Editor/HyperEditor/HyperEditorWrapper";
 // import NodeHeader from "./NodeHeader/NodeHeader";
@@ -27,6 +30,9 @@ import { MemoizedNodeHeader } from "./NodeHeader";
 
 // import "./Node.css";
 
+// CHECK: Improve this passing Full Node Data
+// this Node need to become testeable
+// also split the in (Node and FormNode) to reduce the complexity
 type NodeProps = {
   identifier: string;
   activeNode: any; //organize this i a better forme
@@ -55,7 +61,7 @@ type NodeProps = {
   tags: string[] | { node: string; title?: string; label?: string }[];
   parents: string[];
   nodesChildren: string[] | { node: string; title?: string; label?: string }[];
-  choices: string[];
+  choices: KnowledgeChoice[];
   commentsNum: number;
   proposalsNum: number;
   admin: string;
@@ -94,6 +100,7 @@ type NodeProps = {
   wrongNode: any; //
   uploadNodeImage: any; //
   removeImage: any; //
+  changeNodeHight: any;
   changeChoice: any; //
   changeFeedback: any; //
   switchChoice: any; //
@@ -105,6 +112,7 @@ type NodeProps = {
   closeSideBar: any; //
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
+  setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
 };
 const Node = ({
   identifier,
@@ -166,6 +174,7 @@ const Node = ({
   wrongNode,
   uploadNodeImage,
   removeImage,
+  changeNodeHight,
   changeChoice,
   changeFeedback,
   switchChoice,
@@ -177,6 +186,7 @@ const Node = ({
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
+  setNodeParts,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -191,22 +201,44 @@ const Node = ({
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   // const [summary, setSummary] = useState("");
-  const [titleCopy, setTitleCopy] = useState(title);
-  const [contentCopy, setContentCopy] = useState(content);
+  // const [titleCopy, setTitleCopy] = useState(title);
+  // const [contentCopy, setContentCopy] = useState(content);
   const [reason, setReason] = useState("");
 
   const nodeRef = useRef(null);
+  const previousRef = useRef<number>(0);
+  const observer = useRef<ResizeObserver | null>(null);
 
-  // useEffect(()=>{
-  //   setTitleCopy(title)
-  //   setContentCopy(content)
-  // },[])
+  useEffect(() => {
+    observer.current = new ResizeObserver(entries => {
+      try {
+        const { blockSize } = entries[0].borderBoxSize[0];
+        // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
+        const heightChange = blockSize === previousRef.current;
+        previousRef.current = blockSize;
+        if (heightChange) return;
+
+        changeNodeHight(identifier, blockSize);
+      } catch (err) {
+        console.warn("invalid entry", err);
+      }
+    });
+
+    if (!nodeRef.current) return;
+
+    observer.current.observe(nodeRef.current);
+
+    // observer.current.unobserve();
+    return () => {
+      if (!observer.current) return;
+      return observer.current.disconnect();
+    };
+  }, [title, content, tags, editable]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log("Node Clicked Handler", nodeBookState);
       if (nodeBookState.choosingNode) {
-        console.log("has chosing node");
+        // The first Nodes exist, Now is clicking the Chosen Node
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
@@ -215,7 +247,6 @@ const Node = ({
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
-        console.log("dont have choosing Node");
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
     },
@@ -249,10 +280,7 @@ const Node = ({
 
   const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
-  // const addChoiceHandler = useCallback(
-  //   () => addChoice(nodeRef, identifier),
-  //   [addChoice, nodeRef, identifier]
-  // );
+  const addChoiceHandler = useCallback(() => addChoice(nodeRef, identifier), [addChoice, nodeRef, identifier]);
 
   const markStudiedHandler = useCallback(
     (event: any) => {
@@ -311,64 +339,71 @@ const Node = ({
     [deleteLink, identifier]
   );
 
+  // CHECK: I think we can improve the other function to update content
+  // if only update nodes, because the observer will update the positions
   const titleChange = useCallback(
     (value: string) => {
-      nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart);
+      // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
+      // changeTitle(nodeRef, identifier, value);
+      // setTitleCopy(title);
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }));
     },
-    [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
   );
 
   const contentChange = useCallback(
     (value: string) => {
-      nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+      // nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+      setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }));
     },
-    [nodeChanged, nodeRef, identifier, imageLoaded, openPart]
+    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
   );
 
-  const locationSizeChange = useCallback(() => {
-    console.log("[NODE]: will call nodeChanged");
-    nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
-  }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
+  // const locationSizeChange = useCallback(() => {
+  //   console.log("[NODE]: will call nodeChanged");
+  //   nodeChanged(nodeRef, identifier, null, null, imageLoaded, openPart);
+  // }, [nodeChanged, nodeRef, identifier, imageLoaded, openPart]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      locationSizeChange();
-    }, 700);
-  }, [
-    locationSizeChange,
-    openPart,
-    imageLoaded,
-    // left,
-    // top,
-    nodeImage,
-    open,
-    editable,
-    unaccepted,
-    isNew,
-    isTag,
-    references.length,
-    tags.length,
-    parents.length,
-    nodesChildren.length,
-    title,
-    content,
-    // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
-    // nodeChanged,
-    // markedCorrect,
-    // markedWrong,
-    // viewers,
-    // correctNum,
-    // wrongNum,
-    // commentsNum,
-    // proposalsNum,
-    // lastVisit,
-    // studied,
-    // isStudied,
-    // changed,
-    // changedAt,
-    // bookmarked,
-    // bookmarks,
-  ]);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     locationSizeChange();
+  //   }, 700);
+  // }, [
+  //   locationSizeChange,
+  //   openPart,
+  //   imageLoaded,
+  //   // left,
+  //   // top,
+  //   nodeImage,
+  //   open,
+  //   editable,
+  //   unaccepted,
+  //   isNew,
+  //   isTag,
+  //   references.length,
+  //   tags.length,
+  //   parents.length,
+  //   nodesChildren.length,
+  //   // title,
+  //   // content,
+  //   choices.length,
+  //   // Reasonably, we should not invoke nodeChanged when the following change, but otherwise, it does not fit the nodes vertically!
+  //   // nodeChanged,
+  //   // markedCorrect,
+  //   // markedWrong,
+  //   // viewers,
+  //   // correctNum,
+  //   // wrongNum,
+  //   // commentsNum,
+  //   // proposalsNum,
+  //   // lastVisit,
+  //   // studied,
+  //   // isStudied,
+  //   // changed,
+  //   // changedAt,
+  //   // bookmarked,
+  //   // bookmarks,
+  // ]);
 
   useEffect(() => {
     if (editable) {
@@ -390,6 +425,7 @@ const Node = ({
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
     <div
       ref={nodeRef}
+      // ref={divRef}
       id={identifier}
       onClick={nodeClickHandler}
       data-hoverable={true}
@@ -464,10 +500,12 @@ const Node = ({
               {/* CHECK: I commented this */}
               <Editor
                 label="Please enter the node title below:"
-                value={titleCopy}
+                // label={titleCopy}
+                value={title}
+                // value={titleCopy}
                 // onChangeContent={setReason}
-                // onChangeContent={titleChange}
-                setValue={setTitleCopy}
+                setValue={titleChange}
+                // setValue={setTitleCopy}
                 readOnly={!editable}
               />
               {/* <HyperEditor
@@ -502,9 +540,9 @@ const Node = ({
               {editable && <p>Please edit the node content below:</p>}
               <Editor
                 label="Please edit the node content below:"
-                value={contentCopy}
-                // onChangeContent={contentChange}
-                setValue={setContentCopy}
+                value={content}
+                setValue={contentChange}
+                // setValue={setContentCopy}
                 readOnly={!editable}
               />
               {/* CHECK: I commmented this */}
@@ -525,6 +563,9 @@ const Node = ({
                     </div>
                   )}
                   {/* <a href={nodeImage} target="_blank"> */}
+
+                  {/* TODO: change to Next Image */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={nodeImage}
                     alt="Node image"
@@ -535,10 +576,9 @@ const Node = ({
                   {/* </a> */}
                 </>
               )}
-              {/* CHECK: I commented this */}
-              {/* {nodeType === "Question" && "choices" in props && (
+              {nodeType === "Question" /*&& "choices" in props*/ && (
                 <>
-                  <ul className="collapsible">
+                  <ul className="collapsible" style={{ padding: "0px" }}>
                     {choices.map((choice, idx) => {
                       return (
                         <QuestionChoices
@@ -554,7 +594,7 @@ const Node = ({
                           switchChoice={switchChoice}
                           changeChoice={changeChoice}
                           changeFeedback={changeFeedback}
-                          nodeChanged={locationSizeChange}
+                          // nodeChanged={locationSizeChange}
                         />
                       );
                     })}
@@ -565,31 +605,28 @@ const Node = ({
                         onClick={addChoiceHandler}
                         tooltip="Click to add a new choice to this question."
                       >
-                        <i className="material-icons green-text">add</i> Add Choice
+                        <>
+                          <AddIcon className="green-text" />
+                          <span>Add Choice</span>
+                        </>
                       </MemoizedMetaButton>
                     </div>
                   )}
                 </>
-               )} */}
+              )}
               {editable && (
                 <>
                   <p className="ProposalTitle">
                     {"To expedite your proposal review, explain why you propose this " +
                       (isNew ? nodeType + " child node:" : "new version:")}
                   </p>
-                  {/* CHECK: I commented this */}
-                  {/* <HyperEditor content={reason} readOnly={false} onChange={setReason} /> */}
-                  <Editor label="Reason" value={reason} setValue={setReason} readOnly={false} />
-                  {/* {reason} */}
-                  {/* <p className="ProposalTitle">
-                      Please write a few words to summarize what you've proposed
-                      in this version:
-                    </p>
-                    <HyperEditor
-                      content={summary}
-                      readOnly={false}
-                      onChange={setSummary}
-                     /> */}
+                  <Editor
+                    label="Please write a few words to summarize what you've proposed
+                      in this version:"
+                    value={reason}
+                    setValue={setReason}
+                    readOnly={false}
+                  />
                 </>
               )}
               <MemoizedNodeFooter
@@ -631,7 +668,8 @@ const Node = ({
                 reloadPermanentGrpah={reloadPermanentGrpah}
                 markStudied={markStudiedHandler} // x
                 bookmark={bookmarkHandler} // x
-                nodeChanged={locationSizeChange}
+                nodeChanged={nodeChanged}
+                // nodeChanged={locationSizeChange}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}
@@ -731,9 +769,9 @@ const Node = ({
               {/* {title} */}
               <Editor
                 label="title"
-                value={titleCopy}
-                // onChangeContent={titleChange}
-                setValue={setTitleCopy}
+                value={title}
+                setValue={titleChange}
+                // setValue={setTitleCopy}
                 readOnly={true}
               />
             </div>
@@ -796,7 +834,8 @@ const Node = ({
                 reloadPermanentGrpah={reloadPermanentGrpah}
                 markStudied={markStudiedHandler} // x
                 bookmark={bookmarkHandler} // x
-                nodeChanged={locationSizeChange}
+                // nodeChanged={locationSizeChange}
+                nodeChanged={nodeChanged}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}

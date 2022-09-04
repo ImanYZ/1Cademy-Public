@@ -1,4 +1,4 @@
-const shortenNumber = function (number: number, maxPlaces, forcePlaces, forceLetter?: any) {
+const shortenNumber = function (number: number, maxPlaces: any, forcePlaces: any, forceLetter?: any) {
   number = Number(number);
   forceLetter = forceLetter || false;
   if (forceLetter !== false) {
@@ -17,7 +17,7 @@ const shortenNumber = function (number: number, maxPlaces, forcePlaces, forceLet
   return annotate(number, maxPlaces, forcePlaces, abbr);
 };
 
-function annotate(number: number, maxPlaces, forcePlaces, abbr: string): string {
+function annotate(number: number, maxPlaces: any, forcePlaces: any, abbr: string): string {
   // set places to false to not round
   let rounded: number = 0;
   switch (abbr) {

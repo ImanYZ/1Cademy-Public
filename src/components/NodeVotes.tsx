@@ -21,7 +21,7 @@ const NodeVotes: FC<Props> = ({ corrects = 0, wrongs = 0 }) => {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            mr: 2
+            mr: 2,
           }}
         >
           <CloseIcon fontSize="small" color="error" />
@@ -38,7 +38,7 @@ const NodeVotes: FC<Props> = ({ corrects = 0, wrongs = 0 }) => {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            mr: 2
+            mr: 2,
           }}
         >
           <CheckIcon fontSize="small" color="success" />

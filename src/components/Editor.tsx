@@ -1,20 +1,19 @@
-import { Button, TextField } from '@mui/material'
-import { Box } from '@mui/system';
-import React, { useState } from 'react'
+import { Button, TextField } from "@mui/material";
+import { Box } from "@mui/system";
+import React, { useState } from "react";
 
-import MarkdownRender from './Markdown/MarkdownRender';
+import MarkdownRender from "./Markdown/MarkdownRender";
 
 type EditorProps = {
-  label: string,
-  value: string,
-  setValue: (value: string) => void,
-  readOnly?: boolean,
-}
+  label: string;
+  value: string;
+  setValue: (value: string) => void;
+  readOnly?: boolean;
+};
 
 export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps) => {
-
   // const [value, setValue] = React.useState<string>('');
-  const [canEdit, setCanEdit] = useState(true)
+  const [canEdit, setCanEdit] = useState(true);
 
   // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   setValue(event.target.value);
@@ -40,30 +39,32 @@ export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps)
   // }
 
   return (
-    <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ with: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+    <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
+      <Box sx={{ display: "flex", justifyContent: "end" }}>
         {!readOnly && <Button onClick={() => setCanEdit(!canEdit)}>Preview/Edit</Button>}
       </Box>
-      {
-        (canEdit && !readOnly)
-          ? <TextField
-            id="editor-text-field"
-            label={label}
-            fullWidth
-            multiline
-            // maxRows={4}
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            className='EditableTextarea'
+      {canEdit && !readOnly ? (
+        <TextField
+          id="editor-text-field"
+          label={label}
+          fullWidth
+          multiline
+          // maxRows={4}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          className="EditableTextarea"
           // onMouseDown={handleMouseDown}
-          />
-          : <MarkdownRender fontSize="16px" text={value} />
-      }
+        />
+      ) : (
+        <Box sx={{ p: canEdit ? "0px" : "16px 14px" }}>
+          <MarkdownRender fontSize="16px" text={value} />
+        </Box>
+      )}
     </Box>
-  )
-}
+  );
+};
 
-// CHECK: we can improve this, to only recalculate his size 
+// CHECK: we can improve this, to only recalculate his size
 // if previous height is different from current height,
 // Because in every key down is recalculating all
 

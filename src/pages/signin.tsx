@@ -24,7 +24,7 @@ const SignInPage: NextPageWithLayout = () => {
 
   const initialValues: SignInFormValues = {
     email: "",
-    password: ""
+    password: "",
   };
 
   const validationSchema = yup.object({
@@ -32,7 +32,7 @@ const SignInPage: NextPageWithLayout = () => {
       .string()
       .email("Invalid email address!")
       .required("Your email address provided by your academic/research institutions is required!"),
-    password: yup.string().required("A secure password is required!")
+    password: yup.string().required("A secure password is required!"),
   });
   const handleSignIn = async ({ email, password }: SignInFormValues) => {
     try {

@@ -20,7 +20,9 @@ import NewChildProposal from "./NewChildProposal";
 import ProposalsList from "./ProposalsList/ProposalsList";
 import { MemoizedSidebarTabs } from "./SidebarTabs/SidebarTabs";
 
-const proposedChildTypesIcons: { [key: string]: string } = {
+type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
+
+const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
   Concept: "local_library",
   Relation: "share",
   Question: "help_outline",
@@ -53,6 +55,8 @@ const Proposals = (props: ProposalsProps) => {
     // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
     // Try to solve adding await
     // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -63,6 +67,8 @@ const Proposals = (props: ProposalsProps) => {
     // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
     // Try to solve adding await
     // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.selectedNode]);
 
   useEffect(() => {
@@ -132,18 +138,20 @@ const Proposals = (props: ProposalsProps) => {
           id="ProposalButtonsRow"
           style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
         >
-          {Object.keys(proposedChildTypesIcons).map(childNodeType => {
-            return (
-              <NewChildProposal
-                key={childNodeType}
-                childNodeType={childNodeType}
-                icon={proposedChildTypesIcons[childNodeType] as string}
-                openProposal={openProposal}
-                setOpenProposal={setOpenProposal}
-                proposeNewChild={props.proposeNewChild}
-              />
-            );
-          })}
+          {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+            (childNodeType: ProposedChildTypesIcons) => {
+              return (
+                <NewChildProposal
+                  key={childNodeType}
+                  childNodeType={childNodeType}
+                  icon={proposedChildTypesIcons[childNodeType]}
+                  openProposal={openProposal}
+                  setOpenProposal={setOpenProposal}
+                  proposeNewChild={props.proposeNewChild}
+                />
+              );
+            }
+          )}
         </div>
       </div>
       <MemoizedSidebarTabs tabsTitle="Proposals tabs" tabsItems={tabsItems} />

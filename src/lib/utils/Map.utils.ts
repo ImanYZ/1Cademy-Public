@@ -2,7 +2,7 @@ import dagre from "dagre";
 
 import { FullNodeData } from "../../noteBookTypes";
 
-export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setstate.
+export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setState.
 export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.
 export const NODE_WIDTH = 580; // Default node width
 export const NODE_HEIGHT = 97; // Default node height
@@ -152,18 +152,18 @@ export const setTypeVisibilityOfParentInsideChild = (oldNodes: any, nodeId: stri
   }
 };
 
+// CHECK: I commented parentId and visible
 // setting the node type and visibility of a child node inside a parent
 export const setTypeVisibilityOfChildInsideParent2 = (
   nodeParent: any,
   oldNodes: any,
-  nodeId: string
-  /*   parentId: string */
+  nodeId: string /*, parentId: string*/
 ) => {
   // const oldNodesCopy = { ...oldNodes }
   let parentCopy = copyNode(nodeParent);
   // parentCopy = { ...parentCopy, children: [...parentCopy.children] }
   const childIdx = parentCopy.children.findIndex((c: any) => c.node === nodeId);
-  parentCopy.children[childIdx] = { ...parentCopy.children[childIdx], visible: true };
+  parentCopy.children[childIdx] = { ...parentCopy.children[childIdx] /*, visible: true */ };
   return parentCopy;
 
   // if (parentId in oldNodesCopy) {
@@ -237,10 +237,7 @@ export const setDagNode = (
   callback?: any
 ) => {
   let newNode: any = {};
-  // 10
-  // unde
-  // 0
-  node.width ? node.width : NODE_WIDTH; // 10 // NODE_ // NODE
+  node.width ? node.width : NODE_WIDTH;
   if ("width" in node) {
     newNode.width = node.width;
   } else {
@@ -272,9 +269,8 @@ export const setDagNode = (
     // node.tags[0].node: node Id of the first tag from the node data
     // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
   }
-  console.log(" --> before callback");
+
   if (callback) {
-    console.log(" ----------------> execute callback");
     callback();
   }
   // ***************************************************************
@@ -334,7 +330,7 @@ export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, e
   const oldEdges = { ...edges };
   // debugger
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
-  // CHECK: commented this because nodeEdges dont exist in dagre
+  // CHECK: commented this because nodeEdges don't exist in dagre
   // g.nodes().forEach(function (v) {
   // });
   // g.edges().forEach(function (e) {
@@ -574,6 +570,7 @@ export const createOrUpdateNode = (
     }
     setTypeVisibilityOfChildInsideParent(oldNodes, nodeId, parent.node);
   }
+  // debugger
   let newNodeData;
   // set height to default node height
   // let height = NODE_HEIGHT;
@@ -638,7 +635,7 @@ export const createOrUpdateNode = (
 // CHECK: this function is was working with objects
 // but need to be modified to work with new arrays
 // this works correctly in dashboard with array but,
-// dont work in worker
+// don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
   let newNode = { ...node };
   newNode.parents = [];
@@ -724,6 +721,7 @@ export const copyGraph = (graph: any) => {
 };
 
 export const compareProperty = (obj1: any, obj2: any, propName: string) => {
+  console.log(" ----> --> compareProperty", { obj1, obj2, propName });
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
     return false;
   }
@@ -735,6 +733,19 @@ export const compareProperty = (obj1: any, obj2: any, propName: string) => {
   }
   return true;
 };
+
+// export const compareProperty = (obj1: any, obj2: any, propName: string) => {
+//   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
+//     return false
+//   }
+//   if (!(propName in obj1) && !(propName in obj2)) {
+//     return true
+//   }
+//   if (obj1[propName] !== obj2[propName]) {
+//     return false
+//   }
+//   return true
+// }
 
 export const compareFirestoreTimestamp = (obj1: any, obj2: any, propName: string) => {
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
@@ -756,6 +767,8 @@ export const compareLinks = (
   // if true, check type and visibility
   checkTypesVisibility: boolean
 ) => {
+  console.log("-----> compareLinks", { links1, links2, isTheSame });
+  // debugger
   if (links1.length !== links2.length) {
     return false;
   }

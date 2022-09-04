@@ -23,7 +23,7 @@ export default function AppFooter() {
         alignItems: "center",
         justifyContent: { xs: "center", md: "space-between" },
         color: theme => theme.palette.common.white,
-        background: theme => theme.palette.common.darkGrayBackground
+        background: theme => theme.palette.common.darkGrayBackground,
       }}
     >
       <Container
@@ -34,7 +34,7 @@ export default function AppFooter() {
           display: "flex",
           alignItems: "center",
           flexDirection: { xs: "column", md: "row" },
-          justifyContent: "space-between"
+          justifyContent: "space-between",
         }}
       >
         <Box sx={{ width: "177px" }}>
@@ -91,7 +91,7 @@ export default function AppFooter() {
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
-              gap: { xs: "20px", md: "50px" }
+              gap: { xs: "20px", md: "50px" },
             }}
           >
             <Typography fontSize={"16px"} component="h6" sx={{ whiteSpace: "nowrap", color: "common.white" }}>
@@ -103,7 +103,7 @@ export default function AppFooter() {
                 height: "50px",
                 display: "flex",
                 justifyContent: { xs: "space-between", md: "left" },
-                gap: { md: "50px" }
+                gap: { md: "50px" },
               }}
             >
               <Link
@@ -142,7 +142,7 @@ export default function AppFooter() {
               flexDirection: { xs: "row", md: "row" },
               alignItems: "center",
               justifyContent: "space-between",
-              gap: { xs: "10px", md: "10px" }
+              gap: { xs: "10px", md: "10px" },
             }}
           >
             <Link
@@ -152,7 +152,7 @@ export default function AppFooter() {
               sx={{
                 display: { xs: "flex", md: "none" },
                 color: theme => theme.palette.common.white,
-                textDecorationColor: theme => theme.palette.common.white
+                textDecorationColor: theme => theme.palette.common.white,
               }}
             >
               <GitHubIcon fontSize="inherit" />
@@ -165,7 +165,7 @@ export default function AppFooter() {
                 rel="noreferrer"
                 sx={{
                   color: theme => theme.palette.common.white,
-                  textDecorationColor: theme => theme.palette.common.white
+                  textDecorationColor: theme => theme.palette.common.white,
                 }}
               >
                 Github

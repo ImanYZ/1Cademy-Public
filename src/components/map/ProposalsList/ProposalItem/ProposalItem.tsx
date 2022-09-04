@@ -4,7 +4,6 @@ import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-// import { AnyARecord } from "dns";
 import React, { useCallback } from "react";
 
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
@@ -30,6 +29,8 @@ const ProposalItem = (props: any) => {
         props.openLinkedNode(proposal.node);
       }
     },
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
   );
 
@@ -56,10 +57,7 @@ const ProposalItem = (props: any) => {
             onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              {/* <i className={"material-icons " + (props.proposal.wrong ? "red-text" : "grey-text")}>
-                close
-              </i> */}
-              <CloseIcon fontSize="small" />
+              <CloseIcon fontSize="small" className={props.proposal.wrong ? "red-text" : "grey-text"} />
               <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
@@ -69,14 +67,7 @@ const ProposalItem = (props: any) => {
             onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              {/* <i
-                className={
-                  "material-icons DoneIcon " + (props.proposal.correct ? "green-text" : "grey-text")
-                }
-              >
-                done
-              </i> */}
-              <DoneIcon fontSize="small" />
+              <DoneIcon fontSize="small" className={props.proposal.correct ? "green-text" : "grey-text"} />
               <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
@@ -86,10 +77,7 @@ const ProposalItem = (props: any) => {
             onClick={props.rateProposal}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              {/* <i className={"material-icons " + (props.proposal.award ? "amber-text" : "grey-text")}>
-                grade
-              </i> */}
-              <GradeIcon fontSize="small" />
+              <GradeIcon fontSize="small" className={props.proposal.award ? "amber-text" : "grey-text"} />
               <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
@@ -97,13 +85,7 @@ const ProposalItem = (props: any) => {
       </div>
       <div>
         <div className="ProposalTitle">
-          {/* <p>Node title:</p> */}
-          {props.showTitle && (
-            // <h1>props.proposal.title</h1>
-            <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />
-            // CHECKL i commented this
-            // <HyperEditor readOnly={true} onChange={doNothing} content={props.proposal.title} />
-          )}
+          {props.showTitle && <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />}
           {/* <p>Proposal Summary:</p> */}
           {proposalSummaries.length > 0
             ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
@@ -114,10 +96,7 @@ const ProposalItem = (props: any) => {
                 );
               })
             : props.proposal.summary && (
-                // CHECK: I commented this
-                // <HyperEditor readOnl={true} onChange={doNothing} content={props.proposal.summary} />
                 <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
-                // <p>{props.proposal.summary}</p>
               )}
         </div>
       </div>

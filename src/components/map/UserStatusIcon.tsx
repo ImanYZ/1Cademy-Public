@@ -5,7 +5,6 @@ import usePrevious from "../../hooks/usePrevious";
 import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
-// import RoundImage from "./RoundImage";
 
 type UserStatusIconProps = {
   uname: string;
@@ -59,6 +58,8 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         }, 1000);
       }
     }
+    // TODO: check dependencies to remove this
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.totalPoints, props.totalPositives, props.totalNegatives]);
 
   const openUserInfo = useCallback(
@@ -138,6 +139,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
               {/* <i className="material-icons">remove</i>{" "} */}
               {/* <i className="material-icons red-text">close</i>{" "} */}
               <span>{shortenNumber(props.totalPoints, 2, false)}</span>
+              {/* CHECK:I commented this, please uncomment */}
               {/* {props.inUserBar && tag && <div id="UserProfileButtonDefaultTag">{tag.title}</div>} */}
             </span>
             {/* <span className="UserStatusTotalAwards">

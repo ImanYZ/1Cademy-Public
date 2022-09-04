@@ -51,8 +51,8 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
         sx={{
           p: { xs: 5, md: 10 },
           "&:last-child": {
-            paddingBottom: { xs: 4, md: 10 }
-          }
+            paddingBottom: { xs: 4, md: 10 },
+          },
         }}
       >
         {node.content && (
@@ -63,7 +63,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
             sx={{
               color: theme => theme.palette.common.black,
               lineHeight: 2,
-              fontSize: "19px"
+              fontSize: "19px",
             }}
           >
             <MarkdownRender text={node.content || ""} />
@@ -83,7 +83,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
                 width: "100%",
                 height: "100%",
                 cursor: "pointer",
-                mt: 3
+                mt: 3,
               }}
             >
               <Image
@@ -108,7 +108,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
             flexDirection: { xs: "column", sm: "row" },
             flexWrap: "wrap",
             justifyContent: "space-between",
-            mt: 5
+            mt: 5,
           }}
         >
           <Box
@@ -116,7 +116,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
               width: { xs: "100%" },
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between"
+              justifyContent: "space-between",
             }}
           >
             <NodeVotes corrects={node.corrects} wrongs={node.wrongs} />
@@ -138,7 +138,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
                 sx={{
                   minWidth: "20px",
                   justifyContent: "start",
-                  color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600])
+                  color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
                 }}
               >
                 <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} />

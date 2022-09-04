@@ -48,7 +48,7 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
         const clientPosition = toScrollRef.current?.getBoundingClientRect();
         const yPosition = clientPosition ? clientPosition.y + clientPosition.height - 40 : 500;
         setTimeout(() => window.scrollBy({ top: yPosition, behavior: "smooth" }), 150);
-      }
+      },
     }));
 
     const handleInstitutionsChange = (values: FilterValue[]) => {

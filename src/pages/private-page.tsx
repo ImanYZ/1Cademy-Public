@@ -6,5 +6,5 @@ const PrivatePage = () => {
 
 export default withAuthUser({
   shouldRedirectToLogin: true,
-  shouldRedirectToHomeIfAuthenticated: false
+  shouldRedirectToHomeIfAuthenticated: false,
 })(PrivatePage);

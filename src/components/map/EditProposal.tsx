@@ -1,6 +1,6 @@
 // import "./EditProposal.css";
 
-import CreateIcon from '@mui/icons-material/Create';
+import CreateIcon from "@mui/icons-material/Create";
 import { Button } from "@mui/material";
 import React, { useCallback } from "react";
 
@@ -9,28 +9,28 @@ import React, { useCallback } from "react";
 // import MetaButton from "../../../MetaButton/MetaButton";
 
 type EditProposalProps = {
-  proposeNodeImprovement: any,
-  openProposal: any,
-  selectedNode: any,
-}
+  proposeNodeImprovement: any;
+  openProposal: any;
+  selectedNode: any;
+};
 
 const EditProposal = (props: EditProposalProps) => {
   // const selectedNode = useRecoilValue(selectedNodeState);
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => props.proposeNodeImprovement(event),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.proposeNodeImprovement]
   );
 
   return (
     <div id="ProposeImprovementContainer">
-      <Button onClick={
-        props.openProposal !== "ProposeEditTo" + props.selectedNode
-          ? proposeNodeImprovementClick
-          : undefined
-      }>
+      <Button
+        onClick={props.openProposal !== "ProposeEditTo" + props.selectedNode ? proposeNodeImprovementClick : undefined}
+      >
         <div id="ProposeImprovementButton">
-          <CreateIcon fontSize='small' />
+          <CreateIcon fontSize="small" />
           Edit/Improve
         </div>
       </Button>

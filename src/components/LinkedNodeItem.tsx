@@ -35,7 +35,7 @@ const LinkedNodeItem: FC<Props> = ({
   sx,
   secondaryActions = null,
   secondaryActionSx,
-  openInNewTab = false
+  openInNewTab = false,
 }) => {
   return (
     <HtmlTooltip
@@ -46,7 +46,9 @@ const LinkedNodeItem: FC<Props> = ({
           </Typography>
           {nodeImageUrl && (
             <Box>
-              <img src={nodeImageUrl} width="100%" height="100%" />
+              {/* TODO: change to next Image */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={nodeImageUrl} alt={title} width="100%" height="100%" />
             </Box>
           )}
         </Box>
@@ -70,7 +72,7 @@ const LinkedNodeItem: FC<Props> = ({
                     display: "flex",
                     direction: "row",
                     justifyContent: "center",
-                    color: theme => theme.palette.common.darkGrayBackground
+                    color: theme => theme.palette.common.darkGrayBackground,
                   }}
                 >
                   <LinkIcon />

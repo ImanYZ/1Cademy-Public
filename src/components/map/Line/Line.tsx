@@ -30,12 +30,12 @@ const Line = (props: LineProps) => {
     transform: `translate(${from.x - 0.5 * len * (1 - Math.cos(angle))}px,
                           ${from.y + 0.5 * len * Math.sin(angle)}px)
                           rotate(${angle}rad)`,
-    width: `${len}px`
+    width: `${len}px`,
     // borderBottom:
     //   props.borderBottomStyle + " " + props.color || "1px solid black",
   };
   const rightArrowStyle: any = {
-    borderLeft: `10px solid ${props.color}`
+    borderLeft: `10px solid ${props.color}`,
   };
 
   if (props.leftDirection) {
@@ -54,7 +54,7 @@ const Line = (props: LineProps) => {
         textAlign: "center",
         height: "0px",
         borderBottom: "2.5px solid rgb(1, 211, 106)",
-        transition: '0.5s',
+        transition: "0.5s",
       }}
     >
       <div className="RightArrow" style={rightArrowStyle}></div>

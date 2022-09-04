@@ -72,7 +72,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
         aria-expanded={expanded}
         aria-label="show more"
         sx={{
-          transform: !expand ? "rotate(0deg)" : "rotate(180deg)"
+          transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
         }}
       >
         <Tooltip title={expand ? "Hide the tags and contributors." : "Show the tags and contributors."}>
@@ -100,7 +100,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                 <Box
                   style={{ paddingTop }}
                   sx={{
-                    position: "relative"
+                    position: "relative",
                   }}
                 >
                   <Image
@@ -130,7 +130,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
               flexDirection: "row",
               flex: 1,
               justifyContent: "space-between",
-              alignItems: "center"
+              alignItems: "center",
             }}
           >
             <Box sx={{ display: "flex", flex: 1, justifyContent: "space-between" }}>
@@ -170,7 +170,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                               width: 50,
                               height: 50,
                               borderColor: "red",
-                              border: "solid 2px"
+                              border: "solid 2px",
                             }}
                           >
                             <Image

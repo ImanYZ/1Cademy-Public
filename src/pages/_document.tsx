@@ -77,7 +77,7 @@ CustomDocument.getInitialProps = async ctx => {
             {...props} // @ts-ignore
             emotionCache={cache}
           />
-        )
+        ),
     });
 
   const initialProps = await Document.getInitialProps(ctx);
@@ -97,7 +97,7 @@ CustomDocument.getInitialProps = async ctx => {
 
   return {
     ...initialProps,
-    styles: [...Children.toArray(initialProps.styles), ...emotionStyleTags]
+    styles: [...Children.toArray(initialProps.styles), ...emotionStyleTags],
   };
 };
 

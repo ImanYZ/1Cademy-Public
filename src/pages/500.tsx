@@ -1,7 +1,7 @@
-import React from "react"
+import React from "react";
 
 const Custom500 = () => {
-  return <h1>500 - Server-side error occurred</h1>
-}
+  return <h1>500 - Server-side error occurred</h1>;
+};
 
-export default Custom500
+export default Custom500;

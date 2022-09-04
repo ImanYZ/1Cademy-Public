@@ -2,11 +2,9 @@ import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
 
-// import HyperEditor from "../../../Editor/HyperEditor/HyperEditorWrapper";
 import { NodeType } from "../../../types";
 import NodeTypeIcon from "../../NodeTypeIcon2";
 import { MemoizedMetaButton } from "../MetaButton";
-// import MetaButton from "../../MetaButton/MetaButton";
 
 const doNothing = () => {};
 
@@ -22,6 +20,8 @@ type LinkingButtonProps = {
 };
 
 const LinkingButton = (props: LinkingButtonProps) => {
+  // TODO: check dependencies to remove eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const linkedNodeClick = useCallback(() => props.onClick(props.linkedNodeID), [props.onClick, props.linkedNodeID]);
 
   // let iClassName = "material-icons LinkingButtonIcon ";

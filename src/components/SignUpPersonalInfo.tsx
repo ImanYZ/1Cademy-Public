@@ -31,7 +31,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
       const ISO6391Obj = await import("iso-639-1");
       const allLanguages = [
         ...ISO6391Obj.default.getAllNames().sort((l1, l2) => (l1 < l2 ? -1 : 1)),
-        "Prefer not to say"
+        "Prefer not to say",
       ];
       setLanguages(allLanguages);
     };
@@ -47,7 +47,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         flag: "",
         currency: "",
         latitude: "",
-        longitude: ""
+        longitude: "",
       };
       const { Country } = await import("country-state-city");
       setCountries([...Country.getAllCountries(), defaultCountry]);
