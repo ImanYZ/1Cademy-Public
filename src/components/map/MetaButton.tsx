@@ -1,6 +1,6 @@
 // import "./MetaButton.css";
 
-import { Button, Tooltip, TooltipProps } from "@mui/material";
+import { Tooltip, TooltipProps } from "@mui/material";
 import React, { useCallback } from "react";
 
 // import { useRecoilValue } from "recoil";
@@ -11,18 +11,17 @@ import React, { useCallback } from "react";
 // import useClickPreventionOnDoubleClick from "./preventOnClickTwice";
 // import { preventEventPropagation } from "../../../utils/eventHandlers";
 import useClickPreventionOnDoubleClick from "../../hooks/preventOnClickTwice";
-import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 
-const doNothing = () => { };
+const doNothing = () => {};
 
 type MetaButtonProps = {
-  children: JSX.Element,
-  tooltipPosition?: TooltipProps['placement'],
-  tooltip?: string,
-  onClick?: any,
-  onDoubleClick?: any,
-  round?: boolean,
-}
+  children: JSX.Element;
+  tooltipPosition?: TooltipProps["placement"];
+  tooltip?: string;
+  onClick?: any;
+  onDoubleClick?: any;
+  round?: boolean;
+};
 
 const MetaButton = (props: MetaButtonProps) => {
   // const isSubmitting = useRecoilValue(isSubmittingState);
@@ -47,7 +46,7 @@ const MetaButton = (props: MetaButtonProps) => {
 
   if ("onClick" in props && props.onClick) {
     return (
-      <Tooltip title={props.tooltip || ''} placement={props.tooltipPosition}>
+      <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition}>
         <button
           className={
             // (isSubmitting
@@ -79,9 +78,7 @@ const MetaButton = (props: MetaButtonProps) => {
       <span className={"MetaButton" + ("tooltip" in props && props.tooltip ? " Tooltip" : "")}>
         {props.children}
         {"tooltip" in props && props.tooltip && (
-          <span
-            className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}
-          >
+          <span className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}>
             {props.tooltip}
           </span>
         )}
@@ -90,4 +87,4 @@ const MetaButton = (props: MetaButtonProps) => {
   }
 };
 
-export const MemoizedMetaButton =React.memo(MetaButton);
+export const MemoizedMetaButton = React.memo(MetaButton);

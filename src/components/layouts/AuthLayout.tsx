@@ -12,7 +12,7 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState
+  useState,
 } from "react";
 
 import { useAuth } from "@/context/AuthContext";
@@ -66,7 +66,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
               height: "100vh",
               position: "fixed",
               filter: "brightness(0.25)",
-              zIndex: -2
+              zIndex: -2,
             }}
           >
             <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
@@ -80,7 +80,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
               height: "100vh",
               position: "fixed",
               filter: "brightness(1.4)",
-              zIndex: -2
+              zIndex: -2,
             }}
           >
             <Image alt="Library" src={lightModeLibraryImage} layout="fill" objectFit="cover" priority />
@@ -93,7 +93,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
             height: { xs: "auto", md: "100vh" },
             display: "flex",
             justifyContent: "center",
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
           <Box
@@ -104,7 +104,9 @@ const AuthLayout: FC<Props> = ({ children }) => {
               flexDirection: { sx: "column", md: "row" },
               color: theme => theme.palette.common.white,
               background: theme =>
-                themeActions.themeMode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white
+                themeActions.themeMode === "dark"
+                  ? theme.palette.common.darkGrayBackground
+                  : theme.palette.common.white,
             }}
           >
             {/* left panel */}
@@ -118,7 +120,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
-                  alignItems: "center"
+                  alignItems: "center",
                 }}
               >
                 {/* this this image has absolute position, by their configuration */}
@@ -151,7 +153,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                     left: "16px",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
                   }}
                 >
                   <a
@@ -191,7 +193,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                     sx={{
                       border: "solid 2px",
                       borderColor: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
-                      mt: "16px"
+                      mt: "16px",
                     }}
                   >
                     <Link href={ROUTES.signIn}>
@@ -203,7 +205,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                           p: "12px 16px",
                           textAlign: "center",
                           borderRadius: "0px",
-                          border: "0px"
+                          border: "0px",
                         }}
                       >
                         LOG IN
@@ -218,7 +220,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                           p: "12px 16px",
                           textAlign: "center",
                           borderRadius: "0px",
-                          border: "0px"
+                          border: "0px",
                         }}
                       >
                         SIGN UP
@@ -238,7 +240,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                       sx={{
                         border: "solid 2px",
                         borderColor: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
-                        mb: "16px"
+                        mb: "16px",
                       }}
                     >
                       <Link href={ROUTES.signIn}>
@@ -250,7 +252,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                             p: "12px 16px",
                             textAlign: "center",
                             borderRadius: "0px",
-                            border: "0px"
+                            border: "0px",
                           }}
                         >
                           LOG IN
@@ -265,7 +267,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                             p: "12px 16px",
                             textAlign: "center",
                             borderRadius: "0px",
-                            border: "0px"
+                            border: "0px",
                           }}
                         >
                           SIGN UP
@@ -291,7 +293,7 @@ const useAuthDispatch = () => {
 };
 
 export const useAuthLayout = (): [setBackground: Dispatch<SetStateAction<AppBackground>>] => [
-  useAuthDispatch().setBackground
+  useAuthDispatch().setBackground,
 ];
 
 export default AuthLayout;

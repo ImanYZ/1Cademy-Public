@@ -4,8 +4,8 @@
 // import Tab from "@material-ui/core/Tab";
 // import Tabs from "@material-ui/core/Tabs";
 // import { TabPanelProps } from "@mui/lab";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
-import React, { useCallback, useState } from "react";
+import { Box, Tab, Tabs /* Typography */ } from "@mui/material";
+import React /* useCallback ,*/ /* useState */ from "react";
 
 // import { a11yProps, TabPanel } from "./TabPanel/TabPanel";
 
@@ -46,7 +46,7 @@ const SidebarTabs = (props: any) => {
         </TabPanel>
       ))} 
       */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={value} onChange={handleChange} aria-label={props.tabsTitle + " Tabs"}>
           {props.tabsItems.map((tabItem: any, idx: number) => (
             <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />

@@ -1,4 +1,4 @@
-import { UpDownVoteNode } from "../../src/utils/upDownVoteNode";
+// import { UpDownVoteNode } from "../../src/utils/upDownVoteNode";
 import { nodesData, userNodesData, usersData } from "../../testUtils/mockCollections";
 
 describe("UpDownVoteNode", () => {
@@ -8,7 +8,7 @@ describe("UpDownVoteNode", () => {
     await userNodesData.populate();
   });
   it("should up vote the node", async () => {
-    const userData = usersData.getData()[0];
+    // const userData = usersData.getData()[0];
     // await UpDownVoteNode({
     //   fullname: `${userData.fname} ${userData.lname}`,
     //   uname: userData.uname,

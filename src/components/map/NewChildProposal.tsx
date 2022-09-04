@@ -13,7 +13,7 @@ import { MemoizedMetaButton } from "./MetaButton";
 type NewChildProposalProps = {
   key: any;
   childNodeType: string;
-  icon: any;
+  icon: string;
   openProposal: any;
   setOpenProposal: any;
   proposeNewChild: any;

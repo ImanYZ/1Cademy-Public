@@ -15,7 +15,7 @@ import {
   userNodesData,
   userNodesLogData,
   usersData,
-} from "../../../testUtils/mockData";
+} from "../../../testUtils/mockCollections";
 
 describe("/signup", () => {
   beforeEach(async () => {

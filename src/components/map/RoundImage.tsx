@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from "react";
-
 type RoundImageProps = {
-  imageUrl: string,
-  alt: string,
-}
+  imageUrl: string;
+  alt: string;
+};
 
 const RoundImage = (props: RoundImageProps) => {
   const [imageWidth, setImageWidth] = useState("100%");

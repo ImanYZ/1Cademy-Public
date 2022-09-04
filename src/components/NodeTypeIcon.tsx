@@ -17,11 +17,11 @@ import { FC } from "react";
 import { NodeType } from "../knowledgeTypes";
 
 type Props = {
-  tooltipPlacement: TooltipProps['placement'];
+  tooltipPlacement?: TooltipProps["placement"];
   nodeType?: NodeType;
 } & SvgIconProps;
 
-const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement, color = "primary", ...rest }) => {
+const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "bottom", color = "primary", ...rest }) => {
   const renderIcon = () => {
     switch (nodeType) {
       case "Code":
@@ -53,9 +53,13 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement, color = "primary"
     }
   };
 
-  if (!nodeType) return null
+  if (!nodeType) return null;
 
-  return <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>{renderIcon()}</Tooltip>;
+  return (
+    <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
+      {renderIcon()}
+    </Tooltip>
+  );
 };
 
 export default NodeTypeIcon;

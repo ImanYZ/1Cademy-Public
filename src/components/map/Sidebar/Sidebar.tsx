@@ -1,6 +1,6 @@
 // import "./Sidebar.css";
 
-import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, /*  useMemo, */ useRef, useState } from "react";
 
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-dark-theme.jpg";

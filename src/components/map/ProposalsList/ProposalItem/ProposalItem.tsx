@@ -1,43 +1,43 @@
 // import "./ProposalItem.css";
-import CloseIcon from "@mui/icons-material/Close"
-import DoneIcon from "@mui/icons-material/Done"
-import GradeIcon from "@mui/icons-material/Grade"
-import dayjs from "dayjs"
-import relativeTime from "dayjs/plugin/relativeTime"
-import { AnyARecord } from "dns"
-import React, { useCallback } from "react"
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
+import GradeIcon from "@mui/icons-material/Grade";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+// import { AnyARecord } from "dns";
+import React, { useCallback } from "react";
 
-import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator"
-import shortenNumber from "../../../../lib/utils/shortenNumber"
-import { Editor } from "../../../Editor"
-import { MemoizedMetaButton } from "../../MetaButton"
+import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
+import shortenNumber from "../../../../lib/utils/shortenNumber";
+import { Editor } from "../../../Editor";
+import { MemoizedMetaButton } from "../../MetaButton";
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
 // import MetaButton from "../../../../MetaButton/MetaButton";
 // import proposalSummariesGenerator from "../../proposalSummariesGenerator";
 
-const doNothing = () => {}
+const doNothing = () => {};
 
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 const ProposalItem = (props: any) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
-        props.selectProposal(event, proposal)
+        props.selectProposal(event, proposal);
       } else {
-        props.openLinkedNode(proposal.node)
+        props.openLinkedNode(proposal.node);
       }
     },
     [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
-  )
+  );
 
-  let proposalSummaries
+  let proposalSummaries;
   if (props.proposalSummaries) {
-    proposalSummaries = props.proposalSummaries
+    proposalSummaries = props.proposalSummaries;
   } else {
-    proposalSummaries = proposalSummariesGenerator(props.proposal)
+    proposalSummaries = proposalSummariesGenerator(props.proposal);
   }
 
   return (
@@ -111,7 +111,7 @@ const ProposalItem = (props: any) => {
                   <p style={{ margin: "0px" }} key={"Summary" + props.proposal.id + prSummaryIdx}>
                     {prSummary}
                   </p>
-                )
+                );
               })
             : props.proposal.summary && (
                 // CHECK: I commented this
@@ -122,7 +122,7 @@ const ProposalItem = (props: any) => {
         </div>
       </div>
     </li>
-  )
-}
+  );
+};
 
-export default React.memo(ProposalItem)
+export default React.memo(ProposalItem);

@@ -156,8 +156,8 @@ export const setTypeVisibilityOfParentInsideChild = (oldNodes: any, nodeId: stri
 export const setTypeVisibilityOfChildInsideParent2 = (
   nodeParent: any,
   oldNodes: any,
-  nodeId: string,
-  parentId: string
+  nodeId: string
+  /*   parentId: string */
 ) => {
   // const oldNodesCopy = { ...oldNodes }
   let parentCopy = copyNode(nodeParent);
