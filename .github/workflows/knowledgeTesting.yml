@@ -52,5 +52,6 @@ jobs:
           npm install --legacy-peer-deps
           npm run build
       - name: Unit tests
-        run: npm run run-emulator
-        run: npm run test:ci
+        run: |
+          npm run run-emulator
+          npm run test:ci
