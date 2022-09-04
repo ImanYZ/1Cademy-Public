@@ -18,10 +18,9 @@
     "prepare": "husky install .husky",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
-    "test": "jest --watch --runInBand",
-    "test:coverage": "jest --watch --coverage --all --runInBand",
-    "test:ci": "jest --ci --runInBand",
-    "test:integration": "firebase emulators:start 'npm run test' --project test --only auth,firestore",
+    "test": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --runInBand'",
+    "test:coverage": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --coverage --all --runInBand'",
+    "test:ci": "firebase emulators:exec  --project test --only auth,firestore 'jest --ci --runInBand'",
     "run-emulator": "firebase emulators:start --project test --only auth,firestore"
   },
   "author": "Iman YeckehZaare",
