@@ -15,8 +15,12 @@ import { FC } from "react";
 
 import { NodeType } from "../types";
 
+// This component has improvementTypes
+// 1. optional tooltip
+// 2. and use NodeType from type
+
 type Props = {
-  tooltipPlacement: TooltipProps["placement"];
+  tooltipPlacement?: TooltipProps["placement"];
   nodeType?: NodeType;
 } & SvgIconProps;
 
@@ -52,11 +56,14 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement, color = "primary"
 
   if (!nodeType) return null;
 
-  return (
-    <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
-      {renderIcon()}
-    </Tooltip>
-  );
+  if (tooltipPlacement)
+    return (
+      <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
+        {renderIcon()}
+      </Tooltip>
+    );
+
+  return renderIcon();
 };
 
 export default NodeTypeIcon;

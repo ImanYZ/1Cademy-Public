@@ -104,7 +104,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user }] = useAuth();
-  const [allTags, , allTagsLoaded] = useTagsTreeView();
+  const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   // node that user is currently selected (node will be highlighted)
   const [sNode, setSNode] = useState(null); //<--- this was with recoil

@@ -25,7 +25,7 @@ type HomeFilterProps = {
 
 const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
   ({ onTagsChange, onInstitutionsChange, onContributorsChange, onNodeTypesChange, onReferencesChange }, ref) => {
-    const [allTags, setAllTags] = useTagsTreeView([]);
+    const { allTags, setAllTags } = useTagsTreeView([]);
     const toScrollRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {

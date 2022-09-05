@@ -10,6 +10,7 @@ import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
+import SearchList from "./SearchList";
 // import ChatRoomImage from "../../../assets/ChatRoom.jpg";
 // import RecentNodesImage from "../../../assets/RecentNodes.jpg";
 // import RecentNodesLightModeImage from "../../../assets/lightmode_sort.jpg";
@@ -579,11 +580,10 @@ const Sidebar = (props: SidebarType) => {
               closeSideBar={props.closeSideBar}
             >
               {/* CHECK: I commented this */}
-              {/* <SearchList
-                openLinkedNode={props.openLinkedNode}
-                triggerQuerySearch={props.triggerQuerySearch}
-              /> */}
-              <h2>Search List</h2>
+              <>
+                <SearchList /*openLinkedNode={props.openLinkedNode} triggerQuerySearch={props.triggerQuerySearch}*/ />
+                <h2>Search List</h2>
+              </>
             </MemoizedSidebarWrapper>
           ) : openBookmarks ? (
             <MemoizedSidebarWrapper

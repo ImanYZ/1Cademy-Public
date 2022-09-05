@@ -65,7 +65,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return [tagsTreeView, setTagsTreeView, allTagsLoaded] as const;
+  return { allTags: tagsTreeView, setAllTags: setTagsTreeView, allTagsLoaded };
 };
 
 export const applyTagRemove = (oldAllTags: AllTagsTreeView, nodeId: string /*, dagreLoaded*/) => {
