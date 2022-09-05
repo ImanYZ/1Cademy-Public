@@ -36,7 +36,7 @@ defaults:
 
 jobs:
   tests:
-    name: Unit tests - jest
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,7 +49,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: npm install and build
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run build
       - name: Unit tests
-        run: npm run test:ci
+        run:
+          npm run test:ci

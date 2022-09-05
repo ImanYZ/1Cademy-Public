@@ -22,7 +22,7 @@ const common = {
   orangeLight: "#f9e2d1",
   orangeDark: "#ff6d00",
   darkGrayBackground: "#28282A",
-  gray: "#D3D3D3"
+  gray: "#D3D3D3",
 };
 
 const systemFont = ["Roboto", "sans-serif"];
@@ -34,50 +34,50 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       primary: {
         main: common.orange,
         ...(mode === "dark" && {
-          main: common.orange
-        })
+          main: common.orange,
+        }),
       },
       secondary: {
         main: common.darkGrayBackground,
         ...(mode === "dark" && {
-          main: common.white
-        })
+          main: common.white,
+        }),
       },
       light: {
         main: common.white,
         ...(mode === "dark" && {
-          main: grey[500]
-        })
+          main: grey[500],
+        }),
       },
       warning: {
         main: "#ffc071",
-        dark: "#ffb25e"
+        dark: "#ffb25e",
       },
       divider: mode === "dark" ? grey[200] : grey[200],
       background: {
         default: common.white,
-        paper: common.white
+        paper: common.white,
       },
       ...(mode === "dark" && {
         background: {
           default: common.darkGrayBackground,
-          paper: common.darkGrayBackground
-        }
+          paper: common.darkGrayBackground,
+        },
       }),
       common,
       ...(mode === "light" && {
         text: {
           primary: common.black,
-          secondary: grey[700]
-        }
+          secondary: grey[700],
+        },
       }),
       ...(mode === "dark" && {
         text: {
           primary: common.white,
-          secondary: grey[300]
-        }
+          secondary: grey[300],
+        },
       }),
-      grey
+      grey,
     },
     spacing: 5,
     typography: {
@@ -91,9 +91,9 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       body2: { fontSize: "19px", color: mode === "dark" ? common.white : common.black },
       caption: { fontSize: "14.5px", color: mode === "dark" ? common.white : common.black },
       button: {
-        textTransform: "initial"
-      }
-    }
+        textTransform: "initial",
+      },
+    },
   } as ThemeOptions);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -104,52 +104,52 @@ export function getThemedComponents(theme: Theme): {
     components: {
       MuiButtonBase: {
         defaultProps: {
-          disableTouchRipple: true
-        }
+          disableTouchRipple: true,
+        },
       },
       MuiButton: {
         defaultProps: {
-          disableElevation: true
+          disableElevation: true,
         },
         styleOverrides: {
           containedPrimary: {
             backgroundColor: "common.orange",
             color: common.white,
             ":hover": {
-              backgroundColor: common.orangeDark
-            }
+              backgroundColor: common.orangeDark,
+            },
           },
           containedSecondary: {
             backgroundColor: theme.palette.mode === "dark" ? common.white : common.darkGrayBackground,
             color: theme.palette.mode === "dark" ? common.darkGrayBackground : common.white,
             ":hover": {
               backgroundColor:
-                theme.palette.mode === "dark" ? alpha(common.white, 0.9) : alpha(common.darkGrayBackground, 0.9)
-            }
-          }
+                theme.palette.mode === "dark" ? alpha(common.white, 0.9) : alpha(common.darkGrayBackground, 0.9),
+            },
+          },
         },
         variants: [
           {
             props: { variant: "contained" },
             style: {
               "&.Mui-disabled .MuiLoadingButton-loadingIndicator": {
-                color: common.orangeLight
-              }
-            }
-          }
-        ]
+                color: common.orangeLight,
+              },
+            },
+          },
+        ],
       },
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundColor: common.darkGrayBackground
-          }
-        }
+            backgroundColor: common.darkGrayBackground,
+          },
+        },
       },
       MuiTooltip: {
         defaultProps: {
-          arrow: true
-        }
+          arrow: true,
+        },
       },
       MuiSelect: {
         variants: [
@@ -157,75 +157,75 @@ export function getThemedComponents(theme: Theme): {
             props: { variant: "standard" },
             style: {
               ".MuiSelect-standard:focus": {
-                backgroundColor: "transparent"
+                backgroundColor: "transparent",
               },
               padding: "10px",
               "&:after": { borderBottom: "none" },
               "&:before": {
-                borderBottom: "none"
+                borderBottom: "none",
               },
               "&:hover": {
-                color: grey[800]
+                color: grey[800],
               },
               [`&:hover:not(.disabled):before`]: {
                 borderBottom: "none",
                 "@media (hover: none)": {
-                  borderBottom: "none"
-                }
-              }
-            }
-          }
-        ]
+                  borderBottom: "none",
+                },
+              },
+            },
+          },
+        ],
       },
       MuiCardContent: {
         styleOverrides: {
           root: {
             "&": {
               paddingTop: "0px",
-              paddingBottom: "0px"
+              paddingBottom: "0px",
             },
             "&:last-child": {
               paddingTop: "0px",
-              paddingBottom: "0px"
-            }
-          }
-        }
+              paddingBottom: "0px",
+            },
+          },
+        },
       },
       MuiChip: {
         styleOverrides: {
           root: {
             "&": {
-              border: `solid 1px ${grey[300]}`
-            }
+              border: `solid 1px ${grey[300]}`,
+            },
           },
           icon: {
-            color: common.orange
-          }
-        }
+            color: common.orange,
+          },
+        },
       },
       MuiToggleButtonGroup: {
         styleOverrides: {
           root: {
             backgroundColor: theme.palette.mode === "light" ? common.white : common.darkGrayBackground,
-            color: theme.palette.mode === "light" ? common.darkGrayBackground : common.white
-          }
-        }
+            color: theme.palette.mode === "light" ? common.darkGrayBackground : common.white,
+          },
+        },
       },
       MuiToggleButton: {
         styleOverrides: {
           root: {
-            textTransform: "none"
-          }
-        }
+            textTransform: "none",
+          },
+        },
       },
       MuiFormControlLabel: {
         styleOverrides: {
           root: {
-            color: theme.palette.mode === "dark" ? common.white : common.darkGrayBackground
-          }
-        }
-      }
-    }
+            color: theme.palette.mode === "dark" ? common.white : common.darkGrayBackground,
+          },
+        },
+      },
+    },
   };
 }
 

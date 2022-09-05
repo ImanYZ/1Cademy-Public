@@ -54,14 +54,14 @@ export const FullTagAutocomplete: FC<FullTagAutocompleteProps> = ({ tagsSelected
           display: "flex",
           alignItems: "center",
           mb: "16px",
-          color: theme => theme.palette.grey[600]
+          color: theme => theme.palette.grey[600],
         }}
       >
         <LocalOfferIcon
           fontSize="small"
           sx={{
             mr: "10px",
-            color: theme => theme.palette.grey[400]
+            color: theme => theme.palette.grey[400],
           }}
         />
         Tags

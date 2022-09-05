@@ -1,10 +1,15 @@
 import admin from "firebase-admin";
 import { cert, initializeApp } from "firebase-admin/app";
-import { getFirestore, WriteBatch } from "firebase-admin/firestore";
+import { DocumentReference, getFirestore, WriteBatch } from "firebase-admin/firestore";
+
+import { arrayToChunks } from "../../utils";
+
+export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 
 require("dotenv").config();
+
 if (!admin.apps.length) {
-  initializeApp({
+  let initializationConfigs: any = {
     credential: cert({
       type: process.env.ONECADEMYCRED_TYPE,
       project_id: process.env.NEXT_PUBLIC_PROJECT_ID,
@@ -17,12 +22,21 @@ if (!admin.apps.length) {
       auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
       client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
       storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
-      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL
-    } as any)
-  });
+      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
+    } as any),
+  };
+
+  if (process.env.NODE_ENV === "test") {
+    initializationConfigs = {
+      projectId: "test",
+      credential: admin.credential.applicationDefault(),
+    };
+  }
+  initializeApp(initializationConfigs);
   getFirestore().settings({ ignoreUndefinedProperties: true });
 }
 const MAX_TRANSACTION_WRITES = 499;
+const MIN_ACCEPTED_VERSION_POINT_WEIGHT = 0.1;
 const db = getFirestore();
 
 const makeCommitBatch = async (batch: WriteBatch) => {
@@ -67,4 +81,43 @@ const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: numb
   return [batch, writeCounts];
 };
 
-export { admin, db, checkRestartBatchWriteCounts };
+//////////
+interface TWriteOperation {
+  objRef: DocumentReference;
+  data?: { [key: string]: any };
+
+  operationType: "set" | "update" | "delete";
+}
+const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
+  const chunked = arrayToChunks(tWriteOperations);
+
+  await db.runTransaction(async t => {
+    for (let chunk of chunked) {
+      for (let op of chunk) {
+        const { operationType, objRef, data } = op;
+        switch (operationType) {
+          case "set":
+            t.set(objRef, data);
+            break;
+
+          case "update":
+            t.update(objRef, data);
+            break;
+
+          case "delete":
+            t.delete(objRef);
+            break;
+        }
+      }
+    }
+  });
+};
+
+export {
+  admin,
+  db,
+  writeTransaction,
+  type TWriteOperation,
+  checkRestartBatchWriteCounts,
+  MIN_ACCEPTED_VERSION_POINT_WEIGHT,
+};

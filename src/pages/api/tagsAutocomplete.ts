@@ -14,10 +14,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
       {
         host: process.env.ONECADEMYCRED_TYPESENSE_HOST as string,
         port: parseInt(process.env.ONECADEMYCRED_TYPESENSE_PORT as string),
-        protocol: process.env.ONECADEMYCRED_TYPESENSE_PROTOCOL as string
-      }
+        protocol: process.env.ONECADEMYCRED_TYPESENSE_PROTOCOL as string,
+      },
     ],
-    apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string
+    apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string,
   });
 
   if (q.length === 0) {
@@ -46,7 +46,7 @@ const defaultTags = [
   "Social Perception",
   "Library Science",
   "Are Electronic Cigarettes Less Harmful than Traditional Cigarettes?",
-  "Cognitive Symptoms of Schizophrenia "
+  "Cognitive Symptoms of Schizophrenia ",
 ];
 
 export default handler;

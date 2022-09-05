@@ -4,7 +4,7 @@ const ROUTES = {
   proposal: "/proposal",
   signIn: "/signin",
   signUp: "/signup",
-  forgotpassword: "/forgot-password"
+  forgotpassword: "/forgot-password",
 };
 
 export default ROUTES;

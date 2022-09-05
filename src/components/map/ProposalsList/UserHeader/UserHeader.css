@@ -1,0 +1,9 @@
+.ProposalUsername {
+  margin: -4px 10px 10px -64px;
+}
+
+.ProposalUsername .UserAvatar {
+  height: 49px;
+  width: 49px;
+  line-height: 49px;
+}

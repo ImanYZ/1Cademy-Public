@@ -14,10 +14,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
       {
         host: process.env.ONECADEMYCRED_TYPESENSE_HOST as string,
         port: parseInt(process.env.ONECADEMYCRED_TYPESENSE_PORT as string),
-        protocol: process.env.ONECADEMYCRED_TYPESENSE_PROTOCOL as string
-      }
+        protocol: process.env.ONECADEMYCRED_TYPESENSE_PROTOCOL as string,
+      },
     ],
-    apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string
+    apiKey: process.env.ONECADEMYCRED_TYPESENSE_APIKEY as string,
   });
 
   if (q.length === 0) {
@@ -26,7 +26,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
         ? require("@/lib/datasets/defaultContributors.prod.json")
         : require("@/lib/datasets/defaultContributors.dev.json");
     const response: ResponseAutocompleteFilter = {
-      results: defaultContributors
+      results: defaultContributors,
     };
     res.status(200).json(response);
     return;
@@ -42,10 +42,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
     const contributors: FilterValue[] | undefined = searchResults.hits?.map(el => ({
       id: el.document.username,
       name: el.document.name,
-      imageUrl: el.document.imageUrl
+      imageUrl: el.document.imageUrl,
     }));
     const response: ResponseAutocompleteFilter = {
-      results: contributors || []
+      results: contributors || [],
     };
     res.status(200).json(response);
   } catch (error) {

@@ -1,0 +1,57 @@
+const collection = "comWeeklyPoints";
+
+const data: any[] = [
+  {
+    documentId: "Brit3GCGzeFOvXRq55vV",
+    sInst: 0,
+    totalPoints: 6,
+    aCorrects: 0,
+    nInst: 0,
+    tagId: "r98BjyFDCe4YyLA3U8ZE",
+    mInst: 0,
+    cdInst: 0,
+    positives: 6,
+    rfInst: 0,
+    sCorrects: 0,
+    nWrongs: 0,
+    pWrongs: 0,
+    adminPoints: 1,
+    lterm: 0,
+    cdCorrects: 0,
+    qWrongs: 0,
+    tag: "1Cademy",
+    aChooseUname: false,
+    rfWrongs: 0,
+    mCorrects: 0,
+    aImgUrl: null,
+    cdWrongs: 0,
+    qCorrects: 0,
+    iInst: 0,
+    updatedAt: new Date(),
+    cnInst: 0,
+    qInst: 0,
+    aWrongs: 0,
+    ltermDay: 0,
+    mWrongs: 0,
+    aInst: 0,
+    iWrongs: 0,
+    negatives: 0,
+    sWrongs: 0,
+    aFullname: null,
+    pCorrects: 0,
+    nCorrects: 0,
+    createdAt: new Date(),
+    cnWrongs: 0,
+    rfCorrects: 0,
+    iCorrects: 0,
+    pInst: 0,
+    cnCorrects: 6,
+  },
+];
+
+const comWeeklyPointsData = {
+  data,
+  collection,
+};
+
+export default comWeeklyPointsData;

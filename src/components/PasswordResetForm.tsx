@@ -29,12 +29,12 @@ type Props = {
 };
 
 const validationSchema = yup.object({
-  password: yup.string().required("Required")
+  password: yup.string().required("Required"),
   //   password: yup.string().min(6, "Must be at least 6 characters long").required("Required")
 });
 
 const initialValues = {
-  password: ""
+  password: "",
 };
 
 const PasswordResetForm: FC<Props> = ({ email, actionCode }) => {
@@ -47,7 +47,7 @@ const PasswordResetForm: FC<Props> = ({ email, actionCode }) => {
     validationSchema,
     onSubmit: values => {
       handleSubmitResetPassord(values.password);
-    }
+    },
   });
 
   const handleSubmitResetPassord = async (newPassword: string) => {

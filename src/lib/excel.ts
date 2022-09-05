@@ -9,7 +9,7 @@ export const generateFeedbackReport = (data: Feedback[]) => {
     Title: "Feedback report",
     // Subject: 'Tutorial',
     Author: "1cademy",
-    CreatedDate: new Date()
+    CreatedDate: new Date(),
   };
 
   const wsName = "newSheet";

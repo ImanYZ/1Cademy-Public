@@ -61,11 +61,11 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
             fontWeight: 300,
             border: "none",
             color: theme => theme.palette.common.black,
-            background: theme => theme.palette.common.white
+            background: theme => theme.palette.common.white,
           },
           "& input:focus": {
-            outline: "none"
-          }
+            outline: "none",
+          },
         }}
         renderInput={params => (
           <Box
@@ -75,7 +75,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
               height: { xs: "40px", md: "55px" },
               // px: { xs: "12px", md: "25px" },
               p: { xs: "0px 10px 0px 12px", md: "0px 12px 0px 25px" },
-              background: theme => theme.palette.common.white
+              background: theme => theme.palette.common.white,
             }}
             ref={params.InputProps.ref}
           >

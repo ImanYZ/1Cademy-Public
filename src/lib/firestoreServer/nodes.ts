@@ -3,7 +3,7 @@ import {
   KnowledgeNodeContributor,
   KnowledgeNodeInstitution,
   LinkedKnowledgeNode,
-  NodeFireStore
+  NodeFireStore,
 } from "../../knowledgeTypes";
 import { db } from "./admin";
 
@@ -43,7 +43,7 @@ const convertDateFieldsToString = (
   return {
     updatedAt: nodeData.updatedAt?.toDate().toISOString(),
     changedAt: nodeData.changedAt?.toDate().toISOString(),
-    createdAt: nodeData.createdAt?.toDate().toISOString()
+    createdAt: nodeData.createdAt?.toDate().toISOString(),
   };
 };
 
@@ -58,7 +58,7 @@ const getNodeReferences = (nodeData: NodeFireStore) => {
       references.push({
         node: referenceIds[refIdx],
         title: (nodeData.references as string[])[refIdx],
-        label: referenceLabels[refIdx] || ""
+        label: referenceLabels[refIdx] || "",
       });
     }
   } else {
@@ -73,7 +73,7 @@ const getNodeReferences = (nodeData: NodeFireStore) => {
         references.push({
           node: reference.node,
           title: reference.title,
-          label: reference.label
+          label: reference.label,
         });
       }
     }
@@ -87,7 +87,7 @@ const getNodeTags = (nodeData: NodeFireStore) => {
     for (let tagIdx = 0; tagIdx < nodeData.tagIds.length; tagIdx++) {
       tags.push({
         node: nodeData.tagIds[tagIdx],
-        title: (nodeData.tags as string[])[tagIdx]
+        title: (nodeData.tags as string[])[tagIdx],
       });
     }
   } else {
@@ -99,7 +99,7 @@ const getNodeTags = (nodeData: NodeFireStore) => {
       if (tag.node && tag.title) {
         tags.push({
           node: tag.node,
-          title: tag.title
+          title: tag.title,
         });
       }
     }
@@ -120,7 +120,7 @@ const getFullNodeTag = async (nodeData: NodeFireStore) => {
       title: tagData.title,
       content: tagData.content,
       nodeImage: tagData.nodeImage,
-      nodeType: tagData.nodeType
+      nodeType: tagData.nodeType,
     });
   }
 
@@ -148,7 +148,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
       title: childData.title,
       content: childData.content,
       nodeImage: childData.nodeImage,
-      nodeType: childData.nodeType
+      nodeType: childData.nodeType,
     });
   }
   // Retrieve the content of all the direct parents of the node.
@@ -164,7 +164,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
       title: parentData.title,
       content: parentData.content,
       nodeImage: parentData.nodeImage,
-      nodeType: parentData.nodeType
+      nodeType: parentData.nodeType,
     });
 
     //Retrieve sibling nodes
@@ -178,7 +178,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
         title: childrenData.title,
         content: childrenData.content,
         nodeImage: childrenData.nodeImage,
-        nodeType: childrenData.nodeType
+        nodeType: childrenData.nodeType,
       });
     }
   }
@@ -199,7 +199,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
       title: referenceData.title,
       content: referenceData.content,
       nodeImage: referenceData.nodeImage,
-      nodeType: referenceData.nodeType
+      nodeType: referenceData.nodeType,
     });
   }
 
@@ -251,6 +251,6 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     references: convertedReferences,
     contributors: contributorsNodes,
     institutions: institutionsNodes,
-    siblings: siblingsConverted
+    siblings: siblingsConverted,
   };
 };

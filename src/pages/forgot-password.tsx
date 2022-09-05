@@ -19,11 +19,11 @@ import ROUTES from "@/lib/utils/routes";
 import libraryImage from "../../public/darkModeLibraryBackground.jpg";
 
 const validationSchema = yup.object({
-  email: yup.string().email("Enter a valid email").required("Required")
+  email: yup.string().email("Enter a valid email").required("Required"),
 });
 
 const initialValues = {
-  email: ""
+  email: "",
 };
 
 const ForgotPasswordPage: NextPage = () => {
@@ -39,7 +39,7 @@ const ForgotPasswordPage: NextPage = () => {
       await sendPasswordResetEmail(auth, email);
       enqueueSnackbar("We have sent a reset link to your email address.", {
         variant: "info",
-        autoHideDuration: 8000
+        autoHideDuration: 8000,
       });
       router.replace(ROUTES.signIn);
     } catch (error) {
@@ -54,7 +54,7 @@ const ForgotPasswordPage: NextPage = () => {
     validationSchema,
     onSubmit: values => {
       handleResetPassword(values);
-    }
+    },
   });
 
   return (
@@ -66,7 +66,7 @@ const ForgotPasswordPage: NextPage = () => {
           height: "100vh",
           position: "fixed",
           filter: "brightness(0.25)",
-          zIndex: -2
+          zIndex: -2,
         }}
       >
         <Image alt="Library" src={libraryImage} layout="fill" objectFit="cover" priority />
@@ -77,7 +77,7 @@ const ForgotPasswordPage: NextPage = () => {
           py: 10,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         <Card>

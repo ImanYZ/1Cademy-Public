@@ -16,7 +16,7 @@ export const useOnScreen = (
         setIntersecting(entry.isIntersecting);
       },
       {
-        rootMargin
+        rootMargin,
       }
     );
     if (ref?.current) {

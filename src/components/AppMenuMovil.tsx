@@ -20,7 +20,7 @@ const AppMenuMovil = ({ onSendFeedback }: AppMenuMovilProps) => {
         color: theme => theme.palette.common.white,
         position: "fixed",
         bottom: "0px",
-        zIndex: "10"
+        zIndex: "10",
       }}
     >
       <MenuList>
@@ -34,7 +34,7 @@ const AppMenuMovil = ({ onSendFeedback }: AppMenuMovilProps) => {
               sx={{
                 fontSize: "18px",
                 fontWeight: "400",
-                color: theme => theme.palette.common.white
+                color: theme => theme.palette.common.white,
               }}
               underline="none"
               target={page.label === "Node" ? "_self" : "_blank"}
@@ -53,7 +53,7 @@ const AppMenuMovil = ({ onSendFeedback }: AppMenuMovilProps) => {
               px: "30px",
               fontSize: "18px",
               fontWeight: "500",
-              borderRadius: 40
+              borderRadius: 40,
             }}
           >
             APPLY!
@@ -71,7 +71,7 @@ const AppMenuMovil = ({ onSendFeedback }: AppMenuMovilProps) => {
           fontSize: "18px",
           fontWeight: "500",
           borderColor: theme => theme.palette.common.white,
-          borderRadius: 40
+          borderRadius: 40,
         }}
         onClick={onSendFeedback}
       >

@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const AppFooter: ComponentType<any> = dynamic(() => import("./AppFooter").then(m => m.default), {
-  ssr: false
+  ssr: false,
 });
 
 const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) => {
@@ -44,7 +44,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
           position: "relative",
           mt: "var(--navbar-height)",
           minHeight: "calc(100vh - var(--navbar-height) - var(--footer-height) )",
-          backgroundColor: theme => theme.palette.background.default
+          backgroundColor: theme => theme.palette.background.default,
         }}
       >
         {children}
@@ -62,7 +62,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
               display: { xs: "flex", md: "none" },
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "#6028282A"
+              backgroundColor: "#6028282A",
             }}
           >
             <Box
@@ -71,7 +71,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
                 width: "100%",
                 maxHeight: "600px",
                 backgroundColor: theme => theme.palette.common.darkGrayBackground,
-                position: "relative"
+                position: "relative",
               }}
             >
               <ClickAwayListener onClickAway={() => setShowMobileFeedbackForm(false)}>
@@ -116,7 +116,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
             display: { xs: "none", md: "flex" },
             position: "fixed",
             bottom: "28px",
-            right: "30px"
+            right: "30px",
           }}
         >
           <Tooltip title={"Question/Feedback"} placement="top">
@@ -139,8 +139,8 @@ const FeedbackTooltip = styled(({ className, ...props }: TooltipProps) => (
     fontWeight: theme.typography.fontWeightRegular,
     padding: "0px",
     border: `1px solid ${theme.palette.grey[400]}`,
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)"
-  }
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+  },
 }));
 
 export default PagesNavbar;

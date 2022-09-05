@@ -15,7 +15,7 @@ interface Params extends ParsedUrlQuery {
 export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res, params }) => {
   if (!params)
     return {
-      props: {}
+      props: {},
     };
   const nodeId = params.nodeId.replace(".xml", "");
   const tagDoc = await db.collection("nodes").doc(nodeId).get();
@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
       .where("deleted", "==", false)
       .where("tags", "array-contains", {
         node: nodeId,
-        title: tagData?.title
+        title: tagData?.title,
       })
       .get();
     if (nodesDocs.docs.length === 0) {
@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
     }
   }
   return {
-    props: {}
+    props: {},
   };
 };
 

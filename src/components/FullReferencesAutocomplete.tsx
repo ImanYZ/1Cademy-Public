@@ -26,7 +26,7 @@ type FullReferencesAutocompleteProps = {
 
 export const FullReferencesAutocomplete: FC<FullReferencesAutocompleteProps> = ({
   referencesSelected,
-  setReferencesSelected
+  setReferencesSelected,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchTextDebounce] = useDebounce(searchText, 250);
@@ -61,14 +61,14 @@ export const FullReferencesAutocomplete: FC<FullReferencesAutocompleteProps> = (
           display: "flex",
           alignItems: "center",
           mb: "16px",
-          color: theme => theme.palette.grey[600]
+          color: theme => theme.palette.grey[600],
         }}
       >
         <MenuBookIcon
           fontSize="small"
           sx={{
             mr: "10px",
-            color: theme => theme.palette.grey[400]
+            color: theme => theme.palette.grey[400],
           }}
         />
         References

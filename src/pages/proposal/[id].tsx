@@ -11,7 +11,7 @@ import {
   Link,
   Skeleton,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
@@ -27,7 +27,7 @@ import {
   buildReferences,
   buildTags,
   getNodePageUrl,
-  mapLinkedKnowledgeNodeToLinkedNodeObject
+  mapLinkedKnowledgeNodeToLinkedNodeObject,
 } from "@/lib/utils/utils";
 
 import { LinkedKnowledgeNode, ProposalInput } from "../../knowledgeTypes";
@@ -78,7 +78,7 @@ const NodeProposal = () => {
       ...buildReferences(nodeReferencesSelected),
       ...buildTags(nodeTagsSelected),
       title: formValues.title,
-      choices: formValues.questions.length ? formValues.questions : undefined
+      choices: formValues.questions.length ? formValues.questions : undefined,
     };
     await mutateAsync({ data, nodeType: formValues.nodeType });
     router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) });
@@ -101,7 +101,7 @@ const NodeProposal = () => {
       </Box>,
       {
         variant: "success",
-        anchorOrigin: { horizontal: "left", vertical: "bottom" }
+        anchorOrigin: { horizontal: "left", vertical: "bottom" },
       }
     );
   };
@@ -162,10 +162,12 @@ const NodeProposal = () => {
                             display: "block",
                             width: "100%",
                             cursor: "pointer",
-                            mt: 3
+                            mt: 3,
                           }}
                         >
-                          <img src={data.nodeImage} width="100%" height="100%" loading="lazy" />
+                          {/* TODO: Change to next Image */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={data.nodeImage} alt={"Preview Image"} width="100%" height="100%" loading="lazy" />
                         </Box>
                       </Tooltip>
                     ) : null

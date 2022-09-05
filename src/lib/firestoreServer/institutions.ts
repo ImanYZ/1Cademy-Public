@@ -16,7 +16,7 @@ export const getInstitutionsForAutocomplete = async (institutions: string[]) => 
     response.push({
       id: institution,
       imageUrl: institutionData?.logoURL || null,
-      name: institutionData?.name || ""
+      name: institutionData?.name || "",
     });
   }
 

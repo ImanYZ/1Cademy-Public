@@ -1,0 +1,50 @@
+.Proposals .collection-item .Username {
+  margin-top: -64px;
+}
+
+.Proposals .collection-item .Time textarea {
+  font-weight: 100;
+  font-size: 16px;
+}
+
+.ProposalTitle {
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 0px !important;
+}
+
+.CollapsedProposal .Time,
+.CollapsedProposal .ProposalTitle {
+  margin-left: -61px !important;
+}
+
+.CollapsedProposal {
+  min-height: 0px !important;
+}
+
+.ProposalBody,
+.CommentBody {
+  margin-left: -61px !important;
+}
+
+.CommentBody {
+  margin-top: 13px !important;
+}
+
+.ProposalComments {
+  margin: 13px -22px 4px -61px !important;
+}
+
+.CommentOnProposal {
+  margin-left: -61px !important;
+  margin-right: -22px !important;
+}
+
+.secondary-content {
+  top: 10px !important;
+  right: 13px !important;
+}
+
+.NoProposals {
+  margin-left: 10px;
+}

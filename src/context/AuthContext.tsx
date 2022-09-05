@@ -50,7 +50,7 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
       const errorString = typeof error === "string" ? error : "";
       enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {
         variant: "error",
-        autoHideDuration: 10000
+        autoHideDuration: 10000,
       });
     }
   };

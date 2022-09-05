@@ -30,7 +30,7 @@ interface FeedbackProps {
 const validationSchema = yup.object({
   email: yup.string().email("Enter a valid email").required("Required"),
   name: yup.string().required("Required"),
-  feedback: yup.string().required("Required")
+  feedback: yup.string().required("Required"),
 });
 
 const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, ref) => {
@@ -39,13 +39,13 @@ const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, 
       localStorage.setItem("feedbackName", "");
       localStorage.setItem("feedbackEmail", "");
       localStorage.setItem("feedbackFeedback", "");
-    }
+    },
   });
 
   const initialValues: FeedbackFormValues = {
     name: localStorage.getItem("feedbackName") || "",
     email: localStorage.getItem("feedbackEmail") || "",
-    feedback: localStorage.getItem("feedbackFeedback") || ""
+    feedback: localStorage.getItem("feedbackFeedback") || "",
   };
 
   const formik = useFormik({
@@ -53,7 +53,7 @@ const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, 
     validationSchema,
     onSubmit: values => {
       sendFeedbackMutation.mutate({ ...values, pageURL: window.location.href });
-    }
+    },
   });
 
   return (
@@ -66,7 +66,7 @@ const FeedbackForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, 
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          ...sx
+          ...sx,
         }}
       >
         {sendFeedbackMutation.isSuccess && (

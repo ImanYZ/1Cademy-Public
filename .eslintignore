@@ -1,0 +1,5 @@
+# TODO: uncomment this when work in typesense indexer
+typesenseIndexer/*
+# TODO: uncomment this when fix linter errors in backend
+src/pages/api/*
+src/utils

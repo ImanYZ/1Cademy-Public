@@ -4,5 +4,5 @@ export const registeredUser: User = {
   email: "",
   uname: "",
   background: "",
-  birthDate: ""
+  birthDate: "",
 };

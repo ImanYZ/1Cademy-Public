@@ -5,6 +5,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import { styled } from "@mui/system";
+import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { FC } from "react";
@@ -24,6 +25,11 @@ type Props = {
 const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch = false, onCloseMenu, onShowMenu }) => {
   const router = useRouter();
 
+  const handleSignout = () => {
+    //TODO: Remove thhis button before deploying
+    getAuth().signOut();
+  };
+
   const getTabSelected = () => {
     const tabSelected = SECTIONS.findIndex(cur => cur.route === router.route);
     return tabSelected >= 0 ? tabSelected : false;
@@ -40,7 +46,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
               fontSize: 24,
               margin: "4px 0px 0px 0px",
               cursor: "pointer",
-              mr: { xs: "20px", md: "0px" }
+              mr: { xs: "20px", md: "0px" },
             }}
           >
             <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
@@ -58,14 +64,14 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
             fontWeight: 400,
             display: { xs: "none", md: "flex" },
             "& .MuiTab-root": {
-              color: "#AAAAAA"
+              color: "#AAAAAA",
             },
             "& .MuiTab-root.Mui-selected": {
-              color: "common.white"
+              color: "common.white",
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "common.orange"
-            }
+              backgroundColor: "common.orange",
+            },
           }}
         >
           {SECTIONS.map((page, idx) => (
@@ -81,7 +87,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
                 sx={{
                   fontFamily: "Work Sans,sans-serif",
                   fontSize: "15px",
-                  letterSpacing: "-1px"
+                  letterSpacing: "-1px",
                 }}
               />
             </LightTooltip>
@@ -93,6 +99,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
               <AppHeaderSearchBar />
             </Box>
           )}
+          <Button onClick={handleSignout}>TEMP: Sign out button </Button>
           {showApply && (
             <LightTooltip title="Apply to join 1Cademy">
               <Button
@@ -110,7 +117,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
                   p: "6px 16px",
                   my: "auto",
                   borderRadius: 40,
-                  textAlign: "center"
+                  textAlign: "center",
                 }}
               >
                 APPLY!
@@ -126,7 +133,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
                 onClick={onCloseMenu}
                 color="inherit"
                 sx={{
-                  display: { xs: "flex", md: "none" }
+                  display: { xs: "flex", md: "none" },
                 }}
               >
                 <CloseIcon sx={{ color: theme => theme.palette.common.white, m: "auto" }} fontSize="large" />
@@ -142,7 +149,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
                 onClick={onShowMenu}
                 color="inherit"
                 sx={{
-                  display: { xs: "flex", md: "none" }
+                  display: { xs: "flex", md: "none" },
                 }}
               >
                 <MenuIcon sx={{ color: theme => theme.palette.common.white }} fontSize="large" />
@@ -163,8 +170,8 @@ const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
     backgroundColor: theme.palette.common.white,
     color: "rgba(0, 0, 0, 0.87)",
     boxShadow: "0px 10px 30px 5px rgba(0,0,0,0.5)",
-    fontSize: 12
-  }
+    fontSize: 12,
+  },
 }));
 
 export default AppAppBar;

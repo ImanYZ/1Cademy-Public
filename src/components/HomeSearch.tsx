@@ -30,7 +30,7 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
       const yPosition = clientPosition ? clientPosition.y + clientPosition.height - 40 : 500;
       setTimeout(() => window.scrollBy({ top: yPosition, behavior: "smooth" }), 150);
     },
-    containerRef
+    containerRef,
   }));
 
   return (
@@ -50,7 +50,7 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
         top: 0,
         left: 0,
         color: theme => theme.palette.common.white,
-        ...sx
+        ...sx,
       }}
     >
       <Image
@@ -69,8 +69,8 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
             textAlign: "center",
             display: {
               md: "block",
-              xs: "none"
-            }
+              xs: "none",
+            },
           }}
         >
           <Image src={logoHero} alt="1Cademy Logo" width="421px" height="130px" />

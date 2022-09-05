@@ -57,8 +57,8 @@ export const signUpResponse = {
     theme: "Dark",
     background: "Color",
     practicing: false,
-    createdAt: "2022-07-20T16:32:57.194Z"
-  }
+    createdAt: "2022-07-20T16:32:57.194Z",
+  },
 };
 
 export const signInWithPasswordResponse = {
@@ -71,7 +71,7 @@ export const signInWithPasswordResponse = {
   registered: true,
   refreshToken:
     "AOEOulb5meoLdAhxGcTmXgPyAQjQWF_FzmIt1Ohr0pPM0p2IxIvXN4K3hJgLl07SLYXMEY-k4n48iL7RTXjCU3nAOCKha3Qop_h3yR8WzeHOc9oqVH-CRd0xGxEQOUmkYgZ8qDDfikIeD-7E1x9TRGNeaw_gx3dgyDAV9nXr2pv8yj-U2u6cVsL7T_M6e4KgW6PksrAGp5tKEvXRKhzqGWKaooU4J4FRRg",
-  expiresIn: "3600"
+  expiresIn: "3600",
 };
 
 export const lookupResponse = {
@@ -90,22 +90,22 @@ export const lookupResponse = {
           displayName: "23123",
           federatedId: "two2@umich.edu",
           email: "two2@umich.edu",
-          rawId: "two2@umich.edu"
-        }
+          rawId: "two2@umich.edu",
+        },
       ],
       validSince: "1658334776",
       disabled: false,
       lastLoginAt: "1658334779696",
       createdAt: "1658334776557",
-      lastRefreshAt: "2022-07-20T16:32:59.696Z"
-    }
-  ]
+      lastRefreshAt: "2022-07-20T16:32:59.696Z",
+    },
+  ],
 };
 
 export const signUpEmailRegistered = {
-  errorMessage: "This email address is already in use"
+  errorMessage: "This email address is already in use",
 };
 
 export const signUpUsernameRegistered = {
-  errorMessage: "This username is already in use"
+  errorMessage: "This username is already in use",
 };

@@ -32,7 +32,7 @@ export const CustomPagination = ({ count, page, onChange }: CustomPaginationProp
                   borderRadius: "40px",
                   fontWeight: "400",
                   color: theme => theme.palette.common.black,
-                  background: selected ? theme => theme.palette.grey[200] : undefined
+                  background: selected ? theme => theme.palette.grey[200] : undefined,
                 }}
                 {...item}
               >
@@ -45,7 +45,7 @@ export const CustomPagination = ({ count, page, onChange }: CustomPaginationProp
                 type="button"
                 sx={{
                   color: theme => theme.palette.common.black,
-                  fontWeight: "400"
+                  fontWeight: "400",
                 }}
                 {...item}
               >
@@ -58,7 +58,7 @@ export const CustomPagination = ({ count, page, onChange }: CustomPaginationProp
                 type="button"
                 sx={{
                   color: theme => theme.palette.common.black,
-                  fontWeight: "400"
+                  fontWeight: "400",
                 }}
                 {...item}
               >
@@ -85,5 +85,5 @@ const List = styled("ul")({
   padding: 0,
   margin: 0,
   display: "flex",
-  alignItems: "center"
+  alignItems: "center",
 });
