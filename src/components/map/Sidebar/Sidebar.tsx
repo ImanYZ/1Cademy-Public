@@ -508,18 +508,15 @@ const Sidebar = (props: SidebarType) => {
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              <>
-                <h4 style={{ textAlign: "center" }}>-- Proposals Sidebar --</h4>
-                <Proposals
-                  proposeNodeImprovement={props.proposeNodeImprovement}
-                  fetchProposals={props.fetchProposals}
-                  rateProposal={props.rateProposal}
-                  selectProposal={props.selectProposal}
-                  deleteProposal={props.deleteProposal}
-                  // editHistory={false}
-                  proposeNewChild={props.proposeNewChild}
-                />
-              </>
+              <Proposals
+                proposeNodeImprovement={props.proposeNodeImprovement}
+                fetchProposals={props.fetchProposals}
+                rateProposal={props.rateProposal}
+                selectProposal={props.selectProposal}
+                deleteProposal={props.deleteProposal}
+                // editHistory={false}
+                proposeNewChild={props.proposeNewChild}
+              />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Comments" ? (
             <h3>Comments</h3>
@@ -579,11 +576,7 @@ const Sidebar = (props: SidebarType) => {
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              {/* CHECK: I commented this */}
-              <>
-                <SearchList /*openLinkedNode={props.openLinkedNode} triggerQuerySearch={props.triggerQuerySearch}*/ />
-                <h2>Search List</h2>
-              </>
+              <SearchList /*openLinkedNode={props.openLinkedNode} triggerQuerySearch={props.triggerQuerySearch}*/ />
             </MemoizedSidebarWrapper>
           ) : openBookmarks ? (
             <MemoizedSidebarWrapper

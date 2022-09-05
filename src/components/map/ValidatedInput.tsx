@@ -2,7 +2,8 @@
 // import "./ValidatedInput.css";
 
 import { TextField } from "@mui/material";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
+
 const ValidatedInput = (props: any) => {
   // true if user has clicked on the input component,
   // set to false only when user has never clicked on component or if user refreshes the page
@@ -11,12 +12,12 @@ const ValidatedInput = (props: any) => {
   // false if user has clicked away from input field and nothing exists in it.
   const [, /*enterred*/ setEnterred] = useState(false);
 
-  useEffect(() => {
-    if ("value" in props && props.value !== "") {
-      setEnterred(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.value]);
+  // useEffect(() => {
+  //   if ("value" in props && props.value !== "") {
+  //     setEnterred(true);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [props.value]);
 
   const textFieldFocus = useCallback(() => {
     setEnterred(true);

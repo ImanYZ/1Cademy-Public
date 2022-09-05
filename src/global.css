@@ -1866,7 +1866,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #SearchBoxContainer {
-  padding: 0px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
   border-bottom: 1px solid #e1e1e1;
   width: 430px;
 }
@@ -1880,7 +1880,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #SearchQuery {
-  width: 352px;
+  /* width: 352px; */
   font-size: 19px;
   font-weight: 340;
   color: white;
@@ -1968,13 +1968,13 @@ button.MuiTab-textColorInherit:focus {
 
 #nodesUpdatedSinceContainer {
   display: grid;
-  grid-template-columns: 205px 139px auto;
+  grid-template-columns: 205px 120px auto;
   margin-top: 13px;
   color: gray;
 }
 
 #nodesUpdatedSinceContainer .MuiFormControl-root {
-  max-width: 70px;
+  /* max-width: 70px; */
   margin-left: 3px;
   margin-right: 3px;
   margin-top: -5.2px;
@@ -2083,11 +2083,11 @@ button.MuiTab-textColorInherit:focus {
   float: right;
 }
 
-/* #nodeSelect {
-  z-index: 1;
+#nodeSelect {
+  /* z-index: 1; */
   margin-left: -14px;
-  margin-top: -2px;
-} */
+  /* margin-top: -2px; */
+}
 
 #nodeSelectMenu .MuiPaper-root,
 #sortFilterMenu .MuiPaper-root {
@@ -2212,53 +2212,129 @@ button.MuiTab-textColorInherit:focus {
   font-size: 25px;
 }
 
-/* --------------------- */
-/* validateInput styles */
-.input.validatedInput {
-  margin-top: 10px;
-  margin-bottom: 10px;
+/* -------------------------- recent NodeList styles */
+/* #recentNodesList {
+    display: inline;
+    padding-left: 10px;
+} */
+
+.searchSelect.MuiListItem-gutters {
+  padding: 4px 10px;
 }
 
-.input.validatedInput.validated .MuiOutlinedInput-notchedOutline {
+#recentNodesList .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff;
+  border-radius: 10px;
+}
+
+#recentNodesList .MuiInputBase-root {
+  color: #ffffff;
+  max-height: 30px;
+  max-width: 100px;
+}
+
+#recentNodesList svg {
+  color: #ffffff;
+}
+
+#recentNodesList .MuiSelect-root {
+  padding: 7px 27px 7px 10px;
+}
+
+#sortFilterMenu .MuiList-root.MuiMenu-list {
+  background-color: #1b1b1b;
+  width: 198px;
+}
+
+.searchSelect .MuiListItemText-primary {
+  font-family: Roboto;
+  font-size: 14px;
+  line-height: 16px;
+  color: #ffffff;
+}
+
+.searchCheckbox svg {
+  width: 16px;
+}
+
+.MuiButtonBase-root.MuiIconButton-root {
+  color: #ffffff;
+}
+
+.searchSelect .MuiFormControlLabel-root {
+  margin-right: 0;
+}
+
+.searchIcon.MuiListItemIcon-root {
+  padding-right: 5px;
+  min-width: 0px;
+}
+
+.searchIcon svg {
+  font-size: 16px;
+  color: #ffffff;
+  margin-right: 0px;
+  margin-bottom: -2px;
+}
+
+.searchSelect.MuiListItem-root div {
+  display: inline-block;
+}
+
+#sortFilterMenu .MuiButtonBase-root.MuiIconButton-root.Mui-checked,
+#sortFilterMenu .MuiCheckbox-colorSecondary.Mui-checked,
+.searchIcon.selected svg,
+.searchSelected .selected,
+.selected .MuiTypography-root {
+  color: #ff9100 !important;
+}
+
+.searchSelect .MuiFormGroup-root {
+  display: flex;
+  /* position: absolute;
+  right: 5px; */
+}
+
+#sortFilterMenu .MuiFormControlLabel-root .searchIcon.MuiRadio-root {
+  margin-left: 5px;
+}
+
+#sortFilterMenu .MuiPaper-root.MuiMenu-paper {
+  width: 200px;
+}
+
+#sortFilterMenu .MuiFormControlLabel-root {
+  margin-left: 0;
+}
+
+#sortFilterMenu.MuiPopover-root {
+  position: absolute !important;
+  top: 41px !important;
+  left: -5px !important;
+}
+
+/* Light Mode */
+
+.LightMode #recentNodesList .MuiOutlinedInput-notchedOutline {
   border-color: #454545;
 }
 
-.input.validatedInput.validated .Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-color: #ee5e00;
-}
-
-.input.validatedInput label {
-  color: #ffffff;
-}
-
-.input.validatedInput .Mui-focused {
-  color: #ee5e00;
-}
-
-.input.validatedInput input {
-  caret-color: #9e9e9e;
-  color: #ffffff;
-}
-.LightMode .input.validatedInput input {
+.LightMode #recentNodesList .MuiInputBase-root,
+.LightMode .searchSelect .MuiListItemText-primary,
+.LightMode .MuiButtonBase-root.MuiIconButton-root,
+.LightMode .searchIcon svg,
+.LightMode #recentNodesList svg {
   color: #454545;
 }
 
-.input.validatedInput.MuiTextField-root {
-  width: 100%;
+.LightMode .MuiButtonBase-root.MuiIconButton-root.Mui-checked,
+.LightMode .searchIcon.selected svg,
+.LightMode .searchSelected .selected,
+.LightMode .selected .MuiTypography-root,
+.LightMode .MuiRadio-colorSecondary.Mui-checked.searchIcon {
+  color: #ff9100;
 }
 
-.input.validatedInput .MuiInputBase-input {
-  padding-left: 13px;
-  padding-right: 13px;
-  /* padding-top: 5.5px; */
-  border-bottom: none;
-}
-
-.input.validatedInput.validated .Mui-focused .MuiInputBase-input {
-  border-bottom: none;
-  box-shadow: none;
-}
-
-.input.validatedInput .MuiFormHelperText-root {
-  color: #f44336;
+.LightMode #sortFilterMenu .MuiList-root.MuiMenu-list {
+  background-color: #f0f0f0;
 }

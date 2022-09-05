@@ -43,6 +43,7 @@ import shortenNumber from "../../../lib/utils/shortenNumber";
 // import RecentNodesList from "../../RecentNodes/RecentNodesList/RecentNodesList";
 // import FilterNodeTypes from "../FilterNodeTypes/FilterNodeTypes";
 import Modal from "../Modal/Modal";
+import RecentNodesList from "../RecentNodesList";
 import ValidatedInput from "../ValidatedInput";
 import FilterNodeTypes from "./FilterNodeTypes";
 
@@ -60,14 +61,14 @@ const SearchList = (/*props: SearchListProps*/) => {
   // const username = useRecoilValue(usernameState);
   // const tag = useRecoilValue(tagState);
   const { allTags } = useTagsTreeView();
-  // const [nodesUpdatedSince, setNodesUpdatedSince] = useRecoilState(nodesUpdatedSinceState);
+  const [nodesUpdatedSince, setNodesUpdatedSince] = useState(100);
 
   // const [allNodes, setAllNodes] = useRecoilState(allNodesState);
   // const allUserNodes = useRecoilValue(allUserNodesState);
   // const [nodeTitleBlured, setNodeTitleBlured] = useRecoilState(nodeTitleBluredState);
   // const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults /*setSearchResults*/] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   // const [allTags, setAllTags] = useRecoilState(allTagsState);
 
   // const [filteredNodes, setFilteredNodes] = useState([]);
@@ -256,10 +257,7 @@ const SearchList = (/*props: SearchListProps*/) => {
     // setChosenTags([tag.node]);
   }, []);
 
-  // const setNodesUpdatedSinceClick = useCallback(
-  //   (event) => setNodesUpdatedSince(event.target.value),
-  //   []
-  // );
+  const setNodesUpdatedSinceClick = useCallback(event => setNodesUpdatedSince(event.target.value), []);
 
   const setShowTagSelectorClick = useCallback(() => setShowTagSelector(prevValue => !prevValue), []);
 
@@ -367,42 +365,34 @@ const SearchList = (/*props: SearchListProps*/) => {
             </span>
           )}
         </div>
-        <div id="nodesUpdatedSinceContainer">
+        <div id="nodesUpdatedSinceContainer" style={{ fontSize: "14px" }}>
           {/* Search in <span id="SearchNodesNum">{shortenNumber(filteredNodes.length, 2, false)}</span>{" "} */}
           <div>
             Edited in past
             <ValidatedInput
               identification="nodesUpdatedSince"
               type="number"
-              onChange={
-                () => {}
-                // setNodesUpdatedSinceClick
-              }
-              inputProps={{ min: 0 }}
-              defaultValue={
-                () => {}
-                // nodesUpdatedSince
-              }
+              onChange={setNodesUpdatedSinceClick}
+              inputProps={{ min: 0, style: { width: "50px" } }}
+              defaultValue={nodesUpdatedSince}
             />{" "}
             days
           </div>
           <div id="SearchResutlsNum">{shortenNumber(searchResults.length, 2, false)} Results</div>
           <div id="SearchSortContainer">
-            <span>RecentNodesList</span>
-            {/* CHECK: I commented this */}
-            {/* <RecentNodesList
+            <RecentNodesList
               id="recentNodesList"
               recentNodes={searchResults}
               setRecentNodes={setSearchResults}
               onlyTags={onlyTags}
-            /> */}
+            />
           </div>
         </div>
         {/* <div id="SearchResutlsNumSortContainer">
         </div> */}
       </div>
-
       {/* CHECK: I commented this */}
+      Instant Search
       {/* <InstantSearch
         indexName="nodesIndex"
         searchClient={searchClient}
@@ -415,7 +405,6 @@ const SearchList = (/*props: SearchListProps*/) => {
       >
       </InstantSearch> */}
       {/* Widgets */}
-
       {/* <Divider orientation="horizontal" /> */}
       {/* {!isRetrieving ? (
         <ul className="collection Proposals">
