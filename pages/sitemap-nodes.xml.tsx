@@ -5,7 +5,11 @@ import { db } from "../lib/admin";
 const Sitemap = () => null;
 
 const escapeBreaksQuotes = (text: string) => {
-  return text.replace(/(?:\r\n|\r|\n)/g, "<br>").replace(/['"]/g, "").trim().toLowerCase();
+  return text
+    .replace(/(?:\r\n|\r|\n)/g, "<br>")
+    .replace(/['"]/g, "")
+    .trim()
+    .toLowerCase();
 };
 
 const encodeTitle = (title: string) => {
@@ -13,12 +17,12 @@ const encodeTitle = (title: string) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  let BASE_URL = 'https://node.1cademy.us';
+  let BASE_URL = "https://node.1cademy.us";
 
   const nodes: any = {};
   const nodesDocs = await db.collection("nodes").where("isTag", "==", true).get();
 
-  await nodesDocs.docs.forEach((doc) => {
+  await nodesDocs.docs.forEach(doc => {
     const node = doc.data();
     const nodeId = doc.id;
     const nodeTitle: string = node.title;
@@ -35,52 +39,41 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
       ) {
         nodes[nodeTitle] = {
           id: nodeId,
-          value: (nodeValue + 1),
-          updatedAt: nodeUpdatedAt,
+          value: nodeValue + 1,
+          updatedAt: nodeUpdatedAt
         };
       }
 
       // Again add corresponding nodes from Node.Tags
-      nodeTags.map((elem: any) => {
+      const elem: any = [nodeTags];
+      if (elem) {
         const tagTitle = elem.title;
         const tagNode = elem.node;
         if (tagTitle in nodes) {
           const nodeValuesForTag: any = nodes[tagTitle];
-          if (
-            tagTitle !== "" &&
-            tagTitle !== null &&
-            tagTitle !== undefined
-          ) {
+          if (tagTitle !== "" && tagTitle !== null && tagTitle !== undefined) {
             nodes[tagTitle] = {
               id: tagNode,
               updatedAt: nodeUpdatedAt,
-              value: nodeValuesForTag.value++,
+              value: nodeValuesForTag.value++
             };
           }
         } else {
-          if (
-            tagTitle !== "" &&
-            tagTitle !== null &&
-            tagTitle !== undefined
-          ) {
+          if (tagTitle !== "" && tagTitle !== null && tagTitle !== undefined) {
             nodes[tagTitle] = {
               value: 0,
               id: tagNode,
-              updatedAt: nodeUpdatedAt,
+              updatedAt: nodeUpdatedAt
             };
           }
         }
-      });
+      }
     } else {
-      if (
-        nodeTitle !== "" &&
-        nodeTitle !== null &&
-        nodeTitle !== undefined
-      ) {
+      if (nodeTitle !== "" && nodeTitle !== null && nodeTitle !== undefined) {
         nodes[nodeTitle] = {
           id: nodeId,
           updatedAt: nodeUpdatedAt,
-          value: nodeValue && nodeValue >= 0 ? nodeValue : 0,
+          value: nodeValue && nodeValue >= 0 ? nodeValue : 0
         };
       }
     }
@@ -91,20 +84,25 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
       return;
     }
     const nodeTitle = encodeTitle(title);
-    return `${BASE_URL}/node/${nodeTitle}/${node.id}`
+    return `${BASE_URL}/node/${nodeTitle}/${node.id}`;
   });
 
   const allPaths = [...dynamicPaths];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${allPaths.map(url => (
-          `<url>
+  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${allPaths
+      .map(
+        url =>
+          `<sitemap>
             <loc>${url}</loc>
             <lastmod>${new Date().toISOString()}</lastmod>
-          </url>`)
-  ).join("")}
-  </urlset>`;
+            <changefreq>weekly</changefreq>
+            <priority>0.8</priority>
+          </sitemap>`
+      )
+      .join("")}
+  </sitemapindex>`;
 
   res.setHeader("Content-Type", "text/xml");
   res.write(sitemap);
