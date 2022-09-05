@@ -98,9 +98,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
         url =>
           `<sitemap>
             <loc>${url}</loc>
-            <lastmod>${new Date().toISOString()}</lastmod>
-            <changefreq>weekly</changefreq>
-            <priority>0.8</priority>
           </sitemap>`
       )
       .join("")}
