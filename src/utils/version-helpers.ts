@@ -8,6 +8,7 @@ import {
   tagsAndCommPoints,
   updateReputation,
 } from ".";
+import { NodeType } from "src/types";
 
 export const comPointTypes = [
   "comPoints",
@@ -35,7 +36,7 @@ export const reputationTypes = [
   "othWeekReputations",
 ];
 
-export const NODE_TYPES = [
+export const NODE_TYPES: NodeType[] = [
   "Concept",
   "Code",
   "Relation",
@@ -1498,7 +1499,7 @@ export const versionCreateUpdate = async ({
           if (childType === "Question") {
             childNode.choices = choices;
           }
-          const { versionsColl, userVersionsColl }: any = getTypedCollections(childType);
+          const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType: childType });
           const versionRef = versionsColl.doc();
           //  before setting childNode version, need to obtain the correct corresponding collection in the database
           const childVersion = {

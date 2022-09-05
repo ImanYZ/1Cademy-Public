@@ -9,8 +9,12 @@ import comPoints from "./comPoints.data";
 import comWeeklyPoints from "./comWeeklyPoints.data";
 import credits from "./credits.data";
 import institutions from "./institutions.data";
+import monthlyReputations from "./monthlyReputations.data";
 import nodes from "./nodes.data";
 import notificationNums from "./notificationNums.data";
+import othersReputations from "./othersReputations.data";
+import othMonReputations from "./othMonReputations.data";
+import othWeekReputations from "./othWeekReputations.data";
 import pendingPropsNums from "./pendingPropsNums.data";
 import reputations from "./reputations.data";
 import status from "./status.data";
@@ -18,6 +22,7 @@ import tags from "./tags.data";
 import userNodes from "./userNodes.data";
 import userNodesLog from "./userNodesLog.data";
 import users from "./users.data";
+import weeklyReputations from "./weeklyReputations.data";
 
 class MockData {
   constructor(private data: any[], private collecion: string) {}
@@ -62,3 +67,8 @@ export const comWeeklyPointsData = new MockData(comWeeklyPoints.data, comWeeklyP
 export const comOthersPointsData = new MockData(comOthersPoints.data, comOthersPoints.collection);
 export const comOthMonPointsData = new MockData(comOthMonPoints.data, comOthMonPoints.collection);
 export const comOthWeekPointsData = new MockData(comOthWeekPoints.data, comOthWeekPoints.collection);
+export const weeklyReputationsData = new MockData(weeklyReputations.data, weeklyReputations.collection);
+export const monthlyReputationsData = new MockData(monthlyReputations.data, monthlyReputations.collection);
+export const othersReputationsData = new MockData(othersReputations.data, othersReputations.collection);
+export const othMonReputationsData = new MockData(othMonReputations.data, othMonReputations.collection);
+export const othWeekReputationsData = new MockData(othWeekReputations.data, othWeekReputations.collection);

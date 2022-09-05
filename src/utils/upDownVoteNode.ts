@@ -211,7 +211,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     }
   }
   //  query versions in order to update the upvotes / downvotes in addition to reputations
-  const { versionsColl }: any = getTypedCollections({ nodeData: nodeData.nodeType });
+  const { versionsColl }: any = getTypedCollections(nodeData);
   const versionsQuery = versionsColl
     .where("node", "==", nodeId)
     .where("accepted", "==", true)
