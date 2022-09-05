@@ -1,6 +1,17 @@
+import { CollectionReference, DocumentData } from "firebase-admin/firestore";
 import { db } from "../lib/firestoreServer/admin";
+import { NodeType } from "../types";
 
-export const getTypedCollections = ({ nodeType }: any) => {
+type GetTypedCollectionsParam = { nodeType: NodeType };
+
+type GetTypedCollectionsReturn = {
+  versionsColl: CollectionReference;
+  userVersionsColl: CollectionReference;
+  versionsCommentsColl: CollectionReference;
+  userVersionsCommentsColl: CollectionReference;
+};
+
+export const getTypedCollections = ({ nodeType }: GetTypedCollectionsParam): GetTypedCollectionsReturn => {
   let versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl;
   if (nodeType === "Concept") {
     versionsColl = db.collection("conceptVersions");
@@ -57,6 +68,10 @@ export const getTypedCollections = ({ nodeType }: any) => {
     userVersionsColl = db.collection("userPrivateVersions");
     versionsCommentsColl = db.collection("privateVersionComments");
     userVersionsCommentsColl = db.collection("userPrivateVersionComments");
+  }
+
+  if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) {
+    throw new Error("No Collection foiund for the node type.");
   }
   return {
     versionsColl,
