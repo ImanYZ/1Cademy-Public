@@ -5,6 +5,7 @@ import {
   db,
   MIN_ACCEPTED_VERSION_POINT_WEIGHT,
 } from "../lib/firestoreServer/admin";
+import { WriteBatch } from "firebase-admin/firestore";
 import {
   deleteTagCommunityAndTagsOfTags,
   getAllUserNodes,
@@ -16,14 +17,22 @@ import {
   updateReputation,
 } from ".";
 
-const setOrIncrementNotificationNums = async ({ batch, proposer, notificationRef, writeCounts }: any) => {
+export const setOrIncrementNotificationNums = async ({
+  batch,
+  proposer,
+  writeCounts,
+}: {
+  batch: WriteBatch;
+  proposer: string;
+  writeCounts: number;
+}): Promise<[WriteBatch, number]> => {
   let newBatch = batch;
   const notificationNumRef = db.collection("notificationNums").doc(proposer);
   const notificationNumDoc = await notificationNumRef.get();
   if (notificationNumDoc.exists) {
-    newBatch.update(notificationRef, { nNum: admin.firestore.FieldValue.increment(1) });
+    newBatch.update(notificationNumRef, { nNum: admin.firestore.FieldValue.increment(1) });
   } else {
-    newBatch.set(notificationRef, { nNum: 1 });
+    newBatch.set(notificationNumRef, { nNum: 1 });
   }
   [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   return [newBatch, writeCounts];
@@ -323,7 +332,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     if (notificationData.aType !== "") {
       batch.set(notificationRef, notificationData);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, notificationRef, writeCounts });
+      [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, writeCounts });
     }
   }
   // Updating the node document accordingly.
