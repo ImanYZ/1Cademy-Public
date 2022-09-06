@@ -257,7 +257,7 @@ const SearchList = (/*props: SearchListProps*/) => {
     // setChosenTags([tag.node]);
   }, []);
 
-  const setNodesUpdatedSinceClick = useCallback(event => setNodesUpdatedSince(event.target.value), []);
+  const setNodesUpdatedSinceClick = useCallback((event: any) => setNodesUpdatedSince(event.target.value), []);
 
   const setShowTagSelectorClick = useCallback(() => setShowTagSelector(prevValue => !prevValue), []);
 

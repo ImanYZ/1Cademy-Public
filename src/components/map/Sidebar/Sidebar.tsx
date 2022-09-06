@@ -571,7 +571,7 @@ const Sidebar = (props: SidebarType) => {
             </MemoizedSidebarWrapper>
           ) : props.openSearch ? (
             <MemoizedSidebarWrapper
-              headerImage={searcherHeaderImage} // CHECK: image
+              headerImage={searcherHeaderImage}
               title="Search Nodes"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}

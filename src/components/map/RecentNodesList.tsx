@@ -340,7 +340,11 @@ const RecentNodesList = (props: any) => {
                 <FormControlLabel
                   className={option[2] ? "selected" : ""}
                   control={
-                    <Checkbox className="searchCheckbox" checked={option[2]} onChange={sortByTypeClick(option[3])} />
+                    <Checkbox
+                      className="searchCheckbox"
+                      checked={option[2]}
+                      onChange={() => sortByTypeClick(option[3])}
+                    />
                   }
                   label=""
                   sx={{ p: "0px" }}
