@@ -1841,8 +1841,8 @@ button.MuiTab-textColorInherit:focus {
 /* ------------------ */
 /* search list styles */
 #SearchContainer {
-  display: grid;
-  grid-template-rows: 145px auto;
+  /* display: grid;
+  grid-template-rows: 145px auto; */
   height: 100%;
   width: 100%;
   margin-top: 0px;
@@ -1907,8 +1907,8 @@ button.MuiTab-textColorInherit:focus {
 .MuiChip-outlined.chip {
   max-width: 207px;
   height: 20px;
-  left: 55px;
-  top: 138px;
+  /* left: 55px;
+  top: 138px; */
   border: 1px solid #ffffff;
   box-sizing: border-box;
   border-radius: 10px;

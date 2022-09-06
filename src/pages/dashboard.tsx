@@ -2476,8 +2476,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const edgeIds = Object.keys(edges);
 
-  console.log({ selectionType: nodeBookState.selectionType });
-
   return (
     <div className="MapContainer">
       <div id="Map">

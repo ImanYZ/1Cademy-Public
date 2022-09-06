@@ -1,6 +1,18 @@
 import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import SearchIcon from "@mui/icons-material/Search";
-import { Chip, Divider, FormControl, IconButton, InputAdornment, Select } from "@mui/material";
+import {
+  Checkbox,
+  Chip,
+  Divider,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 // import "./SearchList.css";
 // import Chip from "@material-ui/core/Chip";
 // import Divider from "@material-ui/core/Divider";
@@ -39,13 +51,19 @@ import React, { useCallback, useState } from "react";
 // import TagSearch from "../../../../PublicComps/TagSearch/TagSearch";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import shortenNumber from "../../../lib/utils/shortenNumber";
+import { NodeType } from "../../../types";
+import NodeTypeIcon from "../../NodeTypeIcon2";
+import { MemoizedTagsSearcher, TagTreeView } from "../../TagsSearcher";
 // import NodeTypeIcon from "../../../Node/NodeTypeIcon/NodeTypeIcon";
 // import RecentNodesList from "../../RecentNodes/RecentNodesList/RecentNodesList";
 // import FilterNodeTypes from "../FilterNodeTypes/FilterNodeTypes";
 import Modal from "../Modal/Modal";
 import RecentNodesList from "../RecentNodesList";
 import ValidatedInput from "../ValidatedInput";
-import FilterNodeTypes from "./FilterNodeTypes";
+// import FilterNodeTypes from "./FilterNodeTypes";
+
+export type SortDirection = "ASCENDING" | "DESCENDING";
+export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES";
 
 // const doNothing = () => {};
 
@@ -54,13 +72,15 @@ dayjs.extend(relativeTime);
 //search config, contains api keys
 // const searchClient = algoliasearch("2GWY1UCT1Q", "df93c72310bc4f8ddd6196363db02905");
 
-// type SearchListProps = {};
+// type SearchListProps = {};\
+
+const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 const SearchList = (/*props: SearchListProps*/) => {
   // const firebase = useRecoilValue(firebaseState);
   // const username = useRecoilValue(usernameState);
   // const tag = useRecoilValue(tagState);
-  const { allTags } = useTagsTreeView();
+  const { allTags, setAllTags } = useTagsTreeView();
   const [nodesUpdatedSince, setNodesUpdatedSince] = useState(100);
 
   // const [allNodes, setAllNodes] = useRecoilState(allNodesState);
@@ -77,7 +97,9 @@ const SearchList = (/*props: SearchListProps*/) => {
   const [onlyTags /*setOnlyTags*/] = useState(true);
   const [chosenTags /*setChosenTags*/] = useState([]);
   const [showTagSelector, setShowTagSelector] = useState(false);
-  const [nodeTypes /*setNodeTypes*/] = useState(["Concept", "Relation", "Reference", "Idea", "Code", "Question"]);
+  const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
+  const [sortOption, setSortOption] = useState<SortValues>("DATE_MODIFIED");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
 
   // useEffect(() => {
   //   setFilteredNodes((oFilteredNodes) => {
@@ -144,6 +166,16 @@ const SearchList = (/*props: SearchListProps*/) => {
     setSearchQuery(event.target.value);
   }, []);
 
+  const onSearch = () => {
+    console.log("[onSearch]", {
+      searchQuery,
+      nodeTypes,
+      tags: getTagsSelected(),
+      nodesUpdatedSince,
+      sortOption,
+      sortDirection,
+    });
+  };
   // const doSearch = useCallback(() => {
   //   // const worker = new window.Worker(process.env.PUBLIC_URL + "/searchWorker.js");
   //   const worker = new Worker();
@@ -189,16 +221,16 @@ const SearchList = (/*props: SearchListProps*/) => {
   //   return setChosenTags([...event.target.selectedOptions].map((o) => o.value));
   // }, []);
 
-  const setNodeTypesClick = useCallback(
-    () => console.log("setNodeTypesClick"),
-    // nodeType => event =>
-    //   setNodeTypes(oldNodeTypes =>
-    //     oldNodeTypes.includes(nodeType)
-    //       ? oldNodeTypes.filter(oldNodeType => oldNodeType !== nodeType)
-    //       : [...oldNodeTypes, nodeType]
-    //   ),
-    []
-  );
+  // const setNodeTypesClick = useCallback(
+  //   () => console.log("setNodeTypesClick"),
+  //   // nodeType => event =>
+  //   //   setNodeTypes(oldNodeTypes =>
+  //   //     oldNodeTypes.includes(nodeType)
+  //   //       ? oldNodeTypes.filter(oldNodeType => oldNodeType !== nodeType)
+  //   //       : [...oldNodeTypes, nodeType]
+  //   //   ),
+  //   []
+  // );
 
   // CHECK: I commented this
   // const openLinkedNodeClick = useCallback(
@@ -261,15 +293,30 @@ const SearchList = (/*props: SearchListProps*/) => {
 
   const setShowTagSelectorClick = useCallback(() => setShowTagSelector(prevValue => !prevValue), []);
 
+  const onChangeNoteType = (event: SelectChangeEvent<string[]>) => {
+    setNodeTypes(event.target.value as NodeType[]);
+  };
+
+  const getTagsSelected = useCallback<() => TagTreeView[]>(
+    () => Object.values(allTags).filter(tag => tag.checked),
+    [allTags]
+  );
+
   return (
     <div id="SearchContainer">
       <div id="SearchBoxContainer">
         {showTagSelector && (
           <div id="tagModal">
             <Modal onClick={setShowTagSelectorClick} returnLeft={true}>
+              <MemoizedTagsSearcher
+                allTags={allTags}
+                setAllTags={setAllTags}
+                sx={{ maxHeight: "200px", height: "200px" }}
+                multiple
+              />
               {/* CHECK: add tag searcher */}
               {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} setOnlyTags={setOnlyTags} /> */}
-              <span>TagSearcher</span>
+              {/* <span>TagSearcher</span> */}
             </Modal>
           </div>
         )}
@@ -291,17 +338,39 @@ const SearchList = (/*props: SearchListProps*/) => {
                       variant="outlined"
                       displayEmpty
                       renderValue={() => "Types"}
+                      onChange={onChangeNoteType}
                     >
-                      {["Concept", "Code", "Reference", "Relation", "Question", "Idea"].map(nodeType => (
-                        <FilterNodeTypes
-                          id="nodeTypesSelect"
+                      {NODE_TYPES_ARRAY.map(nodeType => (
+                        // <FilterNodeTypes
+                        //   id="nodeTypesSelect"
+                        //   className="searchSelect"
+                        //   key={nodeType}
+                        //   value={nodeType}
+                        //   nodeTypes={nodeTypes}
+                        //   // setNodeTypesClick={setNodeTypesClick}
+                        //   nodeType={nodeType}
+                        // />
+                        // CHECK: THIS was in FilterNodeTypes
+                        <MenuItem
                           className="searchSelect"
                           key={nodeType}
                           value={nodeType}
-                          nodeTypes={nodeTypes}
-                          setNodeTypesClick={setNodeTypesClick}
-                          nodeType={nodeType}
-                        />
+                          id="nodeTypesSelect"
+                          /*onClick={props.setNodeTypesClick(props.nodeType)}*/
+                          // className={props.className}
+                        >
+                          <Checkbox
+                            className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                            checked={nodeTypes.includes(nodeType)}
+                          />
+                          <ListItemIcon>
+                            <NodeTypeIcon
+                              className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                              nodeType={nodeType}
+                            />
+                          </ListItemIcon>
+                          <ListItemText className={nodeTypes.includes(nodeType) ? "selected" : ""} primary={nodeType} />
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -310,7 +379,7 @@ const SearchList = (/*props: SearchListProps*/) => {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton id="SearchIcon" onClick={() => {}}>
+                  <IconButton id="SearchIcon" onClick={onSearch}>
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
@@ -340,20 +409,18 @@ const SearchList = (/*props: SearchListProps*/) => {
             {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (
               <span className="tagText">All</span>
             ) : (
-              Object.values(allTags)
-                .filter(tag => tag.checked)
-                .map(tag => {
-                  return (
-                    <Chip
-                      key={"tag" + tag.nodeId}
-                      // name={tag.title}
-                      className="chip"
-                      variant="outlined"
-                      label={tag.title}
-                      onDelete={() => console.log("deleteChip(tag)")}
-                    />
-                  );
-                })
+              getTagsSelected().map(tag => {
+                return (
+                  <Chip
+                    key={"tag" + tag.nodeId}
+                    // name={tag.title}
+                    className="chip"
+                    variant="outlined"
+                    label={tag.title}
+                    onDelete={() => console.log("deleteChip(tag)")}
+                  />
+                );
+              })
             )}
           </label>
           <ControlPointIcon id="AddTagIcon" onClick={setShowTagSelectorClick} />
@@ -385,6 +452,10 @@ const SearchList = (/*props: SearchListProps*/) => {
               recentNodes={searchResults}
               setRecentNodes={setSearchResults}
               onlyTags={onlyTags}
+              sortOption={sortOption}
+              setSortOption={setSortOption}
+              sortDirection={sortDirection}
+              setSortDirection={setSortDirection}
             />
           </div>
         </div>
