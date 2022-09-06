@@ -33,7 +33,7 @@ export const getServerSideProps: GetServerSideProps<any, Params> = async ({ res,
       })
       .get();
     if (nodesDocs.docs.length === 0) {
-      res.writeHead(404, { "Content-Type": "text/xml" });
+      res.setHeader("Content-Type", "text/xml");
       res.write(`<message>No child nodes found for Id: ${nodeId}</message>`);
       res.end();
     } else {
