@@ -86,7 +86,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const nodeTitle = encodeTitle(title);
-    return `${BASE_URL}/sitemap/${node.id}`;
+    return `${BASE_URL}/sitemap-${node.id}.xml`;
   });
 
   const allPaths = [...dynamicPaths];
