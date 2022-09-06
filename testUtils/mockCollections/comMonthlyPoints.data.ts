@@ -1,3 +1,7 @@
+import { firstWeekMonthDays } from "../../src/utils";
+
+const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
+
 const collection = "comMonthlyPoints";
 
 const data: any[] = [
@@ -13,11 +17,9 @@ const data: any[] = [
     iInst: 0,
     mWrongs: 0,
     nWrongs: 0,
-    positives: 3,
     tag: "1Cademy",
-    adminPoints: 1,
+    adminPoints: 0,
     iCorrects: 0,
-    negatives: 0,
     rfCorrects: 0,
     iWrongs: 0,
     aWrongs: 0,
@@ -25,6 +27,8 @@ const data: any[] = [
     createdAt: new Date(),
     tagId: "C7L3gNbNp5reFjQf8vAb",
     updatedAt: new Date(),
+    firstWeekDay,
+    firstMonthDay,
     qCorrects: 0,
     lterm: 0,
     cnWrongs: 0,
@@ -34,18 +38,20 @@ const data: any[] = [
     sInst: 0,
     aChooseUname: false,
     qWrongs: 0,
-    aFullname: null,
+    aFullname: "1man",
     cdInst: 0,
     rfWrongs: 0,
-    cnCorrects: 3,
+    cnCorrects: 0,
     pCorrects: 0,
     mCorrects: 0,
     cdWrongs: 0,
-    totalPoints: 3,
+    totalPoints: 0,
     aImgUrl: null,
     qInst: 0,
     pWrongs: 0,
     nInst: 0,
+    positives: 0,
+    negatives: 0,
   },
 ];
 
