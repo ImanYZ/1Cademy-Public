@@ -318,7 +318,6 @@ const RecentNodesList = (props: any) => {
   return (
     <>
       <FormControl id={props.id}>
-        <h4>Selected: {props.sortOption}</h4>
         <Select
           MenuProps={{ id: "sortFilterMenu" }}
           // multiple
