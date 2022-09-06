@@ -1,4 +1,8 @@
-export const collection = "monthlyReputationsData";
+import { firstWeekMonthDays } from "../../src/utils";
+
+const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
+
+export const collection = "monthlyReputations";
 
 const data: any[] = [
   {
@@ -9,7 +13,8 @@ const data: any[] = [
     createdAt: new Date(),
     iCorrects: 0,
     iInst: 0,
-    firstMonthDay: "4-1-2021",
+    firstMonthDay,
+    firstWeekDay,
     positives: 12,
     isAdmin: false,
     mInst: 0,
@@ -19,8 +24,8 @@ const data: any[] = [
     ltermte: 0,
     mWrongs: 0,
     dWrongs: 1.8,
-    tagId: "r98BjyFDCe4YyLA3U8ZE",
-    uname: "jezzhang",
+    tagId: "C7L3gNbNp5reFjQf8vAb",
+    uname: "1man",
     updatedAt: new Date(),
     ltermDay: 0,
     tag: "1Cademy",

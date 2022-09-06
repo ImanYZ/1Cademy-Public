@@ -3,10 +3,7 @@ const collection = "users";
 const data: any[] = [
   {
     documentId: "1man",
-    createdAt: {
-      _seconds: 1579359943,
-      _nanoseconds: 432000000,
-    },
+    createdAt: new Date(),
     clickedCP: true,
     color: "#36cd96",
     blocked: false,
@@ -31,14 +28,12 @@ const data: any[] = [
     imgOrColor: false,
     deMajor: "Information Science",
     userId: "K3DmaX1ZAfXSZ5EzWvz46uJ09fZ2",
-    updatedAt: {
-      _seconds: 1626994109,
-      _nanoseconds: 128000000,
-    },
+    updatedAt: new Date(),
     clickedPP: true,
     sNode: "DVuSVtfgvbfJmQVuHCzD",
     practicing: false,
     email: "oneweb@umich.edu",
+    chooseUname: "1man",
   },
 
   ////////
