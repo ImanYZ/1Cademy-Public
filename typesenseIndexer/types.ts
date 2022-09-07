@@ -76,7 +76,7 @@ export type TypesenseNodesSchema = {
   wrongs: number; //typesense
   mostHelpful: number; // typesense
   isTag: boolean; // typesense
-  proposalsAmount: number; // typesense
+  versions: number; // typesense
   netVotes: number; // typesense
 };
 
@@ -107,23 +107,4 @@ export type LinkedKnowledgeNode = {
   content?: string;
   nodeImage?: string;
   nodeType: NodeType;
-};
-
-export type NodeType2 =
-  | "Relation"
-  | "Concept"
-  | "Code"
-  | "Reference"
-  | "Idea"
-  | "Question"
-  | "Profile"
-  | "Sequel"
-  | "Advertisement"
-  | "News"
-  | "Private";
-
-export type ProposalsAmount = {
-  [key in NodeType2]: {
-    [key: string]: number;
-  };
 };

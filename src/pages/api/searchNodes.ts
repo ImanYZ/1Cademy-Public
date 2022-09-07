@@ -58,6 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
         contributors: el.document.contributors,
         institutions: el.document.institutions,
         choices: el.document.choices || [],
+        versions: el.document.versions,
       })
     );
 

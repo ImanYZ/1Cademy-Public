@@ -16,7 +16,7 @@ export enum NodeType {
   "Advertisement" = "Advertisement",
   "News" = "News",
   "Private" = "Private",
-  "Tag" = "Tag"
+  "Tag" = "Tag",
 }
 
 export type KnowledgeNodeContributor = {
@@ -150,6 +150,7 @@ export type SimpleNode = {
   tags: string[];
   contributors: { fullName: string; imageUrl: string; username: string }[];
   institutions: { name: string }[];
+  versions: number;
 };
 
 export type ResponseAutocompleteFullTags = {
@@ -199,6 +200,7 @@ export type TypesenseNodesSchema = {
   updatedAt: number;
   wrongs: number;
   mostHelpful: number; // typesense
+  versions: number; // typesense
 };
 
 export type TypesenseReferencesSchema = {
@@ -249,13 +251,13 @@ export enum TimeWindowOption {
   "AnyTime" = "Any Time",
   "ThisWeek" = "This Week",
   "ThisMonth" = "This Month",
-  "ThisYear" = "This Year"
+  "ThisYear" = "This Year",
 }
 
 export enum SortTypeWindowOption {
   "MOST_RECENT" = "MOST_RECENT",
   "UPVOTES_DOWNVOTES" = "UPVOTES_DOWNVOTES",
-  "NONE" = "NONE"
+  "NONE" = "NONE",
 }
 
 export type FilterValue = {
@@ -518,9 +520,8 @@ export type Point = {
   y: number;
 };
 
-
 export type NodeChanges = {
-  cType: string,
-  nId: string,
-  nData: NodeFireStore
-}
+  cType: string;
+  nId: string;
+  nData: NodeFireStore;
+};

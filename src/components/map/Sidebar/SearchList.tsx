@@ -1,4 +1,8 @@
+import CloseIcon from "@mui/icons-material/Close";
 import ControlPointIcon from "@mui/icons-material/ControlPoint";
+import CreateIcon from "@mui/icons-material/Create";
+import DoneIcon from "@mui/icons-material/Done";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Checkbox,
@@ -13,6 +17,7 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
+import axios from "axios";
 // import "./SearchList.css";
 // import Chip from "@material-ui/core/Chip";
 // import Divider from "@material-ui/core/Divider";
@@ -51,9 +56,12 @@ import React, { useCallback, useState } from "react";
 // import TagSearch from "../../../../PublicComps/TagSearch/TagSearch";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import shortenNumber from "../../../lib/utils/shortenNumber";
+import { SortDirection, SortValues } from "../../../noteBookTypes";
 import { NodeType } from "../../../types";
+import { Editor } from "../../Editor";
 import NodeTypeIcon from "../../NodeTypeIcon2";
 import { MemoizedTagsSearcher, TagTreeView } from "../../TagsSearcher";
+import { MemoizedMetaButton } from "../MetaButton";
 // import NodeTypeIcon from "../../../Node/NodeTypeIcon/NodeTypeIcon";
 // import RecentNodesList from "../../RecentNodes/RecentNodesList/RecentNodesList";
 // import FilterNodeTypes from "../FilterNodeTypes/FilterNodeTypes";
@@ -62,10 +70,7 @@ import RecentNodesList from "../RecentNodesList";
 import ValidatedInput from "../ValidatedInput";
 // import FilterNodeTypes from "./FilterNodeTypes";
 
-export type SortDirection = "ASCENDING" | "DESCENDING";
-export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES";
-
-// const doNothing = () => {};
+const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
@@ -73,6 +78,13 @@ dayjs.extend(relativeTime);
 // const searchClient = algoliasearch("2GWY1UCT1Q", "df93c72310bc4f8ddd6196363db02905");
 
 // type SearchListProps = {};\
+
+type SearchResult = {
+  data: any[];
+  numResults: number;
+  page: number;
+  perPage: number;
+};
 
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
@@ -88,12 +100,12 @@ const SearchList = (/*props: SearchListProps*/) => {
   // const [nodeTitleBlured, setNodeTitleBlured] = useRecoilState(nodeTitleBluredState);
   // const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   // const [allTags, setAllTags] = useRecoilState(allTagsState);
 
   // const [filteredNodes, setFilteredNodes] = useState([]);
   // const [lastIndex, setLastIndex] = useState(13);
-  // const [isRetrieving, setIsRetrieving] = useState(false);
+  const [isRetrieving /* setIsRetrieving*/] = useState(false);
   const [onlyTags /*setOnlyTags*/] = useState(true);
   const [chosenTags /*setChosenTags*/] = useState([]);
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -166,15 +178,20 @@ const SearchList = (/*props: SearchListProps*/) => {
     setSearchQuery(event.target.value);
   }, []);
 
-  const onSearch = () => {
-    console.log("[onSearch]", {
-      searchQuery,
+  const onSearch = async () => {
+    console.log("[onSearch]");
+
+    const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
+      q: searchQuery,
       nodeTypes,
-      tags: getTagsSelected(),
+      tags: getTagsSelected().map(cur => cur.title),
       nodesUpdatedSince,
       sortOption,
       sortDirection,
     });
+
+    console.log("data", data.data);
+    setSearchResults(data.data);
   };
   // const doSearch = useCallback(() => {
   //   // const worker = new window.Worker(process.env.PUBLIC_URL + "/searchWorker.js");
@@ -445,7 +462,7 @@ const SearchList = (/*props: SearchListProps*/) => {
             />{" "}
             days
           </div>
-          <div id="SearchResutlsNum">{shortenNumber(searchResults.length, 2, false)} Results</div>
+          <div id="SearchResutlsNum">{shortenNumber(searchResults?.numResults ?? 0, 2, false)} Results</div>
           <div id="SearchSortContainer">
             <RecentNodesList
               id="recentNodesList"
@@ -463,7 +480,7 @@ const SearchList = (/*props: SearchListProps*/) => {
         </div> */}
       </div>
       {/* CHECK: I commented this */}
-      Instant Search
+      {/* Instant Search: {searchResults?.data.length} */}
       {/* <InstantSearch
         indexName="nodesIndex"
         searchClient={searchClient}
@@ -477,63 +494,71 @@ const SearchList = (/*props: SearchListProps*/) => {
       </InstantSearch> */}
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
-      {/* {!isRetrieving ? (
-        <ul className="collection Proposals">
-          {searchResults.slice(0, lastIndex).map((resNode) => {
+      {!isRetrieving ? (
+        <ul className="collection Proposals" style={{ padding: "0px" }}>
+          {(searchResults?.data ?? []).map((resNode, idx) => {
             return (
+              // <h4 key={idx}>{resNode.title}</h4>
               <li
-                className={
-                  "collection-item" +
-                  ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")
-                }
-                key={`resNode${resNode.id}`}
-                onClick={openLinkedNodeClick(resNode.id)}
+                className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
+                // key={`resNode${resNode.id}`}
+                key={`resNode${idx}`}
+                onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
+                style={{ listStyle: "none", padding: "10px" }}
               >
-                <div className="SidebarNodeTypeIcon">
+                <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
                   <NodeTypeIcon nodeType={resNode.nodeType} />
                   <div className="right">
-                    <MetaButton
+                    <MemoizedMetaButton
                     // tooltip="Creation or the last update of this node."
                     // tooltipPosition="BottomLeft"
                     >
-                      <i className="material-icons grey-text">event_available</i>{" "}
-                      {dayjs(resNode.changedAt).fromNow()}
-                    </MetaButton>
-                    <MetaButton
+                      <>
+                        {/* <i className="material-icons grey-text">event_available</i> */}
+                        <EventAvailableIcon className="material-icons grey-text" />
+                        <span>{dayjs(resNode.changedAt).fromNow()}</span>
+                      </>
+                    </MemoizedMetaButton>
+                    <MemoizedMetaButton
                     // tooltip="# of improvement/child proposals on this node."
                     // tooltipPosition="BottomLeft"
                     >
-                      <i className="material-icons grey-text">create</i>
-                      <span>{shortenNumber(resNode.versions, 2, false)}</span>
-                    </MetaButton>
-                    <MetaButton
+                      <>
+                        {/* <i className="material-icons grey-text">create</i> */}
+                        <CreateIcon className="material-icons grey-text" />
+                        <span>{shortenNumber(resNode.versions, 2, false)}</span>
+                      </>
+                    </MemoizedMetaButton>
+                    <MemoizedMetaButton
                     // tooltip="# of 1Cademists who have found this node unhelpful."
                     // tooltipPosition="BottomLeft"
                     >
-                      <i className="material-icons grey-text">close</i>
-                      <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
-                    </MetaButton>
-                    <MetaButton
+                      <>
+                        {/* <i className="material-icons grey-text">close</i> */}
+                        <CloseIcon className="material-icons grey-text" />
+                        <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
+                      </>
+                    </MemoizedMetaButton>
+                    <MemoizedMetaButton
                     // tooltip="# of 1Cademists who have found this node helpful."
                     // tooltipPosition="BottomLeft"
                     >
-                      <i className="material-icons DoneIcon grey-text">done</i>
-                      <span>{shortenNumber(resNode.corrects, 2, false)}</span>
-                    </MetaButton>
+                      <>
+                        {/* <i className="material-icons DoneIcon grey-text">done</i> */}
+                        <DoneIcon className="material-icons DoneIcon grey-text" />
+                        <span>{shortenNumber(resNode.corrects, 2, false)}</span>
+                      </>
+                    </MemoizedMetaButton>
                   </div>
                 </div>
                 <div className="SearchResultTitle">
-                  <HyperEditor
-                    readOnly={true}
-                    onChange={doNothing}
-                    content={resNode.title}
-                    width={580}
-                  />
+                  <Editor label="" readOnly={true} setValue={doNothing} value={resNode.title} />
                 </div>
               </li>
             );
           })}
-          {searchResults.length > lastIndex && (
+          {/* CHECK: I commented this */}
+          {/* {searchResults.length > lastIndex && (
             <div id="ContinueButton">
               <MetaButton
                 onClick={loadOlderSearchResultsClick}
@@ -544,13 +569,13 @@ const SearchList = (/*props: SearchListProps*/) => {
                 <i className="material-icons grey-text">expand_more</i>
               </MetaButton>
             </div>
-          )}
+          )} */}
         </ul>
       ) : (
         <div className="CenterredLoadingImageSidebar">
           <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
         </div>
-      )} */}
+      )}
     </div>
   );
 };
