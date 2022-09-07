@@ -73,9 +73,11 @@ export type TypesenseNodesSchema = {
   title: string; // typesense
   titlesReferences: string[]; // typesense
   updatedAt: number;
-  wrongs: number;
+  wrongs: number; //typesense
   mostHelpful: number; // typesense
   isTag: boolean; // typesense
+  proposalsAmount: number; // typesense
+  netVotes: number; // typesense
 };
 
 export type TypesenseProcessedReferences = {
@@ -95,7 +97,7 @@ export enum NodeType {
   "Advertisement" = "Advertisement",
   "News" = "News",
   "Private" = "Private",
-  "Tag" = "Tag"
+  "Tag" = "Tag",
 }
 
 export type LinkedKnowledgeNode = {
@@ -105,4 +107,23 @@ export type LinkedKnowledgeNode = {
   content?: string;
   nodeImage?: string;
   nodeType: NodeType;
+};
+
+export type NodeType2 =
+  | "Relation"
+  | "Concept"
+  | "Code"
+  | "Reference"
+  | "Idea"
+  | "Question"
+  | "Profile"
+  | "Sequel"
+  | "Advertisement"
+  | "News"
+  | "Private";
+
+export type ProposalsAmount = {
+  [key in NodeType2]: {
+    [key: string]: number;
+  };
 };

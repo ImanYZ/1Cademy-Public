@@ -5,7 +5,7 @@ import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
 import { getNodeReferences } from "./helper";
 import indexCollection from "./populateIndex";
-import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
+import { NodeFireStore, NodeType2, ProposalsAmount, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
 
 // Retrieve Job-defined env vars
 const { CLOUD_RUN_TASK_ATTEMPT = 0 } = process.env;
@@ -51,6 +51,47 @@ const getInstitutionsFirestore = async () => {
   });
 };
 
+const getProposalAmountByNodeType = async (nodeType: string) => {
+  const proposals: { [key: string]: number } = {};
+  const versionsDocs = await db.collection(nodeType).get();
+
+  versionsDocs.docs
+    .map(versionDoc => versionDoc.data().node)
+    .forEach((nodeId: string) => (proposals[nodeId] = (proposals[nodeId] ?? 0) + 1));
+
+  return proposals;
+};
+
+const getProposalsAmountByNodesFromFirebase = async (): Promise<ProposalsAmount> => {
+  const proposals: ProposalsAmount = {
+    Concept: {},
+    Code: {},
+    Relation: {},
+    Question: {},
+    Reference: {},
+    Idea: {},
+    Profile: {},
+    Sequel: {},
+    Advertisement: {},
+    News: {},
+    Private: {},
+  };
+
+  proposals.Concept = await getProposalAmountByNodeType("conceptVersions");
+  proposals.Code = await getProposalAmountByNodeType("codeVersions");
+  proposals.Relation = await getProposalAmountByNodeType("relationVersions");
+  proposals.Question = await getProposalAmountByNodeType("questionVersions");
+  proposals.Reference = await getProposalAmountByNodeType("referenceVersions");
+  proposals.Idea = await getProposalAmountByNodeType("ideaVersions");
+  proposals.Profile = await getProposalAmountByNodeType("profileVersions");
+  proposals.Sequel = await getProposalAmountByNodeType("sequelVersions");
+  proposals.Advertisement = await getProposalAmountByNodeType("advertisementVersions");
+  proposals.News = await getProposalAmountByNodeType("newsVersions");
+  proposals.Private = await getProposalAmountByNodeType("privateVersions");
+
+  return proposals;
+};
+
 const getNodeTags = (nodeData: NodeFireStore) => {
   const tags: string[] = [];
   if (nodeData.tagIds) {
@@ -90,7 +131,8 @@ const getContributorsName = (nodeData: NodeFireStore): string[] => {
 };
 
 const getNodesData = (
-  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
+  nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
+  proposalAmount: ProposalsAmount
 ): TypesenseNodesSchema[] => {
   const getContributorsFromNode = (nodeData: NodeFireStore) => {
     return Object.entries(nodeData.contributors || {})
@@ -118,6 +160,10 @@ const getNodesData = (
       .map(institution => ({ name: institution.name }));
   };
 
+  const getProposalsAmount = (nodeType: NodeType2, nodeId: string): number => {
+    return proposalAmount[nodeType][nodeId] ?? 0;
+  };
+
   return nodeDocs.docs.map((nodeDoc): TypesenseNodesSchema => {
     const nodeData = nodeDoc.data() as NodeFireStore;
     const contributors = getContributorsFromNode(nodeData);
@@ -126,6 +172,7 @@ const getNodesData = (
     const institutionsNames = getInstitutionsName(nodeData);
     const tags = getNodeTags(nodeData);
     const references = getNodeReferences(nodeData);
+    const proposalsAmount = getProposalsAmount(nodeData.nodeType as NodeType2, nodeDoc.id);
 
     const titlesReferences = references.map(cur => cur.title || "").filter(cur => cur);
     const labelsReferences = references.map(cur => cur.label).filter(cur => cur);
@@ -153,6 +200,8 @@ const getNodesData = (
       titlesReferences,
       updatedAt: nodeData.updatedAt?.toMillis() || 0,
       wrongs: nodeData.wrongs || 0,
+      netVotes: (nodeData.corrects || 0) - (nodeData.wrongs || 0),
+      proposalsAmount,
     };
   });
 };
@@ -226,15 +275,19 @@ const fillUsersIndex = async (forceReIndex?: boolean) => {
 
 const fillNodesIndex = async (
   nodeDocs: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
+  proposalsAmount: ProposalsAmount,
   forceReIndex?: boolean
 ) => {
-  const data = getNodesData(nodeDocs);
+  const data = getNodesData(nodeDocs, proposalsAmount);
   const fields: CollectionFieldSchema[] = [
-    { name: "changedAtMillis", type: "int64" },
+    { name: "changedAtMillis", type: "int64" }, // DATE_MODIFIED x
+    { name: "updatedAt", type: "int64" }, //LAST_VIEWED from updatedAt X
     { name: "content", type: "string" },
     { name: "contributorsNames", type: "string[]" },
     { name: "mostHelpful", type: "int32" },
     { name: "corrects", type: "int32" },
+    { name: "wrongs", type: "int32" }, //wrongs X
+    { name: "netVotes", type: "int32" }, //NET_NOTES x
     { name: "labelsReferences", type: "string[]" },
     { name: "institutionsNames", type: "string[]" },
     { name: "nodeType", type: "string" },
@@ -243,6 +296,7 @@ const fillNodesIndex = async (
     { name: "titlesReferences", type: "string[]" },
     { name: "isTag", type: "bool" },
     { name: "institNames", type: "string[]" },
+    { name: "proposalsAmount", type: "int64" }, // PROPOSALS X
   ];
 
   await indexCollection("nodes", fields, data, forceReIndex);
@@ -262,6 +316,7 @@ const fillReferencesIndex = async (
 };
 
 const main = async () => {
+  const proposalsAmount = await getProposalsAmountByNodesFromFirebase();
   console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
   console.log(`Begin indexing at ${new Date().toISOString()}`);
   // if (CLOUD_RUN_TASK_INDEX === 0) {
@@ -275,7 +330,7 @@ const main = async () => {
   // if (CLOUD_RUN_TASK_INDEX === 2) {
   console.log("Index Nodes and References task");
   const nodeDocs = await db.collection("nodes").get();
-  await fillNodesIndex(nodeDocs, true);
+  await fillNodesIndex(nodeDocs, proposalsAmount, true);
   await fillReferencesIndex(nodeDocs, true);
   // }
   console.log(`End indexing at ${new Date().toISOString()}`);
