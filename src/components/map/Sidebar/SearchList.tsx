@@ -18,18 +18,6 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
-// import {
-//   ClearRefinements,
-//   Configure,
-//   Highlight,
-//   Hits,
-//   InstantSearch,
-//   Pagination,
-//   RefinementList,
-// } from "react-instantsearch-dom";
-// import { useRecoilState, useRecoilValue } from "recoil";
-// import Worker from "worker-loader!./searchWorker.js"; // eslint-disable-line import/no-webpack-loader-syntax
-import LoadingImg from "1Cademy_Loading_Dots.gif";
 import axios from "axios";
 // import "./SearchList.css";
 // import Chip from "@material-ui/core/Chip";
@@ -45,6 +33,18 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import React, { useCallback, useState } from "react";
 
+// import {
+//   ClearRefinements,
+//   Configure,
+//   Highlight,
+//   Hits,
+//   InstantSearch,
+//   Pagination,
+//   RefinementList,
+// } from "react-instantsearch-dom";
+// import { useRecoilState, useRecoilValue } from "recoil";
+// import Worker from "worker-loader!./searchWorker.js"; // eslint-disable-line import/no-webpack-loader-syntax
+import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 // import Modal from "../../../../../containers/Modal/Modal";
 // import { firebaseState, tagState, usernameState } from "../../../../../store/AuthAtoms";
 // import {
