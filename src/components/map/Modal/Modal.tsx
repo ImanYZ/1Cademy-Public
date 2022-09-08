@@ -1,5 +1,7 @@
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import CloseIcon from "@mui/icons-material/Close";
+import WestIcon from "@mui/icons-material/West";
 // import "./Modal.css";
-
 import React, { useCallback } from "react";
 
 // import { useSetRecoilState } from "recoil";
@@ -32,9 +34,9 @@ const Modal = ({ onClick, ...props }: ModalProps) => {
           <div id={props.returnLeft || props.returnDown ? "ModalReturnButton" : "ModalCloseButton"}>
             <MemoizedMetaButton onClick={closeModal} tooltip="Close the window." tooltipPosition="left">
               <div className="CloseButton">
-                <i className="material-icons grey-text">
-                  {props.returnLeft ? "west" : props.returnDown ? "arrow_downward" : "close"}
-                </i>
+                {props.returnLeft && <WestIcon className="material-icons grey-text" />}
+                {props.returnDown && <ArrowDownwardIcon className="material-icons grey-text" />}
+                {!props.returnDown && !props.returnLeft && <CloseIcon className="material-icons grey-text" />}
               </div>
             </MemoizedMetaButton>
           </div>

@@ -113,7 +113,7 @@ type SidebarType = {
   // reputationsLoaded: any;
   // reputationsWeeklyLoaded: any;
   // reputationsMonthlyLoaded: any;
-  // openLinkedNode: any;
+  openLinkedNode: any;
   proposeNodeImprovement: any; //
   fetchProposals: any; //
   rateProposal: any; //
@@ -576,7 +576,7 @@ const Sidebar = (props: SidebarType) => {
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              <SearchList /*openLinkedNode={props.openLinkedNode} triggerQuerySearch={props.triggerQuerySearch}*/ />
+              <SearchList openLinkedNode={props.openLinkedNode} /* triggerQuerySearch={props.triggerQuerySearch}*/ />
             </MemoizedSidebarWrapper>
           ) : openBookmarks ? (
             <MemoizedSidebarWrapper

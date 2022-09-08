@@ -2517,6 +2517,7 @@ const Dashboard = ({}: DashboardProps) => {
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
             rateProposal={rateProposal}
+            openLinkedNode={openLinkedNode}
             selectProposal={() => console.log("selectProposal")}
             deleteProposal={() => console.log("deleteProposal")}
             closeSideBar={closeSideBar}

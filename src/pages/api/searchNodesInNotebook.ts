@@ -1,23 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { SearchParams } from "typesense/lib/Typesense/Documents";
 
-import { getInstitutionsForAutocomplete } from "@/lib/firestoreServer/institutions";
 import { getTypesenseClient } from "@/lib/typesense/typesense.config";
-import {
-  buildFilterBy,
-  buildSortBy,
-  getQueryParameter,
-  getQueryParameterAsBoolean,
-  getQueryParameterAsNumber,
-  homePageSortByDefaults,
-} from "@/lib/utils/utils";
+import { homePageSortByDefaults } from "@/lib/utils/utils";
 
-import { SearchNodesResponse, SimpleNode, TimeWindowOption, TypesenseNodesSchema } from "../../knowledgeTypes";
+import { SearchNodesResponse, SimpleNode, TypesenseNodesSchema } from "../../knowledgeTypes";
 import { SortDirection, SortValues } from "../../noteBookTypes";
 import { NodeType } from "../../types";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
-  const { q = "*", nodeTypes = [], tags = [], nodesUpdatedSince, sortOption, sortDirection } = req.body;
+  const { q = "*", nodeTypes = [], tags = [], nodesUpdatedSince, sortOption, sortDirection, page } = req.body;
 
   try {
     const typesenseClient = getTypesenseClient();
@@ -27,6 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       query_by: "title,content",
       sort_by: buildSort(sortOption, sortDirection),
       filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
+      page,
     };
 
     const searchResults = await typesenseClient
@@ -73,9 +65,7 @@ const buildFilter = (nodeTypes: NodeType, tags: string[], nodesUpdatedSince: num
 
   if (nodesUpdatedSince) {
     const updatedAt = new Date();
-    console.log("updateDate", updatedAt);
     updatedAt.setDate(updatedAt.getDate() - nodesUpdatedSince);
-    console.log("newDate", updatedAt, updatedAt.getTime());
     if (updatedAt) filters.push(`changedAtMillis:>${updatedAt.getTime()}`);
   }
 
@@ -84,8 +74,6 @@ const buildFilter = (nodeTypes: NodeType, tags: string[], nodesUpdatedSince: num
 
 const buildSort = (sortOption: SortValues, sortDirection: SortDirection) => {
   const sorts = [];
-  // LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES
-  // ASCENDING" | "DESCENDING
   const direction = sortDirection === "ASCENDING" ? "asc" : "desc";
   if (sortOption === "LAST_VIEWED") sorts.push(`updatedAt: ${direction}`); //
   if (sortOption === "DATE_MODIFIED") sorts.push(`changedAtMillis: ${direction}`); // UPDATE AT

@@ -3,6 +3,7 @@ import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Checkbox,
@@ -17,6 +18,18 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
+// import {
+//   ClearRefinements,
+//   Configure,
+//   Highlight,
+//   Hits,
+//   InstantSearch,
+//   Pagination,
+//   RefinementList,
+// } from "react-instantsearch-dom";
+// import { useRecoilState, useRecoilValue } from "recoil";
+// import Worker from "worker-loader!./searchWorker.js"; // eslint-disable-line import/no-webpack-loader-syntax
+import LoadingImg from "1Cademy_Loading_Dots.gif";
 import axios from "axios";
 // import "./SearchList.css";
 // import Chip from "@material-ui/core/Chip";
@@ -29,20 +42,9 @@ import axios from "axios";
 // import algoliasearch from "algoliasearch";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Image from "next/image";
 import React, { useCallback, useState } from "react";
 
-// import {
-//   ClearRefinements,
-//   Configure,
-//   Highlight,
-//   Hits,
-//   InstantSearch,
-//   Pagination,
-//   RefinementList,
-// } from "react-instantsearch-dom";
-// import { useRecoilState, useRecoilValue } from "recoil";
-// import Worker from "worker-loader!./searchWorker.js"; // eslint-disable-line import/no-webpack-loader-syntax
-// import LoadingImg from "../../../../../assets/1Cademy_Loading_Dots.gif";
 // import Modal from "../../../../../containers/Modal/Modal";
 // import { firebaseState, tagState, usernameState } from "../../../../../store/AuthAtoms";
 // import {
@@ -77,7 +79,9 @@ dayjs.extend(relativeTime);
 //search config, contains api keys
 // const searchClient = algoliasearch("2GWY1UCT1Q", "df93c72310bc4f8ddd6196363db02905");
 
-// type SearchListProps = {};\
+type SearchListProps = {
+  openLinkedNode: any;
+};
 
 type SearchResult = {
   data: any[];
@@ -86,21 +90,33 @@ type SearchResult = {
   perPage: number;
 };
 
+type Pagination = {
+  data: any[];
+  lastPageLoaded: number;
+  totalPage: number;
+  totalResults: number;
+};
+
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
-const SearchList = (/*props: SearchListProps*/) => {
+const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const firebase = useRecoilValue(firebaseState);
   // const username = useRecoilValue(usernameState);
   // const tag = useRecoilValue(tagState);
   const { allTags, setAllTags } = useTagsTreeView();
-  const [nodesUpdatedSince, setNodesUpdatedSince] = useState(100);
+  const [nodesUpdatedSince, setNodesUpdatedSince] = useState(1000);
 
   // const [allNodes, setAllNodes] = useRecoilState(allNodesState);
   // const allUserNodes = useRecoilValue(allUserNodesState);
   // const [nodeTitleBlured, setNodeTitleBlured] = useRecoilState(nodeTitleBluredState);
   // const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+  const [searchResults, setSearchResults] = useState<Pagination>({
+    data: [],
+    lastPageLoaded: 0,
+    totalPage: 0,
+    totalResults: 0,
+  });
   // const [allTags, setAllTags] = useRecoilState(allTagsState);
 
   // const [filteredNodes, setFilteredNodes] = useState([]);
@@ -173,12 +189,23 @@ const SearchList = (/*props: SearchListProps*/) => {
   //   }
   // }, [nodeTitleBlured, filteredNodes]);
 
+  const getTagsSelected = useCallback<() => TagTreeView[]>(
+    () => Object.values(allTags).filter(tag => tag.checked),
+    [allTags]
+  );
+
   const handleChange = useCallback((event: any) => {
     event.persist();
     setSearchQuery(event.target.value);
   }, []);
 
-  const onSearch = async () => {
+  const onSearch = async (
+    page: number,
+    sortOption: SortValues,
+    sortDirection: SortDirection,
+    nodeTypes: NodeType[]
+  ) => {
+    // async (page: number = 1) => {
     console.log("[onSearch]");
 
     const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
@@ -188,11 +215,35 @@ const SearchList = (/*props: SearchListProps*/) => {
       nodesUpdatedSince,
       sortOption,
       sortDirection,
+      page,
     });
 
     console.log("data", data.data);
-    setSearchResults(data.data);
+    const res = data.data;
+    const newData = page === 1 ? res.data : [...searchResults.data, ...res.data];
+    setSearchResults({
+      data: newData,
+      lastPageLoaded: res.page,
+      totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
+      totalResults: res.numResults,
+    });
+    // };
   };
+
+  const onChangeSortOptions = (newSortOption: SortValues) => {
+    setSortOption(newSortOption);
+    onSearch(1, newSortOption, sortDirection, nodeTypes);
+  };
+
+  const onChangeSortDirection = (newSortDirection: SortDirection) => {
+    setSortDirection(newSortDirection);
+    onSearch(1, sortOption, newSortDirection, nodeTypes);
+  };
+
+  // useEffect(() => {
+  //   onSearch();
+  // }, [onSearch, sortDirection]);
+
   // const doSearch = useCallback(() => {
   //   // const worker = new window.Worker(process.env.PUBLIC_URL + "/searchWorker.js");
   //   const worker = new Worker();
@@ -215,12 +266,17 @@ const SearchList = (/*props: SearchListProps*/) => {
   // }, [filteredNodes, searchQuery, firebase, username]);
 
   // const loadOlderSearchResultsClick = useCallback(
-  //   (event) => {
-  //     if (lastIndex < searchResults.length) {
-  //       setLastIndex(lastIndex + 13);
-  //     }
-  //   },
-  //   [lastIndex, searchResults]
+  //   // (event: any) => {
+  //   //   if (!searchResults) return onSearch();
+
+  //   //   if (searchResults.page < getTotalPage()) {
+  //   //     return onSearch(searchResults.page + 1);
+  //   //   }
+  //   //   // if (lastIndex < searchResults.length) {
+  //   //   //   setLastIndex(lastIndex + 13);
+  //   //   // }
+  //   // },
+  //   // [getTotalPage, onSearch, searchResults]
   // );
 
   // const onEnter = useCallback(
@@ -311,13 +367,10 @@ const SearchList = (/*props: SearchListProps*/) => {
   const setShowTagSelectorClick = useCallback(() => setShowTagSelector(prevValue => !prevValue), []);
 
   const onChangeNoteType = (event: SelectChangeEvent<string[]>) => {
-    setNodeTypes(event.target.value as NodeType[]);
+    const newNodeTypes = event.target.value as NodeType[];
+    setNodeTypes(newNodeTypes);
+    onSearch(1, sortOption, sortDirection, newNodeTypes);
   };
-
-  const getTagsSelected = useCallback<() => TagTreeView[]>(
-    () => Object.values(allTags).filter(tag => tag.checked),
-    [allTags]
-  );
 
   return (
     <div id="SearchContainer">
@@ -396,7 +449,7 @@ const SearchList = (/*props: SearchListProps*/) => {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton id="SearchIcon" onClick={onSearch}>
+                  <IconButton id="SearchIcon" onClick={() => onSearch(1, sortOption, sortDirection, nodeTypes)}>
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
@@ -462,7 +515,7 @@ const SearchList = (/*props: SearchListProps*/) => {
             />{" "}
             days
           </div>
-          <div id="SearchResutlsNum">{shortenNumber(searchResults?.numResults ?? 0, 2, false)} Results</div>
+          <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
           <div id="SearchSortContainer">
             <RecentNodesList
               id="recentNodesList"
@@ -470,9 +523,9 @@ const SearchList = (/*props: SearchListProps*/) => {
               setRecentNodes={setSearchResults}
               onlyTags={onlyTags}
               sortOption={sortOption}
-              setSortOption={setSortOption}
+              setSortOption={onChangeSortOptions}
               sortDirection={sortDirection}
-              setSortDirection={setSortDirection}
+              setSortDirection={onChangeSortDirection}
             />
           </div>
         </div>
@@ -496,14 +549,15 @@ const SearchList = (/*props: SearchListProps*/) => {
       {/* <Divider orientation="horizontal" /> */}
       {!isRetrieving ? (
         <ul className="collection Proposals" style={{ padding: "0px" }}>
-          {(searchResults?.data ?? []).map((resNode, idx) => {
+          {searchResults.data.map((resNode, idx) => {
             return (
               // <h4 key={idx}>{resNode.title}</h4>
               <li
                 className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
                 // key={`resNode${resNode.id}`}
                 key={`resNode${idx}`}
-                onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
+                // onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
+                onClick={() => openLinkedNode(resNode.id)}
                 style={{ listStyle: "none", padding: "10px" }}
               >
                 <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
@@ -557,23 +611,25 @@ const SearchList = (/*props: SearchListProps*/) => {
               </li>
             );
           })}
-          {/* CHECK: I commented this */}
-          {/* {searchResults.length > lastIndex && (
+          {searchResults.lastPageLoaded < searchResults.totalPage && (
             <div id="ContinueButton">
-              <MetaButton
-                onClick={loadOlderSearchResultsClick}
+              <MemoizedMetaButton
+                onClick={() => onSearch(searchResults.lastPageLoaded + 1, sortOption, sortDirection, nodeTypes)}
                 // tooltip="Load older search results"
                 // tooltipPosition="Right"
               >
-                <i className="material-icons grey-text">expand_more</i> Older search results{" "}
-                <i className="material-icons grey-text">expand_more</i>
-              </MetaButton>
+                <>
+                  <ExpandMoreIcon className="material-icons grey-text" />
+                  <span>Older search results</span>
+                  <ExpandMoreIcon className="material-icons grey-text" />
+                </>
+              </MemoizedMetaButton>
             </div>
-          )} */}
+          )}
         </ul>
       ) : (
         <div className="CenterredLoadingImageSidebar">
-          <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
+          <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
         </div>
       )}
     </div>
