@@ -77,17 +77,24 @@ type NodeFooterProps = {
 
 const NodeFooter = ({
   open,
+  // identifier,
+  // activeNode,
   citationsSelected,
+  // proposalsSelected,
+  // acceptedProposalsSelected,
+  // commentsSelected,
   editable,
   title,
   content,
   unaccepted,
+  // openPart,
   nodeType,
   isNew,
   admin,
   aImgUrl,
   aFullname,
   aChooseUname,
+  // viewers,
   correctNum,
   markedCorrect,
   wrongNum,
@@ -96,8 +103,11 @@ const NodeFooter = ({
   tags,
   parents,
   nodesChildren,
+  // commentsNum,
+  // proposalsNum,
   studied,
   isStudied,
+  // changed,
   changedAt,
   bookmarked,
   bookmarks,
@@ -146,18 +156,16 @@ const NodeFooter = ({
       const msg = new SpeechSynthesisUtterance("Node title: " + title + " \n " + "Node content: " + content);
       window.speechSynthesis.speak(msg);
       setIsSpeaking(true);
-      //   window.speechSynthesis.onend = () => {
-      //   setIsSpeaking(false);
-      // };
+      msg.onend = () => {
+        setIsSpeaking(false);
+      };
     } else {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
   }, [title, content]);
   const uploadImageClicked = useCallback(() => {
-    if (!inputEl?.current) return;
-
-    inputEl.current.click();
+    inputEl?.current?.click();
   }, [inputEl]);
 
   return (

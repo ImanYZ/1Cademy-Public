@@ -198,9 +198,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let notificationData = {
         proposer: versionData.proposer,
         uname: req.body.uname,
-        imageUrl: req.user.userData.imageUrl,
-        fullname: req.user.userData.fName + " " + req.user.userData.lName,
-        chooseUname: req.user.userData.chooseUname,
+        imageUrl: req.body.data.user.userData.imageUrl,
+        fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
+        chooseUname: req.body.data.user.userData.chooseUname,
         nodeId: req.body.nodeId,
         title: versionData.accepted ? versionData.title : nodeData.title,
         // Origin type

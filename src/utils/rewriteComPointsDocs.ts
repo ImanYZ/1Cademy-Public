@@ -1,8 +1,5 @@
-import {
-  checkRestartBatchWriteCounts,
-  db,
-} from "../lib/firestoreServer/admin";
-import { baseReputationObj } from '.';
+import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { baseReputationObj } from ".";
 
 export const rewriteComPointsDocs = async ({ batch, comPointsType, comPointsDict, writeCounts }: any) => {
   let newBatch = batch;
@@ -10,9 +7,7 @@ export const rewriteComPointsDocs = async ({ batch, comPointsType, comPointsDict
   let comRef, cPoints, bReputationObj, bComPointsObj: any;
   const oldComPoints: any = {};
   if (!["comPoints", "comOthersPoints"].includes(comPointsType)) {
-    firstDayType = ["comWeeklyPoints", "comOthWeekPoints"].includes(comPointsType)
-      ? "firstWeekDay"
-      : "firstMonthDay";
+    firstDayType = ["comWeeklyPoints", "comOthWeekPoints"].includes(comPointsType) ? "firstWeekDay" : "firstMonthDay";
   }
   const comDocs = await db.collection(comPointsType).get();
   for (let comDoc of comDocs.docs) {

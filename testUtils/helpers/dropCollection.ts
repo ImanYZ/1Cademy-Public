@@ -1,12 +1,16 @@
-import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
-const dropCollection = async (path: string) => {
-  const batch = db.batch();
-  const documentsList = await db.collection(path).listDocuments();
+import { db } from "../../src/lib/firestoreServer/admin";
+import isTestEnv from "./isTest";
 
-  for (let document of documentsList) {
-    batch.delete(document);
-  }
-  await commitBatch(batch);
+const dropCollection = async (path: string) => {
+  if (!isTestEnv()) return;
+
+  await db.runTransaction(async t => {
+    const documentsList = await t.get(db.collection(path));
+
+    for (let document of documentsList.docs) {
+      await t.delete(document.ref);
+    }
+  });
 };
 
 export default dropCollection;

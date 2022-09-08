@@ -1,6 +1,7 @@
 import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
 import { firstWeekMonthDays } from ".";
 import { convertToTGet } from "./";
+import { CollectionReference, Query, Transaction } from "firebase-admin/firestore";
 
 export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, createdAt }: any) => ({
   // for Concept nodes
@@ -59,7 +60,7 @@ export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, create
 });
 
 //  calculate positives, negatives, and total. If they do not exist then create them
-const calculatePositivesNegativesTotals = (rep_Points: any) => {
+export const calculatePositivesNegativesTotals = (rep_Points: any) => {
   if (!("positives" in rep_Points)) {
     rep_Points.positives =
       // for Concept nodes
@@ -122,7 +123,65 @@ const calculatePositivesNegativesTotals = (rep_Points: any) => {
   }
 };
 
-const updateReputationIncrement = async ({
+export type ReputationType = "All Time" | "Monthly" | "Weekly" | "Others" | "Others Monthly" | "Others Weekly";
+
+export const getRepBaseQueries = (
+  reputationType: ReputationType
+): { reputationsQueryBase: CollectionReference; comPointsQueryBase: CollectionReference } => {
+  let reputationsQueryBase: CollectionReference, comPointsQueryBase: CollectionReference;
+  switch (reputationType) {
+    case "All Time":
+      reputationsQueryBase = db.collection("reputations");
+      comPointsQueryBase = db.collection("comPoints");
+      break;
+    case "Monthly":
+      reputationsQueryBase = db.collection("monthlyReputations");
+      comPointsQueryBase = db.collection("comMonthlyPoints");
+      break;
+    case "Weekly":
+      reputationsQueryBase = db.collection("weeklyReputations");
+      comPointsQueryBase = db.collection("comWeeklyPoints");
+      break;
+    case "Others":
+      reputationsQueryBase = db.collection("othersReputations");
+      comPointsQueryBase = db.collection("comOthersPoints");
+      break;
+    case "Others Monthly":
+      reputationsQueryBase = db.collection("othMonReputations");
+      comPointsQueryBase = db.collection("comOthMonPoints");
+      break;
+    case "Others Weekly":
+      reputationsQueryBase = db.collection("othWeekReputations");
+      comPointsQueryBase = db.collection("comOthWeekPoints");
+      break;
+    default:
+      throw new Error("[getRepBaseQueries]: Strange reputationType: " + reputationType);
+  }
+
+  return {
+    reputationsQueryBase,
+    comPointsQueryBase,
+  };
+};
+
+export const makeQueryBasewhere = (
+  reputationType: ReputationType,
+  baseCollection: CollectionReference,
+  firstWeekDay: string,
+  firstMonthDay: string
+): Query => {
+  let repQuery: Query;
+  if (["Monthly", "Others Monthly"].includes(reputationType)) {
+    repQuery = baseCollection.where("firstMonthDay", "==", firstMonthDay);
+  } else if (["Weekly", "Others Weekly"].includes(reputationType)) {
+    repQuery = baseCollection.where("firstWeekDay", "==", firstWeekDay);
+  } else {
+    return baseCollection;
+  }
+  return repQuery;
+};
+
+export const updateReputationIncrement = async ({
   batch,
   uname,
   imageUrl,
@@ -157,58 +216,27 @@ const updateReputationIncrement = async ({
   com_Points.adminPoints = 0;
 
   let reputationsQuery,
-    reputationsQueryBase,
-    reputationsQueryBaseWhere,
+    // reputationsQueryBaseWhere,
     reputationDoc,
     comPointsQuery,
-    comPointsQueryBase,
-    comPointsQueryBaseWhere,
+    // comPointsQueryBaseWhere,
     comPointDoc,
     com_reputationsDoc;
 
   let updateTheCommunityDoc = false,
     updateTheReputationDoc = false;
-  //    query user reputations
-  switch (reputationType) {
-    case "All Time":
-      reputationsQueryBase = db.collection("reputations") as any;
-      comPointsQueryBase = db.collection("comPoints") as any;
-      break;
-    case "Monthly":
-      reputationsQueryBase = db.collection("monthlyReputations") as any;
-      comPointsQueryBase = db.collection("comMonthlyPoints") as any;
-      break;
-    case "Weekly":
-      reputationsQueryBase = db.collection("weeklyReputations") as any;
-      comPointsQueryBase = db.collection("comWeeklyPoints") as any;
-      break;
-    case "Others":
-      reputationsQueryBase = db.collection("othersReputations") as any;
-      comPointsQueryBase = db.collection("comOthersPoints") as any;
-      break;
-    case "Others Monthly":
-      reputationsQueryBase = db.collection("othMonReputations") as any;
-      comPointsQueryBase = db.collection("comOthMonPoints") as any;
-      break;
-    case "Others Weekly":
-      reputationsQueryBase = db.collection("othWeekReputations") as any;
-      comPointsQueryBase = db.collection("comOthWeekPoints") as any;
-      break;
-    default:
-      console.log("[updateReputationIncrement]: Strange reputationType: " + reputationType);
-  }
-  reputationsQueryBaseWhere = reputationsQueryBase;
-  comPointsQueryBaseWhere = comPointsQueryBase;
-  if (["Monthly", "Others Monthly"].includes(reputationType)) {
-    reputationsQueryBaseWhere = reputationsQueryBase.where("firstMonthDay", "==", firstMonthDay);
-    comPointsQueryBaseWhere = comPointsQueryBase.where("firstMonthDay", "==", firstMonthDay);
-  } else {
-    if (["Weekly", "Others Weekly"].includes(reputationType)) {
-      reputationsQueryBaseWhere = reputationsQueryBase.where("firstWeekDay", "==", firstWeekDay);
-      comPointsQueryBaseWhere = comPointsQueryBase.where("firstWeekDay", "==", firstWeekDay);
-    }
-  }
-  reputationsQuery = (reputationsQueryBaseWhere as any).where("uname", "==", uname).where("tagId", "==", tagId);
+
+  const { reputationsQueryBase, comPointsQueryBase } = getRepBaseQueries(reputationType as ReputationType);
+
+  const reputationsQueryBaseWhere = makeQueryBasewhere(
+    reputationType,
+    reputationsQueryBase,
+    firstWeekDay,
+    firstMonthDay
+  );
+  const comPointsQueryBaseWhere = makeQueryBasewhere(reputationType, comPointsQueryBase, firstWeekDay, firstMonthDay);
+
+  reputationsQuery = reputationsQueryBaseWhere.where("uname", "==", uname).where("tagId", "==", tagId);
 
   let reputationsDoc = await convertToTGet(reputationsQuery.limit(1), t);
   //  if reputationsQuery returns a doc

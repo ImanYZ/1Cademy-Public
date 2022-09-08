@@ -1,5 +1,5 @@
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
-import { deleteTagCommunityAndTagsOfTags } from '.';
+import { deleteTagCommunityAndTagsOfTags } from ".";
 
 export const doRemoveUnusedTags = async () => {
   // Each key is the node ID of a tag and it value if the array of node ids that are tagging the tag.

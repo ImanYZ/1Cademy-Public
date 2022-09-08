@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
-import { comPointTypes } from '../../utils';
+import { comPointTypes } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

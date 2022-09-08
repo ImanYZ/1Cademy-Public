@@ -1,11 +1,7 @@
 import { db } from "../lib/firestoreServer/admin";
 
 export const getUserNode = async ({ nodeId, uname }: any) => {
-  const userNodeQuery = db
-    .collection("userNodes")
-    .where("node", "==", nodeId)
-    .where("user", "==", uname)
-    .limit(1);
+  const userNodeQuery = db.collection("userNodes").where("node", "==", nodeId).where("user", "==", uname).limit(1);
   const userNodeDoc = await userNodeQuery.get();
   let userNodeData = null;
   let userNodeRef = null;

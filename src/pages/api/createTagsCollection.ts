@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
-import { doRemoveUnusedTags, generateTagsOfTags, getDirectTags, hasCycle } from '../../utils';
+import { doRemoveUnusedTags, generateTagsOfTags, getDirectTags, hasCycle } from "../../utils";
 
 const markNodesIsTag = async () => {
   let batch = db.batch();
@@ -44,8 +44,7 @@ const findCycle = (tagsOfNodes: any) => {
     }
     path.add(node);
     visited.add(node);
-    if (((node in tagsOfNodes && tagsOfNodes[node].tagIds) || []).some((tagId: any) => dfs(tagId, path)))
-      return path;
+    if (((node in tagsOfNodes && tagsOfNodes[node].tagIds) || []).some((tagId: any) => dfs(tagId, path))) return path;
     // Backtrack
     path.delete(node);
     // No cycle found here: return undefined

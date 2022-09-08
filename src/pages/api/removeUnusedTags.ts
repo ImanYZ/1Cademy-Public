@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { doRemoveUnusedTags } from '../../utils';
+import { doRemoveUnusedTags } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

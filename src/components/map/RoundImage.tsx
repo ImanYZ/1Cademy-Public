@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from "react";
-
 type RoundImageProps = {
   imageUrl: string;
   alt: string;

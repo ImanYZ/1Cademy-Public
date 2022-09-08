@@ -1,8 +1,5 @@
-import {
-  checkRestartBatchWriteCounts,
-  db,
-} from "../lib/firestoreServer/admin";
-import { baseReputationObj } from '.';
+import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { baseReputationObj } from ".";
 
 export const rewriteReputationDocs = async ({ batch, reputationsType, reputationsDict, writeCounts }: any) => {
   let firstDayType: any;
@@ -56,10 +53,7 @@ export const rewriteReputationDocs = async ({ batch, reputationsType, reputation
         proposerPoints = reputationsDict[tagId][proposer];
         reputationRef = db.collection(reputationsType).doc();
         bReputationObj = baseReputationObj({ points: proposerPoints, tag: proposerPoints.tag, tagId });
-        if (
-          proposerPoints.tagId in oldReputations &&
-          proposer in oldReputations[proposerPoints.tagId]
-        ) {
+        if (proposerPoints.tagId in oldReputations && proposer in oldReputations[proposerPoints.tagId]) {
           if (bReputationObj.createdAt > oldReputations[proposerPoints.tagId][proposer].createdAt) {
             bReputationObj.createdAt = oldReputations[proposerPoints.tagId][proposer].createdAt;
           }
@@ -88,19 +82,11 @@ export const rewriteReputationDocs = async ({ batch, reputationsType, reputation
             proposer in oldReputations[proposerPoints.tag] &&
             firstDayVal in oldReputations[proposerPoints.tag][proposer]
           ) {
-            if (
-              bReputationObj.createdAt >
-              oldReputations[proposerPoints.tagId][proposer][firstDayVal].createdAt
-            ) {
-              bReputationObj.createdAt =
-                oldReputations[proposerPoints.tagId][proposer][firstDayVal].createdAt;
+            if (bReputationObj.createdAt > oldReputations[proposerPoints.tagId][proposer][firstDayVal].createdAt) {
+              bReputationObj.createdAt = oldReputations[proposerPoints.tagId][proposer][firstDayVal].createdAt;
             }
-            if (
-              bReputationObj.updatedAt <
-              oldReputations[proposerPoints.tagId][proposer][firstDayVal].updatedAt
-            ) {
-              bReputationObj.updatedAt =
-                oldReputations[proposerPoints.tagId][proposer][firstDayVal].updatedAt;
+            if (bReputationObj.updatedAt < oldReputations[proposerPoints.tagId][proposer][firstDayVal].updatedAt) {
+              bReputationObj.updatedAt = oldReputations[proposerPoints.tagId][proposer][firstDayVal].updatedAt;
             }
           }
           newBatch.set(reputationRef, {

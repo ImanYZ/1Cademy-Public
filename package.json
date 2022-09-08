@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
     "deploy": "firebase deploy",
     "deploy:hosting": "firebase deploy --only hosting",
     "deploy:database": "firebase deploy --only database",
@@ -17,9 +18,9 @@
     "prepare": "husky install .husky",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
-    "test": "jest --watch",
-    "test:coverage": "jest --watch --coverage --all",
-    "test:ci": "jest --ci",
+    "test": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --runInBand'",
+    "test:coverage": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --coverage --all --runInBand'",
+    "test:ci": "firebase emulators:exec  --project test --only auth,firestore 'jest --ci --runInBand'",
     "run-emulator": "firebase emulators:start --project test --only auth,firestore"
   },
   "author": "Iman YeckehZaare",
@@ -92,6 +93,7 @@
     "jest": "^28.1.3",
     "jest-environment-jsdom": "^28.1.3",
     "lint-staged": "^13.0.3",
+    "node-mocks-http": "^1.11.0",
     "prettier": "^2.7.1",
     "typescript": "^4.7.4"
   },

@@ -8,6 +8,7 @@ import {
   tagsAndCommPoints,
   updateReputation,
 } from ".";
+import { NodeType } from "src/types";
 
 export const comPointTypes = [
   "comPoints",
@@ -35,7 +36,7 @@ export const reputationTypes = [
   "othWeekReputations",
 ];
 
-export const NODE_TYPES = [
+export const NODE_TYPES: NodeType[] = [
   "Concept",
   "Code",
   "Relation",
@@ -781,7 +782,7 @@ export const generateTagsOfTags = async ({ nodeId, tagIds, tags, nodeUpdates }: 
   let tagsChanged = false;
   for (let tagId of tagIds) {
     if (tagId !== nodeId && tagIds.length !== 0 && !hasCycle({ tagsOfNodes: tagIds, nodeId, path: [] })) {
-      const { tagData } = await getTagRefData(tagId, t);
+      const { tagData } = await getTagRefData(tagId);
       const generatedTags = await generateTagsOfTags({
         nodeId: tagId,
         tagIds: tagData.tagIds,
@@ -1498,7 +1499,7 @@ export const versionCreateUpdate = async ({
           if (childType === "Question") {
             childNode.choices = choices;
           }
-          const { versionsColl, userVersionsColl }: any = getTypedCollections(childType);
+          const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType: childType });
           const versionRef = versionsColl.doc();
           //  before setting childNode version, need to obtain the correct corresponding collection in the database
           const childVersion = {

@@ -3,22 +3,21 @@ import { Dispatch } from "react";
 
 // import { NodeType } from "./types";
 
-export type OpenPart = 'LinkingWords' | 'Tags' | 'References' | null
+export type OpenPart = "LinkingWords" | "Tags" | "References" | null;
 
-export type ChoosingType = 'Reference' | 'Tag' | 'Parent' | 'Child' | null
+export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
 
 export type ChoosingNode = {
-  id: string,
-  type: ChoosingType
-}
+  id: string;
+  type: ChoosingType;
+};
 
 export type ChosenNode = {
-  id: string,
-  title: string
-}
+  id: string;
+  title: string;
+};
 
-export type SelectionType = 'AcceptedProposals' | 'Proposals' | 'Citations' | 'Comments' | null
-
+export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | null;
 
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
@@ -42,39 +41,39 @@ export interface NodeBookState {
 }
 
 export type SetSNodeAction = {
-  type: "setSNode",
-  payload: string | null
-}
+  type: "setSNode";
+  payload: string | null;
+};
 
 export type SetIsSubmittingAction = {
-  type: "setIsSubmitting",
-  payload: boolean
-}
+  type: "setIsSubmitting";
+  payload: boolean;
+};
 
 export type SetChoosingNodeAction = {
-  type: "setChoosingNode",
-  payload: ChoosingNode | null
-}
+  type: "setChoosingNode";
+  payload: ChoosingNode | null;
+};
 
 export type SetChosenNodeAction = {
-  type: "setChosenNode",
-  payload: ChosenNode | null
-}
+  type: "setChosenNode";
+  payload: ChosenNode | null;
+};
 
 export type SetSelectedNodeAction = {
-  type: "setSelectedNode",
-  payload: string | null
-}
+  type: "setSelectedNode";
+  payload: string | null;
+};
 
 export type SetSelectionTypeAction = {
-  type: "setSelectionType",
-  payload: SelectionType
-}
+  type: "setSelectionType";
+  payload: SelectionType;
+};
 
 export type SetSelectedTagsAction = {
-  type: "setSelectedTags",
-  payload: string[]
-}
+  type: "setSelectedTags";
+  payload: string[];
+};
 
 // export type SetChoosingTypeAction = {
 //   type: "setChoosingType",
@@ -88,38 +87,38 @@ export type DispatchNodeBookActions =
   | SetChosenNodeAction
   | SetSelectedNodeAction
   | SetSelectionTypeAction
-  | SetSelectedTagsAction
+  | SetSelectedTagsAction;
 // | SetChoosingTypeAction
 
 export type NodeBookActions = {
-  dispatch: Dispatch<DispatchNodeBookActions>
+  dispatch: Dispatch<DispatchNodeBookActions>;
   handleError: (options: ErrorOptions) => void;
-}
+};
 
 export type UserNodesData = {
   // "firstVisit": Timestamp,//CHECK
   // "lastVisit": Timestamp,//CHECK
   // "userNodeId": string,//CHECK
-  "updatedAt": Timestamp,
-  "open": boolean,
-  "deleted": boolean,
-  "wrong": boolean,
-  "bookmarked": boolean,
-  "isStudied": boolean,
-  "visible": boolean,
-  "createdAt": Timestamp,
-  "correct": boolean,
-  "user": string,
-  "changed": boolean,
-  "node": string,
-  "nodeChanges"?: any
-}
+  updatedAt: Timestamp;
+  open: boolean;
+  deleted: boolean;
+  wrong: boolean;
+  bookmarked: boolean;
+  isStudied: boolean;
+  visible: boolean;
+  createdAt: Timestamp;
+  correct: boolean;
+  user: string;
+  changed: boolean;
+  node: string;
+  nodeChanges?: any;
+};
 
 export type UserNodes = {
-  cType: string,
-  uNodeId: string,
-  uNodeData: UserNodesData
-}
+  cType: string;
+  uNodeId: string;
+  uNodeData: UserNodesData;
+};
 
 export type NodeBookNodes = {
   [key: string]: {
@@ -128,4 +127,4 @@ export type NodeBookNodes = {
     imageUrl?: string;
     reputation?: number;
   };
-}
+};

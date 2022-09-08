@@ -34,7 +34,7 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
           sx={{ p: "20px" }}
           secondaryActions={
             <ListItemIcon>
-              <NodeTypeIcon nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
+              <NodeTypeIcon tooltipPlacement="bottom" nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
             </ListItemIcon>
           }
         />

@@ -2,10 +2,6 @@ import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
 import { admin, db } from "../lib/firestoreServer/admin";
 
-interface AuthenticatedRequest extends NextApiRequest {
-  user: any;
-}
-
 const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null; uid: string }) => {
   try {
     let userData: any = {};
@@ -111,8 +107,7 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
 };
 
 const fbAuth = (handler: NextApiHandler) => {
-  return async (req: AuthenticatedRequest, res: NextApiResponse) => {
-    console.log("req.body", req.body);
+  return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       let token = (req.headers.authorization || req.headers.Authorization || "") as string;
       token = token.replace("Bearer ", "");
