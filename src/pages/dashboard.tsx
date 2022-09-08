@@ -2535,6 +2535,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenSearch={setOpenSearch}
             openSearch={openSearch}
             setOpenBookmarks={setOpenBookmarks}
+            openBookmarks={openBookmarks}
             setOpenRecentNodes={setOpenBookmarks}
             setOpenTrends={setOpenTrends}
             setOpenMedia={setOpenMedia}
