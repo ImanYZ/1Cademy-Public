@@ -17,19 +17,21 @@ const doNothing = () => {};
 type BookmarksListProps = {
   openLinkedNode: any;
   updates: boolean;
+  bookmarks: any[];
 };
 
-export const BookmarksList = ({ openLinkedNode }: BookmarksListProps) => {
-  const [bookmarks, setBookmarks] = useState([
-    {
-      id: "sdlflskdf",
-      nodeType: "Concept",
-      changedAt: new Date(),
-      wrongs: 2,
-      corrects: 6,
-      title: "mock Node",
-    },
-  ]);
+export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksListProps) => {
+  console.log("x-------------> bookmarksList", bookmarks);
+  // const [bookmarks, setBookmarks] = useState([
+  //   {
+  //     id: "sdlflskdf",
+  //     nodeType: "Concept",
+  //     changedAt: new Date(),
+  //     wrongs: 2,
+  //     corrects: 6,
+  //     title: "mock Node",
+  //   },
+  // ]);
   const [lastIndex, setLastIndex] = useState(13);
 
   // useEffect(() => {
@@ -61,58 +63,69 @@ export const BookmarksList = ({ openLinkedNode }: BookmarksListProps) => {
   //   [allNodes]
   // );
 
+  const getBookmarksProcessed = () => {
+    const bookmarksFiltered = bookmarks.filter(cur => {
+      if (updates) return cur.changed || !cur.isStudied;
+      return !cur.changed && cur.isStudied;
+    });
+
+    return bookmarksFiltered.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  };
+
   return (
     <>
-      {bookmarks.slice(0, lastIndex).map((node: any) => (
-        <li
-          className="CollapsedProposal collection-item"
-          key={`node${node.id}`}
-          onClick={openLinkedNode(node.id)}
-          style={{ listStyle: "none", padding: "10px" }}
-        >
-          <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
-            <NodeTypeIcon nodeType={node.nodeType} />
-            <div className="right">
-              <MemoizedMetaButton
-              // tooltip="Creation or the last update of this node."
-              // tooltipPosition="TopLeft"
-              >
-                <>
-                  <CreateIcon className="material-icons grey-text" />
-                  {dayjs(node.changedAt).fromNow()}
-                </>
-                {/* </MetaButton>
-              <MetaButton
-                tooltip="# of improvement/child proposals on this node."
-                tooltipPosition="BottomLeft"
-              > */}
-                {/* <span>{shortenNumber(node.versions, 2, false)}</span> */}
-              </MemoizedMetaButton>
-              <MemoizedMetaButton
-              // tooltip="# of 1Cademists who have found this node unhelpful."
-              // tooltipPosition="TopLeft"
-              >
-                <>
-                  <CloseIcon className="material-icons grey-text" />
-                  <span>{shortenNumber(node.wrongs, 2, false)}</span>
-                </>
-              </MemoizedMetaButton>
-              <MemoizedMetaButton
-              // tooltip="# of 1Cademists who have found this node helpful."
-              // tooltipPosition="TopLeft"
-              >
-                <>
-                  <DoneIcon className="material-icons DoneIcon grey-text" />
-                  <span>{shortenNumber(node.corrects, 2, false)}</span>
-                </>
-              </MemoizedMetaButton>
+      {getBookmarksProcessed()
+        .slice(0, lastIndex)
+        .map((node: any) => (
+          <li
+            className="CollapsedProposal collection-item"
+            key={`node${node.id}`}
+            onClick={() => openLinkedNode(node.id)}
+            style={{ listStyle: "none", padding: "10px" }}
+          >
+            <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
+              <NodeTypeIcon nodeType={node.nodeType} />
+              <div className="right">
+                <MemoizedMetaButton
+                // tooltip="Creation or the last update of this node."
+                // tooltipPosition="TopLeft"
+                >
+                  <>
+                    <CreateIcon className="material-icons grey-text" />
+                    {dayjs(node.changedAt).fromNow()}
+                  </>
+                  {/* </MetaButton>
+          <MetaButton
+            tooltip="# of improvement/child proposals on this node."
+            tooltipPosition="BottomLeft"
+          > */}
+                  {/* <span>{shortenNumber(node.versions, 2, false)}</span> */}
+                </MemoizedMetaButton>
+                <MemoizedMetaButton
+                // tooltip="# of 1Cademists who have found this node unhelpful."
+                // tooltipPosition="TopLeft"
+                >
+                  <>
+                    <CloseIcon className="material-icons grey-text" />
+                    <span>{shortenNumber(node.wrongs, 2, false)}</span>
+                  </>
+                </MemoizedMetaButton>
+                <MemoizedMetaButton
+                // tooltip="# of 1Cademists who have found this node helpful."
+                // tooltipPosition="TopLeft"
+                >
+                  <>
+                    <DoneIcon className="material-icons DoneIcon grey-text" />
+                    <span>{shortenNumber(node.corrects, 2, false)}</span>
+                  </>
+                </MemoizedMetaButton>
+              </div>
             </div>
-          </div>
-          <div className="SearchResultTitle">
-            <Editor readOnly={true} setValue={doNothing} value={node.title} label="" />
-          </div>
-        </li>
-      ))}
+            <div className="SearchResultTitle">
+              <Editor readOnly={true} setValue={doNothing} value={node.title} label="" />
+            </div>
+          </li>
+        ))}
       {bookmarks.length > lastIndex && (
         <div id="ContinueButton">
           <MemoizedMetaButton

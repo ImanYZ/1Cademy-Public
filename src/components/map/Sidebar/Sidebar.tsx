@@ -1,19 +1,8 @@
 // import "./Sidebar.css";
 import SearchIcon from "@mui/icons-material/Search";
 import { Button } from "@mui/material";
-import {
-  collection,
-  doc,
-  DocumentData,
-  getFirestore,
-  onSnapshot,
-  Query,
-  query,
-  setDoc,
-  Timestamp,
-  where,
-} from "firebase/firestore";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
+import React, { Suspense, useCallback, useRef, useState } from "react";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
@@ -21,7 +10,6 @@ import searcherHeaderImage from "../../../../public/Magnifier_Compas.jpg";
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
-import { UserNodesData } from "../../../nodeBookTypes";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
 import Bookmarks from "./Bookmarks";
@@ -157,6 +145,7 @@ type SidebarType = {
   selectionType: any;
   setSNode: any;
   selectedUser: any;
+  allNodes: any;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -239,7 +228,7 @@ const Sidebar = (props: SidebarType) => {
   const [openToolbar] = useState(false);
   const [tag] = useState(false);
 
-  const [/*bookmarkedUserNodes,*/ setBookmarkedUserNodes] = useState<any[]>([]);
+  // const [bookmarkedUserNodes, setBookmarkedUserNodes] = useState<any[]>([]);
   // const [openSearch] = useState(false);
   // const [openBookmarks] = useState(false);
   // const [leaderboardType, setLeaderboardType] = useState("Weekly");
@@ -247,43 +236,39 @@ const Sidebar = (props: SidebarType) => {
 
   const sidebarRef = useRef<any | null>(null);
 
-  const snapshot = useCallback((q: Query<DocumentData>) => {
-    const userNodesSnapshot = onSnapshot(q, async snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (!docChanges.length) return null;
+  // const bookmarkedUserNodesSnapshot = useCallback(
+  //   (q: Query<DocumentData>) => {
+  //     const customSnapshot = onSnapshot(q, async snapshot => {
+  //       const docChanges = snapshot.docChanges();
+  //       if (!docChanges.length) return null;
 
-      const newBookmarkedUserNodes = docChanges.map(change => {
-        const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-        // return {
-        //   cType: change.type,
-        //   uNodeId: change.doc.id,
-        //   uNodeData: userNodeData,
-        // };
-        return userNodeData;
-      });
-      console.log("newBookmarkedUserNodes", newBookmarkedUserNodes);
-      setBookmarkedUserNodes(newBookmarkedUserNodes);
-    });
-    return () => userNodesSnapshot();
-  }, []);
+  //       const userNodeChanges = getUserNodeChanges(docChanges);
+  //       const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
+  //       const nodesData = await getNodes(db, nodeIds);
+  //       const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+  //       console.log(" -->  -->  snapshot is called", fullNodes);
+  //       setBookmarkedUserNodes(fullNodes);
+  //     });
+  //     return () => customSnapshot();
+  //   },
+  //   [db]
+  // );
 
-  useEffect(() => {
-    if (!db) return;
-    if (!user) return;
+  // useEffect(() => {
+  //   if (!db) return;
+  //   if (!user) return;
 
-    const userNodesRef = collection(db, "userNodes");
-    const q = query(
-      userNodesRef,
-      where("user", "==", user.uname),
-      where("deleted", "==", false),
-      where("bookmarked", "==", true)
-    );
+  //   const userNodesRef = collection(db, "userNodes");
+  //   const q = query(
+  //     userNodesRef,
+  //     where("user", "==", user.uname),
+  //     where("deleted", "==", false),
+  //     where("bookmarked", "==", true)
+  //   );
 
-    const killSnapshot = snapshot(q);
-    return () => {
-      killSnapshot();
-    };
-  }, [db, snapshot, user]);
+  //   const killSnapshot = bookmarkedUserNodesSnapshot(q);
+  //   return () => killSnapshot();
+  // }, [db, bookmarkedUserNodesSnapshot, user]);
 
   const scrollToTop = useCallback(() => {
     sidebarRef.current.scrollTop = 0;
@@ -643,7 +628,7 @@ const Sidebar = (props: SidebarType) => {
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              <Bookmarks openLinkedNode={props.openLinkedNode} />
+              <Bookmarks bookmarkedUserNodes={props.allNodes} openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Citations" ? (
             <MemoizedSidebarWrapper

@@ -5,7 +5,6 @@ import axios from "axios";
 import {
   collection,
   doc,
-  DocumentChange,
   DocumentData,
   getDoc,
   getDocs,
@@ -66,8 +65,9 @@ import {
   YOFFSET,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
+import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
 import { ChoosingType, UserNodes, UserNodesData } from "../nodeBookTypes";
-import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../noteBookTypes";
+import { FullNodeData } from "../noteBookTypes";
 import { NodeType } from "../types";
 
 type DashboardProps = {};
@@ -132,6 +132,8 @@ const Dashboard = ({}: DashboardProps) => {
   // edges: dictionary of all edges visible on map for specific user
   const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
+
+  const [allNodes, setAllNodes] = useState<FullNodeData[]>([]);
 
   const nodeRef = useRef<{ [key: string]: FullNodeData }>({});
   const edgesRef = useRef<{ [key: string]: any } | null>(null);
@@ -250,7 +252,10 @@ const Dashboard = ({}: DashboardProps) => {
       const q = query(
         userNodesRef,
         where("user", "==", user.uname),
-        where("visible", "==", true),
+        // IMPORTANT: I commented this to call all
+        // visible: used to drag nodes in Notebook
+        // visible and invisible to show bookmarks
+        // where("visible", "==", true),
         where("deleted", "==", false)
       );
 
@@ -266,84 +271,84 @@ const Dashboard = ({}: DashboardProps) => {
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
-      const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
-        // const docChanges = snapshot.docChanges();
-        // if (!docChanges.length) return null
+      // const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
+      //   // const docChanges = snapshot.docChanges();
+      //   // if (!docChanges.length) return null
 
-        return docChanges.map(change => {
-          const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-          return {
-            cType: change.type,
-            uNodeId: change.doc.id,
-            uNodeData: userNodeData,
-          };
-        });
-      };
+      //   return docChanges.map(change => {
+      //     const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
+      //     return {
+      //       cType: change.type,
+      //       uNodeId: change.doc.id,
+      //       uNodeData: userNodeData,
+      //     };
+      //   });
+      // };
 
-      const getNodes = async (nodeIds: string[]): Promise<NodesData[]> => {
-        console.log("[GET NODES]");
-        const nodeDocsPromises = nodeIds.map(nodeId => {
-          const nodeRef = doc(db, "nodes", nodeId);
-          return getDoc(nodeRef);
-        });
+      // const getNodes = async (nodeIds: string[]): Promise<NodesData[]> => {
+      //   console.log("[GET NODES]");
+      //   const nodeDocsPromises = nodeIds.map(nodeId => {
+      //     const nodeRef = doc(db, "nodes", nodeId);
+      //     return getDoc(nodeRef);
+      //   });
 
-        const nodeDocs = await Promise.all(nodeDocsPromises);
+      //   const nodeDocs = await Promise.all(nodeDocsPromises);
 
-        return nodeDocs.map(nodeDoc => {
-          if (!nodeDoc.exists()) return null;
+      //   return nodeDocs.map(nodeDoc => {
+      //     if (!nodeDoc.exists()) return null;
 
-          const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
-          if (nData.deleted) return null;
+      //     const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+      //     if (nData.deleted) return null;
 
-          return {
-            cType: "added",
-            nId: nodeDoc.id,
-            nData,
-          };
-        });
-      };
+      //     return {
+      //       cType: "added",
+      //       nId: nodeDoc.id,
+      //       nData,
+      //     };
+      //   });
+      // };
 
-      const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
-        console.log("[BUILD FULL NODES]");
-        const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
-        const res = userNodesChanges
-          .map(cur => {
-            const nodeDataFound = findNodeDataById(cur.uNodeData.node);
+      // const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
+      //   console.log("[BUILD FULL NODES]");
+      //   const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
+      //   const res = userNodesChanges
+      //     .map(cur => {
+      //       const nodeDataFound = findNodeDataById(cur.uNodeData.node);
 
-            if (!nodeDataFound) return null;
+      //       if (!nodeDataFound) return null;
 
-            const fullNodeData: FullNodeData = {
-              ...cur.uNodeData, // User node data
-              ...nodeDataFound.nData, // Node Data
-              userNodeId: cur.uNodeId,
-              nodeChangeType: cur.cType,
-              userNodeChangeType: nodeDataFound.cType,
-              editable: false,
-              left: 0,
-              top: 0,
-              firstVisit: cur.uNodeData.createdAt.toDate(),
-              lastVisit: cur.uNodeData.updatedAt.toDate(),
-              changedAt: nodeDataFound.nData.changedAt.toDate(),
-              createdAt: nodeDataFound.nData.createdAt.toDate(),
-              updatedAt: nodeDataFound.nData.updatedAt.toDate(),
-              references: nodeDataFound.nData.references || [],
-              referenceIds: nodeDataFound.nData.referenceIds || [],
-              referenceLabels: nodeDataFound.nData.referenceLabels || [],
-              tags: nodeDataFound.nData.tags || [],
-              tagIds: nodeDataFound.nData.tagIds || [],
-            };
-            if (nodeDataFound.nData.nodeType !== "Question") {
-              fullNodeData.choices = [];
-            }
-            fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false;
-            fullNodeData.nodeChanges = cur.uNodeData?.nodeChanges || null;
+      //       const fullNodeData: FullNodeData = {
+      //         ...cur.uNodeData, // User node data
+      //         ...nodeDataFound.nData, // Node Data
+      //         userNodeId: cur.uNodeId,
+      //         nodeChangeType: cur.cType,
+      //         userNodeChangeType: nodeDataFound.cType,
+      //         editable: false,
+      //         left: 0,
+      //         top: 0,
+      //         firstVisit: cur.uNodeData.createdAt.toDate(),
+      //         lastVisit: cur.uNodeData.updatedAt.toDate(),
+      //         changedAt: nodeDataFound.nData.changedAt.toDate(),
+      //         createdAt: nodeDataFound.nData.createdAt.toDate(),
+      //         updatedAt: nodeDataFound.nData.updatedAt.toDate(),
+      //         references: nodeDataFound.nData.references || [],
+      //         referenceIds: nodeDataFound.nData.referenceIds || [],
+      //         referenceLabels: nodeDataFound.nData.referenceLabels || [],
+      //         tags: nodeDataFound.nData.tags || [],
+      //         tagIds: nodeDataFound.nData.tagIds || [],
+      //       };
+      //       if (nodeDataFound.nData.nodeType !== "Question") {
+      //         fullNodeData.choices = [];
+      //       }
+      //       fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false;
+      //       fullNodeData.nodeChanges = cur.uNodeData?.nodeChanges || null;
 
-            return fullNodeData;
-          })
-          .flatMap(cur => cur || []);
+      //       return fullNodeData;
+      //     })
+      //     .flatMap(cur => cur || []);
 
-        return res;
-      };
+      //   return res;
+      // };
 
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
         console.log("[FILL DAGRE]", { currentNodes, currentEdges });
@@ -360,7 +365,7 @@ const Dashboard = ({}: DashboardProps) => {
             }
             if (cur.nodeChangeType === "modified") {
               const node = acu.newNodes[cur.node];
-              // console.log('current node', node)
+              // console.log("  ---> current node", node);
               const currentNode = {
                 ...cur,
                 left: node.left,
@@ -400,9 +405,17 @@ const Dashboard = ({}: DashboardProps) => {
 
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-        const nodesData = await getNodes(nodeIds);
+        const nodesData = await getNodes(db, nodeIds);
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-        const { newNodes, newEdges } = fillDagre(fullNodes, nodeRef.current, edgesRef.current);
+        // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
+        // here set All Full Nodes to use in bookmarks
+        // here set visible Full Nodes to draw Nodes in notebook
+        const visibleFullNodes = fullNodes.filter(cur => cur.visible);
+        const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
+
+        // TODO: MERGE data
+
+        setAllNodes(oldFullNodes => [...oldFullNodes, ...fullNodes]);
         setNodes(newNodes);
         setEdges(newEdges);
         console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes });
@@ -2505,6 +2518,7 @@ const Dashboard = ({}: DashboardProps) => {
             </Box>
             <Box>
               <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button>
+              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
             </Box>
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
@@ -2539,6 +2553,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenRecentNodes={setOpenBookmarks}
             setOpenTrends={setOpenTrends}
             setOpenMedia={setOpenMedia}
+            allNodes={allNodes.filter(cur => cur.bookmarked)}
           />
           <Box sx={{ position: "fixed", bottom: "10px", right: "10px", zIndex: "1300", background: "#123" }}>
             {openSearch ? "open" : "close"}
