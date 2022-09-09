@@ -2,14 +2,19 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Button } from "@mui/material";
 import { collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import React, { Suspense, useCallback, useRef, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
+import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
+import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
 import searcherHeaderImage from "../../../../public/Magnifier_Compas.jpg";
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
+import { FullNodeData } from "../../../noteBookTypes";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
+import Bookmarks from "./Bookmarks";
+import BookmarksButton from "./BookmarksButton";
 import SearchList from "./SearchList";
 // import ChatRoomImage from "../../../assets/ChatRoom.jpg";
 // import RecentNodesImage from "../../../assets/RecentNodes.jpg";
@@ -133,6 +138,7 @@ type SidebarType = {
   setOpenSearch: any;
   openSearch: boolean;
   setOpenBookmarks: any;
+  openBookmarks: boolean;
   setOpenRecentNodes: any;
   setOpenTrends: any;
   setOpenMedia: any;
@@ -140,6 +146,7 @@ type SidebarType = {
   selectionType: any;
   setSNode: any;
   selectedUser: any;
+  allNodes: FullNodeData[];
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -221,8 +228,10 @@ const Sidebar = (props: SidebarType) => {
   const [openNotifications] = useState(false);
   const [openToolbar] = useState(false);
   const [tag] = useState(false);
+
+  // const [bookmarkedUserNodes, setBookmarkedUserNodes] = useState<any[]>([]);
   // const [openSearch] = useState(false);
-  const [openBookmarks] = useState(false);
+  // const [openBookmarks] = useState(false);
   // const [leaderboardType, setLeaderboardType] = useState("Weekly");
   // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
 
@@ -254,6 +263,7 @@ const Sidebar = (props: SidebarType) => {
         console.log("is search");
         props.setOpenSearch(true);
       } else if (sidebarType === "Bookmarks") {
+        console.log("is bookmarks");
         props.setOpenBookmarks(true);
       } else if (sidebarType === "RecentNodes") {
         props.setOpenRecentNodes(true);
@@ -351,10 +361,14 @@ const Sidebar = (props: SidebarType) => {
     openPresentations ||
     openToolbar ||
     props.openSearch ||
-    openBookmarks; /* ||  //CHECK: I commented this
+    props.openBookmarks; /* ||  //CHECK: I commented this
   openRecentNodes ||
   openTrends ||
   openMedia*/
+
+  const bookmarkUpdatesNum = useMemo(() => {
+    return props.allNodes.filter(cur => cur.changed || !cur.isStudied).length;
+  }, [props.allNodes]);
 
   return (
     <>
@@ -362,7 +376,7 @@ const Sidebar = (props: SidebarType) => {
           <Toolbar openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} />
       )} */}
 
-      {/* sidebar menu here ------------ */}
+      {/* sidebar menu here ----------------------------- */}
 
       <div
         id="SidebarButtonsContainer"
@@ -404,9 +418,9 @@ const Sidebar = (props: SidebarType) => {
               <span className="SidebarDescription">Search</span>
             </Button>
 
-            {/* <NotificationsButton openSideBar={openSideBar} />
-          <BookmarksButton openSideBar={openSideBar} />
-          <PendingProposalsButton openSideBar={openSideBar} />
+            {/* <NotificationsButton openSideBar={openSideBar} /> */}
+            <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
+            {/*<PendingProposalsButton openSideBar={openSideBar} />
 
           <PresentationsButton openSideBar={openSideBar} />
           <MemoizedMetaButton
@@ -466,7 +480,7 @@ const Sidebar = (props: SidebarType) => {
         </div>
       </div>
 
-      {/* Every sidebar is here */}
+      {/* Every sidebar is here ------------------------- */}
       <div
         id="Sidebar"
         ref={sidebarRef}
@@ -476,13 +490,13 @@ const Sidebar = (props: SidebarType) => {
           props.selectionType === "Comments" ||
           props.selectionType === "Citations" ||
           props.selectionType === "UserInfo" ||
-          props.openSearch /*||*/
+          props.openSearch ||
+          props.openBookmarks
             ? // openPendingProposals ||
               // openChat ||
               // openNotifications ||
               // openPresentations ||
               // openToolbar ||
-              // openBookmarks ||
               // openRecentNodes
               "active"
             : ""
@@ -578,16 +592,14 @@ const Sidebar = (props: SidebarType) => {
             >
               <SearchList openLinkedNode={props.openLinkedNode} /* triggerQuerySearch={props.triggerQuerySearch}*/ />
             </MemoizedSidebarWrapper>
-          ) : openBookmarks ? (
+          ) : props.openBookmarks ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
+              headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
               title="Bookmarks"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              {/* CHECK: I commented this */}
-              {/* <Bookmarks openLinkedNode={props.openLinkedNode} /> */}
-              <h2>Bookmarks here</h2>
+              <Bookmarks bookmarkedUserNodes={props.allNodes} openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Citations" ? (
             <MemoizedSidebarWrapper

@@ -5,7 +5,6 @@ import axios from "axios";
 import {
   collection,
   doc,
-  DocumentChange,
   DocumentData,
   getDoc,
   getDocs,
@@ -66,8 +65,9 @@ import {
   YOFFSET,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
+import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
 import { ChoosingType, UserNodes, UserNodesData } from "../nodeBookTypes";
-import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../noteBookTypes";
+import { FullNodeData } from "../noteBookTypes";
 import { NodeType } from "../types";
 
 type DashboardProps = {};
@@ -132,6 +132,8 @@ const Dashboard = ({}: DashboardProps) => {
   // edges: dictionary of all edges visible on map for specific user
   const [edges, setEdges] = useState<{ [key: string]: any }>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
+
+  const [allNodes, setAllNodes] = useState<FullNodeData[]>([]);
 
   const nodeRef = useRef<{ [key: string]: FullNodeData }>({});
   const edgesRef = useRef<{ [key: string]: any } | null>(null);
@@ -250,7 +252,10 @@ const Dashboard = ({}: DashboardProps) => {
       const q = query(
         userNodesRef,
         where("user", "==", user.uname),
-        where("visible", "==", true),
+        // IMPORTANT: I commented this to call all
+        // visible: used to drag nodes in Notebook
+        // visible and invisible to show bookmarks
+        // where("visible", "==", true),
         where("deleted", "==", false)
       );
 
@@ -266,85 +271,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
-      const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
-        // const docChanges = snapshot.docChanges();
-        // if (!docChanges.length) return null
-
-        return docChanges.map(change => {
-          const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
-          return {
-            cType: change.type,
-            uNodeId: change.doc.id,
-            uNodeData: userNodeData,
-          };
-        });
-      };
-
-      const getNodes = async (nodeIds: string[]): Promise<NodesData[]> => {
-        console.log("[GET NODES]");
-        const nodeDocsPromises = nodeIds.map(nodeId => {
-          const nodeRef = doc(db, "nodes", nodeId);
-          return getDoc(nodeRef);
-        });
-
-        const nodeDocs = await Promise.all(nodeDocsPromises);
-
-        return nodeDocs.map(nodeDoc => {
-          if (!nodeDoc.exists()) return null;
-
-          const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
-          if (nData.deleted) return null;
-
-          return {
-            cType: "added",
-            nId: nodeDoc.id,
-            nData,
-          };
-        });
-      };
-
-      const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
-        console.log("[BUILD FULL NODES]");
-        const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
-        const res = userNodesChanges
-          .map(cur => {
-            const nodeDataFound = findNodeDataById(cur.uNodeData.node);
-
-            if (!nodeDataFound) return null;
-
-            const fullNodeData: FullNodeData = {
-              ...cur.uNodeData, // User node data
-              ...nodeDataFound.nData, // Node Data
-              userNodeId: cur.uNodeId,
-              nodeChangeType: cur.cType,
-              userNodeChangeType: nodeDataFound.cType,
-              editable: false,
-              left: 0,
-              top: 0,
-              firstVisit: cur.uNodeData.createdAt.toDate(),
-              lastVisit: cur.uNodeData.updatedAt.toDate(),
-              changedAt: nodeDataFound.nData.changedAt.toDate(),
-              createdAt: nodeDataFound.nData.createdAt.toDate(),
-              updatedAt: nodeDataFound.nData.updatedAt.toDate(),
-              references: nodeDataFound.nData.references || [],
-              referenceIds: nodeDataFound.nData.referenceIds || [],
-              referenceLabels: nodeDataFound.nData.referenceLabels || [],
-              tags: nodeDataFound.nData.tags || [],
-              tagIds: nodeDataFound.nData.tagIds || [],
-            };
-            if (nodeDataFound.nData.nodeType !== "Question") {
-              fullNodeData.choices = [];
-            }
-            fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false;
-            fullNodeData.nodeChanges = cur.uNodeData?.nodeChanges || null;
-
-            return fullNodeData;
-          })
-          .flatMap(cur => cur || []);
-
-        return res;
-      };
-
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
         console.log("[FILL DAGRE]", { currentNodes, currentEdges });
         // debugger
@@ -358,22 +284,30 @@ const Dashboard = ({}: DashboardProps) => {
               tmpNodes = res.oldNodes;
               tmpEdges = res.oldEdges;
             }
-            if (cur.nodeChangeType === "modified") {
+            if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
-              // console.log('current node', node)
-              const currentNode = {
-                ...cur,
-                left: node.left,
-                top: node.top,
-              }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-              // console.log('currentNode', currentNode)
-              if (!compare2Nodes(cur, node)) {
-                const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+              if (nodes) {
+                const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
+              } else {
+                // console.log("  ---> current node", node);
+                const currentNode: FullNodeData = {
+                  ...cur,
+                  left: node.left,
+                  top: node.top,
+                }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+                // console.log('currentNode', currentNode)
+                if (!compare2Nodes(cur, node)) {
+                  const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+                  tmpNodes = res.oldNodes;
+                  tmpEdges = res.oldEdges;
+                }
               }
             }
-            if (cur.nodeChangeType === "removed") {
+            // I changed the reference from snapshot
+            // so the NO visible nodes will come as modified and !visible
+            if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
               if (g.current.hasNode(cur.node)) {
                 g.current.nodes().forEach(function () {});
                 g.current.edges().forEach(function () {});
@@ -394,18 +328,43 @@ const Dashboard = ({}: DashboardProps) => {
           { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
         );
       };
+
+      const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodeData[]) => {
+        return newAllNodes.reduce(
+          (acu, cur) => {
+            if (cur.nodeChangeType === "added") {
+              return [...acu, cur];
+            }
+            if (cur.nodeChangeType === "modified") {
+              return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
+            }
+            if (cur.nodeChangeType === "removed") {
+              return acu.filter(c => c.userNodeId !== cur.userNodeId);
+            }
+            return acu;
+          },
+          [...currentAllNodes]
+        );
+      };
+
       const userNodesSnapshot = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         if (!docChanges.length) return null;
 
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-        const nodesData = await getNodes(nodeIds);
+        const nodesData = await getNodes(db, nodeIds);
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-        const { newNodes, newEdges } = fillDagre(fullNodes, nodeRef.current, edgesRef.current);
+        // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
+        // here set All Full Nodes to use in bookmarks
+        // here set visible Full Nodes to draw Nodes in notebook
+        const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+        const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
+
+        setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
         setNodes(newNodes);
         setEdges(newEdges);
-        console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes });
+        console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes, visibleFullNodes });
         setUserNodesLoaded(true);
       });
       return () => userNodesSnapshot();
@@ -2505,6 +2464,7 @@ const Dashboard = ({}: DashboardProps) => {
             </Box>
             <Box>
               <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button>
+              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
             </Box>
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
@@ -2535,9 +2495,11 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenSearch={setOpenSearch}
             openSearch={openSearch}
             setOpenBookmarks={setOpenBookmarks}
+            openBookmarks={openBookmarks}
             setOpenRecentNodes={setOpenBookmarks}
             setOpenTrends={setOpenTrends}
             setOpenMedia={setOpenMedia}
+            allNodes={allNodes.filter(cur => cur.bookmarked)}
           />
           <Box sx={{ position: "fixed", bottom: "10px", right: "10px", zIndex: "1300", background: "#123" }}>
             {openSearch ? "open" : "close"}
