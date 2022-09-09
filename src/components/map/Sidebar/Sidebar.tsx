@@ -2,7 +2,7 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Button } from "@mui/material";
 import { collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import React, { Suspense, useCallback, useRef, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
@@ -10,6 +10,7 @@ import searcherHeaderImage from "../../../../public/Magnifier_Compas.jpg";
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
+import { FullNodeData } from "../../../noteBookTypes";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
 import Bookmarks from "./Bookmarks";
@@ -145,7 +146,7 @@ type SidebarType = {
   selectionType: any;
   setSNode: any;
   selectedUser: any;
-  allNodes: any;
+  allNodes: FullNodeData[];
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -399,6 +400,10 @@ const Sidebar = (props: SidebarType) => {
   openTrends ||
   openMedia*/
 
+  const bookmarkUpdatesNum = useMemo(() => {
+    return props.allNodes.filter(cur => cur.changed || !cur.isStudied).length;
+  }, [props.allNodes]);
+
   return (
     <>
       {/* {openToolbar && tag && (
@@ -448,7 +453,7 @@ const Sidebar = (props: SidebarType) => {
             </Button>
 
             {/* <NotificationsButton openSideBar={openSideBar} /> */}
-            <BookmarksButton openSideBar={openSideBar} />
+            <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
             {/*<PendingProposalsButton openSideBar={openSideBar} />
 
           <PresentationsButton openSideBar={openSideBar} />

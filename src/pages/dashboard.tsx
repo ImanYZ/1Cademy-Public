@@ -399,6 +399,25 @@ const Dashboard = ({}: DashboardProps) => {
           { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
         );
       };
+
+      const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodeData[]) => {
+        return newAllNodes.reduce(
+          (acu, cur) => {
+            if (cur.nodeChangeType === "added") {
+              return [...acu, cur];
+            }
+            if (cur.nodeChangeType === "modified") {
+              return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
+            }
+            if (cur.nodeChangeType === "removed") {
+              return acu.filter(c => c.userNodeId !== cur.userNodeId);
+            }
+            return acu;
+          },
+          [...currentAllNodes]
+        );
+      };
+
       const userNodesSnapshot = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         if (!docChanges.length) return null;
@@ -413,9 +432,7 @@ const Dashboard = ({}: DashboardProps) => {
         const visibleFullNodes = fullNodes.filter(cur => cur.visible);
         const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
 
-        // TODO: MERGE data
-
-        setAllNodes(oldFullNodes => [...oldFullNodes, ...fullNodes]);
+        setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
         setNodes(newNodes);
         setEdges(newEdges);
         console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes });

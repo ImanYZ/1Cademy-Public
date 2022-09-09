@@ -4,11 +4,11 @@ import React from "react";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../MetaButton";
 
-type BookmarksButton = { openSideBar: any };
+type BookmarksButton = { openSideBar: any; bookmarkUpdatesNum: number };
 
-const BookmarksButton = ({ openSideBar }: BookmarksButton) => {
+const BookmarksButton = ({ openSideBar, bookmarkUpdatesNum }: BookmarksButton) => {
   // const bookmarkUpdatesNum = useRecoilValue(bookmarkUpdatesNumState);
-  const bookmarkUpdatesNum = 1;
+  // const bookmarkUpdatesNum = 1;
   return (
     <MemoizedMetaButton
       onClick={() => openSideBar("Bookmarks")}

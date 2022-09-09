@@ -13,7 +13,6 @@ type BookmarksProps = {
 };
 
 const Bookmarks = (props: BookmarksProps) => {
-  console.log(" 00>> props.bookmarkedUserNodes", props.bookmarkedUserNodes);
   // const updatedBookmarks = props.bookmarkedUserNodes.filter(cur=>cur)
   const tabsItems = [
     {

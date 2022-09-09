@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { Editor } from "../../Editor";
@@ -20,19 +20,10 @@ type BookmarksListProps = {
   bookmarks: any[];
 };
 
+const ELEMENTS_PER_PAGE = 3;
+
 export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksListProps) => {
-  console.log("x-------------> bookmarksList", bookmarks);
-  // const [bookmarks, setBookmarks] = useState([
-  //   {
-  //     id: "sdlflskdf",
-  //     nodeType: "Concept",
-  //     changedAt: new Date(),
-  //     wrongs: 2,
-  //     corrects: 6,
-  //     title: "mock Node",
-  //   },
-  // ]);
-  const [lastIndex, setLastIndex] = useState(13);
+  const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
 
   // useEffect(() => {
   //   // filter bookmarks from allNodes, then save the value
@@ -52,25 +43,21 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
   //   setBookmarks(displayableNs);
   // }, [lastIndex, allNodes, allUserNodes]);
 
-  // const loadOlderNotificationsClick = useCallback(
-  //   () =>
-  //     setLastIndex(oldLastIndex => {
-  //       if (lastIndex < Object.keys(allNodes).length) {
-  //         return oldLastIndex + 13;
-  //       }
-  //       return oldLastIndex;
-  //     }),
-  //   [allNodes]
-  // );
-
-  const getBookmarksProcessed = () => {
+  // TODO: change to memo to not recalculate the function
+  // with memo will reuse the value recalculated
+  const getBookmarksProcessed = useCallback(() => {
     const bookmarksFiltered = bookmarks.filter(cur => {
       if (updates) return cur.changed || !cur.isStudied;
       return !cur.changed && cur.isStudied;
     });
 
     return bookmarksFiltered.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-  };
+  }, [bookmarks, updates]);
+
+  const loadOlderNotificationsClick = useCallback(() => {
+    if (lastIndex >= getBookmarksProcessed().length) return;
+    setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
+  }, [getBookmarksProcessed, lastIndex]);
 
   return (
     <>
@@ -79,8 +66,9 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
         .map((node: any) => (
           <li
             className="CollapsedProposal collection-item"
-            key={`node${node.id}`}
-            onClick={() => openLinkedNode(node.id)}
+            // CHECK: I changed: node.id to node.userNodeId
+            key={`node${node.userNodeId}`}
+            onClick={() => openLinkedNode(node.userNodeId)}
             style={{ listStyle: "none", padding: "10px" }}
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
@@ -126,16 +114,17 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             </div>
           </li>
         ))}
-      {bookmarks.length > lastIndex && (
+      {getBookmarksProcessed().length > lastIndex && (
         <div id="ContinueButton">
           <MemoizedMetaButton
-            onClick={() => console.log("loadOlderNotificationsClick")}
+            onClick={loadOlderNotificationsClick}
             // tooltip={"Load older " + (props.updates ? "updated" : "studied") + " bookmarks."}
             // tooltipPosition="Right"
           >
             <>
-              <i className="material-icons grey-text">expand_more</i> Older Bookmarks{" "}
-              <i className="material-icons grey-text">expand_more</i>
+              <ExpandMoreIcon className="material-icons grey-text" />
+              Older Bookmarks
+              <ExpandMoreIcon className="material-icons grey-text" />
             </>
           </MemoizedMetaButton>
         </div>
@@ -143,113 +132,3 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
     </>
   );
 };
-
-// const doNothing = () => {};
-
-// // dayjs.extend(relativeTime);
-
-// const BookmarksList = (props) => {
-//   const allNodes = useRecoilValue(allNodesState);
-//   const allUserNodes = useRecoilValue(allUserNodesState);
-
-//   const [bookmarks, setBookmarks] = useState([]);
-//   const [lastIndex, setLastIndex] = useState(13);
-
-//   useEffect(() => {
-//     let displayableNs = Object.keys(allNodes).map((nodeId) => {
-//       if (
-//         nodeId in allUserNodes &&
-//         "bookmarked" in allUserNodes[nodeId] &&
-//         allUserNodes[nodeId].bookmarked &&
-//         ((!props.updates && !allUserNodes[nodeId].changed && allUserNodes[nodeId].isStudied) ||
-//           (props.updates && (allUserNodes[nodeId].changed || !allUserNodes[nodeId].isStudied)))
-//       ) {
-//         return { ...allNodes[nodeId], id: nodeId };
-//       }
-//     });
-//     displayableNs = displayableNs.filter((dN) => dN);
-//     displayableNs.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-//     setBookmarks(displayableNs);
-//   }, [lastIndex, allNodes, allUserNodes]);
-
-//   const openBookmarkedNode = useCallback(
-//     (nodeId) => (event) => {
-//       props.openLinkedNode(nodeId);
-//     },
-//     [props.openLinkedNode]
-//   );
-
-//   const loadOlderNotificationsClick = useCallback(
-//     () =>
-//       setLastIndex((oldLastIndex) => {
-//         if (lastIndex < Object.keys(allNodes).length) {
-//           return oldLastIndex + 13;
-//         }
-//         return oldLastIndex;
-//       }),
-//     [allNodes]
-//   );
-
-//   return (
-//     <>
-//       {bookmarks.slice(0, lastIndex).map((node) => (
-//         <li
-//           className="CollapsedProposal collection-item"
-//           key={`node${node.id}`}
-//           onClick={openBookmarkedNode(node.id)}
-//         >
-//           <div className="SidebarNodeTypeIcon">
-//             <NodeTypeIcon nodeType={node.nodeType} />
-//             <div className="right">
-//               <MetaButton
-//               // tooltip="Creation or the last update of this node."
-//               // tooltipPosition="TopLeft"
-//               >
-//                 {/* <i className="material-icons grey-text">event_available</i>{" "} */}
-//                 <i className="material-icons grey-text">create</i>
-//                 {dayjs(node.changedAt).fromNow()}
-//                 {/* </MetaButton>
-//               <MetaButton
-//                 tooltip="# of improvement/child proposals on this node."
-//                 tooltipPosition="BottomLeft"
-//               > */}
-//                 {/* <span>{shortenNumber(node.versions, 2, false)}</span> */}
-//               </MetaButton>
-//               <MetaButton
-//               // tooltip="# of 1Cademists who have found this node unhelpful."
-//               // tooltipPosition="TopLeft"
-//               >
-//                 <i className="material-icons grey-text">close</i>
-//                 <span>{shortenNumber(node.wrongs, 2, false)}</span>
-//               </MetaButton>
-//               <MetaButton
-//               // tooltip="# of 1Cademists who have found this node helpful."
-//               // tooltipPosition="TopLeft"
-//               >
-//                 <i className="material-icons DoneIcon grey-text">done</i>
-//                 <span>{shortenNumber(node.corrects, 2, false)}</span>
-//               </MetaButton>
-//             </div>
-//           </div>
-//           <div className="SearchResultTitle">
-//             <HyperEditor readOnly={true} onChange={doNothing} content={node.title} />
-//           </div>
-//         </li>
-//       ))}
-//       {bookmarks.length > lastIndex && (
-//         <div id="ContinueButton">
-//           <MetaButton
-//             onClick={loadOlderNotificationsClick}
-//             // tooltip={"Load older " + (props.updates ? "updated" : "studied") + " bookmarks."}
-//             // tooltipPosition="Right"
-//           >
-//             <i className="material-icons grey-text">expand_more</i> Older Bookmarks{" "}
-//             <i className="material-icons grey-text">expand_more</i>
-//           </MetaButton>
-//         </div>
-//       )}
-//     </>
-//   );
-// };
-
-// export default React.memo(BookmarksList);
