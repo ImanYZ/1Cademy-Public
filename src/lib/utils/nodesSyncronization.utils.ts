@@ -53,7 +53,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         ...cur.uNodeData, // User node data
         ...nodeDataFound.nData, // Node Data
         userNodeId: cur.uNodeId,
-        nodeChangeType: cur.cType,
+        nodeChangeType: cur.cType, // TODO: improve the names and values
         userNodeChangeType: nodeDataFound.cType,
         editable: false,
         left: 0,

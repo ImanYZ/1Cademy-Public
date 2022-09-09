@@ -363,10 +363,10 @@ const Dashboard = ({}: DashboardProps) => {
               tmpNodes = res.oldNodes;
               tmpEdges = res.oldEdges;
             }
-            if (cur.nodeChangeType === "modified") {
+            if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
               // console.log("  ---> current node", node);
-              const currentNode = {
+              const currentNode: FullNodeData = {
                 ...cur,
                 left: node.left,
                 top: node.top,
@@ -378,7 +378,9 @@ const Dashboard = ({}: DashboardProps) => {
                 tmpEdges = res.oldEdges;
               }
             }
-            if (cur.nodeChangeType === "removed") {
+            // I changed the reference from snapshot
+            // so the NO visible nodes will come as modified and !visible
+            if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
               if (g.current.hasNode(cur.node)) {
                 g.current.nodes().forEach(function () {});
                 g.current.edges().forEach(function () {});
@@ -429,13 +431,13 @@ const Dashboard = ({}: DashboardProps) => {
         // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook
-        const visibleFullNodes = fullNodes.filter(cur => cur.visible);
+        const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
         const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
 
         setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
         setNodes(newNodes);
         setEdges(newEdges);
-        console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes });
+        console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes, visibleFullNodes });
         setUserNodesLoaded(true);
       });
       return () => userNodesSnapshot();
