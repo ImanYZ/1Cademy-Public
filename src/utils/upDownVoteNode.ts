@@ -51,8 +51,8 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
 
   let batch = db.batch();
-  let writeCounts = 0;
 
+  let writeCounts = 0;
   let { nodeData, nodeRef }: any = await getNode({ nodeId });
   let { userNodeData, userNodeRef }: any = await getUserNode({ nodeId, uname });
   let { userNodesRefs, userNodesData }: any = await getAllUserNodes({ nodeId });
@@ -61,6 +61,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     correct = userNodeData.correct;
     wrong = userNodeData.wrong;
   }
+
   if (actionType === "Correct") {
     //  if upvoted, remove the upvote
     correctChange = correct ? -1 : 1;
@@ -84,10 +85,11 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       currentTimestamp,
       writeCounts,
     });
+
     // Delete the node from the list of children of each parent node
     for (let parentLink of nodeData.parents) {
       const parentId = parentLink.node;
-      const parentNode = await getNode(parentId);
+      const parentNode = await getNode({ nodeId: parentId });
       //  filter out node to be deleted
       const newChildren = parentNode.nodeData.children.filter((l: any) => l.node !== nodeId);
       const nodeChanges = {
@@ -109,7 +111,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     // Delete the node from the list of parents of each child node
     for (let childLink of nodeData.children) {
       const childId = childLink.node;
-      const childNode: any = await getNode(childId);
+      const childNode: any = await getNode({ nodeId: childId });
       //  filter out node to be deleted
       const newParents = childNode.nodeData.parents.filter((l: any) => l.node !== nodeId);
       const nodeChanges = {
@@ -275,6 +277,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       };
     }
   }
+
   for (let proposer in changedProposers) {
     // Updating the proposer reputation points.
     [batch, writeCounts] = await updateReputation({

@@ -478,7 +478,7 @@ const Dashboard = ({}: DashboardProps) => {
         console.error(err);
         try {
           await idToken();
-          await postWithToken(mapURL, { ...postData, test: "test" });
+          await postWithToken(mapURL, { ...postData });
           // if (postData) {
           //   await axios.post(mapURL, postData);
           // } else {
