@@ -46,35 +46,9 @@ const data: any[] = [
     maxVersionRating: 43.96,
     deleted: false,
     contribNames: ["TirdadBarghi", "Tirdad", "1man"],
-    children: [
-      {
-        title: "Data science references",
-        node: "vLeylJ8p1HoHRZhq8DVN",
-        label: "",
-      },
-      {
-        node: "0q1DhxlFthdAHGOMvdwN",
-        title: "Data science is interdisciplinary",
-        label: "",
-      },
-      {
-        node: "TMJSqsdC6l1SAmerJxmA",
-        label: "",
-        title: "Dataset",
-      },
-      {
-        label: "",
-        node: "uhY5OL0ExpJqEdFRgJBh",
-        title: "Actuarial Mathematics",
-      },
-      {
-        label: "",
-        title: "Data Science In Sports",
-        node: "kJXDPphNofb66vrT9aEr",
-      },
-    ],
+    children: [],
     isTag: true,
-    wrongs: 3,
+    wrongs: 10,
     versions: 23,
     updatedAt: new Date(),
     referenceIds: ["rcCwvHX3l8eDLNzhduRd"],
@@ -96,6 +70,7 @@ const data: any[] = [
       },
     },
   },
+
   ////
   {
     documentId: "00NwvYhgES9mjNQ9LRhG",
@@ -112,13 +87,7 @@ const data: any[] = [
     tagIds: ["FJfzAX7zbgQS8jU5XcEk"],
     institutions: {},
     createdAt: new Date(),
-    parents: [
-      {
-        label: "",
-        title: "Drugs working to inactivate transmitter reuptake",
-        node: "6XYh4Khlw5f3OM8OvdEG",
-      },
-    ],
+    parents: [],
     nodeImage: "",
     contribNames: [],
     referenceLabels: ["109"],

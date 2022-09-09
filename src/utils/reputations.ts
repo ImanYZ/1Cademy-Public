@@ -278,7 +278,6 @@ export const updateReputationIncrement = async ({
       const rData = com_reputationDoc.data();
       // Total reputation points that this specific user has earned so far in this community.
       calculatePositivesNegativesTotals(rData);
-
       // if the current user's points are greater than the admin's points,
       // make the current user the admin
       // We ignore updating the imageURL and aFullname because
@@ -286,57 +285,57 @@ export const updateReputationIncrement = async ({
       // on line 861, we fetch them from the users collection and update them.
       if (rData.totalPoints > com_Points.adminPoints) {
         com_Points.admin = rData.uname;
-        com_Points.adminPoints = rData.totalPoints;
+        com_Points.adminPoints = rData?.totalPoints || 0;
       }
 
       // add current community reputation doc values to total
       // for Concept nodes
-      com_Points.cnCorrects += rData.cnCorrects;
-      com_Points.cnInst += rData.cnInst;
-      com_Points.cnWrongs += rData.cnWrongs;
+      com_Points.cnCorrects += rData?.cnCorrects || 0;
+      com_Points.cnInst += rData?.cnInst || 0;
+      com_Points.cnWrongs += rData?.cnWrongs || 0;
       // for Code nodes
-      com_Points.cdCorrects += rData.cdCorrects;
-      com_Points.cdInst += rData.cdInst;
-      com_Points.cdWrongs += rData.cdWrongs;
+      com_Points.cdCorrects += rData?.cdCorrects || 0;
+      com_Points.cdInst += rData?.cdInst || 0;
+      com_Points.cdWrongs += rData?.cdWrongs || 0;
       // for Question nodes
-      com_Points.qCorrects += rData.qCorrects;
-      com_Points.qInst += rData.qInst;
-      com_Points.qWrongs += rData.qWrongs;
+      com_Points.qCorrects += rData?.qCorrects || 0;
+      com_Points.qInst += rData?.qInst || 0;
+      com_Points.qWrongs += rData?.qWrongs || 0;
       //  for Profile nodes
-      com_Points.pCorrects += rData.pCorrects;
-      com_Points.pInst += rData.pInst;
-      com_Points.pWrongs += rData.pWrongs;
+      com_Points.pCorrects += rData?.pCorrects || 0;
+      com_Points.pInst += rData?.pInst || 0;
+      com_Points.pWrongs += rData?.pWrongs || 0;
       //  for Sequel nodes
-      com_Points.sCorrects += rData.sCorrects;
-      com_Points.sInst += rData.sInst;
-      com_Points.sWrongs += rData.sWrongs;
+      com_Points.sCorrects += rData?.sCorrects || 0;
+      com_Points.sInst += rData?.sInst || 0;
+      com_Points.sWrongs += rData?.sWrongs || 0;
       //  for Advertisement nodes
-      com_Points.aCorrects += rData.aCorrects;
-      com_Points.aInst += rData.aInst;
-      com_Points.aWrongs += rData.aWrongs;
+      com_Points.aCorrects += rData?.aCorrects || 0;
+      com_Points.aInst += rData?.aInst || 0;
+      com_Points.aWrongs += rData.aWrongs || 0;
       //  for Reference nodes
-      com_Points.rfCorrects += rData.rfCorrects;
-      com_Points.rfInst += rData.rfInst;
-      com_Points.rfWrongs += rData.rfWrongs;
+      com_Points.rfCorrects += rData?.rfCorrects || 0;
+      com_Points.rfInst += rData?.rfInst || 0;
+      com_Points.rfWrongs += rData?.rfWrongs || 0;
       //  for News nodes
-      com_Points.nCorrects += rData.nCorrects;
-      com_Points.nInst += rData.nInst;
-      com_Points.nWrongs += rData.nWrongs;
+      com_Points.nCorrects += rData?.nCorrects || 0;
+      com_Points.nInst += rData?.nInst || 0;
+      com_Points.nWrongs += rData?.nWrongs || 0;
       //  for Idea nodes
-      com_Points.iCorrects += rData.iCorrects;
-      com_Points.iInst += rData.iInst;
-      com_Points.iWrongs += rData.iWrongs;
-      com_Points.mCorrects += rData.mCorrects;
+      com_Points.iCorrects += rData?.iCorrects || 0;
+      com_Points.iInst += rData?.iInst || 0;
+      com_Points.iWrongs += rData?.iWrongs || 0;
+      com_Points.mCorrects += rData?.mCorrects || 0;
       //  for Relation nodes
-      com_Points.mInst += rData.mInst;
-      com_Points.mWrongs += rData.mWrongs;
-      com_Points.lterm += rData.lterm;
-      com_Points.ltermDay += rData.ltermDay;
+      com_Points.mInst += rData?.mInst || 0;
+      com_Points.mWrongs += rData?.mWrongs || 0;
+      com_Points.lterm += rData?.lterm || 0;
+      com_Points.ltermDay += rData?.ltermDay || 0;
 
       //  similar to above, if positives, negatives, or total do not exist, calculate them and add them to total
-      com_Points.positives += rData.positives;
-      com_Points.negatives += rData.negatives;
-      com_Points.totalPoints += rData.totalPoints;
+      com_Points.positives += rData?.positives || 0;
+      com_Points.negatives += rData?.negatives || 0;
+      com_Points.totalPoints += rData?.totalPoints || 0;
     }
 
     //  iterate through dictionary userReputations
@@ -349,7 +348,6 @@ export const updateReputationIncrement = async ({
     //   }
     // }
   }
-
   //  update reputation by adding the changes that are referenced in the parameters of this function
   switch (nodeType) {
     case "Concept":
@@ -602,6 +600,12 @@ export const updateReputationIncrement = async ({
     reputationDoc_Obj.firstMonthDay = firstMonthDay;
   } else if (reputationType === "Weekly" || reputationType === "Others Weekly") {
     reputationDoc_Obj.firstWeekDay = firstWeekDay;
+  }
+
+  if (reputationType === "Monthly" || reputationType === "Others Monthly") {
+    com_PointsDoc_Obj.firstMonthDay = firstMonthDay;
+  } else if (reputationType === "Weekly" || reputationType === "Others Weekly") {
+    com_PointsDoc_Obj.firstWeekDay = firstWeekDay;
   }
 
   if (t) {
