@@ -237,40 +237,6 @@ const Sidebar = (props: SidebarType) => {
 
   const sidebarRef = useRef<any | null>(null);
 
-  // const bookmarkedUserNodesSnapshot = useCallback(
-  //   (q: Query<DocumentData>) => {
-  //     const customSnapshot = onSnapshot(q, async snapshot => {
-  //       const docChanges = snapshot.docChanges();
-  //       if (!docChanges.length) return null;
-
-  //       const userNodeChanges = getUserNodeChanges(docChanges);
-  //       const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-  //       const nodesData = await getNodes(db, nodeIds);
-  //       const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-  //       console.log(" -->  -->  snapshot is called", fullNodes);
-  //       setBookmarkedUserNodes(fullNodes);
-  //     });
-  //     return () => customSnapshot();
-  //   },
-  //   [db]
-  // );
-
-  // useEffect(() => {
-  //   if (!db) return;
-  //   if (!user) return;
-
-  //   const userNodesRef = collection(db, "userNodes");
-  //   const q = query(
-  //     userNodesRef,
-  //     where("user", "==", user.uname),
-  //     where("deleted", "==", false),
-  //     where("bookmarked", "==", true)
-  //   );
-
-  //   const killSnapshot = bookmarkedUserNodesSnapshot(q);
-  //   return () => killSnapshot();
-  // }, [db, bookmarkedUserNodesSnapshot, user]);
-
   const scrollToTop = useCallback(() => {
     sidebarRef.current.scrollTop = 0;
   }, [sidebarRef]);
