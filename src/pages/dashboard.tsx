@@ -365,17 +365,23 @@ const Dashboard = ({}: DashboardProps) => {
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
-              // console.log("  ---> current node", node);
-              const currentNode: FullNodeData = {
-                ...cur,
-                left: node.left,
-                top: node.top,
-              }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-              // console.log('currentNode', currentNode)
-              if (!compare2Nodes(cur, node)) {
-                const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+              if (nodes) {
+                const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
+              } else {
+                // console.log("  ---> current node", node);
+                const currentNode: FullNodeData = {
+                  ...cur,
+                  left: node.left,
+                  top: node.top,
+                }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+                // console.log('currentNode', currentNode)
+                if (!compare2Nodes(cur, node)) {
+                  const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+                  tmpNodes = res.oldNodes;
+                  tmpEdges = res.oldEdges;
+                }
               }
             }
             // I changed the reference from snapshot

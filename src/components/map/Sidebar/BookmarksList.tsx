@@ -20,7 +20,7 @@ type BookmarksListProps = {
   bookmarks: any[];
 };
 
-const ELEMENTS_PER_PAGE = 3;
+const ELEMENTS_PER_PAGE = 13;
 
 export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksListProps) => {
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
@@ -68,7 +68,7 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             className="CollapsedProposal collection-item"
             // CHECK: I changed: node.id to node.userNodeId
             key={`node${node.userNodeId}`}
-            onClick={() => openLinkedNode(node.userNodeId)}
+            onClick={() => openLinkedNode(node.node)}
             style={{ listStyle: "none", padding: "10px" }}
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
