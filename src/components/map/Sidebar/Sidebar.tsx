@@ -7,14 +7,18 @@ import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
 import searcherHeaderImage from "../../../../public/Magnifier_Compas.jpg";
+import notificationsDarkTheme from "../../../../public/notifications-dark-theme.jpg";
+import notificationsLightTheme from "../../../../public/notifications-light-theme.jpg";
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
-import referencesLightTheme from "../../../../public/references-dark-theme.jpg";
+import referencesLightTheme from "../../../../public/references-light-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
 import { FullNodeData } from "../../../noteBookTypes";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
 import Bookmarks from "./Bookmarks";
 import BookmarksButton from "./BookmarksButton";
+import Notifications from "./Notifications";
+import { NotificationsButton } from "./NotificationsButton";
 import SearchList from "./SearchList";
 // import ChatRoomImage from "../../../assets/ChatRoom.jpg";
 // import RecentNodesImage from "../../../assets/RecentNodes.jpg";
@@ -133,6 +137,7 @@ type SidebarType = {
   setOpenPendingProposals: any;
   setOpenChat: any;
   setOpenNotifications: any;
+  openNotifications: boolean;
   setOpenPresentations: any;
   setOpenToolbar: any;
   setOpenSearch: any;
@@ -225,7 +230,7 @@ const Sidebar = (props: SidebarType) => {
   const [openPresentations] = useState(false);
   const [openPendingProposals] = useState(false);
   const [openChat] = useState(false);
-  const [openNotifications] = useState(false);
+  // const [openNotifications] = useState(false);
   const [openToolbar] = useState(false);
   const [tag] = useState(false);
 
@@ -357,7 +362,7 @@ const Sidebar = (props: SidebarType) => {
     props.selectionType ||
     openPendingProposals ||
     openChat ||
-    openNotifications ||
+    props.openNotifications ||
     openPresentations ||
     openToolbar ||
     props.openSearch ||
@@ -418,7 +423,7 @@ const Sidebar = (props: SidebarType) => {
               <span className="SidebarDescription">Search</span>
             </Button>
 
-            {/* <NotificationsButton openSideBar={openSideBar} /> */}
+            <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={20} />
             <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
             {/*<PendingProposalsButton openSideBar={openSideBar} />
 
@@ -491,10 +496,10 @@ const Sidebar = (props: SidebarType) => {
           props.selectionType === "Citations" ||
           props.selectionType === "UserInfo" ||
           props.openSearch ||
+          props.openNotifications ||
           props.openBookmarks
             ? // openPendingProposals ||
               // openChat ||
-              // openNotifications ||
               // openPresentations ||
               // openToolbar ||
               // openRecentNodes
@@ -557,16 +562,14 @@ const Sidebar = (props: SidebarType) => {
               {/* <ChatList openLinkedNode={props.openLinkedNode} /> */}
               <h2>openChat</h2>
             </MemoizedSidebarWrapper>
-          ) : openNotifications ? (
+          ) : props.openNotifications ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
+              headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
               title="Notifications"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              {/* CHECK: I commented this */}
-              {/* <Notifications openLinkedNode={props.openLinkedNode} /> */}
-              <h2>openNotifications</h2>
+              <Notifications openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : openToolbar && tag ? (
             <MemoizedSidebarWrapper
