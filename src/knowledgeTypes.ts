@@ -150,6 +150,7 @@ export type SimpleNode = {
   tags: string[];
   contributors: { fullName: string; imageUrl: string; username: string }[];
   institutions: { name: string }[];
+  versions: number;
 };
 
 export type ResponseAutocompleteFullTags = {
@@ -199,6 +200,7 @@ export type TypesenseNodesSchema = {
   updatedAt: number;
   wrongs: number;
   mostHelpful: number; // typesense
+  versions: number; // typesense
 };
 
 export type TypesenseReferencesSchema = {

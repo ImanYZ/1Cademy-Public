@@ -74,3 +74,6 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     createdAt: Date;
     updatedAt: Date;
   };
+
+export type SortDirection = "ASCENDING" | "DESCENDING";
+export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES";

@@ -16,7 +16,7 @@ export type SignUpBasicInformationProps = {
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
   const [setBackground] = useAuthLayout();
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
-  const [allTags, setAllTags] = useTagsTreeView(values.tagId ? [values.tagId] : []);
+  const { allTags, setAllTags } = useTagsTreeView(values.tagId ? [values.tagId] : []);
   const [themeActions] = use1AcademyTheme();
 
   useEffect(() => {

@@ -1,4 +1,5 @@
-import { Button, Drawer, Modal } from "@mui/material";
+import CodeIcon from "@mui/icons-material/Code";
+import { Button, Drawer, IconButton, Modal, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import {
@@ -103,7 +104,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user }] = useAuth();
-  const [allTags, , allTagsLoaded] = useTagsTreeView();
+  const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   // node that user is currently selected (node will be highlighted)
   const [sNode, setSNode] = useState(null); //<--- this was with recoil
@@ -163,7 +164,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [selectedNodeType, setSelectedNodeType] = useState<NodeType | null>(null);
 
   // selectedUser is the user whose profile is in sidebar (such as through clicking a user icon through leader board or on nodes)
-  const [, /*selectedUser*/ setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
   const [, /*openProposal*/ setOpenProposal] = useState<string | boolean>(false);
@@ -2516,17 +2517,35 @@ const Dashboard = ({}: DashboardProps) => {
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
             rateProposal={rateProposal}
+            openLinkedNode={openLinkedNode}
             selectProposal={() => console.log("selectProposal")}
             deleteProposal={() => console.log("deleteProposal")}
             closeSideBar={closeSideBar}
             proposeNewChild={proposeNewChild}
+            // --------------------------- others
             selectionType={nodeBookState.selectionType}
             setSNode={setSNode}
+            selectedUser={selectedUser}
+            // ------------------- flags
+            setOpenPendingProposals={setOpenPendingProposals}
+            setOpenChat={setOpenChat}
+            setOpenNotifications={setOpenNotifications}
+            setOpenPresentations={setOpenPresentations}
+            setOpenToolbar={setOpenToolbar}
+            setOpenSearch={setOpenSearch}
+            openSearch={openSearch}
+            setOpenBookmarks={setOpenBookmarks}
+            setOpenRecentNodes={setOpenBookmarks}
+            setOpenTrends={setOpenTrends}
+            setOpenMedia={setOpenMedia}
           />
           <Box sx={{ position: "fixed", bottom: "10px", right: "10px", zIndex: "1300", background: "#123" }}>
-            <Button variant="contained" onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-              {"X"}
-            </Button>
+            {openSearch ? "open" : "close"}
+            <Tooltip title={"Watch geek data"}>
+              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
 
           {/* end Data from map */}
