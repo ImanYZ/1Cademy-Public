@@ -2490,6 +2490,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenPendingProposals={setOpenPendingProposals}
             setOpenChat={setOpenChat}
             setOpenNotifications={setOpenNotifications}
+            openNotifications={openNotifications}
             setOpenPresentations={setOpenPresentations}
             setOpenToolbar={setOpenToolbar}
             setOpenSearch={setOpenSearch}
