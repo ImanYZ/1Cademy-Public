@@ -157,12 +157,12 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
               institutions[userInstitutions[versionData.proposer]].reputation +=
                 versionData.corrects - versionData.wrongs;
             } else {
-              if (institutions[userInstitutions[versionData.proposer]] === undefined) {
+              if (userInstitutions[versionData.proposer] === undefined) {
                 continue;
               }
               const institutionDocs = await db
                 .collection("institutions")
-                .where("name", "==", institutions[userInstitutions[versionData.proposer]])
+                .where("name", "==", userInstitutions[versionData.proposer])
                 .get();
               if (institutionDocs.docs.length > 0) {
                 institutions[userInstitutions[versionData.proposer]] = {
