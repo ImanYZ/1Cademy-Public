@@ -4,6 +4,7 @@ const { getTypedCollections } = require("./getTypedCollections");
 // On 1Cademy.com nodes do not have their list of contributors and institutions
 // assigned to them. We should run this function every 25 hours in a PubSub to
 // assign these arrays.
+const roundNum = num => Number(Number.parseFloat(Number(num).toFixed(2)));
 exports.assignNodeContributorsInstitutionsStats = async () => {
   // First get the list of all users and create an Object to map their ids to their
   // institution names.
@@ -145,13 +146,16 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
             if (versionData.proposer in contributors) {
               contributors[versionData.proposer].reputation += versionData.corrects - versionData.wrongs;
             } else {
-              contributors[versionData.proposer] = {
-                docRef: db.collection("users").doc(versionData.proposer),
-                reputation: versionData.corrects - versionData.wrongs
-              };
+              if (userInstitutions[versionData.proposer]) {
+                contributors[versionData.proposer] = {
+                  docRef: db.collection("users").doc(versionData.proposer),
+                  reputation: versionData.corrects - versionData.wrongs
+                };
+              }
             }
             if (userInstitutions[versionData.proposer] in institutions) {
-              institutions[userInstitutions[versionData.proposer]] += versionData.corrects - versionData.wrongs;
+              institutions[userInstitutions[versionData.proposer]].reputation +=
+                versionData.corrects - versionData.wrongs;
             } else {
               if (institutions[userInstitutions[versionData.proposer]] === undefined) {
                 continue;
@@ -180,12 +184,12 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
       }
       for (let contributorId in contributors) {
         await batchUpdate(contributors[contributorId].docRef, {
-          totalPoints: contributors[contributorId].reputation
+          totalPoints: roundNum(contributors[contributorId].reputation)
         });
       }
       for (let institutionName in institutions) {
         await batchUpdate(institutions[institutionName].docRef, {
-          totalPoints: institutions[institutionName].reputation
+          totalPoints: roundNum(institutions[institutionName].reputation)
         });
       }
     }
