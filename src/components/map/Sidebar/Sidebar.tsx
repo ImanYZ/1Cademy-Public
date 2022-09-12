@@ -19,6 +19,8 @@ import Bookmarks from "./Bookmarks";
 import BookmarksButton from "./BookmarksButton";
 import Notifications from "./Notifications";
 import { NotificationsButton } from "./NotificationsButton";
+import PendingProposalList from "./PendingProposalList";
+import PendingProposalsButton from "./PendingProposalsButton";
 import SearchList from "./SearchList";
 // import ChatRoomImage from "../../../assets/ChatRoom.jpg";
 // import RecentNodesImage from "../../../assets/RecentNodes.jpg";
@@ -135,6 +137,7 @@ type SidebarType = {
   // setOpenPractice: any;
   // --------------------------- flags
   setOpenPendingProposals: any;
+  openPendingProposals: boolean;
   setOpenChat: any;
   setOpenNotifications: any;
   openNotifications: boolean;
@@ -228,7 +231,7 @@ const Sidebar = (props: SidebarType) => {
 
   // const [selectionType] = useState("Proposals");
   const [openPresentations] = useState(false);
-  const [openPendingProposals] = useState(false);
+  // const [openPendingProposals] = useState(false);
   const [openChat] = useState(false);
   // const [openNotifications] = useState(false);
   const [openToolbar] = useState(false);
@@ -360,7 +363,7 @@ const Sidebar = (props: SidebarType) => {
 
   const isHide =
     props.selectionType ||
-    openPendingProposals ||
+    props.openPendingProposals ||
     openChat ||
     props.openNotifications ||
     openPresentations ||
@@ -425,8 +428,8 @@ const Sidebar = (props: SidebarType) => {
 
             <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={20} />
             <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
-            {/*<PendingProposalsButton openSideBar={openSideBar} />
-
+            <PendingProposalsButton openSideBar={openSideBar} />
+            {/*
           <PresentationsButton openSideBar={openSideBar} />
           <MemoizedMetaButton
             onClick={openSideBarClick("Chat")}
@@ -497,9 +500,9 @@ const Sidebar = (props: SidebarType) => {
           props.selectionType === "UserInfo" ||
           props.openSearch ||
           props.openNotifications ||
+          props.openPendingProposals ||
           props.openBookmarks
-            ? // openPendingProposals ||
-              // openChat ||
+            ? // openChat ||
               // openPresentations ||
               // openToolbar ||
               // openRecentNodes
@@ -539,16 +542,16 @@ const Sidebar = (props: SidebarType) => {
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Comments" ? (
             <h3>Comments</h3>
-          ) : openPendingProposals ? (
+          ) : props.openPendingProposals ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
+              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
               title="Pending Proposals"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               <>
                 <h4 style={{ textAlign: "center" }}>-- Pending Proposals Sidebar --</h4>
-                {/* <PendingProposalList openLinkedNode={props.openLinkedNode} /> */}
+                <PendingProposalList openLinkedNode={props.openLinkedNode} />
               </>
             </MemoizedSidebarWrapper>
           ) : openChat ? (
@@ -637,124 +640,3 @@ const Sidebar = (props: SidebarType) => {
 };
 
 export const MemoizedSidebar = React.memo(Sidebar);
-
-// --------------- sidebar menu
-
-{
-  /* <div
-        id="SidebarButtonsContainer"
-        style={
-          selectionType ||
-            openPendingProposals ||
-            openChat ||
-            openNotifications ||
-            openPresentations ||
-            openToolbar ||
-            openSearch ||
-            openBookmarks ||
-            openRecentNodes ||
-            openTrends ||
-            openMedia
-            ? { display: "none" }
-            : undefined
-        }
-      >
-        <div id="SidebarButtons">
-          <div className="Logo">
-            <MemoizedMetaButton
-              onClick={openSideBarClick("Trends")}
-            // tooltip="Click to open the trends in proposals."
-            // tooltipPosition="Right"
-            >
-              <img
-                src={theme === "Light" ? LogoLightMode : LogoDarkMode}
-                alt="1Logo"
-                width="61px"
-              />
-            </MemoizedMetaButton>
-          </div>
-          <UserStatusIcon
-            uname={username}
-            totalPoints={totalPoints}
-            totalPositives={Positivess}
-            totalNegatives={Negatives}
-            imageUrl={imageUrl}
-            fullname={fName + " " + lName}
-            chooseUname={chooseUname}
-            online={isOnline}
-            inUserBar={true}
-            inNodeFooter={false}
-            reloadPermanentGrpah={props.reloadPermanentGrpah}
-          />
-          <Button id="SearchButton" onClick={openSideBarClick("Search")}>
-            <SearchIcon />
-            
-            <span className="SidebarDescription">Search</span>
-            
-          </Button>
-          
-          <NotificationsButton openSideBar={openSideBar} />
-          <BookmarksButton openSideBar={openSideBar} />
-          <PendingProposalsButton openSideBar={openSideBar} />
-          
-          <PresentationsButton openSideBar={openSideBar} />
-          <MemoizedMetaButton
-            onClick={openSideBarClick("Chat")}
-          // tooltip="Click to open the chat room."
-          // tooltipPosition="Right"
-          >
-            <i className="material-icons material-icons--outlined">forum</i>
-            <span className="SidebarDescription">Chat</span>
-          </MemoizedMetaButton>
-          {tag && (
-            <>
-              <MemoizedMetaButton
-                onClick={leaderboardTypesToggle}
-              // tooltip={
-              //   "Click to " +
-              //   (props.usersStatus ? "hide" : "show") +
-              //   " the user contribution trends."
-              // }
-              // tooltipPosition="Right"
-              >
-                <div className="LeaderbaordIcon">🏆</div>
-                {!props.reputationsLoaded && (
-                  <div className="preloader-wrapper small active">
-                    <div className="spinner-layer spinner-yellow-only">
-                      <div className="circle-clipper left">
-                        <div className="circle"></div>
-                      </div>
-                      <div className="gap-patch">
-                        <div className="circle"></div>
-                      </div>
-                      <div className="circle-clipper right">
-                        <div className="circle"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div id="LeaderboardChanger" className="SidebarDescription">
-                  <div id="LeaderboardTag">{tag.title}</div>
-                  <div id="LeaderboardType">
-                    {leaderboardType ? leaderboardType : "Leaderboard"}
-                  </div>
-                </div>
-              </MemoizedMetaButton>
-              {leaderboardTypeOpen && (
-                <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />
-              )}
-              {leaderboardType && (
-                <UsersStatusList
-                  reputationsLoaded={props.reputationsLoaded}
-                  reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
-                  reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
-                  reloadPermanentGrpah={props.reloadPermanentGrpah}
-                  usersStatus={leaderboardType}
-                />
-              )}
-            </>
-          )}
-        </div>
-      </div> */
-}
