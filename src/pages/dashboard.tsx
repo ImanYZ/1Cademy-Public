@@ -2486,6 +2486,7 @@ const Dashboard = ({}: DashboardProps) => {
             selectionType={nodeBookState.selectionType}
             setSNode={setSNode}
             selectedUser={selectedUser}
+            reloadPermanentGrpah={reloadPermanentGraph}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}

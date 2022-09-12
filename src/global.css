@@ -1300,7 +1300,7 @@ button.MuiTab-textColorInherit:focus {
   left: 137.5px;
   top: 370px;
   width: 130px;
-  height: 186.1px;
+  /* height: 186.1px; */
 }
 
 #MiniUserPrifileHeader {
@@ -2428,4 +2428,37 @@ button.MuiTab-textColorInherit:focus {
 
 .NotificationBody .NotificationNodeLink .ReadOnlyEditor span {
   padding-left: 0px;
+}
+
+/* -------------------------------------- */
+/* multiple choice button styles */
+#MultipleChoiceBtnContainer {
+  position: absolute;
+  /* display: none; */
+  background-color: #333;
+}
+
+.LightMode #MultipleChoiceBtnContainer {
+  background-color: #f0f0f0;
+}
+
+#MultipleChoiceBtnContainer .MetaButton {
+  width: 100%;
+}
+
+/* ------------------------------------------- */
+/* userStatusList styles */
+#UsersStatusList {
+  overflow-y: auto;
+  overflow-x: visible;
+  direction: rtl;
+  margin-top: 0px;
+  padding-top: 4px;
+  margin-left: -16px;
+  padding-left: 16px;
+  transition: margin-left 1s; /* vendorless fallback */
+  -o-transition: margin-left 1s; /* opera */
+  -ms-transition: margin-left 1s; /* IE 10 */
+  -moz-transition: margin-left 1s; /* Firefox */
+  -webkit-transition: margin-left 1s; /*safari and chrome */
 }

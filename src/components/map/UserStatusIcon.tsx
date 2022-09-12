@@ -1,8 +1,10 @@
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
 import { Tooltip } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 
 import usePrevious from "../../hooks/usePrevious";
-import { preventEventPropagation } from "../../lib/utils/eventHandlers";
+// import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
 
@@ -108,11 +110,13 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         {/* {tag ? " ― " + tag.title : ""} */}
         <br></br>
         {shortenNumber(props.totalPositives, 2, false) + " "}
-        <i className="material-icons DoneIcon green-text">done</i>
+        {/* <i className="material-icons DoneIcon green-text">done</i> */}
+        <DoneIcon className="material-icons DoneIcon green-text" />
         {" ― "}
         {/* <i className="material-icons gray-text">remove</i>{" "} */}
         <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-        <i className="material-icons red-text">close</i>
+        <CloseIcon className="material-icons red-text" />
+        {/* <i className="material-icons red-text">close</i> */}
       </>;
     }
 
@@ -124,6 +128,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
       <div className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")} onClick={openUserInfo}>
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
           {/* <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" /> */}
+          {/* <img src={props.imageUrl} alt="s" width={"30px"} /> */}
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
@@ -135,7 +140,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
           <>
             <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
             <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
-              <i className="material-icons DoneIcon green-text">done</i>{" "}
+              <DoneIcon className="material-icons DoneIcon green-text" />
               {/* <i className="material-icons">remove</i>{" "} */}
               {/* <i className="material-icons red-text">close</i>{" "} */}
               <span>{shortenNumber(props.totalPoints, 2, false)}</span>
@@ -148,188 +153,22 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
           </span> */}
           </>
         )}
-        <span className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")} onClick={preventEventPropagation}>
-          {/* {props.inUserBar
-            ? "Your profile settings"
-            : props.chooseUname
-              ? props.uname
-              : props.fullname} */}
-
+        {/* <span className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")} onClick={preventEventPropagation}>
           {props.inUserBar && "Your profile settings"}
           {!("inNodeFooter" in props && props.inNodeFooter) && "totalPositives" in props && "totalNegatives" in props && (
             <>
-              {/* {tag ? " ― " + tag.title : ""} */}
               <br></br>
               {shortenNumber(props.totalPositives, 2, false) + " "}
-              <i className="material-icons DoneIcon green-text">done</i>
+              <DoneIcon className="material-icons DoneIcon green-text" />
               {" ― "}
-              {/* <i className="material-icons gray-text">remove</i>{" "} */}
               <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-              <i className="material-icons red-text">close</i>
+              <CloseIcon className="material-icons red-text" />
             </>
           )}
-        </span>
+        </span> */}
       </div>
     </Tooltip>
   );
 };
 
 export const MemoizedUserStatusIcon = React.memo(UserStatusIcon);
-
-// import React, { useState, useEffect, useCallback } from "react";
-// import { useRecoilValue, useSetRecoilState } from "recoil";
-
-// import { firebaseState, usernameState, tagState } from "../../../../../store/AuthAtoms";
-// import {
-//   selectionTypeState,
-//   openToolbarState,
-//   selectedUserState,
-//   selectedUserImageURLState,
-//   selectedUserFullnameState,
-//   selectedUserChooseUnameState,
-// } from "../../../../../store/MapAtoms";
-
-// import RoundImage from "../../../../PublicComps/RoundImage/RoundImage";
-
-// import usePrevious from "../../../../../hooks/usePrevious";
-// import { preventEventPropagation } from "../../../../../utils/eventHandlers";
-// import shortenNumber from "../../../../../utils/shortenNumber";
-
-// import "./UserStatusIcon.css";
-
-// const UserStatusIcon = (props) => {
-//   const firebase = useRecoilValue(firebaseState);
-//   const username = useRecoilValue(usernameState);
-//   const tag = useRecoilValue(tagState);
-//   const setSelectionType = useSetRecoilState(selectionTypeState);
-//   const setOpenToolbar = useSetRecoilState(openToolbarState);
-//   const setSelectedUser = useSetRecoilState(selectedUserState);
-//   const setSelectedUserImageURL = useSetRecoilState(selectedUserImageURLState);
-//   const setSelectedUserFullname = useSetRecoilState(selectedUserFullnameState);
-//   const setSelectedUserChooseUname = useSetRecoilState(selectedUserChooseUnameState);
-
-//   const [pointsGained, setPointsGained] = useState(false);
-//   const [pointsLost, setPointsLost] = useState(false);
-
-//   const prevAmount = usePrevious({
-//     totalPositives: props.totalPositives,
-//     totalNegatives: props.totalNegatives,
-//     totalPoints: props.totalPoints,
-//   });
-//   useEffect(() => {
-//     if (
-//       prevAmount &&
-//       "totalPositives" in prevAmount &&
-//       "totalPositives" in props &&
-//       "totalNegatives" in prevAmount &&
-//       "totalNegatives" in props &&
-//       "totalPoints" in prevAmount &&
-//       "totalPoints" in props
-//     ) {
-//       if (
-//         prevAmount.totalPoints < props.totalPoints ||
-//         prevAmount.totalPositives - prevAmount.totalNegatives <
-//           props.totalPositives - props.totalNegatives
-//       ) {
-//         setPointsGained(true);
-//         setTimeout(() => {
-//           setPointsGained(false);
-//         }, 1000);
-//       } else if (
-//         prevAmount.totalPoints > props.totalPoints ||
-//         prevAmount.totalPositives - prevAmount.totalNegatives >
-//           props.totalPositives - props.totalNegatives
-//       ) {
-//         setPointsLost(true);
-//         setTimeout(() => {
-//           setPointsLost(false);
-//         }, 1000);
-//       }
-//     }
-//   }, [props.totalPoints, props.totalPositives, props.totalNegatives]);
-
-//   const openUserInfo = useCallback(() => {
-//     const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
-//     if (props.inUserBar) {
-//       setOpenToolbar(true);
-//       userUserInfoLogRef.set({
-//         uname: username,
-//         uInfo: username,
-//         createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-//       });
-//     } else {
-//       setSelectedUser(props.uname);
-//       setSelectedUserImageURL(props.imageUrl);
-//       setSelectedUserFullname(props.fullname);
-//       setSelectedUserChooseUname(props.chooseUname);
-//       setSelectionType("UserInfo");
-//       props.reloadPermanentGrpah();
-//       userUserInfoLogRef.set({
-//         uname: username,
-//         uInfo: props.uname,
-//         createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-//       });
-//     }
-//   }, [
-//     firebase,
-//     props.inUserBar,
-//     username,
-//     props.uname,
-//     props.imageUrl,
-//     props.fullname,
-//     props.chooseUname,
-//   ]);
-
-//   return (
-//     <div
-//       className={"SidebarButton Tooltip" + (props.inUserBar ? " inUserBar" : "")}
-//       onClick={openUserInfo}
-//     >
-//       <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
-//         <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" />
-//       </div>
-//       {!props.inNodeFooter && (
-//         <>
-//           <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-//           <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
-//             <i className="material-icons DoneIcon green-text">done</i>{" "}
-//             {/* <i className="material-icons">remove</i>{" "} */}
-//             {/* <i className="material-icons red-text">close</i>{" "} */}
-//             <span>{shortenNumber(props.totalPoints, 2, false)}</span>
-//             {props.inUserBar && tag && <div id="UserProfileButtonDefaultTag">{tag.title}</div>}
-//           </span>
-//           {/* <span className="UserStatusTotalAwards">
-//             <i className="material-icons amber-text">grade</i>{" "}
-//             <span>{shortenNumber(props.totalAwards, 2, false)}</span>
-//           </span> */}
-//         </>
-//       )}
-//       <span
-//         className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")}
-//         onClick={preventEventPropagation}
-//       >
-//         {props.inUserBar
-//           ? "Your profile settings"
-//           : props.chooseUname
-//           ? props.uname
-//           : props.fullname}
-//         {!("inNodeFooter" in props && props.inNodeFooter) &&
-//           "totalPositives" in props &&
-//           "totalNegatives" in props && (
-//             <>
-//               {/* {tag ? " ― " + tag.title : ""} */}
-//               <br></br>
-//               {shortenNumber(props.totalPositives, 2, false) + " "}
-//               <i className="material-icons DoneIcon green-text">done</i>
-//               {" ― "}
-//               {/* <i className="material-icons gray-text">remove</i>{" "} */}
-//               <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-//               <i className="material-icons red-text">close</i>
-//             </>
-//           )}
-//       </span>
-//     </div>
-//   );
-// };
-
-// export default React.memo(UserStatusIcon);

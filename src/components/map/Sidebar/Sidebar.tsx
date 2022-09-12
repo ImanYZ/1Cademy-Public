@@ -1,7 +1,7 @@
 // import "./Sidebar.css";
 import SearchIcon from "@mui/icons-material/Search";
 import { Button } from "@mui/material";
-import { collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
@@ -12,11 +12,13 @@ import notificationsLightTheme from "../../../../public/notifications-light-them
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-light-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
-import { FullNodeData } from "../../../noteBookTypes";
+import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
+import { MemoizedMetaButton } from "../MetaButton";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
 import Bookmarks from "./Bookmarks";
 import BookmarksButton from "./BookmarksButton";
+import MultipleChoiceBtn from "./MultipleChoiceBtn";
 import Notifications from "./Notifications";
 import { NotificationsButton } from "./NotificationsButton";
 import PendingProposalList from "./PendingProposalList";
@@ -38,6 +40,7 @@ import SearchList from "./SearchList";
 // import NotificationsImage from "../../../assets/Notifications.jpg";
 // import RefImage from "../../../assets/References.jpg";
 import { MemoizedSidebarWrapper } from "./SidebarWrapper";
+import UsersStatusList from "./UsersStatusList";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import Button from "@material-ui/core/Button";
 // import SearchIcon from "@material-ui/icons/Search";
@@ -118,7 +121,7 @@ import { MemoizedSidebarWrapper } from "./SidebarWrapper";
 // const CitationsList = React.lazy(() => import("./Citations/Citations"));
 // const UserInfo = React.lazy(() => import("./UsersStatus/UserInfo/UserInfo"));
 
-// const lBTypes = ["Weekly", "Monthly", "All Time", "Others' Votes", "Others Monthly"];
+const lBTypes = ["Weekly", "Monthly", "All Time", "Others' Votes", "Others Monthly"];
 
 type SidebarType = {
   // reputationsLoaded: any;
@@ -155,6 +158,7 @@ type SidebarType = {
   setSNode: any;
   selectedUser: any;
   allNodes: FullNodeData[];
+  reloadPermanentGrpah: any;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -235,13 +239,13 @@ const Sidebar = (props: SidebarType) => {
   const [openChat] = useState(false);
   // const [openNotifications] = useState(false);
   const [openToolbar] = useState(false);
-  const [tag] = useState(false);
+  // const [tag] = useState(false);
 
   // const [bookmarkedUserNodes, setBookmarkedUserNodes] = useState<any[]>([]);
   // const [openSearch] = useState(false);
   // const [openBookmarks] = useState(false);
-  // const [leaderboardType, setLeaderboardType] = useState("Weekly");
-  // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
+  const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
+  const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
 
   const sidebarRef = useRef<any | null>(null);
 
@@ -331,31 +335,39 @@ const Sidebar = (props: SidebarType) => {
   //   [firebase, username]
   // );
 
-  // const leaderboardTypesToggle = useCallback((event) => {
-  //   setLeaderboardTypeOpen((oldCLT) => !oldCLT);
-  // }, []);
+  const leaderboardTypesToggle = useCallback(() => {
+    setLeaderboardTypeOpen(oldCLT => !oldCLT);
+  }, []);
 
-  // const changeLeaderboard = useCallback(
-  //   (lBType) => (event) => {
-  //     setLeaderboardType(lBType);
-  //     setLeaderboardTypeOpen(false);
-  //     const userLeaderboardLogRef = firebase.db.collection("userLeaderboardLog").doc();
-  //     userLeaderboardLogRef.set({
-  //       uname: username,
-  //       type: lBType,
-  //       createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-  //     });
-  //   },
-  //   [firebase, username]
-  // );
+  const changeLeaderboard = useCallback(
+    async (lBType: any, username: string) => {
+      console.log("==>> changeLeaderboard", lBType, username);
+      setLeaderboardType(lBType);
+      setLeaderboardTypeOpen(false);
 
-  // const choices = useMemo(
-  //   () =>
-  //     lBTypes.map((lBType) => {
-  //       return { label: lBType, choose: changeLeaderboard(lBType) };
-  //     }),
-  //   [changeLeaderboard]
-  // );
+      await addDoc(collection(db, "userLeaderboardLog"), {
+        uname: username,
+        type: lBType,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+
+      // const userLeaderboardLogRef = firebase.db.collection("userLeaderboardLog").doc();
+      // userLeaderboardLogRef.set({
+      //   uname: username,
+      //   type: lBType,
+      //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+      // });
+    },
+    [db]
+  );
+
+  const choices = useMemo((): { label: string; choose: any }[] => {
+    if (!user) return [];
+
+    return lBTypes.map(lBType => {
+      return { label: lBType, choose: () => changeLeaderboard(lBType, user.uname) };
+    });
+  }, [changeLeaderboard, user]);
 
   // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
 
@@ -429,8 +441,8 @@ const Sidebar = (props: SidebarType) => {
             <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={20} />
             <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
             <PendingProposalsButton openSideBar={openSideBar} />
-            {/*
-          <PresentationsButton openSideBar={openSideBar} />
+
+            {/* <PresentationsButton openSideBar={openSideBar} />
           <MemoizedMetaButton
             onClick={openSideBarClick("Chat")}
             // tooltip="Click to open the chat room."
@@ -438,52 +450,55 @@ const Sidebar = (props: SidebarType) => {
           >
             <i className="material-icons material-icons--outlined">forum</i>
             <span className="SidebarDescription">Chat</span>
-          </MemoizedMetaButton>
-          {tag && (
-            <>
-              <MemoizedMetaButton
-                onClick={leaderboardTypesToggle}
-                // tooltip={
-                //   "Click to " +
-                //   (props.usersStatus ? "hide" : "show") +
-                //   " the user contribution trends."
-                // }
-                // tooltipPosition="Right"
-              >
-                <div className="LeaderbaordIcon">🏆</div>
-                {!props.reputationsLoaded && (
-                  <div className="preloader-wrapper small active">
-                    <div className="spinner-layer spinner-yellow-only">
-                      <div className="circle-clipper left">
-                        <div className="circle"></div>
+          </MemoizedMetaButton> */}
+            {user?.tag && (
+              <>
+                <MemoizedMetaButton
+                  onClick={leaderboardTypesToggle}
+                  // tooltip={
+                  //   "Click to " +
+                  //   (props.usersStatus ? "hide" : "show") +
+                  //   " the user contribution trends."
+                  // }
+                  // tooltipPosition="Right"
+                >
+                  <>
+                    <div className="LeaderbaordIcon">🏆</div>
+                    {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
+                    {/* {!props.reputationsLoaded && (
+                      <div className="preloader-wrapper small active">
+                        <div className="spinner-layer spinner-yellow-only">
+                          <div className="circle-clipper left">
+                            <div className="circle"></div>
+                          </div>
+                          <div className="gap-patch">
+                            <div className="circle"></div>
+                          </div>
+                          <div className="circle-clipper right">
+                            <div className="circle"></div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="gap-patch">
-                        <div className="circle"></div>
-                      </div>
-                      <div className="circle-clipper right">
-                        <div className="circle"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    )} */}
 
-                <div id="LeaderboardChanger" className="SidebarDescription">
-                  <div id="LeaderboardTag">{tag.title}</div>
-                  <div id="LeaderboardType">{leaderboardType ? leaderboardType : "Leaderboard"}</div>
-                </div>
-              </MemoizedMetaButton>
-              {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
-              {leaderboardType && (
-                <UsersStatusList
-                  reputationsLoaded={props.reputationsLoaded}
-                  reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
-                  reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
-                  reloadPermanentGrpah={props.reloadPermanentGrpah}
-                  usersStatus={leaderboardType}
-                />
-              )}
-            </>
-          )} */}
+                    <div id="LeaderboardChanger" className="SidebarDescription">
+                      <div id="LeaderboardTag">{user.tag}</div>
+                      <div id="LeaderboardType">{leaderboardType ? leaderboardType : "Leaderboard"}</div>
+                    </div>
+                  </>
+                </MemoizedMetaButton>
+                {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
+                {leaderboardType && (
+                  <UsersStatusList
+                    // reputationsLoaded={props.reputationsLoaded}
+                    // reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
+                    // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
+                    // reloadPermanentGrpah={props.reloadPermanentGrpah}
+                    usersStatus={leaderboardType}
+                  />
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -549,10 +564,7 @@ const Sidebar = (props: SidebarType) => {
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              <>
-                <h4 style={{ textAlign: "center" }}>-- Pending Proposals Sidebar --</h4>
-                <PendingProposalList openLinkedNode={props.openLinkedNode} />
-              </>
+              <PendingProposalList openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : openChat ? (
             <MemoizedSidebarWrapper
