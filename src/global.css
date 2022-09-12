@@ -973,8 +973,8 @@
 #SidebarButtonsContainer:focus #UsersStatusList,
 #SidebarButtonsContainer:hover #UsersStatusList {
   margin-left: -7px;
-  margin-right: -400px;
-  padding-right: 400px;
+  /* margin-right: -400px;
+  padding-right: 400px; */
 }
 #SidebarButtonsContainer:focus #SidebarButtons .SidebarButton,
 #SidebarButtonsContainer:hover #SidebarButtons .SidebarButton {
