@@ -5,11 +5,6 @@ import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
 import { UsersStatus } from "../../../noteBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
-// import { useRecoilValue } from "recoil";
-
-// import { firebaseState, tagIdState } from "../../../../../store/AuthAtoms";
-// import { loadReputationsData } from "../../../MapUtils";
-// import UserStatusIcon from "../UserStatusIcon/UserStatusIcon";
 
 const scale = 1;
 
@@ -87,8 +82,6 @@ type UsersStatusListProps = {
 const UsersStatusList = (props: UsersStatusListProps) => {
   const [{ user }] = useAuth();
   const db = getFirestore();
-  // const firebase = useRecoilValue(firebaseState);
-  // const tagId = useRecoilValue(tagIdState);
 
   const [usersDict, setUsersDict] = useState<{ [key: string]: any }>({});
   const [usersDictLoaded, setUsersDictLoaded] = useState(false);
@@ -229,24 +222,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
         }
         setUsersOnlineStatusLoaded(true);
       });
-      // const usersStatusSnapshot = usersStatusQuery.onSnapshot(function (snapshot) {
-      //   const docChanges = snapshot.docChanges();
-      //   if (docChanges.length > 0) {
-      //     setOnlineUsers(oOnlineUsers => {
-      //       const onlineUsersSet = new Set(oOnlineUsers);
-      //       for (let change of docChanges) {
-      //         const { user } = change.doc.data();
-      //         if (change.type === "removed") {
-      //           onlineUsersSet.delete(user);
-      //         } else if (change.type === "added" || change.type === "modified") {
-      //           onlineUsersSet.add(user);
-      //         }
-      //       }
-      //       return [...onlineUsersSet];
-      //     });
-      //   }
-      //   setUsersOnlineStatusLoaded(true);
-      // });
       return () => usersStatusSnapshot();
     }
   }, [db, reputationsOthersMonthlyLoaded]);
