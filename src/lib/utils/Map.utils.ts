@@ -1,4 +1,5 @@
 import dagre from "dagre";
+import { collection, Firestore, onSnapshot, query, where } from "firebase/firestore";
 
 import { FullNodeData } from "../../noteBookTypes";
 
@@ -41,10 +42,10 @@ const firstMonthDay = (thisDate?: any) => {
 };
 
 export const loadReputationsData = (
-  db: any,
-  isCommunity: any,
+  db: Firestore,
+  isCommunity: boolean,
   reputationType: any,
-  tagId: any,
+  tagId: string,
   setReputationsDict: any,
   setReputationsLoaded: any
 ) => {
@@ -53,41 +54,67 @@ export const loadReputationsData = (
 
   if (isCommunity) {
     if (reputationType === "All Time") {
-      reputationsQuery = db.collection("comPoints");
+      reputationsQuery = query(collection(db, "comPoints"));
+      // reputationsQuery = db.collection("comPoints");
     } else if (reputationType === "Monthly") {
-      reputationsQuery = db.collection("comMonthlyPoints").where("firstMonthDay", "==", firstMonthDay());
+      reputationsQuery = query(collection(db, "comMonthlyPoints"), where("firstMonthDay", "==", firstMonthDay()));
+      // reputationsQuery = db.collection("comMonthlyPoints").where("firstMonthDay", "==", firstMonthDay());
     } else if (reputationType === "Weekly") {
-      reputationsQuery = db.collection("comWeeklyPoints").where("firstWeekDay", "==", firstWeekDay());
+      reputationsQuery = query(collection(db, "comWeeklyPoints"), where("firstWeekDay", "==", firstWeekDay()));
+      // reputationsQuery = db.collection("comWeeklyPoints").where("firstWeekDay", "==", firstWeekDay());
     } else if (reputationType === "Others") {
-      reputationsQuery = db.collection("comOthersPoints");
+      reputationsQuery = query(collection(db, "comOthersPoints"));
+      // reputationsQuery = db.collection("comOthersPoints");
     } else if (reputationType === "Others Monthly") {
-      reputationsQuery = db.collection("comOthMonPoints").where("firstMonthDay", "==", firstMonthDay());
+      reputationsQuery = query(collection(db, "comOthMonPoints"), where("firstMonthDay", "==", firstMonthDay()));
+      // reputationsQuery = db.collection("comOthMonPoints").where("firstMonthDay", "==", firstMonthDay());
     }
   } else {
     if (reputationType === "All Time") {
-      reputationsQuery = db.collection("reputations").where("tagId", "==", tagId);
+      reputationsQuery = query(collection(db, "reputations"), where("tagId", "==", tagId));
+      // reputationsQuery = db.collection("reputations").where("tagId", "==", tagId);
     } else if (reputationType === "Monthly") {
-      reputationsQuery = db
-        .collection("monthlyReputations")
-        .where("tagId", "==", tagId)
-        .where("firstMonthDay", "==", firstMonthDay());
+      reputationsQuery = query(
+        collection(db, "monthlyReputations"),
+        where("tagId", "==", tagId),
+        where("firstMonthDay", "==", firstMonthDay())
+      );
+      // reputationsQuery = db
+      //   .collection("monthlyReputations")
+      //   .where("tagId", "==", tagId)
+      //   .where("firstMonthDay", "==", firstMonthDay());
     } else if (reputationType === "Weekly") {
       //  return here and change tag to tagId, after updating values in database
-      reputationsQuery = db
-        .collection("weeklyReputations")
-        .where("tagId", "==", tagId)
-        .where("firstWeekDay", "==", firstWeekDay());
+      reputationsQuery = query(
+        collection(db, "weeklyReputations"),
+        where("tagId", "==", tagId),
+        where("firstWeekDay", "==", firstWeekDay())
+      );
+      // reputationsQuery = db
+      //   .collection("weeklyReputations")
+      //   .where("tagId", "==", tagId)
+      //   .where("firstWeekDay", "==", firstWeekDay());
     } else if (reputationType === "Others") {
-      reputationsQuery = db.collection("othersReputations").where("tagId", "==", tagId);
+      reputationsQuery = query(collection(db, "othersReputations"), where("tagId", "==", tagId));
+      // reputationsQuery = db.collection("othersReputations").where("tagId", "==", tagId);
     } else if (reputationType === "Others Monthly") {
-      reputationsQuery = db
-        .collection("othMonReputations")
-        .where("tagId", "==", tagId)
-        .where("firstMonthDay", "==", firstMonthDay());
+      reputationsQuery = query(
+        collection(db, "othMonReputations"),
+        where("tagId", "==", tagId),
+        where("firstMonthDay", "==", firstMonthDay())
+      );
+      // reputationsQuery = db
+      //   .collection("othMonReputations")
+      //   .where("tagId", "==", tagId)
+      //   .where("firstMonthDay", "==", firstMonthDay());
     }
   }
-  const reputationsSnapshot = reputationsQuery.onSnapshot(function (snapshot: any) {
+
+  if (!reputationsQuery) return;
+
+  const reputationsSnapshot = onSnapshot(reputationsQuery, async snapshot => {
     const docChanges = snapshot.docChanges();
+
     if (docChanges.length > 0) {
       for (let change of docChanges) {
         const reputationData = change.doc.data();

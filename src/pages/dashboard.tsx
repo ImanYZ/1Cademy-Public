@@ -379,6 +379,9 @@ const Dashboard = ({}: DashboardProps) => {
     edgesRef.current = edges;
   }, [edges]);
 
+  /**
+   * Will revert the graph from last changes (temporal Nodes or other changes)
+   */
   const reloadPermanentGraph = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]");
     // debugger;
@@ -2486,6 +2489,7 @@ const Dashboard = ({}: DashboardProps) => {
             selectionType={nodeBookState.selectionType}
             setSNode={setSNode}
             selectedUser={selectedUser}
+            reloadPermanentGrpah={reloadPermanentGraph}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
