@@ -951,7 +951,7 @@
   top: 0px;
   height: 100vh;
   padding-top: 10px;
-  /* padding-left: 22px; */
+  padding-left: 22px;
   z-index: 4;
   background-color: rgb(31, 31, 31);
   -webkit-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
@@ -988,7 +988,7 @@
 }
 #SidebarButtonsContainer:focus #SidebarButtons .Logo,
 #SidebarButtonsContainer:hover #SidebarButtons .Logo {
-  margin-left: 28px;
+  margin-left: -14px;
 }
 #SidebarButtonsContainer:focus #SearchButton,
 #SidebarButtonsContainer:hover #SearchButton {
@@ -1078,6 +1078,9 @@
 }
 
 #SidebarButtons .Logo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   margin-left: -13px;
   margin-top: -4px;
   margin-bottom: 4px;
@@ -1089,8 +1092,9 @@
 }
 #SidebarButtons .Logo .MetaButton {
   padding-top: 0px;
-  height: 91px;
-  width: 79px;
+  /*Check: I commented this*/
+  /* height: 91px; */
+  /* width: 79px; */
 }
 
 #SidebarButtons .preloader-wrapper {
@@ -2451,10 +2455,11 @@ button.MuiTab-textColorInherit:focus {
 #UsersStatusList {
   overflow-y: auto;
   overflow-x: visible;
-  direction: rtl;
+  /* direction: rtl; */
+  direction: ltr;
   margin-top: 0px;
   padding-top: 4px;
-  margin-left: -16px;
+  /* margin-left: -16px; */
   padding-left: 16px;
   transition: margin-left 1s; /* vendorless fallback */
   -o-transition: margin-left 1s; /* opera */
