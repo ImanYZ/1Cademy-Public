@@ -40,6 +40,7 @@ import SearchList from "./SearchList";
 // import NotificationsImage from "../../../assets/Notifications.jpg";
 // import RefImage from "../../../assets/References.jpg";
 import { MemoizedSidebarWrapper } from "./SidebarWrapper";
+import UserInfo from "./UserInfo";
 import UsersStatusList from "./UsersStatusList";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import Button from "@material-ui/core/Button";
@@ -639,9 +640,7 @@ const Sidebar = (props: SidebarType) => {
               closeSideBar={props.closeSideBar}
               noHeader={true}
             >
-              {/* CHECK: I commented this */}
-              {/* <UserInfo openLinkedNode={props.openLinkedNode} /> */}
-              <h2>UserInfo here</h2>
+              <UserInfo /*openLinkedNode={props.openLinkedNode}*/ />
             </MemoizedSidebarWrapper>
           ) : (
             <span />

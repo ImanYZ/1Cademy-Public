@@ -1,8 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import { Dispatch } from "react";
 
-// import { NodeType } from "./types";
-
 export type OpenPart = "LinkingWords" | "Tags" | "References" | null;
 
 export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
@@ -17,7 +15,14 @@ export type ChosenNode = {
   title: string;
 };
 
-export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | null;
+export type SelectedUser = {
+  username: string;
+  imageUrl: string;
+  fullName: string;
+  chooseUname: string;
+};
+
+export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | "UserInfo" | null;
 
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
@@ -27,7 +32,8 @@ export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "C
  * - selectedNode: node that is in focus (highlighted)
  * - selectionType: will result in pending proposals sidebar or accepted propsals sidebar opening
  * - selectedTags: list of tags used for searching
- * - choosingType: type of the selected option on choosing Node
+ * - openToolbar: to open user setting sidebar
+ * - selectedUser: to open user info sidebar
  */
 export interface NodeBookState {
   readonly sNode: string | null;
@@ -37,7 +43,8 @@ export interface NodeBookState {
   readonly selectedNode: string | null;
   readonly selectionType: SelectionType;
   readonly selectedTags: string[];
-  // readonly choosingType: ChoosingType;
+  readonly openToolbar: boolean;
+  readonly selectedUser: SelectedUser | null;
 }
 
 export type SetSNodeAction = {
@@ -75,10 +82,15 @@ export type SetSelectedTagsAction = {
   payload: string[];
 };
 
-// export type SetChoosingTypeAction = {
-//   type: "setChoosingType",
-//   payload: ChoosingType
-// }
+export type SetOpenToolbar = {
+  type: "setOpenToolbar";
+  payload: boolean;
+};
+
+export type SetSelectedUserAction = {
+  type: "setSelectedUser";
+  payload: SelectedUser | null;
+};
 
 export type DispatchNodeBookActions =
   | SetSNodeAction
@@ -87,8 +99,9 @@ export type DispatchNodeBookActions =
   | SetChosenNodeAction
   | SetSelectedNodeAction
   | SetSelectionTypeAction
-  | SetSelectedTagsAction;
-// | SetChoosingTypeAction
+  | SetSelectedTagsAction
+  | SetOpenToolbar
+  | SetSelectedUserAction;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
