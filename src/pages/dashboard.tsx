@@ -2017,7 +2017,7 @@ const Dashboard = ({}: DashboardProps) => {
           parents: [{ node: nodeBookState.selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType }],
           comments: 0,
           tags: [user.tag],
-          tagIds: [user.tagId], // CHECK: I added this
+          tagIds: [user.tagId], // CHECK: I added this, Check useUserState line 374
           title: "",
           wrongs: 0,
           corrects: 1,
@@ -2488,6 +2488,7 @@ const Dashboard = ({}: DashboardProps) => {
             selectedUser={selectedUser}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
+            openPendingProposals={openPendingProposals}
             setOpenChat={setOpenChat}
             setOpenNotifications={setOpenNotifications}
             openNotifications={openNotifications}
