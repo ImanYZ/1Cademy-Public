@@ -1,6 +1,7 @@
 // import "./UserInfo.css";
 
-import React, { useMemo, useState } from "react";
+import { getDocs, getFirestore, query, where } from "firebase/firestore";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
 // import { useRecoilValue } from "recoil";
@@ -20,7 +21,10 @@ import { useAuth } from "../../../context/AuthContext";
 // import shortenNumber from "../../../../../utils/shortenNumber";
 // import RoundImage from "../../../../PublicComps/RoundImage/RoundImage";
 import { useNodeBook } from "../../../context/NodeBookContext";
+import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
+import { justADate } from "../../../lib/utils/justADate";
 import shortenNumber from "../../../lib/utils/shortenNumber";
+import { NodeType } from "../../../types";
 import ProposalItem from "../ProposalsList/ProposalItem/ProposalItem";
 import RoundImage from "../RoundImage";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
@@ -30,6 +34,19 @@ import UseInfoTrends from "./UseInfoTrends";
 // import SidebarTabs from "../../SidebarTabs/SidebarTabs";
 // import UseInfoTrends from "./UseInfoTrends/UseInfoTrends";
 
+const NODE_TYPE_ARRAY: NodeType[] = [
+  "Concept",
+  "Code",
+  "Relation",
+  "Question",
+  "Profile",
+  "Sequel",
+  "Advertisement",
+  "Reference",
+  "News",
+  "Idea",
+];
+
 const UserInfo = (props: any) => {
   // const firebase = useRecoilValue(firebaseState);
   // const username = useRecoilValue(usernameState);
@@ -38,13 +55,14 @@ const UserInfo = (props: any) => {
   // // const selectedUserImageURL = useRecoilValue(selectedUserImageURLState);
   // // const selectedUserFullname = useRecoilValue(selectedUserFullnameState);
   // // const selectedUserChooseUname = useRecoilValue(selectedUserChooseUnameState);
+  const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
 
-  const [proposals /*setProposals*/] = useState<any[]>([]);
-  const [proposalsPerDay /*setProposalsPerDay*/] = useState<any[]>([]);
+  const [proposals, setProposals] = useState<any[]>([]);
+  const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
   // // const [proposalsTaggedPerDay, setProposalsTaggedPerDay] = useState([]);
-  const [isRetrieving /*setIsRetrieving*/] = useState(false);
+  const [isRetrieving, setIsRetrieving] = useState(false);
   const [sUserObj /*setSUserObj*/] = useState<any | null>(null);
 
   // useEffect(() => {
@@ -75,7 +93,6 @@ const UserInfo = (props: any) => {
             content: (
               <>
                 {/* <div className="ChartTitle">Nodes Contributed</div> */}
-                {/* <UseInfoTrends proposalsPerDay={proposalsPerDay} /> */}
                 <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={user.theme || ""} />
               </>
             ),
@@ -85,10 +102,15 @@ const UserInfo = (props: any) => {
             content: (
               <>
                 <div className="ChartTitle">Proposals in chronological order</div>
-                {proposals.map(proposal => {
+                {proposals.map((proposal, idx) => {
                   return (
                     proposal.title && (
-                      <ProposalItem proposal={proposal} openLinkedNode={props.openLinkedNode} showTitle={true} />
+                      <ProposalItem
+                        key={idx}
+                        proposal={proposal}
+                        openLinkedNode={props.openLinkedNode}
+                        showTitle={true}
+                      />
                     )
                   );
                 })}
@@ -96,149 +118,154 @@ const UserInfo = (props: any) => {
             ),
           },
         ];
-  }, [user]);
+  }, [proposals, proposalsPerDay, props.openLinkedNode, user]);
 
-  // const fetchProposals = useCallback(async () => {
-  //   setIsRetrieving(true);
-  //   const versions = {};
-  //   const versionsTagged = {};
-  //   for (let nodeType of [
-  //     "Concept",
-  //     "Code",
-  //     "Relation",
-  //     "Question",
-  //     "Profile",
-  //     "Sequel",
-  //     "Advertisement",
-  //     "Reference",
-  //     "News",
-  //     "Idea",
-  //   ]) {
-  //     const { versionsColl, userVersionsColl } = getTypedCollections(firebase.db, nodeType);
-  //     const versionsQuery = versionsColl.where("proposer", "==", selectedUser).where("deleted", "==", false);
-  //     const versionsData = await versionsQuery.get();
-  //     let versionId;
-  //     const userVersionsRefs = [];
-  //     versionsData.forEach(versionDoc => {
-  //       const versionData = versionDoc.data();
-  //       // let relatedTag = false;
-  //       // for (let tag of versionData.tags) {
-  //       //   if (tag.title === tag.title) {
-  //       //     relatedTag = true;
-  //       //     break;
-  //       //   }
-  //       // }
-  //       // if (relatedTag) {
-  //       //   versionsTagged[versionDoc.id] = {
-  //       //     ...versionData,
-  //       //     id: versionDoc.id,
-  //       //     createdAt: versionData.createdAt.toDate(),
-  //       //     award: false,
-  //       //     correct: false,
-  //       //     wrong: false,
-  //       //   };
-  //       //   delete versionsTagged[versionDoc.id].deleted;
-  //       //   delete versionsTagged[versionDoc.id].updatedAt;
-  //       // }
-  //       versions[versionDoc.id] = {
-  //         ...versionData,
-  //         id: versionDoc.id,
-  //         createdAt: versionData.createdAt.toDate(),
-  //         award: false,
-  //         correct: false,
-  //         wrong: false,
-  //       };
-  //       delete versions[versionDoc.id].deleted;
-  //       delete versions[versionDoc.id].updatedAt;
-  //       userVersionsRefs.push(userVersionsColl.where("version", "==", versionDoc.id).where("user", "==", username));
-  //     });
-  //     if (userVersionsRefs.length > 0) {
-  //       await Promise.all(
-  //         userVersionsRefs.map(async userVersionsRef => {
-  //           const userVersionsDocs = await userVersionsRef.get();
-  //           userVersionsDocs.forEach(userVersionsDoc => {
-  //             const userVersion = userVersionsDoc.data();
-  //             versionId = userVersion.version;
-  //             delete userVersion.version;
-  //             delete userVersion.updatedAt;
-  //             delete userVersion.createdAt;
-  //             delete userVersion.user;
-  //             versions[versionId] = {
-  //               ...versions[versionId],
-  //               ...userVersion,
-  //             };
-  //           });
-  //         })
-  //       );
-  //     }
-  //   }
-  //   // let orderredProposals = Object.values(versionsTagged).sort(
-  //   //   (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //   // );
-  //   // setProposals(orderredProposals);
-  //   // let proposalsPerDayDict = {};
-  //   // for (let propo of orderredProposals) {
-  //   //   let dateValue = justADate(new Date(propo.createdAt));
-  //   //   if (dateValue in proposalsPerDayDict) {
-  //   //     proposalsPerDayDict[dateValue].num++;
-  //   //     proposalsPerDayDict[dateValue].netVotes +=
-  //   //       propo.corrects - propo.wrongs;
-  //   //   } else {
-  //   //     proposalsPerDayDict[dateValue] = {
-  //   //       num: 1,
-  //   //       netVotes: propo.corrects - propo.wrongs,
-  //   //     };
-  //   //   }
-  //   // }
-  //   // let proposalsPerDayList = [];
-  //   // for (let dateValue of Object.keys(proposalsPerDayDict)) {
-  //   //   proposalsPerDayList.push({
-  //   //     date: new Date(dateValue),
-  //   //     num: proposalsPerDayDict[dateValue].num,
-  //   //     netVotes: proposalsPerDayDict[dateValue].netVotes,
-  //   //     averageVotes:
-  //   //       proposalsPerDayDict[dateValue].netVotes /
-  //   //       proposalsPerDayDict[dateValue].num,
-  //   //   });
-  //   // }
-  //   // setProposalsTaggedPerDay(proposalsPerDayList);
+  const fetchProposals = useCallback(async () => {
+    if (!nodeBookState.selectedUser) return;
+    if (!user) return;
 
-  //   const orderredProposals = Object.values(versions).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  //   const proposalsPerDayDict = {};
-  //   for (let propo of orderredProposals) {
-  //     let dateValue = justADate(new Date(propo.createdAt));
-  //     if (dateValue in proposalsPerDayDict) {
-  //       proposalsPerDayDict[dateValue].num++;
-  //       proposalsPerDayDict[dateValue].netVotes += propo.corrects - propo.wrongs;
-  //     } else {
-  //       proposalsPerDayDict[dateValue] = {
-  //         num: 1,
-  //         netVotes: propo.corrects - propo.wrongs,
-  //       };
-  //     }
-  //   }
-  //   const proposalsPerDayList = [];
-  //   for (let dateValue of Object.keys(proposalsPerDayDict)) {
-  //     proposalsPerDayList.push({
-  //       date: new Date(dateValue),
-  //       num: proposalsPerDayDict[dateValue].num,
-  //       netVotes: proposalsPerDayDict[dateValue].netVotes,
-  //       averageVotes: proposalsPerDayDict[dateValue].netVotes / proposalsPerDayDict[dateValue].num,
-  //     });
-  //   }
-  //   setProposals(orderredProposals);
-  //   setProposalsPerDay(proposalsPerDayList);
-  //   setIsRetrieving(false);
-  // }, [
-  //   firebase,
-  //   selectedUser,
-  //   // tag,
-  //   username,
-  // ]);
+    setIsRetrieving(true);
+    const versions: { [key: string]: any } = {};
+    // const versionsTagged = {};
+    for (let nodeType of NODE_TYPE_ARRAY) {
+      const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
 
-  // useEffect(() => {
-  //   fetchProposals();
-  // }, []);
+      if (!versionsColl || !userVersionsColl) continue;
+
+      const versionCollectionRef = query(
+        versionsColl,
+        where("proposer", "==", nodeBookState.selectedUser.username),
+        where("deleted", "==", false)
+      );
+
+      // const versionsQuery = versionsColl.where("proposer", "==", selectedUser).where("deleted", "==", false);
+      // const versionsData = await versionsQuery.get();
+      const versionsData = await getDocs(versionCollectionRef);
+      let versionId;
+      const userVersionsRefs: any[] = [];
+      versionsData.forEach(versionDoc => {
+        const versionData = versionDoc.data();
+        // let relatedTag = false;
+        // for (let tag of versionData.tags) {
+        //   if (tag.title === tag.title) {
+        //     relatedTag = true;
+        //     break;
+        //   }
+        // }
+        // if (relatedTag) {
+        //   versionsTagged[versionDoc.id] = {
+        //     ...versionData,
+        //     id: versionDoc.id,
+        //     createdAt: versionData.createdAt.toDate(),
+        //     award: false,
+        //     correct: false,
+        //     wrong: false,
+        //   };
+        //   delete versionsTagged[versionDoc.id].deleted;
+        //   delete versionsTagged[versionDoc.id].updatedAt;
+        // }
+        versions[versionDoc.id] = {
+          ...versionData,
+          id: versionDoc.id,
+          createdAt: versionData.createdAt.toDate(),
+          award: false,
+          correct: false,
+          wrong: false,
+        };
+        delete versions[versionDoc.id].deleted;
+        delete versions[versionDoc.id].updatedAt;
+        const userVersionCollectionRef = query(
+          userVersionsColl,
+          where("version", "==", versionDoc.id),
+          where("user", "==", user.uname)
+        );
+        userVersionsRefs.push(userVersionCollectionRef);
+      });
+
+      if (userVersionsRefs.length > 0) {
+        await Promise.all(
+          userVersionsRefs.map(async userVersionsRef => {
+            const userVersionsDocs = await getDocs(userVersionsRef);
+            userVersionsDocs.forEach((userVersionsDoc: any) => {
+              const userVersion = userVersionsDoc.data();
+              versionId = userVersion.version;
+              delete userVersion.version;
+              delete userVersion.updatedAt;
+              delete userVersion.createdAt;
+              delete userVersion.user;
+              versions[versionId] = {
+                ...versions[versionId],
+                ...userVersion,
+              };
+            });
+          })
+        );
+      }
+    }
+    // let orderredProposals = Object.values(versionsTagged).sort(
+    //   (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    // );
+    // setProposals(orderredProposals);
+    // let proposalsPerDayDict = {};
+    // for (let propo of orderredProposals) {
+    //   let dateValue = justADate(new Date(propo.createdAt));
+    //   if (dateValue in proposalsPerDayDict) {
+    //     proposalsPerDayDict[dateValue].num++;
+    //     proposalsPerDayDict[dateValue].netVotes +=
+    //       propo.corrects - propo.wrongs;
+    //   } else {
+    //     proposalsPerDayDict[dateValue] = {
+    //       num: 1,
+    //       netVotes: propo.corrects - propo.wrongs,
+    //     };
+    //   }
+    // }
+    // let proposalsPerDayList = [];
+    // for (let dateValue of Object.keys(proposalsPerDayDict)) {
+    //   proposalsPerDayList.push({
+    //     date: new Date(dateValue),
+    //     num: proposalsPerDayDict[dateValue].num,
+    //     netVotes: proposalsPerDayDict[dateValue].netVotes,
+    //     averageVotes:
+    //       proposalsPerDayDict[dateValue].netVotes /
+    //       proposalsPerDayDict[dateValue].num,
+    //   });
+    // }
+    // setProposalsTaggedPerDay(proposalsPerDayList);
+
+    const orderredProposals = Object.values(versions).sort(
+      (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+    );
+    const proposalsPerDayDict: { [key: string]: any } = {};
+    for (let propo of orderredProposals) {
+      let dateValue = justADate(new Date(propo.createdAt)).toISOString();
+      if (dateValue in proposalsPerDayDict) {
+        proposalsPerDayDict[dateValue].num++;
+        proposalsPerDayDict[dateValue].netVotes += propo.corrects - propo.wrongs;
+      } else {
+        proposalsPerDayDict[dateValue] = {
+          num: 1,
+          netVotes: propo.corrects - propo.wrongs,
+        };
+      }
+    }
+    const proposalsPerDayList = [];
+    for (let dateValue of Object.keys(proposalsPerDayDict)) {
+      proposalsPerDayList.push({
+        date: new Date(dateValue),
+        num: proposalsPerDayDict[dateValue].num,
+        netVotes: proposalsPerDayDict[dateValue].netVotes,
+        averageVotes: proposalsPerDayDict[dateValue].netVotes / proposalsPerDayDict[dateValue].num,
+      });
+    }
+    setProposals(orderredProposals);
+    setProposalsPerDay(proposalsPerDayList);
+    setIsRetrieving(false);
+  }, [db, nodeBookState.selectedUser, user]);
+
+  useEffect(() => {
+    fetchProposals();
+  }, [fetchProposals]);
 
   // useEffect(() => {
   //   const fetchUserData = async () => {
@@ -342,7 +369,8 @@ const UserInfo = (props: any) => {
           <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems} />
         ) : (
           <div className="CenterredLoadingImageSidebar">
-            <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
+            <h1>Loading...</h1>
+            {/* <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" /> */}
           </div>
         )}
       </div>

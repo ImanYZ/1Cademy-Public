@@ -3,6 +3,7 @@
 import React, { ReactNode, useEffect, useState } from "react";
 // import { useRecoilValue } from "recoil";
 import {
+  ScaleName,
   VictoryAxis,
   VictoryBar,
   VictoryBrushContainer,
@@ -20,8 +21,8 @@ type TrendsPlotRowProps = {
   trendData: any[];
   x: string;
   y: string;
-  scaleX: string;
-  scaleY: string;
+  scaleX: ScaleName;
+  scaleY: ScaleName;
   labelX: string;
   labelY: string;
   width: number;
@@ -48,7 +49,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
         x: [twoThirdValue, oneThirdValue],
       });
     }
-  }, [props.trendData]);
+  }, [props.trendData, props.x]);
 
   return (
     <div className="TrendPlotRow">
@@ -59,13 +60,16 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
         height={props.heightTop}
         theme={VictoryTheme.material}
         domainPadding={25}
-        scale={{ x: props.scaleX }}
+        // scale={{ x: props.scaleX }}
+        // scale={{props.scaleX}}
+        scale={{ x: props.scaleX, y: "linear" }}
         containerComponent={
           <VictoryZoomContainer zoomDimension="x" zoomDomain={zoomDomain} onZoomDomainChange={setZoomDomain} />
         }
       >
         <VictoryAxis
-          scale={{ x: props.scaleX }}
+          // scale={{ x: props.scaleX }}
+          scale={props.scaleX}
           label={props.labelX}
           axisLabelComponent={<VictoryLabel dy={25} />}
           style={{
@@ -77,7 +81,8 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
         />
         <VictoryAxis
           dependentAxis
-          scale={{ y: props.scaleY }}
+          // scale={{ y: props.scaleY }}
+          scale={props.scaleY}
           label={props.labelY}
           axisLabelComponent={<VictoryLabel dy={-40} />}
           style={{
@@ -102,7 +107,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
         height={props.heightBottom}
         theme={VictoryTheme.material}
         domainPadding={25}
-        scale={{ x: props.scaleX }}
+        // scale={{ x: props.scaleX }}
         containerComponent={
           <VictoryBrushContainer
             brushDimension="x"
@@ -117,7 +122,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
         }
       >
         <VictoryAxis
-          scale={{ x: props.scaleX }}
+          scale={props.scaleX}
           style={{
             tickLabels: {
               fontSize: 13,
