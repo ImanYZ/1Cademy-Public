@@ -587,7 +587,7 @@ const Sidebar = (props: SidebarType) => {
             >
               <Notifications openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
-          ) : openToolbar && tag ? (
+          ) : openToolbar && user?.tag ? (
             <MemoizedSidebarWrapper
               headerImage=""
               title=""
