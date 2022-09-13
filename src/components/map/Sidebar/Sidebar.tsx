@@ -495,6 +495,7 @@ const Sidebar = (props: SidebarType) => {
                     // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
                     // reloadPermanentGrpah={props.reloadPermanentGrpah}
                     usersStatus={leaderboardType}
+                    reloadPermanentGraph={props.reloadPermanentGrpah}
                   />
                 )}
               </>

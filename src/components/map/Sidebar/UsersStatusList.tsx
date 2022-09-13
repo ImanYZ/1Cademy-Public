@@ -81,6 +81,7 @@ const usersListObjFromReputationObj = (user: any, userReputation: any, uname: st
 
 type UsersStatusListProps = {
   usersStatus: UsersStatus;
+  reloadPermanentGraph: any;
 };
 
 const UsersStatusList = (props: UsersStatusListProps) => {
@@ -129,14 +130,8 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   useEffect(() => {
     if (!user) return;
 
-    // if (firebase) {
-    // console.log("In tagId useEffect");
     const usersDictTemp: { [key: string]: any } = {};
-
     const usersQuery = query(collection(db, "users"), where("tagId", "==", user.tagId));
-
-    // const usersQuery = firebase.db.collection("users").where("tagId", "==", user.tagId);
-
     const usersSnapshot = onSnapshot(usersQuery, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
@@ -157,27 +152,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
       setUsersDict({ ...usersDictTemp });
       setUsersDictLoaded(true);
     });
-
-    // const usersSnapshot = usersQuery.onSnapshot(function (snapshot) {
-    //   const docChanges = snapshot.docChanges();
-    //   if (docChanges.length > 0) {
-    //     for (let change of docChanges) {
-    //       if (change.type === "added" || change.type === "modified") {
-    //         const userId = change.doc.id;
-    //         const { fName, lName, createdAt, imageUrl, chooseUname, uname } = change.doc.data();
-    //         usersDictTemp[uname] = {
-    //           createdAt,
-    //           imageUrl,
-    //           fullname: fName + " " + lName,
-    //           chooseUname,
-    //           userId,
-    //         };
-    //       }
-    //     }
-    //     setUsersDict({ ...usersDictTemp });
-    //     setUsersDictLoaded(true);
-    //   }
-    // });
     return () => usersSnapshot();
     // }
   }, [db, user]);
@@ -366,6 +340,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
     }
   }, [usersOnlineStatusLoaded, reputationsOthersMonthlyDict, props.usersStatus, loadReputationPoints]);
 
+  console.log("  -->> uList", usersList);
   const renderUsersList = useCallback((uList: any[], online: boolean) => {
     return uList.map((user: any) => (
       <MemoizedUserStatusIcon
@@ -381,6 +356,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
         inUserBar={false}
         inNodeFooter={false}
         reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
+        tagTitle={user.tag}
       />
     ));
   }, []);

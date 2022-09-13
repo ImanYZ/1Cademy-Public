@@ -20,6 +20,7 @@ type UserStatusIconProps = {
   totalPositives?: any;
   totalNegatives?: any;
   totalPoints?: any;
+  tagTitle?: string;
 };
 
 const UserStatusIcon = (props: UserStatusIconProps) => {
@@ -105,19 +106,21 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     title += props.inUserBar ? "Your profile settings" : props.chooseUname ? props.uname : props.fullname;
 
     if (!("inNodeFooter" in props && props.inNodeFooter) && "totalPositives" in props && "totalNegatives" in props) {
-      <>
-        <span>{title}</span>
-        {/* {tag ? " ― " + tag.title : ""} */}
-        <br></br>
-        {shortenNumber(props.totalPositives, 2, false) + " "}
-        {/* <i className="material-icons DoneIcon green-text">done</i> */}
-        <DoneIcon className="material-icons DoneIcon green-text" />
-        {" ― "}
-        {/* <i className="material-icons gray-text">remove</i>{" "} */}
-        <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-        <CloseIcon className="material-icons red-text" />
-        {/* <i className="material-icons red-text">close</i> */}
-      </>;
+      return (
+        <>
+          <span>{title}</span>
+          {/* {tag ? " ― " + tag.title : ""} */}
+          <br></br>
+          {shortenNumber(props.totalPositives, 2, false) + " "}
+          {/* <i className="material-icons DoneIcon green-text">done</i> */}
+          <DoneIcon className="material-icons DoneIcon green-text" />
+          {" ― "}
+          {/* <i className="material-icons gray-text">remove</i>{" "} */}
+          <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
+          <CloseIcon className="material-icons red-text" />
+          {/* <i className="material-icons red-text">close</i> */}
+        </>
+      );
     }
 
     return <span>{title}</span>;
@@ -128,7 +131,6 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
       <div className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")} onClick={openUserInfo}>
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
           {/* <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" /> */}
-          {/* <img src={props.imageUrl} alt="s" width={"30px"} /> */}
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
@@ -141,31 +143,11 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
             <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
             <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
               <DoneIcon className="material-icons DoneIcon green-text" />
-              {/* <i className="material-icons">remove</i>{" "} */}
-              {/* <i className="material-icons red-text">close</i>{" "} */}
               <span>{shortenNumber(props.totalPoints, 2, false)}</span>
-              {/* CHECK:I commented this, please uncomment */}
-              {/* {props.inUserBar && tag && <div id="UserProfileButtonDefaultTag">{tag.title}</div>} */}
+              {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
             </span>
-            {/* <span className="UserStatusTotalAwards">
-            <i className="material-icons amber-text">grade</i>{" "}
-            <span>{shortenNumber(props.totalAwards, 2, false)}</span>
-          </span> */}
           </>
         )}
-        {/* <span className={"TooltipText " + (props.inNodeFooter ? "Top" : "Right")} onClick={preventEventPropagation}>
-          {props.inUserBar && "Your profile settings"}
-          {!("inNodeFooter" in props && props.inNodeFooter) && "totalPositives" in props && "totalNegatives" in props && (
-            <>
-              <br></br>
-              {shortenNumber(props.totalPositives, 2, false) + " "}
-              <DoneIcon className="material-icons DoneIcon green-text" />
-              {" ― "}
-              <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-              <CloseIcon className="material-icons red-text" />
-            </>
-          )}
-        </span> */}
       </div>
     </Tooltip>
   );
