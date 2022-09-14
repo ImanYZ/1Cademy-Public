@@ -1,8 +1,11 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import { Tooltip } from "@mui/material";
+import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { useAuth } from "../../context/AuthContext";
+import { useNodeBook } from "../../context/NodeBookContext";
 import usePrevious from "../../hooks/usePrevious";
 // import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
@@ -24,6 +27,9 @@ type UserStatusIconProps = {
 };
 
 const UserStatusIcon = (props: UserStatusIconProps) => {
+  const db = getFirestore();
+  const [{ user }] = useAuth();
+  const { nodeBookDispatch } = useNodeBook();
   const [pointsGained, setPointsGained] = useState(false);
   const [pointsLost, setPointsLost] = useState(false);
 
@@ -67,28 +73,61 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
 
   const openUserInfo = useCallback(
     () => {
+      if (!user) return;
+
+      const userUserInfoCollection = collection(db, "userUserInfoLog");
+
       // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
-      // if (props.inUserBar) {
-      //   setOpenToolbar(true);
-      //   userUserInfoLogRef.set({
-      //     uname: username,
-      //     uInfo: username,
-      //     createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      //   });
-      // } else {
-      //   setSelectedUser(props.uname);
-      //   setSelectedUserImageURL(props.imageUrl);
-      //   setSelectedUserFullname(props.fullname);
-      //   setSelectedUserChooseUname(props.chooseUname);
-      //   setSelectionType("UserInfo");
-      //   props.reloadPermanentGrpah();
-      //   userUserInfoLogRef.set({
-      //     uname: username,
-      //     uInfo: props.uname,
-      //     createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      //   });
-      // }
-      console.log("openUserInfo");
+      if (props.inUserBar) {
+        // Open Toollbar (user setting sidebar)
+        nodeBookDispatch({ type: "setOpenToolbar", payload: true });
+        // setOpenToolbar(true);
+
+        addDoc(userUserInfoCollection, {
+          uname: user.uname,
+          uInfo: user.uname,
+          createdAt: Timestamp.fromDate(new Date()),
+        });
+
+        // userUserInfoLogRef.set({
+        //   uname: username,
+        //   uInfo: username,
+        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+        // });
+      } else {
+        // Open user info sidebar
+        nodeBookDispatch({
+          type: "setSelectedUser",
+          payload: {
+            username: props.uname,
+            imageUrl: props.imageUrl,
+            fullName: props.fullname,
+            chooseUname: props.chooseUname,
+          },
+        });
+
+        // setSelectedUser(props.uname);
+        // setSelectedUserImageURL(props.imageUrl);
+        // setSelectedUserFullname(props.fullname);
+        // setSelectedUserChooseUname(props.chooseUname);
+        nodeBookDispatch({
+          type: "setSelectionType",
+          payload: "UserInfo",
+        });
+        // setSelectionType("UserInfo");
+        props.reloadPermanentGrpah();
+        addDoc(userUserInfoCollection, {
+          uname: user.uname,
+          uInfo: props.uname,
+          createdAt: Timestamp.fromDate(new Date()),
+        });
+        // userUserInfoLogRef.set({
+        //   uname: username,
+        //   uInfo: props.uname,
+        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+        // });
+      }
+      // console.log("openUserInfo");
     },
     [
       // firebase,

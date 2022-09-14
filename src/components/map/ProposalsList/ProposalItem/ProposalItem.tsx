@@ -54,7 +54,7 @@ const ProposalItem = (props: any) => {
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal unhelpful."
             tooltipPosition="bottom-start"
-            onClick={props.rateProposal}
+            // onClick={props.rateProposal} // CHECK: check this
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <CloseIcon fontSize="small" className={props.proposal.wrong ? "red-text" : "grey-text"} />
@@ -64,7 +64,7 @@ const ProposalItem = (props: any) => {
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal helpful."
             tooltipPosition="bottom-start"
-            onClick={props.rateProposal}
+            // onClick={props.rateProposal} // CHECK: check this
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <DoneIcon fontSize="small" className={props.proposal.correct ? "green-text" : "grey-text"} />
@@ -74,7 +74,7 @@ const ProposalItem = (props: any) => {
           <MemoizedMetaButton
             tooltip="# of 1Admins who have awarded this proposal."
             tooltipPosition="bottom-start"
-            onClick={props.rateProposal}
+            // onClick={props.rateProposal} // CHECK: check this
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <GradeIcon fontSize="small" className={props.proposal.award ? "amber-text" : "grey-text"} />
