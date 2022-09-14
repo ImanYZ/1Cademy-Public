@@ -9,6 +9,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
+import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { useAuth } from "../../../context/AuthContext";
 import { useNodeBook } from "../../../context/NodeBookContext";
 import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
@@ -354,8 +355,7 @@ const UserInfo = (props: any) => {
           <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems} />
         ) : (
           <div className="CenterredLoadingImageSidebar">
-            <h1>Loading...</h1>
-            {/* <img className="CenterredLoadingImage" src={LoadingImg} alt="Loading" /> */}
+            <img className="CenterredLoadingImage" src={LoadingImg.src} alt="Loading" />
           </div>
         )}
       </div>
