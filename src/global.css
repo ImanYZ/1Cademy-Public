@@ -990,6 +990,10 @@
 #SidebarButtonsContainer:hover #SidebarButtons .SidebarButton.inUserBar {
   width: 133px;
   left: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  top: 10px;
 }
 #SidebarButtonsContainer:focus #SidebarButtons .Logo,
 #SidebarButtonsContainer:hover #SidebarButtons .Logo {
@@ -1097,9 +1101,10 @@
 }
 #SidebarButtons .Logo .MetaButton {
   padding-top: 0px;
-  /*Check: I commented this*/
-  /* height: 91px; */
-  /* width: 79px; */
+  /* Check: I commented this */
+  height: 91px;
+  width: 79px;
+  margin: auto;
 }
 
 #SidebarButtons .preloader-wrapper {
@@ -2471,4 +2476,14 @@ button.MuiTab-textColorInherit:focus {
   -ms-transition: margin-left 1s; /* IE 10 */
   -moz-transition: margin-left 1s; /* Firefox */
   -webkit-transition: margin-left 1s; /*safari and chrome */
+}
+
+/* ----------------------------- */
+/* custom overrides */
+.customUserStatusTotalPoints {
+  display: none;
+}
+
+#SidebarButtonsContainer:hover .customUserStatusTotalPoints {
+  display: block;
 }

@@ -4,6 +4,7 @@ export const INITIAL_STATE: AuthState = {
   isAuthInitialized: false,
   isAuthenticated: false,
   user: null,
+  reputation: null,
 };
 
 function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
@@ -11,7 +12,7 @@ function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
     case "logoutSuccess":
       return { ...state, user: null, isAuthenticated: false, isAuthInitialized: true };
     case "loginSuccess":
-      return { ...state, user: { ...action.payload }, isAuthenticated: true, isAuthInitialized: true };
+      return { ...state, ...action.payload, isAuthenticated: true, isAuthInitialized: true };
   }
 }
 

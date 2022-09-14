@@ -10,6 +10,7 @@ import usePrevious from "../../hooks/usePrevious";
 // import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
+// import RoundImage from "./RoundImage";
 
 type UserStatusIconProps = {
   uname: string;
@@ -30,8 +31,8 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
-  const [pointsGained, setPointsGained] = useState(false);
-  const [pointsLost, setPointsLost] = useState(false);
+  const [/*pointsGained,*/ setPointsGained] = useState(false);
+  const [/*pointsLost,*/ setPointsLost] = useState(false);
 
   const prevAmount = usePrevious({
     totalPositives: props.totalPositives,
@@ -165,27 +166,64 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     return <span>{title}</span>;
   };
 
+  // return (
+  //   <Tooltip title={getTooltipTitle()} placement="top">
+  //     <div
+  //       className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
+  //       onClick={openUserInfo}
+  //       style={{ border: "dashed 2px pink" }}
+  //     >
+  //       <OptimizedAvatar
+  //         imageUrl={props.imageUrl}
+  //         renderAsAvatar={true}
+  //         contained={false}
+  //         sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
+  //       />
+  //       {!props.inNodeFooter && <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>}
+  //       {!props.inNodeFooter && (
+  //         <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
+  //           <DoneIcon className="material-icons DoneIcon green-text" />
+  //           <span>{shortenNumber(props.totalPoints, 2, false)}</span>
+  //           {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
+  //         </span>
+  //       )}
+  //     </div>
+  //   </Tooltip>
+  // );
+
+  // this is with changes in styles
   return (
     <Tooltip title={getTooltipTitle()} placement="top">
-      <div className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")} onClick={openUserInfo}>
-        <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
-          {/* <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" /> */}
+      <div
+        // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
+        className="SidebarButton"
+        onClick={openUserInfo}
+        style={{
+          // border: "dashed 2px pink",
+          display: "flex",
+          alignItems: "cemter",
+          justifyContent: "space-between",
+          padding: "5px 0px",
+        }}
+      >
+        <div>
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
-            sx={{ border: "none", width: "28px", height: "28px" }}
+            sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
           />
+          {!props.inNodeFooter && (
+            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+          )}
         </div>
         {!props.inNodeFooter && (
-          <>
-            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-            <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
-              <DoneIcon className="material-icons DoneIcon green-text" />
-              <span>{shortenNumber(props.totalPoints, 2, false)}</span>
-              {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
-            </span>
-          </>
+          // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
+          <div className={"customUserStatusTotalPoints"}>
+            <DoneIcon className="material-icons DoneIcon green-text" />
+            <span style={{ fontSize: "14px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
+            {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
+          </div>
         )}
       </div>
     </Tooltip>

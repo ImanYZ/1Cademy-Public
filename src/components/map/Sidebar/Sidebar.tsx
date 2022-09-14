@@ -6,6 +6,17 @@ import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
+// import ChatRoomImage from "../../../assets/ChatRoom.jpg";
+// import RecentNodesImage from "../../../assets/RecentNodes.jpg";
+// import RecentNodesLightModeImage from "../../../assets/lightmode_sort.jpg";
+// import Citations from "../../../assets/Citations.jpg";
+// import PresentationsImage from "../../../assets/darkmode_presentations.jpg";
+import LogoDarkMode from "../../../../public/LogoDarkMode.svg";
+// import BookmarksLightMode from "../../../assets/lightmode_bookmarks.jpg";
+// import NotificationsLightModeImage from "../../../assets/lightmode_notif.jpg";
+// import RefLightModeImage from "../../../assets/lightmode_pending.jpg";
+// import PresentationsLightModeImage from "../../../assets/lightmode_presentations.jpg";
+import LogoLightMode from "../../../../public/LogoLightMode.svg";
 import searcherHeaderImage from "../../../../public/Magnifier_Compas.jpg";
 import notificationsDarkTheme from "../../../../public/notifications-dark-theme.jpg";
 import notificationsLightTheme from "../../../../public/notifications-light-theme.jpg";
@@ -16,6 +27,7 @@ import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
 import { MemoizedMetaButton } from "../MetaButton";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";
+import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 import Bookmarks from "./Bookmarks";
 import BookmarksButton from "./BookmarksButton";
 import MultipleChoiceBtn from "./MultipleChoiceBtn";
@@ -24,17 +36,6 @@ import { NotificationsButton } from "./NotificationsButton";
 import PendingProposalList from "./PendingProposalList";
 import PendingProposalsButton from "./PendingProposalsButton";
 import SearchList from "./SearchList";
-// import ChatRoomImage from "../../../assets/ChatRoom.jpg";
-// import RecentNodesImage from "../../../assets/RecentNodes.jpg";
-// import RecentNodesLightModeImage from "../../../assets/lightmode_sort.jpg";
-// import Citations from "../../../assets/Citations.jpg";
-// import PresentationsImage from "../../../assets/darkmode_presentations.jpg";
-// import LogoDarkMode from "../../../assets/DarkModeLogo.svg";
-// import BookmarksLightMode from "../../../assets/lightmode_bookmarks.jpg";
-// import NotificationsLightModeImage from "../../../assets/lightmode_notif.jpg";
-// import RefLightModeImage from "../../../assets/lightmode_pending.jpg";
-// import PresentationsLightModeImage from "../../../assets/lightmode_presentations.jpg";
-// import LogoLightMode from "../../../assets/LightModeLogo.svg";
 // import SearchImage from "../../../assets/Magnifier_Compas.jpg";
 // import NewsWriters from "../../../assets/NewsWriters.jpg";
 // import NotificationsImage from "../../../assets/Notifications.jpg";
@@ -153,6 +154,7 @@ type SidebarType = {
   openBookmarks: boolean;
   setOpenRecentNodes: any;
   setOpenTrends: any;
+  openTrends: any;
   setOpenMedia: any;
   // --------------------------- Others
   selectionType: any;
@@ -231,7 +233,7 @@ const Sidebar = (props: SidebarType) => {
   // const selectedUser = useRecoilValue(selectedUserState);
   // const theme = useRecoilValue(themeState);
 
-  const [{ user }] = useAuth();
+  const [{ user, reputation }] = useAuth();
   const db = getFirestore();
 
   // const [selectionType] = useState("Proposals");
@@ -372,7 +374,7 @@ const Sidebar = (props: SidebarType) => {
 
   // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
 
-  const theme = "Dark";
+  let theme = "Dark";
 
   const isHide =
     props.selectionType ||
@@ -382,14 +384,16 @@ const Sidebar = (props: SidebarType) => {
     openPresentations ||
     openToolbar ||
     props.openSearch ||
+    props.openTrends ||
     props.openBookmarks; /* ||  //CHECK: I commented this
   openRecentNodes ||
-  openTrends ||
   openMedia*/
 
   const bookmarkUpdatesNum = useMemo(() => {
     return props.allNodes.filter(cur => cur.changed || !cur.isStudied).length;
   }, [props.allNodes]);
+
+  if (!user) return null;
 
   return (
     <>
@@ -408,42 +412,40 @@ const Sidebar = (props: SidebarType) => {
       >
         <div id="SidebarButtons">
           <div className="Logo">
-            {/* <MemoizedMetaButton
-              onClick={openSideBarClick("Trends")}
-              // tooltip="Click to open the trends in proposals."
-              // tooltipPosition="Right"
+            <MemoizedMetaButton
+            // onClick={openSideBarClick("Trends")} // CHECK: I commented this, the sidebar trends was commented
+            // tooltip="Click to open the trends in proposals."
+            // tooltipPosition="Right"
             >
-              <img src={theme === "Light" ? LogoLightMode : LogoDarkMode} alt="1Logo" width="61px" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
             </MemoizedMetaButton>
           </div>
-          <UserStatusIcon
-            uname={username}
-            totalPoints={totalPoints}
-            totalPositives={Positivess}
-            totalNegatives={Negatives}
-            imageUrl={imageUrl}
-            fullname={fName + " " + lName}
-            chooseUname={chooseUname}
-            online={isOnline}
+          <MemoizedUserStatusIcon
+            uname={user.uname}
+            totalPoints={reputation?.totalPoints || 0}
+            totalPositives={reputation?.positives || 0}
+            totalNegatives={reputation?.negatives || 0}
+            imageUrl={user.imageUrl || ""}
+            fullname={user.fName + " " + user.lName}
+            chooseUname={user.chooseUname}
+            // online={isOnline}
+            online={true} // TODO: get online state from useUserState useEffect
             inUserBar={true}
             inNodeFooter={false}
             reloadPermanentGrpah={props.reloadPermanentGrpah}
-          /> */}
-            {/* <Button id="SearchButton" onClick={openSideBarClick("Search")}>
+          />
+
+          <Button id="SearchButton" onClick={openSideBarClick("Search")}>
             <SearchIcon />
-
             <span className="SidebarDescription">Search</span>
-          </Button> */}
-            <Button id="SearchButton" onClick={openSideBarClick("Search")}>
-              <SearchIcon />
-              <span className="SidebarDescription">Search</span>
-            </Button>
+          </Button>
 
-            <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={20} />
-            <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
-            <PendingProposalsButton openSideBar={openSideBar} />
+          <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={20} />
+          <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
+          <PendingProposalsButton openSideBar={openSideBar} />
 
-            {/* <PresentationsButton openSideBar={openSideBar} />
+          {/* <PresentationsButton openSideBar={openSideBar} />
           <MemoizedMetaButton
             onClick={openSideBarClick("Chat")}
             // tooltip="Click to open the chat room."
@@ -452,21 +454,21 @@ const Sidebar = (props: SidebarType) => {
             <i className="material-icons material-icons--outlined">forum</i>
             <span className="SidebarDescription">Chat</span>
           </MemoizedMetaButton> */}
-            {user?.tag && (
-              <>
-                <MemoizedMetaButton
-                  onClick={leaderboardTypesToggle}
-                  // tooltip={
-                  //   "Click to " +
-                  //   (props.usersStatus ? "hide" : "show") +
-                  //   " the user contribution trends."
-                  // }
-                  // tooltipPosition="Right"
-                >
-                  <>
-                    <div className="LeaderbaordIcon">🏆</div>
-                    {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
-                    {/* {!props.reputationsLoaded && (
+          {user?.tag && (
+            <>
+              <MemoizedMetaButton
+                onClick={leaderboardTypesToggle}
+                // tooltip={
+                //   "Click to " +
+                //   (props.usersStatus ? "hide" : "show") +
+                //   " the user contribution trends."
+                // }
+                // tooltipPosition="Right"
+              >
+                <>
+                  <div className="LeaderbaordIcon">🏆</div>
+                  {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
+                  {/* {!props.reputationsLoaded && (
                       <div className="preloader-wrapper small active">
                         <div className="spinner-layer spinner-yellow-only">
                           <div className="circle-clipper left">
@@ -482,26 +484,25 @@ const Sidebar = (props: SidebarType) => {
                       </div>
                     )} */}
 
-                    <div id="LeaderboardChanger" className="SidebarDescription">
-                      <div id="LeaderboardTag">{user.tag}</div>
-                      <div id="LeaderboardType">{leaderboardType ? leaderboardType : "Leaderboard"}</div>
-                    </div>
-                  </>
-                </MemoizedMetaButton>
-                {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
-                {leaderboardType && (
-                  <UsersStatusList
-                    // reputationsLoaded={props.reputationsLoaded}
-                    // reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
-                    // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
-                    // reloadPermanentGrpah={props.reloadPermanentGrpah}
-                    usersStatus={leaderboardType}
-                    reloadPermanentGraph={props.reloadPermanentGrpah}
-                  />
-                )}
-              </>
-            )}
-          </div>
+                  <div id="LeaderboardChanger" className="SidebarDescription">
+                    <div id="LeaderboardTag">{user.tag}</div>
+                    <div id="LeaderboardType">{leaderboardType ? leaderboardType : "Leaderboard"}</div>
+                  </div>
+                </>
+              </MemoizedMetaButton>
+              {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
+              {leaderboardType && (
+                <UsersStatusList
+                  // reputationsLoaded={props.reputationsLoaded}
+                  // reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
+                  // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
+                  // reloadPermanentGrpah={props.reloadPermanentGrpah}
+                  usersStatus={leaderboardType}
+                  reloadPermanentGraph={props.reloadPermanentGrpah}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
 

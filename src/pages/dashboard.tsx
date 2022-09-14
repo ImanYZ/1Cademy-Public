@@ -2504,6 +2504,7 @@ const Dashboard = ({}: DashboardProps) => {
             openBookmarks={openBookmarks}
             setOpenRecentNodes={setOpenBookmarks}
             setOpenTrends={setOpenTrends}
+            openTrends={openTrends}
             setOpenMedia={setOpenMedia}
             allNodes={allNodes.filter(cur => cur.bookmarked)}
           />

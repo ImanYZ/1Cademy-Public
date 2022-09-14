@@ -376,10 +376,55 @@ export type User = {
   instit?: string;
 };
 
+export type Reputation = {
+  aCorrects: number;
+  aInst: number;
+  aWrongs: number;
+  cdCorrects: number;
+  cdInst: number;
+  cdWrongs: number;
+  cnCorrects: number;
+  cnInst: number;
+  cnWrongs: number;
+  createdAt: Date;
+  iCorrects: number;
+  iInst: number;
+  iWrongs: number;
+  isAdmin: boolean;
+  lterm: number;
+  ltermDay: number;
+  mCorrects: number;
+  mInst: number;
+  mWrongs: number;
+  nCorrects: number;
+  nInst: number;
+  nWrongs: number;
+  negatives: number;
+  pCorrects: number;
+  pInst: number;
+  pWrongs: number;
+  positives: number;
+  qCorrects: number;
+  qInst: number;
+  qWrongs: number;
+  rfCorrects: number;
+  rfInst: number;
+  rfWrongs: number;
+  sCorrects: number;
+  sInst: number;
+  sWrongs: number;
+  tag: string;
+  tagId: string;
+  totalPoints: number;
+  uname: string;
+  updatedAt: Date;
+};
+
 export interface AuthState {
   readonly isAuthenticated: boolean;
   readonly isAuthInitialized: boolean;
   readonly user: User | null;
+  readonly reputation: Reputation | null;
 }
 
 export type AuthActions = {
@@ -399,7 +444,7 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
-  payload: User;
+  payload: { user: User; reputation: Reputation };
 };
 export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
 

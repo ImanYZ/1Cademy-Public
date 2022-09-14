@@ -9,7 +9,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import { User } from "src/knowledgeTypes";
+import { Reputation, User } from "src/knowledgeTypes";
+
 export const signUp = async (name: string, email: string, password: string) => {
   const newUser = await createUserWithEmailAndPassword(getAuth(), email, password);
   await updateProfile(newUser.user, { displayName: name });
@@ -53,6 +54,7 @@ export const getIdToken = async (): Promise<string | undefined> => {
 
 export const retrieveAuthenticatedUser = async (userId: string) => {
   let user: User | null = null;
+  let reputationsData: Reputation | null = null;
   const db = getFirestore();
 
   const nodesRef = collection(db, "users");
@@ -90,7 +92,26 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       createdAt: userData.createdAt.toDate(),
       email: userData.email,
     };
+
+    const reputationRef = collection(db, "reputations");
+    const reputationQuery = query(
+      reputationRef,
+      where("uname", "==", userData.uname),
+      where("tagId", "==", userData.tagId),
+      limit(1)
+    );
+
+    const reputationsDoc = await getDocs(reputationQuery);
+    if (reputationsDoc.docs.length !== 0) {
+      const reputationDoc = reputationsDoc.docs[0];
+      reputationsData = reputationDoc.data() as Reputation;
+      // delete reputationsData.createdAt;
+      // delete reputationsData.updatedAt;
+      // delete reputationsData.tagId;
+      // delete reputationsData.tag;
+      // delete reputationsData.uname;
+    }
   }
 
-  return user;
+  return { user, reputation: reputationsData };
 };
