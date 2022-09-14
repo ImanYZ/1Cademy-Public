@@ -1,6 +1,6 @@
 const { db } = require("./admin_Knowledge");
 const fs = require("fs");
-
+const axios = require("axios");
 // On 1Cademy.com when users sign up, we do not make the corresponding changes
 // to the institutions collection. We should run this function every 25 hours in
 // a PubSub to assign these arrays.
@@ -14,7 +14,8 @@ exports.updateInstitutions = async () => {
   userDocs = [...userDocs.docs];
   for (let userDoc of userDocs) {
     const userData = userDoc.data();
-    if (!userData.institUpdated) {
+
+    if (userData.deInstit && !userData.institUpdated) {
       const domainName = userData.email.match("@(.+)$")[0];
       const instQuery = db.collection("institutions").where("name", "==", userData.deInstit).limit(1);
       await db.runTransaction(async t => {
@@ -22,14 +23,26 @@ exports.updateInstitutions = async () => {
         if (instDocs.docs.length > 0) {
           const instRef = db.collection("institutions").doc(instDocs.docs[0].id);
           const institData = instDocs.docs[0].data();
-          if (!institData.users.includes(userDoc.id)) {
+          if (institData.users) {
+            if (!institData.users.includes(userDoc.id)) {
+              const instDomains = [...institData.domains];
+              if (!instDomains.includes(domainName)) {
+                instDomains.push(domainName);
+              }
+              t.update(instRef, {
+                users: [...institData.users, userDoc.id],
+                usersNum: institData.usersNum + 1,
+                domains: instDomains
+              });
+            }
+          } else {
             const instDomains = [...institData.domains];
             if (!instDomains.includes(domainName)) {
               instDomains.push(domainName);
             }
             t.update(instRef, {
-              users: [...institData.users, userDoc.id],
-              usersNum: institData.usersNum + 1,
+              users: [userDoc.id],
+              usersNum: 1,
               domains: instDomains
             });
           }

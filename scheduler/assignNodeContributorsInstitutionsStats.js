@@ -37,28 +37,40 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
     // Retrieving all the nodes data and saving them in nodesData, so that we don't
     // need to retrieve them one by one, over and over again.
     const nodesData = {};
-    const nodeDocs = await db.collection("nodes").get();
-    for (let nodeDoc of nodeDocs.docs) {
-      const nodeData = nodeDoc.data();
-      nodesData[nodeDoc.id] = nodeData;
-      stats.nodes += 1;
-      stats.links +=
-        (nodeData.parents.length + nodeData.children.length) / 2 + nodeData.tags.length + nodeData.references.length;
-      for (let tag of nodeData.tags) {
-        if (tag.node in tags) {
-          tags[tag.node].push(nodeDoc.id);
-        } else {
-          tags[tag.node] = [];
+    const nodeDocsInitial = await db.collection("nodes").orderBy("createdAt").limit(1).get();
+    let lastVisibleNodeDoc = nodeDocsInitial.docs[nodeDocsInitial.docs.length - 1];
+    while (lastVisibleNodeDoc) {
+      const nodeDocs = await db
+        .collection("nodes")
+        .orderBy("createdAt")
+        .startAfter(lastVisibleNodeDoc)
+        .limit(10000)
+        .get();
+
+      for (let nodeDoc of nodeDocs.docs) {
+        const nodeData = nodeDoc.data();
+        nodesData[nodeDoc.id] = nodeData;
+        stats.nodes += 1;
+        stats.links +=
+          (nodeData.parents.length + nodeData.children.length) / 2 + nodeData.tags.length + nodeData.references.length;
+        for (let tag of nodeData.tags) {
+          if (tag.node in tags) {
+            tags[tag.node].push(nodeDoc.id);
+          } else {
+            tags[tag.node] = [];
+          }
+        }
+        for (let reference of nodeData.references) {
+          if (reference.node in references) {
+            references[reference.node].push(nodeDoc.id);
+          } else {
+            references[reference.node] = [];
+          }
         }
       }
-      for (let reference of nodeData.references) {
-        if (reference.node in references) {
-          references[reference.node].push(nodeDoc.id);
-        } else {
-          references[reference.node] = [];
-        }
-      }
+      lastVisibleNodeDoc = nodeDocs.docs[nodeDocs.docs.length - 1];
     }
+
     // We should retrieve all the accepted versions for all types of nodes.
     const nodeTypes = ["Concept", "Code", "Relation", "Question", "Reference", "Idea"];
     for (let nodeType of nodeTypes) {
