@@ -1,4 +1,4 @@
-const { db, commitBatch, batchSet, batchUpdate } = require("./admin_Knowledge");
+const { db, commitBatch, batchUpdate } = require("./admin_Knowledge");
 const { getTypedCollections } = require("./getTypedCollections");
 
 // On 1Cademy.com nodes do not have their list of contributors and institutions
@@ -190,8 +190,8 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
       }
     }
     stats.links = Math.round(stats.links);
-    const statRef = db.collection("stats").doc();
-    await batchSet(statRef, stats);
+    await db.collection("stats").add(stats);
+    // await batchSet(statRef, stats);
     await commitBatch();
   } catch (err) {
     console.log("error ocurred ", err);
