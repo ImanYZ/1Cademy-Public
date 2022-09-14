@@ -640,7 +640,7 @@ const Sidebar = (props: SidebarType) => {
               closeSideBar={props.closeSideBar}
               noHeader={true}
             >
-              <UserInfo /*openLinkedNode={props.openLinkedNode}*/ />
+              <UserInfo openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : (
             <span />

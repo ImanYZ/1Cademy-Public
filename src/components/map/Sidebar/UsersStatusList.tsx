@@ -152,7 +152,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // Load all time reputation after load user
   useEffect(() => {
     if (user?.tagId && usersDictLoaded) {
-      console.log("In usersDictLoaded useEffect");
       loadReputationsData(db, false, "All Time", user.tagId, setReputationsDict, setReputationsLoaded);
     }
   }, [db, user, usersDictLoaded]);
@@ -160,7 +159,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // Load monthly reputation after load allTime reputation
   useEffect(() => {
     if (user?.tagId && reputationsLoaded) {
-      console.log("In reputationsLoaded useEffect");
       loadReputationsData(db, false, "Monthly", user.tagId, setReputationsMonthlyDict, setReputationsMonthlyLoaded);
     }
   }, [db, reputationsLoaded, user]);
@@ -168,7 +166,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // Load weekly reputation after load monthly reputation
   useEffect(() => {
     if (user?.tagId && reputationsMonthlyLoaded) {
-      console.log("In reputationsMonthlyLoaded useEffect");
       loadReputationsData(db, false, "Weekly", user.tagId, setReputationsWeeklyDict, setReputationsWeeklyLoaded);
     }
   }, [db, reputationsMonthlyLoaded, user]);
@@ -176,7 +173,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // Load others reputation after load weekly reputation
   useEffect(() => {
     if (user?.tagId && reputationsWeeklyLoaded) {
-      console.log("In reputationsWeeklyLoaded useEffect");
       loadReputationsData(db, false, "Others", user.tagId, setReputationsOthersDict, setReputationsOthersLoaded);
     }
   }, [db, reputationsWeeklyLoaded, user]);
@@ -184,7 +180,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // load othersMonthly reputation data after load other reputation
   useEffect(() => {
     if (user?.tagId && reputationsOthersLoaded) {
-      console.log("In reputationsOthersLoaded useEffect");
       loadReputationsData(
         db,
         false,
@@ -315,7 +310,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
     }
   }, [usersOnlineStatusLoaded, reputationsOthersMonthlyDict, props.usersStatus, loadReputationPoints]);
 
-  console.log("  -->> uList", usersList);
   const renderUsersList = useCallback((uList: any[], online: boolean) => {
     return uList.map((user: any) => (
       <MemoizedUserStatusIcon

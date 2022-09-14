@@ -1,38 +1,25 @@
-// import "./UserInfo.css";
-
-import { getDocs, getFirestore, query, where } from "firebase/firestore";
+import CodeIcon from "@mui/icons-material/Code";
+import DoneIcon from "@mui/icons-material/Done";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ShareIcon from "@mui/icons-material/Share";
+import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
-// import { useRecoilValue } from "recoil";
-// import LoadingImg from "../../../../../assets/1Cademy_Loading_Dots.gif";
-// import {
-//   firebaseState,
-//   usernameState,
-//   // tagState
-// } from "../../../../../store/AuthAtoms";
-// // import {
-// //   selectedUserChooseUnameState,
-// //   selectedUserFullnameState,
-// //   selectedUserImageURLState,
-// //   selectedUserState,
-// // } from "../../../../../store/MapAtoms";
-// import justADate from "../../../../../utils/justADate";
-// import shortenNumber from "../../../../../utils/shortenNumber";
-// import RoundImage from "../../../../PublicComps/RoundImage/RoundImage";
 import { useNodeBook } from "../../../context/NodeBookContext";
 import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
 import { justADate } from "../../../lib/utils/justADate";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { NodeType } from "../../../types";
+import OptimizedAvatar from "../../OptimizedAvatar";
 import ProposalItem from "../ProposalsList/ProposalItem/ProposalItem";
 import RoundImage from "../RoundImage";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
 import UseInfoTrends from "./UseInfoTrends";
-// import { getTypedCollections } from "../../getTypedCollections";
-// import ProposalItem from "../../Proposals/ProposalsList/ProposalItem/ProposalItem";
-// import SidebarTabs from "../../SidebarTabs/SidebarTabs";
-// import UseInfoTrends from "./UseInfoTrends/UseInfoTrends";
 
 const NODE_TYPE_ARRAY: NodeType[] = [
   "Concept",
@@ -63,26 +50,34 @@ const UserInfo = (props: any) => {
   const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
   // // const [proposalsTaggedPerDay, setProposalsTaggedPerDay] = useState([]);
   const [isRetrieving, setIsRetrieving] = useState(false);
-  const [sUserObj /*setSUserObj*/] = useState<any | null>(null);
+  const [sUserObj, setSUserObj] = useState<any | null>(null);
 
-  // useEffect(() => {
-  //   if (firebase && sUserObj && "deInstit" in sUserObj && !("instLogo" in sUserObj)) {
-  //     const fetchInstitution = async () => {
-  //       const institutionsDocs = await firebase
-  //         .firestore()
-  //         .collection("institutions")
-  //         .where("name", "==", sUserObj.deInstit)
-  //         .get();
-  //       for (let institutionDoc of institutionsDocs.docs) {
-  //         const institutionData = institutionDoc.data();
-  //         setSUserObj(oldSUserObj => {
-  //           return { ...oldSUserObj, instLogo: institutionData.logoURL };
-  //         });
-  //       }
-  //     };
-  //     fetchInstitution();
-  //   }
-  // }, [firebase && sUserObj]);
+  useEffect(() => {
+    // get institutions and update instLogo from setSUserObj
+    if (!db || !sUserObj) return;
+
+    if ("deInstit" in sUserObj && !("instLogo" in sUserObj)) {
+      console.log("useEffect:", sUserObj);
+      const fetchInstitution = async () => {
+        const institutionsQuery = query(collection(db, "institutions"), where("name", "==", sUserObj.deInstit));
+
+        const institutionsDocs = await getDocs(institutionsQuery);
+
+        // const institutionsDocs = await firebase
+        //   .firestore()
+        //   .collection("institutions")
+        //   .where("name", "==", sUserObj.deInstit)
+        //   .get();
+        for (let institutionDoc of institutionsDocs.docs) {
+          const institutionData = institutionDoc.data();
+          setSUserObj((oldSUserObj: any) => {
+            return { ...oldSUserObj, instLogo: institutionData.logoURL };
+          });
+        }
+      };
+      fetchInstitution();
+    }
+  }, [db, sUserObj]);
 
   const tabsItems = useMemo(() => {
     return !user
@@ -145,25 +140,7 @@ const UserInfo = (props: any) => {
       const userVersionsRefs: any[] = [];
       versionsData.forEach(versionDoc => {
         const versionData = versionDoc.data();
-        // let relatedTag = false;
-        // for (let tag of versionData.tags) {
-        //   if (tag.title === tag.title) {
-        //     relatedTag = true;
-        //     break;
-        //   }
-        // }
-        // if (relatedTag) {
-        //   versionsTagged[versionDoc.id] = {
-        //     ...versionData,
-        //     id: versionDoc.id,
-        //     createdAt: versionData.createdAt.toDate(),
-        //     award: false,
-        //     correct: false,
-        //     wrong: false,
-        //   };
-        //   delete versionsTagged[versionDoc.id].deleted;
-        //   delete versionsTagged[versionDoc.id].updatedAt;
-        // }
+
         versions[versionDoc.id] = {
           ...versionData,
           id: versionDoc.id,
@@ -202,36 +179,6 @@ const UserInfo = (props: any) => {
         );
       }
     }
-    // let orderredProposals = Object.values(versionsTagged).sort(
-    //   (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    // );
-    // setProposals(orderredProposals);
-    // let proposalsPerDayDict = {};
-    // for (let propo of orderredProposals) {
-    //   let dateValue = justADate(new Date(propo.createdAt));
-    //   if (dateValue in proposalsPerDayDict) {
-    //     proposalsPerDayDict[dateValue].num++;
-    //     proposalsPerDayDict[dateValue].netVotes +=
-    //       propo.corrects - propo.wrongs;
-    //   } else {
-    //     proposalsPerDayDict[dateValue] = {
-    //       num: 1,
-    //       netVotes: propo.corrects - propo.wrongs,
-    //     };
-    //   }
-    // }
-    // let proposalsPerDayList = [];
-    // for (let dateValue of Object.keys(proposalsPerDayDict)) {
-    //   proposalsPerDayList.push({
-    //     date: new Date(dateValue),
-    //     num: proposalsPerDayDict[dateValue].num,
-    //     netVotes: proposalsPerDayDict[dateValue].netVotes,
-    //     averageVotes:
-    //       proposalsPerDayDict[dateValue].netVotes /
-    //       proposalsPerDayDict[dateValue].num,
-    //   });
-    // }
-    // setProposalsTaggedPerDay(proposalsPerDayList);
 
     const orderredProposals = Object.values(versions).sort(
       (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
@@ -267,42 +214,56 @@ const UserInfo = (props: any) => {
     fetchProposals();
   }, [fetchProposals]);
 
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     if (firebase) {
-  //       const userDoc = await firebase.db.collection("users").doc(selectedUser).get();
-  //       if (userDoc.exists) {
-  //         let userReputationData = {};
-  //         const userData = userDoc.data();
-  //         const userReputationDoc = await firebase.db
-  //           .collection("reputations")
-  //           .where("uname", "==", selectedUser)
-  //           .where("tagId", "==", userData.tag.node)
-  //           .limit(1)
-  //           .get();
-  //         if (userReputationDoc.docs.length > 0) {
-  //           userReputationData = userReputationDoc.docs[0].data();
-  //           delete userReputationData.uname;
-  //           delete userData.tag;
-  //         }
-  //         if ("deInstit" in userData && !("instLogo" in userData)) {
-  //           const institutionsDocs = await firebase.db
-  //             .collection("institutions")
-  //             .where("name", "==", userData.deInstit)
-  //             .get();
-  //           if (institutionsDocs.docs.length > 0) {
-  //             const institutionData = institutionsDocs.docs[0].data();
-  //             userData.instLogo = institutionData.logoURL;
-  //           }
-  //         }
-  //         setSUserObj({ ...userReputationData, ...userData });
-  //       }
-  //     }
-  //   };
-  //   fetchUserData();
-  // }, [firebase, selectedUser]);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!db) return;
+      if (!nodeBookState.selectedUser) return;
 
-  if (!nodeBookState.selectedUser) return null; // TODO manage this case
+      const userRef = doc(db, "users", nodeBookState.selectedUser.username);
+      const userDoc = await getDoc(userRef);
+
+      // const userDoc = await firebase.db.collection("users").doc(selectedUser).get();
+      if (userDoc.exists()) {
+        let userReputationData: any = {};
+        const userData = userDoc.data();
+
+        const reputationQuery = query(
+          collection(db, "reputations"),
+          where("uname", "==", nodeBookState.selectedUser.username),
+          where("tagId", "==", userData.tagId),
+          limit(1)
+        );
+        const userReputationDoc = await getDocs(reputationQuery);
+        // const userReputationDoc = await firebase.db
+        //   .collection("reputations")
+        //   .where("uname", "==", selectedUser)
+        //   .where("tagId", "==", userData.tag.node)
+        //   .limit(1)
+        //   .get();
+        if (userReputationDoc.docs.length > 0) {
+          userReputationData = userReputationDoc.docs[0].data();
+          delete userReputationData.uname;
+          delete userData.tag;
+        }
+        if ("deInstit" in userData && !("instLogo" in userData)) {
+          const institutionsQuery = query(collection(db, "institutions"), where("name", "==", userData.deInstit));
+          const institutionsDocs = await getDocs(institutionsQuery);
+          // const institutionsDocs = await firebase.db
+          //   .collection("institutions")
+          //   .where("name", "==", userData.deInstit)
+          //   .get();
+          if (institutionsDocs.docs.length > 0) {
+            const institutionData = institutionsDocs.docs[0].data();
+            userData.instLogo = institutionData.logoURL;
+          }
+        }
+        setSUserObj({ ...userReputationData, ...userData });
+      }
+    };
+    fetchUserData();
+  }, [db, nodeBookState.selectedUser]);
+
+  if (!nodeBookState.selectedUser) return null; // TODO manage this case passing through props selected user
 
   return (
     <>
@@ -319,15 +280,21 @@ const UserInfo = (props: any) => {
           {sUserObj && (
             <>
               <div id="MiniUserPrifiletag">
-                <i className="material-icons grey-text">local_offer</i>
+                <LocalOfferIcon className="material-icons grey-text" />
                 <span>{sUserObj.tag}</span>
               </div>
-              <div id="MiniUserPrifileInstitution">
-                <img src={sUserObj.instLogo} alt={sUserObj.deInstit + " logo"} width="25px" />
+              <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "5px" }}>
+                {/* <img src={sUserObj.instLogo} alt={sUserObj.deInstit + " logo"} width="25px" /> */}
+                <OptimizedAvatar
+                  imageUrl={sUserObj.instLogo}
+                  name={sUserObj.deInstit + " logo"}
+                  sx={{ width: "25px", height: "25px" }}
+                  renderAsAvatar={false}
+                />
                 <span>{sUserObj.deInstit}</span>
               </div>
               <div id="MiniUserPrifileTotalPoints">
-                <i className="material-icons DoneIcon green-text">done</i>
+                <DoneIcon className="material-icons DoneIcon green-text" />
                 <span>{shortenNumber(sUserObj.totalPoints, 2, false)}</span>
               </div>
             </>
@@ -338,28 +305,46 @@ const UserInfo = (props: any) => {
         {sUserObj && (
           <>
             <div className="MiniUserProfilePoints LeftPoints">
-              <i className="material-icons amber-text">local_library</i>
-              <span className="ToolbarValue">{shortenNumber(sUserObj.cnCorrects - sUserObj.cnWrongs, 2, false)}</span>
+              {/* <i className="material-icons amber-text">local_library</i> */}
+              <LocalLibraryIcon className="material-icons amber-text" />
+              <span className="ToolbarValue">
+                {shortenNumber(sUserObj.cnCorrects || 0 - sUserObj.cnWrongs || 0, 2, false)}
+              </span>
             </div>
             <div className="MiniUserProfilePoints">
-              <i className="material-icons amber-text">share</i>
-              <span className="ToolbarValue">{shortenNumber(sUserObj.mCorrects - sUserObj.mWrongs, 2, false)}</span>
+              {/* <i className="material-icons amber-text">share</i> */}
+              <ShareIcon className="material-icons amber-text" />
+              <span className="ToolbarValue">
+                {shortenNumber(sUserObj.mCorrects || 0 - sUserObj.mWrongs || 0, 2, false)}
+              </span>
             </div>
             <div className="MiniUserProfilePoints">
-              <i className="material-icons amber-text">help_outline</i>
-              <span className="ToolbarValue">{shortenNumber(sUserObj.qCorrects - sUserObj.qWrongs, 2, false)}</span>
+              {/* <i className="material-icons amber-text">help_outline</i> */}
+              <HelpOutlineIcon className="material-icons amber-text" />
+              <span className="ToolbarValue">
+                {shortenNumber(sUserObj.qCorrects || 0 - sUserObj.qWrongs || 0, 2, false)}
+              </span>
             </div>
             <div className="MiniUserProfilePoints LeftPoints">
-              <i className="material-icons material-icons--outlined amber-text">emoji_objects</i>
-              <span className="ToolbarValue">{shortenNumber(sUserObj.iCorrects - sUserObj.iWrongs, 2, false)}</span>
+              {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
+              <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
+              <span className="ToolbarValue">
+                {shortenNumber(sUserObj.iCorrects || 0 - sUserObj.iWrongs || 0, 2, false)}
+              </span>
             </div>
             <div className="MiniUserProfilePoints">
-              <i className="material-icons amber-text">code</i>
-              <span className="ToolbarValue">{shortenNumber(sUserObj.cdCorrects - sUserObj.cdWrongs, 2, false)}</span>
+              {/* <i className="material-icons amber-text">code</i> */}
+              <CodeIcon className="material-icons amber-text" />
+              <span className="ToolbarValue">
+                {shortenNumber(sUserObj.cdCorrects || 0 - sUserObj.cdWrongs || 0, 2, false)}
+              </span>
             </div>
             <div className="MiniUserProfilePoints">
-              <i className="material-icons amber-text">menu_book</i>
-              <span className="ToolbarValue">{shortenNumber(sUserObj.rfCorrects - sUserObj.rfWrongs, 2, false)}</span>
+              {/* <i className="material-icons amber-text">menu_book</i> */}
+              <MenuBookIcon className="material-icons amber-text" />
+              <span className="ToolbarValue">
+                {shortenNumber(sUserObj.rfCorrects || 0 - sUserObj.rfWrongs || 0, 2, false)}
+              </span>
             </div>
           </>
         )}
