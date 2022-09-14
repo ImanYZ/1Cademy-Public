@@ -214,7 +214,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openPresentations, setOpenPresentations] = useState(false);
 
   // flag for is search is open
-  const [openToolbar, setOpenToolbar] = useState(false);
+  // const [openToolbar, setOpenToolbar] = useState(false);
 
   // flag for is search is open
   const [openSearch, setOpenSearch] = useState(false);
@@ -1737,7 +1737,8 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenChat(false);
     setOpenNotifications(false);
     setOpenPresentations(false);
-    setOpenToolbar(false);
+    // setOpenToolbar(false);
+    nodeBookDispatch({ type: "setOpenToolbar", payload: false });
     setOpenSearch(false);
     setOpenBookmarks(false);
     setOpenRecentNodes(false);
@@ -1767,7 +1768,7 @@ const Dashboard = ({}: DashboardProps) => {
     openChat,
     openNotifications,
     openPresentations,
-    openToolbar,
+    nodeBookState.openToolbar,
     openSearch,
     openBookmarks,
     openRecentNodes,
@@ -1832,7 +1833,8 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenPendingProposals(false);
           setOpenChat(false);
           setOpenNotifications(false);
-          setOpenToolbar(false);
+          // setOpenToolbar(false);
+          nodeBookDispatch({ type: "setOpenToolbar", payload: false });
           setOpenSearch(false);
           setOpenRecentNodes(false);
           setOpenTrends(false);
@@ -2497,7 +2499,10 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenNotifications={setOpenNotifications}
             openNotifications={openNotifications}
             setOpenPresentations={setOpenPresentations}
-            setOpenToolbar={setOpenToolbar}
+            setOpenToolbar={
+              /*setOpenToolbar*/ (newValue: boolean) => nodeBookDispatch({ type: "setOpenToolbar", payload: newValue })
+            }
+            openToolbar={nodeBookState.openToolbar}
             setOpenSearch={setOpenSearch}
             openSearch={openSearch}
             setOpenBookmarks={setOpenBookmarks}

@@ -2478,6 +2478,93 @@ button.MuiTab-textColorInherit:focus {
   -webkit-transition: margin-left 1s; /*safari and chrome */
 }
 
+/* -------------------------------- */
+/* user setting sidebar styles */
+
+.UserSettingsSidebarBody #SidebarTabsContainer .MuiTab-fullWidth.MuiTab-root {
+  min-width: 130px;
+}
+
+.UserSettingsSidebarBody #SidebarTabsContainer .MuiTabs-indicator {
+  width: 130px;
+}
+
+#MiniUserPrifileGapLeft {
+  height: 10px;
+}
+
+#MiniUserPrifileGapRight {
+  height: 10px;
+}
+
+.AccountSettingsButtons {
+  margin: 10px;
+}
+
+#UsernameInputContainer .MuiOutlinedInput-notchedOutline,
+#UsernameInputContainer .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: red;
+}
+
+#ChangingUsernameMessage {
+  font-size: 40px;
+  color: red;
+}
+
+.AccountSettingsButtons .Striked {
+  text-decoration: line-through red;
+}
+
+.AccountSettingsButtons .StrikedIcon {
+  position: relative;
+  top: -10px; /* Tweak this and the other top in equal, but opposite values */
+  border-bottom: 1.9px solid red;
+}
+
+.AccountSettingsButtons .StrikedIcon .StrikedIconOffset {
+  position: relative;
+  top: 10px; /* Tweak this and the other top in equal, but opposite values */
+}
+
+.AccountSettingsButtons .AccountSettingsButton {
+  margin: 10px;
+  width: 364px;
+  font-size: 16px;
+}
+
+.AccountSettingsButtons #tagChangeIcon {
+  margin-right: 7px;
+  font-size: 19px;
+}
+
+#LogoutButtonContent {
+  color: red;
+}
+
+#LogoutButtonText {
+  position: relative;
+  top: -5.5px;
+}
+
+#PersonalSettings {
+  margin: 25px;
+}
+
+#PersonalSettings .MuiFormControl-root {
+  width: 379px;
+}
+
+#PersonalSettings .DoubleInputRow .MuiFormControl-root {
+  width: 172px;
+}
+
+#PersonalSettings .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.LightMode #PersonalSettings .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
 /* ----------------------------- */
 /* custom overrides */
 .customUserStatusTotalPoints {

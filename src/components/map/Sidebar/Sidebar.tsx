@@ -42,6 +42,7 @@ import SearchList from "./SearchList";
 // import RefImage from "../../../assets/References.jpg";
 import { MemoizedSidebarWrapper } from "./SidebarWrapper";
 import UserInfo from "./UserInfo";
+import UserSettings from "./UserSettings";
 import UsersStatusList from "./UsersStatusList";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import Button from "@material-ui/core/Button";
@@ -148,6 +149,7 @@ type SidebarType = {
   openNotifications: boolean;
   setOpenPresentations: any;
   setOpenToolbar: any;
+  openToolbar: boolean;
   setOpenSearch: any;
   openSearch: boolean;
   setOpenBookmarks: any;
@@ -241,7 +243,7 @@ const Sidebar = (props: SidebarType) => {
   // const [openPendingProposals] = useState(false);
   const [openChat] = useState(false);
   // const [openNotifications] = useState(false);
-  const [openToolbar] = useState(false);
+  // const [openToolbar] = useState(false);
   // const [tag] = useState(false);
 
   // const [bookmarkedUserNodes, setBookmarkedUserNodes] = useState<any[]>([]);
@@ -382,7 +384,7 @@ const Sidebar = (props: SidebarType) => {
     openChat ||
     props.openNotifications ||
     openPresentations ||
-    openToolbar ||
+    props.openToolbar ||
     props.openSearch ||
     props.openTrends ||
     props.openBookmarks; /* ||  //CHECK: I commented this
@@ -519,10 +521,10 @@ const Sidebar = (props: SidebarType) => {
           props.openSearch ||
           props.openNotifications ||
           props.openPendingProposals ||
+          props.openToolbar ||
           props.openBookmarks
             ? // openChat ||
               // openPresentations ||
-              // openToolbar ||
               // openRecentNodes
               "active"
             : ""
@@ -589,7 +591,7 @@ const Sidebar = (props: SidebarType) => {
             >
               <Notifications openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
-          ) : openToolbar && user?.tag ? (
+          ) : props.openToolbar && user?.tag ? (
             <MemoizedSidebarWrapper
               headerImage=""
               title=""
@@ -597,12 +599,7 @@ const Sidebar = (props: SidebarType) => {
               closeSideBar={props.closeSideBar}
               noHeader={true}
             >
-              {/* CHECK: I commented this */}
-              {/* <UserSettings
-                openPractice={props.openPractice}
-                setOpenPractice={props.setOpenPractice}
-              /> */}
-              <h2>User settings here</h2>
+              <UserSettings /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */ />
             </MemoizedSidebarWrapper>
           ) : props.openSearch ? (
             <MemoizedSidebarWrapper
