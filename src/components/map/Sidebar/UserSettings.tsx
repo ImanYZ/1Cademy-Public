@@ -1,11 +1,21 @@
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 // import Checkbox from "@material-ui/core/Checkbox";
 // import ListItemText from "@material-ui/core/ListItemText";
 // import MenuItem from "@material-ui/core/MenuItem";
 // import Done from "@material-ui/icons/Done";
 // import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 // import axios from "axios";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 
+import { useAuth } from "../../../context/AuthContext";
+import { useNodeBook } from "../../../context/NodeBookContext";
+import { use1AcademyTheme } from "../../../context/ThemeContext";
+import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
+import { User } from "../../../knowledgeTypes";
+import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
+import { MemoizedTagsSearcher } from "../../TagsSearcher";
+import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
 
@@ -81,6 +91,12 @@ const doNothing = () => {};
 // type UserSettingProps = {};
 
 const UserSettings = (/*props: UserSettingProps*/) => {
+  const { nodeBookState } = useNodeBook();
+  const [{ user }] = useAuth();
+  // console.log("rr", rr);
+  const { allTags, setAllTags } = useTagsTreeView([]);
+  const [{ setThemeMode, themeMode }] = use1AcademyTheme();
+
   // const firebase = useRecoilValue(firebaseState);
   // const [username, setUsername] = useRecoilState(usernameState);
   // const [fName, setFName] = useRecoilState(fNameState);
@@ -152,6 +168,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   // const [instlogoURL, setInstlogoURL] = useState("");
   // const [totalPoints, setTotalPoints] = useState("");
   const [changingUsername /*, setChangingUsername*/] = useState(false);
+
   // const [chosenTags, setChosenTags] = useState([]);
   // const [birthDate, setBirthDate] = useState(new Date());
   // const [genderOtherValue, setGenderOtherValue] = useState("");
@@ -491,220 +508,283 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const onEthnicityOtherValueChange = event => setEthnicityOtherValue(event.target.value);
 
-  const tabsItems = [
-    {
-      title: "Account",
-      content: (
-        <>
-          <div className="AccountSettingsButtons">
-            <h2>Account</h2>
-            {/* <div></div>
-            <MetaButton onClick={choosingNodeClick("tag")}>
-              <div className="AccountSettingsButton">
-                <i id="tagChangeIcon" className="material-icons deep-orange-text">
-                  local_offer
-                </i>
-                {tag.title}
-              </div>
-            </MetaButton> */}
-          </div>
-          {/* {choosingNode === "tag" && (
-            <Suspense fallback={<div></div>}>
-              <div id="tagModal">
-                <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
-                  <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} />
-                </Modal>
-              </div>
-            </Suspense>
-          )} */}
-          {/* <UserSettingsSwitches
-            theme={theme}
-            handleThemeSwitch={handleThemeSwitch}
-            background={background}
-            handleBackgroundSwitch={handleBackgroundSwitch}
-            chooseUname={chooseUname}
-            handlesChooseUnameSwitch={handlesChooseUnameSwitch}
-            showClusters={showClusters}
-            showHideClusters={showHideClusters}
-            fName={fName}
-            lName={lName}
-            uname={username}
-          />
-          <InputSave
-            identification="fNameInput"
-            initialValue={fName}
-            onSubmit={changeAttr("fName")}
-            setState={setFName}
-            label="Change your first name"
-          />
-          <InputSave
-            identification="lNameInput"
-            initialValue={lName}
-            onSubmit={changeAttr("lName")}
-            setState={setLName}
-            label="Change your last name"
-          /> */}
-          {/* CHECKL I comented this */}
-          {/* <InputSave
-            identification="UsernameInput"
-            initialValue={username}
-            onSubmit={changeUsername}
-            setState={setUsername}
-            label="DANGEROUS ACTION: Change your username!"
-          /> */}
-          {/* <div className="AccountSettingsButtons">
-            <MetaButton onClick={logoutClick}>
-              <div className="AccountSettingsButton">
-                <span id="LogoutButtonContent">
-                  <ExitToAppIcon />
-                  <span id="LogoutButtonText">Logout</span>
-                </span>
-              </div>
-            </MetaButton>
-          </div> */}
-        </>
-      ),
-    },
-    {
-      title: "Personal",
-      content: (
-        <div id="PersonalSettings">
-          <h2>Personal</h2>
-          {/* <PersonalInfo
-            values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
-            handleChange={handleChange}
-            handleBlur={doNothing}
-            birthDate={birthDate}
-            setBirthDate={setBirthDate}
-            onGenderOtherValueChange={onGenderOtherValueChange}
-            genderOtherValue={genderOtherValue}
-            onEthnicityOtherValueChange={onEthnicityOtherValueChange}
-            ethnicityOtherValue={ethnicityOtherValue}
-            onFoundFromOtherValueChange={doNothing}
-            foundFromOtherValue={""}
-            CSCObj={CSCObj}
-            setCSCObj={setCSCObj}
-            allCountries={allCountries}
-            setAllCountries={setAllCountries}
-            errors={{}}
-            serverError={{}}
-            inSidebar={false}
-          /> */}
-          {/* CHECK:I comented this */}
-          {/* <FormControl className="select" variant="outlined">
-            <InputLabel>Language</InputLabel>
-            <Select
-              label="Language"
-              name="language"
-              onChange={setLang}
-              value<PersonalInfo
-            values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
-            handleChange={handleChange}
-            handleBlur={doNothing}
-            birthDate={birthDate}
-            setBirthDate={setBirthDate}
-            onGenderOtherValueChange={onGenderOtherValueChange}
-            genderOtherValue={genderOtherValue}
-            onEthnicityOtherValueChange={onEthnicityOtherValueChange}
-            ethnicityOtherValue={ethnicityOtherValue}
-            onFoundFromOtherValueChange={doNothing}
-            foundFromOtherValue={""}
-            CSCObj={CSCObj}
-            setCSCObj={setCSCObj}
-            allCountries={allCountries}
-            setAllCountries={setAllCountries}
-            errors={{}}
-            serverError={{}}
-            inSidebar={false}
-          />={lang}
-              renderValue={sameThing}
-            >
-              {sortedLanguages.map(languageItems)}
-            </Select>
-          </FormControl>
+  const getDisplayNameValue = (user: User) => {
+    if (user.chooseUname) return user.uname || "Your Username";
+    return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
+  };
 
-          <div className="DoubleInputRow">
-            <Suspense fallback={<div></div>}>
-              <DatePicker birthDate={props.birthDate} setBirthDate={props.setBirthDate} />
-            </Suspense>
-            <div className="MiddleGap"></div>
+  const tabsItems = (user: User, choosingNodeId?: string) => {
+    return [
+      {
+        title: "Account",
+        content: (
+          <>
+            <div className="AccountSettingsButtons">
+              {/* <div></div> */}
+              <MemoizedMetaButton onClick={() => console.log('choosingNodeClick("tag")')}>
+                <div className="AccountSettingsButton">
+                  {/* <i id="tagChangeIcon" className="material-icons deep-orange-text">
+                    local_offer
+                  </i> */}
+                  <LocalOfferIcon id="tagChangeIcon" className="material-icons deep-orange-text" />
+                  {user.tag}
+                  {/* {tag.title} */}
+                </div>
+              </MemoizedMetaButton>
+            </div>
+            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+            {choosingNodeId === "tag" && (
+              <Suspense fallback={<div></div>}>
+                <div id="tagModal">
+                  <Modal onClick={() => console.log("closeTagSelector")} returnLeft={true} noBackground={true}>
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    <MemoizedTagsSearcher
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "200px", height: "200px" }}
+                    />
+                  </Modal>
+                </div>
+              </Suspense>
+            )}
+            {/* <UserSettingsSwitches
+              theme={theme}
+              handleThemeSwitch={handleThemeSwitch}
+              background={background}
+              handleBackgroundSwitch={handleBackgroundSwitch}
+              chooseUname={chooseUname}
+              handlesChooseUnameSwitch={handlesChooseUnameSwitch}
+              showClusters={showClusters}
+              showHideClusters={showHideClusters}
+              fName={fName}
+              lName={lName}
+              uname={username}
+            /> */}
 
-            <FormControl className="select" variant="outlined">
-              <InputLabel>Gender</InputLabel>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={values.theme === "Dark"}
+                    checked={themeMode === "dark"}
+                    onChange={() => {
+                      // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
+                      setThemeMode(themeMode === "light" ? "dark" : "light");
+                    }}
+                  />
+                }
+                label={`Theme: ${themeMode === "dark" ? "🌜" : "🌞"}`}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={values.background === "Image"}
+                    checked={user.background === "Image"}
+                    onChange={() => {
+                      // setFieldValue("background", values.background === "Color" ? "Image" : "Color");
+                      // setBackground(user.background === "Color" ? "Image" : "Color");
+                      console.log('setBackground(user.background === "Color" ? "Image" : "Color");');
+                    }}
+                  />
+                }
+                label={`Background: ${user.background === "Color" ? "Color" : "Image"}`}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={!values.chooseUname}
+                    checked={!user.chooseUname}
+                    onChange={() => console.log('setFieldValue("chooseUname", !values.chooseUname)')}
+                  />
+                }
+                label={`Display name: ${getDisplayNameValue(user)}`}
+              />
+            </FormGroup>
+
+            {/* <InputSave
+              identification="fNameInput"
+              initialValue={fName}
+              onSubmit={changeAttr("fName")}
+              setState={setFName}
+              label="Change your first name"
+            />
+            <InputSave
+              identification="lNameInput"
+              initialValue={lName}
+              onSubmit={changeAttr("lName")}
+              setState={setLName}
+              label="Change your last name"
+            /> */}
+            {/* CHECKL I comented this */}
+            {/* <InputSave
+              identification="UsernameInput"
+              initialValue={username}
+              onSubmit={changeUsername}
+              setState={setUsername}
+              label="DANGEROUS ACTION: Change your username!"
+            /> */}
+            {/* <div className="AccountSettingsButtons">
+              <MetaButton onClick={logoutClick}>
+                <div className="AccountSettingsButton">
+                  <span id="LogoutButtonContent">
+                    <ExitToAppIcon />
+                    <span id="LogoutButtonText">Logout</span>
+                  </span>
+                </div>
+              </MetaButton>
+            </div> */}
+          </>
+        ),
+      },
+      {
+        title: "Personal",
+        content: (
+          <div id="PersonalSettings">
+            <h2>Personal</h2>
+            {/* <PersonalInfo
+              values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
+              handleChange={handleChange}
+              handleBlur={doNothing}
+              birthDate={birthDate}
+              setBirthDate={setBirthDate}
+              onGenderOtherValueChange={onGenderOtherValueChange}
+              genderOtherValue={genderOtherValue}
+              onEthnicityOtherValueChange={onEthnicityOtherValueChange}
+              ethnicityOtherValue={ethnicityOtherValue}
+              onFoundFromOtherValueChange={doNothing}
+              foundFromOtherValue={""}
+              CSCObj={CSCObj}
+              setCSCObj={setCSCObj}
+              allCountries={allCountries}
+              setAllCountries={setAllCountries}
+              errors={{}}
+              serverError={{}}
+              inSidebar={false}
+            /> */}
+            {/* CHECK:I comented this */}
+            {/* <FormControl className="select" variant="outlined">
+              <InputLabel>Language</InputLabel>
               <Select
+                label="Language"
+                name="language"
+                onChange={setLang}
+                value<PersonalInfo
+              values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
+              handleChange={handleChange}
+              handleBlur={doNothing}
+              birthDate={birthDate}
+              setBirthDate={setBirthDate}
+              onGenderOtherValueChange={onGenderOtherValueChange}
+              genderOtherValue={genderOtherValue}
+              onEthnicityOtherValueChange={onEthnicityOtherValueChange}
+              ethnicityOtherValue={ethnicityOtherValue}
+              onFoundFromOtherValueChange={doNothing}
+              foundFromOtherValue={""}
+              CSCObj={CSCObj}
+              setCSCObj={setCSCObj}
+              allCountries={allCountries}
+              setAllCountries={setAllCountries}
+              errors={{}}
+              serverError={{}}
+              inSidebar={false}
+            />={lang}
                 renderValue={sameThing}
+              >
+                {sortedLanguages.map(languageItems)}
+              </Select>
+            </FormControl>
+  
+            <div className="DoubleInputRow">
+              <Suspense fallback={<div></div>}>
+                <DatePicker birthDate={props.birthDate} setBirthDate={props.setBirthDate} />
+              </Suspense>
+              <div className="MiddleGap"></div>
+  
+              <FormControl className="select" variant="outlined">
+                <InputLabel>Gender</InputLabel>
+                <Select
+                  renderValue={sameThing}
+                  onChange={props.handleChange}
+                  onBlur={props.handleBlur}
+                  name="gender"
+                  label="Gender"
+                  value={gender}
+                >
+                  {
+                    // structure based from https://blog.hubspot.com/service/survey-demographic-questions
+                    GENDER_VALUES.map(genderItems)
+                  }
+                </Select>
+  
+                {gender && gender === "Not listed (Please specify)" && (
+                  <ValidatedInput
+                    className="PleaseSpecify"
+                    label="Please specify your gender."
+                    onChange={props.onGenderOtherValueChange}
+                    name="gender"
+                    value={props.genderOtherValue}
+                  />
+                )}
+              </FormControl>
+            </div>
+  
+            <FormControl className="select" variant="outlined">
+              <InputLabel>Ethnicity</InputLabel>
+              <Select
+                multiple
                 onChange={props.handleChange}
                 onBlur={props.handleBlur}
-                name="gender"
-                label="Gender"
-                value={gender}
+                name="ethnicity"
+                label="Ethnicity"
+                value={ethnicity}
+                renderValue={arrayToString}
+                MenuProps={{ className: "EthnicityMenu" }}
               >
                 {
                   // structure based from https://blog.hubspot.com/service/survey-demographic-questions
-                  GENDER_VALUES.map(genderItems)
+                  ETHNICITY_VALUES.map(ethnicityItems)
                 }
               </Select>
-
-              {gender && gender === "Not listed (Please specify)" && (
-                <ValidatedInput
-                  className="PleaseSpecify"
-                  label="Please specify your gender."
-                  onChange={props.onGenderOtherValueChange}
-                  name="gender"
-                  value={props.genderOtherValue}
-                />
-              )}
+              {ethnicity &&
+                ethnicity.length > 0 &&
+                ethnicity.includes("Not listed (Please specify)") && (
+                  <ValidatedInput
+                    className="PleaseSpecify"
+                    label="Please specify your ethnicity."
+                    onChange={props.onEthnicityOtherValueChange}
+                    name="ethnicity"
+                    value={props.ethnicityOtherValue}
+                  />
+                )}
             </FormControl>
-          </div>
-
-          <FormControl className="select" variant="outlined">
-            <InputLabel>Ethnicity</InputLabel>
-            <Select
-              multiple
-              onChange={props.handleChange}
-              onBlur={props.handleBlur}
-              name="ethnicity"
-              label="Ethnicity"
-              value={ethnicity}
-              renderValue={arrayToString}
-              MenuProps={{ className: "EthnicityMenu" }}
-            >
-              {
-                // structure based from https://blog.hubspot.com/service/survey-demographic-questions
-                ETHNICITY_VALUES.map(ethnicityItems)
-              }
-            </Select>
-            {ethnicity &&
-              ethnicity.length > 0 &&
-              ethnicity.includes("Not listed (Please specify)") && (
-                <ValidatedInput
-                  className="PleaseSpecify"
-                  label="Please specify your ethnicity."
-                  onChange={props.onEthnicityOtherValueChange}
-                  name="ethnicity"
-                  value={props.ethnicityOtherValue}
+            {props.CSCObj.length > 0 && (
+              <Suspense fallback={<div></div>}>
+                <CountryStateCity
+                  handleChange={props.handleChange}
+                  handleBlur={props.handleBlur}
+                  values={props.values}
+                  CSCObj={props.CSCObj}
+                  allCountries={props.allCountries}
                 />
-              )}
-          </FormControl>
-          {props.CSCObj.length > 0 && (
-            <Suspense fallback={<div></div>}>
-              <CountryStateCity
-                handleChange={props.handleChange}
-                handleBlur={props.handleBlur}
-                values={props.values}
-                CSCObj={props.CSCObj}
-                allCountries={props.allCountries}
-              />
-            </Suspense>
-          )} */}
-        </div>
-      ),
-    },
-    {
-      title: "Professional",
-      content: <>Professional here, this was incomplete</>,
-    },
-  ];
+              </Suspense>
+            )} */}
+          </div>
+        ),
+      },
+      {
+        title: "Professional",
+        content: <>Professional here, this was incomplete</>,
+      },
+    ];
+  };
+
+  if (!user) return null;
 
   // const ltermPoints = lterm * ltermMaxDay + ltermDay;
   return !changingUsername ? (
@@ -755,7 +835,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
         </div>
       </div> */}
       <div id="SidebarBody" className="UserSettingsSidebarBody">
-        <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems} />
+        <MemoizedSidebarTabs
+          tabsTitle="User Mini-profile tabs"
+          tabsItems={tabsItems(user, nodeBookState?.choosingNode?.id)}
+        />
       </div>
     </>
   ) : (
