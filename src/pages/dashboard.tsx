@@ -103,7 +103,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const [{ user }] = useAuth();
+  const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   // node that user is currently selected (node will be highlighted)
@@ -2459,6 +2459,8 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
               <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
               <Button onClick={() => console.log(user)}>user</Button>
+              <Button onClick={() => console.log(settings)}>setting</Button>
+              <Button onClick={() => console.log(reputation)}>reputation</Button>
             </Box>
             <Box>
               <Button onClick={() => console.log(nodeChanges)}>node changes</Button>

@@ -174,7 +174,7 @@ const SignUpPage: NextPageWithLayout = () => {
       deMajor: values.major as string,
       deInstit: values.institution as string,
       theme: values.theme,
-      background: values.background as string,
+      background: values.background,
       consented: values.signUpAgreement,
     };
     mutateSignUp.mutate(user);

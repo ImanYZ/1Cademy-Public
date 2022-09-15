@@ -44,18 +44,22 @@ const App = (props: AppPropsWithLayout) => {
           <Head>
             <meta name="viewport" content="initial-scale=1, width=device-width" />
           </Head>
-          <ThemeProvider>
-            <SnackbarProvider
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "center",
-              }}
-              maxSnack={3}
-            >
-              <CssBaseline />
-              <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
-            </SnackbarProvider>
-          </ThemeProvider>
+          {/* <ThemeProvider> */}
+          <SnackbarProvider
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            maxSnack={3}
+          >
+            <AuthProvider>
+              <ThemeProvider>
+                <CssBaseline />
+                {getLayout(<Component {...pageProps} />)}
+              </ThemeProvider>
+            </AuthProvider>
+          </SnackbarProvider>
+          {/* </ThemeProvider> */}
         </CacheProvider>
       </Hydrate>
       <ReactQueryDevtools />

@@ -3,10 +3,9 @@ import { FormikProps } from "formik";
 import React, { useEffect } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
-import { use1AcademyTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { ToUpperCaseEveryWord } from "../lib/utils/utils";
-import { useAuthLayout } from "./layouts/AuthLayout";
 import { MemoizedTagsSearcher } from "./TagsSearcher";
 
 export type SignUpBasicInformationProps = {
@@ -14,10 +13,9 @@ export type SignUpBasicInformationProps = {
 };
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
-  const [setBackground] = useAuthLayout();
+  const [, { dispatch }] = useAuth();
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   const { allTags, setAllTags } = useTagsTreeView(values.tagId ? [values.tagId] : []);
-  const [themeActions] = use1AcademyTheme();
 
   useEffect(() => {
     const getFirstTagChecked = () => {
@@ -129,7 +127,8 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
               checked={values.theme === "Dark"}
               onChange={() => {
                 setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
-                themeActions.setThemeMode(values.theme === "Light" ? "dark" : "light");
+                dispatch({ type: "setTheme", payload: values.theme === "Light" ? "Dark" : "Light" });
+                // themeActions.setThemeMode(values.theme === "Light" ? "dark" : "light");
               }}
             />
           }
@@ -144,7 +143,8 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
               checked={values.background === "Image"}
               onChange={() => {
                 setFieldValue("background", values.background === "Color" ? "Image" : "Color");
-                setBackground(values.background === "Color" ? "Image" : "Color");
+                dispatch({ type: "setBackground", payload: values.background === "Color" ? "Image" : "Color" });
+                // setBackground(values.background === "Color" ? "Image" : "Color");
               }}
             />
           }

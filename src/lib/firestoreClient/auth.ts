@@ -9,7 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import { Reputation, User } from "src/knowledgeTypes";
+import { Reputation, User, UserBackground, UserTheme } from "src/knowledgeTypes";
 
 export const signUp = async (name: string, email: string, password: string) => {
   const newUser = await createUserWithEmailAndPassword(getAuth(), email, password);
@@ -55,6 +55,8 @@ export const getIdToken = async (): Promise<string | undefined> => {
 export const retrieveAuthenticatedUser = async (userId: string) => {
   let user: User | null = null;
   let reputationsData: Reputation | null = null;
+  let theme: UserTheme = "Dark";
+  let background: UserBackground = "Color";
   const db = getFirestore();
 
   const nodesRef = collection(db, "users");
@@ -82,8 +84,8 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       country: userData.country,
       stateInfo: userData.state,
       city: userData.city,
-      theme: userData.theme,
-      background: "background" in userData ? userData.background : "Image",
+      // theme: userData.theme,
+      // background: "background" in userData ? userData.background : "Image",
       uname: userData.uname,
       clickedConsent: userData.clickedConsent,
       clickedTOS: userData.clickedTOS,
@@ -92,6 +94,9 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       createdAt: userData.createdAt.toDate(),
       email: userData.email,
     };
+
+    theme = userData.theme;
+    background = "background" in userData ? userData.background : "Image";
 
     const reputationRef = collection(db, "reputations");
     const reputationQuery = query(
@@ -113,5 +118,5 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
     }
   }
 
-  return { user, reputation: reputationsData };
+  return { user, reputation: reputationsData, theme, background };
 };

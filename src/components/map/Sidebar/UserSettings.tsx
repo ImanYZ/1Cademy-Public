@@ -1,19 +1,20 @@
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { FormControlLabel, FormGroup, Switch } from "@mui/material";
+import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";
 // import ListItemText from "@material-ui/core/ListItemText";
 // import MenuItem from "@material-ui/core/MenuItem";
 // import Done from "@material-ui/icons/Done";
 // import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 // import axios from "axios";
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useCallback, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
 import { useNodeBook } from "../../../context/NodeBookContext";
-import { use1AcademyTheme } from "../../../context/ThemeContext";
+// import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
-import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
+// import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 import { MemoizedTagsSearcher } from "../../TagsSearcher";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
@@ -91,11 +92,13 @@ const doNothing = () => {};
 // type UserSettingProps = {};
 
 const UserSettings = (/*props: UserSettingProps*/) => {
+  const db = getFirestore();
+  const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [{ user }] = useAuth();
   // console.log("rr", rr);
   const { allTags, setAllTags } = useTagsTreeView([]);
-  const [{ setThemeMode, themeMode }] = use1AcademyTheme();
+  // const [{ setThemeMode, themeMode }] = use1AcademyTheme(); // CHECK I comented
 
   // const firebase = useRecoilValue(firebaseState);
   // const [username, setUsername] = useRecoilState(usernameState);
@@ -378,68 +381,91 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   //   [firebase, username]
   // );
 
-  // const changeAttr = useCallback(
-  //   attrName => async newValue => {
-  //     console.log({ [attrName]: newValue });
-  //     const userRef = firebase.db.collection("users").doc(username);
-  //     await userRef.update({ [attrName]: newValue });
-  //     let userLogCollection = "";
-  //     switch (attrName) {
-  //       case "fName":
-  //         userLogCollection = "userFNameLog";
-  //         break;
-  //       case "lName":
-  //         userLogCollection = "userLNameLog";
-  //         break;
-  //       case "theme":
-  //         userLogCollection = "userThemeLog";
-  //         break;
-  //       case "background":
-  //         userLogCollection = "userBackgroundLog";
-  //         break;
-  //       case "chooseUname":
-  //         userLogCollection = "userChooseUnameLog";
-  //         break;
-  //       case "lang":
-  //         userLogCollection = "userLangLog";
-  //         break;
-  //       case "gender":
-  //         userLogCollection = "userGenderLog";
-  //         break;
-  //       case "enthnicity":
-  //         userLogCollection = "userEnthnicityLog";
-  //         break;
-  //       case "country":
-  //         userLogCollection = "userCountryLog";
-  //         break;
-  //       case "state":
-  //         userLogCollection = "userStateLog";
-  //         break;
-  //       case "city":
-  //         userLogCollection = "userCityLog";
-  //         break;
-  //       default:
-  //       // code block
-  //     }
-  //     const userLogRef = firebase.db.collection(userLogCollection).doc();
-  //     await userLogRef.set({
-  //       uname: username,
-  //       [attrName]: newValue,
-  //       createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-  //     });
-  //   },
-  //   [firebase, username]
-  // );
+  const changeAttr = useCallback(
+    (attrName: string) => async (newValue: any) => {
+      if (!user) return;
 
-  // const handleThemeSwitch = useCallback(
-  //   event => {
-  //     event.preventDefault();
-  //     const newTheme = theme === "Dark" ? "Light" : "Dark";
-  //     changeAttr("theme")(newTheme);
-  //     setTheme(newTheme);
-  //   },
-  //   [theme, changeAttr]
-  // );
+      console.log({ [attrName]: newValue });
+
+      const userRef = doc(db, "users", user.uname);
+
+      // // Set the "capital" field of the city 'DC'
+      // await updateDoc(washingtonRef, {
+      //   capital: true,
+      // });
+
+      // const userRef = firebase.db.collection("users").doc(username);
+
+      // await userRef.update({ [attrName]: newValue });
+
+      await updateDoc(userRef, { [attrName]: newValue });
+
+      let userLogCollection = "";
+      switch (attrName) {
+        case "fName":
+          userLogCollection = "userFNameLog";
+          break;
+        case "lName":
+          userLogCollection = "userLNameLog";
+          break;
+        case "theme":
+          userLogCollection = "userThemeLog";
+          break;
+        case "background":
+          userLogCollection = "userBackgroundLog";
+          break;
+        case "chooseUname":
+          userLogCollection = "userChooseUnameLog";
+          break;
+        case "lang":
+          userLogCollection = "userLangLog";
+          break;
+        case "gender":
+          userLogCollection = "userGenderLog";
+          break;
+        case "enthnicity":
+          userLogCollection = "userEnthnicityLog";
+          break;
+        case "country":
+          userLogCollection = "userCountryLog";
+          break;
+        case "state":
+          userLogCollection = "userStateLog";
+          break;
+        case "city":
+          userLogCollection = "userCityLog";
+          break;
+        default:
+        // code block
+      }
+
+      const userLogRef = doc(collection(db, userLogCollection));
+      await setDoc(userLogRef, {
+        uname: user.uname,
+        [attrName]: newValue,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+
+      // const userLogRef = firebase.db.collection(userLogCollection).doc();
+      // await userLogRef.set({
+      //   uname: username,
+      //   [attrName]: newValue,
+      //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+      // });
+    },
+    [db, user]
+  );
+
+  const handleThemeSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newTheme = settings.theme === "Dark" ? "Light" : "Dark";
+      changeAttr("theme")(newTheme);
+      // setTheme(newTheme);
+      dispatch({ type: "setTheme", payload: newTheme });
+    },
+    [changeAttr, dispatch, settings.theme]
+  );
 
   // const handleBackgroundSwitch = useCallback(
   //   event => {
@@ -508,10 +534,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const onEthnicityOtherValueChange = event => setEthnicityOtherValue(event.target.value);
 
-  const getDisplayNameValue = (user: User) => {
-    if (user.chooseUname) return user.uname || "Your Username";
-    return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
-  };
+  // const getDisplayNameValue = (user: User) => {
+  //   if (user.chooseUname) return user.uname || "Your Username";
+  //   return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
+  // };
 
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
@@ -566,18 +592,21 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                 control={
                   <Switch
                     // checked={values.theme === "Dark"}
-                    checked={themeMode === "dark"}
-                    onChange={() => {
-                      // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
-                      setThemeMode(themeMode === "light" ? "dark" : "light");
-                    }}
+                    checked={settings.theme === "Dark"}
+                    onChange={handleThemeSwitch}
+                    // onChange={() => {
+                    //   // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
+                    //   // setThemeMode(settings.theme === "light" ? "dark" : "light");
+                    //   // dispatch({ type: "setTheme", payload: settings.theme === "Light" ? "Dark" : "Light" });
+                    //   handleThemeSwitch();
+                    // }}
                   />
                 }
-                label={`Theme: ${themeMode === "dark" ? "🌜" : "🌞"}`}
+                label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
               />
             </FormGroup>
 
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={
                   <Switch
@@ -591,7 +620,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                   />
                 }
                 label={`Background: ${user.background === "Color" ? "Color" : "Image"}`}
-              />
+              />handleThemeSwitch
             </FormGroup>
 
             <FormGroup>
@@ -605,7 +634,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                 }
                 label={`Display name: ${getDisplayNameValue(user)}`}
               />
-            </FormGroup>
+            </FormGroup> */}
 
             {/* <InputSave
               identification="fNameInput"

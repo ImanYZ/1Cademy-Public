@@ -331,8 +331,11 @@ export type ProposalInput = {
   choices?: KnowledgeChoice[];
 };
 
+export type UserTheme = "Dark" | "Light";
+
+export type UserBackground = "Color" | "Image";
+
 export type User = {
-  background?: string;
   blocked?: boolean;
   chooseUname?: boolean;
   city?: string;
@@ -361,7 +364,6 @@ export type User = {
   sNode?: string;
   tag?: string;
   tagId?: string;
-  theme?: string;
   uname: string;
   updatedAt?: Timestamp;
   userId?: string;
@@ -374,6 +376,11 @@ export type User = {
   reason?: string;
   major?: string;
   instit?: string;
+};
+
+export type userSettings = {
+  background: "Image" | "Color";
+  theme: UserTheme;
 };
 
 export type Reputation = {
@@ -425,6 +432,7 @@ export interface AuthState {
   readonly isAuthInitialized: boolean;
   readonly user: User | null;
   readonly reputation: Reputation | null;
+  readonly settings: userSettings;
 }
 
 export type AuthActions = {
@@ -444,9 +452,24 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
-  payload: { user: User; reputation: Reputation };
+  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground };
 };
-export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
+
+export type SetThemeAction = {
+  type: "setTheme";
+  payload: UserTheme;
+};
+
+export type SetBackgroundAction = {
+  type: "setBackground";
+  payload: UserBackground;
+};
+
+export type DispatchAuthActions =
+  | AuthLogoutSuccessAction
+  | AuthLoginSuccessAction
+  | SetThemeAction
+  | SetBackgroundAction;
 
 export type SignUpValidation = {
   uname?: string;
@@ -499,6 +522,8 @@ export interface SignUpFormValues {
 
 export interface SignUpData extends User {
   password: string;
+  background: UserBackground;
+  theme: UserTheme;
 }
 
 export type ThemeActions = {
