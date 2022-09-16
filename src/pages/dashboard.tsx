@@ -25,6 +25,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 
+import withAuthUser from "@/components/hoc/withAuthUser";
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -2607,5 +2608,9 @@ const NodeBook = () => (
     <Dashboard />
   </NodeBookProvider>
 );
+export default withAuthUser({
+  shouldRedirectToLogin: true,
+  shouldRedirectToHomeIfAuthenticated: false,
+})(NodeBook);
 
-export default NodeBook;
+// export default NodeBook;

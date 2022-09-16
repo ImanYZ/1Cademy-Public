@@ -1,5 +1,7 @@
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { FormControlLabel, FormGroup, Switch } from "@mui/material";
+import { getAuth } from "firebase/auth";
 import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";
 // import ListItemText from "@material-ui/core/ListItemText";
@@ -20,7 +22,6 @@ import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
-
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 // import Modal from "../../../../containers/Modal/Modal";
 // import {
@@ -349,13 +350,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const choosingNodeClick = useCallback(choosingNodeTag => event => setChoosingNode(choosingNodeTag), []);
 
-  // const logoutClick = useCallback(
-  //   event => {
-  //     event.preventDefault();
-  //     firebase.logout();
-  //   },
-  //   [firebase]
-  // );
+  const logoutClick = useCallback((event: any) => {
+    event.preventDefault();
+    getAuth().signOut();
+  }, []);
 
   // const changeUsername = useCallback(
   //   async newUsername => {
@@ -383,77 +381,91 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   // );
 
   const changeAttr = useCallback(
-    (attrName: string) => async (newValue: any) => {
-      if (!user) return;
+    (
+        attrName:
+          | "fName"
+          | "lName"
+          | "theme"
+          | "background"
+          | "chooseUname"
+          | "lang"
+          | "gender"
+          | "enthnicity"
+          | "country"
+          | "state"
+          | "city"
+      ) =>
+      async (newValue: any) => {
+        if (!user) return;
 
-      console.log({ [attrName]: newValue });
+        console.log({ [attrName]: newValue });
 
-      const userRef = doc(db, "users", user.uname);
+        const userRef = doc(db, "users", user.uname);
 
-      // // Set the "capital" field of the city 'DC'
-      // await updateDoc(washingtonRef, {
-      //   capital: true,
-      // });
+        // // Set the "capital" field of the city 'DC'
+        // await updateDoc(washingtonRef, {
+        //   capital: true,
+        // });
 
-      // const userRef = firebase.db.collection("users").doc(username);
+        // const userRef = firebase.db.collection("users").doc(username);
 
-      // await userRef.update({ [attrName]: newValue });
+        // await userRef.update({ [attrName]: newValue });
 
-      await updateDoc(userRef, { [attrName]: newValue });
+        await updateDoc(userRef, { [attrName]: newValue });
 
-      let userLogCollection = "";
-      switch (attrName) {
-        case "fName":
-          userLogCollection = "userFNameLog";
-          break;
-        case "lName":
-          userLogCollection = "userLNameLog";
-          break;
-        case "theme":
-          userLogCollection = "userThemeLog";
-          break;
-        case "background":
-          userLogCollection = "userBackgroundLog";
-          break;
-        case "chooseUname":
-          userLogCollection = "userChooseUnameLog";
-          break;
-        case "lang":
-          userLogCollection = "userLangLog";
-          break;
-        case "gender":
-          userLogCollection = "userGenderLog";
-          break;
-        case "enthnicity":
-          userLogCollection = "userEnthnicityLog";
-          break;
-        case "country":
-          userLogCollection = "userCountryLog";
-          break;
-        case "state":
-          userLogCollection = "userStateLog";
-          break;
-        case "city":
-          userLogCollection = "userCityLog";
-          break;
-        default:
-        // code block
-      }
+        let userLogCollection = "";
+        switch (attrName) {
+          case "fName":
+            userLogCollection = "userFNameLog";
+            break;
+          case "lName":
+            userLogCollection = "userLNameLog";
+            break;
+          case "theme":
+            userLogCollection = "userThemeLog";
+            break;
+          case "background":
+            userLogCollection = "userBackgroundLog";
+            break;
+          case "chooseUname":
+            userLogCollection = "userChooseUnameLog";
+            break;
+          case "lang":
+            userLogCollection = "userLangLog";
+            break;
+          case "gender":
+            userLogCollection = "userGenderLog";
+            break;
+          case "enthnicity":
+            userLogCollection = "userEnthnicityLog";
+            break;
+          case "country":
+            userLogCollection = "userCountryLog";
+            break;
+          case "state":
+            userLogCollection = "userStateLog";
+            break;
+          case "city":
+            userLogCollection = "userCityLog";
+            break;
+          default:
+          // code block
+        }
 
-      const userLogRef = doc(collection(db, userLogCollection));
-      await setDoc(userLogRef, {
-        uname: user.uname,
-        [attrName]: newValue,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
+        const userLogRef = doc(collection(db, userLogCollection));
+        await setDoc(userLogRef, {
+          uname: user.uname,
+          [attrName]: newValue,
+          createdAt: Timestamp.fromDate(new Date()),
+        });
 
-      // const userLogRef = firebase.db.collection(userLogCollection).doc();
-      // await userLogRef.set({
-      //   uname: username,
-      //   [attrName]: newValue,
-      //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      // });
-    },
+        // const userLogRef = firebase.db.collection(userLogCollection).doc();
+        // await userLogRef.set({
+        //   uname: username,
+        //   [attrName]: newValue,
+        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+        // });
+      },
     [db, user]
   );
 
@@ -590,7 +602,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               uname={username}
             /> */}
 
-            <FormGroup>
+            <FormGroup sx={{ p: "10px 19px" }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -609,7 +621,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               />
             </FormGroup>
 
-            <FormGroup>
+            <FormGroup sx={{ p: "10px 19px" }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -630,7 +642,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               handleThemeSwitch
             </FormGroup>
 
-            <FormGroup>
+            <FormGroup sx={{ p: "10px 19px" }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -664,13 +676,20 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               fullWidth
               sx={{ mb: "16px" }}
             /> */}
-            {/* <InputSave
+            <MemoizedInputSave
               identification="lNameInput"
-              initialValue={lName}
+              initialValue={user.lName || ""} //TODO: important fill empty user field
               onSubmit={changeAttr("lName")}
-              setState={setLName}
+              setState={(lName: string) => dispatch({ type: "setAuthUser", payload: { ...user, lName } })}
               label="Change your last name"
-            /> */}
+            />
+            {/* <InputSave
+                identification="lNameInput"
+                initialValue={lName}
+                onSubmit={changeAttr("lName")}
+                setState={setLName}
+                label="Change your last name"
+              /> */}
             {/* CHECKL I comented this */}
             {/* <InputSave
               identification="UsernameInput"
@@ -679,6 +698,16 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               setState={setUsername}
               label="DANGEROUS ACTION: Change your username!"
             /> */}
+            <div className="AccountSettingsButtons">
+              <MemoizedMetaButton onClick={logoutClick}>
+                <div className="AccountSettingsButton">
+                  <span id="LogoutButtonContent">
+                    <ExitToAppIcon />
+                    <span id="LogoutButtonText">Logout</span>
+                  </span>
+                </div>
+              </MemoizedMetaButton>
+            </div>
             {/* <div className="AccountSettingsButtons">
               <MetaButton onClick={logoutClick}>
                 <div className="AccountSettingsButton">
