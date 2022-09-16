@@ -16,7 +16,7 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
-import { GENDER_VALUES } from "../../../lib/utils/constants";
+import { ETHNICITY_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 import { MemoizedTagsSearcher } from "../../TagsSearcher";
 import { MemoizedInputSave } from "../InputSave";
@@ -822,6 +822,29 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                 sx={{ mb: "16px" }}
               />
             )}
+
+            <Autocomplete
+              id="ethnicity"
+              value={user.ethnicity}
+              onChange={
+                (_, value) =>
+                  handleChange({ target: { value, name: "ethnicity" } }) /* handleChange("ethnicity", value)*/
+              }
+              // onBlur={() => setTouched({ ...touched, ethnicity: true })}
+              // structure based from https://blog.hubspot.com/service/survey-demographic-questions
+              options={ETHNICITY_VALUES}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label="Ethnicity"
+                  // error={Boolean(errors.ethnicity) && Boolean(touched.ethnicity)}
+                  // helperText={touched.ethnicity && errors.ethnicity}
+                />
+              )}
+              fullWidth
+              multiple
+              sx={{ mb: "16px" }}
+            />
 
             <TextField
               id="reason"
