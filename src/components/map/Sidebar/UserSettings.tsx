@@ -1,6 +1,6 @@
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import { FormControlLabel, FormGroup, Switch } from "@mui/material";
+import { Autocomplete, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";
@@ -9,7 +9,7 @@ import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "fir
 // import Done from "@material-ui/icons/Done";
 // import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 // import axios from "axios";
-import React, { Suspense, useCallback, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
 import { useNodeBook } from "../../../context/NodeBookContext";
@@ -100,6 +100,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   const [{ user }] = useAuth();
   // console.log("rr", rr);
   const { allTags, setAllTags } = useTagsTreeView([]);
+  const [languages, setLanguages] = useState<string[]>([]);
   // const [{ setThemeMode, themeMode }] = use1AcademyTheme(); // CHECK I comented
 
   // const firebase = useRecoilValue(firebaseState);
@@ -176,11 +177,21 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const [chosenTags, setChosenTags] = useState([]);
   // const [birthDate, setBirthDate] = useState(new Date());
-  // const [genderOtherValue, setGenderOtherValue] = useState("");
-  // const [ethnicityOtherValue, setEthnicityOtherValue] = useState("");
+  const [genderOtherValue /*setGenderOtherValue*/] = useState("");
+  const [ethnicityOtherValue /*setEthnicityOtherValue*/] = useState("");
   // const [CSCObj, setCSCObj] = useState([]);
   // const [allCountries, setAllCountries] = useState([]);
-
+  useEffect(() => {
+    const getLanguages = async () => {
+      const ISO6391Obj = await import("iso-639-1");
+      const allLanguages = [
+        ...ISO6391Obj.default.getAllNames().sort((l1, l2) => (l1 < l2 ? -1 : 1)),
+        "Prefer not to say",
+      ];
+      setLanguages(allLanguages);
+    };
+    getLanguages();
+  }, []);
   // useEffect(() => {
   //   setTotalPoints(
   //     cnCorrects -
@@ -390,7 +401,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
           | "chooseUname"
           | "lang"
           | "gender"
-          | "enthnicity"
+          | "ethnicity"
           | "country"
           | "state"
           | "city"
@@ -436,7 +447,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
           case "gender":
             userLogCollection = "userGenderLog";
             break;
-          case "enthnicity":
+          case "ethnicity":
             userLogCollection = "userEnthnicityLog";
             break;
           case "country":
@@ -510,40 +521,47 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   //   setIsSubmitting(false);
   // }, []);
 
-  // const handleChange = useCallback(
-  //   event => {
-  //     if ("persist" in event) {
-  //       event.persist();
-  //     }
-  //     if (event.target.name === "ethnicity") {
-  //       const newEthnicity = [
-  //         ...ethnicity.filter(option => option !== "Not listed (Please specify)"),
-  //         event.target.value,
-  //       ];
-  //       setEthnicity(newEthnicity);
-  //       const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : ethnicity;
-  //       changeAttr("ethnicity")(ethnicityArray);
-  //     } else if (event.target.name === "gender") {
-  //       setGender(event.target.value);
-  //       changeAttr("gender")(
-  //         event.target.value === "Not listed (Please specify)" ? genderOtherValue : event.target.value
-  //       );
-  //     } else if (event.target.name === "language") {
-  //       setLang(event.target.value);
-  //       changeAttr("lang")(event.target.value);
-  //     } else if (event.target.name === "country") {
-  //       setCountry(event.target.value);
-  //       changeAttr("country")(event.target.value.split(";")[0]);
-  //     } else if (event.target.name === "stateId") {
-  //       setStateInfo(event.target.value);
-  //       changeAttr("state")(event.target.value.split(";")[0]);
-  //     } else if (event.target.name === "city") {
-  //       setCity(event.target.value);
-  //       changeAttr("city")(event.target.value);
-  //     }
-  //   },
-  //   [ethnicity, genderOtherValue, ethnicityOtherValue]
-  // );
+  const handleChange = useCallback(
+    (event: any) => {
+      if ("persist" in event) {
+        event.persist();
+      }
+      if (!user) return;
+      if (event.target.name === "ethnicity") {
+        const newEthnicity = [
+          ...(user.ethnicity || []).filter(option => option !== "Not listed (Please specify)"),
+          event.target.value,
+        ];
+        // setEthnicity(newEthnicity);
+        dispatch({ type: "setAuthUser", payload: { ...user, ethnicity: newEthnicity } });
+        const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : user.ethnicity;
+        changeAttr("ethnicity")(ethnicityArray);
+      } else if (event.target.name === "gender") {
+        // setGender(event.target.value);
+        dispatch({ type: "setAuthUser", payload: { ...user, gender: event.target.value } });
+        changeAttr("gender")(
+          event.target.value === "Not listed (Please specify)" ? genderOtherValue : event.target.value
+        );
+      } else if (event.target.name === "language") {
+        // setLang(event.target.value);
+        dispatch({ type: "setAuthUser", payload: { ...user, lang: event.target.value } });
+        changeAttr("lang")(event.target.value);
+      } else if (event.target.name === "country") {
+        // setCountry(event.target.value);
+        dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value } });
+        changeAttr("country")(event.target.value.split(";")[0]);
+      } else if (event.target.name === "stateId") {
+        // setStateInfo(event.target.value);
+        dispatch({ type: "setAuthUser", payload: { ...user, state: event.target.value } });
+        changeAttr("state")(event.target.value.split(";")[0]);
+      } else if (event.target.name === "city") {
+        // setCity(event.target.value);
+        dispatch({ type: "setAuthUser", payload: { ...user, city: event.target.value } });
+        changeAttr("city")(event.target.value);
+      }
+    },
+    [changeAttr, dispatch, ethnicityOtherValue, genderOtherValue, user]
+  );
 
   // const onGenderOtherValueChange = event => setGenderOtherValue(event.target.value);
 
@@ -726,6 +744,37 @@ const UserSettings = (/*props: UserSettingProps*/) => {
         content: (
           <div id="PersonalSettings">
             <h2>Personal</h2>
+            <Autocomplete
+              id="language"
+              value={user.lang}
+              // onChange={(_, value) => setFieldValue("language", value)}
+              onChange={(_, value) => handleChange({ target: { value, name: "language" } })}
+              // onBlur={() => setTouched({ ...touched, language: true })}
+              options={languages}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label="Language"
+                  // error={Boolean(errors.language) && Boolean(touched.language)}
+                  // helperText={touched.language && errors.language}
+                />
+              )}
+              fullWidth
+              sx={{ mb: "16px" }}
+            />
+            {/* <FormControl className="select" variant="outlined">
+              <InputLabel>Language</InputLabel>
+              <Select
+                label="Language"
+                name="language"
+                onChange={handleChange}
+                // onBlur={props.handleBlur}
+                value={user.lang}
+                renderValue={sameThing => sameThing}
+              >
+                {sortedLanguages.map(languageItems)}
+              </Select>
+            </FormControl> */}
             {/* <PersonalInfo
               values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
               handleChange={handleChange}
