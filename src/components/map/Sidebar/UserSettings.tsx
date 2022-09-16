@@ -16,6 +16,7 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
+import { GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 import { MemoizedTagsSearcher } from "../../TagsSearcher";
 import { MemoizedInputSave } from "../InputSave";
@@ -177,10 +178,15 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const [chosenTags, setChosenTags] = useState([]);
   // const [birthDate, setBirthDate] = useState(new Date());
-  const [genderOtherValue /*setGenderOtherValue*/] = useState("");
+  const [genderOtherValue, setGenderOtherValue] = useState("");
   const [ethnicityOtherValue /*setEthnicityOtherValue*/] = useState("");
   // const [CSCObj, setCSCObj] = useState([]);
   // const [allCountries, setAllCountries] = useState([]);
+
+  const [reason, setReason] = useState(user?.reason || ""); // TODO: improve this
+
+  // useEffect(()=>{},[])
+
   useEffect(() => {
     const getLanguages = async () => {
       const ISO6391Obj = await import("iso-639-1");
@@ -405,6 +411,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
           | "country"
           | "state"
           | "city"
+          | "reason"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -458,6 +465,9 @@ const UserSettings = (/*props: UserSettingProps*/) => {
             break;
           case "city":
             userLogCollection = "userCityLog";
+            break;
+          case "reason":
+            userLogCollection = "userReasonLog";
             break;
           default:
           // code block
@@ -558,6 +568,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
         // setCity(event.target.value);
         dispatch({ type: "setAuthUser", payload: { ...user, city: event.target.value } });
         changeAttr("city")(event.target.value);
+      } else if (event.target.name === "reason") {
+        // This is an input,
+        // we call changeAttr function only when is onBlur
+        setReason(event.target.value);
       }
     },
     [changeAttr, dispatch, ethnicityOtherValue, genderOtherValue, user]
@@ -759,6 +773,56 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                   // helperText={touched.language && errors.language}
                 />
               )}
+              fullWidth
+              sx={{ mb: "16px" }}
+            />
+
+            <Autocomplete
+              id="gender"
+              value={user.gender}
+              // onChange={(_, value) => setFieldValue("gender", value)}
+              onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
+              // onBlur={() => setTouched({ ...touched, gender: true })}
+              options={GENDER_VALUES}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label="Gender"
+                  // error={Boolean(errors.gender) && Boolean(touched.gender)}
+                  // helperText={touched.gender && errors.gender}
+                />
+              )}
+              fullWidth
+              sx={{ mb: "16px" }}
+            />
+
+            {user.gender === "Not listed (Please specify)" && (
+              <TextField
+                id="genderOtherValue"
+                name="genderOtherValue"
+                label="Please specify your gender."
+                value={genderOtherValue}
+                onChange={e => setGenderOtherValue(e.target.value)}
+                // onBlur={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                onBlur={(event: any) => changeAttr("gender")(event.target.value)}
+                variant="outlined"
+                // error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
+                // helperText={touched.genderOtherValue && errors.genderOtherValue}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+            )}
+
+            <TextField
+              id="reason"
+              name="reason"
+              label="Reason for Joining"
+              value={reason}
+              onChange={(event: any) => handleChange({ target: { value: event.target.value, name: "reason" } })}
+              onBlur={(event: any) => changeAttr("reason")(event.target.value)}
+              variant="outlined"
+              // error={Boolean(errors.reason) && Boolean(touched.reason)}
+              // helperText={touched.reason && errors.reason}
               fullWidth
               sx={{ mb: "16px" }}
             />

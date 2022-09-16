@@ -93,6 +93,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       clickedCP: userData.clickedCP,
       createdAt: userData.createdAt.toDate(),
       email: userData.email,
+      reason: userData.reason,
     };
 
     theme = userData.theme;
