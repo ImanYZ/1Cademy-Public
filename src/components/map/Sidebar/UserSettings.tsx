@@ -460,7 +460,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
             userLogCollection = "userGenderLog";
             break;
           case "ethnicity":
-            userLogCollection = "userEnthnicityLog";
+            userLogCollection = "userEthnicityLog";
             break;
           case "country":
             userLogCollection = "userCountryLog";
@@ -543,14 +543,16 @@ const UserSettings = (/*props: UserSettingProps*/) => {
       }
       if (!user) return;
       if (event.target.name === "ethnicity") {
+        console.log("ETH -->", event.target.value);
         const newEthnicity = [
-          ...(user.ethnicity || []).filter(option => option !== "Not listed (Please specify)"),
-          event.target.value,
+          ...(event.target.value || []) /*.filter((option: any) => option !== "Not listed (Please specify)")*/,
         ];
         // setEthnicity(newEthnicity);
         dispatch({ type: "setAuthUser", payload: { ...user, ethnicity: newEthnicity } });
         const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : user.ethnicity;
-        changeAttr("ethnicity")(ethnicityArray);
+        changeAttr("ethnicity")(
+          (ethnicityArray || []).filter((option: any) => option !== "Not listed (Please specify)")
+        );
       } else if (event.target.name === "gender") {
         // setGender(event.target.value);
         dispatch({ type: "setAuthUser", payload: { ...user, gender: event.target.value } });
@@ -595,7 +597,12 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     if (!userGender) return null;
     return GENDER_VALUES.includes(userGender) ? userGender : GENDER_VALUES[2];
   };
-
+  const canShowOtherEthnicityInput = (ethnicity: string[]) => {
+    const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
+    if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
+    if (ethnicity.some((ethnicityItem: string) => !isInEthnicityValues(ethnicityItem))) return true;
+    return false;
+  };
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
       {
@@ -845,7 +852,37 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               multiple
               sx={{ mb: "16px" }}
             />
-
+            {canShowOtherEthnicityInput(user.ethnicity || []) && (
+              <TextField
+                id="genderOtherValue"
+                name="genderOtherValue"
+                label="Please specify your gender."
+                value={genderOtherValue}
+                onChange={e => setGenderOtherValue(e.target.value)}
+                // onBlur={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                onBlur={(event: any) => changeAttr("gender")(event.target.value)}
+                variant="outlined"
+                // error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
+                // helperText={touched.genderOtherValue && errors.genderOtherValue}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+            )}
+            {/* {values.ethnicity.includes("Not listed (Please specify)") && (
+        <TextField
+          id="ethnicityOtherValue"
+          name="ethnicityOtherValue"
+          label="Please specify your ethnicity."
+          value={values.ethnicityOtherValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          variant="outlined"
+          error={Boolean(errors.ethnicityOtherValue) && Boolean(touched.ethnicityOtherValue)}
+          helperText={touched.ethnicityOtherValue && errors.ethnicityOtherValue}
+          fullWidth
+          sx={{ mb: "16px" }}
+        />
+      )} */}
             <TextField
               id="reason"
               name="reason"
