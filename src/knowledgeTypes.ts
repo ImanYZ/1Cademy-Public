@@ -464,12 +464,16 @@ export type SetBackgroundAction = {
   type: "setBackground";
   payload: UserBackground;
 };
-
+export type SetAuthUserAction = {
+  type: "setAuthUser";
+  payload: User;
+};
 export type DispatchAuthActions =
   | AuthLogoutSuccessAction
   | AuthLoginSuccessAction
   | SetThemeAction
-  | SetBackgroundAction;
+  | SetBackgroundAction
+  | SetAuthUserAction;
 
 export type SignUpValidation = {
   uname?: string;

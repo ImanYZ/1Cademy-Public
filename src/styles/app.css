@@ -1,19 +1,23 @@
-/* CHECK: remove all unnecessary thing */
-
-/* body {
+body {
   background-image: none;
   background-color: #121212;
 }
 body.Image {
-  background-image: url(../../assets/ReducedExposureBackground.png);
+  background-image: url(../../public/darkModeLibraryBackground.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: none;
 }
 body.LightMode {
   background-image: none;
   background-color: #dfdfdf;
 }
 body.Image.LightMode {
-  background-image: url(../../assets/LightModeBackground.jpg);
-} */
+  background-image: url(../../public/lightModeLibraryBackground.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: none;
+}
 
 #AppContainer {
   width: 100%;

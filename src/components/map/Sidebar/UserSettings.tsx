@@ -14,8 +14,9 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
-// import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
+import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 import { MemoizedTagsSearcher } from "../../TagsSearcher";
+import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
@@ -467,25 +468,27 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     [changeAttr, dispatch, settings.theme]
   );
 
-  // const handleBackgroundSwitch = useCallback(
-  //   event => {
-  //     event.preventDefault();
-  //     const newBackground = background === "Image" ? "Color" : "Image";
-  //     changeAttr("background")(newBackground);
-  //     setBackground(newBackground);
-  //   },
-  //   [background, changeAttr]
-  // );
+  const handleBackgroundSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newBackground = settings.background === "Image" ? "Color" : "Image";
+      changeAttr("background")(newBackground);
+      // setBackground(newBackground);
+      dispatch({ type: "setBackground", payload: newBackground });
+    },
+    [changeAttr, dispatch, settings.background]
+  );
 
-  // const handlesChooseUnameSwitch = useCallback(
-  //   event => {
-  //     event.preventDefault();
-  //     const newChooseUname = !chooseUname;
-  //     changeAttr("chooseUname")(newChooseUname);
-  //     setChooseUname(newChooseUname);
-  //   },
-  //   [chooseUname, changeAttr]
-  // );
+  const handlesChooseUnameSwitch = useCallback(
+    (event: any, user: User) => {
+      event.preventDefault();
+      const newChooseUname = !user.chooseUname;
+      changeAttr("chooseUname")(newChooseUname);
+      // setChooseUname(newChooseUname);
+      dispatch({ type: "setAuthUser", payload: { ...user, chooseUname: newChooseUname } });
+    },
+    [changeAttr, dispatch]
+  );
 
   // const closeTagSelector = useCallback(() => {
   //   setChoosingNode(false);
@@ -534,10 +537,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const onEthnicityOtherValueChange = event => setEthnicityOtherValue(event.target.value);
 
-  // const getDisplayNameValue = (user: User) => {
-  //   if (user.chooseUname) return user.uname || "Your Username";
-  //   return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
-  // };
+  const getDisplayNameValue = (user: User) => {
+    if (user.chooseUname) return user.uname || "Your Username";
+    return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
+  };
 
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
@@ -606,21 +609,25 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               />
             </FormGroup>
 
-            {/* <FormGroup>
+            <FormGroup>
               <FormControlLabel
                 control={
                   <Switch
                     // checked={values.background === "Image"}
-                    checked={user.background === "Image"}
-                    onChange={() => {
-                      // setFieldValue("background", values.background === "Color" ? "Image" : "Color");
-                      // setBackground(user.background === "Color" ? "Image" : "Color");
-                      console.log('setBackground(user.background === "Color" ? "Image" : "Color");');
-                    }}
+                    checked={settings.background === "Image"}
+                    // onChange={() => {
+                    //   // setFieldValue("background", values.background === "Color" ? "Image" : "Color");
+                    //   // setBackground(user.background === "Color" ? "Image" : "Color");
+
+                    //   // setBackground(user.background === "Color" ? "Image" : "Color");
+
+                    // }}
+                    onChange={handleBackgroundSwitch}
                   />
                 }
-                label={`Background: ${user.background === "Color" ? "Color" : "Image"}`}
-              />handleThemeSwitch
+                label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
+              />
+              handleThemeSwitch
             </FormGroup>
 
             <FormGroup>
@@ -629,21 +636,35 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                   <Switch
                     // checked={!values.chooseUname}
                     checked={!user.chooseUname}
-                    onChange={() => console.log('setFieldValue("chooseUname", !values.chooseUname)')}
+                    onChange={e => handlesChooseUnameSwitch(e, user)}
                   />
                 }
                 label={`Display name: ${getDisplayNameValue(user)}`}
               />
-            </FormGroup> */}
+            </FormGroup>
 
-            {/* <InputSave
+            <MemoizedInputSave
               identification="fNameInput"
-              initialValue={fName}
+              initialValue={user.fName || ""} //TODO: important fill empty user field
               onSubmit={changeAttr("fName")}
-              setState={setFName}
+              setState={(fName: string) => dispatch({ type: "setAuthUser", payload: { ...user, fName } })}
               label="Change your first name"
             />
-            <InputSave
+            {/* <TextField
+              id="firstName"
+              name="firstName"
+              label="First Name"
+              value={user.fName}
+              onChange={e => dispatch({ type: "setAuthUser", payload: { ...user, fName: e.target.value } })}
+              //onChange={handleChange}
+              // onBlur={handleBlur}
+              variant="outlined"
+              // error={Boolean(errors.firstName) && Boolean(touched.firstName)}
+              // helperText={touched.firstName && errors.firstName}
+              fullWidth
+              sx={{ mb: "16px" }}
+            /> */}
+            {/* <InputSave
               identification="lNameInput"
               initialValue={lName}
               onSubmit={changeAttr("lName")}
@@ -728,13 +749,13 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                 {sortedLanguages.map(languageItems)}
               </Select>
             </FormControl>
-  
+
             <div className="DoubleInputRow">
               <Suspense fallback={<div></div>}>
                 <DatePicker birthDate={props.birthDate} setBirthDate={props.setBirthDate} />
               </Suspense>
               <div className="MiddleGap"></div>
-  
+
               <FormControl className="select" variant="outlined">
                 <InputLabel>Gender</InputLabel>
                 <Select
@@ -750,7 +771,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                     GENDER_VALUES.map(genderItems)
                   }
                 </Select>
-  
+
                 {gender && gender === "Not listed (Please specify)" && (
                   <ValidatedInput
                     className="PleaseSpecify"
@@ -762,7 +783,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                 )}
               </FormControl>
             </div>
-  
+
             <FormControl className="select" variant="outlined">
               <InputLabel>Ethnicity</InputLabel>
               <Select

@@ -2564,9 +2564,26 @@ button.MuiTab-textColorInherit:focus {
 .LightMode #PersonalSettings .MuiOutlinedInput-notchedOutline {
   border-color: rgba(0, 0, 0, 0.22);
 }
+/* -------------------------------- */
+/* Input save */
+.InputSaveContainer {
+  margin: 10px 19px 10px 19px;
+}
+
+.InputSaveContainer .ImageUploadButtonLoader {
+  position: relative;
+  margin: -4px 0px -4px -34px;
+  width: 31px !important;
+  height: 31px !important;
+}
+
+.SaveIcon {
+  color: red;
+}
 
 /* ----------------------------- */
 /* custom overrides */
+
 .customUserStatusTotalPoints {
   display: none;
 }
