@@ -178,7 +178,12 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const [chosenTags, setChosenTags] = useState([]);
   // const [birthDate, setBirthDate] = useState(new Date());
-  const [genderOtherValue, setGenderOtherValue] = useState("");
+  const getOtherGenderValue = (user: User) => {
+    if (!user?.gender) return "";
+    if (user.gender === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
+    return "";
+  };
+  const [genderOtherValue, setGenderOtherValue] = useState(getOtherGenderValue(user));
   const [ethnicityOtherValue /*setEthnicityOtherValue*/] = useState("");
   // const [CSCObj, setCSCObj] = useState([]);
   // const [allCountries, setAllCountries] = useState([]);
@@ -586,6 +591,11 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
   };
 
+  const getValidGenderValue = (userGender?: string) => {
+    if (!userGender) return null;
+    return GENDER_VALUES.includes(userGender) ? userGender : GENDER_VALUES[2];
+  };
+
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
       {
@@ -779,7 +789,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
             <Autocomplete
               id="gender"
-              value={user.gender}
+              value={getValidGenderValue(user.gender)}
               // onChange={(_, value) => setFieldValue("gender", value)}
               onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
               // onBlur={() => setTouched({ ...touched, gender: true })}
@@ -796,7 +806,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               sx={{ mb: "16px" }}
             />
 
-            {user.gender === "Not listed (Please specify)" && (
+            {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
               <TextField
                 id="genderOtherValue"
                 name="genderOtherValue"
