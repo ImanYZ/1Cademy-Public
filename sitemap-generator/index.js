@@ -122,27 +122,6 @@ async function main() {
     })
   }
 
-  // sitemap can have atmost 50000 entries and should not exceed 50MB in size
-  // we are using 40000 to be safe in case of size per entry increases
-  if(sitemaps.length > 40000) {
-    const sitemapIndexes = [];
-    while(sitemaps.length > 0) {
-      sitemapIndexes.push(sitemaps.splice(0, 40000))
-    }
-
-    let c = 1
-    for(const sitemapSubindex of sitemapIndexes) {
-      const sitemapFilename = `sitemap_index_${c}.xml`;
-      const sitemapIndexUrl = await uploadToBucket(sitemapFilename, await buildSitemapIndex(sitemapSubindex))
-      console.log(sitemapIndexUrl, 'Sitemap sub index url')
-      sitemaps.push({
-        url: `https://${process.env.STATIC_STORAGE_BUCKET}/${sitemapFilename}`,
-        updated_at: (new Date()).toISOString()
-      })
-      c++
-    }
-  }
-
   // community sitemaps
   for(const community of communityList) {
     const pages = [];
@@ -171,26 +150,27 @@ async function main() {
     let sitemapContent = '';
 
     // apply sub indexes strategy for community tags
-    if(pages.length > 40000) {
+    if(pages.length > 500) {
       const subCommunityIndexes = [];
       while(pages.length > 0) {
-        subCommunityIndexes.push(pages.splice(0, 40000))
+        subCommunityIndexes.push(pages.splice(0, 500))
       }
 
-      const communityMap = [];
       let c = 1
       for(const sitemapSubindex of subCommunityIndexes) {
+        const _sitemapContent = await buildSitemap(sitemapSubindex);
+        // adding first chunk sitemap as sitemap and others in sitemap index
+        if(c++ === 1) {
+          sitemapContent = _sitemapContent;
+          continue;
+        }
         const communitySubSmFilename = `sitemaps/${community[0]}_${c}.xml`;
-        const communitySubSmUrl = await uploadToBucket(communitySubSmFilename, await buildSitemap(sitemapSubindex))
-        communityMap.push({
+        const communitySubSmUrl = await uploadToBucket(communitySubSmFilename, _sitemapContent)
+        sitemaps.push({
           url: communitySubSmUrl,
           updated_at: (new Date()).toISOString()
         })
-        console.log(communitySubSmUrl, 'Community sub index url')
-        c++
       }
-
-      sitemapContent = await buildSitemapIndex(communityMap)
     } else {
       sitemapContent = await buildSitemap(pages)
     }
