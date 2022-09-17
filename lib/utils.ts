@@ -31,6 +31,10 @@ export const encodeTitle = (title?: string) => {
   return encodeURI(escapeBreaksQuotes(title)).replace(/[&\/\?\\]/g, "");
 };
 
+export function generateAlias(name?: string) {
+  return String(name).toLowerCase().replace(/[^a-z- ]/g, '').trim().replace(/ /g, '-')
+}
+
 export const getQueryParameter = (val: string | string[] | undefined) => {
   if (Array.isArray(val)) {
     return val[0];
