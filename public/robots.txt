@@ -1,6 +1,6 @@
 # https://www.robotstxt.org/robotstxt.html
 
-Sitemap: https://node.1cademy.us/sitemap_index.xml
+Sitemap: https://static.1cademy.us/sitemap_index.xml
 
 # Allow all crawlers
 User-agent: *
