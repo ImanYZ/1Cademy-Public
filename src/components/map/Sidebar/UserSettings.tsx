@@ -3,6 +3,8 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Autocomplete, Box, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import axios from "axios";
+import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";
@@ -25,6 +27,7 @@ import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
+
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 // import Modal from "../../../../containers/Modal/Modal";
 // import {
@@ -104,6 +107,13 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   // console.log("rr", rr);
   const { allTags, setAllTags } = useTagsTreeView([]);
   const [languages, setLanguages] = useState<string[]>([]);
+  const [countries, setCountries] = useState<ICountry[]>([]);
+  const [states, setStates] = useState<IState[]>([]);
+  const [cities, setCities] = useState<ICity[]>([]);
+  const [CSCByGeolocation, setCSCByGeolocation] = useState<{ country: string; state: string; city: string } | null>(
+    null
+  );
+
   // const [{ setThemeMode, themeMode }] = use1AcademyTheme(); // CHECK I comented
 
   // const firebase = useRecoilValue(firebaseState);
@@ -222,6 +232,104 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     };
     getLanguages();
   }, []);
+
+  useEffect(() => {
+    const getCountries = async () => {
+      const defaultCountry: ICountry = {
+        name: "Prefer not to say",
+        isoCode: "",
+        phonecode: "",
+        flag: "",
+        currency: "",
+        latitude: "",
+        longitude: "",
+      };
+      const { Country } = await import("country-state-city");
+      setCountries([...Country.getAllCountries(), defaultCountry]);
+    };
+    getCountries();
+  }, []);
+
+  useEffect(() => {
+    if (!user?.country) return;
+    if (CSCByGeolocation) return;
+
+    const getCSCByGeolocation = async () => {
+      try {
+        if (user.country) return;
+
+        const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=4ddb5d78eaf24b12875c0eb5f790e495");
+        if (!res.data) return;
+
+        const { country_name, state_prov, city } = res.data;
+        setCSCByGeolocation({ country: country_name, state: state_prov, city });
+        if (!countries.filter(cur => cur.name === country_name)) return;
+
+        dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
+        updateStatesByCountry(country_name);
+        updateCitiesByState(state_prov);
+      } catch (err) {
+        console.log("cant autocomplete country state city");
+      }
+    };
+
+    getCSCByGeolocation();
+  }, [CSCByGeolocation, countries, dispatch, updateCitiesByState, updateStatesByCountry, user]);
+
+  const updateStatesByCountry = useCallback(
+    async (currentCountry: string | null) => {
+      if (!currentCountry) return [];
+
+      const countryObject = countries.find(cur => cur.name === currentCountry);
+      if (!countryObject) return [];
+
+      const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
+      const { State } = await import("country-state-city");
+      setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
+    },
+    [countries]
+  );
+
+  const updateCitiesByState = useCallback(
+    async (currentState: string | null) => {
+      if (!user?.country) return [];
+      if (!currentState) return [];
+
+      const currentCountry = countries.find(cur => cur.name === user.country);
+      if (!currentCountry) return [];
+
+      const stateObject = states.find(cur => cur.name === currentState);
+      if (!stateObject) return [];
+
+      const defaultCountry: ICity = { name: "Prefer not to say", countryCode: "", stateCode: "" };
+      const { City } = await import("country-state-city");
+      setCities([...City.getCitiesOfState(currentCountry.isoCode, stateObject.isoCode), defaultCountry]);
+    },
+    [countries, states, user?.country]
+  );
+
+  // const onChangeCountry = async (_: any, value: string | null) => {
+  //   if (!user) return;
+
+  //   dispatch({
+  //     type: "setAuthUser",
+  //     payload: { ...user, country: value ?? undefined, state: undefined, city: undefined },
+  //   });
+  //   // setFieldValue("country", value);
+  //   // setFieldValue("state", null);
+  //   // setFieldValue("city", null);
+  //   await updateStatesByCountry(value);
+  // };
+
+  // const onChangeState = async (_: any, value: string | null) => {
+  //   if (!user) return;
+
+  //   dispatch({ type: "setAuthUser", payload: { ...user, state: value ?? undefined, city: undefined } });
+  //   // setFieldValue("state", value);
+  //   // setFieldValue("city", null);
+
+  //   await updateCitiesByState(value);
+  // };
   // useEffect(() => {
   //   setTotalPoints(
   //     cnCorrects -
@@ -437,11 +545,12 @@ const UserSettings = (/*props: UserSettingProps*/) => {
           | "city"
           | "reason"
           | "foundFrom"
+          | "birthDate"
       ) =>
       async (newValue: any) => {
         if (!user) return;
 
-        console.log({ [attrName]: newValue });
+        console.log("changeAttr -->", { [attrName]: newValue });
 
         const userRef = doc(db, "users", user.uname);
 
@@ -497,6 +606,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
           case "foundFrom":
             userLogCollection = "userFoundFromLog";
             break;
+          case "birthDate":
+            userLogCollection = "userBirthDayLog";
+            break;
+
           default:
           // code block
         }
@@ -593,12 +706,16 @@ const UserSettings = (/*props: UserSettingProps*/) => {
         changeAttr("lang")(event.target.value);
       } else if (event.target.name === "country") {
         // setCountry(event.target.value);
+        const country = event.target.value.split(";")[0];
         dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value } });
-        changeAttr("country")(event.target.value.split(";")[0]);
-      } else if (event.target.name === "stateId") {
+        changeAttr("country")(country);
+        updateStatesByCountry(country);
+      } else if (event.target.name === "state") {
         // setStateInfo(event.target.value);
+        const state = event.target.value.split(";")[0];
         dispatch({ type: "setAuthUser", payload: { ...user, state: event.target.value } });
-        changeAttr("state")(event.target.value.split(";")[0]);
+        changeAttr("state")(state);
+        updateCitiesByState(state);
       } else if (event.target.name === "city") {
         // setCity(event.target.value);
         dispatch({ type: "setAuthUser", payload: { ...user, city: event.target.value } });
@@ -610,9 +727,13 @@ const UserSettings = (/*props: UserSettingProps*/) => {
       } else if (event.target.name === "foundFrom") {
         dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: event.target.value } });
         changeAttr("foundFrom")(event.target.value);
+      } else if (event.target.name === "birthDate") {
+        const newDate = Timestamp.fromDate(new Date(event.target.value || ""));
+        dispatch({ type: "setAuthUser", payload: { ...user, birthDate: event.target.value } });
+        changeAttr("birthDate")(newDate);
       }
     },
-    [changeAttr, dispatch, genderOtherValue, user]
+    [changeAttr, dispatch, genderOtherValue, updateCitiesByState, updateStatesByCountry, user]
   );
 
   // const onGenderOtherValueChange = event => setGenderOtherValue(event.target.value);
@@ -851,7 +972,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               <LocalizationProvider dateAdapter={AdapterDaysJs}>
                 <DatePicker
                   value={user.birthDate}
-                  onChange={newValue => dispatch({ type: "setAuthUser", payload: { ...user, birthDate: newValue } })}
+                  onChange={value => handleChange({ target: { value, name: "birthDate" } })}
                   renderInput={params => (
                     <TextField
                       {...params}
@@ -932,6 +1053,59 @@ const UserSettings = (/*props: UserSettingProps*/) => {
                 label="Please specify your ethnicity."
               />
             )}
+            <Autocomplete
+              id="country"
+              value={user.country}
+              onChange={(_, value) => handleChange({ target: { value, name: "country" } })}
+              // onBlur={() => setTouched({ ...touched, country: true })}
+              options={countries.map(cur => cur.name)}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label="Country"
+                  // error={Boolean(errors.country) && Boolean(touched.country)}
+                  // helperText={touched.country && errors.country}
+                />
+              )}
+              fullWidth
+              sx={{ mb: "16px" }}
+            />
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <Autocomplete
+                id="state"
+                value={user.stateInfo}
+                onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
+                // onBlur={() => setTouched({ ...touched, state: true })}
+                options={states.map(cur => cur.name)}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label="State"
+                    // error={Boolean(errors.state) && Boolean(touched.state)}
+                    // helperText={touched.state && errors.state}
+                  />
+                )}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+              <Autocomplete
+                id="city"
+                value={user.city}
+                onChange={(_, value) => handleChange({ target: { value, name: "city" } })}
+                // onBlur={() => setTouched({ ...touched, city: true })}
+                options={cities.map(cur => cur.name)}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label="City"
+                    // error={Boolean(errors.city) && Boolean(touched.city)}
+                    // helperText={touched.city && errors.city}
+                  />
+                )}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+            </Box>
             <MemoizedInputSave
               identification="reason"
               initialValue={reason} //TODO: important fill empty user field
