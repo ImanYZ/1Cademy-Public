@@ -9,10 +9,9 @@ type NodeHeadProps = {
   keywords: string;
   updatedStr: string;
   createdStr: string;
-  canonical?: string;
 };
 
-export const NodeHead = ({ node, keywords, updatedStr, createdStr, canonical }: NodeHeadProps) => {
+export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadProps) => {
   const {
     id,
     title,
@@ -104,7 +103,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr, canonical }: 
 
   return (
     <Head>
-      <link rel="canonical" href={canonical ? canonical : (`${getNodePageWithDomain(title || "", id)}`)} key="canonical" />
+      <link rel="canonical" href={`${getNodePageWithDomain(title || "", id)}`} key="canonical" />
       <meta name="topic" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="subject" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="Classification" content={nodeType} />
