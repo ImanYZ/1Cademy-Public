@@ -178,13 +178,23 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // const [chosenTags, setChosenTags] = useState([]);
   // const [birthDate, setBirthDate] = useState(new Date());
+
+  const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
   const getOtherGenderValue = (user: User) => {
     if (!user?.gender) return "";
     if (user.gender === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
     return "";
   };
+  const getOtherEthnicityValue = (user: User): string => {
+    if (!user?.ethnicity) return "";
+    const otherEthnicity = user.ethnicity.find(ethnicityItem => !isInEthnicityValues(ethnicityItem));
+    return otherEthnicity ? otherEthnicity : "";
+    // if(user.ethnicity.some(ethnicityItem=>!isInEthnicityValues(ethnicityItem))) return user.ethnicity.filter(cur=>cur!==ETHNICITY_VALUES[6])
+    //     if (user.ethnicity.includes("") === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
+    //     return "";
+  };
   const [genderOtherValue, setGenderOtherValue] = useState(getOtherGenderValue(user));
-  const [ethnicityOtherValue /*setEthnicityOtherValue*/] = useState("");
+  const [ethnicityOtherValue, setEthnicityOtherValue] = useState(getOtherEthnicityValue(user));
   // const [CSCObj, setCSCObj] = useState([]);
   // const [allCountries, setAllCountries] = useState([]);
 
@@ -550,6 +560,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
         // setEthnicity(newEthnicity);
         dispatch({ type: "setAuthUser", payload: { ...user, ethnicity: newEthnicity } });
         const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : user.ethnicity;
+        // check if not otherValue => remove other values
         changeAttr("ethnicity")(
           (ethnicityArray || []).filter((option: any) => option !== "Not listed (Please specify)")
         );
@@ -597,12 +608,24 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     if (!userGender) return null;
     return GENDER_VALUES.includes(userGender) ? userGender : GENDER_VALUES[2];
   };
+
   const canShowOtherEthnicityInput = (ethnicity: string[]) => {
-    const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
     if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
     if (ethnicity.some((ethnicityItem: string) => !isInEthnicityValues(ethnicityItem))) return true;
     return false;
   };
+
+  const mergeEthnicityOtherValueWithUserEthnicity = (user: User, otherEthnicity: string) => {
+    const filteredEthnicities = (user.ethnicity || []).filter(cur => cur !== ETHNICITY_VALUES[6]);
+    return [...filteredEthnicities, otherEthnicity];
+  };
+
+  const getEthnicitySelectedOptions = (userEthnicity: string[]) => {
+    const existOtherValue = userEthnicity.some(ethnicityItem => !isInEthnicityValues(ethnicityItem));
+    const filteredEthnicity = userEthnicity.filter(ethnicityItem => isInEthnicityValues(ethnicityItem));
+    return existOtherValue ? [...filteredEthnicity, ETHNICITY_VALUES[6]] : filteredEthnicity;
+  };
+
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
       {
@@ -832,7 +855,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
             <Autocomplete
               id="ethnicity"
-              value={user.ethnicity}
+              value={getEthnicitySelectedOptions(user.ethnicity || [])}
               onChange={
                 (_, value) =>
                   handleChange({ target: { value, name: "ethnicity" } }) /* handleChange("ethnicity", value)*/
@@ -854,13 +877,15 @@ const UserSettings = (/*props: UserSettingProps*/) => {
             />
             {canShowOtherEthnicityInput(user.ethnicity || []) && (
               <TextField
-                id="genderOtherValue"
-                name="genderOtherValue"
-                label="Please specify your gender."
-                value={genderOtherValue}
-                onChange={e => setGenderOtherValue(e.target.value)}
+                id="ethnicityOtherValue"
+                name="ethnicityOtherValue"
+                label="Please specify your ethnicity."
+                value={ethnicityOtherValue}
+                onChange={e => setEthnicityOtherValue(e.target.value)}
                 // onBlur={(_, value) => handleChange({ target: { value, name: "gender" } })}
-                onBlur={(event: any) => changeAttr("gender")(event.target.value)}
+                onBlur={(event: any) =>
+                  changeAttr("ethnicity")(mergeEthnicityOtherValueWithUserEthnicity(user, event.target.value))
+                }
                 variant="outlined"
                 // error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
                 // helperText={touched.genderOtherValue && errors.genderOtherValue}
