@@ -16,7 +16,7 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
-import { ETHNICITY_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
+import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 import { MemoizedTagsSearcher } from "../../TagsSearcher";
 import { MemoizedInputSave } from "../InputSave";
@@ -427,6 +427,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
           | "state"
           | "city"
           | "reason"
+          | "foundFrom"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -483,6 +484,9 @@ const UserSettings = (/*props: UserSettingProps*/) => {
             break;
           case "reason":
             userLogCollection = "userReasonLog";
+            break;
+          case "foundFrom":
+            userLogCollection = "userFoundFromLog";
             break;
           default:
           // code block
@@ -555,14 +559,18 @@ const UserSettings = (/*props: UserSettingProps*/) => {
       if (event.target.name === "ethnicity") {
         console.log("ETH -->", event.target.value);
         const newEthnicity = [
-          ...(event.target.value || []) /*.filter((option: any) => option !== "Not listed (Please specify)")*/,
+          ...event.target.value /*.filter((option: any) => option !== "Not listed (Please specify)")*/,
         ];
         // setEthnicity(newEthnicity);
+        const toRemoveOtherValues = newEthnicity.includes(ETHNICITY_VALUES[6]);
+        const processedNewUserEthnicity = toRemoveOtherValues
+          ? newEthnicity.filter(eth => isInEthnicityValues(eth))
+          : newEthnicity;
         dispatch({ type: "setAuthUser", payload: { ...user, ethnicity: newEthnicity } });
-        const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : user.ethnicity;
+        //const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : user.ethnicity;
         // check if not otherValue => remove other values
         changeAttr("ethnicity")(
-          (ethnicityArray || []).filter((option: any) => option !== "Not listed (Please specify)")
+          processedNewUserEthnicity.filter((option: any) => option !== "Not listed (Please specify)")
         );
       } else if (event.target.name === "gender") {
         // setGender(event.target.value);
@@ -590,9 +598,12 @@ const UserSettings = (/*props: UserSettingProps*/) => {
         // This is an input,
         // we call changeAttr function only when is onBlur
         setReason(event.target.value);
+      } else if (event.target.name === "foundFrom") {
+        dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: event.target.value } });
+        changeAttr("foundFrom")(event.target.value);
       }
     },
-    [changeAttr, dispatch, ethnicityOtherValue, genderOtherValue, user]
+    [changeAttr, dispatch, genderOtherValue, user]
   );
 
   // const onGenderOtherValueChange = event => setGenderOtherValue(event.target.value);
@@ -604,10 +615,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
   };
 
-  const getValidGenderValue = (userGender?: string) => {
-    if (!userGender) return null;
-    return GENDER_VALUES.includes(userGender) ? userGender : GENDER_VALUES[2];
-  };
+  // const getValidGenderValue = (userGender?: string) => {
+  //   if (!userGender) return null;
+  //   return GENDER_VALUES.includes(userGender) ? userGender : GENDER_VALUES[2];
+  // };
 
   const canShowOtherEthnicityInput = (ethnicity: string[]) => {
     if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
@@ -616,14 +627,24 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   };
 
   const mergeEthnicityOtherValueWithUserEthnicity = (user: User, otherEthnicity: string) => {
-    const filteredEthnicities = (user.ethnicity || []).filter(cur => cur !== ETHNICITY_VALUES[6]);
+    const toRemoveOtherValues = !user.ethnicity.includes(ETHNICITY_VALUES[6]);
+    const processedUserEthnicity = toRemoveOtherValues
+      ? user.ethnicity.filter(eth => isInEthnicityValues(eth))
+      : user.ethnicity;
+
+    const filteredEthnicities = processedUserEthnicity.filter(cur => cur !== ETHNICITY_VALUES[6]);
     return [...filteredEthnicities, otherEthnicity];
   };
-
-  const getEthnicitySelectedOptions = (userEthnicity: string[]) => {
-    const existOtherValue = userEthnicity.some(ethnicityItem => !isInEthnicityValues(ethnicityItem));
-    const filteredEthnicity = userEthnicity.filter(ethnicityItem => isInEthnicityValues(ethnicityItem));
-    return existOtherValue ? [...filteredEthnicity, ETHNICITY_VALUES[6]] : filteredEthnicity;
+  const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
+    if (!userValue) return null;
+    const res = userOptions.includes(userValue) ? userValue : defaultValue;
+    console.log("RES -->", res);
+    return userOptions.includes(userValue) ? userValue : defaultValue;
+  };
+  const getSelectedOptionsByValue = (userValues: string[], isInValues: any, defaultValue: string) => {
+    const existOtherValue = userValues.some(item => !isInValues(item));
+    const filteredValues = userValues.filter(item => isInValues(item));
+    return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
 
   const tabsItems = (user: User, choosingNodeId?: string) => {
@@ -819,7 +840,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
             <Autocomplete
               id="gender"
-              value={getValidGenderValue(user.gender)}
+              value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
               // onChange={(_, value) => setFieldValue("gender", value)}
               onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
               // onBlur={() => setTouched({ ...touched, gender: true })}
@@ -837,29 +858,19 @@ const UserSettings = (/*props: UserSettingProps*/) => {
             />
 
             {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
-              <TextField
-                id="genderOtherValue"
-                name="genderOtherValue"
+              <MemoizedInputSave
+                identification="genderOtherValue"
+                initialValue={genderOtherValue} //TODO: important fill empty user field
+                onSubmit={(value: any) => changeAttr("gender")(value)}
+                setState={setGenderOtherValue}
                 label="Please specify your gender."
-                value={genderOtherValue}
-                onChange={e => setGenderOtherValue(e.target.value)}
-                // onBlur={(_, value) => handleChange({ target: { value, name: "gender" } })}
-                onBlur={(event: any) => changeAttr("gender")(event.target.value)}
-                variant="outlined"
-                // error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
-                // helperText={touched.genderOtherValue && errors.genderOtherValue}
-                fullWidth
-                sx={{ mb: "16px" }}
               />
             )}
 
             <Autocomplete
               id="ethnicity"
-              value={getEthnicitySelectedOptions(user.ethnicity || [])}
-              onChange={
-                (_, value) =>
-                  handleChange({ target: { value, name: "ethnicity" } }) /* handleChange("ethnicity", value)*/
-              }
+              value={getSelectedOptionsByValue(user.ethnicity, isInEthnicityValues, ETHNICITY_VALUES[6])}
+              onChange={(_, value) => handleChange({ target: { value, name: "ethnicity" } })}
               // onBlur={() => setTouched({ ...touched, ethnicity: true })}
               // structure based from https://blog.hubspot.com/service/survey-demographic-questions
               options={ETHNICITY_VALUES}
@@ -876,191 +887,62 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               sx={{ mb: "16px" }}
             />
             {canShowOtherEthnicityInput(user.ethnicity || []) && (
-              <TextField
-                id="ethnicityOtherValue"
-                name="ethnicityOtherValue"
-                label="Please specify your ethnicity."
-                value={ethnicityOtherValue}
-                onChange={e => setEthnicityOtherValue(e.target.value)}
-                // onBlur={(_, value) => handleChange({ target: { value, name: "gender" } })}
-                onBlur={(event: any) =>
-                  changeAttr("ethnicity")(mergeEthnicityOtherValueWithUserEthnicity(user, event.target.value))
+              <MemoizedInputSave
+                identification="ethnicityOtherValue"
+                initialValue={ethnicityOtherValue} //TODO: important fill empty user field
+                onSubmit={(value: any) =>
+                  changeAttr("ethnicity")(mergeEthnicityOtherValueWithUserEthnicity(user, value))
                 }
-                variant="outlined"
-                // error={Boolean(errors.genderOtherValue) && Boolean(touched.genderOtherValue)}
-                // helperText={touched.genderOtherValue && errors.genderOtherValue}
-                fullWidth
-                sx={{ mb: "16px" }}
+                setState={setEthnicityOtherValue}
+                label="Please specify your ethnicity."
               />
             )}
-            {/* {values.ethnicity.includes("Not listed (Please specify)") && (
-        <TextField
-          id="ethnicityOtherValue"
-          name="ethnicityOtherValue"
-          label="Please specify your ethnicity."
-          value={values.ethnicityOtherValue}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          variant="outlined"
-          error={Boolean(errors.ethnicityOtherValue) && Boolean(touched.ethnicityOtherValue)}
-          helperText={touched.ethnicityOtherValue && errors.ethnicityOtherValue}
-          fullWidth
-          sx={{ mb: "16px" }}
-        />
-      )} */}
-            <TextField
-              id="reason"
-              name="reason"
-              label="Reason for Joining"
-              value={reason}
-              onChange={(event: any) => handleChange({ target: { value: event.target.value, name: "reason" } })}
-              onBlur={(event: any) => changeAttr("reason")(event.target.value)}
-              variant="outlined"
-              // error={Boolean(errors.reason) && Boolean(touched.reason)}
-              // helperText={touched.reason && errors.reason}
+            <MemoizedInputSave
+              identification="reason"
+              initialValue={reason} //TODO: important fill empty user field
+              onSubmit={(value: any) => changeAttr("reason")(value)}
+              setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, reason: value } })}
+              label="Reason for Joining."
+            />
+            <Autocomplete
+              id="foundFrom"
+              value={getValidValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[5], user.foundFrom)}
+              onChange={(_, value) => handleChange({ target: { value, name: "foundFrom" } })}
+              // onBlur={() => setTouched({ ...touched, foundFrom: true })}
+              options={FOUND_FROM_VALUES}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label="How did you hear about us?"
+                  // error={Boolean(errors.foundFrom) && Boolean(touched.foundFrom)}
+                  // helperText={touched.foundFrom && errors.foundFrom}
+                />
+              )}
               fullWidth
               sx={{ mb: "16px" }}
             />
-            {/* <FormControl className="select" variant="outlined">
-              <InputLabel>Language</InputLabel>
-              <Select
-                label="Language"
-                name="language"
-                onChange={handleChange}
-                // onBlur={props.handleBlur}
-                value={user.lang}
-                renderValue={sameThing => sameThing}
-              >
-                {sortedLanguages.map(languageItems)}
-              </Select>
-            </FormControl> */}
-            {/* <PersonalInfo
-              values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
-              handleChange={handleChange}
-              handleBlur={doNothing}
-              birthDate={birthDate}
-              setBirthDate={setBirthDate}
-              onGenderOtherValueChange={onGenderOtherValueChange}
-              genderOtherValue={genderOtherValue}
-              onEthnicityOtherValueChange={onEthnicityOtherValueChange}
-              ethnicityOtherValue={ethnicityOtherValue}
-              onFoundFromOtherValueChange={doNothing}
-              foundFromOtherValue={""}
-              CSCObj={CSCObj}
-              setCSCObj={setCSCObj}
-              allCountries={allCountries}
-              setAllCountries={setAllCountries}
-              errors={{}}
-              serverError={{}}
-              inSidebar={false}
-            /> */}
-            {/* CHECK:I comented this */}
-            {/* <FormControl className="select" variant="outlined">
-              <InputLabel>Language</InputLabel>
-              <Select
-                label="Language"
-                name="language"
-                onChange={setLang}
-                value<PersonalInfo
-              values={{ country: "", stateInfo: "", city: "", language: lang, gender, ethnicity }}
-              handleChange={handleChange}
-              handleBlur={doNothing}
-              birthDate={birthDate}
-              setBirthDate={setBirthDate}
-              onGenderOtherValueChange={onGenderOtherValueChange}
-              genderOtherValue={genderOtherValue}
-              onEthnicityOtherValueChange={onEthnicityOtherValueChange}
-              ethnicityOtherValue={ethnicityOtherValue}
-              onFoundFromOtherValueChange={doNothing}
-              foundFromOtherValue={""}
-              CSCObj={CSCObj}
-              setCSCObj={setCSCObj}
-              allCountries={allCountries}
-              setAllCountries={setAllCountries}
-              errors={{}}
-              serverError={{}}
-              inSidebar={false}
-            />={lang}
-                renderValue={sameThing}
-              >
-                {sortedLanguages.map(languageItems)}
-              </Select>
-            </FormControl>
-
-            <div className="DoubleInputRow">
-              <Suspense fallback={<div></div>}>
-                <DatePicker birthDate={props.birthDate} setBirthDate={props.setBirthDate} />
-              </Suspense>
-              <div className="MiddleGap"></div>
-
-              <FormControl className="select" variant="outlined">
-                <InputLabel>Gender</InputLabel>
-                <Select
-                  renderValue={sameThing}
-                  onChange={props.handleChange}
-                  onBlur={props.handleBlur}
-                  name="gender"
-                  label="Gender"
-                  value={gender}
-                >
-                  {
-                    // structure based from https://blog.hubspot.com/service/survey-demographic-questions
-                    GENDER_VALUES.map(genderItems)
-                  }
-                </Select>
-
-                {gender && gender === "Not listed (Please specify)" && (
-                  <ValidatedInput
-                    className="PleaseSpecify"
-                    label="Please specify your gender."
-                    onChange={props.onGenderOtherValueChange}
-                    name="gender"
-                    value={props.genderOtherValue}
-                  />
-                )}
-              </FormControl>
-            </div>
-
-            <FormControl className="select" variant="outlined">
-              <InputLabel>Ethnicity</InputLabel>
-              <Select
-                multiple
-                onChange={props.handleChange}
-                onBlur={props.handleBlur}
-                name="ethnicity"
-                label="Ethnicity"
-                value={ethnicity}
-                renderValue={arrayToString}
-                MenuProps={{ className: "EthnicityMenu" }}
-              >
-                {
-                  // structure based from https://blog.hubspot.com/service/survey-demographic-questions
-                  ETHNICITY_VALUES.map(ethnicityItems)
-                }
-              </Select>
-              {ethnicity &&
-                ethnicity.length > 0 &&
-                ethnicity.includes("Not listed (Please specify)") && (
-                  <ValidatedInput
-                    className="PleaseSpecify"
-                    label="Please specify your ethnicity."
-                    onChange={props.onEthnicityOtherValueChange}
-                    name="ethnicity"
-                    value={props.ethnicityOtherValue}
-                  />
-                )}
-            </FormControl>
-            {props.CSCObj.length > 0 && (
-              <Suspense fallback={<div></div>}>
-                <CountryStateCity
-                  handleChange={props.handleChange}
-                  handleBlur={props.handleBlur}
-                  values={props.values}
-                  CSCObj={props.CSCObj}
-                  allCountries={props.allCountries}
-                />
-              </Suspense>
-            )} */}
+            {user.foundFrom === "Not listed (Please specify)" && (
+              // <TextField
+              //   id="foundFromOtherValue"
+              //   name="foundFromOtherValue"
+              //   label="Please specify, How did you hear about us?"
+              //   value={user.foundFromOtherValue}
+              //   onChange={handleChange}
+              //   onBlur={handleBlur}
+              //   variant="outlined"
+              //   error={Boolean(errors.foundFromOtherValue) && Boolean(touched.foundFromOtherValue)}
+              //   helperText={touched.foundFromOtherValue && errors.foundFromOtherValue}
+              //   fullWidth
+              //   sx={{ mb: "16px" }}
+              // />
+              <MemoizedInputSave
+                identification="foundFromOtherValue"
+                initialValue={user.foundFrom} //TODO: important fill empty user field
+                onSubmit={(value: any) => changeAttr("foundFrom")(value)}
+                setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
+                label="Please specify, How did you hear about us."
+              />
+            )}
           </div>
         ),
       },

@@ -352,7 +352,7 @@ export type User = {
   deInstit?: string;
   deMajor?: string;
   email: string;
-  ethnicity?: string[];
+  ethnicity: string[];
   fName?: string;
   gender?: string;
   imageUrl?: string;

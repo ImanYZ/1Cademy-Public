@@ -80,7 +80,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       chooseUname: userData.chooseUname,
       lang: userData.lang,
       gender: userData.gender,
-      ethnicity: userData.ethnicity,
+      ethnicity: userData.ethnicity ?? [],
       country: userData.country,
       stateInfo: userData.state,
       city: userData.city,
