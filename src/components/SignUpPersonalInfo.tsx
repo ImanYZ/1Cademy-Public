@@ -4,7 +4,7 @@ import { Box } from "@mui/system";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import axios from "axios";
-import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
+import { City, Country, ICity, ICountry, IState, State } from "country-state-city";
 import { FormikProps } from "formik";
 import { useEffect, useState } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
@@ -49,7 +49,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         latitude: "",
         longitude: "",
       };
-      const { Country } = await import("country-state-city");
       setCountries([...Country.getAllCountries(), defaultCountry]);
     };
     getCountries();
@@ -88,7 +87,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
     if (!countryObject) return [];
 
     const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
-    const { State } = await import("country-state-city");
     setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
   };
 
@@ -103,7 +101,6 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
     if (!stateObject) return [];
 
     const defaultCountry: ICity = { name: "Prefer not to say", countryCode: "", stateCode: "" };
-    const { City } = await import("country-state-city");
     setCities([...City.getCitiesOfState(currentCountry.isoCode, stateObject.isoCode), defaultCountry]);
   };
 
