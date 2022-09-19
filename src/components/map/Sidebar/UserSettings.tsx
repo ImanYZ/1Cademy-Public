@@ -1,6 +1,8 @@
+import AdapterDaysJs from "@date-io/dayjs";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import { Autocomplete, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
+import { Autocomplete, Box, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";
@@ -180,11 +182,13 @@ const UserSettings = (/*props: UserSettingProps*/) => {
   // const [birthDate, setBirthDate] = useState(new Date());
 
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
-  const getOtherGenderValue = (user: User) => {
-    if (!user?.gender) return "";
-    if (user.gender === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
+
+  const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
+    if (!userValue) return "";
+    if (userValue === defaultValue || !userValues.includes(userValue)) return userValue;
     return "";
   };
+
   const getOtherEthnicityValue = (user: User): string => {
     if (!user?.ethnicity) return "";
     const otherEthnicity = user.ethnicity.find(ethnicityItem => !isInEthnicityValues(ethnicityItem));
@@ -193,8 +197,13 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     //     if (user.ethnicity.includes("") === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
     //     return "";
   };
-  const [genderOtherValue, setGenderOtherValue] = useState(getOtherGenderValue(user));
+  const [genderOtherValue, setGenderOtherValue] = useState(
+    getOtherValue(GENDER_VALUES, GENDER_VALUES[2], user?.gender)
+  );
   const [ethnicityOtherValue, setEthnicityOtherValue] = useState(getOtherEthnicityValue(user));
+  const [foundFromOtherValue, setFoundFromOtherValue] = useState(
+    getOtherValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[2], user?.foundFrom)
+  );
   // const [CSCObj, setCSCObj] = useState([]);
   // const [allCountries, setAllCountries] = useState([]);
 
@@ -838,24 +847,50 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               sx={{ mb: "16px" }}
             />
 
-            <Autocomplete
-              id="gender"
-              value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
-              // onChange={(_, value) => setFieldValue("gender", value)}
-              onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
-              // onBlur={() => setTouched({ ...touched, gender: true })}
-              options={GENDER_VALUES}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label="Gender"
-                  // error={Boolean(errors.gender) && Boolean(touched.gender)}
-                  // helperText={touched.gender && errors.gender}
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <LocalizationProvider dateAdapter={AdapterDaysJs}>
+                <DatePicker
+                  value={user.birthDate}
+                  onChange={newValue => dispatch({ type: "setAuthUser", payload: { ...user, birthDate: newValue } })}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      id="birthDate"
+                      label="Birth Date"
+                      name="birthDate"
+                      // onBlur={() => setTouched({ ...touched, birthDate: true })}
+                      // error={Boolean(errors.birthDate) && Boolean(touched.birthDate)}
+                      // helperText={
+                      //   touched.birthDate &&
+                      //   errors.birthDate &&
+                      //   (errors.birthDate ===
+                      //   "birthDate must be a `date` type, but the final value was: `Invalid Date` (cast from the value `Invalid Date`)."
+                      //     ? "Invalid Date"
+                      //     : errors.birthDate)
+                      // }
+                    />
+                  )}
                 />
-              )}
-              fullWidth
-              sx={{ mb: "16px" }}
-            />
+              </LocalizationProvider>
+              <Autocomplete
+                id="gender"
+                value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
+                // onChange={(_, value) => setFieldValue("gender", value)}
+                onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                // onBlur={() => setTouched({ ...touched, gender: true })}
+                options={GENDER_VALUES}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label="Gender"
+                    // error={Boolean(errors.gender) && Boolean(touched.gender)}
+                    // helperText={touched.gender && errors.gender}
+                  />
+                )}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+            </Box>
 
             {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
               <MemoizedInputSave
@@ -921,7 +956,8 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               fullWidth
               sx={{ mb: "16px" }}
             />
-            {user.foundFrom === "Not listed (Please specify)" && (
+            {(user.foundFrom === "Not listed (Please specify)" ||
+              !FOUND_FROM_VALUES.includes(user.foundFrom || "")) && (
               // <TextField
               //   id="foundFromOtherValue"
               //   name="foundFromOtherValue"
@@ -937,9 +973,10 @@ const UserSettings = (/*props: UserSettingProps*/) => {
               // />
               <MemoizedInputSave
                 identification="foundFromOtherValue"
-                initialValue={user.foundFrom} //TODO: important fill empty user field
+                initialValue={foundFromOtherValue} //TODO: important fill empty user field
                 onSubmit={(value: any) => changeAttr("foundFrom")(value)}
-                setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
+                // setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
+                setState={setFoundFromOtherValue}
                 label="Please specify, How did you hear about us."
               />
             )}

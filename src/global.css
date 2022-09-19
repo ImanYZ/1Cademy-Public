@@ -2547,12 +2547,12 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #PersonalSettings {
-  margin: 25px;
+  padding: 25px;
 }
 
-#PersonalSettings .MuiFormControl-root {
+/* #PersonalSettings .MuiFormControl-root {
   width: 379px;
-}
+} */
 
 #PersonalSettings .DoubleInputRow .MuiFormControl-root {
   width: 172px;
@@ -2567,7 +2567,7 @@ button.MuiTab-textColorInherit:focus {
 /* -------------------------------- */
 /* Input save */
 .InputSaveContainer {
-  margin: 10px 19px 10px 19px;
+  margin: 10px 0px;
 }
 
 .InputSaveContainer .ImageUploadButtonLoader {

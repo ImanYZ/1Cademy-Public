@@ -371,7 +371,7 @@ export type User = {
   stateId?: string;
   education?: string;
   birthDate?: string;
-  foundFrom?: string;
+  foundFrom: string;
   occupation?: string;
   reason?: string;
   major?: string;

@@ -69,6 +69,7 @@ const ValidatedInput = (props: any) => {
       inputProps={props.inputProps}
       InputProps={props.InputProps}
       defaultValue={props.defaultValue}
+      sx={{ width: "100%" }}
     />
 
     // {/* {props.label && (

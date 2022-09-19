@@ -46,7 +46,7 @@ const SidebarTabs = (props: any) => {
         </TabPanel>
       ))} 
       */}
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", width: "430px" }}>
         <Tabs value={value} onChange={handleChange} aria-label={props.tabsTitle + " Tabs"}>
           {props.tabsItems.map((tabItem: any, idx: number) => (
             <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
