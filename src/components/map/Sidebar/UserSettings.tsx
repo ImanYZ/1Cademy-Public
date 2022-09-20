@@ -419,6 +419,7 @@ const UserSettings = ({ user }: UserSettingProps) => {
   //   }
   // }, [firebase && deInstit]);
 
+  // ==================>>>> UNCOMMENT this
   // useEffect(() => {
   //   if (chosenTags.length > 0 && chosenTags[0] in allTags) {
   //     setChosenNodeTitle(allTags[chosenTags[0]].title);
@@ -671,16 +672,16 @@ const UserSettings = ({ user }: UserSettingProps) => {
     [changeAttr, dispatch]
   );
 
-  // const closeTagSelector = useCallback(() => {
-  //   nodeBookDispatch({ type: "setChosenNode", payload: null });
-  //   nodeBookDispatch({ type: "setChoosingNode", payload: null });
-  //   // setChoosingNode(false);
-  //   // setChosenNode(null);
-  //   // setChosenNodeTitle(null);
-  //   // setChosenTags([]);
-  //   setAllTags([]);
-  //   // setIsSubmitting(false); //Check i comented this
-  // }, []);
+  const closeTagSelector = useCallback(() => {
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
+    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    // setChoosingNode(false);
+    // setChosenNode(null);
+    // setChosenNodeTitle(null);
+    // setChosenTags([]);
+    // setAllTags({});
+    // setIsSubmitting(false); //Check i comented this
+  }, [nodeBookDispatch]);
 
   const handleChange = useCallback(
     (event: any) => {
@@ -794,6 +795,13 @@ const UserSettings = ({ user }: UserSettingProps) => {
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
 
+  const getAllTags = () => {
+    if (!user.tagId) return allTags;
+    const foundTag = allTags[user.tagId];
+    if (!foundTag) return allTags;
+    return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
+  };
+
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
       {
@@ -812,10 +820,10 @@ const UserSettings = ({ user }: UserSettingProps) => {
             {choosingNodeId === "tag" && (
               <Suspense fallback={<div></div>}>
                 <div id="tagModal">
-                  <Modal onClick={() => console.log("closeTagSelector")} returnLeft={true} noBackground={true}>
+                  <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
                     {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
                     <MemoizedTagsSearcher
-                      allTags={allTags}
+                      allTags={getAllTags()}
                       setAllTags={setAllTags}
                       sx={{ maxHeight: "200px", height: "200px" }}
                     />
