@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { delay } from "../../src/utils/common";
 export const fetchGoogleMapsGeolocation = async (institution: any) => {
   try {
     const response = await axios.get(
@@ -7,7 +7,7 @@ export const fetchGoogleMapsGeolocation = async (institution: any) => {
         `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDdW02hAK8Y2_2SWMwLGV9RJr4wm17IZUc&address=${institution}`
       )
     );
-    return response.data.results[0].geometry.location;
+    return response.data.results[0]?.geometry.location;
   } catch (err) {
     console.log(err);
     return null;
@@ -21,9 +21,8 @@ export const fetchGoogleMapsGeolocationWrapper = async (institution: any) => {
   geoLoc = await fetchGoogleMapsGeolocation(institution);
   while (!geoLoc && errorNum < 10) {
     errorNum += 1;
-    geoLoc = setTimeout(async () => {
-      await fetchGoogleMapsGeolocation(institution);
-    }, 400);
+    geoLoc = await fetchGoogleMapsGeolocation(institution);
+    await delay(400);
   }
   //  if geoLoc still doesn't exist, create temp values for it
   if (!geoLoc) {
