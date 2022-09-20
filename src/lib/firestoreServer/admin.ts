@@ -45,16 +45,14 @@ const makeCommitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]>
   return [batch, 0];
 };
 
-/*
-I commented this function as its not going to be used and it will give eslint errors If I don't comment it out
-*/
-/* const isFirestoreDeadlineError = (err: any) => {
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+const isFirestoreDeadlineError = (err: any) => {
   const errString = err.toString();
   return (
     errString.includes("Error: 13 INTERNAL: Received RST_STREAM") ||
     errString.includes("Error: 4 DEADLINE_EXCEEDED: Deadline exceeded")
   );
-}; */
+};
 
 export const delay = async (time: number) => {
   return new Promise(resolve => {
