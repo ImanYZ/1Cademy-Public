@@ -39,44 +39,46 @@ const MAX_TRANSACTION_WRITES = 499;
 const MIN_ACCEPTED_VERSION_POINT_WEIGHT = 0.1;
 const db = getFirestore();
 
-const makeCommitBatch = async (batch: WriteBatch) => {
+const makeCommitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {
   await batch.commit();
   batch = db.batch();
   return [batch, 0];
 };
 
-const isFirestoreDeadlineError = (err: any) => {
+/*
+I commented this function as its not going to be used and it will give eslint errors If I don't comment it out
+*/
+/* const isFirestoreDeadlineError = (err: any) => {
   const errString = err.toString();
   return (
     errString.includes("Error: 13 INTERNAL: Received RST_STREAM") ||
     errString.includes("Error: 4 DEADLINE_EXCEEDED: Deadline exceeded")
   );
+}; */
+
+export const delay = async (time: number) => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(true);
+    }, time);
+  });
 };
 
-export const commitBatch = async (batch: WriteBatch) => {
+export const commitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {
   try {
-    await makeCommitBatch(batch);
+    return makeCommitBatch(batch);
   } catch (err) {
-    if (isFirestoreDeadlineError(err)) {
-      const theInterval = setInterval(async () => {
-        try {
-          await makeCommitBatch(batch);
-          clearInterval(theInterval);
-        } catch (err) {
-          if (!isFirestoreDeadlineError(err)) {
-            clearInterval(theInterval);
-            throw err;
-          }
-        }
-      }, 4000);
-    }
+    await delay(4000);
+    // we removed this condition so that it keeps trying until transaction is committed
+    // if (isFirestoreDeadlineError(err))
+    return commitBatch(batch);
   }
 };
 
 const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: number): Promise<[WriteBatch, number]> => {
   writeCounts += 1;
   if (writeCounts >= MAX_TRANSACTION_WRITES) {
-    await commitBatch(batch);
+    [batch, writeCounts] = await commitBatch(batch);
   }
   return [batch, writeCounts];
 };
