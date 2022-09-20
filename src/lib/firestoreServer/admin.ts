@@ -3,6 +3,7 @@ import { cert, initializeApp } from "firebase-admin/app";
 import { DocumentReference, getFirestore, WriteBatch } from "firebase-admin/firestore";
 
 import { arrayToChunks } from "../../utils";
+import { delay } from "../utils/utils";
 
 export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 
@@ -52,14 +53,6 @@ const isFirestoreDeadlineError = (err: any) => {
     errString.includes("Error: 13 INTERNAL: Received RST_STREAM") ||
     errString.includes("Error: 4 DEADLINE_EXCEEDED: Deadline exceeded")
   );
-};
-
-export const delay = async (time: number) => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
 };
 
 export const commitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {
