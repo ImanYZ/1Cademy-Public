@@ -264,3 +264,11 @@ export const validPNG = (myURL: string) => {
   const pattern2 = new RegExp(".+\\.PNG$");
   return pattern1.test(myURL) || pattern2.test(myURL);
 };
+
+export const delay = async (time: number) => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(true);
+    }, time);
+  });
+};
