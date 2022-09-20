@@ -599,7 +599,9 @@ const Sidebar = (props: SidebarType) => {
               closeSideBar={props.closeSideBar}
               noHeader={true}
             >
-              <UserSettings /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */ />
+              <UserSettings
+                user={user} /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */
+              />
             </MemoizedSidebarWrapper>
           ) : props.openSearch ? (
             <MemoizedSidebarWrapper

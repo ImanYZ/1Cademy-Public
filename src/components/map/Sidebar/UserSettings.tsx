@@ -97,22 +97,22 @@ import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
 
 const doNothing = () => {};
 
-// type UserSettingProps = {};
+type UserSettingProps = { user: User };
 
-const UserSettings = (/*props: UserSettingProps*/) => {
+const UserSettings = ({ user }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState } = useNodeBook();
-  const [{ user }] = useAuth();
+  // const [{ user }] = useAuth();
   // console.log("rr", rr);
   const { allTags, setAllTags } = useTagsTreeView([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
-  const [CSCByGeolocation, setCSCByGeolocation] = useState<{ country: string; state: string; city: string } | null>(
-    null
-  );
+  // const [CSCByGeolocation /*setCSCByGeolocation*/] = useState<{ country: string; state: string; city: string } | null>(
+  //   null
+  // );
 
   // const [{ setThemeMode, themeMode }] = use1AcademyTheme(); // CHECK I comented
 
@@ -221,61 +221,6 @@ const UserSettings = (/*props: UserSettingProps*/) => {
 
   // useEffect(()=>{},[])
 
-  useEffect(() => {
-    const getLanguages = async () => {
-      const ISO6391Obj = await import("iso-639-1");
-      const allLanguages = [
-        ...ISO6391Obj.default.getAllNames().sort((l1, l2) => (l1 < l2 ? -1 : 1)),
-        "Prefer not to say",
-      ];
-      setLanguages(allLanguages);
-    };
-    getLanguages();
-  }, []);
-
-  useEffect(() => {
-    const getCountries = async () => {
-      const defaultCountry: ICountry = {
-        name: "Prefer not to say",
-        isoCode: "",
-        phonecode: "",
-        flag: "",
-        currency: "",
-        latitude: "",
-        longitude: "",
-      };
-      const { Country } = await import("country-state-city");
-      setCountries([...Country.getAllCountries(), defaultCountry]);
-    };
-    getCountries();
-  }, []);
-
-  useEffect(() => {
-    if (!user?.country) return;
-    if (CSCByGeolocation) return;
-
-    const getCSCByGeolocation = async () => {
-      try {
-        if (user.country) return;
-
-        const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=4ddb5d78eaf24b12875c0eb5f790e495");
-        if (!res.data) return;
-
-        const { country_name, state_prov, city } = res.data;
-        setCSCByGeolocation({ country: country_name, state: state_prov, city });
-        if (!countries.filter(cur => cur.name === country_name)) return;
-
-        dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
-        updateStatesByCountry(country_name);
-        updateCitiesByState(state_prov);
-      } catch (err) {
-        console.log("cant autocomplete country state city");
-      }
-    };
-
-    getCSCByGeolocation();
-  }, [CSCByGeolocation, countries, dispatch, updateCitiesByState, updateStatesByCountry, user]);
-
   const updateStatesByCountry = useCallback(
     async (currentCountry: string | null) => {
       if (!currentCountry) return [];
@@ -307,6 +252,65 @@ const UserSettings = (/*props: UserSettingProps*/) => {
     },
     [countries, states, user?.country]
   );
+
+  useEffect(() => {
+    const getLanguages = async () => {
+      const ISO6391Obj = await import("iso-639-1");
+      const allLanguages = [
+        ...ISO6391Obj.default.getAllNames().sort((l1, l2) => (l1 < l2 ? -1 : 1)),
+        "Prefer not to say",
+      ];
+      setLanguages(allLanguages);
+    };
+    getLanguages();
+  }, []);
+
+  useEffect(() => {
+    const getCountries = async () => {
+      const defaultCountry: ICountry = {
+        name: "Prefer not to say",
+        isoCode: "",
+        phonecode: "",
+        flag: "",
+        currency: "",
+        latitude: "",
+        longitude: "",
+      };
+      const { Country } = await import("country-state-city");
+      setCountries([...Country.getAllCountries(), defaultCountry]);
+    };
+    getCountries();
+  }, []);
+
+  useEffect(() => {
+    // if (CSCByGeolocation) return;
+    const getCSCByGeolocation = async () => {
+      try {
+        if (user.country && user.state) {
+          if (!states.length) {
+            await updateStatesByCountry(user.country);
+          }
+          if (!cities.length) {
+            await updateCitiesByState(user.state);
+          }
+          console.log("user data was updated");
+          return;
+        } else {
+          console.log("will set data by ip");
+          const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=b1a57107845644e2b5e8688727eacb0e");
+          if (!res.data) return;
+          const { country_name, state_prov, city } = res.data;
+          if (!countries.filter(cur => cur.name === country_name)) return;
+          dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
+          const userRef = doc(db, "users", user.uname);
+          await updateDoc(userRef, { country: country_name, state: state_prov, city: city });
+        }
+      } catch (err) {
+        console.log("cant autocomplete country state city");
+      }
+    };
+    getCSCByGeolocation();
+  }, [cities.length, countries, db, dispatch, states.length, updateCitiesByState, updateStatesByCountry, user]);
 
   // const onChangeCountry = async (_: any, value: string | null) => {
   //   if (!user) return;
@@ -550,8 +554,6 @@ const UserSettings = (/*props: UserSettingProps*/) => {
       async (newValue: any) => {
         if (!user) return;
 
-        console.log("changeAttr -->", { [attrName]: newValue });
-
         const userRef = doc(db, "users", user.uname);
 
         // // Set the "capital" field of the city 'DC'
@@ -679,50 +681,57 @@ const UserSettings = (/*props: UserSettingProps*/) => {
       }
       if (!user) return;
       if (event.target.name === "ethnicity") {
-        console.log("ETH -->", event.target.value);
-        const newEthnicity = [
-          ...event.target.value /*.filter((option: any) => option !== "Not listed (Please specify)")*/,
-        ];
-        // setEthnicity(newEthnicity);
+        const newEthnicity = [...event.target.value];
         const toRemoveOtherValues = newEthnicity.includes(ETHNICITY_VALUES[6]);
         const processedNewUserEthnicity = toRemoveOtherValues
           ? newEthnicity.filter(eth => isInEthnicityValues(eth))
           : newEthnicity;
         dispatch({ type: "setAuthUser", payload: { ...user, ethnicity: newEthnicity } });
-        //const ethnicityArray = ethnicityOtherValue !== "" ? [...newEthnicity, ethnicityOtherValue] : user.ethnicity;
-        // check if not otherValue => remove other values
         changeAttr("ethnicity")(
           processedNewUserEthnicity.filter((option: any) => option !== "Not listed (Please specify)")
         );
       } else if (event.target.name === "gender") {
-        // setGender(event.target.value);
         dispatch({ type: "setAuthUser", payload: { ...user, gender: event.target.value } });
         changeAttr("gender")(
           event.target.value === "Not listed (Please specify)" ? genderOtherValue : event.target.value
         );
       } else if (event.target.name === "language") {
-        // setLang(event.target.value);
         dispatch({ type: "setAuthUser", payload: { ...user, lang: event.target.value } });
         changeAttr("lang")(event.target.value);
       } else if (event.target.name === "country") {
-        // setCountry(event.target.value);
-        const country = event.target.value.split(";")[0];
-        dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value } });
-        changeAttr("country")(country);
-        updateStatesByCountry(country);
+        if (!event.target.value) {
+          dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value, state: "", city: "" } });
+          changeAttr("country")("");
+          changeAttr("state")("");
+          changeAttr("city")("");
+          updateStatesByCountry(null);
+        } else {
+          const country = event.target.value.split(";")[0];
+          dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value } });
+          changeAttr("country")(country);
+          updateStatesByCountry(country);
+        }
       } else if (event.target.name === "state") {
-        // setStateInfo(event.target.value);
-        const state = event.target.value.split(";")[0];
-        dispatch({ type: "setAuthUser", payload: { ...user, state: event.target.value } });
-        changeAttr("state")(state);
-        updateCitiesByState(state);
+        if (!event.target.value) {
+          dispatch({ type: "setAuthUser", payload: { ...user, state: "", city: "" } });
+          changeAttr("state")("");
+          changeAttr("city")("");
+          updateCitiesByState(null);
+        } else {
+          const state = event.target.value.split(";")[0];
+          dispatch({ type: "setAuthUser", payload: { ...user, state: event.target.value } });
+          changeAttr("state")(state);
+          updateCitiesByState(state);
+        }
       } else if (event.target.name === "city") {
-        // setCity(event.target.value);
-        dispatch({ type: "setAuthUser", payload: { ...user, city: event.target.value } });
-        changeAttr("city")(event.target.value);
+        if (!event.target.value) {
+          dispatch({ type: "setAuthUser", payload: { ...user, city: "" } });
+          changeAttr("city")(event.target.value);
+        } else {
+          dispatch({ type: "setAuthUser", payload: { ...user, city: event.target.value } });
+          changeAttr("city")(event.target.value);
+        }
       } else if (event.target.name === "reason") {
-        // This is an input,
-        // we call changeAttr function only when is onBlur
         setReason(event.target.value);
       } else if (event.target.name === "foundFrom") {
         dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: event.target.value } });
@@ -1073,7 +1082,7 @@ const UserSettings = (/*props: UserSettingProps*/) => {
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
               <Autocomplete
                 id="state"
-                value={user.stateInfo}
+                value={user.state}
                 onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
                 // onBlur={() => setTouched({ ...touched, state: true })}
                 options={states.map(cur => cur.name)}

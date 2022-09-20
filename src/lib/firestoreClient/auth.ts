@@ -82,7 +82,8 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       gender: userData.gender,
       ethnicity: userData.ethnicity ?? [],
       country: userData.country,
-      stateInfo: userData.state,
+      state: userData.state,
+      // stateInfo: userData.state, // CHECK: state and stateId is not used
       city: userData.city,
       // theme: userData.theme,
       // background: "background" in userData ? userData.background : "Image",

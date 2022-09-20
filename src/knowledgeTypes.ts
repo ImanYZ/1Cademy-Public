@@ -360,7 +360,7 @@ export type User = {
   lName?: string;
   lang?: string;
   practicing?: boolean;
-  stateInfo?: string;
+  // stateInfo?: string;// CHECK: I comment and add state
   sNode?: string;
   tag?: string;
   tagId?: string;
@@ -368,7 +368,7 @@ export type User = {
   updatedAt?: Timestamp;
   userId?: string;
   state?: string;
-  stateId?: string;
+  // stateId?: string;// this is not used and not exist in DB
   education?: string;
   birthDate?: string;
   foundFrom: string;
