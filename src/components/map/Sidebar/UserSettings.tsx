@@ -22,13 +22,13 @@ import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
+// import { ChoosingType } from "../../../nodeBookTypes";
 import { MemoizedTagsSearcher } from "../../TagsSearcher";
 import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
 import { UserSettingsProfessionalInfo } from "./UserSettingsProfessionalInfo";
-
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 // import Modal from "../../../../containers/Modal/Modal";
 // import {
@@ -103,7 +103,7 @@ type UserSettingProps = { user: User };
 const UserSettings = ({ user }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
-  const { nodeBookState } = useNodeBook();
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
   // const [{ user }] = useAuth();
   // console.log("rr", rr);
   const { allTags, setAllTags } = useTagsTreeView([]);
@@ -111,6 +111,7 @@ const UserSettings = ({ user }: UserSettingProps) => {
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
+
   // const [CSCByGeolocation /*setCSCByGeolocation*/] = useState<{ country: string; state: string; city: string } | null>(
   //   null
   // );
@@ -501,9 +502,12 @@ const UserSettings = ({ user }: UserSettingProps) => {
   //   () => props.setOpenPractice(oldOpenPractice => !oldOpenPractice),
   //   [props.setOpenPractice]
   // );
-
-  // const choosingNodeClick = useCallback(choosingNodeTag => event => setChoosingNode(choosingNodeTag), []);
-
+  const choosingNodeClick = useCallback(
+    (choosingNodeTag: string) =>
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } }),
+    [nodeBookDispatch]
+  );
+  // setChoosingNode(choosingNodeTag);
   const logoutClick = useCallback((event: any) => {
     event.preventDefault();
     getAuth().signOut();
@@ -668,11 +672,14 @@ const UserSettings = ({ user }: UserSettingProps) => {
   );
 
   // const closeTagSelector = useCallback(() => {
-  //   setChoosingNode(false);
-  //   setChosenNode(null);
-  //   setChosenNodeTitle(null);
-  //   setChosenTags([]);
-  //   setIsSubmitting(false);
+  //   nodeBookDispatch({ type: "setChosenNode", payload: null });
+  //   nodeBookDispatch({ type: "setChoosingNode", payload: null });
+  //   // setChoosingNode(false);
+  //   // setChosenNode(null);
+  //   // setChosenNodeTitle(null);
+  //   // setChosenTags([]);
+  //   setAllTags([]);
+  //   // setIsSubmitting(false); //Check i comented this
   // }, []);
 
   const handleChange = useCallback(
@@ -794,15 +801,10 @@ const UserSettings = ({ user }: UserSettingProps) => {
         content: (
           <>
             <div className="AccountSettingsButtons">
-              {/* <div></div> */}
-              <MemoizedMetaButton onClick={() => console.log('choosingNodeClick("tag")')}>
+              <MemoizedMetaButton onClick={() => choosingNodeClick("tag")}>
                 <div className="AccountSettingsButton">
-                  {/* <i id="tagChangeIcon" className="material-icons deep-orange-text">
-                    local_offer
-                  </i> */}
                   <LocalOfferIcon id="tagChangeIcon" className="material-icons deep-orange-text" />
                   {user.tag}
-                  {/* {tag.title} */}
                 </div>
               </MemoizedMetaButton>
             </div>
