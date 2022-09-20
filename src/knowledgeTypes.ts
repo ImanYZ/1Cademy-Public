@@ -372,7 +372,7 @@ export type User = {
   education?: string;
   birthDate?: string;
   foundFrom: string;
-  occupation?: string;
+  occupation: string;
   reason?: string;
   major?: string;
   instit?: string;

@@ -64,6 +64,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
   const userDoc = await getDocs(q);
   if (userDoc.size !== 0) {
     const userData = userDoc.docs[0].data();
+    console.log("Userdata: ", userData);
     user = {
       userId,
       deCourse: userData.deCourse,
@@ -96,6 +97,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       email: userData.email,
       reason: userData.reason,
       foundFrom: userData.foundFrom,
+      occupation: userData.occupation,
     };
 
     theme = userData.theme;

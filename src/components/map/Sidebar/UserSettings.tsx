@@ -27,6 +27,7 @@ import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
+import { UserSettingsProfessionalInfo } from "./UserSettingsProfessionalInfo";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 // import Modal from "../../../../containers/Modal/Modal";
@@ -1168,7 +1169,11 @@ const UserSettings = ({ user }: UserSettingProps) => {
       },
       {
         title: "Professional",
-        content: <>Professional here, this was incomplete</>,
+        content: (
+          <div id="PersonalSettings">
+            <UserSettingsProfessionalInfo user={user} />
+          </div>
+        ),
       },
     ];
   };
