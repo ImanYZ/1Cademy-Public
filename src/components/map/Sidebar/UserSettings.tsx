@@ -20,10 +20,11 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { User } from "../../../knowledgeTypes";
+import { postWithToken } from "../../../lib/mapApi";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 // import { ChoosingType } from "../../../nodeBookTypes";
-import { MemoizedTagsSearcher } from "../../TagsSearcher";
+import { ChosenTag, MemoizedTagsSearcher } from "../../TagsSearcher";
 import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
@@ -106,7 +107,7 @@ const UserSettings = ({ user }: UserSettingProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   // const [{ user }] = useAuth();
   // console.log("rr", rr);
-  const { allTags, setAllTags } = useTagsTreeView([]);
+  const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
@@ -220,6 +221,9 @@ const UserSettings = ({ user }: UserSettingProps) => {
   // const [allCountries, setAllCountries] = useState([]);
 
   const [reason, setReason] = useState(user?.reason || ""); // TODO: improve this
+  const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
+
+  console.log("--->>> chosenTags", chosenTags);
 
   // useEffect(()=>{},[])
 
@@ -420,12 +424,14 @@ const UserSettings = ({ user }: UserSettingProps) => {
   // }, [firebase && deInstit]);
 
   // ==================>>>> UNCOMMENT this
-  // useEffect(() => {
-  //   if (chosenTags.length > 0 && chosenTags[0] in allTags) {
-  //     setChosenNodeTitle(allTags[chosenTags[0]].title);
-  //     setChosenNode(chosenTags[0]);
-  //   }
-  // }, [allTags, chosenTags]);
+  useEffect(() => {
+    if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
+      console.log("11111111111111111111");
+      nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
+      // setChosenNodeTitle(allTags[chosenTags[0]].title);
+      // setChosenNode(chosenTags[0]);
+    }
+  }, [allTags, chosenTags, nodeBookDispatch]);
 
   // useEffect(() => {
   //   setAllTags(oldAllTags => {
@@ -445,26 +451,37 @@ const UserSettings = ({ user }: UserSettingProps) => {
   //   });
   // }, [tag]);
 
-  // useEffect(() => {
-  //   const setDefaultTag = async () => {
-  //     if (choosingNode && chosenNode && choosingNode === "tag") {
-  //       setIsSubmitting(true);
-  //       try {
-  //         await firebase.idToken();
-  //         await axios.post(`/changeDefaultTag/${chosenNode}`);
-  //         setTag({ node: chosenNode, title: chosenNodeTitle });
-  //       } catch (err) {
-  //         console.error(err);
-  //         // window.location.reload();
-  //       }
-  //       setChoosingNode(false);
-  //       setChosenNode(null);
-  //       setChosenNodeTitle(null);
-  //       setIsSubmitting(false);
-  //     }
-  //   };
-  //   setDefaultTag();
-  // }, [chosenNode]);
+  // Every time the choosingNode.id === tag and change the choosing Node
+  // We need to call changeDefaultTag(endpoint) and update userTag(local)
+  useEffect(() => {
+    const setDefaultTag = async () => {
+      // if (choosingNode && chosenNode && choosingNode === "tag") {
+      if (nodeBookState.choosingNode?.id === "tag" && nodeBookState.chosenNode) {
+        // setIsSubmitting(true); // TODO: enable submitting global state
+        try {
+          // await firebase.idToken();
+          await postWithToken(`changeDefaultTag/${nodeBookState.chosenNode.id}`);
+
+          // await axios.post(`/changeDefaultTag/${chosenNode}`);
+          // setTag({ node: chosenNode, title: chosenNodeTitle });
+          dispatch({
+            type: "setAuthUser",
+            payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
+          });
+        } catch (err) {
+          console.error(err);
+          // window.location.reload();
+        }
+        // setChoosingNode(false);
+        // setChosenNode(null);
+        // setChosenNodeTitle(null);
+        // setIsSubmitting(false);
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+      }
+    };
+    setDefaultTag();
+  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
   // const showHideClusters = useCallback(
   //   event => {
@@ -795,12 +812,14 @@ const UserSettings = ({ user }: UserSettingProps) => {
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
 
-  const getAllTags = () => {
-    if (!user.tagId) return allTags;
-    const foundTag = allTags[user.tagId];
-    if (!foundTag) return allTags;
-    return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
-  };
+  // const getAllTags = () => {
+  //   if (!user.tagId) return allTags;
+  //   const foundTag = allTags[user.tagId];
+  //   if (!foundTag) return allTags;
+  //   return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
+  // };
+
+  console.log("====================>>>", chosenTags);
 
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
@@ -823,7 +842,9 @@ const UserSettings = ({ user }: UserSettingProps) => {
                   <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
                     {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
                     <MemoizedTagsSearcher
-                      allTags={getAllTags()}
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
                       setAllTags={setAllTags}
                       sx={{ maxHeight: "200px", height: "200px" }}
                     />

@@ -671,7 +671,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  // DEPRECATED: nodeChanged, check improvement flow please
+  // deprecated: NODE_CHANGED, check improvement flow please
   // const nodeChanged = useMemoizedCallback()=>{}
 
   const chosenNodeChanged = useCallback(
@@ -2551,7 +2551,7 @@ const Dashboard = ({}: DashboardProps) => {
                 toggleNode={toggleNode}
                 openNodePart={openNodePart}
                 selectNode={selectNode}
-                nodeClicked={() => console.log("nodeClicked")}
+                nodeClicked={() => console.log("nodeClicked--->>>>")}
                 correctNode={correctNode}
                 wrongNode={wrongNode}
                 uploadNodeImage={uploadNodeImage}

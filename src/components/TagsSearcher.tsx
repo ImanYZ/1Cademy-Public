@@ -21,11 +21,16 @@ export type TagTreeView = {
   tags: string[];
   tagIds: string[];
 };
+
+export type ChosenTag = { id: string; title: string };
+
 export type AllTagsTreeView = { [string: string]: TagTreeView };
 
 type TagsExploratorySearcherProps = {
   allTags: AllTagsTreeView;
   setAllTags: React.Dispatch<React.SetStateAction<AllTagsTreeView>>;
+  chosenTags: ChosenTag[];
+  setChosenTags: (newChosenTags: ChosenTag[]) => void;
   multiple?: boolean;
   sx?: SxProps<Theme>;
 };
@@ -34,7 +39,15 @@ type TagsExploratorySearcherProps = {
  * Show a autocomplete and a tree view to search tags
  * it can be configurable to select one or multiple tags
  */
-const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExploratorySearcherProps) => {
+const TagsSearcher = ({
+  allTags,
+  setAllTags,
+  chosenTags,
+  setChosenTags,
+  multiple = false,
+  sx,
+}: TagsExploratorySearcherProps) => {
+  // const [chosenTags, setChosenTags] = useState<{ id: string; title: string }[]>([]);
   const setAutocompleteInput = useCallback((params: any) => <TextField label="Search for Tags" {...params} />, []);
 
   const setAutocompleteOptions = useCallback(
@@ -63,24 +76,30 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
       reason: AutocompleteChangeReason,
       details?: AutocompleteChangeDetails<TagTreeView> | undefined
     ) => {
+      console.log("---->>reason", reason);
       if (reason === "selectOption") {
-        const targetTag = details?.option.nodeId;
+        const targetTag = details?.option;
         if (!targetTag) return;
 
         setAllTags(oldAllTags => {
           const newAllTags: AllTagsTreeView = {
             ...oldAllTags,
-            [targetTag]: { ...oldAllTags[targetTag], checked: true },
+            [targetTag.nodeId]: { ...oldAllTags[targetTag.nodeId], checked: true },
           };
           if (!multiple) {
             // if not multiple, set all checked to false except the targetTag
             for (let aTag in newAllTags) {
-              if (aTag !== targetTag && newAllTags[aTag].checked) {
+              if (aTag !== targetTag.nodeId && newAllTags[aTag].checked) {
                 newAllTags[aTag] = { ...newAllTags[aTag], checked: false };
               }
             }
           }
           // [TODO]: set newAllTags or the targetTag to chosenTags
+          if (multiple) {
+            setChosenTags(value.map(cur => ({ id: cur.nodeId, title: cur.title })));
+          } else {
+            setChosenTags([{ id: targetTag.nodeId, title: targetTag.title }]);
+          }
           return newAllTags;
         });
       }
@@ -93,6 +112,11 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
           return { ...oldAllTags, [targetTag]: { ...oldAllTags[targetTag], checked: false } };
         });
         // [TODO]: set newAllTags to chosenTags
+        if (multiple) {
+          setChosenTags(value.map(cur => ({ id: cur.nodeId, title: cur.title })));
+        } else {
+          setChosenTags([]);
+        }
       }
 
       if (reason === "clear") {
@@ -104,9 +128,10 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
           return clearedTags;
         });
         // [TODO]: set [] to chosenTags
+        setChosenTags([]);
       }
     },
-    [multiple, setAllTags]
+    [multiple, setAllTags, setChosenTags]
   );
 
   /**
@@ -115,6 +140,7 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
    */
   const setCheckboxes = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("[setCheckboxes]: event", event.target);
       setAllTags(oldAllTags => {
         const newAllTags = {
           ...oldAllTags,
@@ -129,7 +155,43 @@ const TagsSearcher = ({ allTags, setAllTags, multiple = false, sx }: TagsExplora
         }
         return newAllTags;
       });
+
+      const tagId = event.target.name;
+      const tagTitle = allTags[tagId].title;
       // [TODO]: set [] to chosenTags
+      if (event.target.checked) {
+        if (multiple) {
+          setChosenTags([...chosenTags, { id: tagId, title: tagTitle }]);
+        } else {
+          setChosenTags([{ id: tagId, title: tagTitle }]);
+        }
+      } else {
+        if (multiple) {
+          setChosenTags(chosenTags.filter(({ id }) => id != tagId));
+        } else {
+          setChosenTags([]);
+        }
+      }
+
+      // if (event.target.checked) {
+      //   if (props.chosenTags.length === 0 && !onlyOneOrCommunityPicking) {
+      //     props.setOnlyTags(true);
+      //   }
+      //   if (onlyOneOrCommunityPicking) {
+      //     props.setChosenTags([event.target.name]);
+      //   } else {
+      //     props.setChosenTags([...props.chosenTags, event.target.name]);
+      //   }
+      // } else {
+      //   if (props.chosenTags.length === 1 && !onlyOneOrCommunityPicking) {
+      //     props.setOnlyTags(false);
+      //   }
+      //   if (onlyOneOrCommunityPicking) {
+      //     props.setChosenTags([]);
+      //   } else {
+      //     props.setChosenTags(props.chosenTags.filter(nodeId => nodeId != event.target.name));
+      //   }
+      // }
     },
     [multiple, setAllTags]
   );
