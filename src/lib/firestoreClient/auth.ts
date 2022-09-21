@@ -98,6 +98,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       reason: userData.reason,
       foundFrom: userData.foundFrom,
       occupation: userData.occupation,
+      fieldOfInterest: userData.fieldOfInterest ?? "",
     };
 
     theme = userData.theme;

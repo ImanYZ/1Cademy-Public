@@ -374,8 +374,9 @@ export type User = {
   foundFrom: string;
   occupation: string;
   reason?: string;
-  major?: string;
-  instit?: string;
+  // major?: string; //CHECK: I commented this because we have deMajor
+  // instit?: string; //CHECK: I commented this because we have deInstit
+  fieldOfInterest: string;
 };
 
 export type userSettings = {

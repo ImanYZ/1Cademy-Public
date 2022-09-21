@@ -1,12 +1,19 @@
 import AdapterDaysJs from "@date-io/dayjs";
+import CodeIcon from "@mui/icons-material/Code";
+import DoneIcon from "@mui/icons-material/Done";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ShareIcon from "@mui/icons-material/Share";
 import { Autocomplete, Box, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
 import { getAuth } from "firebase/auth";
-import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";
 // import ListItemText from "@material-ui/core/ListItemText";
 // import MenuItem from "@material-ui/core/MenuItem";
@@ -15,11 +22,14 @@ import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "fir
 // import axios from "axios";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 
+import OptimizedAvatar from "@/components/OptimizedAvatar";
+import shortenNumber from "@/lib/utils/shortenNumber";
+
 import { useAuth } from "../../../context/AuthContext";
 import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
-import { User } from "../../../knowledgeTypes";
+import { Reputation, User } from "../../../knowledgeTypes";
 import { postWithToken } from "../../../lib/mapApi";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
@@ -29,6 +39,7 @@ import { MemoizedInputSave } from "../InputSave";
 import { MemoizedMetaButton } from "../MetaButton";
 import Modal from "../Modal/Modal";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
+import ProfileAvatar from "./ProfileAvatar";
 import { UserSettingsProfessionalInfo } from "./UserSettingsProfessionalInfo";
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 // import Modal from "../../../../containers/Modal/Modal";
@@ -99,9 +110,9 @@ import { UserSettingsProfessionalInfo } from "./UserSettingsProfessionalInfo";
 
 const doNothing = () => {};
 
-type UserSettingProps = { user: User };
+type UserSettingProps = { user: User; userReputation: Reputation };
 
-const UserSettings = ({ user }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -187,8 +198,8 @@ const UserSettings = ({ user }: UserSettingProps) => {
   // const [deInstit, setDeInstit] = useRecoilState(deInstitState);
   // const [allTags, setAllTags] = useRecoilState(allTagsState);
 
-  // const [instlogoURL, setInstlogoURL] = useState("");
-  // const [totalPoints, setTotalPoints] = useState("");
+  const [instlogoURL, setInstlogoURL] = useState("");
+  const [totalPoints, setTotalPoints] = useState(0);
   const [changingUsername /*, setChangingUsername*/] = useState(false);
 
   // const [chosenTags, setChosenTags] = useState([]);
@@ -222,10 +233,6 @@ const UserSettings = ({ user }: UserSettingProps) => {
 
   const [reason, setReason] = useState(user?.reason || ""); // TODO: improve this
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
-
-  console.log("--->>> chosenTags", chosenTags);
-
-  // useEffect(()=>{},[])
 
   const updateStatesByCountry = useCallback(
     async (currentCountry: string | null) => {
@@ -340,71 +347,96 @@ const UserSettings = ({ user }: UserSettingProps) => {
 
   //   await updateCitiesByState(value);
   // };
-  // useEffect(() => {
-  //   setTotalPoints(
-  //     cnCorrects -
-  //       cnWrongs +
-  //       cnInst +
-  //       cdCorrects -
-  //       cdWrongs +
-  //       cdInst +
-  //       qCorrects -
-  //       qWrongs +
-  //       qInst +
-  //       pCorrects -
-  //       pWrongs +
-  //       pInst +
-  //       sCorrects -
-  //       sWrongs +
-  //       sInst +
-  //       aCorrects -
-  //       aWrongs +
-  //       aInst +
-  //       rfCorrects -
-  //       rfWrongs +
-  //       rfInst +
-  //       nCorrects -
-  //       nWrongs +
-  //       nInst +
-  //       mCorrects -
-  //       mWrongs +
-  //       mInst +
-  //       iCorrects -
-  //       iWrongs +
-  //       iInst
-  //   );
-  // }, [
-  //   cnCorrects,
-  //   cnWrongs,
-  //   cnInst,
-  //   cdCorrects,
-  //   cdWrongs,
-  //   cdInst,
-  //   qCorrects,
-  //   qWrongs,
-  //   qInst,
-  //   pCorrects,
-  //   pWrongs,
-  //   pInst,
-  //   sCorrects,
-  //   sWrongs,
-  //   sInst,
-  //   aCorrects,
-  //   aWrongs,
-  //   aInst,
-  //   rfCorrects,
-  //   rfWrongs,
-  //   rfInst,
-  //   nCorrects,
-  //   nWrongs,
-  //   nInst,
-  //   mCorrects,
-  //   mWrongs,
-  //   mInst,
-  //   iCorrects,
-  //   iWrongs,
-  //   iInst,
-  // ]);
+  useEffect(() => {
+    const total =
+      userReputation.cnCorrects -
+      userReputation.cnWrongs +
+      userReputation.cnInst +
+      userReputation.cdCorrects -
+      userReputation.cdWrongs +
+      userReputation.cdInst +
+      userReputation.qCorrects -
+      userReputation.qWrongs +
+      userReputation.qInst +
+      userReputation.pCorrects -
+      userReputation.pWrongs +
+      userReputation.pInst +
+      userReputation.sCorrects -
+      userReputation.sWrongs +
+      userReputation.sInst +
+      userReputation.aCorrects -
+      userReputation.aWrongs +
+      userReputation.aInst +
+      userReputation.rfCorrects -
+      userReputation.rfWrongs +
+      userReputation.rfInst +
+      userReputation.nCorrects -
+      userReputation.nWrongs +
+      userReputation.nInst +
+      userReputation.mCorrects -
+      userReputation.mWrongs +
+      userReputation.mInst +
+      userReputation.iCorrects -
+      userReputation.iWrongs +
+      userReputation.iInst;
+    setTotalPoints(total);
+  }, [
+    userReputation.aCorrects,
+    userReputation.aInst,
+    userReputation.aWrongs,
+    userReputation.cdCorrects,
+    userReputation.cdInst,
+    userReputation.cdWrongs,
+    userReputation.cnCorrects,
+    userReputation.cnInst,
+    userReputation.cnWrongs,
+    userReputation.iCorrects,
+    userReputation.iInst,
+    userReputation.iWrongs,
+    userReputation.mCorrects,
+    userReputation.mInst,
+    userReputation.mWrongs,
+    userReputation.nCorrects,
+    userReputation.nInst,
+    userReputation.nWrongs,
+    userReputation.pCorrects,
+    userReputation.pInst,
+    userReputation.pWrongs,
+    userReputation.qCorrects,
+    userReputation.qInst,
+    userReputation.qWrongs,
+    userReputation.rfCorrects,
+    userReputation.rfInst,
+    userReputation.rfWrongs,
+    userReputation.sCorrects,
+    userReputation.sInst,
+    userReputation.sWrongs,
+  ]);
+
+  useEffect(() => {
+    // get institutions and update instLogo from setSUserObj
+    if (!db || !user) return;
+
+    if ("deInstit" in user && !("instLogo" in user)) {
+      console.log("useEffect:", user);
+      const fetchInstitution = async () => {
+        const institutionsQuery = query(collection(db, "institutions"), where("name", "==", user.deInstit));
+
+        const institutionsDocs = await getDocs(institutionsQuery);
+
+        // const institutionsDocs = await firebase
+        //   .firestore()
+        //   .collection("institutions")
+        //   .where("name", "==", sUserObj.deInstit)
+        //   .get();
+        for (let institutionDoc of institutionsDocs.docs) {
+          const institutionData = institutionDoc.data();
+          setInstlogoURL(institutionData.logoURL);
+        }
+      };
+      fetchInstitution();
+    }
+  }, [db, user]);
 
   // useEffect(() => {
   //   if (firebase && deInstit) {
@@ -426,7 +458,6 @@ const UserSettings = ({ user }: UserSettingProps) => {
   // ==================>>>> UNCOMMENT this
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
-      console.log("11111111111111111111");
       nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
       // setChosenNodeTitle(allTags[chosenTags[0]].title);
       // setChosenNode(chosenTags[0]);
@@ -819,14 +850,12 @@ const UserSettings = ({ user }: UserSettingProps) => {
   //   return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
   // };
 
-  console.log("====================>>>", chosenTags);
-
   const tabsItems = (user: User, choosingNodeId?: string) => {
     return [
       {
         title: "Account",
         content: (
-          <>
+          <div id="AccountSettings">
             <div className="AccountSettingsButtons">
               <MemoizedMetaButton onClick={() => choosingNodeClick("tag")}>
                 <div className="AccountSettingsButton">
@@ -865,8 +894,7 @@ const UserSettings = ({ user }: UserSettingProps) => {
               lName={lName}
               uname={username}
             /> */}
-
-            <FormGroup sx={{ p: "10px 19px" }}>
+            <FormGroup>
               <FormControlLabel
                 control={
                   <Switch
@@ -884,8 +912,7 @@ const UserSettings = ({ user }: UserSettingProps) => {
                 label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
               />
             </FormGroup>
-
-            <FormGroup sx={{ p: "10px 19px" }}>
+            <FormGroup>
               <FormControlLabel
                 control={
                   <Switch
@@ -903,10 +930,8 @@ const UserSettings = ({ user }: UserSettingProps) => {
                 }
                 label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
               />
-              handleThemeSwitch
             </FormGroup>
-
-            <FormGroup sx={{ p: "10px 19px" }}>
+            <FormGroup>
               <FormControlLabel
                 control={
                   <Switch
@@ -918,7 +943,6 @@ const UserSettings = ({ user }: UserSettingProps) => {
                 label={`Display name: ${getDisplayNameValue(user)}`}
               />
             </FormGroup>
-
             <MemoizedInputSave
               identification="fNameInput"
               initialValue={user.fName || ""} //TODO: important fill empty user field
@@ -982,14 +1006,13 @@ const UserSettings = ({ user }: UserSettingProps) => {
                 </div>
               </MetaButton>
             </div> */}
-          </>
+          </div>
         ),
       },
       {
         title: "Personal",
         content: (
           <div id="PersonalSettings">
-            <h2>Personal</h2>
             <Autocomplete
               id="language"
               value={user.lang}
@@ -1208,57 +1231,88 @@ const UserSettings = ({ user }: UserSettingProps) => {
       },
     ];
   };
-
+  const setUserImage = (newImage: string) => {
+    dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
+  };
   if (!user) return null;
 
   // const ltermPoints = lterm * ltermMaxDay + ltermDay;
   return !changingUsername ? (
     <>
-      {/* <div id="MiniUserPrifileHeader">
+      <div id="MiniUserPrifileHeader">
         <div id="MiniUserPrifileAboveProfilePicture"></div>
         <div id="MiniUserPrifileFullProfileLink"></div>
-        <ProfileAvatar />
+        <ProfileAvatar userImage={user.imageUrl} setUserImage={setUserImage} />
+
         <div id="MiniUserPrifileIdentity">
-          <div id="MiniUserPrifileName">{chooseUname ? username : fName + " " + lName}</div>
+          {/* <div id="MiniUserPrifileName">{chooseUname ? username : fName + " " + lName}</div> */}
+          <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
           <div id="MiniUserPrifileTag">
-            <i className="material-icons grey-text">local_offer</i> <span>{tag.title}</span>
+            {/* <i className="material-icons grey-text">local_offer</i> */}
+            <LocalOfferIcon className="material-icons grey-text" />
+            <span>{user.tag}</span>
           </div>
-          <div id="MiniUserPrifileInstitution">
-            <img src={instlogoURL} alt={deInstit + " logo"} width="25px" />
-            <span>{deInstit}</span>
+          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "5px" }}>
+            <OptimizedAvatar
+              imageUrl={instlogoURL}
+              name={user.deInstit + " logo"}
+              sx={{ width: "25px", height: "25px" }}
+              renderAsAvatar={false}
+            />
+            {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}
+            <span>{user.deInstit}</span>
           </div>
           <div id="MiniUserPrifileTotalPoints">
-            <i className="material-icons DoneIcon green-text">done</i>
+            {/* <i className="material-icons DoneIcon green-text">done</i> */}
+            <DoneIcon className="material-icons DoneIcon green-text" />
             <span>{shortenNumber(totalPoints, 2, false)}</span>
           </div>
         </div>
       </div>
       <div id="MiniUserPrifilePointsContainer">
         <div className="MiniUserProfilePoints LeftPoints">
-          <i className="material-icons amber-text">local_library</i>
-          <span className="ToolbarValue">{shortenNumber(cnCorrects - cnWrongs, 2, false)}</span>
+          {/* <i className="material-icons amber-text">local_library</i> */}
+          <LocalLibraryIcon className="material-icons amber-text" />
+          <span className="ToolbarValue">
+            {shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false)}
+          </span>
         </div>
         <div className="MiniUserProfilePoints">
-          <i className="material-icons amber-text">share</i>
-          <span className="ToolbarValue">{shortenNumber(mCorrects - mWrongs, 2, false)}</span>
+          {/* <i className="material-icons amber-text">share</i> */}
+          <ShareIcon className="material-icons amber-text" />
+          <span className="ToolbarValue">
+            {shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false)}
+          </span>
         </div>
         <div className="MiniUserProfilePoints">
-          <i className="material-icons amber-text">help_outline</i>
-          <span className="ToolbarValue">{shortenNumber(qCorrects - qWrongs, 2, false)}</span>
+          {/* <i className="material-icons amber-text">help_outline</i> */}
+          <HelpOutlineIcon className="material-icons amber-text" />
+          <span className="ToolbarValue">
+            {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
+          </span>
         </div>
         <div className="MiniUserProfilePoints LeftPoints">
-          <i className="material-icons material-icons--outlined amber-text">emoji_objects</i>
-          <span className="ToolbarValue">{shortenNumber(iCorrects - iWrongs, 2, false)}</span>
+          {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
+          <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
+          <span className="ToolbarValue">
+            {shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false)}
+          </span>
         </div>
         <div className="MiniUserProfilePoints">
-          <i className="material-icons amber-text">code</i>
-          <span className="ToolbarValue">{shortenNumber(cdCorrects - cdWrongs, 2, false)}</span>
+          {/* <i className="material-icons amber-text">code</i> */}
+          <CodeIcon className="material-icons amber-text" />
+          <span className="ToolbarValue">
+            {shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false)}
+          </span>
         </div>
         <div className="MiniUserProfilePoints">
-          <i className="material-icons amber-text">menu_book</i>
-          <span className="ToolbarValue">{shortenNumber(rfCorrects - rfWrongs, 2, false)}</span>
+          {/* <i className="material-icons amber-text">menu_book</i> */}
+          <MenuBookIcon className="material-icons amber-text" />
+          <span className="ToolbarValue">
+            {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}
+          </span>
         </div>
-      </div> */}
+      </div>
       <div id="SidebarBody" className="UserSettingsSidebarBody">
         <MemoizedSidebarTabs
           tabsTitle="User Mini-profile tabs"

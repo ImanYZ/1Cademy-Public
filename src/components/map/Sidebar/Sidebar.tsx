@@ -395,12 +395,12 @@ const Sidebar = (props: SidebarType) => {
     return props.allNodes.filter(cur => cur.changed || !cur.isStudied).length;
   }, [props.allNodes]);
 
-  if (!user) return null;
+  if (!user || !reputation) return null;
 
   return (
     <>
       {/* {openToolbar && tag && (
-          <Toolbar openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} />
+          <Toolbar openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} />reputation
       )} */}
 
       {/* sidebar menu here ----------------------------- */}
@@ -600,7 +600,10 @@ const Sidebar = (props: SidebarType) => {
               noHeader={true}
             >
               <UserSettings
-                user={user} /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */
+                user={user}
+                userReputation={
+                  reputation
+                } /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */
               />
             </MemoizedSidebarWrapper>
           ) : props.openSearch ? (

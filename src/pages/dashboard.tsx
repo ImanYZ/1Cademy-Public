@@ -420,10 +420,10 @@ const Dashboard = ({}: DashboardProps) => {
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
     // so we reduce the rerenders, also we can set only the empty array here
-    setAddedParents(oldAddedParents => (oldAddedParents === [] ? oldAddedParents : []));
-    setAddedChildren(oldAddedChildren => (oldAddedChildren === [] ? oldAddedChildren : []));
-    setRemovedParents(oldRemovedParents => (oldRemovedParents === [] ? oldRemovedParents : []));
-    setRemovedChildren(oldRemovedChildren => (oldRemovedChildren === [] ? oldRemovedChildren : []));
+    setAddedParents(oldAddedParents => (oldAddedParents.length > 0 ? oldAddedParents : []));
+    setAddedChildren(oldAddedChildren => (oldAddedChildren.length > 0 ? oldAddedChildren : []));
+    setRemovedParents(oldRemovedParents => (oldRemovedParents.length > 0 ? oldRemovedParents : []));
+    setRemovedChildren(oldRemovedChildren => (oldRemovedChildren.length > 0 ? oldRemovedChildren : []));
   }, []);
 
   const getMapGraph = useCallback(

@@ -62,7 +62,7 @@ import { SortDirection, SortValues } from "../../../noteBookTypes";
 import { NodeType } from "../../../types";
 import { Editor } from "../../Editor";
 import NodeTypeIcon from "../../NodeTypeIcon2";
-import { MemoizedTagsSearcher, TagTreeView } from "../../TagsSearcher";
+import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../TagsSearcher";
 import { MemoizedMetaButton } from "../MetaButton";
 // import NodeTypeIcon from "../../../Node/NodeTypeIcon/NodeTypeIcon";
 // import RecentNodesList from "../../RecentNodes/RecentNodesList/RecentNodesList";
@@ -123,12 +123,12 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const [lastIndex, setLastIndex] = useState(13);
   const [isRetrieving /* setIsRetrieving*/] = useState(false);
   const [onlyTags /*setOnlyTags*/] = useState(true);
-  const [chosenTags /*setChosenTags*/] = useState([]);
+  // const [chosenTags /*setChosenTags*/] = useState([]);
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
   const [sortOption, setSortOption] = useState<SortValues>("DATE_MODIFIED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
-
+  const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   // useEffect(() => {
   //   setFilteredNodes((oFilteredNodes) => {
   //     const oldFilteredNodes = [];
@@ -381,6 +381,8 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
               <MemoizedTagsSearcher
                 allTags={allTags}
                 setAllTags={setAllTags}
+                chosenTags={chosenTags}
+                setChosenTags={setChosenTags}
                 sx={{ maxHeight: "200px", height: "200px" }}
                 multiple
               />

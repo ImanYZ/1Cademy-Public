@@ -18,7 +18,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
   const [ocupation, setOcupation] = useState(user.occupation);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
-  const [fieldOfInterest, setFieldOfInterest] = useState("");
+  const [fieldOfInterest, setFieldOfInterest] = useState(user.fieldOfInterest);
 
   const updateUserField = async (username: string, attributeName: string, newValue: any) => {
     const userRef = doc(db, "users", username);
@@ -158,8 +158,8 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
       />
       <MemoizedInputSave
         identification="fieldOfInterest"
-        initialValue={fieldOfInterest} //TODO: important fill empty user field
-        onSubmit={() => console.log('onSubmitField(user, "fieldOfInterest", value)')}
+        initialValue={fieldOfInterest}
+        onSubmit={(value: string) => onSubmitField(user, "fieldOfInterest", value)}
         setState={setFieldOfInterest}
         label="Research field of interest (if any)"
       />

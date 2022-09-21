@@ -159,6 +159,7 @@ const ProposalsList = (props: ProposalsListProps) => {
           // THIS Show pending proposal and aproved proposals
           return (
             <ProposalItem
+              key="0"
               proposal={proposal}
               selectProposal={props.selectProposal}
               proposalSummaries={proposalSummaries}

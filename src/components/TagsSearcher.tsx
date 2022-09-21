@@ -76,7 +76,6 @@ const TagsSearcher = ({
       reason: AutocompleteChangeReason,
       details?: AutocompleteChangeDetails<TagTreeView> | undefined
     ) => {
-      console.log("---->>reason", reason);
       if (reason === "selectOption") {
         const targetTag = details?.option;
         if (!targetTag) return;
