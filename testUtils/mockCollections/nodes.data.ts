@@ -69,6 +69,18 @@ const data: any[] = [
         reputation: 158.32000000000005,
       },
     },
+    choices: [
+      {
+        choice: "choice 1",
+        correct: "correct",
+        feedback: "feedback",
+      },
+      {
+        choice: "choice 2",
+        correct: "correct",
+        feedback: "feedback",
+      },
+    ],
   },
 
   ////
@@ -106,6 +118,18 @@ const data: any[] = [
     comments: 0,
     aFullname: "Bridget Funk",
     tags: ["Data Science & something"],
+    choices: [
+      {
+        choice: "choice 1",
+        correct: "correct",
+        feedback: "feedback",
+      },
+      {
+        choice: "choice 2",
+        correct: "correct",
+        feedback: "feedback",
+      },
+    ],
   },
 
   {
@@ -145,6 +169,18 @@ const data: any[] = [
     comments: 0,
     aFullname: "Gail Grot",
     tags: ["Data Science & something"],
+    choices: [
+      {
+        choice: "choice 1",
+        correct: "correct",
+        feedback: "feedback",
+      },
+      {
+        choice: "choice 3",
+        correct: "correct",
+        feedback: "feedback",
+      },
+    ],
   },
 ];
 

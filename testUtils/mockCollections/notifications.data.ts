@@ -1,4 +1,4 @@
-const collection = "notification";
+const collection = "notifications";
 
 const data: any[] = [
   {
