@@ -47,6 +47,7 @@ export const NODE_TYPES: NodeType[] = [
   "Reference",
   "News",
   "Idea",
+  "Private",
 ];
 
 export const improvementTypes = [
