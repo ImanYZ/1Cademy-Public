@@ -2,14 +2,14 @@ const collection = "userPrivateVersions";
 
 const data: any[] = [
   {
-    documentId: "1man",
-    award: false,
-    correct: true,
-    createdAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    updatedAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    user: "elijah-fox",
-    version: "ibdbxeC0PspeOpBlOCAP",
+    documentId: "ZdG2fEKEHTPqb3Shp9Xx",
+    updatedAt: new Date(),
+    createdAt: new Date(),
     wrong: false,
+    correct: true,
+    user: "A_wei",
+    award: false,
+    version: "ehf51y8R7GIbKiyAFG7t",
   },
 ];
 

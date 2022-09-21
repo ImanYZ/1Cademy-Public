@@ -2,14 +2,11 @@ const collection = "advertisementVersionComments";
 
 const data: any[] = [
   {
-    documentId: "1man",
-    award: false,
-    correct: true,
-    createdAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    updatedAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    user: "elijah-fox",
-    version: "ibdbxeC0PspeOpBlOCAP",
-    wrong: false,
+    documentId: "Y4SaIAu4WShmMEmbm52p",
+    updatedAt: new Date(),
+    createdAt: new Date(),
+    author: "A_wei",
+    version: "h53QGQvbgEehf51yFG7t",
   },
 ];
 
