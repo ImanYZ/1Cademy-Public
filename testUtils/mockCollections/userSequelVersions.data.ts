@@ -2,14 +2,14 @@ const collection = "userSequelVersions";
 
 const data: any[] = [
   {
-    documentId: "1man",
-    award: false,
-    correct: true,
-    createdAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    updatedAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    user: "elijah-fox",
-    version: "ibdbxeC0PspeOpBlOCAP",
+    documentId: "uhwfS8fvu3lQRDKe7QZ8",
+    updatedAt: new Date(),
+    createdAt: new Date(),
     wrong: false,
+    correct: true,
+    user: "A_wei",
+    award: false,
+    version: "rUWPbLVYBx92nhsjnKSr",
   },
 ];
 

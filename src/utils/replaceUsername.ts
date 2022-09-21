@@ -45,6 +45,9 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
   const uname = userDoc.id;
   const userData = userDoc.data();
   let userRef = db.collection("users").doc(newUsername);
+  if ((await userRef.get()).exists) {
+    throw new Error("Username already exists");
+  }
   batch.set(userRef, { ...userData, uname: newUsername });
   writeCounts += 1;
 
@@ -60,7 +63,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
       collQuery: versionsColl,
-      collectionName: nodeType + "Versions",
+      collectionName: versionsColl.id,
       columnName: "proposer",
       oldUname: uname,
       newUname: newUsername,
@@ -69,7 +72,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
       collQuery: userVersionsColl,
-      collectionName: nodeType + "Versions",
+      collectionName: userVersionsColl.id,
       columnName: "user",
       oldUname: uname,
       newUname: newUsername,
@@ -78,7 +81,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
       collQuery: versionsCommentsColl,
-      collectionName: nodeType + "Versions",
+      collectionName: versionsCommentsColl.id,
       columnName: "author",
       oldUname: uname,
       newUname: newUsername,
@@ -87,7 +90,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
     [batch, writeCounts] = await replaceUnameInCollection({
       batch,
       collQuery: userVersionsCommentsColl,
-      collectionName: nodeType + "Versions",
+      collectionName: userVersionsCommentsColl.id,
       columnName: "user",
       oldUname: uname,
       newUname: newUsername,

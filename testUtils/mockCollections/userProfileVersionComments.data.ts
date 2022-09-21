@@ -2,13 +2,14 @@ const collection = "userProfileVersionComments";
 
 const data: any[] = [
   {
-    documentId: "1man",
+    documentId: "bbw9HaAgODaj37krr1t2",
     award: false,
     correct: true,
-    createdAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    updatedAt: "January 15, 2021 at 3:05:15 AM UTC+5",
-    user: "elijah-fox",
-    version: "ibdbxeC0PspeOpBlOCAP",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    user: "A_wei",
+    comment: "meKuVG3tJksgmUbfXZBy",
+    version: "UjfC9gNBTAiyPFok9CFk",
     wrong: false,
   },
 ];
