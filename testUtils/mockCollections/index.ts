@@ -22,6 +22,7 @@ import newsVersionComments from "./newsVersionComments.data";
 import newsVersions from "./newsVersions.data";
 import nodes from "./nodes.data";
 import notificationNums from "./notificationNums.data";
+import notifications from "./notifications.data";
 import othersReputations from "./othersReputations.data";
 import othMonReputations from "./othMonReputations.data";
 import othWeekReputations from "./othWeekReputations.data";
@@ -98,6 +99,7 @@ export const institutionsData = new MockData(institutions.data, institutions.col
 export const tagsData = new MockData(tags.data, tags.collection);
 export const creditsData = new MockData(credits.data, credits.collection);
 export const bookmarkNumsData = new MockData(bookmarkNums.data, bookmarkNums.collection);
+export const notificationsData = new MockData(notifications.data, notifications.collection);
 export const notificationNumsData = new MockData(notificationNums.data, notificationNums.collection);
 export const pendingPropsNumsData = new MockData(pendingPropsNums.data, pendingPropsNums.collection);
 export const reputationsData = new MockData(reputations.data, reputations.collection);
