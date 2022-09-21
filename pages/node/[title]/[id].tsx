@@ -15,7 +15,7 @@ import PagesNavbar from "../../../components/PagesNavbar";
 import { ReferencesList } from "../../../components/ReferencesList";
 import { TagsList } from "../../../components/TagsList";
 import { getAllNodeParamsForStaticProps, getNodeData } from "../../../lib/nodes";
-import { escapeBreaksQuotes, generateAlias } from "../../../lib/utils";
+import { escapeBreaksQuotes } from "../../../lib/utils";
 import { KnowledgeNode } from "../../../src/knowledgeTypes";
 
 type Props = {
@@ -77,7 +77,7 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
   return (
     <PagesNavbar title={`1Cademy - ${node.title}`} showSearch={false}>
       <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
-        <NodeHead canonical={generateAlias(node.title)} node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
+        <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={3}>
             {parents && parents?.length > 0 && <LinkedNodes data={parents || []} header="Learn Before" />}

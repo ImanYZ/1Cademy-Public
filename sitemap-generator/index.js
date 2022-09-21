@@ -36,6 +36,7 @@ const admin = firebaseAdmin.initializeApp({
     })
 });
 
+// bucket storage initialization, in our case storage was in different project otherwise we can use single service to connect both of services
 const storage = new Storage({
   credentials: {
     type: process.env.GCSTORAGE_TYPE,
@@ -70,7 +71,6 @@ async function buildSitemapIndex(sitemaps) {
   sitemaps.forEach((sitemap) => {
     sitemapIndex += `<sitemap>
       <loc>${sitemap.url}</loc>
-      <lastmod>${sitemap.updated_at}</lastmod>
     </sitemap>`
   })
   
@@ -101,92 +101,81 @@ async function main() {
     .where('deleted', '==', false)
     .where('isTag', '==', true).get();
 
-  // for individual sitemaps
-  const communityList = [];
-
   // for sitemap index builder
   let sitemaps = [];
+  const pages = {};
+  const communityIds = [];
   
   for(const node of nodes.docs) {
     const nodeData = node.data();
-    const communitySmUrl = `sitemaps/community-${generateAlias(nodeData.title)}.xml`;
-
-    communityList.push([
-      node.id, nodeData.title, communitySmUrl,
-      nodeData.updatedAt.toDate().toISOString()
-    ])
-
-    sitemaps.push({
-      url: `https://${process.env.STATIC_STORAGE_BUCKET}/${communitySmUrl}`,
-      updated_at: nodeData.updatedAt.toDate().toISOString()
+    communityIds.push({
+      id: node.id,
+      title: nodeData.title
     })
+    console.log(`${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`, nodeData.title, node.id, "c")
+    pages[node.id] = {
+      url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
+      updated_at: nodeData.updatedAt.toDate().toISOString()
+    }
   }
 
   // community sitemaps
-  for(const community of communityList) {
-    const pages = [];
+  for(const community of communityIds) {
     const contentNodes = await db.collection('nodes')
       .where('deleted', '==', false)
       .where('tags', 'array-contains', {
-        node: community[0],
-        title: community[1]
+        node: community.id,
+        title: community.title
       }).get()
     
-    // community url itself
-    pages.push({
-      url: `${process.env.APP_URL}/node/${generateAlias(community[1])}/${community[0]}`,
-      updated_at: community[3]
-    })
-
     // individual nodes in this community
     for(const contentNode of contentNodes.docs) {
       const contentNodeData = contentNode.data();
-      pages.push({
+      // if node already present in pages hashmap
+      if(pages.hasOwnProperty(contentNode.id)) continue;
+      console.log(`${process.env.APP_URL}/node/${generateAlias(contentNodeData.title)}/${contentNode.id}`, contentNodeData.title, contentNode.id)
+      pages[contentNode.id] = {
         url: `${process.env.APP_URL}/node/${generateAlias(contentNodeData.title)}/${contentNode.id}`,
         updated_at: contentNodeData.updatedAt.toDate().toISOString()
+      }
+    }
+  }
+
+  // this variable will hold sitemap (urlset) or sitemap index, contents depends upon total entries
+  let sitemapContent = '';
+
+  let _nodes = Object.values(pages);
+  // apply sub indexes strategy for community tags
+  // sitemap can have atmost 50000 entries and should not exceed 50MB in size
+  // we are using 40000 to be safe in case of size per entry increases
+  if(_nodes.length > 40000) {
+    const subSitemaps = [];
+    while(_nodes.length > 0) {
+      subSitemaps.push(_nodes.splice(0, 40000))
+    }
+
+    // building each sitemap with atmost 40k entries
+    let c = 1
+    for(const subSitemapIndex of subSitemaps) {
+      const _sitemapContent = await buildSitemap(subSitemapIndex);
+      const communitySubSmFilename = `sitemaps/sitemap_${c}.xml`;
+      // pushing sub tree sitemap to bucket
+      const communitySubSmUrl = await uploadToBucket(communitySubSmFilename, _sitemapContent)
+      sitemaps.push({
+        url: communitySubSmUrl,
+        updated_at: (new Date()).toISOString()
       })
+      c++;
     }
-
-    let sitemapContent = '';
-
-    // apply sub indexes strategy for community tags
-    if(pages.length > 500) {
-      const subCommunityIndexes = [];
-      while(pages.length > 0) {
-        subCommunityIndexes.push(pages.splice(0, 500))
-      }
-
-      let c = 1
-      for(const sitemapSubindex of subCommunityIndexes) {
-        const _sitemapContent = await buildSitemap(sitemapSubindex);
-        // adding first chunk sitemap as sitemap and others in sitemap index
-        if(c++ === 1) {
-          sitemapContent = _sitemapContent;
-          continue;
-        }
-        const communitySubSmFilename = `sitemaps/${community[0]}_${c}.xml`;
-        const communitySubSmUrl = await uploadToBucket(communitySubSmFilename, _sitemapContent)
-        sitemaps.push({
-          url: communitySubSmUrl,
-          updated_at: (new Date()).toISOString()
-        })
-      }
-    } else {
-      sitemapContent = await buildSitemap(pages)
-    }
-    // pushing community sitemap to bucket
-    try {
-      const communityUrl = await uploadToBucket(community[2], sitemapContent)
-      console.log(communityUrl, 'community sitemap url')
-    } catch(e) {
-      throw new Error(`Error while upload to cloud storage: ${community[2]}`)
-    }
+    sitemapContent = await buildSitemapIndex(sitemaps)
+  } else {
+    // building sitemap in index because, entries were less than 40k
+    sitemapContent = await buildSitemap(_nodes)
   }
   
   // pushing sitemap index to bucket
-  const sitemapIndexContent = await buildSitemapIndex(sitemaps)
   try {
-    const sitemapIndexUrl = await uploadToBucket(`sitemap_index.xml`, sitemapIndexContent)
+    const sitemapIndexUrl = await uploadToBucket(`sitemap_index.xml`, sitemapContent)
     console.log(sitemapIndexUrl, 'Sitemap index url')
   } catch(e) {
     console.log(e.message)
