@@ -29,6 +29,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
@@ -2334,12 +2335,13 @@ const Dashboard = ({}: DashboardProps) => {
               async function complete() {
                 console.log("storageRef", storageRef);
                 const imageGeneratedUrl = await getDownloadURL(storageRef);
-                console.log("---> imageGeneratedUrl", imageGeneratedUrl);
+                const imageUrlFixed = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
+                console.log("---> imageGeneratedUrl", imageUrlFixed);
                 setIsSubmitting(false);
                 setIsUploading(false);
-                if (imageGeneratedUrl && imageGeneratedUrl !== "") {
+                if (imageUrlFixed && imageUrlFixed !== "") {
                   setNodeParts(nodeId, (thisNode: any) => {
-                    thisNode.nodeImage = imageGeneratedUrl;
+                    thisNode.nodeImage = imageUrlFixed;
                     return { ...thisNode };
                   });
                 }

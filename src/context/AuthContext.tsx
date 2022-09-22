@@ -34,7 +34,9 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
 
   useEffect(() => {
     const auth = getAuth();
+
     const unsubscriber = onAuthStateChanged(auth, user => {
+      console.log("USER NEW> ", user);
       if (user) {
         //sign in
         loadUser(user.uid);

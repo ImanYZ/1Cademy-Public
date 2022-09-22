@@ -6,6 +6,8 @@ import { getAuth, updateProfile } from "firebase/auth";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useCallback, useRef, useState } from "react";
 
+import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
+
 import { postWithToken } from "../../../lib/mapApi";
 // import { newId } from "../../../lib/utils/newid";
 import { MemoizedMetaButton } from "../MetaButton";
@@ -85,7 +87,9 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
               );
             },
             async function complete() {
-              const imageGeneratedUrl = await getDownloadURL(storageRef);
+              let imageGeneratedUrl = await getDownloadURL(storageRef);
+              imageGeneratedUrl = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
+              // TODO: REQUEST TO BACKEND
               const postData = {
                 imageUrl: imageGeneratedUrl,
               };
@@ -126,6 +130,7 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
       >
         <div className="UserAvatar UserStatusIcon">
           {/* TODO: manage undefinder ser image (show default image) */}
+
           <img
             src={userImage}
             // style={{ width: imageWidth, height: imageHeight }}
