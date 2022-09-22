@@ -17,6 +17,7 @@ import credits from "./credits.data";
 import ideaVersionComments from "./ideaVersionComments.data";
 import ideaVersions from "./ideaVersions.data";
 import institutions from "./institutions.data";
+import messages from "./messages.data";
 import monthlyReputations from "./monthlyReputations.data";
 import newsVersionComments from "./newsVersionComments.data";
 import newsVersions from "./newsVersions.data";
@@ -209,3 +210,5 @@ export const userPrivateVersionCommentsData = new MockData(
   userPrivateVersionComments.data,
   userPrivateVersionComments.collection
 );
+
+export const messagesData = new MockData(messages.data, messages.collection);
