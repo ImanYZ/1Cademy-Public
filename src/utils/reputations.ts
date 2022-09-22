@@ -547,54 +547,60 @@ export const updateReputationIncrement = async ({
   }
 
   //  create a new community reputation object
+  console.log("com_Points.cdCorrects", com_Points.cdCorrects);
   const com_PointsDoc_Obj = {
     ...com_Points,
     // for Concept nodes
-    cnCorrects: parseFloat(com_Points.cnCorrects.toFixed(3)),
-    cnInst: parseFloat(com_Points.cnInst.toFixed(3)),
-    cnWrongs: parseFloat(com_Points.cnWrongs.toFixed(3)),
+    cnCorrects:
+      com_Points.cnCorrects !== null && com_Points.cnCorrects ? parseFloat(com_Points.cnCorrects.toFixed(3)) : 0,
+    cnInst: com_Points.cnInst !== null && com_Points.cnInst ? parseFloat(com_Points.cnInst.toFixed(3)) : 0,
+    cnWrongs: com_Points.cnWrongs !== null && com_Points.cnWrongs ? parseFloat(com_Points.cnWrongs.toFixed(3)) : 0,
     // for Code nodes
-    cdCorrects: parseFloat(com_Points.cdCorrects.toFixed(3)),
-    cdInst: parseFloat(com_Points.cdInst.toFixed(3)),
-    cdWrongs: parseFloat(com_Points.cdWrongs.toFixed(3)),
+    cdCorrects:
+      com_Points.cdCorrects !== null && com_Points.cdCorrects ? parseFloat(com_Points.cdCorrects.toFixed(3)) : 0,
+    cdInst: com_Points.cdInst !== null && com_Points.cdInst ? parseFloat(com_Points.cdInst.toFixed(3)) : 0,
+    cdWrongs: com_Points.cdWrongs !== null && com_Points.cdWrongs ? parseFloat(com_Points.cdWrongs.toFixed(3)) : 0,
     // for Question nodes
-    qCorrects: parseFloat(com_Points.qCorrects.toFixed(3)),
-    qInst: parseFloat(com_Points.qInst.toFixed(3)),
-    qWrongs: parseFloat(com_Points.qWrongs.toFixed(3)),
+    qCorrects: com_Points.qCorrects !== null && com_Points.qCorrects ? parseFloat(com_Points.qCorrects.toFixed(3)) : 0,
+    qInst: com_Points.qInst !== null && com_Points.qInst ? parseFloat(com_Points.qInst.toFixed(3)) : 0,
+    qWrongs: com_Points.qWrongs !== null && com_Points.qWrongs ? parseFloat(com_Points.qWrongs.toFixed(3)) : 0,
     //  for Profile nodes
-    pCorrects: parseFloat(com_Points.pCorrects.toFixed(3)),
-    pInst: parseFloat(com_Points.pInst.toFixed(3)),
-    pWrongs: parseFloat(com_Points.pWrongs.toFixed(3)),
+    pCorrects: com_Points.pCorrects !== null && com_Points.pCorrects ? parseFloat(com_Points.pCorrects.toFixed(3)) : 0,
+    pInst: com_Points.pInst !== null && com_Points.pInst ? parseFloat(com_Points.pInst.toFixed(3)) : 0,
+    pWrongs: com_Points.pWrongs !== null && com_Points.pWrongs ? parseFloat(com_Points.pWrongs.toFixed(3)) : 0,
     //  for Sequel nodes
-    sCorrects: parseFloat(com_Points.sCorrects.toFixed(3)),
-    sInst: parseFloat(com_Points.sInst.toFixed(3)),
-    sWrongs: parseFloat(com_Points.sWrongs.toFixed(3)),
+    sCorrects: com_Points.sCorrects !== null && com_Points.sCorrects ? parseFloat(com_Points.sCorrects.toFixed(3)) : 0,
+    sInst: com_Points.sInst !== null && com_Points.sInst ? parseFloat(com_Points.sInst.toFixed(3)) : 0,
+    sWrongs: com_Points.sWrongs !== null && com_Points.sWrongs ? parseFloat(com_Points.sWrongs.toFixed(3)) : 0,
     //  for Advertisement nodes
-    aCorrects: parseFloat(com_Points.aCorrects.toFixed(3)),
-    aInst: parseFloat(com_Points.aInst.toFixed(3)),
-    aWrongs: parseFloat(com_Points.aWrongs.toFixed(3)),
+    aCorrects: com_Points.aCorrects !== null && com_Points.aCorrects ? parseFloat(com_Points.aCorrects.toFixed(3)) : 0,
+    aInst: com_Points.aInst !== null && com_Points.aInst ? parseFloat(com_Points.aInst.toFixed(3)) : 0,
+    aWrongs: com_Points.aWrongs !== null && com_Points.aWrongs ? parseFloat(com_Points.aWrongs.toFixed(3)) : 0,
     //  for Reference nodes
-    rfCorrects: parseFloat(com_Points.rfCorrects.toFixed(3)),
-    rfInst: parseFloat(com_Points.rfInst.toFixed(3)),
-    rfWrongs: parseFloat(com_Points.rfWrongs.toFixed(3)),
+    rfCorrects:
+      com_Points.rfCorrects !== null && com_Points.rfCorrects ? parseFloat(com_Points.rfCorrects.toFixed(3)) : 0,
+    rfInst: com_Points.rfInst !== null && com_Points.rfInst ? parseFloat(com_Points.rfInst.toFixed(3)) : 0,
+    rfWrongs: com_Points.rfWrongs !== null && com_Points.rfWrongs ? parseFloat(com_Points.rfWrongs.toFixed(3)) : 0,
     //  for News nodes
-    nCorrects: parseFloat(com_Points.nCorrects.toFixed(3)),
-    nInst: parseFloat(com_Points.nInst.toFixed(3)),
-    nWrongs: parseFloat(com_Points.nWrongs.toFixed(3)),
+    nCorrects: com_Points.nCorrects !== null && com_Points.nCorrects ? parseFloat(com_Points.nCorrects.toFixed(3)) : 0,
+    nInst: com_Points.nInst !== null && com_Points.nInst ? parseFloat(com_Points.nInst.toFixed(3)) : 0,
+    nWrongs: com_Points.nWrongs !== null && com_Points.nWrongs ? parseFloat(com_Points.nWrongs.toFixed(3)) : 0,
     //  for Idea nodes
-    iCorrects: parseFloat(com_Points.iCorrects.toFixed(3)),
-    iInst: parseFloat(com_Points.iInst.toFixed(3)),
-    iWrongs: parseFloat(com_Points.iWrongs.toFixed(3)),
+    iCorrects: com_Points.iCorrects !== null && com_Points.iCorrects ? parseFloat(com_Points.iCorrects.toFixed(3)) : 0,
+    iInst: com_Points.iInst !== null && com_Points.iInst ? parseFloat(com_Points.iInst.toFixed(3)) : 0,
+    iWrongs: com_Points.iWrongs !== null && com_Points.iWrongs ? parseFloat(com_Points.iWrongs.toFixed(3)) : 0,
     //  for Relation nodes
-    mCorrects: parseFloat(com_Points.mCorrects.toFixed(3)),
-    mInst: parseFloat(com_Points.mInst.toFixed(3)),
-    mWrongs: parseFloat(com_Points.mWrongs.toFixed(3)),
-    lterm: parseFloat(com_Points.lterm.toFixed(3)),
-    ltermDay: parseFloat(com_Points.ltermDay.toFixed(3)),
-    positives: parseFloat(com_Points.positives.toFixed(3)),
-    negatives: parseFloat(com_Points.negatives.toFixed(3)),
-    totalPoints: parseFloat(com_Points.totalPoints.toFixed(3)),
-    adminPoints: parseFloat(com_Points.adminPoints.toFixed(3)),
+    mCorrects: com_Points.mCorrects !== null && com_Points.mCorrects ? parseFloat(com_Points.mCorrects.toFixed(3)) : 0,
+    mInst: com_Points.mInst !== null && com_Points.mInst ? parseFloat(com_Points.mInst.toFixed(3)) : 0,
+    mWrongs: com_Points.mWrongs !== null && com_Points.mWrongs ? parseFloat(com_Points.mWrongs.toFixed(3)) : 0,
+    lterm: com_Points.lterm !== null && com_Points.lterm ? parseFloat(com_Points.lterm.toFixed(3)) : 0,
+    ltermDay: com_Points.ltermDay !== null && com_Points.ltermDay ? parseFloat(com_Points.ltermDay.toFixed(3)) : 0,
+    positives: com_Points.positives !== null && com_Points.positives ? parseFloat(com_Points.positives.toFixed(3)) : 0,
+    negatives: com_Points.negatives !== null && com_Points.negatives ? parseFloat(com_Points.negatives.toFixed(3)) : 0,
+    totalPoints:
+      com_Points.totalPoints !== null && com_Points.totalPoints ? parseFloat(com_Points.totalPoints.toFixed(3)) : 0,
+    adminPoints:
+      com_Points.adminPoints !== null && com_Points.adminPoints ? parseFloat(com_Points.adminPoints.toFixed(3)) : 0,
   };
   if (reputationType === "Monthly" || reputationType === "Others Monthly") {
     reputationDoc_Obj.firstMonthDay = firstMonthDay;

@@ -14,7 +14,7 @@ type Props = {
   children: ReactNode;
 };
 const ThemeProvider: FC<Props> = ({ children }) => {
-  const [{ user }] = useAuth();
+  const [{ settings }] = useAuth();
   // const [themeMode, setThemeMode] = useState<AppTheme>("dark");
 
   const getMUIModeTheme = (theme?: UserTheme) => {
@@ -23,7 +23,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
     return "dark";
   };
   const theme = useMemo(() => {
-    const currentTheme = getMUIModeTheme(user?.theme);
+    const currentTheme = getMUIModeTheme(settings.theme);
     const brandingDesignTokens = getDesignTokens(currentTheme);
     let nextTheme = createTheme({
       ...brandingDesignTokens,
@@ -35,7 +35,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
 
     nextTheme = deepmerge(nextTheme, getThemedComponents(nextTheme));
     return nextTheme;
-  }, [user?.theme]);
+  }, [settings.theme]);
 
   return <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>;
 };

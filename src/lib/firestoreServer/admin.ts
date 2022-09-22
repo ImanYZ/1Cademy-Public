@@ -3,6 +3,7 @@ import { cert, initializeApp } from "firebase-admin/app";
 import { DocumentReference, getFirestore, WriteBatch } from "firebase-admin/firestore";
 
 import { arrayToChunks } from "../../utils";
+import { delay } from "../utils/utils";
 
 export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 
@@ -39,12 +40,13 @@ const MAX_TRANSACTION_WRITES = 499;
 const MIN_ACCEPTED_VERSION_POINT_WEIGHT = 0.1;
 const db = getFirestore();
 
-const makeCommitBatch = async (batch: WriteBatch) => {
+const makeCommitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {
   await batch.commit();
   batch = db.batch();
   return [batch, 0];
 };
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const isFirestoreDeadlineError = (err: any) => {
   const errString = err.toString();
   return (
@@ -53,30 +55,21 @@ const isFirestoreDeadlineError = (err: any) => {
   );
 };
 
-export const commitBatch = async (batch: WriteBatch) => {
+export const commitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {
   try {
-    await makeCommitBatch(batch);
+    return makeCommitBatch(batch);
   } catch (err) {
-    if (isFirestoreDeadlineError(err)) {
-      const theInterval = setInterval(async () => {
-        try {
-          await makeCommitBatch(batch);
-          clearInterval(theInterval);
-        } catch (err) {
-          if (!isFirestoreDeadlineError(err)) {
-            clearInterval(theInterval);
-            throw err;
-          }
-        }
-      }, 4000);
-    }
+    await delay(4000);
+    // we removed this condition so that it keeps trying until transaction is committed
+    // if (isFirestoreDeadlineError(err))
+    return commitBatch(batch);
   }
 };
 
 const checkRestartBatchWriteCounts = async (batch: WriteBatch, writeCounts: number): Promise<[WriteBatch, number]> => {
   writeCounts += 1;
   if (writeCounts >= MAX_TRANSACTION_WRITES) {
-    await commitBatch(batch);
+    [batch, writeCounts] = await commitBatch(batch);
   }
   return [batch, writeCounts];
 };
