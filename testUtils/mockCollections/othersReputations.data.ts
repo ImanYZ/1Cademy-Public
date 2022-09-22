@@ -26,7 +26,7 @@ interface data {
 
 const data: data[] = [
   {
-    documentId: "00agUIVckQC7WmJXgV07",
+    documentId: "00agUIVckJK7WmJXgV07",
     createdAt: new Date(),
     dInst: 0,
     positives: 6,
@@ -47,6 +47,29 @@ const data: data[] = [
     mCorrects: 4,
     dCorrects: 2,
     tagId: "MlwLPB5GwSBWXgf1wqTe",
+  },
+  {
+    documentId: "00agUIVckQC7WmJXgV07",
+    createdAt: new Date(),
+    dInst: 0,
+    positives: 6,
+    isAdmin: false,
+    lterm: 0,
+    uname: "Catherine Huang",
+    mWrongs: 0,
+    negatives: 0,
+    ltermDay: 0,
+    totalPoints: 6,
+    updatedAt: new Date(),
+    iCorrects: 0,
+    iWrongs: 0,
+    mInst: 0,
+    iInst: 0,
+    tag: "Python Programming Language",
+    dWrongs: 0,
+    mCorrects: 4,
+    dCorrects: 2,
+    tagId: "FJfzAX7zbgQS8jU5XcEk",
   },
   {
     documentId: "04kxJvmd30xhWwUNWrHM",

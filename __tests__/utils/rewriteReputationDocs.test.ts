@@ -1,34 +1,49 @@
-import { db } from "../../src/lib/firestoreServer/admin";
-import { getTypedCollections, initializeNewReputationData,rewriteReputationDocs } from "../../src/utils";
+import { commitBatch,db } from "../../src/lib/firestoreServer/admin";
+import { getTypedCollections, initializeNewReputationData, rewriteReputationDocs } from "../../src/utils";
 import { firstWeekMonthDays } from "../../src/utils";
-import { conceptVersionsData } from "../../testUtils/mockCollections";
+import {
+  conceptVersionsData,
+  monthlyReputationsData,
+  othMonReputationsData,
+  othWeekReputationsData,
+  reputationsData,
+  weeklyReputationsData,
+} from "../../testUtils/mockCollections";
 
 describe("rewriteReputationDocs", () => {
   let node = "OR8UsmsxmeExHG8ekkIY";
   beforeEach(async () => {
     await conceptVersionsData.populate();
+    await reputationsData.populate();
+    await monthlyReputationsData.populate();
+    await weeklyReputationsData.populate();
+    await othMonReputationsData.populate();
+    await othWeekReputationsData.populate();
   });
 
   afterEach(async () => {
     await conceptVersionsData.clean();
+    await reputationsData.clean();
+    await monthlyReputationsData.clean();
+    await weeklyReputationsData.clean();
+    await othMonReputationsData.clean();
+    await othWeekReputationsData.clean();
   });
 
   it("Should return write counts grater than 0 in case of reputations", async () => {
     const reputations: any = {};
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      reputations[tagId] = {
-        // { { tagId, tag, updatedAt, createdAt } }
-        [proposer]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-      };
-    }
+    const tagId = versionsDocs.docs[0].data().tagIds[0];
+    const tag = "Data Science";
+    const proposer = versionsDocs.docs[0].data().proposer;
+    let createdAt = versionsDocs.docs[0].data().createdAt;
+    let updatedAt = new Date();
+    reputations[tagId] = {
+      // { { tagId, tag, updatedAt, createdAt } }
+      [proposer]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
+    };
+    reputations[tagId][proposer].totalPoints = 1000;
     let batch = db.batch();
     let writeCounts = 0;
     let reputationsType = "reputations";
@@ -39,56 +54,28 @@ describe("rewriteReputationDocs", () => {
       reputationsDict,
       writeCounts,
     });
+    await commitBatch(batch);
+    const comPointsDocs: any = await db.collection("reputations").where("tagId", "==", tagId).get();
     expect(writeCounts).toBeGreaterThan(0);
-  });
-
-  it("Should return write counts grater than 0 in case of reputations", async () => {
-    const reputations: any = {};
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
-    const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      reputations[tagId] = {
-        // { { tagId, tag, updatedAt, createdAt } }
-        [proposer]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-      };
-    }
-    let batch = db.batch();
-    let writeCounts = 0;
-    let reputationsType = "reputations";
-    let reputationsDict = reputations;
-    [batch, writeCounts] = await rewriteReputationDocs({
-      batch,
-      reputationsType,
-      reputationsDict,
-      writeCounts,
-    });
-    expect(writeCounts).toBeGreaterThan(0);
+    expect(comPointsDocs.docs[0].data().totalPoints).toEqual(1000);
   });
 
   it("Should return write counts grater than 0 in case of monthlyReputations", async () => {
     const monthlyReputations: any = {};
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      const { firstMonthDay } = firstWeekMonthDays(updatedAt);
-      monthlyReputations[tagId] = {
-        [proposer]: {
-          [firstMonthDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-        },
-      };
-    }
+    const tagId = versionsDocs.docs[0].data().tagIds[0];
+    const tag = "Data Science";
+    const proposer = versionsDocs.docs[0].data().proposer;
+    let createdAt = versionsDocs.docs[0].data().createdAt;
+    let updatedAt = new Date();
+    const { firstMonthDay } = firstWeekMonthDays(updatedAt);
+    monthlyReputations[tagId] = {
+      [proposer]: {
+        [firstMonthDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
+      },
+    };
+    monthlyReputations[tagId][proposer][firstMonthDay].totalPoints = 1000;
     let batch = db.batch();
     let writeCounts = 0;
     let reputationsType = "monthlyReputations";
@@ -99,27 +86,28 @@ describe("rewriteReputationDocs", () => {
       reputationsDict,
       writeCounts,
     });
+    await commitBatch(batch);
+    const comPointsDocs: any = await db.collection("monthlyReputations").where("tagId", "==", tagId).get();
     expect(writeCounts).toBeGreaterThan(0);
+    expect(comPointsDocs.docs[0].data().totalPoints).toEqual(1000);
   });
 
   it("Should return write counts grater than 0 in case of weeklyReputations", async () => {
     const weeklyReputations: any = {};
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      const { firstWeekDay } = firstWeekMonthDays(updatedAt);
-      weeklyReputations[tagId] = {
-        [proposer]: {
-          [firstWeekDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-        },
-      };
-    }
+    const tagId = versionsDocs.docs[0].data().tagIds[0];
+    const tag = "Data Science";
+    const proposer = versionsDocs.docs[0].data().proposer;
+    let createdAt = versionsDocs.docs[0].data().createdAt;
+    let updatedAt = new Date();
+    const { firstWeekDay } = firstWeekMonthDays(updatedAt);
+    weeklyReputations[tagId] = {
+      [proposer]: {
+        [firstWeekDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
+      },
+    };
+    weeklyReputations[tagId][proposer][firstWeekDay].totalPoints = 1000;
     let batch = db.batch();
     let writeCounts = 0;
     let reputationsType = "weeklyReputations";
@@ -130,24 +118,25 @@ describe("rewriteReputationDocs", () => {
       reputationsDict,
       writeCounts,
     });
+    await commitBatch(batch);
+    const comPointsDocs: any = await db.collection("weeklyReputations").where("tagId", "==", tagId).get();
     expect(writeCounts).toBeGreaterThan(0);
+    expect(comPointsDocs.docs[0].data().totalPoints).toEqual(1000);
   });
 
   it("Should return write counts grater than 0 in case of othersReputations", async () => {
     const othersReputations: any = {};
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      othersReputations[tagId] = {
-        [proposer]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-      };
-    }
+    const tagId = versionsDocs.docs[0].data().tagIds[0];
+    const tag = "Data Science";
+    const proposer = versionsDocs.docs[0].data().proposer;
+    let createdAt = versionsDocs.docs[0].data().createdAt;
+    let updatedAt = new Date();
+    othersReputations[tagId] = {
+      [proposer]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
+    };
+    othersReputations[tagId][proposer].totalPoints = 1000;
     let batch = db.batch();
     let writeCounts = 0;
     let reputationsType = "othersReputations";
@@ -158,27 +147,28 @@ describe("rewriteReputationDocs", () => {
       reputationsDict,
       writeCounts,
     });
+    await commitBatch(batch);
+    const comPointsDocs: any = await db.collection("othersReputations").where("tagId", "==", tagId).get();
     expect(writeCounts).toBeGreaterThan(0);
+    expect(comPointsDocs.docs[0].data().totalPoints).toEqual(1000);
   });
 
   it("Should return write counts grater than 0 in case of othMonReputations", async () => {
     const othMonReputations: any = {};
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      const { firstMonthDay } = firstWeekMonthDays(updatedAt);
-      othMonReputations[tagId] = {
-        [proposer]: {
-          [firstMonthDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-        },
-      };
-    }
+    const tagId = versionsDocs.docs[0].data().tagIds[0];
+    const tag = "Data Science";
+    const proposer = versionsDocs.docs[0].data().proposer;
+    let createdAt = versionsDocs.docs[0].data().createdAt;
+    let updatedAt = new Date();
+    const { firstMonthDay } = firstWeekMonthDays(updatedAt);
+    othMonReputations[tagId] = {
+      [proposer]: {
+        [firstMonthDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
+      },
+    };
+    othMonReputations[tagId][proposer][firstMonthDay].totalPoints = 1000;
     let batch = db.batch();
     let writeCounts = 0;
     let reputationsType = "othMonReputations";
@@ -189,27 +179,28 @@ describe("rewriteReputationDocs", () => {
       reputationsDict,
       writeCounts,
     });
+    await commitBatch(batch);
+    const comPointsDocs: any = await db.collection("othMonReputations").where("tagId", "==", tagId).get();
     expect(writeCounts).toBeGreaterThan(0);
+    expect(comPointsDocs.docs[0].data().totalPoints).toEqual(1000);
   });
 
   it("Should return write counts grater than 0 in case of othWeekReputations", async () => {
     const othWeekReputations: any = {};
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", node).get();
-    for (let versionDoc of versionsDocs.docs) {
-      const versionData = versionDoc.data();
-      const tagId = versionData.tagIds[0];
-      const tag = "Data Science";
-      const proposer = versionData.proposer;
-      let createdAt = versionData.createdAt;
-      let updatedAt = new Date();
-      const { firstWeekDay } = firstWeekMonthDays(updatedAt);
-      othWeekReputations[tagId] = {
-        [proposer]: {
-          [firstWeekDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
-        },
-      };
-    }
+    const tagId = versionsDocs.docs[0].data().tagIds[0];
+    const tag = "Data Science";
+    const proposer = versionsDocs.docs[0].data().proposer;
+    let createdAt = versionsDocs.docs[0].data().createdAt;
+    let updatedAt = new Date();
+    const { firstWeekDay } = firstWeekMonthDays(updatedAt);
+    othWeekReputations[tagId] = {
+      [proposer]: {
+        [firstWeekDay]: initializeNewReputationData({ tagId, tag, updatedAt, createdAt }),
+      },
+    };
+    othWeekReputations[tagId][proposer][firstWeekDay].totalPoints = 1000;
     let batch = db.batch();
     let writeCounts = 0;
     let reputationsType = "othWeekReputations";
@@ -220,6 +211,9 @@ describe("rewriteReputationDocs", () => {
       reputationsDict,
       writeCounts,
     });
+    await commitBatch(batch);
+    const comPointsDocs: any = await db.collection("othWeekReputations").where("tagId", "==", tagId).get();
     expect(writeCounts).toBeGreaterThan(0);
+    expect(comPointsDocs.docs[0].data().totalPoints).toEqual(1000);
   });
 });

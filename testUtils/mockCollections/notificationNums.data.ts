@@ -9,6 +9,10 @@ const data: any[] = [
     documentId: "AMYZH",
     nNum: 0,
   },
+  {
+    documentId: "A_wei",
+    nNum: 0,
+  },
 ];
 
 const notificationNumsData = {

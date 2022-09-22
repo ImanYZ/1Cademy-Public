@@ -28,6 +28,7 @@ import othersReputations from "./othersReputations.data";
 import othMonReputations from "./othMonReputations.data";
 import othWeekReputations from "./othWeekReputations.data";
 import pendingPropsNums from "./pendingPropsNums.data";
+import practice from "./practice.data";
 import privateVersionComments from "./privateVersionComments.data";
 import privateVersions from "./privateVersions.data";
 import profileVersionComments from "./profileVersionComments.data";
@@ -214,3 +215,4 @@ export const userPrivateVersionCommentsData = new MockData(
 );
 
 export const messagesData = new MockData(messages.data, messages.collection);
+export const practiceData = new MockData(practice.data, practice.collection);

@@ -8,7 +8,7 @@ const data: any[] = [
     uname: "1man",
     updatedAt: new Date(),
     iWrongs: 0,
-    tagId: "r98BjyFDCe4YyLA3U8ZE",
+    tagId: "FJfzAX7zbgQS8jU5XcEk",
     mCorrects: 3,
     lterm: 0,
     ltermDay: 0,
