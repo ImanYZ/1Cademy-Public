@@ -31,6 +31,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
+import ClustersList from "../components/map/ClustersList";
 import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
@@ -156,7 +157,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   // object of cluster boundaries
-  const [, /*clusterNodes*/ setClusterNodes] = useState({});
+  const [clusterNodes, setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -564,7 +565,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodesToRecalculate: any, edgesToRecalculate: any) => {
       console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
       let mapChangedFlag = true;
-      const oldClusterNodes = {};
+      const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
       let oldNodes = { ...nodesToRecalculate };
@@ -2539,8 +2540,7 @@ const Dashboard = ({}: DashboardProps) => {
             onMouseOver={mapContentMouseOver}
           >
             <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
-              {/* show clusters */}
-
+              {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
               <NodesList
                 nodes={nodes}

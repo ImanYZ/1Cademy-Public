@@ -956,7 +956,7 @@
   top: 0px;
   height: 100vh;
   padding-top: 10px;
-  padding-left: 22px;
+  /* padding-left: 22px; */
   z-index: 4;
   background-color: rgb(31, 31, 31);
   -webkit-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
@@ -1168,7 +1168,7 @@
 }
 
 #UsersStatusList .SidebarButton {
-  left: -19px;
+  left: -8px;
   top: 0px;
   direction: ltr;
   overflow: visible;
@@ -2198,7 +2198,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 .ModalWithReturnContent {
-  margin-top: 25px;
+  margin-top: 38px;
 }
 #ModalContent.ModalWithReturnContent {
   height: 310px;
@@ -2464,7 +2464,7 @@ button.MuiTab-textColorInherit:focus {
 /* userStatusList styles */
 #UsersStatusList {
   overflow-y: auto;
-  overflow-x: visible;
+  overflow-x: hidden;
   /* direction: rtl; */
   direction: ltr;
   margin-top: 0px;

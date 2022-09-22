@@ -3,10 +3,11 @@ import dagre from "dagre";
 
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
+import { ClusterNodes } from "../noteBookTypes";
 
 const layoutHandler = (
   mapChangedFlag: boolean,
-  oldClusterNodes: { [x: string]: { id: string; x: any; y: any; width: number; height: number; title: any } },
+  oldClusterNodes: ClusterNodes,
   oldMapWidth: number,
   oldMapHeight: any,
   oldNodes: { [x: string]: any },
@@ -28,7 +29,15 @@ const layoutHandler = (
     // DAGRE RECALCULATE LAYOUT
     // dagre.layout(dag1);
     dagre.layout(g);
-    const clusterRegions: any = {};
+    const clusterRegions: {
+      [key: string]: {
+        yMin: number;
+        yMax: number;
+        xMin: number;
+        xMax: number;
+        title: string;
+      };
+    } = {};
 
     // Iterate oldNodes and find the cluster boundary
     // and update their size

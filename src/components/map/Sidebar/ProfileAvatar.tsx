@@ -1,10 +1,6 @@
-// import axios from "axios";
-// import React, { useCallback, useEffect, useRef, useState } from "react";
-// import { useRecoilState, useRecoilValue } from "recoil";
-
 import { getAuth, updateProfile } from "firebase/auth";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
@@ -25,30 +21,30 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [imageUrlError, setImageUrlError] = useState<string | boolean>(false);
-  // const [imageWidth, setImageWidth] = useState("100%");
-  // const [imageHeight, setImageHeight] = useState("auto");
+  const [imageWidth, setImageWidth] = useState("100%");
+  const [imageHeight, setImageHeight] = useState("auto");
 
   const inputEl = useRef<HTMLInputElement>(null);
 
-  // const setImageSize = useCallback(({ target: img }) => {
-  //   if (img.offsetHeight > img.offsetWidth) {
-  //     setImageWidth("100%");
-  //     setImageHeight("auto");
-  //   } else {
-  //     setImageWidth("auto");
-  //     setImageHeight("100%");
-  //   }
-  // }, []);
+  const setImageSize = useCallback(({ target: img }) => {
+    if (img.offsetHeight > img.offsetWidth) {
+      setImageWidth("100%");
+      setImageHeight("auto");
+    } else {
+      setImageWidth("auto");
+      setImageHeight("100%");
+    }
+  }, []);
 
-  // useEffect(() => {
-  //   setImageUrlError(
-  //     !imageUrl ||
-  //       imageUrl === "" ||
-  //       imageUrl === "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png"
-  //       ? "Upload your profile picture!"
-  //       : false
-  //   );
-  // }, [imageUrl]);
+  useEffect(() => {
+    setImageUrlError(
+      !userImage ||
+        userImage === "" ||
+        userImage === "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png"
+        ? "Upload your profile picture!"
+        : false
+    );
+  }, [userImage]);
 
   const handleImageChange = useCallback(
     (event: any) => {
@@ -129,13 +125,13 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
         tooltipPosition="right"
       >
         <div className="UserAvatar UserStatusIcon">
-          {/* TODO: manage undefinder ser image (show default image) */}
-
+          {/* TODO: change with NextJs image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={userImage}
-            // style={{ width: imageWidth, height: imageHeight }}
+            style={{ width: imageWidth, height: imageHeight }}
             alt="1Cademist Profile Picture"
-            // onLoad={setImageSize}
+            onLoad={setImageSize}
           />
         </div>
       </MemoizedMetaButton>
