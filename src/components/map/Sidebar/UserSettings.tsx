@@ -110,9 +110,14 @@ import { UserSettingsProfessionalInfo } from "./UserSettingsProfessionalInfo";
 
 const doNothing = () => {};
 
-type UserSettingProps = { user: User; userReputation: Reputation };
+type UserSettingProps = {
+  user: User;
+  userReputation: Reputation;
+  showClusters: boolean;
+  setShowClusters: (oClusters: boolean) => void;
+};
 
-const UserSettings = ({ user, userReputation }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -514,20 +519,15 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
     setDefaultTag();
   }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
-  // const showHideClusters = useCallback(
-  //   event => {
-  //     setShowClusters(oClusters => {
-  //       const userClustersLogRef = firebase.db.collection("userClustersLog").doc();
-  //       userClustersLogRef.set({
-  //         uname: username,
-  //         open: !oClusters,
-  //         createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-  //       });
-  //       return !oClusters;
-  //     });
-  //   },
-  //   [firebase, username]
-  // );
+  const showHideClusters = useCallback(() => {
+    const userFieldLogRef = doc(collection(db, "userClustersLog"));
+    setDoc(userFieldLogRef, {
+      uname: user.uname,
+      open: !showClusters,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+    setShowClusters(!showClusters);
+  }, [db, setShowClusters, showClusters, user.uname]);
 
   // const closedSidebarClick = useCallback(
   //   event => {
@@ -941,6 +941,27 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
                   />
                 }
                 label={`Display name: ${getDisplayNameValue(user)}`}
+              />
+            </FormGroup>
+            {/* {props.showHideClusters && (
+
+            )} */}
+            <FormGroup row>
+              {/* <FormControl className="select RowSwitch">
+                <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />
+                <div className="RowSwitchItem">Clusters:</div>
+                <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
+              </FormControl> */}
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={!values.chooseUname}
+                    checked={showClusters}
+                    // onChange={e => console.log("handlesChooseUnameSwitch(e, user)")}
+                    onChange={showHideClusters}
+                  />
+                }
+                label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
               />
             </FormGroup>
             <MemoizedInputSave

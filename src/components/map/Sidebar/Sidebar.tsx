@@ -164,6 +164,8 @@ type SidebarType = {
   selectedUser: any;
   allNodes: FullNodeData[];
   reloadPermanentGrpah: any;
+  showClusters: boolean;
+  setShowClusters: (newValue: boolean) => void;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -604,6 +606,8 @@ const Sidebar = (props: SidebarType) => {
                 userReputation={
                   reputation
                 } /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */
+                showClusters={props.showClusters}
+                setShowClusters={props.setShowClusters}
               />
             </MemoizedSidebarWrapper>
           ) : props.openSearch ? (

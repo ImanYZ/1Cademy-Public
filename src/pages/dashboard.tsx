@@ -238,6 +238,9 @@ const Dashboard = ({}: DashboardProps) => {
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
   const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
+  //
+  const [showClusters, setShowClusters] = useState(false);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -2497,6 +2500,8 @@ const Dashboard = ({}: DashboardProps) => {
             setSNode={setSNode}
             selectedUser={selectedUser}
             reloadPermanentGrpah={reloadPermanentGraph}
+            showClusters={showClusters}
+            setShowClusters={setShowClusters}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
