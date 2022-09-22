@@ -90,5 +90,13 @@ describe("updateUserImageEverywhere", () => {
           .docs.length
       ).toBeGreaterThan(0);
     }
+
+    // TODO: we are not testing school collections here, that feature is not implemented yet but, existing in this function for image updates
+    const nodesQuery = await db
+      .collection("nodes")
+      .where("admin", "==", username)
+      .where("aImgUrl", "==", newImageUrl)
+      .get();
+    expect(nodesQuery.docs.length).toBeGreaterThan(0);
   });
 });
