@@ -2,26 +2,31 @@
 // import React, { useCallback, useEffect, useRef, useState } from "react";
 // import { useRecoilState, useRecoilValue } from "recoil";
 
-import React from "react";
+import { getAuth, updateProfile } from "firebase/auth";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import React, { useCallback, useRef, useState } from "react";
 
+import { postWithToken } from "../../../lib/mapApi";
+import { newId } from "../../../lib/utils/newid";
 import { MemoizedMetaButton } from "../MetaButton";
+import PercentageLoader from "../PercentageLoader";
 
 // import { firebaseState, imageUrlState, uidState } from "../../../../store/AuthAtoms";
 // import PercentageLoader from "../../../PublicComps/PercentageLoader/PercentageLoader";
 // import MetaButton from "../../MetaButton/MetaButton";
 type ProfileAvatarType = { userImage?: string; setUserImage: (newImage: string) => void };
-const ProfileAvatar = ({ userImage /*setUserImage*/ }: ProfileAvatarType) => {
+const ProfileAvatar = ({ userImage, setUserImage }: ProfileAvatarType) => {
   // const firebase = useRecoilValue(firebaseState);
   // const uid = useRecoilValue(uidState);
   // const [imageUrl, setImageUrl] = useRecoilState(imageUrlState);
 
-  // const [isUploading, setIsUploading] = useState(false);
-  // const [percentageUploaded, setPercentageUploaded] = useState(0);
-  // const [imageUrlError, setImageUrlError] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [percentageUploaded, setPercentageUploaded] = useState(0);
+  const [imageUrlError, setImageUrlError] = useState<string | boolean>(false);
   // const [imageWidth, setImageWidth] = useState("100%");
   // const [imageHeight, setImageHeight] = useState("auto");
 
-  // const inputEl = useRef(null);
+  const inputEl = useRef<HTMLInputElement>(null);
 
   // const setImageSize = useCallback(({ target: img }) => {
   //   if (img.offsetHeight > img.offsetWidth) {
@@ -43,79 +48,92 @@ const ProfileAvatar = ({ userImage /*setUserImage*/ }: ProfileAvatarType) => {
   //   );
   // }, [imageUrl]);
 
-  // const handleImageChange = useCallback(
-  //   event => {
-  //     try {
-  //       event.preventDefault();
-  //       const image = event.target.files[0];
-  //       if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
-  //         setImageUrlError("We only accept JPG, JPEG, or PNG images. Please upload another image.");
-  //       } else if (image.size > 1024 * 1024) {
-  //         setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
-  //       } else {
-  //         setIsUploading(true);
-  //         const rootURL = "https://storage.googleapis.com/" + firebase.storageBucket + "/";
-  //         const picturesFolder = "ProfilePictures/";
-  //         const imageNameSplit = image.name.split(".");
-  //         const imageExtension = imageNameSplit[imageNameSplit.length - 1];
-  //         let imageFileName = uid + "/" + new Date().toGMTString() + "." + imageExtension;
-  //         const storageRef = firebase.storage.ref(picturesFolder + imageFileName);
-  //         const task = storageRef.put(image);
-  //         task.on(
-  //           "state_changed",
-  //           function progress(snapshot) {
-  //             setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
-  //           },
-  //           function error(err) {
-  //             console.error("Image Upload Error: ", err);
-  //             setIsUploading(false);
-  //             setImageUrlError(
-  //               "There is an error with uploading your picture. Please upload your profile picture again! If the problem persists, please try another picture."
-  //             );
-  //           },
-  //           async function complete() {
-  //             const imageGeneratedUrl = await task.snapshot.ref.getDownloadURL();
-  //             let responseObj = {};
-  //             const postData = {
-  //               imageUrl: imageGeneratedUrl,
-  //             };
-  //             const userAuthObj = firebase.auth.currentUser;
-  //             await userAuthObj.updateProfile({
-  //               photoURL: imageGeneratedUrl,
-  //             });
-  //             await firebase.idToken();
-  //             responseObj = await axios.post("/user/image", postData);
-  //             setImageUrlError(false);
-  //             setIsUploading(false);
-  //             setImageUrl(imageGeneratedUrl);
-  //             setPercentageUploaded(100);
-  //           }
-  //         );
-  //       }
-  //     } catch (err) {
-  //       console.error("Image Upload Error: ", err);
-  //       setIsUploading(false);
-  //       setImageUrlError("Upload your profile picture!");
-  //     }
-  //   },
-  //   [firebase, uid]
-  // );
+  const handleImageChange = useCallback(
+    (event: any) => {
+      try {
+        event.preventDefault();
+        const storage = getStorage();
+        const auth = getAuth();
 
-  // const handleEditImage = useCallback(
-  //   event => {
-  //     if (!isUploading) {
-  //       inputEl.current.click();
-  //     }
-  //   },
-  //   [isUploading, inputEl]
-  // );
+        const userAuthObj = auth.currentUser;
+        if (!userAuthObj) return; // CHECK: Show error when user auth doesn't exist
+
+        const image = event.target.files[0];
+        if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
+          setImageUrlError("We only accept JPG, JPEG, or PNG images. Please upload another image.");
+        } else if (image.size > 1024 * 1024) {
+          setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
+        } else {
+          setIsUploading(true);
+          // const rootURL = "https://storage.googleapis.com/" + firebase.storageBucket + "/";
+          const picturesFolder = "ProfilePictures/";
+          const imageNameSplit = image.name.split(".");
+          const imageExtension = imageNameSplit[imageNameSplit.length - 1];
+          let imageFileName = newId() + "/" + Number(new Date()) + "." + imageExtension;
+          // const storageRef = firebase.storage.ref(picturesFolder + imageFileName);
+          const storageRef = ref(storage, picturesFolder + imageFileName);
+          console.log("imageFileName", imageFileName);
+          // const task = storageRef.put(image);
+          const task = uploadBytesResumable(storageRef, image);
+          task.on(
+            "state_changed",
+            function progress(snapshot) {
+              setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
+            },
+            function error(err) {
+              console.error("Image Upload Error: ", err);
+              setIsUploading(false);
+              setImageUrlError(
+                "There is an error with uploading your picture. Please upload your profile picture again! If the problem persists, please try another picture."
+              );
+            },
+            async function complete() {
+              // const imageGeneratedUrl = await task.snapshot.ref.getDownloadURL();
+              const imageGeneratedUrl = await getDownloadURL(storageRef);
+
+              // let responseObj = {};
+              const postData = {
+                imageUrl: imageGeneratedUrl,
+              };
+              // const userAuthObj = firebase.auth.currentUser;
+              await updateProfile(userAuthObj, {
+                photoURL: imageGeneratedUrl,
+              });
+              // await userAuthObj.updateProfile({
+              //   photoURL: imageGeneratedUrl,
+              // });
+              // await firebase.idToken();
+              await postWithToken("/user/image", postData); // update userImage in everywhere
+              // responseObj = await axios.post("/user/image", postData);
+              setImageUrlError(false);
+              setIsUploading(false);
+              // setImageUrl(imageGeneratedUrl);
+              setUserImage(imageGeneratedUrl);
+              setPercentageUploaded(100);
+            }
+          );
+        }
+      } catch (err) {
+        console.error("Image Upload Error: ", err);
+        setIsUploading(false);
+        setImageUrlError("Upload your profile picture!");
+      }
+    },
+    [setUserImage]
+  );
+
+  const handleEditImage = useCallback(() => {
+    if (!inputEl.current) return;
+    if (isUploading) return;
+    inputEl.current.click();
+  }, [isUploading, inputEl]);
 
   return (
     <div id="UserProfilePicture">
-      {/* <input type="file" ref={inputEl} onChange={handleImageChange} hidden="hidden" /> */}
+      <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />
       <MemoizedMetaButton
         round={true}
-        onClick={() => console.log("handleEditImage")}
+        onClick={handleEditImage}
         tooltip="Change your profile picture."
         tooltipPosition="right"
       >
@@ -129,8 +147,10 @@ const ProfileAvatar = ({ userImage /*setUserImage*/ }: ProfileAvatarType) => {
           />
         </div>
       </MemoizedMetaButton>
-      {/* {isUploading && <PercentageLoader percentage={percentageUploaded} radius={85} width="200px" height="200px" />}
-      {imageUrlError && <div className="errorMessage">{imageUrlError}</div>} */}
+      {isUploading && (
+        <PercentageLoader percentage={percentageUploaded} radius={85} widthInPx="200px" heightInPx="200px" />
+      )}
+      {imageUrlError && <div className="errorMessage">{imageUrlError}</div>}
     </div>
   );
 };
