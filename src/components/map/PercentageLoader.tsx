@@ -10,7 +10,7 @@ const PercentageLoader = (props: PercentageLoaderProps) => {
   return (
     <>
       <div className="cont" data-pct={props.percentage} style={{ width: props.widthInPx, height: props.heightInPx }}>
-        <svg className="svg" width="200" height="200" viewport="0 0 100 100" version="1.1">
+        <svg className="svg" width="200" height="200" version="1.1">
           <circle
             r={props.radius}
             cx="98.5"

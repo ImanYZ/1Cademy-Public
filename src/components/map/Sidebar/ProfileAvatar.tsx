@@ -7,15 +7,15 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/
 import React, { useCallback, useRef, useState } from "react";
 
 import { postWithToken } from "../../../lib/mapApi";
-import { newId } from "../../../lib/utils/newid";
+// import { newId } from "../../../lib/utils/newid";
 import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
 
 // import { firebaseState, imageUrlState, uidState } from "../../../../store/AuthAtoms";
 // import PercentageLoader from "../../../PublicComps/PercentageLoader/PercentageLoader";
 // import MetaButton from "../../MetaButton/MetaButton";
-type ProfileAvatarType = { userImage?: string; setUserImage: (newImage: string) => void };
-const ProfileAvatar = ({ userImage, setUserImage }: ProfileAvatarType) => {
+type ProfileAvatarType = { userId: string; userImage?: string; setUserImage: (newImage: string) => void };
+const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) => {
   // const firebase = useRecoilValue(firebaseState);
   // const uid = useRecoilValue(uidState);
   // const [imageUrl, setImageUrl] = useRecoilState(imageUrlState);
@@ -56,7 +56,7 @@ const ProfileAvatar = ({ userImage, setUserImage }: ProfileAvatarType) => {
         const auth = getAuth();
 
         const userAuthObj = auth.currentUser;
-        if (!userAuthObj) return; // CHECK: Show error when user auth doesn't exist
+        if (!userAuthObj) return;
 
         const image = event.target.files[0];
         if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
@@ -65,15 +65,12 @@ const ProfileAvatar = ({ userImage, setUserImage }: ProfileAvatarType) => {
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
         } else {
           setIsUploading(true);
-          // const rootURL = "https://storage.googleapis.com/" + firebase.storageBucket + "/";
           const picturesFolder = "ProfilePictures/";
           const imageNameSplit = image.name.split(".");
           const imageExtension = imageNameSplit[imageNameSplit.length - 1];
-          let imageFileName = newId() + "/" + Number(new Date()) + "." + imageExtension;
-          // const storageRef = firebase.storage.ref(picturesFolder + imageFileName);
+          let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
           const storageRef = ref(storage, picturesFolder + imageFileName);
           console.log("imageFileName", imageFileName);
-          // const task = storageRef.put(image);
           const task = uploadBytesResumable(storageRef, image);
           task.on(
             "state_changed",
@@ -88,26 +85,16 @@ const ProfileAvatar = ({ userImage, setUserImage }: ProfileAvatarType) => {
               );
             },
             async function complete() {
-              // const imageGeneratedUrl = await task.snapshot.ref.getDownloadURL();
               const imageGeneratedUrl = await getDownloadURL(storageRef);
-
-              // let responseObj = {};
               const postData = {
                 imageUrl: imageGeneratedUrl,
               };
-              // const userAuthObj = firebase.auth.currentUser;
               await updateProfile(userAuthObj, {
                 photoURL: imageGeneratedUrl,
               });
-              // await userAuthObj.updateProfile({
-              //   photoURL: imageGeneratedUrl,
-              // });
-              // await firebase.idToken();
               await postWithToken("/user/image", postData); // update userImage in everywhere
-              // responseObj = await axios.post("/user/image", postData);
               setImageUrlError(false);
               setIsUploading(false);
-              // setImageUrl(imageGeneratedUrl);
               setUserImage(imageGeneratedUrl);
               setPercentageUploaded(100);
             }
@@ -119,7 +106,7 @@ const ProfileAvatar = ({ userImage, setUserImage }: ProfileAvatarType) => {
         setImageUrlError("Upload your profile picture!");
       }
     },
-    [setUserImage]
+    [setUserImage, userId]
   );
 
   const handleEditImage = useCallback(() => {

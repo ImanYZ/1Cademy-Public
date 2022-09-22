@@ -366,7 +366,7 @@ export type User = {
   tagId?: string;
   uname: string;
   updatedAt?: Timestamp;
-  userId?: string;
+  userId: string;
   state?: string;
   // stateId?: string;// this is not used and not exist in DB
   education?: string;

@@ -1242,7 +1242,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
       <div id="MiniUserPrifileHeader">
         <div id="MiniUserPrifileAboveProfilePicture"></div>
         <div id="MiniUserPrifileFullProfileLink"></div>
-        <ProfileAvatar userImage={user.imageUrl} setUserImage={setUserImage} />
+        <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
 
         <div id="MiniUserPrifileIdentity">
           {/* <div id="MiniUserPrifileName">{chooseUname ? username : fName + " " + lName}</div> */}
