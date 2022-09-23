@@ -1,4 +1,4 @@
-import { commitBatch,db } from "../../../src/lib/firestoreServer/admin";
+import { commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addToPendingPropsNums } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
 import { conceptVersionsData, pendingPropsNumsData, usersData } from "../../../testUtils/mockCollections";

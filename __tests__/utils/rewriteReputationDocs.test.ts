@@ -1,4 +1,4 @@
-import { commitBatch,db } from "../../src/lib/firestoreServer/admin";
+import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
 import { getTypedCollections, initializeNewReputationData, rewriteReputationDocs } from "../../src/utils";
 import { firstWeekMonthDays } from "../../src/utils";
 import {
