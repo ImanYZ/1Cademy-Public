@@ -21,7 +21,7 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   const loadUser = useCallback(async (userId: string) => {
     try {
       const { user, reputation, theme, background } = await retrieveAuthenticatedUser(userId);
-      console.log("----> user", user);
+
       if (user && reputation) {
         dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background } });
       } else {
@@ -36,7 +36,6 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
     const auth = getAuth();
 
     const unsubscriber = onAuthStateChanged(auth, user => {
-      console.log("USER NEW> ", user);
       if (user) {
         //sign in
         loadUser(user.uid);

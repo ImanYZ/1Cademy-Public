@@ -591,7 +591,6 @@ const Dashboard = ({}: DashboardProps) => {
       worker.onmessage = e => {
         const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
         const gg = dagreUtils.mapObjectToGraph(graph);
-        console.log(" -- Dagre updated by worker:", gg);
 
         worker.terminate();
         g.current = gg;
@@ -1595,13 +1594,14 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      console.log("[CHANGE NODE HIGHT]", { node: nodes[nodeId], height });
+      console.log("[2.CHANGE NODE HIGHT 🚀]", { node: nodes[nodeId], height });
 
       // if (value === nodes[nodeId].title) return;
-
       const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
-      console.log("nodeChanges", { nodeId, nodeChanged, nodes: { ...nodes } });
+
+      // console.log("nodeChanges", { nodeId, nodeChanged, nodes: { ...nodes } });
       const oldNodes = setDagNode(g.current, nodeId, nodeChanged, { ...nodes }, { ...allTags }, null);
+      console.log("-->", { oldNodes, nodeChanged });
       recalculateGraphWithWorker(oldNodes, edges);
     },
     [allTags, edges, nodes, recalculateGraphWithWorker]

@@ -339,7 +339,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
     if (!db || !user) return;
 
     if ("deInstit" in user && !("instLogo" in user)) {
-      console.log("useEffect:", user);
+      // console.log("useEffect:", user);
       const fetchInstitution = async () => {
         const institutionsQuery = query(collection(db, "institutions"), where("name", "==", user.deInstit));
 
@@ -751,8 +751,8 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   };
   const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return null;
-    const res = userOptions.includes(userValue) ? userValue : defaultValue;
-    console.log("RES -->", res);
+    userOptions.includes(userValue) ? userValue : defaultValue;
+    // console.log("RES -->", res);
     return userOptions.includes(userValue) ? userValue : defaultValue;
   };
   const getSelectedOptionsByValue = (userValues: string[], isInValues: any, defaultValue: string) => {

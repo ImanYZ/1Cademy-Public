@@ -212,11 +212,12 @@ const Node = ({
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
+        console.log(" ---> 1.entries", entries, previousRef.current);
         const { blockSize } = entries[0].borderBoxSize[0];
         // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
-        const heightChange = blockSize === previousRef.current;
+        const isSimilar = blockSize === previousRef.current;
         previousRef.current = blockSize;
-        if (heightChange) return;
+        if (isSimilar) return;
 
         changeNodeHight(identifier, blockSize);
       } catch (err) {
