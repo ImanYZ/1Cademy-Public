@@ -1,5 +1,6 @@
 import CodeIcon from "@mui/icons-material/Code";
-import { Button, Drawer, IconButton, Modal, Tooltip } from "@mui/material";
+import CoronavirusIcon from "@mui/icons-material/Coronavirus";
+import { Button, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import {
@@ -37,6 +38,7 @@ import NodesList from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
+import { Task, useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken } from "../lib/firestoreClient/auth";
 import { postWithToken } from "../lib/mapApi";
@@ -105,6 +107,8 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const [nodesTest, setNodesTest] = useState<Task[]>([]);
+  const { addTask, queue } = useWorkerQueue({ nodes: nodesTest, setNodes: setNodesTest });
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
@@ -2524,13 +2528,39 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenMedia={setOpenMedia}
             allNodes={allNodes.filter(cur => cur.bookmarked)}
           />
-          <Box sx={{ position: "fixed", bottom: "10px", right: "10px", zIndex: "1300", background: "#123" }}>
-            {openSearch ? "open" : "close"}
-            <Tooltip title={"Watch geek data"}>
-              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                <CodeIcon />
-              </IconButton>
-            </Tooltip>
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: "10px",
+              right: "10px",
+              zIndex: "1300",
+              background: "#123",
+              color: "white",
+            }}
+          >
+            <Box sx={{ border: "dashed 1px royalBlue" }}>
+              <Typography>Workers</Typography>
+              {queue.map(cur => ` 👷‍♂️ ${cur.height} `)}
+            </Box>
+            <Box sx={{ border: "dashed 1px royalBlue" }}>
+              <Typography>Nodes</Typography>
+              {nodesTest.map(cur => ` 🧶 ${cur.height} `)}
+            </Box>
+
+            <Box sx={{ float: "right" }}>
+              <Tooltip title={"Watch geek data"}>
+                <>
+                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                    <CodeIcon color="warning" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => addTask({ id: Math.random().toString(), height: Math.ceil(Math.random() * 100) })}
+                  >
+                    <CoronavirusIcon color="primary" />
+                  </IconButton>
+                </>
+              </Tooltip>
+            </Box>
           </Box>
 
           {/* end Data from map */}
