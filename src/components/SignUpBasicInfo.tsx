@@ -1,35 +1,43 @@
 import { Box, FormControlLabel, FormGroup, Switch, TextField, Typography } from "@mui/material";
 import { FormikProps } from "formik";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
-import { use1AcademyTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { ToUpperCaseEveryWord } from "../lib/utils/utils";
-import { useAuthLayout } from "./layouts/AuthLayout";
-import { MemoizedTagsSearcher } from "./TagsSearcher";
+import { ChosenTag, MemoizedTagsSearcher } from "./TagsSearcher";
 
 export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
 };
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
-  const [setBackground] = useAuthLayout();
+  const [, { dispatch }] = useAuth();
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   const { allTags, setAllTags } = useTagsTreeView(values.tagId ? [values.tagId] : []);
-  const [themeActions] = use1AcademyTheme();
+
+  const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
+
+  // useEffect(() => {
+  //   const getFirstTagChecked = () => {
+  //     const tagSelected = Object.values(allTags).find(cur => cur.checked);
+  //     if (!tagSelected) return;
+
+  //     setFieldValue("tagId", tagSelected.nodeId);
+  //     setFieldValue("tag", tagSelected.title);
+  //   };
+
+  //   getFirstTagChecked();
+  // }, [allTags, setFieldValue]);
 
   useEffect(() => {
-    const getFirstTagChecked = () => {
-      const tagSelected = Object.values(allTags).find(cur => cur.checked);
-      if (!tagSelected) return;
+    if (!chosenTags.length) return;
 
-      setFieldValue("tagId", tagSelected.nodeId);
-      setFieldValue("tag", tagSelected.title);
-    };
-
-    getFirstTagChecked();
-  }, [allTags, setFieldValue]);
+    const tagSelected = chosenTags[0];
+    setFieldValue("tagId", tagSelected.id);
+    setFieldValue("tag", tagSelected.title);
+  }, [chosenTags, setFieldValue]);
 
   const getDisplayNameValue = () => {
     if (values.chooseUname) return values.username || "Your Username";
@@ -129,7 +137,8 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
               checked={values.theme === "Dark"}
               onChange={() => {
                 setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
-                themeActions.setThemeMode(values.theme === "Light" ? "dark" : "light");
+                dispatch({ type: "setTheme", payload: values.theme === "Light" ? "Dark" : "Light" });
+                // themeActions.setThemeMode(values.theme === "Light" ? "dark" : "light");
               }}
             />
           }
@@ -144,7 +153,8 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
               checked={values.background === "Image"}
               onChange={() => {
                 setFieldValue("background", values.background === "Color" ? "Image" : "Color");
-                setBackground(values.background === "Color" ? "Image" : "Color");
+                dispatch({ type: "setBackground", payload: values.background === "Color" ? "Image" : "Color" });
+                // setBackground(values.background === "Color" ? "Image" : "Color");
               }}
             />
           }
@@ -162,7 +172,13 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
       </FormGroup>
 
       <FormGroup sx={{ mt: "8px" }}>
-        <MemoizedTagsSearcher allTags={allTags} setAllTags={setAllTags} sx={{ maxHeight: "200px", height: "200px" }} />
+        <MemoizedTagsSearcher
+          allTags={allTags}
+          setAllTags={setAllTags}
+          chosenTags={chosenTags}
+          setChosenTags={setChosenTags}
+          sx={{ maxHeight: "200px", height: "200px" }}
+        />
         <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
           You're going to be a member of: {values.tag}
         </Typography>

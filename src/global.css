@@ -956,7 +956,7 @@
   top: 0px;
   height: 100vh;
   padding-top: 10px;
-  padding-left: 22px;
+  /* padding-left: 22px; */
   z-index: 4;
   background-color: rgb(31, 31, 31);
   -webkit-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
@@ -990,6 +990,10 @@
 #SidebarButtonsContainer:hover #SidebarButtons .SidebarButton.inUserBar {
   width: 133px;
   left: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  top: 10px;
 }
 #SidebarButtonsContainer:focus #SidebarButtons .Logo,
 #SidebarButtonsContainer:hover #SidebarButtons .Logo {
@@ -1097,9 +1101,10 @@
 }
 #SidebarButtons .Logo .MetaButton {
   padding-top: 0px;
-  /*Check: I commented this*/
-  /* height: 91px; */
-  /* width: 79px; */
+  /* Check: I commented this */
+  height: 91px;
+  width: 79px;
+  margin: auto;
 }
 
 #SidebarButtons .preloader-wrapper {
@@ -1163,7 +1168,7 @@
 }
 
 #UsersStatusList .SidebarButton {
-  left: -19px;
+  left: -8px;
   top: 0px;
   direction: ltr;
   overflow: visible;
@@ -2193,7 +2198,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 .ModalWithReturnContent {
-  margin-top: 25px;
+  margin-top: 38px;
 }
 #ModalContent.ModalWithReturnContent {
   height: 310px;
@@ -2459,7 +2464,7 @@ button.MuiTab-textColorInherit:focus {
 /* userStatusList styles */
 #UsersStatusList {
   overflow-y: auto;
-  overflow-x: visible;
+  overflow-x: hidden;
   /* direction: rtl; */
   direction: ltr;
   margin-top: 0px;
@@ -2471,4 +2476,162 @@ button.MuiTab-textColorInherit:focus {
   -ms-transition: margin-left 1s; /* IE 10 */
   -moz-transition: margin-left 1s; /* Firefox */
   -webkit-transition: margin-left 1s; /*safari and chrome */
+}
+
+/* -------------------------------- */
+/* user setting sidebar styles */
+
+.UserSettingsSidebarBody #SidebarTabsContainer .MuiTab-fullWidth.MuiTab-root {
+  min-width: 130px;
+}
+
+.UserSettingsSidebarBody #SidebarTabsContainer .MuiTabs-indicator {
+  width: 130px;
+}
+
+#MiniUserPrifileGapLeft {
+  height: 10px;
+}
+
+#MiniUserPrifileGapRight {
+  height: 10px;
+}
+
+/* .AccountSettingsButtons {
+  margin: 10px;
+} */
+
+#UsernameInputContainer .MuiOutlinedInput-notchedOutline,
+#UsernameInputContainer .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: red;
+}
+
+#ChangingUsernameMessage {
+  font-size: 40px;
+  color: red;
+}
+
+#AccountSettings {
+  padding: 25px;
+  width: 430px;
+}
+.AccountSettingsButtons .Striked {
+  text-decoration: line-through red;
+}
+
+.AccountSettingsButtons .StrikedIcon {
+  position: relative;
+  top: -10px; /* Tweak this and the other top in equal, but opposite values */
+  border-bottom: 1.9px solid red;
+}
+
+.AccountSettingsButtons .StrikedIcon .StrikedIconOffset {
+  position: relative;
+  top: 10px; /* Tweak this and the other top in equal, but opposite values */
+}
+
+.AccountSettingsButtons .AccountSettingsButton {
+  width: 364px;
+  font-size: 16px;
+}
+
+.AccountSettingsButtons #tagChangeIcon {
+  margin-right: 7px;
+  font-size: 19px;
+}
+
+#LogoutButtonContent {
+  color: red;
+}
+
+#LogoutButtonText {
+  position: relative;
+  top: -5.5px;
+}
+
+#PersonalSettings {
+  padding: 25px;
+}
+
+/* #PersonalSettings .MuiFormControl-root {
+  width: 379px;
+} */
+
+#PersonalSettings .DoubleInputRow .MuiFormControl-root {
+  width: 172px;
+}
+
+#PersonalSettings .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.LightMode #PersonalSettings .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+/* -------------------------------- */
+/* Input save */
+.InputSaveContainer {
+  margin: 10px 0px;
+}
+
+.InputSaveContainer .ImageUploadButtonLoader {
+  position: relative;
+  margin: -4px 0px -4px -34px;
+  width: 31px !important;
+  height: 31px !important;
+}
+
+.SaveIcon {
+  color: red;
+}
+
+/* ------------------------------- */
+/* percentaje loader styles */
+.svg circle {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear; /* vendorless fallback */
+  -o-transition: stroke-dashoffset 1s linear; /* opera */
+  -ms-transition: stroke-dashoffset 1s linear; /* IE 10 */
+  -moz-transition: stroke-dashoffset 1s linear; /* Firefox */
+  -webkit-transition: stroke-dashoffset 1s linear; /*safari and chrome */
+  stroke: #666;
+  stroke-width: 4px;
+}
+.svg .bar {
+  stroke: #ff9f1e;
+}
+.cont {
+  display: block;
+  height: 200px;
+  width: 200px;
+  border-radius: 100%;
+  position: relative;
+  margin-top: -190px;
+  margin-left: -1px;
+  z-index: 4;
+}
+.cont:after {
+  position: absolute;
+  display: block;
+  height: 160px;
+  width: 160px;
+  left: 50%;
+  top: 50%;
+  content: attr(data-pct) "%";
+  margin-top: -85px;
+  margin-left: -70px;
+  line-height: 160px;
+  font-size: 61px;
+  color: white;
+  text-shadow: 0 0 0.5em black;
+}
+
+/* ----------------------------- */
+/* custom overrides */
+
+.customUserStatusTotalPoints {
+  display: none;
+}
+
+#SidebarButtonsContainer:hover .customUserStatusTotalPoints {
+  display: block;
 }

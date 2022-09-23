@@ -10,6 +10,7 @@ import usePrevious from "../../hooks/usePrevious";
 // import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
+// import RoundImage from "./RoundImage";
 
 type UserStatusIconProps = {
   uname: string;
@@ -71,74 +72,52 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.totalPoints, props.totalPositives, props.totalNegatives]);
 
-  const openUserInfo = useCallback(
-    () => {
-      if (!user) return;
+  const openUserInfo = useCallback(() => {
+    if (!user) return;
 
-      const userUserInfoCollection = collection(db, "userUserInfoLog");
+    const userUserInfoCollection = collection(db, "userUserInfoLog");
 
-      // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
-      if (props.inUserBar) {
-        // Open Toollbar (user setting sidebar)
-        nodeBookDispatch({ type: "setOpenToolbar", payload: true });
-        // setOpenToolbar(true);
+    // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
+    if (props.inUserBar) {
+      // Open Toollbar (user setting sidebar)
+      nodeBookDispatch({ type: "setOpenToolbar", payload: true });
+      // setOpenToolbar(true);
 
-        addDoc(userUserInfoCollection, {
-          uname: user.uname,
-          uInfo: user.uname,
-          createdAt: Timestamp.fromDate(new Date()),
-        });
+      addDoc(userUserInfoCollection, {
+        uname: user.uname,
+        uInfo: user.uname,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+    } else {
+      // Open user info sidebar
+      nodeBookDispatch({
+        type: "setSelectedUser",
+        payload: {
+          username: props.uname,
+          imageUrl: props.imageUrl,
+          fullName: props.fullname,
+          chooseUname: props.chooseUname,
+        },
+      });
 
-        // userUserInfoLogRef.set({
-        //   uname: username,
-        //   uInfo: username,
-        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-        // });
-      } else {
-        // Open user info sidebar
-        nodeBookDispatch({
-          type: "setSelectedUser",
-          payload: {
-            username: props.uname,
-            imageUrl: props.imageUrl,
-            fullName: props.fullname,
-            chooseUname: props.chooseUname,
-          },
-        });
-
-        // setSelectedUser(props.uname);
-        // setSelectedUserImageURL(props.imageUrl);
-        // setSelectedUserFullname(props.fullname);
-        // setSelectedUserChooseUname(props.chooseUname);
-        nodeBookDispatch({
-          type: "setSelectionType",
-          payload: "UserInfo",
-        });
-        // setSelectionType("UserInfo");
-        props.reloadPermanentGrpah();
-        addDoc(userUserInfoCollection, {
-          uname: user.uname,
-          uInfo: props.uname,
-          createdAt: Timestamp.fromDate(new Date()),
-        });
-        // userUserInfoLogRef.set({
-        //   uname: username,
-        //   uInfo: props.uname,
-        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-        // });
-      }
-      // console.log("openUserInfo");
-    },
-    [
-      // firebase,
-      // props.inUserBar,
-      // username,
-      // props.uname,
-      // props.imageUrl,
-      // props.fullname,
-      // props.chooseUname,
-    ]
-  );
+      // setSelectedUser(props.uname);
+      // setSelectedUserImageURL(props.imageUrl);
+      // setSelectedUserFullname(props.fullname);
+      // setSelectedUserChooseUname(props.chooseUname);
+      nodeBookDispatch({
+        type: "setSelectionType",
+        payload: "UserInfo",
+      });
+      // setSelectionType("UserInfo");
+      props.reloadPermanentGrpah();
+      addDoc(userUserInfoCollection, {
+        uname: user.uname,
+        uInfo: props.uname,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+    }
+    // console.log("openUserInfo");
+  }, [db, nodeBookDispatch, props, user]);
 
   const getTooltipTitle = (): JSX.Element => {
     let title: string = "";
@@ -165,27 +144,39 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     return <span>{title}</span>;
   };
 
+  // this is with changes in styles
   return (
     <Tooltip title={getTooltipTitle()} placement="top">
-      <div className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")} onClick={openUserInfo}>
+      <div
+        // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
+        className="SidebarButton"
+        onClick={openUserInfo}
+        style={{
+          // border: "dashed 2px pink",
+          display: "flex",
+          alignItems: "cemter",
+          justifyContent: "space-between",
+          padding: "5px 0px",
+        }}
+      >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
-          {/* <RoundImage imageUrl={props.imageUrl} alt="1Cademist Profile Picture" /> */}
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
-            sx={{ border: "none", width: "28px", height: "28px" }}
+            sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
           />
+          {!props.inNodeFooter && (
+            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+          )}
         </div>
         {!props.inNodeFooter && (
-          <>
-            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-            <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
-              <DoneIcon className="material-icons DoneIcon green-text" />
-              <span>{shortenNumber(props.totalPoints, 2, false)}</span>
-              {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
-            </span>
-          </>
+          // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
+          <div className={"customUserStatusTotalPoints"}>
+            <DoneIcon className="material-icons DoneIcon green-text" />
+            <span style={{ fontSize: "14px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
+            {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
+          </div>
         )}
       </div>
     </Tooltip>

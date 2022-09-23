@@ -9,7 +9,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import { User } from "src/knowledgeTypes";
+import { Reputation, User, UserBackground, UserTheme } from "src/knowledgeTypes";
+
 export const signUp = async (name: string, email: string, password: string) => {
   const newUser = await createUserWithEmailAndPassword(getAuth(), email, password);
   await updateProfile(newUser.user, { displayName: name });
@@ -53,6 +54,9 @@ export const getIdToken = async (): Promise<string | undefined> => {
 
 export const retrieveAuthenticatedUser = async (userId: string) => {
   let user: User | null = null;
+  let reputationsData: Reputation | null = null;
+  let theme: UserTheme = "Dark";
+  let background: UserBackground = "Color";
   const db = getFirestore();
 
   const nodesRef = collection(db, "users");
@@ -60,6 +64,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
   const userDoc = await getDocs(q);
   if (userDoc.size !== 0) {
     const userData = userDoc.docs[0].data();
+    console.log("Userdata: ", userData);
     user = {
       userId,
       deCourse: userData.deCourse,
@@ -76,12 +81,13 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       chooseUname: userData.chooseUname,
       lang: userData.lang,
       gender: userData.gender,
-      ethnicity: userData.ethnicity,
+      ethnicity: userData.ethnicity ?? [],
       country: userData.country,
-      stateInfo: userData.state,
+      state: userData.state,
+      // stateInfo: userData.state, // CHECK: state and stateId is not used
       city: userData.city,
-      theme: userData.theme,
-      background: "background" in userData ? userData.background : "Image",
+      // theme: userData.theme,
+      // background: "background" in userData ? userData.background : "Image",
       uname: userData.uname,
       clickedConsent: userData.clickedConsent,
       clickedTOS: userData.clickedTOS,
@@ -89,8 +95,34 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       clickedCP: userData.clickedCP,
       createdAt: userData.createdAt.toDate(),
       email: userData.email,
+      reason: userData.reason,
+      foundFrom: userData.foundFrom,
+      occupation: userData.occupation,
+      fieldOfInterest: userData.fieldOfInterest ?? "",
     };
+
+    theme = userData.theme;
+    background = "background" in userData ? userData.background : "Image";
+
+    const reputationRef = collection(db, "reputations");
+    const reputationQuery = query(
+      reputationRef,
+      where("uname", "==", userData.uname),
+      where("tagId", "==", userData.tagId),
+      limit(1)
+    );
+
+    const reputationsDoc = await getDocs(reputationQuery);
+    if (reputationsDoc.docs.length !== 0) {
+      const reputationDoc = reputationsDoc.docs[0];
+      reputationsData = reputationDoc.data() as Reputation;
+      // delete reputationsData.createdAt;
+      // delete reputationsData.updatedAt;
+      // delete reputationsData.tagId;
+      // delete reputationsData.tag;
+      // delete reputationsData.uname;
+    }
   }
 
-  return user;
+  return { user, reputation: reputationsData, theme, background };
 };

@@ -237,7 +237,9 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
+      console.log("nodeclickeck handler");
       if (nodeBookState.choosingNode) {
+        console.log("has chosing node");
         // The first Nodes exist, Now is clicking the Chosen Node
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);

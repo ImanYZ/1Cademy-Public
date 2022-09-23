@@ -748,7 +748,6 @@ export const copyGraph = (graph: any) => {
 };
 
 export const compareProperty = (obj1: any, obj2: any, propName: string) => {
-  console.log(" ----> --> compareProperty", { obj1, obj2, propName });
   if ((propName in obj1 && !(propName in obj2)) || (!(propName in obj1) && propName in obj2)) {
     return false;
   }
@@ -794,7 +793,6 @@ export const compareLinks = (
   // if true, check type and visibility
   checkTypesVisibility: boolean
 ) => {
-  console.log("-----> compareLinks", { links1, links2, isTheSame });
   // debugger
   if (links1.length !== links2.length) {
     return false;

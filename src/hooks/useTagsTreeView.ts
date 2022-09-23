@@ -24,6 +24,8 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
   const [allTagsLoaded, setAllTagsLoaded] = useState(false);
   const [tagsTreeView, setTagsTreeView] = useState<AllTagsTreeView>(initializeTagsTreeView(chosenTags));
 
+  // const resetTags = ()=>setTagsTreeView([])
+
   const applyTagsTreeViewChanges = (
     oldTags: AllTagsTreeView,
     docChanges: DocumentChange<DocumentData>[] /*, dagreLoaded*/

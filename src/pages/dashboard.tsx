@@ -25,10 +25,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 
+import withAuthUser from "@/components/hoc/withAuthUser";
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
+import ClustersList from "../components/map/ClustersList";
 import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
@@ -67,7 +70,7 @@ import {
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
 import { ChoosingType, UserNodes, UserNodesData } from "../nodeBookTypes";
-import { FullNodeData } from "../noteBookTypes";
+import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType } from "../types";
 
 type DashboardProps = {};
@@ -103,7 +106,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const [{ user }] = useAuth();
+  const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   // node that user is currently selected (node will be highlighted)
@@ -154,7 +157,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   // object of cluster boundaries
-  const [, /*clusterNodes*/ setClusterNodes] = useState({});
+  const [clusterNodes, setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -214,7 +217,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openPresentations, setOpenPresentations] = useState(false);
 
   // flag for is search is open
-  const [openToolbar, setOpenToolbar] = useState(false);
+  // const [openToolbar, setOpenToolbar] = useState(false);
 
   // flag for is search is open
   const [openSearch, setOpenSearch] = useState(false);
@@ -235,6 +238,9 @@ const Dashboard = ({}: DashboardProps) => {
   // when click in improve Node the copy of original Node is here
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
   const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
+
+  //
+  const [showClusters, setShowClusters] = useState(false);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -559,7 +565,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodesToRecalculate: any, edgesToRecalculate: any) => {
       console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
       let mapChangedFlag = true;
-      const oldClusterNodes = {};
+      const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
       let oldNodes = { ...nodesToRecalculate };
@@ -670,7 +676,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  // DEPRECATED: nodeChanged, check improvement flow please
+  // deprecated: NODE_CHANGED, check improvement flow please
   // const nodeChanged = useMemoizedCallback()=>{}
 
   const chosenNodeChanged = useCallback(
@@ -1737,7 +1743,8 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenChat(false);
     setOpenNotifications(false);
     setOpenPresentations(false);
-    setOpenToolbar(false);
+    // setOpenToolbar(false);
+    nodeBookDispatch({ type: "setOpenToolbar", payload: false });
     setOpenSearch(false);
     setOpenBookmarks(false);
     setOpenRecentNodes(false);
@@ -1767,7 +1774,7 @@ const Dashboard = ({}: DashboardProps) => {
     openChat,
     openNotifications,
     openPresentations,
-    openToolbar,
+    nodeBookState.openToolbar,
     openSearch,
     openBookmarks,
     openRecentNodes,
@@ -1832,7 +1839,8 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenPendingProposals(false);
           setOpenChat(false);
           setOpenNotifications(false);
-          setOpenToolbar(false);
+          // setOpenToolbar(false);
+          nodeBookDispatch({ type: "setOpenToolbar", payload: false });
           setOpenSearch(false);
           setOpenRecentNodes(false);
           setOpenTrends(false);
@@ -2331,12 +2339,13 @@ const Dashboard = ({}: DashboardProps) => {
               async function complete() {
                 console.log("storageRef", storageRef);
                 const imageGeneratedUrl = await getDownloadURL(storageRef);
-                console.log("---> imageGeneratedUrl", imageGeneratedUrl);
+                const imageUrlFixed = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
+                console.log("---> imageGeneratedUrl", imageUrlFixed);
                 setIsSubmitting(false);
                 setIsUploading(false);
-                if (imageGeneratedUrl && imageGeneratedUrl !== "") {
+                if (imageUrlFixed && imageUrlFixed !== "") {
                   setNodeParts(nodeId, (thisNode: any) => {
-                    thisNode.nodeImage = imageGeneratedUrl;
+                    thisNode.nodeImage = imageUrlFixed;
                     return { ...thisNode };
                   });
                 }
@@ -2457,6 +2466,8 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
               <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
               <Button onClick={() => console.log(user)}>user</Button>
+              <Button onClick={() => console.log(settings)}>setting</Button>
+              <Button onClick={() => console.log(reputation)}>reputation</Button>
             </Box>
             <Box>
               <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
@@ -2490,6 +2501,8 @@ const Dashboard = ({}: DashboardProps) => {
             setSNode={setSNode}
             selectedUser={selectedUser}
             reloadPermanentGrpah={reloadPermanentGraph}
+            showClusters={showClusters}
+            setShowClusters={setShowClusters}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
@@ -2497,13 +2510,17 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenNotifications={setOpenNotifications}
             openNotifications={openNotifications}
             setOpenPresentations={setOpenPresentations}
-            setOpenToolbar={setOpenToolbar}
+            setOpenToolbar={
+              /*setOpenToolbar*/ (newValue: boolean) => nodeBookDispatch({ type: "setOpenToolbar", payload: newValue })
+            }
+            openToolbar={nodeBookState.openToolbar}
             setOpenSearch={setOpenSearch}
             openSearch={openSearch}
             setOpenBookmarks={setOpenBookmarks}
             openBookmarks={openBookmarks}
             setOpenRecentNodes={setOpenBookmarks}
             setOpenTrends={setOpenTrends}
+            openTrends={openTrends}
             setOpenMedia={setOpenMedia}
             allNodes={allNodes.filter(cur => cur.bookmarked)}
           />
@@ -2523,8 +2540,7 @@ const Dashboard = ({}: DashboardProps) => {
             onMouseOver={mapContentMouseOver}
           >
             <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
-              {/* show clusters */}
-
+              {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
               <NodesList
                 nodes={nodes}
@@ -2542,7 +2558,7 @@ const Dashboard = ({}: DashboardProps) => {
                 toggleNode={toggleNode}
                 openNodePart={openNodePart}
                 selectNode={selectNode}
-                nodeClicked={() => console.log("nodeClicked")}
+                nodeClicked={() => console.log("nodeClicked--->>>>")}
                 correctNode={correctNode}
                 wrongNode={wrongNode}
                 uploadNodeImage={uploadNodeImage}
@@ -2599,5 +2615,9 @@ const NodeBook = () => (
     <Dashboard />
   </NodeBookProvider>
 );
+export default withAuthUser({
+  shouldRedirectToLogin: true,
+  shouldRedirectToHomeIfAuthenticated: false,
+})(NodeBook);
 
-export default NodeBook;
+// export default NodeBook;

@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { FilterValue } from "../knowledgeTypes";
@@ -8,7 +8,7 @@ import ContributorsAutocomplete from "./ContributorsAutocomplete";
 import InstitutionsAutocomplete from "./InstitutionsAutocomplete";
 import NodeTypesAutocomplete from "./NodeTypesAutocomplete";
 import { ReferencesAutocomplete } from "./ReferencesAutocomplete";
-import { MemoizedTagsSearcher } from "./TagsSearcher";
+import { ChosenTag, MemoizedTagsSearcher } from "./TagsSearcher";
 
 export type HomeFilterRef = {
   scroll: () => void;
@@ -28,20 +28,27 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
     const { allTags, setAllTags } = useTagsTreeView([]);
     const toScrollRef = useRef<HTMLDivElement | null>(null);
 
+    const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
+
+    // useEffect(() => {
+    //   const getTagsChecked = () => {
+    //     const tagSelected = Object.values(allTags)
+    //       .filter(cur => cur.checked)
+    //       .map(cur => cur.title);
+    //     if (!tagSelected) return;
+    //     onTagsChange(tagSelected);
+    //   };
+
+    //   getTagsChecked();
+
+    //   // Don't add onTagsChange because get in a infinity loop
+    //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [allTags]);
+
     useEffect(() => {
-      const getTagsChecked = () => {
-        const tagSelected = Object.values(allTags)
-          .filter(cur => cur.checked)
-          .map(cur => cur.title);
-        if (!tagSelected) return;
-        onTagsChange(tagSelected);
-      };
-
-      getTagsChecked();
-
-      // Don't add onTagsChange because get in a infinity loop
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [allTags]);
+      const tagSelected = chosenTags.map(cur => cur.title);
+      onTagsChange(tagSelected);
+    }, [chosenTags, onTagsChange]);
 
     useImperativeHandle(ref, () => ({
       scroll: () => {
@@ -74,6 +81,8 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
             <MemoizedTagsSearcher
               allTags={allTags}
               setAllTags={setAllTags}
+              chosenTags={chosenTags}
+              setChosenTags={setChosenTags}
               sx={{ maxHeight: "200px", height: "200px" }}
               multiple
             />

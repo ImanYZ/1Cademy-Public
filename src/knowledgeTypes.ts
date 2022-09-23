@@ -331,8 +331,11 @@ export type ProposalInput = {
   choices?: KnowledgeChoice[];
 };
 
+export type UserTheme = "Dark" | "Light";
+
+export type UserBackground = "Color" | "Image";
+
 export type User = {
-  background?: string;
   blocked?: boolean;
   chooseUname?: boolean;
   city?: string;
@@ -349,7 +352,7 @@ export type User = {
   deInstit?: string;
   deMajor?: string;
   email: string;
-  ethnicity?: string[];
+  ethnicity: string[];
   fName?: string;
   gender?: string;
   imageUrl?: string;
@@ -357,29 +360,80 @@ export type User = {
   lName?: string;
   lang?: string;
   practicing?: boolean;
-  stateInfo?: string;
+  // stateInfo?: string;// CHECK: I comment and add state
   sNode?: string;
   tag?: string;
   tagId?: string;
-  theme?: string;
   uname: string;
   updatedAt?: Timestamp;
-  userId?: string;
+  userId: string;
   state?: string;
-  stateId?: string;
+  // stateId?: string;// this is not used and not exist in DB
   education?: string;
   birthDate?: string;
-  foundFrom?: string;
-  occupation?: string;
+  foundFrom: string;
+  occupation: string;
   reason?: string;
-  major?: string;
-  instit?: string;
+  // major?: string; //CHECK: I commented this because we have deMajor
+  // instit?: string; //CHECK: I commented this because we have deInstit
+  fieldOfInterest: string;
+};
+
+export type userSettings = {
+  background: "Image" | "Color";
+  theme: UserTheme;
+};
+
+export type Reputation = {
+  aCorrects: number;
+  aInst: number;
+  aWrongs: number;
+  cdCorrects: number;
+  cdInst: number;
+  cdWrongs: number;
+  cnCorrects: number;
+  cnInst: number;
+  cnWrongs: number;
+  createdAt: Date;
+  iCorrects: number;
+  iInst: number;
+  iWrongs: number;
+  isAdmin: boolean;
+  lterm: number;
+  ltermDay: number;
+  mCorrects: number;
+  mInst: number;
+  mWrongs: number;
+  nCorrects: number;
+  nInst: number;
+  nWrongs: number;
+  negatives: number;
+  pCorrects: number;
+  pInst: number;
+  pWrongs: number;
+  positives: number;
+  qCorrects: number;
+  qInst: number;
+  qWrongs: number;
+  rfCorrects: number;
+  rfInst: number;
+  rfWrongs: number;
+  sCorrects: number;
+  sInst: number;
+  sWrongs: number;
+  tag: string;
+  tagId: string;
+  totalPoints: number;
+  uname: string;
+  updatedAt: Date;
 };
 
 export interface AuthState {
   readonly isAuthenticated: boolean;
   readonly isAuthInitialized: boolean;
   readonly user: User | null;
+  readonly reputation: Reputation | null;
+  readonly settings: userSettings;
 }
 
 export type AuthActions = {
@@ -399,9 +453,28 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
+  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground };
+};
+
+export type SetThemeAction = {
+  type: "setTheme";
+  payload: UserTheme;
+};
+
+export type SetBackgroundAction = {
+  type: "setBackground";
+  payload: UserBackground;
+};
+export type SetAuthUserAction = {
+  type: "setAuthUser";
   payload: User;
 };
-export type DispatchAuthActions = AuthLogoutSuccessAction | AuthLoginSuccessAction;
+export type DispatchAuthActions =
+  | AuthLogoutSuccessAction
+  | AuthLoginSuccessAction
+  | SetThemeAction
+  | SetBackgroundAction
+  | SetAuthUserAction;
 
 export type SignUpValidation = {
   uname?: string;
@@ -452,8 +525,10 @@ export interface SignUpFormValues {
   clickedCP: boolean;
 }
 
-export interface SignUpData extends User {
+export interface SignUpData extends Omit<User, "userId"> {
   password: string;
+  background: UserBackground;
+  theme: UserTheme;
 }
 
 export type ThemeActions = {

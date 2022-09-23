@@ -20,9 +20,10 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
 
   const loadUser = useCallback(async (userId: string) => {
     try {
-      const user = await retrieveAuthenticatedUser(userId);
-      if (user) {
-        dispatch({ type: "loginSuccess", payload: user });
+      const { user, reputation, theme, background } = await retrieveAuthenticatedUser(userId);
+      console.log("----> user", user);
+      if (user && reputation) {
+        dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background } });
       } else {
         dispatch({ type: "logoutSuccess" });
       }
@@ -33,10 +34,14 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
 
   useEffect(() => {
     const auth = getAuth();
+
     const unsubscriber = onAuthStateChanged(auth, user => {
+      console.log("USER NEW> ", user);
       if (user) {
+        //sign in
         loadUser(user.uid);
       } else {
+        //sign out
         dispatch({ type: "logoutSuccess" });
       }
     });

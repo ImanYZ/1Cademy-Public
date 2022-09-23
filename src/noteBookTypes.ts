@@ -78,3 +78,14 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
 export type SortDirection = "ASCENDING" | "DESCENDING";
 export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES";
 export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "Others Monthly";
+
+export type Cluster = {
+  id: string;
+  y: number;
+  x: number;
+  width: number;
+  height: number;
+  title: string;
+};
+
+export type ClusterNodes = { [key: string]: Cluster };

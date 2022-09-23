@@ -225,6 +225,13 @@ export function getThemedComponents(theme: Theme): {
           },
         },
       },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            color: theme.palette.mode === "dark" ? common.white : common.black,
+          },
+        },
+      },
     },
   };
 }
