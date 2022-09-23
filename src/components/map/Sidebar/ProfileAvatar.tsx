@@ -26,7 +26,7 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
 
   const inputEl = useRef<HTMLInputElement>(null);
 
-  const setImageSize = useCallback(({ target: img }) => {
+  const setImageSize = useCallback(({ target: img }: { target: any }) => {
     if (img.offsetHeight > img.offsetWidth) {
       setImageWidth("100%");
       setImageHeight("auto");

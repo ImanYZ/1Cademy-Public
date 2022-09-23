@@ -31,8 +31,8 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
-  const [/*pointsGained,*/ setPointsGained] = useState(false);
-  const [/*pointsLost,*/ setPointsLost] = useState(false);
+  const [pointsGained, setPointsGained] = useState(false);
+  const [pointsLost, setPointsLost] = useState(false);
 
   const prevAmount = usePrevious({
     totalPositives: props.totalPositives,
@@ -72,74 +72,52 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.totalPoints, props.totalPositives, props.totalNegatives]);
 
-  const openUserInfo = useCallback(
-    () => {
-      if (!user) return;
+  const openUserInfo = useCallback(() => {
+    if (!user) return;
 
-      const userUserInfoCollection = collection(db, "userUserInfoLog");
+    const userUserInfoCollection = collection(db, "userUserInfoLog");
 
-      // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
-      if (props.inUserBar) {
-        // Open Toollbar (user setting sidebar)
-        nodeBookDispatch({ type: "setOpenToolbar", payload: true });
-        // setOpenToolbar(true);
+    // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
+    if (props.inUserBar) {
+      // Open Toollbar (user setting sidebar)
+      nodeBookDispatch({ type: "setOpenToolbar", payload: true });
+      // setOpenToolbar(true);
 
-        addDoc(userUserInfoCollection, {
-          uname: user.uname,
-          uInfo: user.uname,
-          createdAt: Timestamp.fromDate(new Date()),
-        });
+      addDoc(userUserInfoCollection, {
+        uname: user.uname,
+        uInfo: user.uname,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+    } else {
+      // Open user info sidebar
+      nodeBookDispatch({
+        type: "setSelectedUser",
+        payload: {
+          username: props.uname,
+          imageUrl: props.imageUrl,
+          fullName: props.fullname,
+          chooseUname: props.chooseUname,
+        },
+      });
 
-        // userUserInfoLogRef.set({
-        //   uname: username,
-        //   uInfo: username,
-        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-        // });
-      } else {
-        // Open user info sidebar
-        nodeBookDispatch({
-          type: "setSelectedUser",
-          payload: {
-            username: props.uname,
-            imageUrl: props.imageUrl,
-            fullName: props.fullname,
-            chooseUname: props.chooseUname,
-          },
-        });
-
-        // setSelectedUser(props.uname);
-        // setSelectedUserImageURL(props.imageUrl);
-        // setSelectedUserFullname(props.fullname);
-        // setSelectedUserChooseUname(props.chooseUname);
-        nodeBookDispatch({
-          type: "setSelectionType",
-          payload: "UserInfo",
-        });
-        // setSelectionType("UserInfo");
-        props.reloadPermanentGrpah();
-        addDoc(userUserInfoCollection, {
-          uname: user.uname,
-          uInfo: props.uname,
-          createdAt: Timestamp.fromDate(new Date()),
-        });
-        // userUserInfoLogRef.set({
-        //   uname: username,
-        //   uInfo: props.uname,
-        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-        // });
-      }
-      // console.log("openUserInfo");
-    },
-    [
-      // firebase,
-      // props.inUserBar,
-      // username,
-      // props.uname,
-      // props.imageUrl,
-      // props.fullname,
-      // props.chooseUname,
-    ]
-  );
+      // setSelectedUser(props.uname);
+      // setSelectedUserImageURL(props.imageUrl);
+      // setSelectedUserFullname(props.fullname);
+      // setSelectedUserChooseUname(props.chooseUname);
+      nodeBookDispatch({
+        type: "setSelectionType",
+        payload: "UserInfo",
+      });
+      // setSelectionType("UserInfo");
+      props.reloadPermanentGrpah();
+      addDoc(userUserInfoCollection, {
+        uname: user.uname,
+        uInfo: props.uname,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+    }
+    // console.log("openUserInfo");
+  }, [db, nodeBookDispatch, props, user]);
 
   const getTooltipTitle = (): JSX.Element => {
     let title: string = "";
@@ -206,7 +184,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
           padding: "5px 0px",
         }}
       >
-        <div>
+        <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}

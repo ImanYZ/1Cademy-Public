@@ -70,7 +70,7 @@ import {
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
 import { ChoosingType, UserNodes, UserNodesData } from "../nodeBookTypes";
-import { FullNodeData } from "../noteBookTypes";
+import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType } from "../types";
 
 type DashboardProps = {};

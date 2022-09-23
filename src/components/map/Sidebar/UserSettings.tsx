@@ -11,7 +11,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import { Autocomplete, Box, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
-import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
+import { ICity, ICountry, IState } from "country-state-city";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 // import Checkbox from "@material-ui/core/Checkbox";

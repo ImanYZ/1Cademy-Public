@@ -176,6 +176,7 @@ const SignUpPage: NextPageWithLayout = () => {
       theme: values.theme,
       background: values.background,
       consented: values.signUpAgreement,
+      fieldOfInterest: values.fieldOfInterest,
     };
     mutateSignUp.mutate(user);
   };

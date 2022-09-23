@@ -17,6 +17,7 @@ import {
   ResponseGeneric,
   SearchNodesParams,
   SearchNodesResponse,
+  SignUpData,
   SignUpValidation,
   StatsSchema,
   User,
@@ -129,7 +130,7 @@ export const validateSignUp = async ({
   return { results: res.data };
 };
 
-export const signUp = async (user: User): Promise<User> => {
+export const signUp = async (user: SignUpData): Promise<User> => {
   const res = await API.post<User>("/api/signup", { data: user });
   return res.data;
 };

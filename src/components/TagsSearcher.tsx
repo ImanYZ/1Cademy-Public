@@ -139,7 +139,6 @@ const TagsSearcher = ({
    */
   const setCheckboxes = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      console.log("[setCheckboxes]: event", event.target);
       setAllTags(oldAllTags => {
         const newAllTags = {
           ...oldAllTags,
@@ -192,7 +191,7 @@ const TagsSearcher = ({
       //   }
       // }
     },
-    [multiple, setAllTags]
+    [allTags, chosenTags, multiple, setAllTags, setChosenTags]
   );
 
   const tagsTreeView = useCallback(

@@ -44,7 +44,7 @@ const UserInfo = (props: any) => {
   // // const selectedUserFullname = useRecoilValue(selectedUserFullnameState);
   // // const selectedUserChooseUname = useRecoilValue(selectedUserChooseUnameState);
   const db = getFirestore();
-  const [{ user }] = useAuth();
+  const [{ user, settings }] = useAuth();
   const { nodeBookState } = useNodeBook();
 
   const [proposals, setProposals] = useState<any[]>([]);
@@ -89,7 +89,7 @@ const UserInfo = (props: any) => {
             content: (
               <>
                 {/* <div className="ChartTitle">Nodes Contributed</div> */}
-                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={user.theme || ""} />
+                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={settings.theme || ""} />
               </>
             ),
           },
