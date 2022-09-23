@@ -8,51 +8,48 @@ import {
   comOthWeekPointsData,
   comPointsData,
   comWeeklyPointsData,
+  conceptVersionCommentsData,
+  conceptVersionsData,
   monthlyReputationsData,
   nodesData,
   othersReputationsData,
   othMonReputationsData,
   othWeekReputationsData,
+  reputationsData,
+  userConceptVersionCommentsData,
+  userConceptVersionsData,
   usersData,
+  weeklyReputationsData,
 } from "../../../testUtils/mockCollections";
 
 describe("updateReputationIncrement", () => {
+  const mockCollections = [
+    comMonthlyPointsData,
+    comOthersPointsData,
+    comOthMonPointsData,
+    comOthWeekPointsData,
+    comPointsData,
+    comWeeklyPointsData,
+    reputationsData,
+    weeklyReputationsData,
+    monthlyReputationsData,
+    othersReputationsData,
+    othMonReputationsData,
+    othWeekReputationsData,
+    usersData,
+    nodesData,
+    conceptVersionsData,
+    userConceptVersionsData,
+    conceptVersionCommentsData,
+    userConceptVersionCommentsData,
+  ];
+
   beforeEach(async () => {
-    await Promise.all(
-      [
-        comMonthlyPointsData,
-        comOthersPointsData,
-        comOthMonPointsData,
-        comOthWeekPointsData,
-        comPointsData,
-        comWeeklyPointsData,
-        monthlyReputationsData,
-        nodesData,
-        othersReputationsData,
-        othMonReputationsData,
-        othWeekReputationsData,
-        usersData,
-      ].map(col => col.populate())
-    );
+    await Promise.all(mockCollections.map(col => col.populate()));
   });
 
   afterEach(async () => {
-    await Promise.all(
-      [
-        comMonthlyPointsData,
-        comOthersPointsData,
-        comOthMonPointsData,
-        comOthWeekPointsData,
-        comPointsData,
-        comWeeklyPointsData,
-        monthlyReputationsData,
-        nodesData,
-        othersReputationsData,
-        othMonReputationsData,
-        othWeekReputationsData,
-        usersData,
-      ].map(col => col.clean())
-    );
+    await Promise.all(mockCollections.map(col => col.clean()));
   });
 
   it("Should increment total, positive and negative points of the community points.", async () => {
@@ -62,7 +59,7 @@ describe("updateReputationIncrement", () => {
     const { uname, imageUrl, chooseUname, fName, lName } = await usersData.getData()[0];
     const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
     const nodeType = "Concept";
-    const tagId = "C7L3gNbNp5reFjQf8vAb";
+    const tagId = "r98BjyFDCe4YyLA3U8ZE";
     const tag = "1Cademy";
 
     const fullname = `${fName} ${lName}`;
@@ -121,7 +118,7 @@ describe("updateReputationIncrement", () => {
     const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
 
     const nodeType = "Concept";
-    const tagId = "C7L3gNbNp5reFjQf8vAb";
+    const tagId = "r98BjyFDCe4YyLA3U8ZE";
     const tag = "1Cademy";
 
     const fullname = `${fName} ${lName}`;
@@ -185,7 +182,7 @@ describe("updateReputationIncrement", () => {
     const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
 
     const nodeType = "Concept";
-    const tagId = "C7L3gNbNp5reFjQf8vAb";
+    const tagId = "r98BjyFDCe4YyLA3U8ZE";
     const tag = "1Cademy";
 
     const fullname = `${fName} ${lName}`;
