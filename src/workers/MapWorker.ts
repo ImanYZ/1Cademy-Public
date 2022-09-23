@@ -3,7 +3,8 @@ import dagre from "dagre";
 
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
-import { ClusterNodes } from "../noteBookTypes";
+import { ClusterNodes } from "../nodeBookTypes";
+// import { ClusterNodes } from "../noteBookTypes";
 
 const layoutHandler = (
   mapChangedFlag: boolean,

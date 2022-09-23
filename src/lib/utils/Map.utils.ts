@@ -1,7 +1,9 @@
 import dagre from "dagre";
 import { collection, Firestore, onSnapshot, query, where } from "firebase/firestore";
 
-import { FullNodeData } from "../../noteBookTypes";
+import { FullNodeData } from "../../nodeBookTypes";
+
+// import { FullNodeData } from "../../noteBookTypes";
 
 export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setState.
 export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.

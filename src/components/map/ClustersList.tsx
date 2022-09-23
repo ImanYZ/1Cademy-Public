@@ -1,6 +1,8 @@
 import React from "react";
 
-import { ClusterNodes } from "../../noteBookTypes";
+import { ClusterNodes } from "../../nodeBookTypes";
+
+// import { ClusterNodes } from "../../noteBookTypes";
 
 // import { compareClusters } from "./MapUtils";
 

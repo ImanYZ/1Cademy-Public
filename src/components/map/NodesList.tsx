@@ -1,10 +1,10 @@
 import React from "react";
-import { OpenPart } from "src/nodeBookTypes";
+import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
 
-import { FullNodeData } from "../../noteBookTypes";
+// import { FullNodeData } from "../../noteBookTypes";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {

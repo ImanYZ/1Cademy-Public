@@ -4,13 +4,13 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { OpenPart } from "src/nodeBookTypes";
+import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
-import { FullNodeData } from "../../noteBookTypes";
+// import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
