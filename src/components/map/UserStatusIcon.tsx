@@ -144,31 +144,6 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     return <span>{title}</span>;
   };
 
-  // return (
-  //   <Tooltip title={getTooltipTitle()} placement="top">
-  //     <div
-  //       className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
-  //       onClick={openUserInfo}
-  //       style={{ border: "dashed 2px pink" }}
-  //     >
-  //       <OptimizedAvatar
-  //         imageUrl={props.imageUrl}
-  //         renderAsAvatar={true}
-  //         contained={false}
-  //         sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
-  //       />
-  //       {!props.inNodeFooter && <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>}
-  //       {!props.inNodeFooter && (
-  //         <span className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}>
-  //           <DoneIcon className="material-icons DoneIcon green-text" />
-  //           <span>{shortenNumber(props.totalPoints, 2, false)}</span>
-  //           {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
-  //         </span>
-  //       )}
-  //     </div>
-  //   </Tooltip>
-  // );
-
   // this is with changes in styles
   return (
     <Tooltip title={getTooltipTitle()} placement="top">

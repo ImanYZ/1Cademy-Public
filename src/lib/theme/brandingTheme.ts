@@ -229,11 +229,6 @@ export function getThemedComponents(theme: Theme): {
         styleOverrides: {
           root: {
             color: theme.palette.mode === "dark" ? common.white : common.black,
-            // styles: {
-            //   ".Mui-selected": {
-            //     color: common.orange,
-            //   },
-            // },
           },
         },
       },

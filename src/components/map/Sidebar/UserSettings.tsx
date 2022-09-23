@@ -14,12 +14,6 @@ import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
-// import Checkbox from "@material-ui/core/Checkbox";
-// import ListItemText from "@material-ui/core/ListItemText";
-// import MenuItem from "@material-ui/core/MenuItem";
-// import Done from "@material-ui/icons/Done";
-// import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-// import axios from "axios";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
@@ -121,94 +115,16 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  // const [{ user }] = useAuth();
-  // console.log("rr", rr);
+
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
 
-  // const [CSCByGeolocation /*setCSCByGeolocation*/] = useState<{ country: string; state: string; city: string } | null>(
-  //   null
-  // );
-
-  // const [{ setThemeMode, themeMode }] = use1AcademyTheme(); // CHECK I comented
-
-  // const firebase = useRecoilValue(firebaseState);
-  // const [username, setUsername] = useRecoilState(usernameState);
-  // const [fName, setFName] = useRecoilState(fNameState);
-  // const [lName, setLName] = useRecoilState(lNameState);
-  // const [tag, setTag] = useRecoilState(tagState);
-  // const setIsSubmitting = useSetRecoilState(isSubmittingState);
-  // const [choosingNode, setChoosingNode] = useRecoilState(choosingNodeState);
-  // const [chosenNode, setChosenNode] = useRecoilState(chosenNodeState);
-  // const [chosenNodeTitle, setChosenNodeTitle] = useRecoilState(chosenNodeTitleState);
-
-  // // for Concept nodes
-  // const cnCorrects = useRecoilValue(cnCorrectsState);
-  // const cnWrongs = useRecoilValue(cnWrongsState);
-  // const cnInst = useRecoilValue(cnInstState);
-  // // for Code nodes
-  // const cdCorrects = useRecoilValue(cdCorrectsState);
-  // const cdWrongs = useRecoilValue(cdWrongsState);
-  // const cdInst = useRecoilValue(cdInstState);
-  // // for Question nodes
-  // const qCorrects = useRecoilValue(qCorrectsState);
-  // const qWrongs = useRecoilValue(qWrongsState);
-  // const qInst = useRecoilValue(qInstState);
-  // //  for Profile nodes
-  // const pCorrects = useRecoilValue(pCorrectsState);
-  // const pWrongs = useRecoilValue(pWrongsState);
-  // const pInst = useRecoilValue(pInstState);
-  // //  for Sequel nodes
-  // const sCorrects = useRecoilValue(sCorrectsState);
-  // const sWrongs = useRecoilValue(sWrongsState);
-  // const sInst = useRecoilValue(sInstState);
-  // //  for Advertisement nodes
-  // const aCorrects = useRecoilValue(aCorrectsState);
-  // const aWrongs = useRecoilValue(aWrongsState);
-  // const aInst = useRecoilValue(aInstState);
-  // //  for Reference nodes
-  // const rfCorrects = useRecoilValue(rfCorrectsState);
-  // const rfWrongs = useRecoilValue(rfWrongsState);
-  // const rfInst = useRecoilValue(rfInstState);
-  // //  for News nodes
-  // const nCorrects = useRecoilValue(nCorrectsState);
-  // const nWrongs = useRecoilValue(nWrongsState);
-  // const nInst = useRecoilValue(nInstState);
-  // //  for Relation nodes
-  // const mCorrects = useRecoilValue(mCorrectsState);
-  // const mWrongs = useRecoilValue(mWrongsState);
-  // const mInst = useRecoilValue(mInstState);
-  // //  for Idea nodes
-  // const iCorrects = useRecoilValue(iCorrectsState);
-  // const iWrongs = useRecoilValue(iWrongsState);
-  // const iInst = useRecoilValue(iInstState);
-
-  // const lterm = useRecoilValue(ltermState);
-  // const ltermDay = useRecoilValue(ltermDayState);
-  // const ltermMaxDay = useRecoilValue(ltermMaxDayState);
-  // const setOpenToolbar = useSetRecoilState(openToolbarState);
-  // const [showClusters, setShowClusters] = useRecoilState(showClustersState);
-  // const [theme, setTheme] = useRecoilState(themeState);
-  // const [background, setBackground] = useRecoilState(backgroundState);
-  // const [chooseUname, setChooseUname] = useRecoilState(chooseUnameState);
-  // const [lang, setLang] = useRecoilState(langState);
-  // const [gender, setGender] = useRecoilState(genderState);
-  // const [ethnicity, setEthnicity] = useRecoilState(ethnicityState);
-  // const [country, setCountry] = useRecoilState(countryState);
-  // const [stateInfo, setStateInfo] = useRecoilState(stateInfoState);
-  // const [city, setCity] = useRecoilState(cityState);
-  // const [deInstit, setDeInstit] = useRecoilState(deInstitState);
-  // const [allTags, setAllTags] = useRecoilState(allTagsState);
-
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
   const [changingUsername /*, setChangingUsername*/] = useState(false);
-
-  // const [chosenTags, setChosenTags] = useState([]);
-  // const [birthDate, setBirthDate] = useState(new Date());
 
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
 
@@ -529,6 +445,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
     setShowClusters(!showClusters);
   }, [db, setShowClusters, showClusters, user.uname]);
 
+  // ------------------->> THIS IS NOT USED
   // const closedSidebarClick = useCallback(
   //   event => {
   //     const userClosedSidebarLogRef = firebase.db.collection("userClosedSidebarLog").doc();
@@ -551,6 +468,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   //   () => props.setOpenPractice(oldOpenPractice => !oldOpenPractice),
   //   [props.setOpenPractice]
   // );
+  // << -----------------------------
   const choosingNodeClick = useCallback(
     (choosingNodeTag: string) =>
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } }),

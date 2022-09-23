@@ -123,7 +123,6 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const [lastIndex, setLastIndex] = useState(13);
   const [isRetrieving /* setIsRetrieving*/] = useState(false);
   const [onlyTags /*setOnlyTags*/] = useState(true);
-  // const [chosenTags /*setChosenTags*/] = useState([]);
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
   const [sortOption, setSortOption] = useState<SortValues>("DATE_MODIFIED");
