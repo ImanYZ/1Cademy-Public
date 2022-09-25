@@ -40,9 +40,6 @@ export const setOrIncrementNotificationNums = async ({
 
 //  Up/down-votes nodes
 export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, actionType, chooseUname }: any) => {
-  // let nodeData, nodeRef, versionsDocs, versionsColl, userNodesRefs, userNodesData;
-  // let userNodeData = null;
-  // let userNodeRef = null;
   let correct = false;
   let wrong = false;
   let deleteNode = false;
@@ -53,10 +50,15 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   let batch = db.batch();
 
   let writeCounts = 0;
-  let { nodeData, nodeRef }: any = await getNode({ nodeId });
+  let { nodeData, nodeRef, nodeExists } = await getNode({ nodeId });
+  // restricting voting for nodes that already exists
+  if (!nodeExists) {
+    throw new Error("Node doesn't exists.");
+  }
   let { userNodeData, userNodeRef }: any = await getUserNode({ nodeId, uname });
   let { userNodesRefs, userNodesData }: any = await getAllUserNodes({ nodeId });
   let maxVersionRating = nodeData.maxVersionRating;
+  // if user already voted on this node
   if (userNodeData) {
     correct = userNodeData.correct;
     wrong = userNodeData.wrong;
@@ -72,7 +74,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     correctChange = !wrong && correct ? -1 : 0;
     wrongChange = wrong ? -1 : 1;
   }
-  //  if the new change yields node with more downvotes than upvotes, delete
+  //  if the new change yields node with more downvotes than upvotes, DELETE
   if (nodeData.corrects + correctChange < nodeData.wrongs + wrongChange) {
     deleteNode = true;
     [batch, writeCounts] = await signalAllUserNodesChanges({
@@ -212,8 +214,9 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       }
     }
   }
+
   //  query versions in order to update the upvotes / downvotes in addition to reputations
-  const { versionsColl }: any = getTypedCollections(nodeData);
+  const { versionsColl }: any = getTypedCollections({ nodeType: nodeData.nodeType });
   const versionsQuery = versionsColl
     .where("node", "==", nodeId)
     .where("accepted", "==", true)
@@ -223,11 +226,17 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   //  there may be more than one proposal on a node, only one reputation change per user.
   //  which means proposer is the key to the dictionary
   let changedProposers: any = {};
-  let maxVersionNetVotes = 0;
+
+  let maxVersionNetVotes = 1;
+  // finding max net vote from active proposals
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
-    maxVersionNetVotes = versionData.corrects - versionData.wrongs || 0;
+    const versionNetVote = versionData.corrects - versionData.wrongs || 0;
+    if (maxVersionNetVotes < versionNetVote) {
+      maxVersionNetVotes = versionNetVote;
+    }
   }
+
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
     const versionRatingChange =
