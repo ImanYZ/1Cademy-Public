@@ -2,7 +2,15 @@ import dayjs from "dayjs";
 import { APP_DOMAIN } from "src/1cademyConfig";
 import ROUTES from "src/routes";
 
-import { LinkedKnowledgeNode, LinkedNodeObject, LinkedNodeTag, ReferencesArray, SortTypeWindowOption, TagsArray, TimeWindowOption } from "../src/knowledgeTypes";
+import {
+  LinkedKnowledgeNode,
+  LinkedNodeObject,
+  LinkedNodeTag,
+  ReferencesArray,
+  SortTypeWindowOption,
+  TagsArray,
+  TimeWindowOption
+} from "../src/knowledgeTypes";
 
 export const isValidHttpUrl = (possibleUrl?: string) => {
   let url;
@@ -31,7 +39,14 @@ export const encodeTitle = (title?: string) => {
 };
 
 export function generateAlias(name?: string) {
-  return String(name).toLowerCase().replace(/[^a-z- ]/g, '').trim().replace(/ /g, '-')
+  const alias = String(name)
+    .toLowerCase()
+    .replace(/[^a-z- ]/g, "")
+    .trim()
+    .replace(/ /g, "-")
+    .replace(/[-]+/g, "-");
+  if (!alias.length) return "-";
+  return alias;
 }
 
 export const getQueryParameter = (val: string | string[] | undefined) => {
@@ -155,62 +170,67 @@ export const loadHomeSearchBackground = () => `
 export const toBase64 = (str: string) =>
   typeof window === "undefined" ? Buffer.from(str).toString("base64") : window.btoa(str);
 
-
 export const getReferenceTitle = (el: LinkedKnowledgeNode) => {
-  if (isValidHttpUrl(el.label)) return `${el.title}:  ${el.label}`
-  return el.title || ""
-}
+  if (isValidHttpUrl(el.label)) return `${el.title}:  ${el.label}`;
+  return el.title || "";
+};
 
-export const mapLinkedKnowledgeNodeToReferencesArrays = (nodeReferences: LinkedKnowledgeNode[])
-  : ReferencesArray => {
-  return nodeReferences.reduce((acu: ReferencesArray, cur) => {
-    return {
-      referenceIds: [...acu.referenceIds, cur.node],
-      referenceLabels: [...acu.referenceLabels, cur.label || ''],
-      references: [...acu.references, cur.title || '']
-    }
-  }, { referenceIds: [], referenceLabels: [], references: [] })
-}
+export const mapLinkedKnowledgeNodeToReferencesArrays = (nodeReferences: LinkedKnowledgeNode[]): ReferencesArray => {
+  return nodeReferences.reduce(
+    (acu: ReferencesArray, cur) => {
+      return {
+        referenceIds: [...acu.referenceIds, cur.node],
+        referenceLabels: [...acu.referenceLabels, cur.label || ""],
+        references: [...acu.references, cur.title || ""]
+      };
+    },
+    { referenceIds: [], referenceLabels: [], references: [] }
+  );
+};
 
-export const mapLinkedKnowledgeNodeToLinkedNodeObject = (nodeReferences: LinkedKnowledgeNode[])
-  : LinkedNodeObject[] => {
-  return nodeReferences.map((cur) => {
-    return {
-      node: cur.node,
-      title: cur.title || '',
-      label: cur.label || ''
-    }
-  })
-}
-
-export const mapReferencesNodeToTagsArrays = (nodeReferences: LinkedKnowledgeNode[])
-  : TagsArray => {
-  return nodeReferences.reduce((acu: TagsArray, cur) => {
-    return {
-      tagIds: [...acu.tagIds, cur.node],
-      tags: [...acu.tags, cur.title || ''],
-    }
-  }, { tagIds: [], tags: [] })
-}
-
-export const mapLinkedKnowledgeNodeToLinkedNodeTag = (nodeTags: LinkedKnowledgeNode[]):
-  LinkedNodeTag[] => {
-  return nodeTags.map((cur) => {
+export const mapLinkedKnowledgeNodeToLinkedNodeObject = (nodeReferences: LinkedKnowledgeNode[]): LinkedNodeObject[] => {
+  return nodeReferences.map(cur => {
     return {
       node: cur.node,
-      title: cur.title || ''
-    }
-  })
-}
+      title: cur.title || "",
+      label: cur.label || ""
+    };
+  });
+};
+
+export const mapReferencesNodeToTagsArrays = (nodeReferences: LinkedKnowledgeNode[]): TagsArray => {
+  return nodeReferences.reduce(
+    (acu: TagsArray, cur) => {
+      return {
+        tagIds: [...acu.tagIds, cur.node],
+        tags: [...acu.tags, cur.title || ""]
+      };
+    },
+    { tagIds: [], tags: [] }
+  );
+};
+
+export const mapLinkedKnowledgeNodeToLinkedNodeTag = (nodeTags: LinkedKnowledgeNode[]): LinkedNodeTag[] => {
+  return nodeTags.map(cur => {
+    return {
+      node: cur.node,
+      title: cur.title || ""
+    };
+  });
+};
 
 export const buildReferences = (references: LinkedKnowledgeNode[]) => {
-  const env = process.env.NODE_ENV
-  if (env === 'development') { return mapLinkedKnowledgeNodeToReferencesArrays(references) }
-  return { references: mapLinkedKnowledgeNodeToLinkedNodeObject(references) }
-}
+  const env = process.env.NODE_ENV;
+  if (env === "development") {
+    return mapLinkedKnowledgeNodeToReferencesArrays(references);
+  }
+  return { references: mapLinkedKnowledgeNodeToLinkedNodeObject(references) };
+};
 
 export const buildTags = (tags: LinkedKnowledgeNode[]) => {
-  const env = process.env.NODE_ENV
-  if (env === 'development') { return mapReferencesNodeToTagsArrays(tags) }
-  return { tags: mapLinkedKnowledgeNodeToLinkedNodeTag(tags) }
-}
+  const env = process.env.NODE_ENV;
+  if (env === "development") {
+    return mapReferencesNodeToTagsArrays(tags);
+  }
+  return { tags: mapLinkedKnowledgeNodeToLinkedNodeTag(tags) };
+};
