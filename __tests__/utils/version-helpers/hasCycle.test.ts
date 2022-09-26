@@ -1,8 +1,8 @@
 import { db } from "../../../src/lib/firestoreServer/admin";
-import { getDirectTags } from "../../../src/utils";
+import { hasCycle } from "../../../src/utils";
 import { nodesData } from "../../../testUtils/mockCollections";
 
-describe("getDirectTags", () => {
+describe("hasCycle", () => {
   beforeEach(async () => {
     await nodesData.populate();
   });
@@ -11,14 +11,16 @@ describe("getDirectTags", () => {
     await nodesData.clean();
   });
 
-  it("should get direct tags against specific node", async () => {
+  it("should check node hasCycle", async () => {
     const nodes: any = await db.collection("nodes").get();
-    let nodeTags = nodes.docs[0].data().tags;
     let nodeTagIds = nodes.docs[0].data().tagIds;
     const tagsOfNodes: any = {};
     tagsOfNodes[nodeTagIds[0]] = { tagIds: ["Tag 1", "Tag 3"] };
-    let { tags, tagIds } = await getDirectTags({ nodeTagIds, nodeTags, tagsOfNodes });
-    expect(tags.length).toBeGreaterThan(0);
-    expect(tagIds.length).toBeGreaterThan(0);
+    let hasCycleResult = hasCycle({
+      tagsOfNodes: tagsOfNodes,
+      nodeId: nodes.docs[0].id,
+      path: [nodes.docs[0].id],
+    });
+    expect(hasCycleResult).toBe(true);
   });
 });

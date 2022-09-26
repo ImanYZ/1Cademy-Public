@@ -1,4 +1,4 @@
-import { admin, commitBatch,db } from "../../../src/lib/firestoreServer/admin";
+import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { proposalNotification } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
 import {
