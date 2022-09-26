@@ -304,7 +304,9 @@ const Dashboard = ({}: DashboardProps) => {
             let tmpEdges = {};
 
             if (cur.nodeChangeType === "added") {
-              const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
+              const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+              // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
+              const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
               tmpNodes = res.oldNodes;
               tmpEdges = res.oldEdges;
             }
@@ -1026,6 +1028,170 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookState.choosingNode, nodes, recursiveOffsprings]
   );
 
+  // /**
+  //  * get Node data
+  //  * iterate over children and update updatedAt field
+  //  * iterate over parents and update updatedAt field
+  //  * get userNode data
+  //  *  - if exist: update visible and updatedAt field
+  //  *  - else: create
+  //  * build fullNode then call makeNodeVisibleInItsLinks and createOrUpdateNode
+  //  * scroll
+  //  * update selectedNode
+  //  */
+  // const openNodeHandler = useMemoizedCallback(
+  //   async (nodeId: string) => {
+  //     // setFlag(!flag)
+  //     let linkedNodeRef;
+  //     let userNodeRef = null;
+  //     let userNodeData: UserNodesData | null = null;
+
+  //     const nodeRef = doc(db, "nodes", nodeId);
+  //     const nodeDoc = await getDoc(nodeRef);
+
+  //     const batch = writeBatch(db);
+  //     // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
+  //     // const nodeDoc = await nodeRef.get();
+  //     if (nodeDoc.exists() && user) {
+  //       //CHECK: added user
+  //       const thisNode: any = { ...nodeDoc.data(), id: nodeId };
+  //       try {
+  //         for (let child of thisNode.children) {
+  //           linkedNodeRef = doc(db, "nodes", child.node);
+
+  //           // linkedNodeRef = db.collection("nodes").doc(child.node);
+
+  //           batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+  //           // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
+  //         }
+  //         for (let parent of thisNode.parents) {
+  //           // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+  //           linkedNodeRef = doc(db, "nodes", parent.node);
+  //           // do a batch r
+  //           batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+  //           // await firebase.batchUpdate(linkedNodeRef, {
+  //           //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+  //           // });
+  //         }
+  //         const userNodesRef = collection(db, "userNodes");
+  //         const q = query(userNodesRef, where("node", "==", nodeId), where("user", "==", user.uname), limit(1));
+  //         const userNodeDoc = await getDocs(q);
+  //         let userNodeId = null;
+  //         if (userNodeDoc.docs.length > 0) {
+  //           // if exist documents update the first
+  //           userNodeId = userNodeDoc.docs[0].id;
+  //           // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
+  //           const userNodeRef = doc(db, "userNodes", userNodeId);
+  //           userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
+  //           userNodeData.visible = true;
+  //           userNodeData.updatedAt = Timestamp.fromDate(new Date());
+  //           batch.update(userNodeRef, userNodeData);
+  //         } else {
+  //           // if NOT exist documents create a document
+  //           userNodeRef = collection(db, "userNodes");
+  //           // userNodeId = userNodeRef.id;
+  //           // console.log(' ---->> userNodeId', userNodeRef, userNodeId)
+  //           userNodeData = {
+  //             changed: true,
+  //             correct: false,
+  //             createdAt: Timestamp.fromDate(new Date()),
+  //             updatedAt: Timestamp.fromDate(new Date()),
+  //             // firstVisit: Timestamp.fromDate(new Date()),//CHECK
+  //             // lastVisit: Timestamp.fromDate(new Date()),//CHECK
+  //             // userNodeId: newId(),
+  //             deleted: false,
+  //             isStudied: false,
+  //             bookmarked: false,
+  //             node: nodeId,
+  //             open: true,
+  //             user: user.uname,
+  //             visible: true,
+  //             wrong: false,
+  //           };
+  //           batch.set(doc(userNodeRef), userNodeData); // CHECK: changed with batch
+  //           // const docRef = await addDoc(userNodeRef, userNodeData);
+  //           // userNodeId = docRef.id; // CHECK: commented this
+  //         }
+  //         batch.update(nodeRef, {
+  //           viewers: thisNode.viewers + 1,
+  //           updatedAt: Timestamp.fromDate(new Date()),
+  //         });
+  //         const userNodeLogRef = collection(db, "userNodesLog");
+
+  //         const userNodeLogData = {
+  //           ...userNodeData,
+  //           createdAt: Timestamp.fromDate(new Date()),
+  //         };
+
+  //         // const id = userNodeLogRef.id
+  //         batch.set(doc(userNodeLogRef), userNodeLogData);
+
+  //         let oldNodes: { [key: string]: any } = { ...nodes };
+  //         let oldEdges: { [key: string]: any } = { ...edges };
+  //         // let oldAllNodes: any = { ...nodes };
+  //         // let oldAllUserNodes: any = { ...nodeChanges };
+  //         // if data for the node is loaded
+  //         let uNodeData = {
+  //           // load all data corresponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+  //           ...nodes[nodeId],
+  //           ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
+  //           ...userNodeData,
+  //           open: true,
+  //         };
+
+  //         if (userNodeId) {
+  //           // TODO: I added this validation
+  //           uNodeData[userNodeId] = userNodeId;
+  //         }
+  //         ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+  //           // modify nodes and edges
+  //           uNodeData,
+  //           oldNodes,
+  //           oldEdges
+  //           // oldAllNodes
+  //         ));
+
+  //         // debugger
+  //         ({ oldNodes, oldEdges } = createOrUpdateNode(
+  //           // modify dagger
+  //           g.current,
+  //           uNodeData,
+  //           nodeId,
+  //           oldNodes,
+  //           { ...oldEdges },
+  //           allTags
+  //         ));
+
+  //         // CHECK: need to update the nodes and edges
+  //         // to get the last changes from:
+  //         //  makeNodeVisibleInItsLinks and createOrUpdateNode
+  //         // setNodes(oldNodes)
+  //         // setEdges(oldEdges)
+
+  //         // oldAllNodes[nodeId] = uNodeData;
+  //         // setNodes(oldAllNodes)
+  //         // setNodes(oldNodes => ({ ...oldNodes, oldNodes[nodeId]}))
+  //         // oldAllUserNodes = {
+  //         //   ...oldAllUserNodes,
+  //         //   [nodeId]: userNodeData,
+  //         // };
+  //         // await firebase.commitBatch();
+  //         await batch.commit();
+  //         scrollToNode(nodeId);
+  //         //  there are some places when calling scroll to node but we are not selecting that node
+  //         setTimeout(() => {
+  //           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+  //           // setSelectedNode(nodeId);
+  //         }, 400);
+  //       } catch (err) {
+  //         console.error(err);
+  //       }
+  //     }
+  //   },
+  //   // CHECK: I commented allNode, I did'nt found where is defined
+  //   [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
+  // );
+
   /**
    * get Node data
    * iterate over children and update updatedAt field
@@ -1124,41 +1290,41 @@ const Dashboard = ({}: DashboardProps) => {
           // const id = userNodeLogRef.id
           batch.set(doc(userNodeLogRef), userNodeLogData);
 
-          let oldNodes: { [key: string]: any } = { ...nodes };
-          let oldEdges: { [key: string]: any } = { ...edges };
-          // let oldAllNodes: any = { ...nodes };
-          // let oldAllUserNodes: any = { ...nodeChanges };
-          // if data for the node is loaded
-          let uNodeData = {
-            // load all data corresponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
-            ...nodes[nodeId],
-            ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
-            ...userNodeData,
-            open: true,
-          };
+          // let oldNodes: { [key: string]: any } = { ...nodes };
+          // let oldEdges: { [key: string]: any } = { ...edges };
+          // // let oldAllNodes: any = { ...nodes };
+          // // let oldAllUserNodes: any = { ...nodeChanges };
+          // // if data for the node is loaded
+          // let uNodeData = {
+          //   // load all data corresponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+          //   ...nodes[nodeId],
+          //   ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
+          //   ...userNodeData,
+          //   open: true,
+          // };
 
-          if (userNodeId) {
-            // TODO: I added this validation
-            uNodeData[userNodeId] = userNodeId;
-          }
-          ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
-            // modify nodes and edges
-            uNodeData,
-            oldNodes,
-            oldEdges
-            // oldAllNodes
-          ));
+          // if (userNodeId) {
+          //   // TODO: I added this validation
+          //   uNodeData[userNodeId] = userNodeId;
+          // }
+          // ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+          //   // modify nodes and edges
+          //   uNodeData,
+          //   oldNodes,
+          //   oldEdges
+          //   // oldAllNodes
+          // ));
 
-          // debugger
-          ({ oldNodes, oldEdges } = createOrUpdateNode(
-            // modify dagger
-            g.current,
-            uNodeData,
-            nodeId,
-            oldNodes,
-            { ...oldEdges },
-            allTags
-          ));
+          // // debugger
+          // ({ oldNodes, oldEdges } = createOrUpdateNode(
+          //   // modify dagger
+          //   g.current,
+          //   uNodeData,
+          //   nodeId,
+          //   oldNodes,
+          //   { ...oldEdges },
+          //   allTags
+          // ));
 
           // CHECK: need to update the nodes and edges
           // to get the last changes from:
@@ -1175,6 +1341,7 @@ const Dashboard = ({}: DashboardProps) => {
           // };
           // await firebase.commitBatch();
           await batch.commit();
+          console.log("------------ batch commit");
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {

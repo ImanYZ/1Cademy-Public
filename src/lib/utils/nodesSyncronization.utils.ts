@@ -35,7 +35,7 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
     return {
       cType: "added",
       nId: nodeDoc.id,
-      nData,
+      nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
     };
   });
 };

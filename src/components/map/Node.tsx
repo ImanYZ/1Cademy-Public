@@ -237,9 +237,7 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log("nodeclickeck handler");
       if (nodeBookState.choosingNode) {
-        console.log("has chosing node");
         // The first Nodes exist, Now is clicking the Chosen Node
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
@@ -257,7 +255,6 @@ const Node = ({
 
   const hideNodeHandler = useCallback(
     (event: any) => {
-      console.log("Hide Node Handler is called", event.target);
       event.preventDefault();
       event.stopPropagation();
       onHideNode(identifier, setIsHiding);
@@ -286,7 +283,6 @@ const Node = ({
 
   const markStudiedHandler = useCallback(
     (event: any) => {
-      console.log("first");
       markStudied(event, identifier);
     },
 
@@ -297,7 +293,6 @@ const Node = ({
 
   const openNodePartHandler = useCallback(
     (event: any, partType: any) => {
-      console.log("openNodePartHandler");
       openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
     },
 
