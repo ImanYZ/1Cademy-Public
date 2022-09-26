@@ -3,7 +3,7 @@ import { MutableRefObject, useCallback, useEffect, useState } from "react";
 
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils } from "../lib/utils/dagre.util";
-import { setDagNode } from "../lib/utils/Map.utils";
+import { setDagNodes } from "../lib/utils/Map.utils";
 import { ClusterNodes, FullNodeData, FullNodesData } from "../nodeBookTypes";
 
 export type Task = {
@@ -109,12 +109,18 @@ export const useWorkerQueue = ({
     if (!queue.length) return;
     if (!g?.current) return;
 
+    // CREATE WORKER with Nodes and Nodes changed
     console.log("[queue]: recalculateGraphWithWorker", nodes, queue[0], queue);
-
-    const [firstTask, ...others] = queue;
-    setQueue(others);
-    const nodeChanged: FullNodeData = { ...nodes[firstTask.id], height: firstTask.height };
-    const nodesToRecalculate = setDagNode(g.current, firstTask.id, nodeChanged, { ...nodes }, { ...allTags }, null);
+    const individualNodeChanges: FullNodeData[] = queue.map(cur => ({ ...nodes[cur.id], height: cur.height }));
+    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, nodes, allTags);
+    // const nodesChanges: FullNodesData = individualNodeChanges.reduce((acu, cur) => {
+    //   return { ...acu, [cur.node]: { ...cur } };
+    // }, nodes);
+    // const [firstTask, ...others] = queue;
+    setQueue([]);
+    // const nodeChanged: FullNodeData = { ...nodes[firstTask.id], height: firstTask.height };
+    // console.log("--> nodeChanged", nodeChanged);
+    // const nodesToRecalculate = setDagNode(g.current, firstTask.id, nodeChanged, { ...nodes }, { ...allTags }, null);
     recalculateGraphWithWorker(nodesToRecalculate, edges);
   }, [allTags, edges, g, isWorking, nodes, queue, recalculateGraphWithWorker]);
 

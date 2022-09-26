@@ -214,6 +214,12 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     changedAt: Date;
     createdAt: Date;
     updatedAt: Date;
+    width?: number;
+    height?: number;
+    // left: number;
+    // top: number;
+    x?: number;
+    y?: number;
   };
 
 export type FullNodesData = { [key: string]: FullNodeData };

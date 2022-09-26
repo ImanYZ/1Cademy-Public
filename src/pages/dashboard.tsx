@@ -1026,6 +1026,17 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookState.choosingNode, nodes, recursiveOffsprings]
   );
 
+  /**
+   * get Node data
+   * iterate over children and update updatedAt field
+   * iterate over parents and update updatedAt field
+   * get userNode data
+   *  - if exist: update visible and updatedAt field
+   *  - else: create
+   * build fullNode then call makeNodeVisibleInItsLinks and createOrUpdateNode
+   * scroll
+   * update selectedNode
+   */
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
       // setFlag(!flag)
