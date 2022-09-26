@@ -14,6 +14,7 @@ export const useWorkerQueue = ({ nodes, setNodes }: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
 
+  console.log(" --> use nodes:", nodes, queue);
   const recalculateGraphWithWorker = useCallback(
     (newTask: Task, newNodes: Task[]) => {
       console.log("worker was created!", newNodes);
@@ -26,25 +27,27 @@ export const useWorkerQueue = ({ nodes, setNodes }: UseWorkerQueueProps) => {
         console.log("result of worker:", e.data);
         const newNodes = e.data;
         setNodes(newNodes);
-        const [, ...others] = queue;
-        console.log("--others", others);
-        setQueue(others);
         setIsWorking(false);
       };
     },
-    [queue, setNodes]
+    [setNodes]
   );
 
   useEffect(() => {
-    console.log(0);
+    console.log("[queue]: useEffect");
     if (isWorking) return;
     if (!queue.length) return;
 
-    console.log(1);
+    console.log("[queue]: recalculateGraphWithWorker", nodes, queue[0], queue);
+
+    const [, ...others] = queue;
+    console.log("--others", others, queue);
+    setQueue(others);
     recalculateGraphWithWorker(queue[0], nodes);
   }, [isWorking, nodes, queue, recalculateGraphWithWorker]);
 
   const addTask = (newTask: Task) => {
+    console.log("[queue]: add task\n", queue);
     setQueue(queue => [...queue, newTask]);
   };
 
