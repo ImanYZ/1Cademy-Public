@@ -3,9 +3,8 @@ import dagre from "dagre";
 
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
-// import { ClusterNodes } from "../noteBookTypes";
-import { MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
 import { ClusterNodes } from "../nodeBookTypes";
+// import { ClusterNodes } from "../noteBookTypes";
 
 const layoutHandler = (
   mapChangedFlag: boolean,
@@ -15,6 +14,11 @@ const layoutHandler = (
   oldNodes: { [x: string]: any },
   oldEdges: { [x: string]: any },
   allTags: any,
+  XOFFSET: number,
+  YOFFSET: number,
+  MIN_CHANGE: number,
+  MAP_RIGHT_GAP: number,
+  NODE_WIDTH: number,
   g: dagre.graphlib.Graph<{}>
 ) => {
   // debugger
@@ -166,7 +170,21 @@ const layoutHandler = (
 };
 
 onmessage = e => {
-  const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, allTags, graph } = e.data;
+  const {
+    mapChangedFlag,
+    oldClusterNodes,
+    oldMapWidth,
+    oldMapHeight,
+    oldNodes,
+    oldEdges,
+    allTags,
+    XOFFSET,
+    YOFFSET,
+    MIN_CHANGE,
+    MAP_RIGHT_GAP,
+    NODE_WIDTH,
+    graph,
+  } = e.data;
 
   const g = dagreUtils.mapObjectToGraph(graph);
 
@@ -178,6 +196,11 @@ onmessage = e => {
     oldNodes,
     oldEdges,
     allTags,
+    XOFFSET,
+    YOFFSET,
+    MIN_CHANGE,
+    MAP_RIGHT_GAP,
+    NODE_WIDTH,
     g
   );
   postMessage(workerResults);

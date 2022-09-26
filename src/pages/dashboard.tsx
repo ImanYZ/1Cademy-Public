@@ -1,5 +1,4 @@
 import CodeIcon from "@mui/icons-material/Code";
-import CoronavirusIcon from "@mui/icons-material/Coronavirus";
 import { Button, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -38,7 +37,7 @@ import NodesList from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
-import { Task, useWorkerQueue } from "../hooks/useWorkerQueue";
+import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken } from "../lib/firestoreClient/auth";
 import { postWithToken } from "../lib/mapApi";
@@ -107,8 +106,8 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  const [nodesTest, setNodesTest] = useState<Task[]>([]);
-  const { addTask, queue } = useWorkerQueue({ nodes: nodesTest, setNodes: setNodesTest });
+  // const [nodesTest, setNodesTest] = useState<Task[]>([]);
+
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
@@ -186,6 +185,21 @@ const Dashboard = ({}: DashboardProps) => {
 
   const g = useRef(dagreUtils.createGraph());
 
+  const { addTask, queue } = useWorkerQueue({
+    g,
+    nodes,
+    setNodes,
+    setMapWidth,
+    setMapHeight,
+    setClusterNodes,
+    setEdges,
+    setMapChanged,
+    mapWidth,
+    mapHeight,
+    allTags,
+    edges,
+  });
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FLAGS
@@ -200,7 +214,7 @@ const Dashboard = ({}: DashboardProps) => {
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
-  const [userNodesLoaded, setUserNodesLoaded] = useState(false);
+  const [, /*userNodesLoaded*/ setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
   const [, /*isSubmitting*/ setIsSubmitting] = useState(false);
@@ -638,40 +652,40 @@ const Dashboard = ({}: DashboardProps) => {
     [allTags, mapHeight, mapWidth]
   );
 
-  useEffect(() => {
-    console.log("[WORKER]", {
-      mapChanged,
-      nodeChanges: nodeChanges.length === 0,
-      userNodeChanges: userNodeChanges.length === 0,
-      userNodesLoaded,
-      EdgesSync: Object.keys(edges).length === g.current.edgeCount(),
-    });
-    if (
-      mapChanged &&
-      nodeChanges.length === 0 &&
-      userNodeChanges.length === 0 &&
-      // nodeTypeVisibilityChanges.length === 0 &&
-      // (necessaryNodesLoaded && !mapRendered) ||
-      userNodesLoaded &&
-      // Object.keys(nodes).length + Object.keys(allTags).length === g.current.nodeCount() &&
-      Object.keys(edges).length === g.current.edgeCount()
-    ) {
-      recalculateGraphWithWorker(nodes, edges);
-    }
-  }, [
-    // necessaryNodesLoaded,
-    // nodeTypeVisibilityChanges,
-    userNodesLoaded,
-    mapChanged,
-    allTags,
-    nodes,
-    edges,
-    mapWidth,
-    mapHeight,
-    userNodeChanges,
-    nodeChanges,
-    recalculateGraphWithWorker,
-  ]);
+  // useEffect(() => {
+  //   console.log("[WORKER]", {
+  //     mapChanged,
+  //     nodeChanges: nodeChanges.length === 0,
+  //     userNodeChanges: userNodeChanges.length === 0,
+  //     userNodesLoaded,
+  //     EdgesSync: Object.keys(edges).length === g.current.edgeCount(),
+  //   });
+  //   if (
+  //     mapChanged &&
+  //     nodeChanges.length === 0 &&
+  //     userNodeChanges.length === 0 &&
+  //     // nodeTypeVisibilityChanges.length === 0 &&
+  //     // (necessaryNodesLoaded && !mapRendered) ||
+  //     userNodesLoaded &&
+  //     // Object.keys(nodes).length + Object.keys(allTags).length === g.current.nodeCount() &&
+  //     Object.keys(edges).length === g.current.edgeCount()
+  //   ) {
+  //     recalculateGraphWithWorker(nodes, edges);
+  //   }
+  // }, [
+  //   // necessaryNodesLoaded,
+  //   // nodeTypeVisibilityChanges,
+  //   userNodesLoaded,
+  //   mapChanged,
+  //   allTags,
+  //   nodes,
+  //   edges,
+  //   mapWidth,
+  //   mapHeight,
+  //   userNodeChanges,
+  //   nodeChanges,
+  //   recalculateGraphWithWorker,
+  // ]);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -1600,15 +1614,16 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string, height: number) => {
       console.log("[2.CHANGE NODE HIGHT 🚀]", { node: nodes[nodeId], height });
 
-      // if (value === nodes[nodeId].title) return;
-      const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
+      // // if (value === nodes[nodeId].title) return;
+      // const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
 
-      // console.log("nodeChanges", { nodeId, nodeChanged, nodes: { ...nodes } });
-      const oldNodes = setDagNode(g.current, nodeId, nodeChanged, { ...nodes }, { ...allTags }, null);
-      console.log("-->", { oldNodes, nodeChanged });
-      recalculateGraphWithWorker(oldNodes, edges);
+      // // console.log("nodeChanges", { nodeId, nodeChanged, nodes: { ...nodes } });
+      // const oldNodes = setDagNode(g.current, nodeId, nodeChanged, { ...nodes }, { ...allTags }, null);
+      // console.log("-->", { oldNodes, nodeChanged });
+      // recalculateGraphWithWorker(oldNodes, edges);
+      addTask({ id: nodeId, height });
     },
-    [allTags, edges, nodes, recalculateGraphWithWorker]
+    [addTask, nodes]
   );
 
   const changeChoice = useCallback(
@@ -2539,13 +2554,13 @@ const Dashboard = ({}: DashboardProps) => {
             }}
           >
             <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>Workers</Typography>
+              <Typography>Queue Workers</Typography>
               {queue.map(cur => ` 👷‍♂️ ${cur.height} `)}
             </Box>
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
+            {/* <Box sx={{ border: "dashed 1px royalBlue" }}>
               <Typography>Nodes</Typography>
               {nodesTest.map(cur => ` 🧶 ${cur.height} `)}
-            </Box>
+            </Box> */}
 
             <Box sx={{ float: "right" }}>
               <Tooltip title={"Watch geek data"}>
@@ -2553,11 +2568,11 @@ const Dashboard = ({}: DashboardProps) => {
                   <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                     <CodeIcon color="warning" />
                   </IconButton>
-                  <IconButton
+                  {/* <IconButton
                     onClick={() => addTask({ id: Math.random().toString(), height: Math.ceil(Math.random() * 100) })}
                   >
                     <CoronavirusIcon color="primary" />
-                  </IconButton>
+                  </IconButton> */}
                 </>
               </Tooltip>
             </Box>

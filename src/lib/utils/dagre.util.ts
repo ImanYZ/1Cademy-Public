@@ -1,5 +1,30 @@
 import dagre from "dagre";
 
+type GraphObject = {
+  nodes: {
+    id: string;
+    data: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      class?: string | undefined;
+      label?: string | undefined;
+      padding?: number | undefined;
+      paddingX?: number | undefined;
+      paddingY?: number | undefined;
+      rx?: number | undefined;
+      ry?: number | undefined;
+      shape?: string | undefined;
+    };
+  }[];
+  edges: {
+    from: string;
+    to: string;
+    data: dagre.GraphEdge;
+  }[];
+};
+
 export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
 export const COLUMN_GAP = 190; // The minimum gap between the node columns.
 
@@ -31,31 +56,6 @@ const getSummary = (g: dagre.graphlib.Graph<{}>) => {
   });
 
   return summary;
-};
-
-type GraphObject = {
-  nodes: {
-    id: string;
-    data: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-      class?: string | undefined;
-      label?: string | undefined;
-      padding?: number | undefined;
-      paddingX?: number | undefined;
-      paddingY?: number | undefined;
-      rx?: number | undefined;
-      ry?: number | undefined;
-      shape?: string | undefined;
-    };
-  }[];
-  edges: {
-    from: string;
-    to: string;
-    data: dagre.GraphEdge;
-  }[];
 };
 
 const mapGraphToObject = (g: dagre.graphlib.Graph<{}>): GraphObject => {
