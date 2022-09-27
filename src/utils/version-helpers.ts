@@ -465,7 +465,7 @@ export const changeNodeTitle = async ({
     for (let taggedNodeDoc of taggedNodesDocs.docs) {
       const linkedRef = db.collection("nodes").doc(taggedNodeDoc.id);
       const linkedData = taggedNodeDoc.data();
-      const tagIdx = linkedData.tagIds.findIndex(nodeId);
+      const tagIdx = linkedData.tagIds.indexOf(nodeId);
       linkedData.tags[tagIdx] = newTitle;
       linkedDataChanges = {
         tags: linkedData.tags,
@@ -550,7 +550,7 @@ export const changeNodeTitle = async ({
       for (let versionDoc of versionsDocs.docs) {
         const linkedRef = versionsColl.doc(versionDoc.id);
         const linkedData = versionDoc.data();
-        const tagIdx = linkedData.tagIds.findIndex(nodeId);
+        const tagIdx = linkedData.tagIds.indexOf(nodeId);
         linkedData.tags[tagIdx] = newTitle;
         linkedDataChanges = {
           tags: linkedData.tags,
@@ -638,7 +638,8 @@ export const addTagCommunityAndTagsOfTags = async ({
   let newBatch = batch;
   await tagsAndCommPoints({
     nodeId: tagNodeId,
-    callback: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
+
+    callBack: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
       let tagNewData;
       // If the tag or comPoints document already exists in the corresponding collection:
       if (tagDoc) {
@@ -663,7 +664,7 @@ export const addTagCommunityAndTagsOfTags = async ({
           });
           [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           tagNewData = {
-            ...getDirectTags({ nodeTagIds: tagNodeData.tagsIds, nodeTags: tagNodeData.tags, tagsOfNodes: null }),
+            ...getDirectTags({ nodeTagIds: tagNodeData.tagIds, nodeTags: tagNodeData.tags, tagsOfNodes: null }),
             // Number of the nodes tagging this tag.
             nodesNum: 1,
             node: tagNodeId,
@@ -672,6 +673,7 @@ export const addTagCommunityAndTagsOfTags = async ({
             createdAt: currentTimestamp,
             updatedAt: currentTimestamp,
           };
+
           // If we need to create different types of community point documents:
         } else {
           tagNewData = initializeNewReputationData(tagNodeId, tagTitle, currentTimestamp, currentTimestamp);
@@ -700,12 +702,12 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
   // Delete the corresponding tag document from the tags collection.
   await tagsAndCommPoints({
     nodeId: tagNodeId,
-    callback: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
+    callBack: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
       if (tagDoc && !tagData.deleted) {
         const tagUpdates: any = {};
         // Only delete the tag document. Later, in the update time, we'll delete the corresponding comPoints documents.
         if (collectionName === "tags") {
-          tagUpdates.nodesNum = tagData.nodesNum - 1;
+          tagUpdates.nodesNum = tagData.nodesNum && tagData.nodesNum > 0 ? tagData.nodesNum - 1 : 0;
           tagUpdates.updatedAt = currentTimestamp;
           if (tagUpdates.nodesNum === 0) {
             shouldRemove = true;
@@ -730,8 +732,10 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
             operationType: "update",
           });
         } else {
-          newBatch.update(tagRef, tagUpdates);
-          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+          if (Object.keys(tagUpdates).length > 0) {
+            newBatch.update(tagRef, tagUpdates);
+            [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+          }
         }
       }
     },
@@ -847,6 +851,7 @@ export const generateTagsData = async ({
     nodeTagRef = tagRef;
     nodeTagData = tagData;
   }
+
   // For the case where there is a tag in the old version of the node that does not exist on its new version.
   for (let tagIdx = 0; tagIdx < nodeTagIds.length; tagIdx++) {
     const tagId = nodeTagIds[tagIdx];
@@ -875,8 +880,8 @@ export const generateTagsData = async ({
     }
   }
   const tagUpdates = {
-    tagIds: nodeTagData.tagIds,
-    tags: nodeTagData.tags,
+    tagIds: nodeTagData ? nodeTagData.tagIds : [],
+    tags: nodeTagData ? nodeTagData.tags : [],
   };
 
   const newTagIdsSoFar = [];
@@ -929,7 +934,17 @@ export const generateTagsData = async ({
     }
   }
   if (isTag && Object.keys(tagUpdates).length > 0) {
-    await newBatch.update(nodeTagRef, tagUpdates);
+    if (nodeTagData) {
+      await newBatch.update(nodeTagRef, tagUpdates);
+    } else {
+      const node = await db.collection("nodes").doc(nodeId).get();
+      const nodeData: any = node.data();
+      await newBatch.set(nodeTagRef, {
+        ...tagUpdates,
+        title: nodeData.title,
+        node: node.id,
+      });
+    }
     [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
   return [newBatch, writeCounts];
@@ -1210,6 +1225,7 @@ export const versionCreateUpdate = async ({
     versionData.accepted = nodeDataDoc ? true : false;
     // If the version was accepted previously, accepted === true.
     // If the version is determined to be approved right now, versionData.accepted === true.
+
     if (versionData.accepted || accepted) {
       const { newMaxVersionRating, adminPoints, nodeAdmin, aImgUrl, aFullname, aChooseUname } =
         await getCumulativeProposerVersionRatingsOnNode({
@@ -1237,6 +1253,7 @@ export const versionCreateUpdate = async ({
         maxVersionRating: newMaxVersionRating,
         updatedAt: currentTimestamp,
       };
+
       //  proposal was accepted previously, not accepted just now
       if (accepted) {
         // When someone votes on an accepted proposal of a node, that person has definitely studied it.
@@ -1713,6 +1730,7 @@ export const versionCreateUpdate = async ({
       }
     }
   }
+
   return [newBatch, writeCounts];
 };
 
