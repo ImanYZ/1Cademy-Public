@@ -1,20 +1,21 @@
 // dagre is used for calculating location of nodes and arrows
 import dagre from "dagre";
 
+import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
 // import { ClusterNodes } from "../noteBookTypes";
 import { MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
-import { ClusterNodes } from "../nodeBookTypes";
+import { ClusterNodes, EdgesData, FullNodesData } from "../nodeBookTypes";
 
 const layoutHandler = (
   mapChangedFlag: boolean,
   oldClusterNodes: ClusterNodes,
   oldMapWidth: number,
   oldMapHeight: any,
-  oldNodes: { [x: string]: any },
-  oldEdges: { [x: string]: any },
-  allTags: any,
+  oldNodes: FullNodesData,
+  oldEdges: EdgesData,
+  allTags: AllTagsTreeView,
   g: dagre.graphlib.Graph<{}>
 ) => {
   // debugger
@@ -125,6 +126,8 @@ const layoutHandler = (
     });
 
     // ITERATE EDGES and calculate the new positions
+    // debugger;
+    console.log("[Worker]:g.edges()", g.edges().length);
     g.edges().map((e: any) => {
       const fromNode = g.node(e.v) as any;
       const toNode = g.node(e.w) as any;

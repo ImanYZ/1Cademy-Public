@@ -1,6 +1,6 @@
 import dagre from "dagre";
 
-type GraphObject = {
+export type GraphObject = {
   nodes: {
     id: string;
     data: {

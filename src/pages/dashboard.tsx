@@ -55,8 +55,6 @@ import {
   createOrUpdateNode,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
-  MAP_RIGHT_GAP,
-  MIN_CHANGE,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -65,12 +63,10 @@ import {
   setDagNode,
   setNewParentChildrenEdges,
   tempNodes,
-  XOFFSET,
-  YOFFSET,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { ChoosingType, ClusterNodes, FullNodeData, UserNodes, UserNodesData } from "../nodeBookTypes";
+import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType } from "../types";
 
@@ -134,15 +130,15 @@ const Dashboard = ({}: DashboardProps) => {
   // usernodes: collection of all data about each interaction between user and node
   // (ex: node open, hidden, closed, hidden, etc.) (contains every user with every node interacted with)
   // nodes: dictionary of all nodes visible on map for specific user
-  const [nodes, setNodes] = useState<{ [key: string]: FullNodeData }>({});
+  const [nodes, setNodes] = useState<FullNodesData>({});
   // edges: dictionary of all edges visible on map for specific user
-  const [edges, setEdges] = useState<{ [key: string]: any }>({});
+  const [edges, setEdges] = useState<EdgesData>({});
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
   const [allNodes, setAllNodes] = useState<FullNodeData[]>([]);
 
-  const nodeRef = useRef<{ [key: string]: FullNodeData }>({});
-  const edgesRef = useRef<{ [key: string]: any } | null>(null);
+  const nodeRef = useRef<FullNodesData>({});
+  const edgesRef = useRef<EdgesData | null>(null);
 
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
@@ -312,7 +308,8 @@ const Dashboard = ({}: DashboardProps) => {
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
-              if (nodes) {
+              if (!node) {
+                // <---  CHECK I change this from nodes
                 const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
@@ -384,18 +381,27 @@ const Dashboard = ({}: DashboardProps) => {
         // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook
+        console.log(" -> fullNodes", fullNodes);
         const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
         const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
 
         setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
         setNodes(newNodes);
         setEdges(newEdges);
-        console.log("userNodesSnapshot:", { userNodeChanges, nodeIds, nodesData, fullNodes, visibleFullNodes });
+        console.log(" -> userNodesSnapshot:", {
+          userNodeChanges,
+          nodeIds,
+          nodesData,
+          fullNodes,
+          visibleFullNodes,
+          newNodes,
+          newEdges,
+        });
         setUserNodesLoaded(true);
       });
       return () => userNodesSnapshot();
     },
-    [db, allTags]
+    [allTags, db]
   );
 
   useEffect(() => {
@@ -581,78 +587,78 @@ const Dashboard = ({}: DashboardProps) => {
 
   // fire if map changed; responsible for laying out the knowledge map
 
-  const recalculateGraphWithWorker = useCallback(
-    (nodesToRecalculate: any, edgesToRecalculate: any) => {
-      console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
-      let mapChangedFlag = true;
-      const oldClusterNodes: ClusterNodes = {};
-      let oldMapWidth = mapWidth;
-      let oldMapHeight = mapHeight;
-      let oldNodes = { ...nodesToRecalculate };
-      let oldEdges = { ...edgesToRecalculate };
+  // const recalculateGraphWithWorker = useCallback(
+  //   (nodesToRecalculate: FullNodesData, edgesToRecalculate: EdgesData) => {
+  //     console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
+  //     let mapChangedFlag = true;
+  //     const oldClusterNodes: ClusterNodes = {};
+  //     let oldMapWidth = mapWidth;
+  //     let oldMapHeight = mapHeight;
+  //     let oldNodes = { ...nodesToRecalculate };
+  //     let oldEdges = { ...edgesToRecalculate };
 
-      const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
-      worker.postMessage({
-        mapChangedFlag,
-        oldClusterNodes,
-        oldMapWidth,
-        oldMapHeight,
-        oldNodes,
-        oldEdges,
-        allTags,
-        XOFFSET,
-        YOFFSET,
-        MIN_CHANGE,
-        MAP_RIGHT_GAP,
-        NODE_WIDTH,
-        graph: dagreUtils.mapGraphToObject(g.current),
-      });
-      // worker.onerror = (err) => err;
-      worker.onmessage = e => {
-        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
-        const gg = dagreUtils.mapObjectToGraph(graph);
+  //     const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
+  //     worker.postMessage({
+  //       mapChangedFlag,
+  //       oldClusterNodes,
+  //       oldMapWidth,
+  //       oldMapHeight,
+  //       oldNodes,
+  //       oldEdges,
+  //       allTags,
+  //       XOFFSET,
+  //       YOFFSET,
+  //       MIN_CHANGE,
+  //       MAP_RIGHT_GAP,
+  //       NODE_WIDTH,
+  //       graph: dagreUtils.mapGraphToObject(g.current),
+  //     });
+  //     // worker.onerror = (err) => err;
+  //     worker.onmessage = e => {
+  //       const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
+  //       const gg = dagreUtils.mapObjectToGraph(graph);
 
-        worker.terminate();
-        g.current = gg;
-        setMapWidth(oldMapWidth);
-        setMapHeight(oldMapHeight);
-        setClusterNodes(oldClusterNodes);
-        setNodes(oldNodes);
-        setEdges(oldEdges);
-        setMapChanged(mapChangedFlag);
-        // setMapChanged(false)
-        // // if (!mapRendered) {
-        // //   setTimeout(() => {
-        // //     let nodeToNavigateTo = null;
-        // //     if (
-        // //       "location" in window &&
-        // //       "pathname" in window.location &&
-        // //       window.location.pathname.length > 1 &&
-        // //       window.location.pathname[0] === "/"
-        // //     ) {
-        // //       const pathParts = window.location.pathname.split("/");
-        // //       if (pathParts.length === 4) {
-        // //         nodeToNavigateTo = pathParts[3];
-        // //       }
-        // //     }
-        // //     // navigate to node that is identified in the URL
-        // //     if (nodeToNavigateTo) {
-        // //       openLinkedNode(nodeToNavigateTo);
-        // //       // Navigate to node that the user interacted with the last time they used 1Cademy.
-        // //     } else if (sNode) {
-        // //       openLinkedNode(sNode);
-        // //     } else {
-        // //       //  redirect to the very first node that is loaded
-        // //       scrollToNode(Object.keys(nodes)[0]);
-        // //     }
-        // //     setMapRendered(true);
-        // //     // setMap
-        // //   }, 10);
-        // // }
-      };
-    },
-    [allTags, mapHeight, mapWidth]
-  );
+  //       worker.terminate();
+  //       g.current = gg;
+  //       setMapWidth(oldMapWidth);
+  //       setMapHeight(oldMapHeight);
+  //       setClusterNodes(oldClusterNodes);
+  //       setNodes(oldNodes);
+  //       setEdges(oldEdges);
+  //       setMapChanged(mapChangedFlag);
+  //       // setMapChanged(false)
+  //       // // if (!mapRendered) {
+  //       // //   setTimeout(() => {
+  //       // //     let nodeToNavigateTo = null;
+  //       // //     if (
+  //       // //       "location" in window &&
+  //       // //       "pathname" in window.location &&
+  //       // //       window.location.pathname.length > 1 &&
+  //       // //       window.location.pathname[0] === "/"
+  //       // //     ) {
+  //       // //       const pathParts = window.location.pathname.split("/");
+  //       // //       if (pathParts.length === 4) {
+  //       // //         nodeToNavigateTo = pathParts[3];
+  //       // //       }
+  //       // //     }
+  //       // //     // navigate to node that is identified in the URL
+  //       // //     if (nodeToNavigateTo) {
+  //       // //       openLinkedNode(nodeToNavigateTo);
+  //       // //       // Navigate to node that the user interacted with the last time they used 1Cademy.
+  //       // //     } else if (sNode) {
+  //       // //       openLinkedNode(sNode);
+  //       // //     } else {
+  //       // //       //  redirect to the very first node that is loaded
+  //       // //       scrollToNode(Object.keys(nodes)[0]);
+  //       // //     }
+  //       // //     setMapRendered(true);
+  //       // //     // setMap
+  //       // //   }, 10);
+  //       // // }
+  //     };
+  //   },
+  //   [allTags, mapHeight, mapWidth]
+  // );
 
   // useEffect(() => {
   //   console.log("[WORKER]", {
@@ -1260,9 +1266,6 @@ const Dashboard = ({}: DashboardProps) => {
               correct: false,
               createdAt: Timestamp.fromDate(new Date()),
               updatedAt: Timestamp.fromDate(new Date()),
-              // firstVisit: Timestamp.fromDate(new Date()),//CHECK
-              // lastVisit: Timestamp.fromDate(new Date()),//CHECK
-              // userNodeId: newId(),
               deleted: false,
               isStudied: false,
               bookmarked: false,
@@ -1340,8 +1343,9 @@ const Dashboard = ({}: DashboardProps) => {
           //   [nodeId]: userNodeData,
           // };
           // await firebase.commitBatch();
+          console.log("------------ before batch commit");
           await batch.commit();
-          console.log("------------ batch commit");
+          console.log("------------ after batch commit");
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
@@ -2768,7 +2772,7 @@ const Dashboard = ({}: DashboardProps) => {
               <NodesList
                 nodes={nodes}
                 // nodeChanged={nodeChanged}
-                nodeChanged={() => recalculateGraphWithWorker(nodes, edges)}
+                nodeChanged={() => console.log("this button will be deprecated!!")}
                 bookmark={bookmark}
                 markStudied={markStudied}
                 chosenNodeChanged={chosenNodeChanged}

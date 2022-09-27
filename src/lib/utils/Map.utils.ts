@@ -1,7 +1,7 @@
 import dagre from "dagre";
 import { collection, Firestore, onSnapshot, query, where } from "firebase/firestore";
 
-import { FullNodeData, FullNodesData } from "../../nodeBookTypes";
+import { EdgesData, FullNodeData, FullNodesData } from "../../nodeBookTypes";
 
 // import { FullNodeData } from "../../noteBookTypes";
 
@@ -374,7 +374,7 @@ export const setDagNodes = (
   // (clusters are based on nodes' first tags)
 
   individualNodeChanges.forEach(cur => {
-    if (!cur.tagIds.length) return;
+    if (!cur?.tagIds.length) return;
     if (!(cur.tagIds[0] in allTags)) return;
     g.setParent(cur.node, "Tag" + cur.tagIds[0]);
   });
@@ -657,10 +657,10 @@ export const compareAndUpdateNodeLinks = (
 
 export const createOrUpdateNode = (
   g: dagre.graphlib.Graph<{}>,
-  newNode: any,
+  newNode: FullNodeData,
   nodeId: string,
   oldNodes: any,
-  oldEdges: any,
+  oldEdges: EdgesData,
   allTags: any
 ) => {
   // CHECK: object.children was node by I changed with newNode

@@ -222,7 +222,17 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     y?: number;
   };
 
+export type EdgeData = {
+  fromX: number;
+  fromY: number;
+  label: string;
+  points: any[];
+  toX: number;
+  toY: number;
+};
+
 export type FullNodesData = { [key: string]: FullNodeData };
+export type EdgesData = { [key: string]: EdgeData };
 
 export type SortDirection = "ASCENDING" | "DESCENDING";
 export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES";
