@@ -1,6 +1,6 @@
-import { admin,commitBatch, db } from "../../../src/lib/firestoreServer/admin";
+import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { changeNodeTitle } from "../../../src/utils";
-import { nodesData, notificationsData,usersData } from "../../../testUtils/mockCollections";
+import { nodesData, notificationsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("changeNodeTitle", () => {
   beforeEach(async () => {

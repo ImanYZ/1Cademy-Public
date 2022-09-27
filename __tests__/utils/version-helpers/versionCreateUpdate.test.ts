@@ -1,4 +1,4 @@
-import { admin,commitBatch, db } from "@/lib/firestoreServer/admin";
+import { admin, commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { versionCreateUpdate } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";

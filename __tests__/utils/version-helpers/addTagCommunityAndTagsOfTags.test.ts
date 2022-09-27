@@ -1,6 +1,6 @@
-import { admin,commitBatch, db } from "../../../src/lib/firestoreServer/admin";
+import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addTagCommunityAndTagsOfTags, getTypedCollections } from "../../../src/utils";
-import { conceptVersionsData,nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("addTagCommunityAndTagsOfTags", () => {
   let node = "OR8UsmsxmeExHG8ekkIY";
