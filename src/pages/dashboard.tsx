@@ -130,15 +130,16 @@ const Dashboard = ({}: DashboardProps) => {
   // usernodes: collection of all data about each interaction between user and node
   // (ex: node open, hidden, closed, hidden, etc.) (contains every user with every node interacted with)
   // nodes: dictionary of all nodes visible on map for specific user
-  const [nodes, setNodes] = useState<FullNodesData>({});
+  // const [nodes, setNodes] = useState<FullNodesData>({});
   // edges: dictionary of all edges visible on map for specific user
-  const [edges, setEdges] = useState<EdgesData>({});
+  // const [edges, setEdges] = useState<EdgesData>({});
+  const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
   const [allNodes, setAllNodes] = useState<FullNodeData[]>([]);
 
-  const nodeRef = useRef<FullNodesData>({});
-  const edgesRef = useRef<EdgesData | null>(null);
+  // const nodeRef = useRef<FullNodesData>({});
+  // const edgesRef = useRef<EdgesData | null>(null);
 
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
@@ -183,17 +184,19 @@ const Dashboard = ({}: DashboardProps) => {
 
   const { addTask, queue } = useWorkerQueue({
     g,
-    nodes,
-    setNodes,
+    graph,
+    setGraph,
+    // nodes,
+    // setNodes,
     setMapWidth,
     setMapHeight,
     setClusterNodes,
-    setEdges,
+    // setEdges,
     setMapChanged,
     mapWidth,
     mapHeight,
     allTags,
-    edges,
+    // edges,
   });
 
   // ---------------------------------------------------------------------
@@ -381,21 +384,36 @@ const Dashboard = ({}: DashboardProps) => {
         // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook
-        console.log(" -> fullNodes", fullNodes);
         const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-        const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
+        // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
 
         setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-        setNodes(newNodes);
-        setEdges(newEdges);
+        // setNodes(newNodes);
+        // setEdges(newEdges);
+        // setNodes(nodes => {
+        //   const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edgesRef.current);
+        //   setEdges(newEdges);
+        //   return newNodes;
+        //   // setEdges(edges=>{
+        //   // })
+        // });
+        setGraph(({ nodes, edges }) => {
+          const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edges);
+          console.log({ newNodes, newEdges });
+          return { nodes: newNodes, edges: newEdges };
+        });
+        // setEdges(edges => {
+        //   setNodes(newNodes);
+        //   return newEdges;
+        // });
         console.log(" -> userNodesSnapshot:", {
           userNodeChanges,
           nodeIds,
           nodesData,
           fullNodes,
           visibleFullNodes,
-          newNodes,
-          newEdges,
+          // newNodes,
+          // newEdges,
         });
         setUserNodesLoaded(true);
       });
@@ -404,12 +422,12 @@ const Dashboard = ({}: DashboardProps) => {
     [allTags, db]
   );
 
-  useEffect(() => {
-    nodeRef.current = nodes;
-  }, [nodes]);
-  useEffect(() => {
-    edgesRef.current = edges;
-  }, [edges]);
+  // useEffect(() => {
+  //   nodeRef.current = nodes;
+  // }, [nodes]);
+  // useEffect(() => {
+  //   edgesRef.current = edges;
+  // }, [edges]);
 
   /**
    * Will revert the graph from last changes (temporal Nodes or other changes)
@@ -417,8 +435,8 @@ const Dashboard = ({}: DashboardProps) => {
   const reloadPermanentGraph = useMemoizedCallback(() => {
     console.log("[RELOAD PERMANENT GRAPH]");
     // debugger;
-    let oldNodes = nodes;
-    let oldEdges = edges;
+    let oldNodes = graph.nodes;
+    let oldEdges = graph.edges;
     if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
       oldNodes = { ...oldNodes };
       oldEdges = { ...oldEdges };
@@ -443,10 +461,11 @@ const Dashboard = ({}: DashboardProps) => {
       oldNodes = setDagNode(g.current, cId, copyNode(changedNode), oldNodes, allTags, null);
       delete changedNodes[cId];
     }
-    setEdges(oldEdges);
-    setNodes(oldNodes);
+    // setEdges(oldEdges);
+    // setNodes(oldNodes);
+    setGraph({ nodes: oldNodes, edges: oldEdges });
     setMapChanged(true);
-  }, [nodes, edges, allTags]);
+  }, [allTags]);
 
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
@@ -710,13 +729,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // if (nodeId === nodeBookState.choosingNode?.id && nodeBookState.chosenNode) {
       console.log("[CHOSEN_NODE_CHANGED]");
-      setNodes(oldNodes => {
-        // debugger
-        if (!nodeBookState.choosingNode || !nodeBookState.chosenNode) return oldNodes;
-        if (nodeId !== nodeBookState.choosingNode.id) return oldNodes;
+      setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+        if (!nodeBookState.choosingNode || !nodeBookState.chosenNode) return { nodes: oldNodes, edges: oldEdges };
+        if (nodeId !== nodeBookState.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
 
         const thisNode = copyNode(oldNodes[nodeId]);
         const chosenNodeObj = copyNode(oldNodes[nodeBookState.chosenNode.id]);
+
+        let newEdges = oldEdges;
 
         const validLink =
           (nodeBookState.choosingNode.type === "Reference" &&
@@ -782,16 +802,26 @@ const Dashboard = ({}: DashboardProps) => {
               const choosingNodeId = nodeBookState.choosingNode.id;
               setAddedParents(oldAddedParents => [...oldAddedParents, choosingNodeId]);
             }
-            setEdges(oldEdges => {
-              if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges;
-              return setDagEdge(
+
+            // setEdges(oldEdges => {
+            //   if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges;
+            //   return setDagEdge(
+            //     g.current,
+            //     nodeBookState.chosenNode.id,
+            //     nodeBookState.choosingNode.id,
+            //     { label: "" },
+            //     { ...oldEdges }
+            //   );
+            // });
+            if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
+              newEdges = setDagEdge(
                 g.current,
                 nodeBookState.chosenNode.id,
                 nodeBookState.choosingNode.id,
                 { label: "" },
                 { ...oldEdges }
               );
-            });
+            }
           } else if (nodeBookState.choosingNode.type === "Child") {
             thisNode.children = [
               ...thisNode.children,
@@ -812,16 +842,25 @@ const Dashboard = ({}: DashboardProps) => {
                 label: "",
               },
             ];
-            setEdges(oldEdges => {
-              if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges;
-              return setDagEdge(
+            // setEdges(oldEdges => {
+            //   if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges;
+            //   return setDagEdge(
+            //     g.current,
+            //     nodeBookState.choosingNode.id,
+            //     nodeBookState.chosenNode.id,
+            //     { label: "" },
+            //     { ...oldEdges }
+            //   );
+            // });
+            if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
+              newEdges = setDagEdge(
                 g.current,
                 nodeBookState.choosingNode.id,
                 nodeBookState.chosenNode.id,
                 { label: "" },
                 { ...oldEdges }
               );
-            });
+            }
             if (removedChildren.includes(nodeBookState.chosenNode.id)) {
               const chosenNodeId = nodeBookState.choosingNode.id;
               setRemovedChildren(removedChildren.filter(nId => nId !== chosenNodeId));
@@ -841,15 +880,19 @@ const Dashboard = ({}: DashboardProps) => {
           scrollToNode(nodeId);
           setMapChanged(true);
 
-          return {
+          const newNodes = {
             ...oldNodes,
             [nodeId]: thisNode,
             [chosenNode]: chosenNodeObj,
           };
-        } else {
-          return oldNodes;
+          return { nodes: newNodes, edges: newEdges };
         }
+        return { nodes: oldNodes, edges: oldEdges };
       });
+
+      // setNodes(oldNodes => {
+      //   // debugger
+      // });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -870,8 +913,9 @@ const Dashboard = ({}: DashboardProps) => {
   const deleteLink = useCallback(
     (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
       console.log("[DELETE LINK]");
-      setNodes(oNodes => {
-        let oldNodes = { ...oNodes };
+      setGraph(({ nodes, edges }) => {
+        let oldNodes = { ...nodes };
+        let newEdges = { ...edges };
         const thisNode = copyNode(oldNodes[nodeId]);
         console.log("thisNode", thisNode);
         // debugger
@@ -887,9 +931,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
           if (parentId in oldNodes) {
             parentNode = copyNode(oldNodes[parentId]);
-            setEdges(oldEdges => {
-              return removeDagEdge(g.current, parentId, nodeId, { ...oldEdges });
-            });
+            // setEdges(oldEdges => {
+            //   return removeDagEdge(g.current, parentId, nodeId, { ...oldEdges });
+            // });
+            newEdges = removeDagEdge(g.current, parentId, nodeId, { ...newEdges });
             if (!(parentId in changedNodes)) {
               changedNodes[parentId] = copyNode(oldNodes[parentId]);
             }
@@ -908,9 +953,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
           if (childId in oldNodes) {
             childNode = oldNodes[childId];
-            setEdges((oldEdges: any) => {
-              return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
-            });
+            // setEdges((oldEdges: any) => {
+            //   return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
+            // });
+            newEdges = removeDagEdge(g.current, nodeId, childId, { ...newEdges });
             if (!(childId in changedNodes)) {
               changedNodes[childId] = copyNode(oldNodes[childId]);
             }
@@ -929,8 +975,70 @@ const Dashboard = ({}: DashboardProps) => {
         }
         scrollToNode(nodeId);
         oldNodes[nodeId] = thisNode;
-        return oldNodes;
+        return { nodes: oldNodes, edges: newEdges };
       });
+
+      // setNodes(oNodes => {
+      //   let oldNodes = { ...oNodes };
+      //   const thisNode = copyNode(oldNodes[nodeId]);
+      //   console.log("thisNode", thisNode);
+      //   // debugger
+      //   if (linkType === "Parent") {
+      //     let parentNode = null;
+      //     const parentId = thisNode.parents[linkIdx].node;
+      //     thisNode.parents = [...thisNode.parents];
+      //     thisNode.parents.splice(linkIdx, 1);
+      //     if (addedParents.includes(parentId)) {
+      //       setAddedParents(addedParents.filter(nId => nId !== parentId));
+      //     } else {
+      //       setRemovedParents(oldRemovedParents => [...oldRemovedParents, parentId]);
+      //     }
+      //     if (parentId in oldNodes) {
+      //       parentNode = copyNode(oldNodes[parentId]);
+      //       setEdges(oldEdges => {
+      //         return removeDagEdge(g.current, parentId, nodeId, { ...oldEdges });
+      //       });
+      //       if (!(parentId in changedNodes)) {
+      //         changedNodes[parentId] = copyNode(oldNodes[parentId]);
+      //       }
+      //       parentNode.children = parentNode.children.filter(l => l.node !== nodeId);
+      //       oldNodes[parentId] = parentNode;
+      //     }
+      //   } else if (linkType === "Child") {
+      //     let childNode = null;
+      //     const childId = thisNode.children[linkIdx].node;
+      //     thisNode.children = [...thisNode.children];
+      //     thisNode.children.splice(linkIdx, 1);
+      //     if (addedChildren.includes(childId)) {
+      //       setAddedChildren(addedChildren.filter(nId => nId !== childId));
+      //     } else {
+      //       setRemovedChildren([...removedChildren, childId]);
+      //     }
+      //     if (childId in oldNodes) {
+      //       childNode = oldNodes[childId];
+      //       setEdges((oldEdges: any) => {
+      //         return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
+      //       });
+      //       if (!(childId in changedNodes)) {
+      //         changedNodes[childId] = copyNode(oldNodes[childId]);
+      //       }
+      //       childNode.parents = childNode.parents.filter(l => l.node !== nodeId);
+      //       oldNodes[childId] = childNode;
+      //     }
+      //   } else if (linkType === "Reference") {
+      //     thisNode.references = [...thisNode.references];
+      //     thisNode.references.splice(linkIdx, 1);
+      //     thisNode.referenceIds.splice(linkIdx, 1);
+      //     thisNode.referenceLabels.splice(linkIdx, 1);
+      //   } else if (linkType === "Tag") {
+      //     thisNode.tags = [...thisNode.tags];
+      //     thisNode.tags.splice(linkIdx, 1);
+      //     thisNode.tagIds.splice(linkIdx, 1);
+      //   }
+      //   scrollToNode(nodeId);
+      //   oldNodes[nodeId] = thisNode;
+      //   return oldNodes;
+      // });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -939,15 +1047,21 @@ const Dashboard = ({}: DashboardProps) => {
 
   const setNodeParts = useMemoizedCallback((nodeId, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
     // console.log("In setNodeParts");
-    setNodes(oldNodes => {
-      // setSelectedNode(nodeId);
+    setGraph(({ nodes: oldNodes, edges }) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
-      return {
-        ...oldNodes,
-        [nodeId]: innerFunc(thisNode),
-      };
+      const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
+      return { nodes: newNode, edges };
     });
+    // setNodes(oldNodes => {
+    //   // setSelectedNode(nodeId);
+    //   setSelectedNodeType(oldNodes[nodeId].nodeType);
+    //   const thisNode = { ...oldNodes[nodeId] };
+    //   return {
+    //     ...oldNodes,
+    //     [nodeId]: innerFunc(thisNode),
+    //   };
+    // });
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
@@ -967,15 +1081,17 @@ const Dashboard = ({}: DashboardProps) => {
 
   const hideOffsprings = useMemoizedCallback(
     async nodeId => {
+      console.log("hide ofsepring", nodeId);
       if (!nodeBookState.choosingNode && user) {
         // setIsHiding(true);
         setIsSubmitting(true);
         const offsprings = recursiveOffsprings(nodeId);
+        console.log(offsprings);
         // debugger
         const batch = writeBatch(db);
         try {
           for (let offspring of offsprings) {
-            const thisNode = nodes[offspring];
+            const thisNode = graph.nodes[offspring];
             const { nodeRef, userNodeRef } = initNodeStatusChange(offspring, thisNode.userNodeId);
             const userNodeData = {
               changed: thisNode.changed,
@@ -1016,11 +1132,12 @@ const Dashboard = ({}: DashboardProps) => {
           }
           // await firebase.commitBatch();
           await batch.commit();
-          let oldNodes = { ...nodes };
-          let oldEdges = edges;
+          let oldNodes = { ...graph.nodes };
+          let oldEdges = { ...graph.edges };
           for (let offspring of offsprings) {
             ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges));
           }
+          console.log({ oldNodes, oldEdges });
           // CHECK: I commented this because in the SYNC function it will update nodes and edges
           // setNodes(oldNodes);
           // setEdges(oldEdges);
@@ -1031,7 +1148,7 @@ const Dashboard = ({}: DashboardProps) => {
         setIsSubmitting(false);
       }
     },
-    [nodeBookState.choosingNode, nodes, recursiveOffsprings]
+    [nodeBookState.choosingNode, graph, recursiveOffsprings]
   );
 
   // /**
@@ -1358,7 +1475,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
     },
     // CHECK: I commented allNode, I did'nt found where is defined
-    [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
+    [user /*allNodes*/, , allTags /*allUserNodes*/]
   );
 
   const openLinkedNode = useCallback(
@@ -1426,6 +1543,7 @@ const Dashboard = ({}: DashboardProps) => {
        * change node
        * create userNodeLog
        */
+      console.log("hideNodeHandler", nodeId);
       const batch = writeBatch(db);
       const username = user?.uname;
       if (!nodeBookState.choosingNode) {
@@ -1434,7 +1552,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (username) {
           // try {
 
-          const thisNode = nodes[nodeId];
+          const thisNode = graph.nodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
 
           const userNodeData = {
@@ -1492,7 +1610,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, user, nodes, edges, initNodeStatusChange /*navigateToFirstParent*/]
+    [nodeBookState.choosingNode, user, graph, initNodeStatusChange /*navigateToFirstParent*/]
   );
 
   const toggleNode = useCallback(
@@ -1501,7 +1619,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       // debugger
       if (!nodeBookState.choosingNode) {
-        setNodes(oldNodes => {
+        setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
           console.log("[TOGGLE_NODE]", thisNode);
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
@@ -1548,8 +1666,57 @@ const Dashboard = ({}: DashboardProps) => {
           }
           console.log("update user node log");
           setDoc(doc(userNodeLogRef), userNodeLogData);
-          return oldNodes;
+          return { nodes: oldNodes, edges };
         });
+        // setNodes(oldNodes => {
+        //   const thisNode = oldNodes[nodeId];
+        //   console.log("[TOGGLE_NODE]", thisNode);
+        //   const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+        //   const changeNode: any = {
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //   };
+        //   if (thisNode.open && "openHeight" in thisNode) {
+        //     changeNode.height = thisNode.openHeight;
+        //   } else if ("closedHeight" in thisNode) {
+        //     changeNode.closedHeight = thisNode.closedHeight;
+        //   }
+
+        //   updateDoc(nodeRef, changeNode);
+        //   // nodeRef.update(changeNode);
+
+        //   updateDoc(userNodeRef, {
+        //     open: !thisNode.open,
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //   });
+        //   // userNodeRef.update({
+        //   //   open: !thisNode.open,
+        //   //   updatedAt: Timestamp.fromDate(new Date()),
+        //   // });
+        //   const userNodeLogRef = collection(db, "userNodesLog");
+        //   // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+        //   const userNodeLogData: any = {
+        //     changed: thisNode.changed,
+        //     correct: thisNode.correct,
+        //     createdAt: Timestamp.fromDate(new Date()),
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //     deleted: false,
+        //     isStudied: thisNode.isStudied,
+        //     bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+        //     node: nodeId,
+        //     open: !thisNode.open,
+        //     user: user?.uname,
+        //     visible: true,
+        //     wrong: thisNode.wrong,
+        //   };
+        //   if ("openHeight" in thisNode) {
+        //     userNodeLogData.height = thisNode.openHeight;
+        //   } else if ("closedHeight" in thisNode) {
+        //     userNodeLogData.closedHeight = thisNode.closedHeight;
+        //   }
+        //   console.log("update user node log");
+        //   setDoc(doc(userNodeLogRef), userNodeLogData);
+        //   return oldNodes;
+        // });
       }
       if (event) {
         event.currentTarget.blur();
@@ -1602,11 +1769,15 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string, referenceIdx: number) => {
       console.log("[REFERENCE_LABEL_CHANGE]", { event, nodeId, referenceIdx });
       event.persist();
-      const thisNode = { ...nodes[nodeId] };
+      const thisNode = { ...graph.nodes[nodeId] };
       let referenceLabelsCopy = [...thisNode.referenceLabels];
       referenceLabelsCopy[referenceIdx] = event.target.value;
       thisNode.referenceLabels = referenceLabelsCopy;
-      setNodes({ ...nodes, [nodeId]: thisNode });
+      // setNodes({ ...nodes, [nodeId]: thisNode });
+      setGraph({
+        nodes: { ...graph.nodes, [nodeId]: thisNode },
+        edges: graph.edges,
+      });
 
       // setNodes((oldNodes) => {
       //   const thisNode = { ...oldNodes[nodeId] };
@@ -1621,13 +1792,13 @@ const Dashboard = ({}: DashboardProps) => {
       //   };
       // });
     },
-    [nodes /*setNodeParts*/]
+    [graph /*setNodeParts*/]
   );
 
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
-        setNodes(oldNodes => {
+        setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           let studiedNum = 0;
@@ -1671,8 +1842,54 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
-          return oldNodes;
+          return { nodes: oldNodes, edges };
         });
+        // setNodes(oldNodes => {
+        //   const thisNode = oldNodes[nodeId];
+        //   const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+        //   let studiedNum = 0;
+        //   if ("studied" in thisNode) {
+        //     studiedNum = thisNode.studied;
+        //   }
+        //   const changeNode: any = {
+        //     studied: studiedNum + (thisNode.isStudied ? -1 : 1),
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //   };
+        //   if (thisNode.open && "openHeight" in thisNode) {
+        //     changeNode.height = thisNode.openHeight;
+        //   } else if ("closedHeight" in thisNode) {
+        //     changeNode.closedHeight = thisNode.closedHeight;
+        //   }
+        //   updateDoc(nodeRef, changeNode);
+        //   updateDoc(userNodeRef, {
+        //     changed: thisNode.isStudied ? thisNode.changed : false,
+        //     isStudied: !thisNode.isStudied,
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //   });
+        //   const userNodeLogRef = collection(db, "userNodesLog");
+        //   // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+        //   const userNodeLogData: any = {
+        //     correct: thisNode.correct,
+        //     createdAt: Timestamp.fromDate(new Date()),
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //     deleted: false,
+        //     changed: thisNode.isStudied ? thisNode.changed : false,
+        //     isStudied: !thisNode.isStudied,
+        //     bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+        //     node: nodeId,
+        //     open: !thisNode.open,
+        //     user: user?.uname,
+        //     visible: true,
+        //     wrong: thisNode.wrong,
+        //   };
+        //   if ("openHeight" in thisNode) {
+        //     userNodeLogData.height = thisNode.openHeight;
+        //   } else if ("closedHeight" in thisNode) {
+        //     userNodeLogData.closedHeight = thisNode.closedHeight;
+        //   }
+        //   setDoc(doc(userNodeLogRef), userNodeLogData);
+        //   return oldNodes;
+        // });
       }
       event.currentTarget.blur();
     },
@@ -1684,7 +1901,7 @@ const Dashboard = ({}: DashboardProps) => {
   const bookmark = useCallback(
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
-        setNodes(oldNodes => {
+        setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           // let bookmarks = 0;
@@ -1727,8 +1944,53 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
-          return oldNodes;
+          return { nodes: oldNodes, edges };
         });
+        // setNodes(oldNodes => {
+        //   const thisNode = oldNodes[nodeId];
+        //   const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+        //   // let bookmarks = 0;
+        //   // if ("bookmarks" in thisNode) {
+        //   //   bookmarks = thisNode.bookmarks;
+        //   // }
+        //   const bookmarks = thisNode.bookmarks || 0;
+        //   const changeNode: any = {
+        //     bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //   };
+        //   if (thisNode.open && "openHeight" in thisNode) {
+        //     changeNode.height = thisNode.openHeight;
+        //   } else if ("closedHeight" in thisNode) {
+        //     changeNode.closedHeight = thisNode.closedHeight;
+        //   }
+        //   updateDoc(nodeRef, changeNode);
+        //   updateDoc(userNodeRef, {
+        //     bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //   });
+        //   const userNodeLogRef = collection(db, "userNodesLog");
+        //   const userNodeLogData: any = {
+        //     changed: thisNode.changed,
+        //     isStudied: thisNode.isStudied,
+        //     correct: thisNode.correct,
+        //     createdAt: Timestamp.fromDate(new Date()),
+        //     updatedAt: Timestamp.fromDate(new Date()),
+        //     deleted: false,
+        //     bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
+        //     node: nodeId,
+        //     open: !thisNode.open,
+        //     user: user?.uname,
+        //     visible: true,
+        //     wrong: thisNode.wrong,
+        //   };
+        //   if ("openHeight" in thisNode) {
+        //     userNodeLogData.height = thisNode.openHeight;
+        //   } else if ("closedHeight" in thisNode) {
+        //     userNodeLogData.closedHeight = thisNode.closedHeight;
+        //   }
+        //   setDoc(doc(userNodeLogRef), userNodeLogData);
+        //   return oldNodes;
+        // });
       }
       event.currentTarget.blur();
     },
@@ -1794,7 +2056,7 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      console.log("[2.CHANGE NODE HIGHT 🚀]", { node: nodes[nodeId], height });
+      console.log("[2.CHANGE NODE HIGHT 🚀]", { height });
 
       // // if (value === nodes[nodeId].title) return;
       // const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
@@ -1805,7 +2067,7 @@ const Dashboard = ({}: DashboardProps) => {
       // recalculateGraphWithWorker(oldNodes, edges);
       addTask({ id: nodeId, height });
     },
-    [addTask, nodes]
+    [addTask]
   );
 
   const changeChoice = useCallback(
@@ -1904,7 +2166,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
       nodeBookState.selectionType === "Proposals" ||
-      (nodeBookState.selectedNode && "selectedNode" in nodes && nodes[nodeBookState.selectedNode].editable)
+      (nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable)
     ) {
       reloadPermanentGraph();
     }
@@ -1968,7 +2230,7 @@ const Dashboard = ({}: DashboardProps) => {
     // });
   }, [
     user,
-    nodes,
+    graph.nodes,
     nodeBookState.selectedNode,
     nodeBookState.selectionType,
     openPendingProposals,
@@ -2000,8 +2262,23 @@ const Dashboard = ({}: DashboardProps) => {
       // when have nodes with new data
       // update with setNodes
       console.log("set Nodes and change editable to true");
-      setNodes(oldNodes => {
-        if (!nodeBookState.selectedNode) return oldNodes;
+      // setNodes(oldNodes => {
+      //   if (!nodeBookState.selectedNode) return oldNodes;
+
+      //   if (!(nodeBookState.selectedNode in changedNodes)) {
+      //     changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+      //   }
+      //   const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
+      //   setNodeToImprove(thisNode); // CHECK: I added this to compare then
+      //   thisNode.editable = true;
+      //   // setMapChanged(true);
+      //   return {
+      //     ...oldNodes,
+      //     [nodeBookState.selectedNode]: thisNode,
+      //   };
+      // });
+      setGraph(({ nodes: oldNodes, edges }) => {
+        if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
@@ -2010,10 +2287,11 @@ const Dashboard = ({}: DashboardProps) => {
         setNodeToImprove(thisNode); // CHECK: I added this to compare then
         thisNode.editable = true;
         // setMapChanged(true);
-        return {
+        const newNodes = {
           ...oldNodes,
           [nodeBookState.selectedNode]: thisNode,
         };
+        return { nodes: newNodes, edges };
       });
       scrollToNode(nodeBookState.selectedNode);
     },
@@ -2084,16 +2362,16 @@ const Dashboard = ({}: DashboardProps) => {
       let referencesOK = true;
 
       if (
-        (nodes[nodeBookState.selectedNode].nodeType === "Concept" ||
-          nodes[nodeBookState.selectedNode].nodeType === "Relation" ||
-          nodes[nodeBookState.selectedNode].nodeType === "Question" ||
-          nodes[nodeBookState.selectedNode].nodeType === "News") &&
-        nodes[nodeBookState.selectedNode].references.length === 0
+        (graph.nodes[nodeBookState.selectedNode].nodeType === "Concept" ||
+          graph.nodes[nodeBookState.selectedNode].nodeType === "Relation" ||
+          graph.nodes[nodeBookState.selectedNode].nodeType === "Question" ||
+          graph.nodes[nodeBookState.selectedNode].nodeType === "News") &&
+        graph.nodes[nodeBookState.selectedNode].references.length === 0
       ) {
         referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
       }
       if (referencesOK) {
-        const newNode = { ...nodes[nodeBookState.selectedNode] };
+        const newNode = { ...graph.nodes[nodeBookState.selectedNode] };
         if (newNode.children.length > 0) {
           const newChildren = [];
           for (let child of newNode.children) {
@@ -2174,7 +2452,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
     },
     [
-      nodes,
+      graph.nodes,
       // allNodes,
       nodeBookState.selectedNode,
       addedParents,
@@ -2194,9 +2472,8 @@ const Dashboard = ({}: DashboardProps) => {
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
       const newNodeId = newId();
-
-      setNodes(oldNodes => {
-        if (!nodeBookState.selectedNode) return oldNodes; // CHECK: I added this to validate
+      setGraph(({ nodes: oldNodes, edges }) => {
+        if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
@@ -2253,15 +2530,94 @@ const Dashboard = ({}: DashboardProps) => {
           ];
         }
 
-        return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
-          setEdges(oldEdges => {
-            if (!nodeBookState.selectedNode) return oldEdges; //CHECK: I add this to validate
-            return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
-          });
-          setMapChanged(true);
-          scrollToNode(newNodeId);
-        });
+        // let newEdges = edges;
+
+        const newNodes = setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {});
+        if (!nodeBookState.selectedNode) return { nodes: newNodes, edges }; //CHECK: I add this to validate
+        const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
+
+        // setEdges(oldEdges => {
+        // });
+        setMapChanged(true);
+        scrollToNode(newNodeId);
+        return { nodes: newNodes, edges: newEdges };
+
+        // return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
+        //   setEdges(oldEdges => {
+        //     if (!nodeBookState.selectedNode) return oldEdges; //CHECK: I add this to validate
+        //     return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
+        //   });
+        //   setMapChanged(true);
+        //   scrollToNode(newNodeId);
+        // });
       });
+      // setNodes(oldNodes => {
+      //   if (!nodeBookState.selectedNode) return oldNodes; // CHECK: I added this to validate
+
+      //   if (!(nodeBookState.selectedNode in changedNodes)) {
+      //     changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+      //   }
+      //   if (!tempNodes.has(newNodeId)) {
+      //     tempNodes.add(newNodeId);
+      //   }
+
+      //   const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+
+      //   const newChildNode: any = {
+      //     isStudied: true,
+      //     bookmarked: false,
+      //     isNew: true,
+      //     id: newNodeId,
+      //     correct: true,
+      //     updatedAt: new Date(),
+      //     open: true,
+      //     user: user.uname,
+      //     visible: true,
+      //     deleted: false,
+      //     wrong: false,
+      //     createdAt: new Date(),
+      //     firstVisit: new Date(),
+      //     lastVisit: new Date(),
+      //     versions: 1,
+      //     viewers: 1,
+      //     children: [],
+      //     nodeType: childNodeType,
+      //     parents: [{ node: nodeBookState.selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType }],
+      //     comments: 0,
+      //     tags: [user.tag],
+      //     tagIds: [user.tagId], // CHECK: I added this, Check useUserState line 374
+      //     title: "",
+      //     wrongs: 0,
+      //     corrects: 1,
+      //     content: "",
+      //     nodeImage: "",
+      //     studied: 1,
+      //     references: [],
+      //     referenceIds: [], // CHECK: I added this
+      //     referenceLabels: [], // CHECK: I added this
+      //     choices: [],
+      //     editable: true,
+      //     width: NODE_WIDTH,
+      //   };
+      //   if (childNodeType === "Question") {
+      //     newChildNode.choices = [
+      //       {
+      //         choice: "Replace this with the choice.",
+      //         correct: true,
+      //         feedback: "Replace this with the choice-specific feedback.",
+      //       },
+      //     ];
+      //   }
+
+      //   return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
+      //     setEdges(oldEdges => {
+      //       if (!nodeBookState.selectedNode) return oldEdges; //CHECK: I add this to validate
+      //       return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
+      //     });
+      //     setMapChanged(true);
+      //     scrollToNode(newNodeId);
+      //   });
+      // });
     },
     [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
   );
@@ -2276,14 +2632,24 @@ const Dashboard = ({}: DashboardProps) => {
       if (!selectedNodeType) return;
 
       setIsRetrieving(true);
-      setNodes(oldNodes => {
+      setGraph(({ nodes: oldNodes, edges }) => {
+        // setNodes(oldNodes => {
         // if (selectedNode && "selectedNode" in oldNodes) {
         if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
           // setIsAdmin(oldNodes[selectedNode].admin === username);
           setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
         }
-        return oldNodes;
+        return { nodes: oldNodes, edges };
+        // });
       });
+      // setNodes(oldNodes => {
+      //   // if (selectedNode && "selectedNode" in oldNodes) {
+      //   if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
+      //     // setIsAdmin(oldNodes[selectedNode].admin === username);
+      //     setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
+      //   }
+      //   return oldNodes;
+      // });
       const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
         db,
         selectedNodeType
@@ -2646,7 +3012,7 @@ const Dashboard = ({}: DashboardProps) => {
     [setNodeParts]
   );
 
-  const edgeIds = Object.keys(edges);
+  const edgeIds = Object.keys(graph.edges);
 
   return (
     <div className="MapContainer">
@@ -2656,11 +3022,11 @@ const Dashboard = ({}: DashboardProps) => {
           <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
             {/* Data from map, don't REMOVE */}
             <Box>
-              Interaction map from '{user?.uname}' with [{Object.entries(nodes).length}] Nodes
+              Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
             </Box>
             <Box>
-              <Button onClick={() => console.log(nodes)}>nodes</Button>
-              <Button onClick={() => console.log(edges)}>edges</Button>
+              <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+              <Button onClick={() => console.log(graph.edges)}>edges</Button>
               <Button onClick={() => console.log(allTags)}>allTags</Button>
             </Box>
             <Box>
@@ -2768,9 +3134,9 @@ const Dashboard = ({}: DashboardProps) => {
           >
             <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
               {showClusters && <ClustersList clusterNodes={clusterNodes} />}
-              <LinksList edgeIds={edgeIds} edges={edges} selectedRelation={selectedRelation} />
+              <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <NodesList
-                nodes={nodes}
+                nodes={graph.nodes}
                 // nodeChanged={nodeChanged}
                 nodeChanged={() => console.log("this button will be deprecated!!")}
                 bookmark={bookmark}

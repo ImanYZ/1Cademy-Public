@@ -146,6 +146,8 @@ const layoutHandler = (
         const newToY = toNode.top + Math.floor(toNode.height / 2);
         const thisEdge = oldEdges[e.v + "-" + e.w];
 
+        console.log(52, e.v + "-" + e.w);
+
         if (
           !("fromX" in thisEdge) ||
           !("fromY" in thisEdge) ||

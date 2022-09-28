@@ -13,13 +13,20 @@ export type Task = {
 
 type UseWorkerQueueProps = {
   g: MutableRefObject<graphlib.Graph<{}>>;
-  nodes: FullNodesData;
-  edges: any;
-  setNodes: Dispatch<SetStateAction<FullNodesData>>;
+  graph: { nodes: FullNodesData; edges: EdgesData };
+  setGraph: Dispatch<
+    SetStateAction<{
+      nodes: FullNodesData;
+      edges: EdgesData;
+    }>
+  >;
+  // nodes: FullNodesData;
+  // edges: any;
+  // setNodes: Dispatch<SetStateAction<FullNodesData>>;
   setMapWidth: any;
   setMapHeight: any;
   setClusterNodes: any;
-  setEdges: Dispatch<SetStateAction<EdgesData>>;
+  // setEdges: Dispatch<SetStateAction<EdgesData>>;
   setMapChanged: any;
   mapWidth: number;
   mapHeight: number;
@@ -27,40 +34,23 @@ type UseWorkerQueueProps = {
 };
 export const useWorkerQueue = ({
   g,
-  nodes,
-  setNodes,
+  graph,
+  setGraph,
+  // nodes,
+  // setNodes,
   setMapWidth,
   setMapHeight,
   setClusterNodes,
-  setEdges,
+  // setEdges,
   setMapChanged,
   mapWidth,
   mapHeight,
   allTags,
-  edges,
-}: UseWorkerQueueProps) => {
+}: // edges,
+UseWorkerQueueProps) => {
   //   const [nodes, setNodes] = useState<Task[]>([]);
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
-
-  // console.log(" --> use nodes:", nodes, queue);
-  // const recalculateGraphWithWorker = useCallback(
-  //   (newTask: Task, newNodes: FullNodesData) => {
-  //     console.log("worker was created!", newNodes);
-  //     setIsWorking(true);
-  //     const worker: Worker = new Worker(new URL("../workers/TestWorker.ts", import.meta.url));
-  //     worker.postMessage({ nodeChange: newTask, nodes: newNodes });
-  //     // worker.onerror = (err) => err;
-  //     worker.onmessage = e => {
-  //       worker.terminate();
-  //       console.log("result of worker:", e.data);
-  //       const newNodes = e.data;
-  //       setNodes(newNodes);
-  //       setIsWorking(false);
-  //     };
-  //   },
-  //   [setNodes]
-  // );
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
@@ -85,7 +75,7 @@ export const useWorkerQueue = ({
         graph: dagreUtils.mapGraphToObject(g.current),
       });
       worker.onerror = err => {
-        console.log("[WORKER]error:", err);
+        console.error("[WORKER]error:", err);
         worker.terminate();
         setIsWorking(false);
       };
@@ -109,14 +99,14 @@ export const useWorkerQueue = ({
         const gg = dagreUtils.mapObjectToGraph(gObject);
 
         worker.terminate();
-        console.log({ g: g.current, gg });
+        console.log("[queue]: ", { g: g.current, gg });
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
         setClusterNodes(oldClusterNodes);
 
-        setNodes(nodes => {
-          console.log("nodes", nodes);
+        setGraph(({ nodes, edges }) => {
+          console.log("[queue]: setNodes", { nodes });
           const nodesCopy = { ...nodes };
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];
@@ -130,14 +120,11 @@ export const useWorkerQueue = ({
               y: resultNode.y,
               height: resultNode.height,
             };
-            console.log("override node");
             nodesCopy[nodeId] = overrideNode;
           });
-          console.log(nodesCopy);
-          return nodesCopy;
-        });
+          console.log("[queue]: ", { nodesCopy });
+          // return nodesCopy;
 
-        setEdges(edges => {
           console.log("override:edges:", { edges, oldEdges });
           const edgesCopy = { ...edges };
           Object.keys(edgesCopy).forEach(edgeId => {
@@ -146,28 +133,36 @@ export const useWorkerQueue = ({
 
             edgesCopy[edgeId] = { ...resultEdge };
           });
-          return edgesCopy;
+          // return edgesCopy;
+          return { nodes: nodesCopy, edges: edgesCopy };
         });
+        // setNodes(nodes => {
+
+        // });
+
+        // setEdges(edges => {
+
+        // });
         setMapChanged(mapChangedFlag); // CHECK: if is used
         setIsWorking(false);
       };
     },
-    [allTags, g, mapHeight, mapWidth, setClusterNodes, setEdges, setMapChanged, setMapHeight, setMapWidth, setNodes]
+    [allTags, g, mapHeight, mapWidth, setClusterNodes, setGraph, setMapChanged, setMapHeight, setMapWidth]
   );
 
   useEffect(() => {
-    console.log("[queue]: useEffect", { nodes });
+    console.log("[queue]: useEffect", { graph });
     if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
 
     // CREATE WORKER with Nodes and Nodes changed
-    console.log("[queue]: recalculateGraphWithWorker", nodes, queue[0], queue);
-    const individualNodeChanges: FullNodeData[] = queue.map(cur => ({ ...nodes[cur.id], height: cur.height }));
-    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, nodes, allTags);
-    recalculateGraphWithWorker(nodesToRecalculate, edges);
+    console.log("[queue]: recalculateGraphWithWorker", graph, queue);
+    const individualNodeChanges: FullNodeData[] = queue.map(cur => ({ ...graph.nodes[cur.id], height: cur.height }));
+    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags);
+    recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, edges, g, isWorking, nodes, queue, recalculateGraphWithWorker]);
+  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker]);
 
   const addTask = (newTask: Task) => {
     console.log("[queue]: add task\n", queue);
