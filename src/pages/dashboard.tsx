@@ -102,8 +102,6 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  // const [nodesTest, setNodesTest] = useState<Task[]>([]);
-
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
@@ -129,17 +127,13 @@ const Dashboard = ({}: DashboardProps) => {
   // nodes: collection of all data of each node
   // usernodes: collection of all data about each interaction between user and node
   // (ex: node open, hidden, closed, hidden, etc.) (contains every user with every node interacted with)
+
   // nodes: dictionary of all nodes visible on map for specific user
-  // const [nodes, setNodes] = useState<FullNodesData>({});
   // edges: dictionary of all edges visible on map for specific user
-  // const [edges, setEdges] = useState<EdgesData>({});
   const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
   const [allNodes, setAllNodes] = useState<FullNodeData[]>([]);
-
-  // const nodeRef = useRef<FullNodesData>({});
-  // const edgesRef = useRef<EdgesData | null>(null);
 
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
@@ -186,17 +180,13 @@ const Dashboard = ({}: DashboardProps) => {
     g,
     graph,
     setGraph,
-    // nodes,
-    // setNodes,
     setMapWidth,
     setMapHeight,
     setClusterNodes,
-    // setEdges,
     setMapChanged,
     mapWidth,
     mapHeight,
     allTags,
-    // edges,
   });
 
   // ---------------------------------------------------------------------
@@ -421,13 +411,6 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [allTags, db]
   );
-
-  // useEffect(() => {
-  //   nodeRef.current = nodes;
-  // }, [nodes]);
-  // useEffect(() => {
-  //   edgesRef.current = edges;
-  // }, [edges]);
 
   /**
    * Will revert the graph from last changes (temporal Nodes or other changes)
@@ -803,16 +786,6 @@ const Dashboard = ({}: DashboardProps) => {
               setAddedParents(oldAddedParents => [...oldAddedParents, choosingNodeId]);
             }
 
-            // setEdges(oldEdges => {
-            //   if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges;
-            //   return setDagEdge(
-            //     g.current,
-            //     nodeBookState.chosenNode.id,
-            //     nodeBookState.choosingNode.id,
-            //     { label: "" },
-            //     { ...oldEdges }
-            //   );
-            // });
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
               newEdges = setDagEdge(
                 g.current,
@@ -842,16 +815,6 @@ const Dashboard = ({}: DashboardProps) => {
                 label: "",
               },
             ];
-            // setEdges(oldEdges => {
-            //   if (!nodeBookState.chosenNode || !nodeBookState.choosingNode) return oldEdges;
-            //   return setDagEdge(
-            //     g.current,
-            //     nodeBookState.choosingNode.id,
-            //     nodeBookState.chosenNode.id,
-            //     { label: "" },
-            //     { ...oldEdges }
-            //   );
-            // });
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
               newEdges = setDagEdge(
                 g.current,
@@ -931,9 +894,6 @@ const Dashboard = ({}: DashboardProps) => {
           }
           if (parentId in oldNodes) {
             parentNode = copyNode(oldNodes[parentId]);
-            // setEdges(oldEdges => {
-            //   return removeDagEdge(g.current, parentId, nodeId, { ...oldEdges });
-            // });
             newEdges = removeDagEdge(g.current, parentId, nodeId, { ...newEdges });
             if (!(parentId in changedNodes)) {
               changedNodes[parentId] = copyNode(oldNodes[parentId]);
@@ -953,9 +913,6 @@ const Dashboard = ({}: DashboardProps) => {
           }
           if (childId in oldNodes) {
             childNode = oldNodes[childId];
-            // setEdges((oldEdges: any) => {
-            //   return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
-            // });
             newEdges = removeDagEdge(g.current, nodeId, childId, { ...newEdges });
             if (!(childId in changedNodes)) {
               changedNodes[childId] = copyNode(oldNodes[childId]);
@@ -977,68 +934,6 @@ const Dashboard = ({}: DashboardProps) => {
         oldNodes[nodeId] = thisNode;
         return { nodes: oldNodes, edges: newEdges };
       });
-
-      // setNodes(oNodes => {
-      //   let oldNodes = { ...oNodes };
-      //   const thisNode = copyNode(oldNodes[nodeId]);
-      //   console.log("thisNode", thisNode);
-      //   // debugger
-      //   if (linkType === "Parent") {
-      //     let parentNode = null;
-      //     const parentId = thisNode.parents[linkIdx].node;
-      //     thisNode.parents = [...thisNode.parents];
-      //     thisNode.parents.splice(linkIdx, 1);
-      //     if (addedParents.includes(parentId)) {
-      //       setAddedParents(addedParents.filter(nId => nId !== parentId));
-      //     } else {
-      //       setRemovedParents(oldRemovedParents => [...oldRemovedParents, parentId]);
-      //     }
-      //     if (parentId in oldNodes) {
-      //       parentNode = copyNode(oldNodes[parentId]);
-      //       setEdges(oldEdges => {
-      //         return removeDagEdge(g.current, parentId, nodeId, { ...oldEdges });
-      //       });
-      //       if (!(parentId in changedNodes)) {
-      //         changedNodes[parentId] = copyNode(oldNodes[parentId]);
-      //       }
-      //       parentNode.children = parentNode.children.filter(l => l.node !== nodeId);
-      //       oldNodes[parentId] = parentNode;
-      //     }
-      //   } else if (linkType === "Child") {
-      //     let childNode = null;
-      //     const childId = thisNode.children[linkIdx].node;
-      //     thisNode.children = [...thisNode.children];
-      //     thisNode.children.splice(linkIdx, 1);
-      //     if (addedChildren.includes(childId)) {
-      //       setAddedChildren(addedChildren.filter(nId => nId !== childId));
-      //     } else {
-      //       setRemovedChildren([...removedChildren, childId]);
-      //     }
-      //     if (childId in oldNodes) {
-      //       childNode = oldNodes[childId];
-      //       setEdges((oldEdges: any) => {
-      //         return removeDagEdge(g.current, nodeId, childId, { ...oldEdges });
-      //       });
-      //       if (!(childId in changedNodes)) {
-      //         changedNodes[childId] = copyNode(oldNodes[childId]);
-      //       }
-      //       childNode.parents = childNode.parents.filter(l => l.node !== nodeId);
-      //       oldNodes[childId] = childNode;
-      //     }
-      //   } else if (linkType === "Reference") {
-      //     thisNode.references = [...thisNode.references];
-      //     thisNode.references.splice(linkIdx, 1);
-      //     thisNode.referenceIds.splice(linkIdx, 1);
-      //     thisNode.referenceLabels.splice(linkIdx, 1);
-      //   } else if (linkType === "Tag") {
-      //     thisNode.tags = [...thisNode.tags];
-      //     thisNode.tags.splice(linkIdx, 1);
-      //     thisNode.tagIds.splice(linkIdx, 1);
-      //   }
-      //   scrollToNode(nodeId);
-      //   oldNodes[nodeId] = thisNode;
-      //   return oldNodes;
-      // });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1053,15 +948,6 @@ const Dashboard = ({}: DashboardProps) => {
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
       return { nodes: newNode, edges };
     });
-    // setNodes(oldNodes => {
-    //   // setSelectedNode(nodeId);
-    //   setSelectedNodeType(oldNodes[nodeId].nodeType);
-    //   const thisNode = { ...oldNodes[nodeId] };
-    //   return {
-    //     ...oldNodes,
-    //     [nodeId]: innerFunc(thisNode),
-    //   };
-    // });
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
@@ -1410,59 +1296,7 @@ const Dashboard = ({}: DashboardProps) => {
           // const id = userNodeLogRef.id
           batch.set(doc(userNodeLogRef), userNodeLogData);
 
-          // let oldNodes: { [key: string]: any } = { ...nodes };
-          // let oldEdges: { [key: string]: any } = { ...edges };
-          // // let oldAllNodes: any = { ...nodes };
-          // // let oldAllUserNodes: any = { ...nodeChanges };
-          // // if data for the node is loaded
-          // let uNodeData = {
-          //   // load all data corresponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
-          //   ...nodes[nodeId],
-          //   ...thisNode, // CHECK <-- I added this to have children, parents, tags properties
-          //   ...userNodeData,
-          //   open: true,
-          // };
-
-          // if (userNodeId) {
-          //   // TODO: I added this validation
-          //   uNodeData[userNodeId] = userNodeId;
-          // }
-          // ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
-          //   // modify nodes and edges
-          //   uNodeData,
-          //   oldNodes,
-          //   oldEdges
-          //   // oldAllNodes
-          // ));
-
-          // // debugger
-          // ({ oldNodes, oldEdges } = createOrUpdateNode(
-          //   // modify dagger
-          //   g.current,
-          //   uNodeData,
-          //   nodeId,
-          //   oldNodes,
-          //   { ...oldEdges },
-          //   allTags
-          // ));
-
-          // CHECK: need to update the nodes and edges
-          // to get the last changes from:
-          //  makeNodeVisibleInItsLinks and createOrUpdateNode
-          // setNodes(oldNodes)
-          // setEdges(oldEdges)
-
-          // oldAllNodes[nodeId] = uNodeData;
-          // setNodes(oldAllNodes)
-          // setNodes(oldNodes => ({ ...oldNodes, oldNodes[nodeId]}))
-          // oldAllUserNodes = {
-          //   ...oldAllUserNodes,
-          //   [nodeId]: userNodeData,
-          // };
-          // await firebase.commitBatch();
-          console.log("------------ before batch commit");
           await batch.commit();
-          console.log("------------ after batch commit");
           scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
@@ -1668,55 +1502,6 @@ const Dashboard = ({}: DashboardProps) => {
           setDoc(doc(userNodeLogRef), userNodeLogData);
           return { nodes: oldNodes, edges };
         });
-        // setNodes(oldNodes => {
-        //   const thisNode = oldNodes[nodeId];
-        //   console.log("[TOGGLE_NODE]", thisNode);
-        //   const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-        //   const changeNode: any = {
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //   };
-        //   if (thisNode.open && "openHeight" in thisNode) {
-        //     changeNode.height = thisNode.openHeight;
-        //   } else if ("closedHeight" in thisNode) {
-        //     changeNode.closedHeight = thisNode.closedHeight;
-        //   }
-
-        //   updateDoc(nodeRef, changeNode);
-        //   // nodeRef.update(changeNode);
-
-        //   updateDoc(userNodeRef, {
-        //     open: !thisNode.open,
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //   });
-        //   // userNodeRef.update({
-        //   //   open: !thisNode.open,
-        //   //   updatedAt: Timestamp.fromDate(new Date()),
-        //   // });
-        //   const userNodeLogRef = collection(db, "userNodesLog");
-        //   // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-        //   const userNodeLogData: any = {
-        //     changed: thisNode.changed,
-        //     correct: thisNode.correct,
-        //     createdAt: Timestamp.fromDate(new Date()),
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //     deleted: false,
-        //     isStudied: thisNode.isStudied,
-        //     bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-        //     node: nodeId,
-        //     open: !thisNode.open,
-        //     user: user?.uname,
-        //     visible: true,
-        //     wrong: thisNode.wrong,
-        //   };
-        //   if ("openHeight" in thisNode) {
-        //     userNodeLogData.height = thisNode.openHeight;
-        //   } else if ("closedHeight" in thisNode) {
-        //     userNodeLogData.closedHeight = thisNode.closedHeight;
-        //   }
-        //   console.log("update user node log");
-        //   setDoc(doc(userNodeLogRef), userNodeLogData);
-        //   return oldNodes;
-        // });
       }
       if (event) {
         event.currentTarget.blur();
@@ -1778,19 +1563,6 @@ const Dashboard = ({}: DashboardProps) => {
         nodes: { ...graph.nodes, [nodeId]: thisNode },
         edges: graph.edges,
       });
-
-      // setNodes((oldNodes) => {
-      //   const thisNode = { ...oldNodes[nodeId] };
-      //   thisNode.references = [...thisNode.references];
-      //   thisNode.references[referenceIdx] = {
-      //     // ...thisNode.references[referenceIdx],
-      //     label: event.target.value,
-      //   };
-      //   return {
-      //     ...oldNodes,
-      //     [nodeId]: { ...thisNode },
-      //   };
-      // });
     },
     [graph /*setNodeParts*/]
   );
@@ -1844,52 +1616,6 @@ const Dashboard = ({}: DashboardProps) => {
           setDoc(doc(userNodeLogRef), userNodeLogData);
           return { nodes: oldNodes, edges };
         });
-        // setNodes(oldNodes => {
-        //   const thisNode = oldNodes[nodeId];
-        //   const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-        //   let studiedNum = 0;
-        //   if ("studied" in thisNode) {
-        //     studiedNum = thisNode.studied;
-        //   }
-        //   const changeNode: any = {
-        //     studied: studiedNum + (thisNode.isStudied ? -1 : 1),
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //   };
-        //   if (thisNode.open && "openHeight" in thisNode) {
-        //     changeNode.height = thisNode.openHeight;
-        //   } else if ("closedHeight" in thisNode) {
-        //     changeNode.closedHeight = thisNode.closedHeight;
-        //   }
-        //   updateDoc(nodeRef, changeNode);
-        //   updateDoc(userNodeRef, {
-        //     changed: thisNode.isStudied ? thisNode.changed : false,
-        //     isStudied: !thisNode.isStudied,
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //   });
-        //   const userNodeLogRef = collection(db, "userNodesLog");
-        //   // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
-        //   const userNodeLogData: any = {
-        //     correct: thisNode.correct,
-        //     createdAt: Timestamp.fromDate(new Date()),
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //     deleted: false,
-        //     changed: thisNode.isStudied ? thisNode.changed : false,
-        //     isStudied: !thisNode.isStudied,
-        //     bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-        //     node: nodeId,
-        //     open: !thisNode.open,
-        //     user: user?.uname,
-        //     visible: true,
-        //     wrong: thisNode.wrong,
-        //   };
-        //   if ("openHeight" in thisNode) {
-        //     userNodeLogData.height = thisNode.openHeight;
-        //   } else if ("closedHeight" in thisNode) {
-        //     userNodeLogData.closedHeight = thisNode.closedHeight;
-        //   }
-        //   setDoc(doc(userNodeLogRef), userNodeLogData);
-        //   return oldNodes;
-        // });
       }
       event.currentTarget.blur();
     },
@@ -1946,51 +1672,6 @@ const Dashboard = ({}: DashboardProps) => {
           setDoc(doc(userNodeLogRef), userNodeLogData);
           return { nodes: oldNodes, edges };
         });
-        // setNodes(oldNodes => {
-        //   const thisNode = oldNodes[nodeId];
-        //   const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-        //   // let bookmarks = 0;
-        //   // if ("bookmarks" in thisNode) {
-        //   //   bookmarks = thisNode.bookmarks;
-        //   // }
-        //   const bookmarks = thisNode.bookmarks || 0;
-        //   const changeNode: any = {
-        //     bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //   };
-        //   if (thisNode.open && "openHeight" in thisNode) {
-        //     changeNode.height = thisNode.openHeight;
-        //   } else if ("closedHeight" in thisNode) {
-        //     changeNode.closedHeight = thisNode.closedHeight;
-        //   }
-        //   updateDoc(nodeRef, changeNode);
-        //   updateDoc(userNodeRef, {
-        //     bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //   });
-        //   const userNodeLogRef = collection(db, "userNodesLog");
-        //   const userNodeLogData: any = {
-        //     changed: thisNode.changed,
-        //     isStudied: thisNode.isStudied,
-        //     correct: thisNode.correct,
-        //     createdAt: Timestamp.fromDate(new Date()),
-        //     updatedAt: Timestamp.fromDate(new Date()),
-        //     deleted: false,
-        //     bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
-        //     node: nodeId,
-        //     open: !thisNode.open,
-        //     user: user?.uname,
-        //     visible: true,
-        //     wrong: thisNode.wrong,
-        //   };
-        //   if ("openHeight" in thisNode) {
-        //     userNodeLogData.height = thisNode.openHeight;
-        //   } else if ("closedHeight" in thisNode) {
-        //     userNodeLogData.closedHeight = thisNode.closedHeight;
-        //   }
-        //   setDoc(doc(userNodeLogRef), userNodeLogData);
-        //   return oldNodes;
-        // });
       }
       event.currentTarget.blur();
     },
@@ -2541,83 +2222,7 @@ const Dashboard = ({}: DashboardProps) => {
         setMapChanged(true);
         scrollToNode(newNodeId);
         return { nodes: newNodes, edges: newEdges };
-
-        // return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
-        //   setEdges(oldEdges => {
-        //     if (!nodeBookState.selectedNode) return oldEdges; //CHECK: I add this to validate
-        //     return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
-        //   });
-        //   setMapChanged(true);
-        //   scrollToNode(newNodeId);
-        // });
       });
-      // setNodes(oldNodes => {
-      //   if (!nodeBookState.selectedNode) return oldNodes; // CHECK: I added this to validate
-
-      //   if (!(nodeBookState.selectedNode in changedNodes)) {
-      //     changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
-      //   }
-      //   if (!tempNodes.has(newNodeId)) {
-      //     tempNodes.add(newNodeId);
-      //   }
-
-      //   const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
-
-      //   const newChildNode: any = {
-      //     isStudied: true,
-      //     bookmarked: false,
-      //     isNew: true,
-      //     id: newNodeId,
-      //     correct: true,
-      //     updatedAt: new Date(),
-      //     open: true,
-      //     user: user.uname,
-      //     visible: true,
-      //     deleted: false,
-      //     wrong: false,
-      //     createdAt: new Date(),
-      //     firstVisit: new Date(),
-      //     lastVisit: new Date(),
-      //     versions: 1,
-      //     viewers: 1,
-      //     children: [],
-      //     nodeType: childNodeType,
-      //     parents: [{ node: nodeBookState.selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType }],
-      //     comments: 0,
-      //     tags: [user.tag],
-      //     tagIds: [user.tagId], // CHECK: I added this, Check useUserState line 374
-      //     title: "",
-      //     wrongs: 0,
-      //     corrects: 1,
-      //     content: "",
-      //     nodeImage: "",
-      //     studied: 1,
-      //     references: [],
-      //     referenceIds: [], // CHECK: I added this
-      //     referenceLabels: [], // CHECK: I added this
-      //     choices: [],
-      //     editable: true,
-      //     width: NODE_WIDTH,
-      //   };
-      //   if (childNodeType === "Question") {
-      //     newChildNode.choices = [
-      //       {
-      //         choice: "Replace this with the choice.",
-      //         correct: true,
-      //         feedback: "Replace this with the choice-specific feedback.",
-      //       },
-      //     ];
-      //   }
-
-      //   return setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {
-      //     setEdges(oldEdges => {
-      //       if (!nodeBookState.selectedNode) return oldEdges; //CHECK: I add this to validate
-      //       return setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...oldEdges });
-      //     });
-      //     setMapChanged(true);
-      //     scrollToNode(newNodeId);
-      //   });
-      // });
     },
     [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
   );
@@ -2642,14 +2247,6 @@ const Dashboard = ({}: DashboardProps) => {
         return { nodes: oldNodes, edges };
         // });
       });
-      // setNodes(oldNodes => {
-      //   // if (selectedNode && "selectedNode" in oldNodes) {
-      //   if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
-      //     // setIsAdmin(oldNodes[selectedNode].admin === username);
-      //     setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
-      //   }
-      //   return oldNodes;
-      // });
       const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
         db,
         selectedNodeType
@@ -3105,10 +2702,6 @@ const Dashboard = ({}: DashboardProps) => {
               <Typography>Queue Workers</Typography>
               {queue.map(cur => ` 👷‍♂️ ${cur.height} `)}
             </Box>
-            {/* <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>Nodes</Typography>
-              {nodesTest.map(cur => ` 🧶 ${cur.height} `)}
-            </Box> */}
 
             <Box sx={{ float: "right" }}>
               <Tooltip title={"Watch geek data"}>
@@ -3116,11 +2709,6 @@ const Dashboard = ({}: DashboardProps) => {
                   <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                     <CodeIcon color="warning" />
                   </IconButton>
-                  {/* <IconButton
-                    onClick={() => addTask({ id: Math.random().toString(), height: Math.ceil(Math.random() * 100) })}
-                  >
-                    <CoronavirusIcon color="primary" />
-                  </IconButton> */}
                 </>
               </Tooltip>
             </Box>
@@ -3212,5 +2800,3 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
-
-// export default NodeBook;
