@@ -20,13 +20,9 @@ type UseWorkerQueueProps = {
       edges: EdgesData;
     }>
   >;
-  // nodes: FullNodesData;
-  // edges: any;
-  // setNodes: Dispatch<SetStateAction<FullNodesData>>;
   setMapWidth: any;
   setMapHeight: any;
   setClusterNodes: any;
-  // setEdges: Dispatch<SetStateAction<EdgesData>>;
   setMapChanged: any;
   mapWidth: number;
   mapHeight: number;
@@ -36,19 +32,14 @@ export const useWorkerQueue = ({
   g,
   graph,
   setGraph,
-  // nodes,
-  // setNodes,
   setMapWidth,
   setMapHeight,
   setClusterNodes,
-  // setEdges,
   setMapChanged,
   mapWidth,
   mapHeight,
   allTags,
-}: // edges,
-UseWorkerQueueProps) => {
-  //   const [nodes, setNodes] = useState<Task[]>([]);
+}: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
 
@@ -81,10 +72,10 @@ UseWorkerQueueProps) => {
       };
       worker.onmessage = e => {
         const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
-        // const gg = dagreUtils.mapObjectToGraph(graph);
+
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
-        // const nodesMerged = graphObject.nodes.
+
         graphObject.edges.forEach(cur => {
           const indexFound = gObject.edges.findIndex(c => c.from === cur.from && c.to == cur.to);
           if (indexFound < 0) return;
@@ -123,7 +114,6 @@ UseWorkerQueueProps) => {
             nodesCopy[nodeId] = overrideNode;
           });
           console.log("[queue]: ", { nodesCopy });
-          // return nodesCopy;
 
           console.log("override:edges:", { edges, oldEdges });
           const edgesCopy = { ...edges };
@@ -133,16 +123,8 @@ UseWorkerQueueProps) => {
 
             edgesCopy[edgeId] = { ...resultEdge };
           });
-          // return edgesCopy;
           return { nodes: nodesCopy, edges: edgesCopy };
         });
-        // setNodes(nodes => {
-
-        // });
-
-        // setEdges(edges => {
-
-        // });
         setMapChanged(mapChangedFlag); // CHECK: if is used
         setIsWorking(false);
       };
