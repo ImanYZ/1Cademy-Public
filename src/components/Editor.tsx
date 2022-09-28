@@ -9,9 +9,10 @@ type EditorProps = {
   value: string;
   setValue: (value: string) => void;
   readOnly?: boolean;
+  fontSize?: string;
 };
 
-export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps) => {
+export const Editor = ({ label, value, setValue, readOnly = true, fontSize = "16px" }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   const [canEdit, setCanEdit] = useState(true);
 
@@ -57,7 +58,7 @@ export const Editor = ({ label, value, setValue, readOnly = true }: EditorProps)
         />
       ) : (
         <Box sx={{ p: canEdit ? "0px" : "16px 14px" }}>
-          <MarkdownRender fontSize="16px" text={value} />
+          <MarkdownRender fontSize={fontSize} text={value} />
         </Box>
       )}
     </Box>

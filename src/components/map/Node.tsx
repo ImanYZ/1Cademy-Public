@@ -465,7 +465,8 @@ const Node = ({
       //       }
       // }
     >
-      {identifier}
+      {/* INFO: uncomment this only on develope */}
+      {/* {identifier} */}
       {open ? (
         <>
           <div className="card-content">
@@ -504,6 +505,7 @@ const Node = ({
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
+                fontSize="25px"
               />
               {/* <HyperEditor
                 readOnly={!editable}
@@ -764,12 +766,14 @@ const Node = ({
                 width={width}
                /> */}
               {/* {title} */}
+
               <Editor
                 label="title"
                 value={title}
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={true}
+                fontSize={"25px"}
               />
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (
