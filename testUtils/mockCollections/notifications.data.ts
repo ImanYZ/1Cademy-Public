@@ -1,4 +1,4 @@
-const collection = "notification";
+const collection = "notifications";
 
 const data: any[] = [
   {
@@ -16,6 +16,18 @@ const data: any[] = [
   {
     documentId: "00fLmckPv62pwu0AD1PG",
     uname: "Julia Costa",
+    proposer: "ajreardon",
+    checked: true,
+    nodeId: "Pkd4Ff4Cz8whReycYnYn",
+    imageUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FK29gvApGnmdkmCWuB8rdXCHMpCD2%2FFri%2C%2021%20Aug%202020%2001%3A31%3A46%20GMT.jpeg?alt=media&token=c2e62677-6fc4-4abe-9921-abd0d184af09",
+    aType: "Wrong",
+    createdAt: new Date(),
+    oType: "Node",
+  },
+  {
+    documentId: "hPTTEieXjdYNI99dW0zb",
+    uname: "A_wei",
     proposer: "ajreardon",
     checked: true,
     nodeId: "Pkd4Ff4Cz8whReycYnYn",

@@ -61,20 +61,20 @@ describe("calculatePositivesNegativesTotals", () => {
     const obj: any = {};
 
     [...positiveFields, ...negativeFields].forEach(field => {
-      obj[field] = 1;
+      obj[field] = parseFloat((Math.random() * 1000).toFixed(2)); // random float
     });
 
     return obj;
   };
 
   describe("For Positive", () => {
-    it("Should calculate the total positive points if they do not exist.", () => {
+    it("Should calculate the total positive points if it do not exist.", () => {
       const req_points = generateRepPointsObj();
       calculatePositivesNegativesTotals(req_points);
-      expect(req_points.positives).toEqual(positiveFields.length);
+      expect(req_points.positives).toEqual(positiveFields.reduce((carry, field) => carry + req_points[field], 0));
     });
 
-    it("Should not calculate the total positive points if they already exist.", () => {
+    it("Should not calculate the total positive points if it already exist.", () => {
       const req_points = generateRepPointsObj();
       req_points.positives = -1;
       calculatePositivesNegativesTotals(req_points);
@@ -83,13 +83,13 @@ describe("calculatePositivesNegativesTotals", () => {
   });
 
   describe("For Negative", () => {
-    it("Should calculate the total negative points if they do not exist.", () => {
+    it("Should calculate the total negative points if it do not exist.", () => {
       const req_points = generateRepPointsObj();
       calculatePositivesNegativesTotals(req_points);
-      expect(req_points.negatives).toEqual(negativeFields.length);
+      expect(req_points.negatives).toEqual(negativeFields.reduce((carry, field) => carry + req_points[field], 0));
     });
 
-    it("Should not calculate the total negative points if they already exist.", () => {
+    it("Should not calculate the total negative points if it already exist.", () => {
       const req_points = generateRepPointsObj();
       req_points.negatives = -1;
       calculatePositivesNegativesTotals(req_points);
@@ -98,13 +98,16 @@ describe("calculatePositivesNegativesTotals", () => {
   });
 
   describe("For totalPoints", () => {
-    it("Should calculate the total points if they do not exist.", () => {
+    it("Should calculate the total points if it do not exist.", () => {
       const req_points = generateRepPointsObj();
       calculatePositivesNegativesTotals(req_points);
-      expect(req_points.totalPoints).toEqual(positiveFields.length - negativeFields.length);
+      expect(req_points.totalPoints).toEqual(
+        positiveFields.reduce((carry, field) => carry + req_points[field], 0) -
+          negativeFields.reduce((carry, field) => carry + req_points[field], 0)
+      );
     });
 
-    it("Should not calculate the total points if they already exist.", () => {
+    it("Should not calculate the total points if it already exist.", () => {
       const req_points = generateRepPointsObj();
       req_points.totalPoints = -1;
       calculatePositivesNegativesTotals(req_points);
