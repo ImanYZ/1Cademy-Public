@@ -90,14 +90,14 @@ export const useWorkerQueue = ({
         const gg = dagreUtils.mapObjectToGraph(gObject);
 
         worker.terminate();
-        console.log("[queue]: ", { g: g.current, gg });
+        // console.log("[queue]: ", { g: g.current, gg });
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
         setClusterNodes(oldClusterNodes);
 
         setGraph(({ nodes, edges }) => {
-          console.log("[queue]: setNodes", { nodes });
+          // console.log("[queue]: setNodes", { nodes });
           const nodesCopy = { ...nodes };
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];
@@ -113,9 +113,9 @@ export const useWorkerQueue = ({
             };
             nodesCopy[nodeId] = overrideNode;
           });
-          console.log("[queue]: ", { nodesCopy });
+          // console.log("[queue]: ", { nodesCopy });
 
-          console.log("override:edges:", { edges, oldEdges });
+          // console.log("override:edges:", { edges, oldEdges });
           const edgesCopy = { ...edges };
           Object.keys(edgesCopy).forEach(edgeId => {
             const resultEdge: EdgeData = oldEdges[edgeId];
@@ -139,7 +139,7 @@ export const useWorkerQueue = ({
     if (!g?.current) return;
 
     // CREATE WORKER with Nodes and Nodes changed
-    console.log("[queue]: recalculateGraphWithWorker", graph, queue);
+    // console.log("[queue]: recalculateGraphWithWorker", graph, queue);
     const individualNodeChanges: FullNodeData[] = queue.map(cur => ({ ...graph.nodes[cur.id], height: cur.height }));
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags);
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
@@ -147,7 +147,7 @@ export const useWorkerQueue = ({
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker]);
 
   const addTask = (newTask: Task) => {
-    console.log("[queue]: add task\n", queue);
+    // console.log("[queue]: add task\n", queue);
     setQueue(queue => [...queue, newTask]);
   };
 

@@ -19,7 +19,7 @@ const layoutHandler = (
   g: dagre.graphlib.Graph<{}>
 ) => {
   // debugger
-  console.log("{ WORKER }", { oldNodes, oldEdges });
+  // console.log("{ WORKER }", { oldNodes, oldEdges });
   let mapNewWidth, mapNewHeight;
   while (mapChangedFlag) {
     mapChangedFlag = false;
@@ -127,7 +127,7 @@ const layoutHandler = (
 
     // ITERATE EDGES and calculate the new positions
     // debugger;
-    console.log("[Worker]:g.edges()", g.edges().length);
+    // console.log("[Worker]:g.edges()", g.edges().length);
     g.edges().map((e: any) => {
       const fromNode = g.node(e.v) as any;
       const toNode = g.node(e.w) as any;
@@ -145,8 +145,6 @@ const layoutHandler = (
         const newToX = toNode.left;
         const newToY = toNode.top + Math.floor(toNode.height / 2);
         const thisEdge = oldEdges[e.v + "-" + e.w];
-
-        console.log(52, e.v + "-" + e.w);
 
         if (
           !("fromX" in thisEdge) ||
