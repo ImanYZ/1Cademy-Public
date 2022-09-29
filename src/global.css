@@ -230,7 +230,7 @@
   bottom: 10px;
   right: 13px; */
   font-size: 13px;
-  width: 97%;
+  width: 100%;
 }
 .card-content .footer i {
   padding-left: 10px;
@@ -344,42 +344,45 @@
 /* ------------------------------------------ */
 /* styles from meta button */
 
-.MetaButton {
+/* .MetaButton {
   text-align: left;
   padding: 4px 7px 4px 7px;
   color: rgb(190, 190, 190) !important;
   /* text-transform: none !important; */
-  /* transition: color 0.1s ease; vendorless fallback */
-  /* -o-transition: color 0.1s ease; opera */
-  /* -ms-transition: color 0.1s ease; IE 10 */
-  /* -moz-transition: color 0.1s ease; Firefox */
-  /* -webkit-transition: color 0.1s ease; safari and chrome */
-  display: inline-block;
+/* transition: color 0.1s ease; vendorless fallback */
+/* -o-transition: color 0.1s ease; opera */
+/* -ms-transition: color 0.1s ease; IE 10 */
+/* -moz-transition: color 0.1s ease; Firefox */
+/* -webkit-transition: color 0.1s ease; safari and chrome */
+/* display: inline-flex;
+  align-items: center;
+  border: solid 2px green;
   position: relative;
   vertical-align: middle;
   background: none;
   border: none;
   border-radius: 4px;
   overflow: visible;
-  z-index: 1;
+  z-index: 1; */
 
-  overflow-wrap: break-word;
+/* overflow-wrap: break-word;
   word-wrap: break-word;
 
   -ms-word-break: break-all;
   /* This is the dangerous one in WebKit, as it breaks things wherever */
-  word-break: break-all;
+/* word-break: break-all;
   /* Instead use this non-standard one: */
-  word-break: break-word;
+/* word-break: break-word; */
+*/ */
 
   /* Adds a hyphen where the word breaks, if supported (No Blink) */
-  -ms-hyphens: auto;
+  /* -ms-hyphens: auto;
   -moz-hyphens: auto;
   -webkit-hyphens: auto;
   hyphens: auto;
-}
+} */
 
-.MetaButton.Round {
+/* .MetaButton.Round {
   border-radius: 50%;
 }
 
@@ -429,11 +432,11 @@
   -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-
+}  */
+/*
 .MetaButton span {
   padding-left: 4px;
-}
+} */
 
 /* ------------------------------------------ */
 /* styles from line */
@@ -477,6 +480,11 @@
   font-weight: 100; */
 }
 .NodeFooter.Right {
+  /* float: right;
+  right: -10px; */
+  font-size: 14px;
+}
+.NodeFooter.Right span {
   /* float: right;
   right: -10px; */
 }
@@ -1424,15 +1432,16 @@ button.MuiTab-textColorInherit:focus {
 
 .MetaButton {
   text-align: left;
-  padding: 4px 7px 4px 7px;
-  color: rgb(190, 190, 190) !important;
+  color: #bebebe !important;
   /* text-transform: none !important; */
   /* transition: color 0.1s ease; vendorless fallback */
   /* -o-transition: color 0.1s ease; opera */
   /* -ms-transition: color 0.1s ease; IE 10 */
   /* -moz-transition: color 0.1s ease; Firefox */
   /* -webkit-transition: color 0.1s ease; safari and chrome */
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   position: relative;
   vertical-align: middle;
   background: none;
@@ -1455,8 +1464,14 @@ button.MuiTab-textColorInherit:focus {
   -moz-hyphens: auto;
   -webkit-hyphens: auto;
   hyphens: auto;
+  font-size: inherit;
 }
-
+.MetaButton:hover svg {
+  color: #ff9100 !important;
+}
+.MetaButton:hover {
+  color: #fff !important;
+}
 .MetaButton.Round {
   border-radius: 50%;
 }
@@ -1468,7 +1483,9 @@ button.MuiTab-textColorInherit:focus {
 .LightMode .MetaButton {
   color: rgba(0, 0, 0, 0.6) !important;
 }
-
+.LightMode .MetaButton:hover {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
 .MetaButton.Clickable:hover,
 .MetaButton.Clickable:focus {
   background: rgba(255, 255, 255, 0.13);
@@ -1479,7 +1496,7 @@ button.MuiTab-textColorInherit:focus {
   color: rgba(0, 0, 0, 0.9) !important;
 }
 
-.MetaButton.Clickable:hover i {
+.MetaButton.Clickable:hover svg {
   color: #ff9100 !important;
 }
 
@@ -1508,10 +1525,10 @@ button.MuiTab-textColorInherit:focus {
   -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 }
-
+/*
 .MetaButton span {
-  padding-left: 4px;
-}
+  padding-left: 2px;
+} */
 
 /* ------------------------------------------ */
 /* styles from sidebar wrapper */

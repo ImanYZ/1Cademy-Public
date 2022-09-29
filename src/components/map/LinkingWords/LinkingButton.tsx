@@ -47,7 +47,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
       }
     >
       <>
-        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
+        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"left"} sx={{ fontSize: "15px" }} />
         {/* CHECK: I commented this, please uncomment this */}
         {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
         {/* <HyperEditor
@@ -55,9 +55,15 @@ const LinkingButton = (props: LinkingButtonProps) => {
         onChange={doNothing}
         content={props.linkedNodeTitle}
       /> */}
-        <Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTitle} />
+        <Editor
+          readOnly={true}
+          setValue={doNothing}
+          label={""}
+          value={props.linkedNodeTitle}
+          sxPreview={{ fontSize: "14px" }}
+        />
         {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
-        <div className="preloader-wrapper active small right">
+        <div c<Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTlassName="preloader-wrapper active small right">
           <div className="spinner-layer spinner-yellow-only">
             <div className="circle-clipper left">
               <div className="circle"></div>

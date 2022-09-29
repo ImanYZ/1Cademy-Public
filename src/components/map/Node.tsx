@@ -505,7 +505,7 @@ const Node = ({
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
-                sxPreview={{ fontSize: "25px", fontWeight: 300, border: "solid 2px royalBlue" }}
+                sxPreview={{ fontSize: "25px", fontWeight: 300 }}
               />
               {/* <HyperEditor
                 readOnly={!editable}
@@ -521,7 +521,7 @@ const Node = ({
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={hideOffspringsHandler}
                   onHideNodeHandler={hideNodeHandler}
-                  sx={{ position: "absolute", right: "0px", top: "0px" }}
+                  sx={{ position: "absolute", right: "10px", top: "0px" }}
                 />
                 // <NodeHeader
                 //   identifier={identifier}
@@ -543,7 +543,7 @@ const Node = ({
                 setValue={contentChange}
                 // setValue={setContentCopy}
                 readOnly={!editable}
-                sxPreview={{ fontSize: "15px", border: "solid 2px pink" }}
+                sxPreview={{ fontSize: "15px" }}
               />
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
@@ -783,7 +783,7 @@ const Node = ({
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
                 onHideNodeHandler={hideNodeHandler}
-                sx={{ position: "absolute", right: "0px", top: "0px" }}
+                sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
               // <NodeHeader
               //   identifier={identifier}

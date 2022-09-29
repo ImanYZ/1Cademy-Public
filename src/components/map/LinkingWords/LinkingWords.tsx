@@ -6,7 +6,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Button, Link, TextField } from "@mui/material";
+import { Box, Button, Link, TextField } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -340,7 +340,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           </>
         )}
         {props.openPart === "LinkingWords" && (
-          <>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
             <strong>Children (Follow-ups)</strong>
             {props.nodesChildren.map((child: any, idx: number) => {
               return (
@@ -379,7 +379,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               nodeType={"Relation"}
               visible={false}
             />
-          </>
+          </Box>
         )}
         {props.editable &&
           !props.isNew &&

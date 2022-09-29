@@ -87,7 +87,7 @@ const NodeFooter = ({
   title,
   content,
   unaccepted,
-  // openPart,
+  openPart,
   nodeType,
   isNew,
   admin,
@@ -170,7 +170,7 @@ const NodeFooter = ({
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "10px" }}>
-      <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center" }}>
+      <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
         {open &&
           (isNew ? (
             //   <UserStatusIcon
@@ -221,7 +221,7 @@ const NodeFooter = ({
           style={{ display: "flex", alignItems: "center" }}
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
-          <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} />
+          <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
           {/* <span
             className={"TooltipText " + (open ? "Top" : "Bottom")}
             onClick={preventEventPropagation}
@@ -267,10 +267,10 @@ const NodeFooter = ({
                   // }
                   tooltipPosition="top"
                 >
-                  <>
+                  <span>
                     <CreateIcon fontSize="inherit" />
                     {` ${dayjs(new Date(changedAt)).fromNow()}`}
-                  </>
+                  </span>
                 </MemoizedMetaButton>
                 {/* <MemoizedMetaButton
                   onClick={selectAcceptedProposals}
@@ -360,10 +360,7 @@ const NodeFooter = ({
                 <>
                   <MenuBookIcon fontSize="inherit" />
                   <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
-                  <Box component={"span"} sx={{ mx: "5px" }}>
-                    {" "}
-                    |{" "}
-                  </Box>
+                  <Box component={"span"}> | </Box>
                   <LocalOfferIcon fontSize="inherit" />
                   <span>{shortenNumber(tags.length, 2, false)}</span>
                 </>
@@ -436,7 +433,7 @@ const NodeFooter = ({
                 >
                   <i
                     className={
-                      "material-icons " + 
+                      "material-icons " +
                       (activeNode &&
                       commentsSelected
                         ? "orange-text"
@@ -486,13 +483,13 @@ const NodeFooter = ({
             >
               <>
                 <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
-                <SwapHorizIcon fontSize="inherit" />
+                <SwapHorizIcon fontSize="inherit" color={openPart === "LinkingWords" ? "primary" : "secondary"} />
                 <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
               </>
             </MemoizedMetaButton>
           </>
         ) : (
-          <>
+          <Box sx={{ display: "flex", alignItems: "center", fontSize: "14px", fontWeight: "normal" }}>
             <MemoizedMetaButton
               tooltip={
                 shortenNumber(correctNum, 2, false) +
@@ -503,11 +500,15 @@ const NodeFooter = ({
                 " found it unhelpful."
               }
             >
-              <Box sx={{ display: "flex", alignItems: "center", p: "4px 7px", fontSize: "15px" }}>
-                <CloseIcon fontSize="inherit" sx={{ color: markedWrong ? "red" : "inherit" }} />
-                <span>{shortenNumber(wrongNum, 2, false)}</span>
-                <DoneIcon fontSize="inherit" sx={{ color: markedCorrect ? "green" : "inherit" }} />
-                <span>{shortenNumber(wrongNum, 2, false)}</span>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <CloseIcon fontSize="inherit" sx={{ color: markedWrong ? "red" : "inherit" }} />
+                  <span>{shortenNumber(wrongNum, 2, false)}</span>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <DoneIcon fontSize="inherit" sx={{ color: markedCorrect ? "green" : "inherit" }} />
+                  <span>{shortenNumber(wrongNum, 2, false)}</span>
+                </Box>
               </Box>
             </MemoizedMetaButton>
             <MemoizedMetaButton
@@ -519,7 +520,7 @@ const NodeFooter = ({
                 " bookmarked this node."
               }
             >
-              <Box sx={{ display: "flex", alignItems: "center", p: "4px 7px", fontSize: "15px" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
                 {bookmarked ? (
                   <BookmarkIcon fontSize="inherit" className={"orange-text"} />
                 ) : (
@@ -541,7 +542,7 @@ const NodeFooter = ({
                 (nodesChildren.length === 1 ? "." : "s.")
               }
             >
-              <Box sx={{ display: "flex", alignItems: "center", p: "4px 7px", fontSize: "15px" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "2px" }}>
                 <span /*className="FooterParentNodesClosed"*/>{shortenNumber(parents.length, 2, false)}</span>
                 <SwapHorizIcon fontSize="inherit" />
                 <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
@@ -564,7 +565,7 @@ const NodeFooter = ({
               >school</i>
               <span>{shortenNumber(studied, 2, false)}</span>
             </MemoizedMetaButton> */}
-          </>
+          </Box>
         )}
       </Box>
     </Box>
