@@ -1,5 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import { Box } from "@mui/system";
+import { SxProps, Theme } from "@mui/system";
 import React, { useState } from "react";
 
 import MarkdownRender from "./Markdown/MarkdownRender";
@@ -8,11 +9,11 @@ type EditorProps = {
   label: string;
   value: string;
   setValue: (value: string) => void;
+  sxPreview?: SxProps<Theme>;
   readOnly?: boolean;
-  fontSize?: string;
 };
 
-export const Editor = ({ label, value, setValue, readOnly = true, fontSize = "16px" }: EditorProps) => {
+export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   const [canEdit, setCanEdit] = useState(true);
 
@@ -58,7 +59,7 @@ export const Editor = ({ label, value, setValue, readOnly = true, fontSize = "16
         />
       ) : (
         <Box sx={{ p: canEdit ? "0px" : "16px 14px" }}>
-          <MarkdownRender fontSize={fontSize} text={value} />
+          <MarkdownRender text={value} sx={sxPreview} />
         </Box>
       )}
     </Box>

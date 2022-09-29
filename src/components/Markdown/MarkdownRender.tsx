@@ -1,24 +1,24 @@
 import "katex/dist/katex.min.css";
 
 import { Typography } from "@mui/material";
+import { SxProps, Theme } from "@mui/system";
 import React, { FC } from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-
 type Props = {
   text: string;
-  fontSize?: string;
+  sx?: SxProps<Theme>;
 };
-const MarkdownRender: FC<Props> = ({ text, fontSize = "inherit" }) => {
+const MarkdownRender: FC<Props> = ({ text, sx = { fontSize: "inherit" } }) => {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        p: ({ ...props }) => <Typography fontSize={fontSize} lineHeight={"inherit"} {...props} />,
+        p: ({ ...props }) => <Typography lineHeight={"inherit"} {...props} sx={{ ...sx }} />,
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
@@ -26,7 +26,7 @@ const MarkdownRender: FC<Props> = ({ text, fontSize = "inherit" }) => {
               {String(text).replace(/\n$/, "")}
             </SyntaxHighlighter>
           ) : (
-            <code className={className} {...props}>
+            <code className={className} {...props} style={{ border: "solid 2px red" }}>
               {children || ""}
             </code>
           );

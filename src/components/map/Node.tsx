@@ -505,7 +505,7 @@ const Node = ({
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
-                fontSize="25px"
+                sxPreview={{ fontSize: "25px", fontWeight: 300, border: "solid 2px royalBlue" }}
               />
               {/* <HyperEditor
                 readOnly={!editable}
@@ -543,6 +543,7 @@ const Node = ({
                 setValue={contentChange}
                 // setValue={setContentCopy}
                 readOnly={!editable}
+                sxPreview={{ fontSize: "15px", border: "solid 2px pink" }}
               />
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
@@ -773,7 +774,7 @@ const Node = ({
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={true}
-                fontSize={"25px"}
+                sxPreview={{ fontSize: "25px", border: "solid 2px orange" }}
               />
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (
