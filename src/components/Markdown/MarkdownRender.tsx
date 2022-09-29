@@ -10,23 +10,25 @@ import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 type Props = {
   text: string;
+  customClass?: string;
   sx?: SxProps<Theme>;
 };
-const MarkdownRender: FC<Props> = ({ text, sx = { fontSize: "inherit" } }) => {
+const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inherit" } }) => {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
       rehypePlugins={[rehypeKatex]}
+      className={customClass}
       components={{
         p: ({ ...props }) => <Typography lineHeight={"inherit"} {...props} sx={{ ...sx }} />,
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
             <SyntaxHighlighter style={darcula as any} language={match[1]} PreTag="div" {...props}>
-              {String(text).replace(/\n$/, "")}
+              {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
           ) : (
-            <code className={className} {...props} style={{ border: "solid 2px red" }}>
+            <code className={className} {...props}>
               {children || ""}
             </code>
           );

@@ -486,12 +486,10 @@ i {
   color: #454545;
 }
 
-h2 {
+check: I commented this, /* h2 {
   color: #a7a7a7;
   text-align: center;
-}
-
-.FormInputs .MuiOutlinedInput-notchedOutline {
+} */ .FormInputs .MuiOutlinedInput-notchedOutline {
   border-color: #424242;
 }
 
