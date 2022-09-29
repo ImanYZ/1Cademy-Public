@@ -779,7 +779,7 @@ const Node = ({
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={true}
-                sxPreview={{ fontSize: "25px", border: "solid 2px orange" }}
+                sxPreview={{ fontSize: "25px" }}
               />
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (

@@ -1,4 +1,4 @@
-import { Input, InputLabel, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Button, Input, InputLabel } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
 import React, { useMemo, useRef, useState } from "react";
@@ -53,33 +53,49 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: E
     [label]
   );
 
-  const onChangeOption = (event: React.MouseEvent<HTMLElement>, newAlignment: EditorOptions | null) => {
-    if (newAlignment !== null) {
-      setOption(newAlignment);
-    }
-  };
-
   return (
     <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
       {!readOnly && <InputLabel htmlFor={inputId}>{label}</InputLabel>}
 
-      <Box sx={{ p: "5px 0px", display: "flex", justifyContent: "end" }}>
+      <Box sx={{ p: "0px 0px 5px 0px", display: "flex", justifyContent: "end", gap: "5px" }}>
         {
           !readOnly && (
             // <Tabs value={option} onChange={onChangeOption} aria-label="Editor options">
             //   <Tab label="Edit" sx={{ p: "0px" }} />
             //   <Tab label="Preview" sx={{ p: "0px" }} />
             // </Tabs>
-            <ToggleButtonGroup value={option} onChange={onChangeOption} aria-label="text alignment">
-              <ToggleButton value="EDIT" size="small" aria-label="left aligned">
-                {/* <FormatAlignLeftIcon /> */}
+            // <ToggleButtonGroup value={option} onChange={onChangeOption} aria-label="text alignment">
+            //   <ToggleButton value="EDIT" size="small" aria-label="left aligned">
+            //     {/* <FormatAlignLeftIcon /> */}
+            //     Edit
+            //   </ToggleButton>
+            //   <ToggleButton value="PREVIEW" size="small" aria-label="centered">
+            //     {/* <FormatAlignCenterIcon /> */}
+            //     Preview
+            //   </ToggleButton>
+            // </ToggleButtonGroup>
+            // <ButtonGroup size="small" aria-label="small button group">
+            <>
+              <Button
+                color={"secondary"}
+                variant={option === "EDIT" ? "contained" : "outlined"}
+                onClick={() => setOption("EDIT")}
+                size="small"
+                sx={{ py: "0px" }}
+              >
                 Edit
-              </ToggleButton>
-              <ToggleButton value="PREVIEW" size="small" aria-label="centered">
-                {/* <FormatAlignCenterIcon /> */}
+              </Button>
+              <Button
+                color={"secondary"}
+                variant={option === "PREVIEW" ? "contained" : "outlined"}
+                onClick={() => setOption("PREVIEW")}
+                size="small"
+                sx={{ py: "0px" }}
+              >
                 Preview
-              </ToggleButton>
-            </ToggleButtonGroup>
+              </Button>
+            </>
+            // </ButtonGroup>
           )
           // (
           //   canEdit ? (
@@ -101,7 +117,6 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: E
           <Input
             id={inputId}
             ref={inputRef}
-            defaultValue="Hello world"
             fullWidth
             multiline
             value={value}
