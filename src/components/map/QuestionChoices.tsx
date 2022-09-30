@@ -88,11 +88,11 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <div style={{ alignSelf: "flex-end" }}>
             {props.choice.correct ? (
               <IconButton onClick={switchChoiceHandler}>
-                <DoneIcon className="green-text" />
+                <DoneIcon className="green-text" sx={{ fontSize: "16px" }} />
               </IconButton>
             ) : (
               <IconButton onClick={switchChoiceHandler}>
-                <CloseIcon className="red-text" />
+                <CloseIcon className="red-text" sx={{ fontSize: "16px" }} />
               </IconButton>
             )}
           </div>

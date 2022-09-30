@@ -577,7 +577,6 @@ const Node = ({
                     onLoad={onImageLoad}
                     onClick={onImageClick}
                   />
-                  {/* </a> */}
                 </>
               )}
               {nodeType === "Question" /*&& "choices" in props*/ && (
@@ -620,9 +619,6 @@ const Node = ({
               )}
               {editable && (
                 <>
-                  {/* <p className="ProposalTitle">
-
-                  </p> */}
                   <Editor
                     label={
                       "To expedite your proposal review, explain why you propose this " +
