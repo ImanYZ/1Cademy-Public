@@ -241,7 +241,7 @@ const NodeFooter = ({
       <Box className="NodeFooter Right" sx={{ display: "flex", alignItems: "center" }}>
         {open ? (
           // REF: Node.css ln 122
-          <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px", border: "solid 2px pink" }}>
+          <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
             {!editable && !unaccepted ? (
               // Accepted nodes
               <>
@@ -369,14 +369,14 @@ const NodeFooter = ({
                 <>
                   <MenuBookIcon
                     // className={openPart === "References" ? "orange-text" : "grey-text"}
-                    color={openPart === "References" ? "primary" : "secondary"}
+                    color={openPart === "References" ? "primary" : "inherit"}
                     sx={{ fontSize: "16px" }}
                   />
                   <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
                   <Box component={"span"}> | </Box>
                   <LocalOfferIcon
                     // className={openPart === "References" ? "orange-text" : "grey-text"}
-                    color={openPart === "References" ? "primary" : "secondary"}
+                    color={openPart === "References" ? "primary" : "inherit"}
                     sx={{ fontSize: "16px" }}
                   />
                   <span>{shortenNumber(tags.length, 2, false)}</span>
@@ -419,12 +419,13 @@ const NodeFooter = ({
                 >
                   <>
                     {bookmarked ? (
-                      <BookmarkIcon className={bookmarked ? "orange-text" : "grey-text"} sx={{ fontSize: "16px" }} />
+                      <BookmarkIcon color={bookmarked ? "primary" : "secondary"} sx={{ fontSize: "16px" }} />
                     ) : (
                       <BookmarkBorderIcon
                         // color={bookmarked ? "orange-text" : "grey-text"}
                         // className={bookmarked ? "orange-text" : "grey-text"}
-                        sx={{ fontSize: "16px", color: bookmarked ? "orange-text" : "grey-text" }}
+                        color={bookmarked ? "primary" : "secondary"}
+                        sx={{ fontSize: "16px" }}
                       />
                     )}
                     <span>{shortenNumber(bookmarks, 2, false)}</span>
@@ -522,7 +523,6 @@ const NodeFooter = ({
               display: "flex",
               alignItems: "center",
               fontWeight: "normal",
-              border: "solid 2px royalBlue",
               fontSize: "13px",
             }}
           >
@@ -558,9 +558,9 @@ const NodeFooter = ({
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 {bookmarked ? (
-                  <BookmarkIcon sx={{ fontSize: "16px" }} className={"orange-text"} />
+                  <BookmarkIcon color={"primary"} sx={{ fontSize: "16px" }} />
                 ) : (
-                  <BookmarkBorderIcon sx={{ fontSize: "16px" }} />
+                  <BookmarkBorderIcon color={"secondary"} sx={{ fontSize: "16px" }} />
                 )}
                 <span>{shortenNumber(bookmarks, 2, false)}</span>
               </Box>
