@@ -479,7 +479,7 @@ const Node = ({
                     <p className="NewChildProposalWarning">Before proposing,</p>
                     <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
                       <span>- Search </span>
-                      <SearchIcon fontSize="small" sx={{ color: "white", mx: "5px" }} />
+                      <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
                       <span> to ensure the node does not exist.</span>
                     </p>
                     {(nodeType === "Concept" ||
@@ -562,7 +562,7 @@ const Node = ({
                   {editable && (
                     <div className="RemoveImageDIV">
                       <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                        <DeleteForeverIcon />
+                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                       </MemoizedMetaButton>
                     </div>
                   )}
@@ -581,7 +581,7 @@ const Node = ({
                 </>
               )}
               {nodeType === "Question" /*&& "choices" in props*/ && (
-                <>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <ul className="collapsible" style={{ padding: "0px" }}>
                     {choices.map((choice, idx) => {
                       return (
@@ -604,19 +604,19 @@ const Node = ({
                     })}
                   </ul>
                   {editable && (
-                    <div className="QuestionAddChoice">
+                    <Box sx={{ alignSelf: "flex-end" }}>
                       <MemoizedMetaButton
                         onClick={addChoiceHandler}
                         tooltip="Click to add a new choice to this question."
                       >
                         <>
-                          <AddIcon className="green-text" />
+                          <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
                           <span>Add Choice</span>
                         </>
                       </MemoizedMetaButton>
-                    </div>
+                    </Box>
                   )}
-                </>
+                </Box>
               )}
               {editable && (
                 <>
