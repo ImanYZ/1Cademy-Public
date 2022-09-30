@@ -26,6 +26,22 @@ type IFakeNodeOptions = {
   admin?: IUser;
 };
 
+type IFakeNodeVersionOptions = {
+  documentId?: string;
+  nodeType?: INodeType;
+  childType?: INodeType;
+  proposer?: IUser;
+  node?: INode;
+  tags?: INode[];
+  references?: INode[];
+  parents?: INode[];
+  children?: INode[];
+  accepted?: boolean;
+  addedParents?: boolean;
+  removedParents?: boolean;
+  viewers?: number;
+};
+
 export function createNode(params: IFakeNodeOptions): INode {
   let contributors: { [key: string]: INodeContributor } = {};
   let contribNames: string[] = [];
@@ -164,5 +180,75 @@ export function getDefaultNode(params: IFakeNodeOptions): INode {
     createdAt: new Date(),
     updatedAt: new Date(),
     maxVersionRating: 0,
+  };
+}
+
+export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion {
+  const {
+    childType,
+    documentId,
+    proposer,
+    parents,
+    children,
+    accepted,
+    node,
+    addedParents,
+    removedParents,
+    viewers,
+    tags,
+  } = params;
+  return {
+    documentId: documentId ? documentId : faker.datatype.uuid(),
+    childType: childType,
+    content: faker.hacker.phrase(),
+    title: faker.hacker.phrase(),
+    fullname: proposer ? `${proposer.fName} ${proposer.lName}` : faker.company.name(),
+    children: children
+      ? children.map(
+          child =>
+            ({
+              node: child.documentId,
+              title: child.title,
+              nodeType: child.nodeType,
+            } as INodeLink)
+        )
+      : [],
+    addedInstitContris: false,
+    accepted: accepted ? accepted : false,
+    imageUrl: faker.image.imageUrl(),
+    chooseUname: !!proposer?.chooseUname,
+    node: node ? String(node.documentId) : faker.datatype.uuid(),
+    parents: parents
+      ? parents.map(
+          parent =>
+            ({
+              node: parent.documentId,
+              title: parent.title,
+              nodeType: parent.nodeType,
+            } as INodeLink)
+        )
+      : [],
+    addedParents: !!addedParents,
+    deleted: false,
+    corrects: 0,
+    wrongs: 0,
+    proposer: proposer ? proposer.uname : faker.internet.userName(),
+    viewers: viewers ? viewers : 0,
+    proposal: faker.hacker.phrase(),
+    removedParents: !!removedParents,
+    awards: 0,
+    summary: faker.hacker.phrase(),
+    nodeImage: faker.image.imageUrl(),
+    references: params.references ? params.references.map(reference => reference.title) : [],
+    referenceLabels: params.references
+      ? params.references.map(() =>
+          faker.datatype.number({ precision: 0, min: 0, max: 1 }) > 0 ? faker.datatype.string() : ""
+        )
+      : [],
+    referenceIds: params.references ? params.references.map(reference => String(reference.documentId)) : [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    tags: tags ? tags.map(tag => tag.title) : [],
+    tagIds: tags ? tags.map(tag => String(tag.documentId)) : [],
   };
 }

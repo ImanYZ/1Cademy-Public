@@ -21,7 +21,7 @@ export type IUserNode = {
   deleted: boolean;
   node: string;
   user: string;
-  visible: string;
+  visible: boolean;
   correct: boolean;
   wrong: boolean;
   isStudied: boolean;

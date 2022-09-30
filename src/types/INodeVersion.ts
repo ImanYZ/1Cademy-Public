@@ -3,7 +3,7 @@ import { INodeType } from "./INodeType";
 
 export type INodeVersion = {
   documentId?: string;
-  childType: INodeType;
+  childType?: INodeType;
   content: string;
   title: string;
   fullname: string;
