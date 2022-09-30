@@ -3,6 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
+import { Box } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
@@ -490,10 +491,11 @@ const Node = ({
                           - Make the reference nodes that you'd like to cite, visible on your map view.
                         </p>
                       )}
-                    <p id="NewChildProposalTitleHint">Please enter the node title below:</p>
+                    {/* <p id="NewChildProposalTitleHint">Please enter the node title below:</p> */}
                   </>
                 ) : (
-                  <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
+                  // <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
+                  <></>
                 ))}
               {/* CHECK: I commented this */}
               <Editor
@@ -507,6 +509,7 @@ const Node = ({
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
               />
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* <HyperEditor
                 readOnly={!editable}
                 onChange={titleChange}
@@ -536,7 +539,7 @@ const Node = ({
               )}
             </div>
             <div className="NodeContent" data-hoverable={true}>
-              {editable && <p>Please edit the node content below:</p>}
+              {/* {editable && <p>Please edit the node content below:</p>} */}
               <Editor
                 label="Please edit the node content below:"
                 value={content}
@@ -545,6 +548,7 @@ const Node = ({
                 readOnly={!editable}
                 sxPreview={{ fontSize: "15px" }}
               />
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* CHECK: I commmented this */}
               {/* <HyperEditor
                 readOnly={!editable}
@@ -616,13 +620,14 @@ const Node = ({
               )}
               {editable && (
                 <>
-                  <p className="ProposalTitle">
-                    {"To expedite your proposal review, explain why you propose this " +
-                      (isNew ? nodeType + " child node:" : "new version:")}
-                  </p>
+                  {/* <p className="ProposalTitle">
+                    
+                  </p> */}
                   <Editor
-                    label="Please write a few words to summarize what you've proposed
-                      in this version:"
+                    label={
+                      "To expedite your proposal review, explain why you propose this " +
+                      (isNew ? nodeType + " child node:" : "new version:")
+                    }
                     value={reason}
                     setValue={setReason}
                     readOnly={false}
@@ -774,7 +779,7 @@ const Node = ({
                 setValue={titleChange}
                 // setValue={setTitleCopy}
                 readOnly={true}
-                sxPreview={{ fontSize: "25px", border: "solid 2px orange" }}
+                sxPreview={{ fontSize: "25px" }}
               />
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (

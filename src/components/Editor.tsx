@@ -1,7 +1,7 @@
-import { Button, TextField } from "@mui/material";
+import { Button, Input, InputLabel } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import MarkdownRender from "./Markdown/MarkdownRender";
 
@@ -13,9 +13,13 @@ type EditorProps = {
   readOnly?: boolean;
 };
 
+type EditorOptions = "EDIT" | "PREVIEW";
+
 export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
-  const [canEdit, setCanEdit] = useState(true);
+  // const [canEdit, setCanEdit] = useState(true);
+  const inputRef = useRef(null);
+  const [option, setOption] = useState<EditorOptions>(readOnly ? "PREVIEW" : "EDIT");
 
   // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   setValue(event.target.value);
@@ -40,28 +44,95 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: E
   //   }*/
   // }
 
+  const inputId = useMemo(
+    () =>
+      `editor-text-field-${label
+        .replace(/[^A-Za-z]/g, "")
+        .split(" ")
+        .join("-")}`,
+    [label]
+  );
+
   return (
     <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
-      <Box sx={{ display: "flex", justifyContent: "end" }}>
-        {!readOnly && <Button onClick={() => setCanEdit(!canEdit)}>Preview/Edit</Button>}
+      {!readOnly && <InputLabel htmlFor={inputId}>{label}</InputLabel>}
+
+      <Box sx={{ p: "0px 0px 5px 0px", display: "flex", justifyContent: "end", gap: "5px" }}>
+        {
+          !readOnly && (
+            // <Tabs value={option} onChange={onChangeOption} aria-label="Editor options">
+            //   <Tab label="Edit" sx={{ p: "0px" }} />
+            //   <Tab label="Preview" sx={{ p: "0px" }} />
+            // </Tabs>
+            // <ToggleButtonGroup value={option} onChange={onChangeOption} aria-label="text alignment">
+            //   <ToggleButton value="EDIT" size="small" aria-label="left aligned">
+            //     {/* <FormatAlignLeftIcon /> */}
+            //     Edit
+            //   </ToggleButton>
+            //   <ToggleButton value="PREVIEW" size="small" aria-label="centered">
+            //     {/* <FormatAlignCenterIcon /> */}
+            //     Preview
+            //   </ToggleButton>
+            // </ToggleButtonGroup>
+            // <ButtonGroup size="small" aria-label="small button group">
+            <>
+              <Button
+                color={"secondary"}
+                variant={option === "EDIT" ? "contained" : "outlined"}
+                onClick={() => setOption("EDIT")}
+                size="small"
+                sx={{ py: "0px" }}
+              >
+                Edit
+              </Button>
+              <Button
+                color={"secondary"}
+                variant={option === "PREVIEW" ? "contained" : "outlined"}
+                onClick={() => setOption("PREVIEW")}
+                size="small"
+                sx={{ py: "0px" }}
+              >
+                Preview
+              </Button>
+            </>
+            // </ButtonGroup>
+          )
+          // (
+          //   canEdit ? (
+          //     <Button variant="outlined" size="small" onClick={() => setCanEdit(false)}>
+          //       Preview
+          //     </Button>
+          //   ) : (
+          //     <Button variant="outlined" size="small" onClick={() => setCanEdit(true)}>
+          //       Edit
+          //     </Button>
+          //   )
+          // )
+        }
       </Box>
-      {canEdit && !readOnly ? (
-        <TextField
-          id="editor-text-field"
-          label={label}
-          fullWidth
-          multiline
-          // maxRows={4}
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          className="EditableTextarea"
-          // onMouseDown={handleMouseDown}
-        />
-      ) : (
-        <Box sx={{ p: canEdit ? "0px" : "16px 14px" }}>
-          <MarkdownRender text={value} sx={sxPreview} />
-        </Box>
-      )}
+
+      {/* {!readOnly && <hr />} */}
+      <Box sx={{ border: readOnly ? undefined : "solid 2px gray" }}>
+        {option === "EDIT" && !readOnly ? (
+          <Input
+            id={inputId}
+            ref={inputRef}
+            fullWidth
+            multiline
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            sx={{ p: "0px", m: "0px", fontWeight: 250 }}
+          />
+        ) : (
+          <Box sx={{ p: readOnly ? "0px" : "0px" }}>
+            <MarkdownRender
+              text={value}
+              customClass={"custom-react-markdown"}
+              sx={{ ...sxPreview, fontWeight: readOnly ? 300 : 250, letterSpacing: "inherit" }}
+            />
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
