@@ -218,7 +218,7 @@ const NodeFooter = ({
           ))}
         <div
           className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
-          style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
+          style={{ display: "flex", alignItems: "center", fontSize: "25px" }} // font size refL Map.css ln 71
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
           <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />

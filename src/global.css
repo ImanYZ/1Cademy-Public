@@ -669,10 +669,10 @@
   padding: 7px 16px 7px 7px;
 }
  */
-.ProposalCommentSubmitButton .btn {
+/* .ProposalCommentSubmitButton .btn {
   margin-top: 7px;
   margin-bottom: 4px;
-}
+} */
 .ProposalCommentSubmitButton .btn.green {
   margin-left: 13px;
 }

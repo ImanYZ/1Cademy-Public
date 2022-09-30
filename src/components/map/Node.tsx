@@ -549,7 +549,7 @@ const Node = ({
                 sxPreview={{ fontSize: "15px" }}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
-              {/* CHECK: I commmented this */}
+              {/* CHECK: I commmented  this */}
               {/* <HyperEditor
                 readOnly={!editable}
                 onChange={contentChange}
@@ -621,7 +621,7 @@ const Node = ({
               {editable && (
                 <>
                   {/* <p className="ProposalTitle">
-                    
+
                   </p> */}
                   <Editor
                     label={
