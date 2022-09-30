@@ -1,6 +1,6 @@
-import { admin, commitBatch,db } from "../../../src/lib/firestoreServer/admin";
+import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { createPractice } from "../../../src/utils";
-import { conceptVersionsData, nodesData, practiceData,usersData } from "../../../testUtils/mockCollections";
+import { conceptVersionsData, nodesData, practiceData, usersData } from "../../../testUtils/mockCollections";
 
 describe("createPractice", () => {
   beforeEach(async () => {
