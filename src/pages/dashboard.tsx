@@ -80,20 +80,20 @@ type DashboardProps = {};
  *     - Build Full Nodes (Merge nodeData and userNodeData)
  *     - SYNCHRONIZATION: merge FullNodes into Nodes
  *         Type: useEffect
- *         Flag: nodeChanges || userNodeChanges
- *         Description: will use [nodeChanges] or [userNodeChanges] to get [nodes] updated
+ *         Description:
  *
- *  --- render nodes, every node will call NODE CHANGED
+ *  --- render nodes, every node when its heigh is changed will add task
  *
- *  4. recalculateGraphWithWorker: (only when change Height) (n)
- *      Type: function
+ *  4. WORKER QUEUE: will add tasks to a queue
+ *     - is working: add task to the queue
+ *     - is NOT working: will merge all tasks from queue and execute in one
  *
  *  3. WORKER: (n)
  *      Type: useEffect
  *      Flag: mapChanged
  *      Description: will calculate the [nodes] and [edges] positions
  *
- *  --- render nodes, every node will call NODE CHANGED
+ *  --- render nodes
  */
 const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
@@ -448,7 +448,7 @@ const Dashboard = ({}: DashboardProps) => {
     // setNodes(oldNodes);
     setGraph({ nodes: oldNodes, edges: oldEdges });
     setMapChanged(true);
-  }, [allTags]);
+  }, [graph, allTags]);
 
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
@@ -1737,7 +1737,7 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      console.log("[2.CHANGE NODE HIGHT 🚀]", { height });
+      console.log("[2.CHANGE NODE HIGHT 🚀]", { height, nodeId });
 
       // // if (value === nodes[nodeId].title) return;
       // const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
@@ -2152,24 +2152,33 @@ const Dashboard = ({}: DashboardProps) => {
       event.preventDefault();
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
+      console.log(1);
       const newNodeId = newId();
-      setGraph(({ nodes: oldNodes, edges }) => {
+      setGraph(graph => {
+        console.log("setGraph:", graph);
+        const { nodes: oldNodes, edges } = graph;
+        // debugger;
+        console.log(11, edges, oldNodes);
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
+        console.log(12, changedNodes, oldNodes[nodeBookState.selectedNode]);
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
+        console.log(13);
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
 
+        console.log(14);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
+        console.log(15);
         const newChildNode: any = {
           isStudied: true,
           bookmarked: false,
           isNew: true,
-          id: newNodeId,
+          // id: newNodeId,
           correct: true,
           updatedAt: new Date(),
           open: true,
@@ -2200,6 +2209,7 @@ const Dashboard = ({}: DashboardProps) => {
           choices: [],
           editable: true,
           width: NODE_WIDTH,
+          node: newNodeId,
         };
         if (childNodeType === "Question") {
           newChildNode.choices = [
@@ -2211,20 +2221,23 @@ const Dashboard = ({}: DashboardProps) => {
           ];
         }
 
+        console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
         const newNodes = setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {});
         if (!nodeBookState.selectedNode) return { nodes: newNodes, edges }; //CHECK: I add this to validate
+        console.log(3);
         const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
 
         // setEdges(oldEdges => {
         // });
+        console.log(4, { newNodes, newEdges });
         setMapChanged(true);
         scrollToNode(newNodeId);
         return { nodes: newNodes, edges: newEdges };
       });
     },
-    [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
+    [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph, graph]
   );
 
   const fetchProposals = useCallback(

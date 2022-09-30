@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
@@ -46,15 +47,8 @@ const LinkingButton = (props: LinkingButtonProps) => {
           : "left"
       }
     >
-      <>
-        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"left"} sx={{ fontSize: "15px" }} />
-        {/* CHECK: I commented this, please uncomment this */}
-        {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
-        {/* <HyperEditor
-        readOnly={true}
-        onChange={doNothing}
-        content={props.linkedNodeTitle}
-      /> */}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"left"} sx={{ fontSize: "16px" }} />
         <Editor
           readOnly={true}
           setValue={doNothing}
@@ -62,6 +56,13 @@ const LinkingButton = (props: LinkingButtonProps) => {
           value={props.linkedNodeTitle}
           sxPreview={{ fontSize: "14px" }}
         />
+        {/* CHECK: I commented this, please uncomment this */}
+        {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
+        {/* <HyperEditor
+        readOnly={true}
+        onChange={doNothing}
+        content={props.linkedNodeTitle}
+      /> */}
         {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
         <div c<Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTlassName="preloader-wrapper active small right">
           <div className="spinner-layer spinner-yellow-only">
@@ -71,7 +72,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
           </div>
         </div>
       )} */}
-      </>
+      </Box>
     </MemoizedMetaButton>
   );
 };
