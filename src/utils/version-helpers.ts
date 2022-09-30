@@ -47,7 +47,6 @@ export const NODE_TYPES: NodeType[] = [
   "Reference",
   "News",
   "Idea",
-  "Private",
 ];
 
 export const improvementTypes = [
@@ -315,9 +314,9 @@ export const getTagRefData = async (nodeId: string, t = false) => {
   let tagData = null;
   if (tagDoc.docs.length > 0) {
     tagRef = db.collection("tags").doc(tagDoc.docs[0].id);
-    tagData = tagDoc.data();
+    tagData = tagDoc.docs[0].data();
   } else {
-    tagRef = db.collection("tags");
+    tagRef = db.collection("tags").doc();
   }
   return { tagRef, tagData };
 };

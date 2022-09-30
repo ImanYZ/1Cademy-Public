@@ -14,7 +14,7 @@ export const retrieveAndsignalAllUserNodesChanges = async ({
   const { userNodesRefs, userNodesData } = await getAllUserNodes({ nodeId: linkedId, t });
   //  update adminsList, we need every admin of every node in userLinkedData
   [newBatch, writeCounts] = await signalAllUserNodesChanges({
-    newBatch,
+    batch: newBatch,
     userNodesRefs,
     userNodesData,
     nodeChanges,
