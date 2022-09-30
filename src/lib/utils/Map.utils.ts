@@ -391,7 +391,7 @@ export const setDagNodes = (
   // copies the other attributes of the node (attributes not necessary for dagre object)
 
   const nodesChanges: FullNodesData = individualNodeChanges.reduce((acu, cur) => {
-    return { ...acu, [cur.node]: { ...copyNode(cur), id: undefined } };
+    return { ...acu, [cur.node]: { ...copyNode(cur) } };
   }, oldNodes);
 
   // newNode = copyNode(node);

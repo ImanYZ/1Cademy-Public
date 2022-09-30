@@ -73,7 +73,7 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
               <NodeTypeIcon nodeType={node.nodeType} />
-              <div className="right">
+              <div className="right" style={{ display: "flex", gap: "10px" }}>
                 <MemoizedMetaButton
                 // tooltip="Creation or the last update of this node."
                 // tooltipPosition="TopLeft"

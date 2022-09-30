@@ -139,14 +139,23 @@ export const useWorkerQueue = ({
     if (!g?.current) return;
 
     // CREATE WORKER with Nodes and Nodes changed
-    // console.log("[queue]: recalculateGraphWithWorker", graph, queue);
-    const individualNodeChanges: FullNodeData[] = queue.map(cur => ({ ...graph.nodes[cur.id], height: cur.height }));
+    console.log("[queue]: recalculateGraphWithWorker", Object.keys(graph.nodes), queue);
+    const individualNodeChanges: FullNodeData[] = queue.map(cur => {
+      const nodeUpdated = { ...graph.nodes[cur.id], height: cur.height };
+      console.log("nodeUpdated", nodeUpdated);
+      return nodeUpdated;
+      // console.log("...graph.nodes[cur.id]",nodeUpdated , cur);
+      // return { ...graph.nodes[cur.id], height: cur.height };
+    });
+    console.log("individualNodeChanges", individualNodeChanges);
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags);
+    console.log("nodesToRecalculate", nodesToRecalculate);
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker]);
 
   const addTask = (newTask: Task) => {
+    console.log("addTask", newTask);
     // console.log("[queue]: add task\n", queue);
     setQueue(queue => [...queue, newTask]);
   };

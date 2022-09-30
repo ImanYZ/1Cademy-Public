@@ -564,7 +564,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
               >
                 <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
                   <NodeTypeIcon nodeType={resNode.nodeType} />
-                  <div className="right">
+                  <div className="right" style={{ display: "flex", gap: "10px" }}>
                     <MemoizedMetaButton
                     // tooltip="Creation or the last update of this node."
                     // tooltipPosition="BottomLeft"
