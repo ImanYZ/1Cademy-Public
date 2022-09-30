@@ -472,31 +472,27 @@ const Node = ({
         <>
           <div className="card-content">
             <div className="card-title" data-hoverable={true}>
-              {editable &&
-                (isNew ? (
-                  <>
-                    {/* New Node with inputs */}
-                    <p className="NewChildProposalWarning">Before proposing,</p>
-                    <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                      <span>- Search </span>
-                      <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
-                      <span> to ensure the node does not exist.</span>
-                    </p>
-                    {(nodeType === "Concept" ||
-                      nodeType === "Relation" ||
-                      nodeType === "Question" ||
-                      nodeType === "News") &&
-                      references.length === 0 && (
-                        <p className="NewChildProposalWarning">
-                          - Make the reference nodes that you'd like to cite, visible on your map view.
-                        </p>
-                      )}
-                    {/* <p id="NewChildProposalTitleHint">Please enter the node title below:</p> */}
-                  </>
-                ) : (
-                  // <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
-                  <></>
-                ))}
+              {editable && isNew && (
+                <>
+                  {/* New Node with inputs */}
+                  <p className="NewChildProposalWarning">Before proposing,</p>
+                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
+                    <span>- Search </span>
+                    <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
+                    <span> to ensure the node does not exist.</span>
+                  </p>
+                  {(nodeType === "Concept" ||
+                    nodeType === "Relation" ||
+                    nodeType === "Question" ||
+                    nodeType === "News") &&
+                    references.length === 0 && (
+                      <p className="NewChildProposalWarning">
+                        - Make the reference nodes that you'd like to cite, visible on your map view.
+                      </p>
+                    )}
+                  {/* <p id="NewChildProposalTitleHint">Please enter the node title below:</p> */}
+                </>
+              )}
               {/* CHECK: I commented this */}
               <Editor
                 label="Please enter the node title below:"
