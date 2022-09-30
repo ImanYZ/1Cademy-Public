@@ -1,4 +1,5 @@
 @import url("./styles/app.css");
+@import url("./styles/reactMarkdown.css");
 
 :root {
   --navbar-height: 70px;
@@ -204,7 +205,7 @@
 
 .card .card-content .card-title textarea {
   line-height: 37px;
-  margin-top: 7px;
+  /* margin-top: 7px; */
   /* margin-bottom: 13px; */
   font-size: 25px;
 }
@@ -230,7 +231,7 @@
   bottom: 10px;
   right: 13px; */
   font-size: 13px;
-  width: 97%;
+  width: 100%;
 }
 .card-content .footer i {
   padding-left: 10px;
@@ -263,10 +264,10 @@
   padding-bottom: 10px;
 }
 
-.QuestionAddChoice {
+/* .QuestionAddChoice {
   margin-top: 4px;
   margin-left: 400px;
-}
+} */
 .QuestionAddChoice i {
   font-size: 20px;
   margin-bottom: 3px;
@@ -342,100 +343,6 @@
 }
 
 /* ------------------------------------------ */
-/* styles from meta button */
-
-.MetaButton {
-  text-align: left;
-  padding: 4px 7px 4px 7px;
-  color: rgb(190, 190, 190) !important;
-  /* text-transform: none !important; */
-  /* transition: color 0.1s ease; vendorless fallback */
-  /* -o-transition: color 0.1s ease; opera */
-  /* -ms-transition: color 0.1s ease; IE 10 */
-  /* -moz-transition: color 0.1s ease; Firefox */
-  /* -webkit-transition: color 0.1s ease; safari and chrome */
-  display: inline-block;
-  position: relative;
-  vertical-align: middle;
-  background: none;
-  border: none;
-  border-radius: 4px;
-  overflow: visible;
-  z-index: 1;
-
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-
-  -ms-word-break: break-all;
-  /* This is the dangerous one in WebKit, as it breaks things wherever */
-  word-break: break-all;
-  /* Instead use this non-standard one: */
-  word-break: break-word;
-
-  /* Adds a hyphen where the word breaks, if supported (No Blink) */
-  -ms-hyphens: auto;
-  -moz-hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-}
-
-.MetaButton.Round {
-  border-radius: 50%;
-}
-
-.MetaButton.Clickable {
-  cursor: pointer;
-}
-
-.LightMode .MetaButton {
-  color: rgba(0, 0, 0, 0.6) !important;
-}
-
-.MetaButton.Clickable:hover,
-.MetaButton.Clickable:focus {
-  background: rgba(255, 255, 255, 0.13);
-  color: rgb(255, 255, 255) !important;
-}
-.LightMode .MetaButton.Clickable:hover,
-.LightMode .MetaButton.Clickable:focus {
-  color: rgba(0, 0, 0, 0.9) !important;
-}
-
-.MetaButton.Clickable:hover i {
-  color: #ff9100 !important;
-}
-
-.MetaButton .CloseButton {
-  background: rgb(34, 34, 34);
-  background: radial-gradient(circle, rgba(34, 34, 34, 1) 0%, rgba(69, 69, 69, 1) 4%, rgba(0, 212, 255, 0) 70%);
-}
-
-.LightMode .MetaButton .CloseButton {
-  background: rgb(255, 255, 255);
-  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 4%, rgba(255, 255, 255, 0) 70%);
-}
-
-.LightMode .MetaButton .CloseButton i {
-  color: #808080 !important;
-}
-
-.MetaButton:hover .CloseButton i {
-  color: red !important;
-}
-
-.MetaButton.hoverable:hover,
-.MetaButton.hoverable:focus,
-.TooltipText {
-  -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-
-.MetaButton span {
-  padding-left: 4px;
-}
-
-/* ------------------------------------------ */
 /* styles from line */
 
 .LineContainer {
@@ -477,6 +384,11 @@
   font-weight: 100; */
 }
 .NodeFooter.Right {
+  /* float: right;
+  right: -10px; */
+  font-size: 14px;
+}
+.NodeFooter.Right span {
   /* float: right;
   right: -10px; */
 }
@@ -642,7 +554,7 @@
 
 .LinkingWordsContainer {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: 100%;
 }
 
@@ -660,10 +572,10 @@
   padding: 7px 16px 7px 7px;
 }
  */
-.ProposalCommentSubmitButton .btn {
+/* .ProposalCommentSubmitButton .btn {
   margin-top: 7px;
   margin-bottom: 4px;
-}
+} */
 .ProposalCommentSubmitButton .btn.green {
   margin-left: 13px;
 }
@@ -1424,15 +1336,16 @@ button.MuiTab-textColorInherit:focus {
 
 .MetaButton {
   text-align: left;
-  padding: 4px 7px 4px 7px;
-  color: rgb(190, 190, 190) !important;
+  color: #bebebe !important;
   /* text-transform: none !important; */
   /* transition: color 0.1s ease; vendorless fallback */
   /* -o-transition: color 0.1s ease; opera */
   /* -ms-transition: color 0.1s ease; IE 10 */
   /* -moz-transition: color 0.1s ease; Firefox */
   /* -webkit-transition: color 0.1s ease; safari and chrome */
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   position: relative;
   vertical-align: middle;
   background: none;
@@ -1455,8 +1368,14 @@ button.MuiTab-textColorInherit:focus {
   -moz-hyphens: auto;
   -webkit-hyphens: auto;
   hyphens: auto;
+  font-size: inherit;
 }
-
+.MetaButton:hover svg {
+  color: #ff9100 !important;
+}
+.MetaButton:hover {
+  color: #fff !important;
+}
 .MetaButton.Round {
   border-radius: 50%;
 }
@@ -1468,7 +1387,9 @@ button.MuiTab-textColorInherit:focus {
 .LightMode .MetaButton {
   color: rgba(0, 0, 0, 0.6) !important;
 }
-
+.LightMode .MetaButton:hover {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
 .MetaButton.Clickable:hover,
 .MetaButton.Clickable:focus {
   background: rgba(255, 255, 255, 0.13);
@@ -1479,7 +1400,7 @@ button.MuiTab-textColorInherit:focus {
   color: rgba(0, 0, 0, 0.9) !important;
 }
 
-.MetaButton.Clickable:hover i {
+.MetaButton.Clickable:hover svg {
   color: #ff9100 !important;
 }
 
@@ -1504,14 +1425,15 @@ button.MuiTab-textColorInherit:focus {
 .MetaButton.hoverable:hover,
 .MetaButton.hoverable:focus,
 .TooltipText {
-  -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  /* -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22); */
+  box-shadow: 1px 0 10px 0 #bebebe;
 }
-
+/*
 .MetaButton span {
-  padding-left: 4px;
-}
+  padding-left: 2px;
+} */
 
 /* ------------------------------------------ */
 /* styles from sidebar wrapper */

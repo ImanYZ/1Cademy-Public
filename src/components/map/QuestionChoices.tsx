@@ -83,16 +83,16 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
 
   if (props.editable) {
     return (
-      <li className="QuestionChoices" style={{ border: "solid 1px white" }}>
+      <li className="QuestionChoices">
         <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ alignSelf: "flex-end" }}>
             {props.choice.correct ? (
               <IconButton onClick={switchChoiceHandler}>
-                <DoneIcon className="green-text" />
+                <DoneIcon className="green-text" sx={{ fontSize: "16px" }} />
               </IconButton>
             ) : (
               <IconButton onClick={switchChoiceHandler}>
-                <CloseIcon className="red-text" />
+                <CloseIcon className="red-text" sx={{ fontSize: "16px" }} />
               </IconButton>
             )}
           </div>
