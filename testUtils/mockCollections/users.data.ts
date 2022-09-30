@@ -7,7 +7,7 @@ const data: any[] = [
     clickedCP: true,
     color: "#36cd96",
     blocked: false,
-    tagId: "FJfzAX7zbgQS8jU5XcEk",
+    tagIds: ["FJfzAX7zbgQS8jU5XcEk"],
     background: "Color",
     deCredits: 3,
     country: "United States",
@@ -34,6 +34,7 @@ const data: any[] = [
     practicing: false,
     email: "oneweb@umich.edu",
     chooseUname: "1man",
+    tagId: "FJfzAX7zbgQS8jU5XcEk",
   },
 
   ////////

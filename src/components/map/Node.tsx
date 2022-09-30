@@ -472,31 +472,27 @@ const Node = ({
         <>
           <div className="card-content">
             <div className="card-title" data-hoverable={true}>
-              {editable &&
-                (isNew ? (
-                  <>
-                    {/* New Node with inputs */}
-                    <p className="NewChildProposalWarning">Before proposing,</p>
-                    <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                      <span>- Search </span>
-                      <SearchIcon fontSize="small" sx={{ color: "white", mx: "5px" }} />
-                      <span> to ensure the node does not exist.</span>
-                    </p>
-                    {(nodeType === "Concept" ||
-                      nodeType === "Relation" ||
-                      nodeType === "Question" ||
-                      nodeType === "News") &&
-                      references.length === 0 && (
-                        <p className="NewChildProposalWarning">
-                          - Make the reference nodes that you'd like to cite, visible on your map view.
-                        </p>
-                      )}
-                    {/* <p id="NewChildProposalTitleHint">Please enter the node title below:</p> */}
-                  </>
-                ) : (
-                  // <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
-                  <></>
-                ))}
+              {editable && isNew && (
+                <>
+                  {/* New Node with inputs */}
+                  <p className="NewChildProposalWarning">Before proposing,</p>
+                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
+                    <span>- Search </span>
+                    <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
+                    <span> to ensure the node does not exist.</span>
+                  </p>
+                  {(nodeType === "Concept" ||
+                    nodeType === "Relation" ||
+                    nodeType === "Question" ||
+                    nodeType === "News") &&
+                    references.length === 0 && (
+                      <p className="NewChildProposalWarning">
+                        - Make the reference nodes that you'd like to cite, visible on your map view.
+                      </p>
+                    )}
+                  {/* <p id="NewChildProposalTitleHint">Please enter the node title below:</p> */}
+                </>
+              )}
               {/* CHECK: I commented this */}
               <Editor
                 label="Please enter the node title below:"
@@ -549,7 +545,7 @@ const Node = ({
                 sxPreview={{ fontSize: "15px" }}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
-              {/* CHECK: I commmented this */}
+              {/* CHECK: I commmented  this */}
               {/* <HyperEditor
                 readOnly={!editable}
                 onChange={contentChange}
@@ -562,7 +558,7 @@ const Node = ({
                   {editable && (
                     <div className="RemoveImageDIV">
                       <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                        <DeleteForeverIcon />
+                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                       </MemoizedMetaButton>
                     </div>
                   )}
@@ -577,11 +573,10 @@ const Node = ({
                     onLoad={onImageLoad}
                     onClick={onImageClick}
                   />
-                  {/* </a> */}
                 </>
               )}
               {nodeType === "Question" /*&& "choices" in props*/ && (
-                <>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <ul className="collapsible" style={{ padding: "0px" }}>
                     {choices.map((choice, idx) => {
                       return (
@@ -604,25 +599,22 @@ const Node = ({
                     })}
                   </ul>
                   {editable && (
-                    <div className="QuestionAddChoice">
+                    <Box sx={{ alignSelf: "flex-end" }}>
                       <MemoizedMetaButton
                         onClick={addChoiceHandler}
                         tooltip="Click to add a new choice to this question."
                       >
                         <>
-                          <AddIcon className="green-text" />
+                          <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
                           <span>Add Choice</span>
                         </>
                       </MemoizedMetaButton>
-                    </div>
+                    </Box>
                   )}
-                </>
+                </Box>
               )}
               {editable && (
                 <>
-                  {/* <p className="ProposalTitle">
-                    
-                  </p> */}
                   <Editor
                     label={
                       "To expedite your proposal review, explain why you propose this " +

@@ -295,8 +295,6 @@ const NodeFooter = ({
               </>
             ) : (
               // new Node or unaccepted proposal
-
-              // {/* CHECK: I commented this, please uncomented when work in proposal */}
               <>
                 <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
                 <MemoizedMetaButton

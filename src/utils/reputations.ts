@@ -252,6 +252,7 @@ export const updateReputationIncrement = async ({
   } else {
     //else, reputationsQuery did not return a doc, have to create a reference
     reputationDoc = reputationsQueryBase.doc();
+    rep_Points.uname = uname;
   }
 
   //  query community points
@@ -547,7 +548,7 @@ export const updateReputationIncrement = async ({
   }
 
   //  create a new community reputation object
-  console.log("com_Points.cdCorrects", com_Points.cdCorrects);
+  // console.log("com_Points.cdCorrects", com_Points.cdCorrects);
   const com_PointsDoc_Obj = {
     ...com_Points,
     // for Concept nodes
