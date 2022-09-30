@@ -285,7 +285,7 @@ const Dashboard = ({}: DashboardProps) => {
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
-        console.log("[FILL DAGRE]", { currentNodes, currentEdges });
+        console.log("[FILL DAGRE]", { fullNodes, currentNodes, currentEdges });
         // debugger
         return fullNodes.reduce(
           (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
@@ -293,6 +293,7 @@ const Dashboard = ({}: DashboardProps) => {
             let tmpEdges = {};
 
             if (cur.nodeChangeType === "added") {
+              console.log("added");
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
               const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
@@ -300,6 +301,7 @@ const Dashboard = ({}: DashboardProps) => {
               tmpEdges = res.oldEdges;
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
+              console.log("modified");
               const node = acu.newNodes[cur.node];
               if (!node) {
                 // <---  CHECK I change this from nodes
@@ -324,7 +326,9 @@ const Dashboard = ({}: DashboardProps) => {
             // I changed the reference from snapshot
             // so the NO visible nodes will come as modified and !visible
             if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+              console.log("removed", cur.node, g.current);
               if (g.current.hasNode(cur.node)) {
+                console.log("has Node");
                 g.current.nodes().forEach(function () {});
                 g.current.edges().forEach(function () {});
                 // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
@@ -332,8 +336,29 @@ const Dashboard = ({}: DashboardProps) => {
                 // !IMPORTANT, Don't change the order, first remove edges then nodes
                 tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
                 tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
+                console.log("hasNode", { tmpEdges, tmpNodes });
+              } else {
+                console.log("dont has", acu.newEdges);
+                // remove edges
+                const oldEdges = { ...acu.newEdges };
+                console.log(oldEdges);
+                Object.keys(oldEdges).forEach(key => {
+                  if (key.includes(cur.node)) {
+                    delete oldEdges[key];
+                  }
+                });
+                // console.log(oldEdges);
+                tmpEdges = oldEdges;
+                // remove node
+                const oldNodes = acu.newNodes;
+                if (cur.node in oldNodes) {
+                  delete oldNodes[cur.node];
+                }
+                // tmpEdges = {acu.newEdges,}
+                tmpNodes = { ...oldNodes };
               }
             }
+            console.log(" ->", { tmpNodes, tmpEdges });
             return {
               // newNodes: { ...acu.newNodes, ...tmpNodes },
               // newEdges: { ...acu.newEdges, ...tmpEdges },
