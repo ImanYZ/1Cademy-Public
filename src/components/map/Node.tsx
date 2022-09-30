@@ -4,13 +4,13 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { OpenPart } from "src/nodeBookTypes";
+import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
-import { FullNodeData } from "../../noteBookTypes";
+// import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -214,9 +214,9 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
-        const heightChange = blockSize === previousRef.current;
+        const isSimilar = blockSize === previousRef.current;
         previousRef.current = blockSize;
-        if (heightChange) return;
+        if (isSimilar) return;
 
         changeNodeHight(identifier, blockSize);
       } catch (err) {
@@ -237,9 +237,7 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log("nodeclickeck handler");
       if (nodeBookState.choosingNode) {
-        console.log("has chosing node");
         // The first Nodes exist, Now is clicking the Chosen Node
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
@@ -257,7 +255,6 @@ const Node = ({
 
   const hideNodeHandler = useCallback(
     (event: any) => {
-      console.log("Hide Node Handler is called", event.target);
       event.preventDefault();
       event.stopPropagation();
       onHideNode(identifier, setIsHiding);
@@ -286,7 +283,6 @@ const Node = ({
 
   const markStudiedHandler = useCallback(
     (event: any) => {
-      console.log("first");
       markStudied(event, identifier);
     },
 
@@ -297,7 +293,6 @@ const Node = ({
 
   const openNodePartHandler = useCallback(
     (event: any, partType: any) => {
-      console.log("openNodePartHandler");
       openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
     },
 

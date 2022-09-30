@@ -1,7 +1,7 @@
 import { doc, DocumentChange, DocumentData, Firestore, getDoc } from "firebase/firestore";
 
-import { UserNodesData } from "../../nodeBookTypes";
-import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../../noteBookTypes";
+import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges, UserNodesData } from "../../nodeBookTypes";
+// import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../../noteBookTypes";
 
 export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
   // const docChanges = snapshot.docChanges();
@@ -35,7 +35,7 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
     return {
       cType: "added",
       nId: nodeDoc.id,
-      nData,
+      nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
     };
   });
 };

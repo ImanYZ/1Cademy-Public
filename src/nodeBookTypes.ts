@@ -1,6 +1,9 @@
 import { Timestamp } from "firebase/firestore";
 import { Dispatch } from "react";
 
+import { KnowledgeChoice } from "./knowledgeTypes";
+import { NodeType } from "./types";
+
 export type OpenPart = "LinkingWords" | "Tags" | "References" | null;
 
 export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
@@ -141,3 +144,107 @@ export type NodeBookNodes = {
     reputation?: number;
   };
 };
+
+export type NodeFireStore = {
+  aChooseUname: boolean;
+  aFullname: string;
+  aImgUrl?: string;
+  admin: string;
+  bookmarks?: number;
+  changedAt: Timestamp;
+  children: {
+    node: string;
+    label: string;
+    title: string;
+  }[];
+  choices: KnowledgeChoice[];
+  closedHeight?: number;
+  comments: number;
+  content: string;
+  contribNames: string[];
+  contributors: {
+    [key: string]: {
+      chooseUname: boolean;
+      fullname: string;
+      imageUrl: string;
+      reputation: number;
+    };
+  };
+  corrects: number;
+  createdAt: Timestamp;
+  deleted: boolean;
+  height: number;
+  institNames: string[];
+  institutions: {
+    [key: string]: { reputation?: number };
+  };
+  isTag: boolean;
+  maxVersionRating?: number;
+  nodeImage?: string;
+  nodeType: NodeType;
+  parents: { node: string; label: string; title: string }[];
+  referenceIds: string[];
+  referenceLabels: string[];
+  references: string[];
+  studied: number;
+  tagIds: string[];
+  tags: string[];
+  title: string;
+  updatedAt: Timestamp;
+  versions?: number;
+  viewers: number;
+  wrongs: number;
+};
+
+export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserNodesData };
+
+export type NodesData = { cType: string; nId: string; nData: NodeFireStore } | null;
+
+export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "updatedAt"> &
+  Omit<NodeFireStore, "changedAt" | "createdAt" | "updatedAt"> & {
+    editable: boolean;
+    left: number;
+    openHeight?: number;
+    top: number;
+    userNodeId: string;
+    nodeChangeType: string /*'added' | ''*/;
+    userNodeChangeType: string /*'added' | ''*/;
+    firstVisit: Date;
+    lastVisit: Date;
+    changedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    width?: number;
+    height?: number;
+    // left: number;
+    // top: number;
+    x?: number;
+    y?: number;
+  };
+
+export type EdgeData = {
+  fromX: number;
+  fromY: number;
+  label: string;
+  points: any[];
+  toX: number;
+  toY: number;
+};
+
+export type FullNodesData = { [key: string]: FullNodeData };
+export type EdgesData = { [key: string]: EdgeData };
+
+export type SortDirection = "ASCENDING" | "DESCENDING";
+export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES";
+export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "Others Monthly";
+
+export type Cluster = {
+  id: string;
+  y: number;
+  x: number;
+  width: number;
+  height: number;
+  title: string;
+};
+
+export type ClusterNodes = { [key: string]: Cluster };

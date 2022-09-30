@@ -3,7 +3,8 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
-import { UsersStatus } from "../../../noteBookTypes";
+import { UsersStatus } from "../../../nodeBookTypes";
+// import { UsersStatus } from "../../../noteBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 
 const scale = 1;

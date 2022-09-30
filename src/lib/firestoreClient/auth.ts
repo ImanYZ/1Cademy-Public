@@ -64,7 +64,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
   const userDoc = await getDocs(q);
   if (userDoc.size !== 0) {
     const userData = userDoc.docs[0].data();
-    console.log("Userdata: ", userData);
+
     user = {
       userId,
       deCourse: userData.deCourse,
