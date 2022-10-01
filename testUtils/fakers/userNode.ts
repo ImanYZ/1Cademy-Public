@@ -3,6 +3,7 @@ import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 
 import { INodeChanges, IUserNode } from "../../src/types/IUserNode";
+import { IUserNodeLog } from "../../src/types/IUserNodeLog";
 
 type IFakeUserNodeOptions = {
   documentId?: string;
@@ -16,6 +17,11 @@ type IFakeUserNodeOptions = {
   open?: boolean;
   user?: IUser;
   node?: INode;
+};
+
+type IFakeUserNodeLogOptions = {
+  documentId?: string;
+  userNode?: IUserNode;
 };
 
 export function createUserNode(params: IFakeUserNodeOptions): IUserNode {
@@ -33,6 +39,26 @@ export function createUserNode(params: IFakeUserNodeOptions): IUserNode {
     isStudied: typeof isStudied !== "undefined" ? isStudied : false,
     bookmarked: typeof bookmarked !== "undefined" ? bookmarked : false,
     nodeChanges: nodeChanges ? nodeChanges : {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+export function createUserNodeLog(params: IFakeUserNodeLogOptions): IUserNodeLog {
+  const { documentId, userNode } = params;
+  return {
+    documentId: documentId ? documentId : faker.datatype.uuid(),
+    changed: !!Object.keys(userNode?.nodeChanges || {}).length,
+    open: !!userNode?.open,
+    correct: !!userNode?.correct,
+    wrong: !!userNode?.wrong,
+    user: userNode ? userNode.user : faker.internet.userName(),
+    node: userNode ? userNode.node : faker.datatype.uuid(),
+    isStudied: !!userNode?.isStudied,
+    visible: !!userNode?.visible,
+    isAdmin: false, // removed
+    deleted: false,
+    bookmarked: !!userNode?.bookmarked,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

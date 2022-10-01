@@ -1,10 +1,11 @@
 export type IUserNodeLog = {
+  documentId?: string;
   changed: boolean;
   open: boolean;
   updatedAt?: Date;
+  correct: boolean;
   wrong: boolean;
   user: string;
-  correct: string;
   node: string;
   isStudied: boolean;
   visible: boolean;

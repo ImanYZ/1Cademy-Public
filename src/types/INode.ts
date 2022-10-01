@@ -3,6 +3,8 @@ import { INodeLink } from "./INodeLink";
 import { INodeType } from "./INodeType";
 import { IQuestionChoice } from "./IQuestionChoice";
 
+export type INodeVoteActionType = "Correct" | "Wrong";
+
 export type INode = {
   documentId?: string;
   aChooseUname: boolean;

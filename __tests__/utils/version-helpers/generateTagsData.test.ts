@@ -1,6 +1,6 @@
-import { admin,commitBatch, db } from "../../../src/lib/firestoreServer/admin";
+import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { generateTagsData, getTypedCollections } from "../../../src/utils";
-import { conceptVersionsData,nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("generateTagsData", () => {
   beforeEach(async () => {

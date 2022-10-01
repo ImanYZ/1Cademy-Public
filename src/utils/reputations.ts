@@ -204,6 +204,7 @@ export const updateReputationIncrement = async ({
   t,
   tWriteOperations,
 }: any) => {
+  // console.log(uname, correctVal, "correctVal")
   let newBatch = batch;
 
   let rep_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt });

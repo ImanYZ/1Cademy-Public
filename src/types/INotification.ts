@@ -12,20 +12,22 @@ export type INotificationAType =
 export type INotificationOType = "Node" | "Propo" | "Proposal" | "PropoAccept" | "AccProposal";
 
 export type INotification = {
+  documentId?: string;
   chooseUname: boolean;
   proposer: string;
   checked: boolean;
-  title: string;
+  title?: string; // only 25 of 10865 has it (prod)
   fullname: string;
-  aType: INotificationAType;
   nodeId: string;
-  createdAt: Date;
   uname: string;
   imageUrl: string;
+  aType: INotificationAType;
   oType: INotificationOType;
-  updatedAt: Date;
+  createdAt: Date;
+  updatedAt?: Date;
 };
 
 export type INotificationNum = {
+  documentId?: string;
   nNum: number;
 };

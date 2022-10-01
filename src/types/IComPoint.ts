@@ -1,4 +1,7 @@
 export type IComPoint = {
+  documentId?: string;
+
+  aChooseUname: boolean;
   aFullname: string;
   aImgUrl: string;
   admin: string;

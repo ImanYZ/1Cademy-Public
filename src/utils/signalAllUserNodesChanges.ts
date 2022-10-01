@@ -24,8 +24,9 @@ export const signalAllUserNodesChanges = async ({
     const changedUserNode: any = {};
     const userStatus = await convertToTGet(db.collection("status").doc(uname), t);
     const userStatusData: any = userStatus.data();
-    const last_online = new Date(userStatusData.last_online);
-    if (userStatusData.state === "online" || last_online.getTime() + 24 * 60 * 60 > new Date().getTime()) {
+    const last_online =
+      userStatusData && userStatusData?.last_online ? new Date(userStatusData.last_online) : new Date();
+    if (userStatusData?.state === "online" || last_online.getTime() + 24 * 60 * 60 > new Date().getTime()) {
       changedUserNode.nodeChanges = nodeChanges;
     } else if ("nodeChanges" in changedUserNode) {
       changedUserNode.nodeChanges = deleteField();

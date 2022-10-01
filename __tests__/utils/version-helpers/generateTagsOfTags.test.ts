@@ -1,6 +1,6 @@
 import { db } from "../../../src/lib/firestoreServer/admin";
 import { generateTagsOfTags } from "../../../src/utils";
-import { conceptVersionsData,nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("generateTagsOfTags", () => {
   beforeEach(async () => {

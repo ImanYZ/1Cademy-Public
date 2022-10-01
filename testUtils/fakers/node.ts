@@ -28,9 +28,10 @@ type IFakeNodeOptions = {
 
 type IFakeNodeVersionOptions = {
   documentId?: string;
-  nodeType?: INodeType;
   childType?: INodeType;
   proposer?: IUser;
+  corrects?: number;
+  wrongs?: number;
   node?: INode;
   tags?: INode[];
   references?: INode[];
@@ -196,6 +197,8 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     removedParents,
     viewers,
     tags,
+    corrects,
+    wrongs,
   } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
@@ -230,8 +233,8 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
       : [],
     addedParents: !!addedParents,
     deleted: false,
-    corrects: 0,
-    wrongs: 0,
+    corrects: corrects ? corrects : 0,
+    wrongs: wrongs ? wrongs : 0,
     proposer: proposer ? proposer.uname : faker.internet.userName(),
     viewers: viewers ? viewers : 0,
     proposal: faker.hacker.phrase(),

@@ -1,4 +1,6 @@
 export type IReputation = {
+  documentId?: string;
+
   uname: string;
 
   tag: string;
