@@ -1,6 +1,8 @@
+import { INodeLink } from "src/types/INodeLink";
+
 import { db } from "../../../src/lib/firestoreServer/admin";
 import { IComPoint } from "../../../src/types/IComPoint";
-import { INodeVoteActionType } from "../../../src/types/INode";
+import { INode, INodeVoteActionType } from "../../../src/types/INode";
 import { IReputation } from "../../../src/types/IReputationPoint";
 import { UpDownVoteNode } from "../../../src/utils/upDownVoteNode";
 import { createComMonthlyPoints, createComPoints, createComWeeklyPoints } from "../../../testUtils/fakers/com-point";
@@ -2621,17 +2623,41 @@ describe("UpDownVoteNode", () => {
   describe("Sub Logics", () => {
     describe("Delete node if downvotes are more than upvotes", () => {
       const users = [getDefaultUser({}), createUser({}), createUser({})];
-      const nodes = [
-        getDefaultNode({
-          admin: users[0],
-        }),
-      ];
-      nodes.push(
-        createNode({
-          admin: users[0],
-          tags: [nodes[0]],
-        })
-      );
+      const nodes: INode[] = [];
+      const defaultNode = getDefaultNode({
+        admin: users[0],
+      });
+      // this node would be used for testing edge cases
+      const node1 = createNode({
+        admin: users[1],
+        tags: [defaultNode],
+        isTag: true,
+        parents: [defaultNode],
+      });
+      defaultNode.children.push({
+        node: node1.documentId,
+        title: node1.title,
+        label: "",
+        nodeType: node1.nodeType,
+      } as INodeLink);
+      const node2 = createNode({
+        admin: users[1],
+        tags: [defaultNode, node1],
+        parents: [node1],
+      });
+      node1.children.push({
+        node: node2.documentId,
+        title: node2.title,
+        label: "",
+        nodeType: node2.nodeType,
+      } as INodeLink);
+      /*
+      NODE0      <--      NODE1      <--      NODE2
+                          Tags:               Tags:
+                            NODE0              NODE0
+                                               NODE1
+      */
+      nodes.push(defaultNode, node1, node2);
 
       // default user reputation
       const reputationPoints = [
@@ -2840,7 +2866,7 @@ describe("UpDownVoteNode", () => {
           uname: users[0].uname,
           imageUrl: users[0].imageUrl,
           chooseUname: users[0].chooseUname,
-          nodeId: nodes[1].documentId,
+          nodeId: node1.documentId,
           actionType: "Wrong" as INodeVoteActionType,
         });
       });
@@ -2854,6 +2880,26 @@ describe("UpDownVoteNode", () => {
         for (const userNodeDoc of userNodeDocs) {
           expect(userNodeDoc.data().deleted).toBeTruthy();
         }
+      });
+
+      it("remove it from parents (for each) -> children property and signal all usernodes for each parent for nodeChanges", async () => {
+        const node0Data: INode = (
+          await db.collection("nodes").doc(String(defaultNode.documentId)).get()
+        ).data() as INode;
+        const node1AsChild = node0Data.children.find(child => child.node === node1.documentId);
+        expect(node1AsChild).toBeUndefined();
+      });
+
+      it("remove it from children (for each) -> parents property and signal all usernodes for each child for nodeChanges", async () => {
+        const node2Data: INode = (await db.collection("nodes").doc(String(node2.documentId)).get()).data() as INode;
+        const node1AsParent = node2Data.parents.find(parent => parent.node === node1.documentId);
+        expect(node1AsParent).toBeUndefined();
+      });
+
+      it("if node is a tag: remove its id from tagIds of every node that has tagged this node", async () => {
+        const node2Data: INode = (await db.collection("nodes").doc(String(node2.documentId)).get()).data() as INode;
+        const node1AsTag = node2Data.tagIds.find(tagId => tagId === node1.documentId);
+        expect(node1AsTag).toBeUndefined();
       });
     });
   });
