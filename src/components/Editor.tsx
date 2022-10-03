@@ -9,13 +9,14 @@ type EditorProps = {
   label: string;
   value: string;
   setValue: (value: string) => void;
+  onBlurCallback?: (value: string) => void;
   sxPreview?: SxProps<Theme>;
   readOnly?: boolean;
 };
 
 type EditorOptions = "EDIT" | "PREVIEW";
 
-export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: EditorProps) => {
+export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onBlurCallback }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
   const inputRef = useRef(null);
@@ -90,6 +91,7 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview }: E
             multiline
             value={value}
             onChange={e => setValue(e.target.value)}
+            onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
             sx={{ p: "0px", m: "0px", fontWeight: 250 }}
           />
         ) : (

@@ -209,7 +209,8 @@ const Node = ({
   const nodeRef = useRef(null);
   const previousRef = useRef<number>(0);
   const observer = useRef<ResizeObserver | null>(null);
-
+  const [titleCopy, setTitleCopy] = useState(title);
+  const [contentCopy, setContentCopy] = useState(content);
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
@@ -339,23 +340,23 @@ const Node = ({
 
   // CHECK: I think we can improve the other function to update content
   // if only update nodes, because the observer will update the positions
-  const titleChange = useCallback(
-    (value: string) => {
-      // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
-      // changeTitle(nodeRef, identifier, value);
-      // setTitleCopy(title);
-      setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }));
-    },
-    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
-  );
+  // const titleChange = useCallback(
+  //   (value: string) => {
+  //     // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
+  //     // changeTitle(nodeRef, identifier, value);
+  //     // setTitleCopy(title);
+  //     setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }));
+  //   },
+  //   [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
+  // );
 
-  const contentChange = useCallback(
-    (value: string) => {
-      // nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
-      setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }));
-    },
-    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
-  );
+  // const contentChange = useCallback(
+  //   (value: string) => {
+  //     // nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+  //     setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }));
+  //   },
+  //   [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
+  // );
 
   // const locationSizeChange = useCallback(() => {
   //   console.log("[NODE]: will call nodeChanged");
@@ -497,10 +498,11 @@ const Node = ({
               <Editor
                 label="Please enter the node title below:"
                 // label={titleCopy}
-                value={title}
+                value={titleCopy}
                 // value={titleCopy}
                 // onChangeContent={setReason}
-                setValue={titleChange}
+                setValue={setTitleCopy}
+                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
@@ -538,8 +540,9 @@ const Node = ({
               {/* {editable && <p>Please edit the node content below:</p>} */}
               <Editor
                 label="Please edit the node content below:"
-                value={content}
-                setValue={contentChange}
+                value={contentCopy}
+                setValue={setContentCopy}
+                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}
                 sxPreview={{ fontSize: "15px" }}
@@ -767,8 +770,8 @@ const Node = ({
 
               <Editor
                 label="title"
-                value={title}
-                setValue={titleChange}
+                value={titleCopy}
+                setValue={setTitleCopy}
                 // setValue={setTitleCopy}
                 readOnly={true}
                 sxPreview={{ fontSize: "25px" }}
