@@ -543,7 +543,7 @@ const Node = ({
                 label="Please edit the node content below:"
                 value={contentCopy}
                 setValue={setContentCopy}
-                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
+                // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}
               />

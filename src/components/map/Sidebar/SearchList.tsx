@@ -31,7 +31,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 // import {
 //   ClearRefinements,
@@ -184,18 +184,48 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   //   // });
   // }, [tag]);
 
-  // useEffect(() => {
-  //   if (nodeBookState.nodeTitleBlured && filteredNodes.length !== 0) {
-  //     // doSearch();
-  //     onSearch(1, sortOption, newSortDirection, nodeTypes);
-  //     setNodeTitleBlured(false);
-  //   }
-  // }, [nodeTitleBlured, filteredNodes]);
-
   const getTagsSelected = useCallback<() => TagTreeView[]>(
     () => Object.values(allTags).filter(tag => tag.checked),
     [allTags]
   );
+
+  const onSearch = useCallback(
+    async (page: number, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
+      // async (page: number = 1) => {
+      console.log("[onSearch]");
+
+      const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
+        q: nodeBookState.searchQuery,
+        nodeTypes,
+        tags: getTagsSelected().map(cur => cur.title),
+        nodesUpdatedSince,
+        sortOption,
+        sortDirection,
+        page,
+      });
+
+      console.log("data", data.data);
+      const res = data.data;
+      const newData = page === 1 ? res.data : [...searchResults.data, ...res.data];
+      setSearchResults({
+        data: newData,
+        lastPageLoaded: res.page,
+        totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
+        totalResults: res.numResults,
+      });
+      // };
+    },
+    [getTagsSelected, nodeBookState.searchQuery, nodesUpdatedSince, searchResults.data]
+  );
+
+  useEffect(() => {
+    if (nodeBookState.nodeTitleBlured /*&& filteredNodes.length !== 0*/) {
+      // doSearch();
+      onSearch(1, sortOption, sortDirection, nodeTypes);
+      // setNodeTitleBlured(false);
+      nodeBookDispatch({ type: "setNodeTitleBlured", payload: false });
+    }
+  }, [nodeBookDispatch, nodeBookState.nodeTitleBlured, nodeTypes, onSearch, sortDirection, sortOption]);
 
   const handleChange = useCallback(
     (event: any) => {
@@ -205,37 +235,6 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
     },
     [nodeBookDispatch]
   );
-
-  const onSearch = async (
-    page: number,
-    sortOption: SortValues,
-    sortDirection: SortDirection,
-    nodeTypes: NodeType[]
-  ) => {
-    // async (page: number = 1) => {
-    console.log("[onSearch]");
-
-    const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
-      q: nodeBookState.searchQuery,
-      nodeTypes,
-      tags: getTagsSelected().map(cur => cur.title),
-      nodesUpdatedSince,
-      sortOption,
-      sortDirection,
-      page,
-    });
-
-    console.log("data", data.data);
-    const res = data.data;
-    const newData = page === 1 ? res.data : [...searchResults.data, ...res.data];
-    setSearchResults({
-      data: newData,
-      lastPageLoaded: res.page,
-      totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
-      totalResults: res.numResults,
-    });
-    // };
-  };
 
   const onChangeSortOptions = (newSortOption: SortValues) => {
     setSortOption(newSortOption);

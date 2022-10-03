@@ -2271,6 +2271,7 @@ const Dashboard = ({}: DashboardProps) => {
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
+      nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
       nodeBookDispatch({ type: "setSelectionType", payload: null });
     },
