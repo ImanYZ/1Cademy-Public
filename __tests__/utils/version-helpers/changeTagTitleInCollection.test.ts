@@ -24,7 +24,6 @@ describe("changeTagTitleInCollection", () => {
     await commitBatch(batch);
     const userDocs: any = await db.collection("users").where("tagId", "==", "FJfzAX7zbgQS8jU5XcEk").get();
     expect(writeCounts).toBeGreaterThan(0);
-
     expect(userDocs.docs[0].data()).toMatchObject({ tag: "Test 1Academy" });
   });
 });

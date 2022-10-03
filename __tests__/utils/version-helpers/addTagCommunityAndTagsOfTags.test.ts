@@ -3,7 +3,6 @@ import { addTagCommunityAndTagsOfTags, getTypedCollections } from "../../../src/
 import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("addTagCommunityAndTagsOfTags", () => {
-  let node = "OR8UsmsxmeExHG8ekkIY";
   beforeEach(async () => {
     await usersData.populate();
     await nodesData.populate();
@@ -20,9 +19,9 @@ describe("addTagCommunityAndTagsOfTags", () => {
 
   it("should perform addTagCommunityAndTagsOfTags action on tags collection", async () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-    let nodeDoc: any = await db.collection("nodes").doc("FJfzAX7zbgQS8jU5XcEk").get();
+    let nodeDoc: any = await db.collection("nodes").doc("VnXTRolBGyHF3q8EvxS3").get();
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
-    const versionsDocs = await versionsColl.where("node", "==", node).get();
+    const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     const proposer = versionsDocs.docs[0].data().proposer;
     let batch = db.batch();
     let writeCounts = 0;
