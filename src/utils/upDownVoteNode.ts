@@ -38,6 +38,33 @@ export const setOrIncrementNotificationNums = async ({
   return [newBatch, writeCounts];
 };
 
+// Cases
+// - Upvote
+// - Downvote
+// - Upvote and Remove Downvote
+// - Remove Upvote and Downvote
+// - Remove Upvote
+// - Remove Downvote
+
+// Sub Logics
+// - increase corrects/wrongs on active proposals by this formula (currentProposalNetVote/maxProposalNetVote) + upvoteOrDownVote
+// - Delete node if downvotes are more than upvotes
+//   - flag all user nodes as delete related to node
+//   - remove it from parents (for each) -> children property and signal all usernodes for each parent for nodeChanges
+//   - remove it from children (for each) -> parents property and signal all usernodes for each child for nodeChanges
+//   - if node is a tag
+//     - remove its id from tagIds of every node that has tagged this node
+//     - remove reputation documents (weekly, monthly and all-time) that related to this community (missing logic)
+//     - remove community points (weekly, monthly and all-time) documents related to this community
+//   - if node type is reference
+//     - remove node id (references, referenceIds and referenceLabels) from each node that this node's id in referenceIds
+//     - mark isStudied=false for each node that had reference of this node
+// - if node is not deleted then update votes data in each user node related to this node
+//   - if deleted then signal all usernodes that node is deleted
+// - increase notifications count for proposers
+// - create notification that has data for actionType
+// - create userNodeLog (it stores all actions of Wrongs and Corrects)
+
 //  Up/down-votes nodes
 export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, actionType, chooseUname }: any) => {
   let correct = false;
@@ -188,7 +215,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       for (let citingNodeDoc of citingNodesDocs.docs) {
         const citingNodeRef = db.collection("nodes").doc(citingNodeDoc.id);
         const citingNodeData = citingNodeDoc.data();
-        const referenceIdx = citingNodeData.referenceIds.findIndex(nodeId);
+        const referenceIdx = citingNodeData.referenceIds.indexOf(nodeId);
         if (referenceIdx !== -1) {
           citingNodeData.references.splice(referenceIdx, 1);
           citingNodeData.referenceLabels.splice(referenceIdx, 1);
@@ -239,8 +266,12 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
 
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
-    const versionRatingChange =
+    let versionRatingChange =
       Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, versionData.corrects - versionData.wrongs) / maxVersionNetVotes;
+    // edge case if node has 0 up-down votes
+    if (nodeData.corrects === 0 && nodeData.wrongs === 0) {
+      versionRatingChange = 1;
+    }
     const correctVal = Math.round((correctChange * versionRatingChange + Number.EPSILON) * 100) / 100;
     const wrongVal = Math.round((wrongChange * versionRatingChange + Number.EPSILON) * 100) / 100;
 

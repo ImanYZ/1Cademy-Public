@@ -11,9 +11,17 @@ describe("compareChoices", () => {
     await nodesData.clean();
   });
 
-  it("should compare nodes choices", async () => {
-    const nodes = await db.collection("nodes").get();
-    let compareChoice = compareChoices({ node1: nodes.docs[0].data(), node2: nodes.docs[2].data() });
+  it("should compare nodes choices with same choices", async () => {
+    const node1 = await db.collection("nodes").doc("iUex43wFn3yzFcDbma04").get();
+    const node2 = await db.collection("nodes").doc("9BVhNniLS940DBVqKbFR").get();
+    let compareChoice = compareChoices({ node1: node1.data(), node2: node2.data() });
     expect(compareChoice).toBe(true);
+  });
+
+  it("should compare nodes choices without same choices", async () => {
+    const node1 = await db.collection("nodes").doc("iUex43wFn3yzFcDbma04").get();
+    const node2 = await db.collection("nodes").doc("FJfzAX7zbgQS8jU5XcEk").get();
+    let compareChoice = compareChoices({ node1: node1.data(), node2: node2.data() });
+    expect(compareChoice).toBe(false);
   });
 });
