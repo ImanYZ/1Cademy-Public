@@ -21,7 +21,9 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React from "react";
 
-import { SortDirection, SortValues } from "../../noteBookTypes";
+import { SortDirection, SortValues } from "../../nodeBookTypes";
+
+// import { SortDirection, SortValues } from "../../noteBookTypes";
 
 type SortOptions = { name: string; icon: JSX.Element; value: SortValues };
 

@@ -3,14 +3,15 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
+import { Box } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { OpenPart } from "src/nodeBookTypes";
+import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
-import { FullNodeData } from "../../noteBookTypes";
+// import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -208,15 +209,16 @@ const Node = ({
   const nodeRef = useRef(null);
   const previousRef = useRef<number>(0);
   const observer = useRef<ResizeObserver | null>(null);
-
+  const [titleCopy, setTitleCopy] = useState(title);
+  const [contentCopy, setContentCopy] = useState(content);
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
-        const heightChange = blockSize === previousRef.current;
+        const isSimilar = blockSize === previousRef.current;
         previousRef.current = blockSize;
-        if (heightChange) return;
+        if (isSimilar) return;
 
         changeNodeHight(identifier, blockSize);
       } catch (err) {
@@ -237,9 +239,7 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log("nodeclickeck handler");
       if (nodeBookState.choosingNode) {
-        console.log("has chosing node");
         // The first Nodes exist, Now is clicking the Chosen Node
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
@@ -257,7 +257,6 @@ const Node = ({
 
   const hideNodeHandler = useCallback(
     (event: any) => {
-      console.log("Hide Node Handler is called", event.target);
       event.preventDefault();
       event.stopPropagation();
       onHideNode(identifier, setIsHiding);
@@ -286,7 +285,6 @@ const Node = ({
 
   const markStudiedHandler = useCallback(
     (event: any) => {
-      console.log("first");
       markStudied(event, identifier);
     },
 
@@ -297,7 +295,6 @@ const Node = ({
 
   const openNodePartHandler = useCallback(
     (event: any, partType: any) => {
-      console.log("openNodePartHandler");
       openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
     },
 
@@ -343,23 +340,23 @@ const Node = ({
 
   // CHECK: I think we can improve the other function to update content
   // if only update nodes, because the observer will update the positions
-  const titleChange = useCallback(
-    (value: string) => {
-      // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
-      // changeTitle(nodeRef, identifier, value);
-      // setTitleCopy(title);
-      setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }));
-    },
-    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
-  );
+  // const titleChange = useCallback(
+  //   (value: string) => {
+  //     // nodeChanged(nodeRef, identifier, null, value, imageLoaded, openPart)
+  //     // changeTitle(nodeRef, identifier, value);
+  //     // setTitleCopy(title);
+  //     setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }));
+  //   },
+  //   [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
+  // );
 
-  const contentChange = useCallback(
-    (value: string) => {
-      // nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
-      setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }));
-    },
-    [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
-  );
+  // const contentChange = useCallback(
+  //   (value: string) => {
+  //     // nodeChanged(nodeRef, identifier, value, null, imageLoaded, openPart);
+  //     setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }));
+  //   },
+  //   [/*nodeChanged,*/ setNodeParts, nodeRef, identifier, imageLoaded, openPart]
+  // );
 
   // const locationSizeChange = useCallback(() => {
   //   console.log("[NODE]: will call nodeChanged");
@@ -470,46 +467,47 @@ const Node = ({
       //       }
       // }
     >
-      {identifier}
+      {/* INFO: uncomment this only on develope */}
+      {/* {identifier} */}
       {open ? (
         <>
           <div className="card-content">
             <div className="card-title" data-hoverable={true}>
-              {editable &&
-                (isNew ? (
-                  <>
-                    {/* New Node with inputs */}
-                    <p className="NewChildProposalWarning">Before proposing,</p>
-                    <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                      <span>- Search </span>
-                      <SearchIcon fontSize="small" sx={{ color: "white", mx: "5px" }} />
-                      <span> to ensure the node does not exist.</span>
-                    </p>
-                    {(nodeType === "Concept" ||
-                      nodeType === "Relation" ||
-                      nodeType === "Question" ||
-                      nodeType === "News") &&
-                      references.length === 0 && (
-                        <p className="NewChildProposalWarning">
-                          - Make the reference nodes that you'd like to cite, visible on your map view.
-                        </p>
-                      )}
-                    <p id="NewChildProposalTitleHint">Please enter the node title below:</p>
-                  </>
-                ) : (
-                  <p id="NewChildProposalTitleHint">Please edit the node title below:</p>
-                ))}
+              {editable && isNew && (
+                <>
+                  {/* New Node with inputs */}
+                  <p className="NewChildProposalWarning">Before proposing,</p>
+                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
+                    <span>- Search </span>
+                    <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
+                    <span> to ensure the node does not exist.</span>
+                  </p>
+                  {(nodeType === "Concept" ||
+                    nodeType === "Relation" ||
+                    nodeType === "Question" ||
+                    nodeType === "News") &&
+                    references.length === 0 && (
+                      <p className="NewChildProposalWarning">
+                        - Make the reference nodes that you'd like to cite, visible on your map view.
+                      </p>
+                    )}
+                  {/* <p id="NewChildProposalTitleHint">Please enter the node title below:</p> */}
+                </>
+              )}
               {/* CHECK: I commented this */}
               <Editor
                 label="Please enter the node title below:"
                 // label={titleCopy}
-                value={title}
+                value={titleCopy}
                 // value={titleCopy}
                 // onChangeContent={setReason}
-                setValue={titleChange}
+                setValue={setTitleCopy}
+                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
+                sxPreview={{ fontSize: "25px", fontWeight: 300 }}
               />
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* <HyperEditor
                 readOnly={!editable}
                 onChange={titleChange}
@@ -524,7 +522,7 @@ const Node = ({
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={hideOffspringsHandler}
                   onHideNodeHandler={hideNodeHandler}
-                  sx={{ position: "absolute", right: "0px", top: "0px" }}
+                  sx={{ position: "absolute", right: "10px", top: "0px" }}
                 />
                 // <NodeHeader
                 //   identifier={identifier}
@@ -539,15 +537,18 @@ const Node = ({
               )}
             </div>
             <div className="NodeContent" data-hoverable={true}>
-              {editable && <p>Please edit the node content below:</p>}
+              {/* {editable && <p>Please edit the node content below:</p>} */}
               <Editor
                 label="Please edit the node content below:"
-                value={content}
-                setValue={contentChange}
+                value={contentCopy}
+                setValue={setContentCopy}
+                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}
+                sxPreview={{ fontSize: "15px" }}
               />
-              {/* CHECK: I commmented this */}
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
+              {/* CHECK: I commmented  this */}
               {/* <HyperEditor
                 readOnly={!editable}
                 onChange={contentChange}
@@ -560,7 +561,7 @@ const Node = ({
                   {editable && (
                     <div className="RemoveImageDIV">
                       <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                        <DeleteForeverIcon />
+                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                       </MemoizedMetaButton>
                     </div>
                   )}
@@ -575,11 +576,10 @@ const Node = ({
                     onLoad={onImageLoad}
                     onClick={onImageClick}
                   />
-                  {/* </a> */}
                 </>
               )}
               {nodeType === "Question" /*&& "choices" in props*/ && (
-                <>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <ul className="collapsible" style={{ padding: "0px" }}>
                     {choices.map((choice, idx) => {
                       return (
@@ -602,29 +602,27 @@ const Node = ({
                     })}
                   </ul>
                   {editable && (
-                    <div className="QuestionAddChoice">
+                    <Box sx={{ alignSelf: "flex-end" }}>
                       <MemoizedMetaButton
                         onClick={addChoiceHandler}
                         tooltip="Click to add a new choice to this question."
                       >
                         <>
-                          <AddIcon className="green-text" />
+                          <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
                           <span>Add Choice</span>
                         </>
                       </MemoizedMetaButton>
-                    </div>
+                    </Box>
                   )}
-                </>
+                </Box>
               )}
               {editable && (
                 <>
-                  <p className="ProposalTitle">
-                    {"To expedite your proposal review, explain why you propose this " +
-                      (isNew ? nodeType + " child node:" : "new version:")}
-                  </p>
                   <Editor
-                    label="Please write a few words to summarize what you've proposed
-                      in this version:"
+                    label={
+                      "To expedite your proposal review, explain why you propose this " +
+                      (isNew ? nodeType + " child node:" : "new version:")
+                    }
                     value={reason}
                     setValue={setReason}
                     readOnly={false}
@@ -769,12 +767,14 @@ const Node = ({
                 width={width}
                /> */}
               {/* {title} */}
+
               <Editor
                 label="title"
-                value={title}
-                setValue={titleChange}
+                value={titleCopy}
+                setValue={setTitleCopy}
                 // setValue={setTitleCopy}
                 readOnly={true}
+                sxPreview={{ fontSize: "25px" }}
               />
             </div>
             {!nodeBookState.choosingNode /* && choosingNode */ && (
@@ -783,7 +783,7 @@ const Node = ({
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
                 onHideNodeHandler={hideNodeHandler}
-                sx={{ position: "absolute", right: "0px", top: "0px" }}
+                sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
               // <NodeHeader
               //   identifier={identifier}

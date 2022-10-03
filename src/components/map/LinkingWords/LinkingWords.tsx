@@ -6,7 +6,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Button, Link, TextField } from "@mui/material";
+import { Box, Button, Link, TextField } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -193,7 +193,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           </div>
         )}
         {props.openPart === "References" && (
-          <>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
             <strong>References</strong>
             {props.references.map((reference: any, idx: number) => {
               let refTitle = reference.title;
@@ -219,7 +219,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   />
                   {urlRefLabel[0] && urlRefLabel[1]}
                   {props.editable && (
-                    <>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
                       <TextField
                         key={props.identifier + "LinkTo" + reference.node + "Label"}
                         id={props.identifier + "LinkTo" + reference.node + "Label"}
@@ -228,6 +228,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         value={reference.label}
                         onChange={referenceLabelChangeHandler(idx)}
                         label="Enter page # or voice/video time"
+                        size="small"
                       />
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
@@ -235,18 +236,18 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           tooltip="Delete the link to this reference."
                           tooltipPosition="right"
                         >
-                          <DeleteForeverIcon />
+                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </MemoizedMetaButton>
                       </div>
-                    </>
+                    </Box>
                   )}
                 </div>
               );
             })}
-          </>
+          </Box>
         )}
         {props.editable && (
-          <>
+          <Box sx={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
             {props.openPart === "LinkingWords" && !props.isNew && nodeBookState.selectedNode === props.identifier ? (
               <MemoizedMetaButton
                 onClick={choosingNewLinkedNode("Parent")}
@@ -254,8 +255,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 tooltipPosition="left"
               >
                 <>
-                  <ArrowBackIcon fontSize="small" sx={{ color: "#00E676" }} />
-                  <AddIcon fontSize="small" sx={{ color: "#00E676" }} />
+                  <ArrowBackIcon fontSize="small" sx={{ color: "#00E676", fontSize: "16px" }} />
+                  <AddIcon fontSize="small" sx={{ color: "#00E676", fontSize: "16px" }} />
                   <span>Link to an existing Parent</span>
                 </>
               </MemoizedMetaButton>
@@ -266,11 +267,11 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   tooltip="Link to a reference node."
                   tooltipPosition="left"
                 >
-                  <>
-                    <MenuBookIcon sx={{ color: "#f9a825" }} />
-                    <AddIcon sx={{ color: "#00E676" }} />
+                  <Box sx={{ fontSize: "16px", display: "flex", gap: "5px" }}>
+                    <MenuBookIcon sx={{ color: "#f9a825", fontSize: "inherit" }} />
+                    <AddIcon sx={{ color: "#00E676", fontSize: "inherit" }} />
                     <span> Cite an existing Reference</span>
-                  </>
+                  </Box>
                 </MemoizedMetaButton>
               )
             )}
@@ -292,12 +293,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 Propose
               </Button>
             </div>
-          </>
+          </Box>
         )}
       </div>
       <div className="LearnAfter">
         {props.openPart === "References" && (
-          <>
+          //StyleRef, f-size from Map.css ln 71
+          <Box sx={{ fontSize: "16px" }}>
             <strong>Tags</strong>
             {props.tags.map((tag: any, idx: number) => {
               return (
@@ -317,7 +319,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         tooltip="Delete the link to this tag."
                         tooltipPosition="right"
                       >
-                        <DeleteForeverIcon />
+                        <DeleteForeverIcon sx={{ fontSize: "inherit" }} />
                       </MemoizedMetaButton>
                     </div>
                   )}
@@ -330,17 +332,17 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 tooltip="Link to a node."
                 tooltipPosition="left"
               >
-                <>
-                  <LocalOfferIcon sx={{ color: "#f9a825" }} />
-                  <AddIcon sx={{ color: "#00E676" }} />
+                <Box sx={{ display: "flex", gap: "px" }}>
+                  <LocalOfferIcon sx={{ color: "#f9a825", fontSize: "inherit" }} />
+                  <AddIcon sx={{ color: "#00E676", fontSize: "inherit" }} />
                   <span> Add an existing Tag</span>
-                </>
+                </Box>
               </MemoizedMetaButton>
             )}
-          </>
+          </Box>
         )}
         {props.openPart === "LinkingWords" && (
-          <>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
             <strong>Children (Follow-ups)</strong>
             {props.nodesChildren.map((child: any, idx: number) => {
               return (
@@ -362,7 +364,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         tooltip="Delete the link to this child."
                         tooltipPosition="right"
                       >
-                        <DeleteForeverIcon />
+                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                       </MemoizedMetaButton>
                     </div>
                   )}
@@ -379,7 +381,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               nodeType={"Relation"}
               visible={false}
             />
-          </>
+          </Box>
         )}
         {props.editable &&
           !props.isNew &&
@@ -392,8 +394,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
             >
               <>
                 <span>Link to an existing Child node</span>
-                <AddIcon fontSize="small" sx={{ color: "#00E676" }} />
-                <ArrowForwardIcon fontSize="small" sx={{ color: "#00E676" }} />
+                <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
               </>
             </MemoizedMetaButton>
           )}

@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
@@ -46,8 +47,15 @@ const LinkingButton = (props: LinkingButtonProps) => {
           : "left"
       }
     >
-      <>
-        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"top"} />
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"left"} sx={{ fontSize: "16px" }} />
+        <Editor
+          readOnly={true}
+          setValue={doNothing}
+          label={""}
+          value={props.linkedNodeTitle}
+          sxPreview={{ fontSize: "14px" }}
+        />
         {/* CHECK: I commented this, please uncomment this */}
         {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
         {/* <HyperEditor
@@ -55,9 +63,8 @@ const LinkingButton = (props: LinkingButtonProps) => {
         onChange={doNothing}
         content={props.linkedNodeTitle}
       /> */}
-        <Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTitle} />
         {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
-        <div className="preloader-wrapper active small right">
+        <div c<Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTlassName="preloader-wrapper active small right">
           <div className="spinner-layer spinner-yellow-only">
             <div className="circle-clipper left">
               <div className="circle"></div>
@@ -65,7 +72,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
           </div>
         </div>
       )} */}
-      </>
+      </Box>
     </MemoizedMetaButton>
   );
 };

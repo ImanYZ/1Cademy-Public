@@ -23,7 +23,8 @@ import notificationsLightTheme from "../../../../public/notifications-light-them
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-light-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
-import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
+import { FullNodeData, UsersStatus } from "../../../nodeBookTypes";
+// import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
 import { MemoizedMetaButton } from "../MetaButton";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
 import Proposals from "../Proposals";

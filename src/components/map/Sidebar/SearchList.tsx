@@ -58,7 +58,8 @@ import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 // import TagSearch from "../../../../PublicComps/TagSearch/TagSearch";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import shortenNumber from "../../../lib/utils/shortenNumber";
-import { SortDirection, SortValues } from "../../../noteBookTypes";
+import { SortDirection, SortValues } from "../../../nodeBookTypes";
+// import { SortDirection, SortValues } from "../../../noteBookTypes";
 import { NodeType } from "../../../types";
 import { Editor } from "../../Editor";
 import NodeTypeIcon from "../../NodeTypeIcon2";
@@ -335,22 +336,23 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   //   [chosenTags]
   // );
 
-  // const deleteChip = useCallback(
-  //   () => console.log("deleteChip"),
-  //   // chip => () => {
-  //   //   setChosenTags(oldChosenTags => {
-  //   //     console.log({ status: "DeleteChip", oldChosenTags });
-  //   //     if (oldChosenTags.length === 1) {
-  //   //       setOnlyTags(false);
-  //   //     }
-  //   //     return oldChosenTags.filter(tag => tag !== chip.nodeId);
-  //   //   });
-  //   //   setAllTags(oldAllTags => {
-  //   //     return { ...oldAllTags, [chip.nodeId]: { ...oldAllTags[chip.nodeId], checked: false } };
-  //   //   });
-  //   // },
-  //   []
-  // );
+  const deleteChip = useCallback(
+    (nodeId: string) => {
+      setChosenTags(oldChosenTags => {
+        console.log({ status: "DeleteChip", oldChosenTags });
+        // Check: I commented this
+        // if (oldChosenTags.length === 1) {
+        //   setOnlyTags(false);
+        // }
+        const r = oldChosenTags.filter(tag => tag.id !== nodeId);
+        return r;
+      });
+      setAllTags(oldAllTags => {
+        return { ...oldAllTags, [nodeId]: { ...oldAllTags[nodeId], checked: false } };
+      });
+    },
+    [setAllTags]
+  );
 
   const setRecoverDefaultTags = useCallback(() => {
     console.log("setRecoverDefaultTags");
@@ -488,7 +490,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                     className="chip"
                     variant="outlined"
                     label={tag.title}
-                    onDelete={() => console.log("deleteChip(tag)")}
+                    onDelete={() => deleteChip(tag.nodeId)}
                   />
                 );
               })
@@ -563,7 +565,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
               >
                 <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
                   <NodeTypeIcon nodeType={resNode.nodeType} />
-                  <div className="right">
+                  <div className="right" style={{ display: "flex", gap: "10px" }}>
                     <MemoizedMetaButton
                     // tooltip="Creation or the last update of this node."
                     // tooltipPosition="BottomLeft"

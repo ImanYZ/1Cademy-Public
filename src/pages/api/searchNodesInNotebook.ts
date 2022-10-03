@@ -4,8 +4,9 @@ import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 import { homePageSortByDefaults } from "@/lib/utils/utils";
 
 import { SearchNodesResponse, SimpleNode, TypesenseNodesSchema } from "../../knowledgeTypes";
-import { SortDirection, SortValues } from "../../noteBookTypes";
+// import { SortDirection, SortValues } from "../../noteBookTypes";
 import { NodeType } from "../../types";
+import { SortDirection, SortValues } from "../../nodeBookTypes";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const { q = "*", nodeTypes = [], tags = [], nodesUpdatedSince, sortOption, sortDirection, page } = req.body;

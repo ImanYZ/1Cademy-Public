@@ -1,7 +1,9 @@
 import dagre from "dagre";
 import { collection, Firestore, onSnapshot, query, where } from "firebase/firestore";
 
-import { FullNodeData } from "../../noteBookTypes";
+import { EdgesData, FullNodeData, FullNodesData } from "../../nodeBookTypes";
+
+// import { FullNodeData } from "../../noteBookTypes";
 
 export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setState.
 export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.
@@ -294,7 +296,7 @@ export const setDagNode = (
   if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
     // setParent sets a cluster for the node with node Id
     // node.tags[0].node: node Id of the first tag from the node data
-    // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
+    g.setParent(nodeId, "Tag" + node.tagIds[0]);
   }
 
   if (callback) {
@@ -313,6 +315,94 @@ export const setDagNode = (
   // adding the newNode to oldNodes
   oldNodes[nodeId] = newNode;
   return oldNodes;
+};
+
+type GraphNode = {
+  width: number;
+  height: number;
+  left?: number;
+  top?: number;
+  x?: number;
+  y?: number;
+};
+export const setDagNodes = (
+  g: dagre.graphlib.Graph<{}>,
+  individualNodeChanges: FullNodeData[],
+  oldNodes: FullNodesData,
+  allTags: any
+) => {
+  const graphNodes: { id: string; data: GraphNode }[] = individualNodeChanges.map(cur => ({
+    id: cur.node,
+    data: {
+      width: cur.width ?? NODE_WIDTH,
+      height: cur.height ?? NODE_HEIGHT,
+      left: cur.left,
+      top: cur.top,
+      x: cur.x,
+      y: cur.y,
+    },
+  }));
+  // let newNode: any = {};
+  // node.width ? node.width : NODE_WIDTH;
+  // if ("width" in node) {
+  //   newNode.width = node.width;
+  // } else {
+  //   newNode.width = NODE_WIDTH;
+  // }
+  // if ("height" in node) {
+  //   newNode.height = node.height;
+  // } else {
+  //   newNode.height = NODE_HEIGHT;
+  // }
+  // if ("left" in node) {
+  //   newNode.left = node.left;
+  // }
+  // if ("top" in node) {
+  //   newNode.top = node.top;
+  // }
+  // if ("x" in node) {
+  //   newNode.x = node.x;
+  // }
+  // if ("y" in node) {
+  //   newNode.y = node.y;
+  // }
+  // add newNode data to dagre object with the id: nodeId
+
+  graphNodes.forEach(cur => g.setNode(cur.id, cur.data));
+  // g.setNode(nodeId, newNode);
+  // if the node has at least one tag, check if the nodeId of the tag is in allTags
+  // (clusters are based on nodes' first tags)
+
+  individualNodeChanges.forEach(cur => {
+    if (!cur?.tagIds.length) return;
+    if (!(cur.tagIds[0] in allTags)) return;
+    g.setParent(cur.node, "Tag" + cur.tagIds[0]);
+  });
+
+  // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
+  //   // setParent sets a cluster for the node with node Id
+  //   // node.tags[0].node: node Id of the first tag from the node data
+  //   // dag1[0].setParent(nodeId, "Tag" + node.tagIds[0]); // <---- CHECK: this line was commented
+  // }
+
+  // ***************************************************************
+  // Candidate for removal!
+  // copyNode: creates copy of the object
+  // copies the other attributes of the node (attributes not necessary for dagre object)
+
+  const nodesChanges: FullNodesData = individualNodeChanges.reduce((acu, cur) => {
+    return { ...acu, [cur.node]: { ...copyNode(cur) } };
+  }, oldNodes);
+
+  // newNode = copyNode(node);
+  // ***************************************************************
+  // id is deleted because nodeId will be used as key in oldNodes
+  // if ("id" in newNode) {
+  //   delete newNode.id;
+  // }
+  // adding the newNode to oldNodes
+  // oldNodes[nodeId] = newNode;
+  return nodesChanges;
 };
 
 // removes a node from the map
@@ -567,10 +657,10 @@ export const compareAndUpdateNodeLinks = (
 
 export const createOrUpdateNode = (
   g: dagre.graphlib.Graph<{}>,
-  newNode: any,
+  newNode: FullNodeData,
   nodeId: string,
   oldNodes: any,
-  oldEdges: any,
+  oldEdges: EdgesData,
   allTags: any
 ) => {
   // CHECK: object.children was node by I changed with newNode
@@ -664,6 +754,7 @@ export const createOrUpdateNode = (
 // this works correctly in dashboard with array but,
 // don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
+  // console.log("\n----->\n -> NODE HERE:", node.parents);
   let newNode = { ...node };
   newNode.parents = [];
   for (let parent of node.parents) {

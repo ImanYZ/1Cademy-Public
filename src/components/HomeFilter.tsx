@@ -48,7 +48,9 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
     useEffect(() => {
       const tagSelected = chosenTags.map(cur => cur.title);
       onTagsChange(tagSelected);
-    }, [chosenTags, onTagsChange]);
+      //   // Don't add onTagsChange because get in a infinity loop
+      //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chosenTags]);
 
     useImperativeHandle(ref, () => ({
       scroll: () => {
