@@ -71,7 +71,7 @@ import userSequelVersionComments from "./userSequelVersionComments.data";
 import userSequelVersions from "./userSequelVersions.data";
 import weeklyReputations from "./weeklyReputations.data";
 
-class MockData {
+export class MockData {
   constructor(private data: any[], private collecion: string) {}
 
   public getData = () => this.data;
