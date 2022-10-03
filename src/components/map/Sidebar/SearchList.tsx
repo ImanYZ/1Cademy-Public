@@ -17,6 +17,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Stack,
 } from "@mui/material";
 import axios from "axios";
 // import "./SearchList.css";
@@ -507,7 +508,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         </div>
         <div id="nodesUpdatedSinceContainer" style={{ fontSize: "14px" }}>
           {/* Search in <span id="SearchNodesNum">{shortenNumber(filteredNodes.length, 2, false)}</span>{" "} */}
-          <div>
+          <Stack sx={{ gap: "10px" }}>
             Edited in past
             <ValidatedInput
               identification="nodesUpdatedSince"
@@ -517,7 +518,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
               defaultValue={nodesUpdatedSince}
             />{" "}
             days
-          </div>
+          </Stack>
           <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
           <div id="SearchSortContainer">
             <RecentNodesList
