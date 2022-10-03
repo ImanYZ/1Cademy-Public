@@ -32,6 +32,8 @@ type QuestionChoicesProps = {
 
 const QuestionChoices = (props: QuestionChoicesProps) => {
   const [choicesOpen, setChoicesOpen] = useState<boolean[]>([]);
+  const [choiceCopy, setChoiceCopy] = useState(props.choice.choice);
+  const [feedbackCopy, setFeedbackCopy] = useState(props.choice.feedback);
 
   useEffect(() => {
     const choices: boolean[] = [];
@@ -39,9 +41,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
       choices[i] = false;
     }
     setChoicesOpen(choices);
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.choices.length]);
 
   const choiceClick = useCallback(() => {
     // console.log("choiceClick");
@@ -69,16 +69,12 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
 
   const changeChoiceHandler = useCallback(
     (value: any) => props.changeChoice(props.nodeRef, props.identifier, value, props.idx),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.changeChoice, props.nodeRef, props.identifier, props.idx]
+    [props]
   );
 
   const changeFeedbackHandler = useCallback(
     (value: any) => props.changeFeedback(props.nodeRef, props.identifier, value, props.idx),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.changeFeedback, props.nodeRef, props.identifier, props.idx]
+    [props]
   );
 
   if (props.editable) {
@@ -96,26 +92,29 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
               </IconButton>
             )}
           </div>
-          {/* <i
-            onClick={switchChoiceHandler}
-            className={"material-icons " + (props.choice.correct ? "green-text DoneIcon" : "red-text")}
-          >
-            {props.choice.correct ? "done" : "close"}
-          </i> */}
-          <Editor label="" readOnly={false} setValue={changeChoiceHandler} value={props.choice.choice} />
+          <Editor
+            label=""
+            readOnly={false}
+            value={choiceCopy}
+            setValue={setChoiceCopy}
+            onBlurCallback={changeChoiceHandler}
+          />
           {props.choicesNum > 1 && (
-            // <div className="">
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ display: "flex", alignSelf: "flex-end" }}>
               <MemoizedMetaButton onClick={deleteChoiceHandler} tooltip="Delete this choice from this question.">
-                {/* <i className="material-icons red-text">delete_forever</i> */}
                 <DeleteForeverIcon className="red-text" />
               </MemoizedMetaButton>
             </div>
-            // </div>
           )}
         </div>
         <div className="collapsible-body" style={{ display: "block" }}>
-          <Editor label="" readOnly={false} setValue={changeFeedbackHandler} value={props.choice.feedback} />
+          <Editor
+            label=""
+            readOnly={false}
+            setValue={setFeedbackCopy}
+            value={feedbackCopy}
+            onBlurCallback={changeFeedbackHandler}
+          />
         </div>
       </li>
     );
