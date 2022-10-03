@@ -60,7 +60,7 @@ export const setOrIncrementNotificationNums = async ({
 //     - remove node id (references, referenceIds and referenceLabels) from each node that this node's id in referenceIds
 //     - mark isStudied=false for each node that had reference of this node
 // - if node is not deleted then update votes data in each user node related to this node
-//   - if deleted then signal all usernodes that node is deleted and
+//   - if deleted then signal all usernodes that node is deleted
 // - increase notifications count for proposers
 // - create notification that has data for actionType
 // - create userNodeLog (it stores all actions of Wrongs and Corrects)
@@ -215,7 +215,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       for (let citingNodeDoc of citingNodesDocs.docs) {
         const citingNodeRef = db.collection("nodes").doc(citingNodeDoc.id);
         const citingNodeData = citingNodeDoc.data();
-        const referenceIdx = citingNodeData.referenceIds.findIndex(nodeId);
+        const referenceIdx = citingNodeData.referenceIds.indexOf(nodeId);
         if (referenceIdx !== -1) {
           citingNodeData.references.splice(referenceIdx, 1);
           citingNodeData.referenceLabels.splice(referenceIdx, 1);
