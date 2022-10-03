@@ -1,4 +1,4 @@
-import { Button, Input, InputLabel } from "@mui/material";
+import { Input, InputLabel, Switch, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
 import React, { useMemo, useRef, useState } from "react";
@@ -64,7 +64,11 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
 
       {!readOnly && (
         <Box sx={{ display: "flex", justifyContent: "end", gap: "5px", py: "5px" }}>
-          <Button
+          <Typography>Off</Typography>
+          <Switch value={option} onChange={e => setOption(e.target.checked ? "EDIT" : "PREVIEW")} />
+          <Typography>On</Typography>
+
+          {/* <Button
             color={"secondary"}
             variant={option === "EDIT" ? "contained" : "outlined"}
             onClick={() => setOption("EDIT")}
@@ -81,7 +85,7 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
             sx={{ py: "0px" }}
           >
             Preview
-          </Button>
+          </Button> */}
         </Box>
       )}
 
