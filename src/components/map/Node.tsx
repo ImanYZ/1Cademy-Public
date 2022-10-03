@@ -546,7 +546,6 @@ const Node = ({
                 onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}
-                sxPreview={{ fontSize: "15px" }}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* CHECK: I commmented  this */}
