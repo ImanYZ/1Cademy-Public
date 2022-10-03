@@ -336,22 +336,23 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   //   [chosenTags]
   // );
 
-  // const deleteChip = useCallback(
-  //   () => console.log("deleteChip"),
-  //   // chip => () => {
-  //   //   setChosenTags(oldChosenTags => {
-  //   //     console.log({ status: "DeleteChip", oldChosenTags });
-  //   //     if (oldChosenTags.length === 1) {
-  //   //       setOnlyTags(false);
-  //   //     }
-  //   //     return oldChosenTags.filter(tag => tag !== chip.nodeId);
-  //   //   });
-  //   //   setAllTags(oldAllTags => {
-  //   //     return { ...oldAllTags, [chip.nodeId]: { ...oldAllTags[chip.nodeId], checked: false } };
-  //   //   });
-  //   // },
-  //   []
-  // );
+  const deleteChip = useCallback(
+    (nodeId: string) => {
+      setChosenTags(oldChosenTags => {
+        console.log({ status: "DeleteChip", oldChosenTags });
+        // Check: I commented this
+        // if (oldChosenTags.length === 1) {
+        //   setOnlyTags(false);
+        // }
+        const r = oldChosenTags.filter(tag => tag.id !== nodeId);
+        return r;
+      });
+      setAllTags(oldAllTags => {
+        return { ...oldAllTags, [nodeId]: { ...oldAllTags[nodeId], checked: false } };
+      });
+    },
+    [setAllTags]
+  );
 
   const setRecoverDefaultTags = useCallback(() => {
     console.log("setRecoverDefaultTags");
@@ -489,7 +490,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                     className="chip"
                     variant="outlined"
                     label={tag.title}
-                    onDelete={() => console.log("deleteChip(tag)")}
+                    onDelete={() => deleteChip(tag.nodeId)}
                   />
                 );
               })
