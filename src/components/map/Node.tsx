@@ -211,7 +211,6 @@ const Node = ({
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
   const [contentCopy, setContentCopy] = useState(content);
-  const [choicesCopy, setChoicesCopy] = useState(choices);
 
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
@@ -581,12 +580,12 @@ const Node = ({
                 </>
               )}
               {nodeType === "Question" /*&& "choices" in props*/ && (
-                <Box sx={{ display: "flex", flexDirection: "column", border: "solid 2px royalBlue" }}>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <ul className="collapsible" style={{ padding: "0px" }}>
                     {choices.map((choice, idx) => {
                       return (
                         <QuestionChoices
-                          key={identifier + "Choice" + idx}
+                          key={identifier + "Choice" + idx + choice.choice}
                           identifier={identifier}
                           nodeRef={nodeRef}
                           editable={editable}

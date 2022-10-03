@@ -4,7 +4,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import { IconButton } from "@mui/material";
 // import "./QuestionChoices.css"
-import React, { useCallback, useEffect, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useState } from "react";
 
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { Editor } from "../Editor";
@@ -55,20 +55,17 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
 
   const deleteChoiceHandler = useCallback(
     () => props.deleteChoice(props.nodeRef, props.identifier, props.idx),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.deleteChoice, props.nodeRef, props.identifier, props.idx]
+    [props]
   );
 
-  const switchChoiceHandler = useCallback(
-    () => props.switchChoice(props.identifier, props.idx),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.switchChoice, props.identifier, props.idx]
-  );
+  const switchChoiceHandler = useCallback(() => props.switchChoice(props.identifier, props.idx), [props]);
 
   const changeChoiceHandler = useCallback(
-    (value: any) => props.changeChoice(props.nodeRef, props.identifier, value, props.idx),
+    (value: any) => {
+      startTransition(() => {
+        props.changeChoice(props.nodeRef, props.identifier, value, props.idx);
+      });
+    },
     [props]
   );
 
@@ -92,6 +89,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
               </IconButton>
             )}
           </div>
+          {/* TODO: Keep the state of readonly after render */}
           <Editor
             label=""
             readOnly={false}
@@ -100,14 +98,15 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             onBlurCallback={changeChoiceHandler}
           />
           {props.choicesNum > 1 && (
-            <div style={{ display: "flex", alignSelf: "flex-end" }}>
+            <div style={{ display: "flex", alignSelf: "flex-end", padding: "8px 0px" }}>
               <MemoizedMetaButton onClick={deleteChoiceHandler} tooltip="Delete this choice from this question.">
-                <DeleteForeverIcon className="red-text" />
+                <DeleteForeverIcon className="red-text" sx={{ fontSize: "16px" }} />
               </MemoizedMetaButton>
             </div>
           )}
         </div>
         <div className="collapsible-body" style={{ display: "block" }}>
+          {/* TODO: Keep the state of readonly after render */}
           <Editor
             label=""
             readOnly={false}
