@@ -43,6 +43,22 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
     setChoicesOpen(choices);
   }, [props.choices.length]);
 
+  const onSetChoiseCopy = (newChoise: string) => {
+    setChoiceCopy(newChoise);
+    startTransition(() => {
+      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+      props.changeChoice(props.nodeRef, props.identifier, newChoise, props.idx);
+    });
+  };
+
+  const onSetFeedbackCopy = (newFeedback: string) => {
+    setFeedbackCopy(newFeedback);
+    startTransition(() => {
+      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+      props.changeChoice(props.nodeRef, props.identifier, newFeedback, props.idx);
+    });
+  };
+
   const choiceClick = useCallback(() => {
     // console.log("choiceClick");
     const choices = [...choicesOpen];
@@ -60,19 +76,20 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
 
   const switchChoiceHandler = useCallback(() => props.switchChoice(props.identifier, props.idx), [props]);
 
-  const changeChoiceHandler = useCallback(
-    (value: any) => {
-      startTransition(() => {
-        props.changeChoice(props.nodeRef, props.identifier, value, props.idx);
-      });
-    },
-    [props]
-  );
+  // const changeChoiceHandler = useCallback(
 
-  const changeFeedbackHandler = useCallback(
-    (value: any) => props.changeFeedback(props.nodeRef, props.identifier, value, props.idx),
-    [props]
-  );
+  //   (value: any) => {
+  //     startTransition(() => {
+  //       props.changeChoice(props.nodeRef, props.identifier, value, props.idx);
+  //     });
+  //   },
+  //   [props]
+  // );
+
+  // const changeFeedbackHandler = useCallback(
+  //   (value: any) => props.changeFeedback(props.nodeRef, props.identifier, value, props.idx),
+  //   [props]
+  // );
 
   if (props.editable) {
     return (
@@ -94,8 +111,8 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             label=""
             readOnly={false}
             value={choiceCopy}
-            setValue={setChoiceCopy}
-            onBlurCallback={changeChoiceHandler}
+            setValue={onSetChoiseCopy}
+            // onBlurCallback={changeChoiceHandler}
           />
           {props.choicesNum > 1 && (
             <div style={{ display: "flex", alignSelf: "flex-end", padding: "8px 0px" }}>
@@ -110,9 +127,9 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <Editor
             label=""
             readOnly={false}
-            setValue={setFeedbackCopy}
+            setValue={onSetFeedbackCopy}
             value={feedbackCopy}
-            onBlurCallback={changeFeedbackHandler}
+            // onBlurCallback={changeFeedbackHandler}
           />
         </div>
       </li>

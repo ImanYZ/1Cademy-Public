@@ -8,24 +8,26 @@ import MarkdownRender from "./Markdown/MarkdownRender";
 type EditorProps = {
   label: string;
   value: string;
+  readOnly: boolean;
   setValue: (value: string) => void;
-  onBlurCallback?: (value: string) => void;
   sxPreview?: SxProps<Theme>;
-  readOnly?: boolean;
 };
 
 type EditorOptions = "EDIT" | "PREVIEW";
 
-export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onBlurCallback }: EditorProps) => {
+export const Editor = ({ label, value, setValue, readOnly, sxPreview }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
   const inputRef = useRef(null);
-  const [option, setOption] = useState<EditorOptions>(readOnly ? "PREVIEW" : "EDIT");
-
+  const [option, setOption] = useState<EditorOptions>("EDIT");
+  // const [preview, setPreview] = useState<boolean>(readOnly);
   // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   setValue(event.target.value);
   // };
 
+  const onChangeOption = (newOption: boolean) => {
+    setOption(newOption ? "PREVIEW" : "EDIT");
+  };
   // const handleMouseDown = (event: any) => {
   //   console.log('click in input', event)
   //   // event.target.focus()
@@ -65,7 +67,7 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
       {!readOnly && (
         <Box sx={{ display: "flex", justifyContent: "end", gap: "5px", py: "5px" }}>
           <Typography>Off</Typography>
-          <Switch value={option} onChange={e => setOption(e.target.checked ? "EDIT" : "PREVIEW")} />
+          <Switch value={option} onClick={() => onChangeOption(option === "EDIT")} />
           <Typography>On</Typography>
 
           {/* <Button
@@ -90,7 +92,8 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
       )}
 
       {/* {!readOnly && <hr />} */}
-      <Box sx={{ border: readOnly ? undefined : "solid 2px gray" }}>
+      {/* sx={{ border: readOnly ? undefined : "solid 2px gray" }} */}
+      <Box>
         {option === "EDIT" && !readOnly ? (
           <Input
             id={inputId}
@@ -99,11 +102,11 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
             multiline
             value={value}
             onChange={e => setValue(e.target.value)}
-            onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
-            sx={{ p: "0px", m: "0px", fontWeight: readOnly ? 400 : 300 }}
+            // onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
+            sx={{ p: "0px", m: "0px", fontWeight: 400 }}
           />
         ) : (
-          <Box sx={{ p: readOnly ? "0px" : "0px" }}>
+          <Box>
             <MarkdownRender
               text={value}
               customClass={"custom-react-markdown"}
