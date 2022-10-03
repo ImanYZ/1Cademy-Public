@@ -6,7 +6,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Box, Button, Link, TextField } from "@mui/material";
+import { Box, Button, Link } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -24,6 +24,7 @@ import { MemoizedMetaButton } from "../MetaButton";
 // import { compareLinks } from "../../MapUtils";
 // import MetaButton from "../../MetaButton/MetaButton";
 import LinkingButton from "./LinkingButton";
+import { ReferenceLabelInput } from "./ReferenceLabelInput";
 
 const separateURL = (text: string): [boolean, any] => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -220,16 +221,26 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   {urlRefLabel[0] && urlRefLabel[1]}
                   {props.editable && (
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <TextField
+                      <ReferenceLabelInput
+                        key={props.identifier + "LinkTo" + reference.node + "Label"}
+                        inputProperties={{
+                          id: props.identifier + "LinkTo" + reference.node + "Label",
+                          name: props.identifier + "LinkTo" + reference.node + "Label",
+                        }}
+                        referenceLabelChangeHandler={() => referenceLabelChangeHandler(idx)}
+                        reference={reference}
+                      />
+                      {/* <TextField
                         key={props.identifier + "LinkTo" + reference.node + "Label"}
                         id={props.identifier + "LinkTo" + reference.node + "Label"}
                         name={props.identifier + "LinkTo" + reference.node + "Label"}
                         type="text"
                         value={reference.label}
                         onChange={referenceLabelChangeHandler(idx)}
+                        onBlur={referenceLabelChangeHandler(idx)}
                         label="Enter page # or voice/video time"
                         size="small"
-                      />
+                      /> */}
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
                           onClick={deleteLink(idx, "Reference")}

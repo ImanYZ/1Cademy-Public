@@ -211,6 +211,7 @@ const Node = ({
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
   const [contentCopy, setContentCopy] = useState(content);
+
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
@@ -583,7 +584,7 @@ const Node = ({
                     {choices.map((choice, idx) => {
                       return (
                         <QuestionChoices
-                          key={identifier + "Choice" + idx}
+                          key={identifier + "Choice" + idx + choice.choice}
                           identifier={identifier}
                           nodeRef={nodeRef}
                           editable={editable}
