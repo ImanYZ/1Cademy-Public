@@ -45,6 +45,7 @@ import React, { useCallback, useState } from "react";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import Worker from "worker-loader!./searchWorker.js"; // eslint-disable-line import/no-webpack-loader-syntax
 import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
+import { useNodeBook } from "../../../context/NodeBookContext";
 // import Modal from "../../../../../containers/Modal/Modal";
 // import { firebaseState, tagState, usernameState } from "../../../../../store/AuthAtoms";
 // import {
@@ -104,6 +105,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const firebase = useRecoilValue(firebaseState);
   // const username = useRecoilValue(usernameState);
   // const tag = useRecoilValue(tagState);
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
   const [nodesUpdatedSince, setNodesUpdatedSince] = useState(1000);
 
@@ -111,7 +113,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const allUserNodes = useRecoilValue(allUserNodesState);
   // const [nodeTitleBlured, setNodeTitleBlured] = useRecoilState(nodeTitleBluredState);
   // const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Pagination>({
     data: [],
     lastPageLoaded: 0,
@@ -183,8 +185,9 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // }, [tag]);
 
   // useEffect(() => {
-  //   if (nodeTitleBlured && filteredNodes.length !== 0) {
-  //     doSearch();
+  //   if (nodeBookState.nodeTitleBlured && filteredNodes.length !== 0) {
+  //     // doSearch();
+  //     onSearch(1, sortOption, newSortDirection, nodeTypes);
   //     setNodeTitleBlured(false);
   //   }
   // }, [nodeTitleBlured, filteredNodes]);
@@ -194,10 +197,14 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
     [allTags]
   );
 
-  const handleChange = useCallback((event: any) => {
-    event.persist();
-    setSearchQuery(event.target.value);
-  }, []);
+  const handleChange = useCallback(
+    (event: any) => {
+      event.persist();
+      nodeBookDispatch({ type: "setSearchQuery", payload: event.target.value });
+      // setSearchQuery(event.target.value);
+    },
+    [nodeBookDispatch]
+  );
 
   const onSearch = async (
     page: number,
@@ -209,7 +216,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
     console.log("[onSearch]");
 
     const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
-      q: searchQuery,
+      q: nodeBookState.searchQuery,
       nodeTypes,
       tags: getTagsSelected().map(cur => cur.title),
       nodesUpdatedSince,
@@ -399,7 +406,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             name="SearchQuery"
             type="text"
             onChange={handleChange}
-            value={searchQuery}
+            value={nodeBookState.searchQuery}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
