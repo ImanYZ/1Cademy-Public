@@ -56,7 +56,11 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
 
   return (
     <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
-      {!readOnly && <InputLabel htmlFor={inputId}>{label}</InputLabel>}
+      {!readOnly && (
+        <InputLabel htmlFor={inputId} sx={{ fontWeight: 490 }}>
+          {label}
+        </InputLabel>
+      )}
 
       {!readOnly && (
         <Box sx={{ display: "flex", justifyContent: "end", gap: "5px", py: "5px" }}>
@@ -92,14 +96,14 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
             value={value}
             onChange={e => setValue(e.target.value)}
             onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
-            sx={{ p: "0px", m: "0px", fontWeight: 250 }}
+            sx={{ p: "0px", m: "0px", fontWeight: readOnly ? 400 : 300 }}
           />
         ) : (
           <Box sx={{ p: readOnly ? "0px" : "0px" }}>
             <MarkdownRender
               text={value}
               customClass={"custom-react-markdown"}
-              sx={{ ...sxPreview, fontWeight: readOnly ? 300 : 250, letterSpacing: "inherit" }}
+              sx={{ ...sxPreview, fontWeight: 400, letterSpacing: "inherit" }}
             />
           </Box>
         )}
