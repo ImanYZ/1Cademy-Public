@@ -223,7 +223,7 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for if presentations is open
   const [openPresentations, setOpenPresentations] = useState(false);
 
-  // flag for is search is open
+  // // flag for is search is open
   // const [openToolbar, setOpenToolbar] = useState(false);
 
   // flag for is search is open
@@ -293,7 +293,7 @@ const Dashboard = ({}: DashboardProps) => {
             let tmpEdges = {};
 
             if (cur.nodeChangeType === "added") {
-              console.log("added");
+              // console.log("added");
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
               const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
@@ -301,7 +301,7 @@ const Dashboard = ({}: DashboardProps) => {
               tmpEdges = res.oldEdges;
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
-              console.log("modified");
+              // console.log("modified");
               const node = acu.newNodes[cur.node];
               if (!node) {
                 // <---  CHECK I change this from nodes
@@ -326,9 +326,9 @@ const Dashboard = ({}: DashboardProps) => {
             // I changed the reference from snapshot
             // so the NO visible nodes will come as modified and !visible
             if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-              console.log("removed", cur.node, g.current);
+              // console.log("removed", cur.node, g.current);
               if (g.current.hasNode(cur.node)) {
-                console.log("has Node");
+                // console.log("has Node");
                 g.current.nodes().forEach(function () {});
                 g.current.edges().forEach(function () {});
                 // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
@@ -336,9 +336,9 @@ const Dashboard = ({}: DashboardProps) => {
                 // !IMPORTANT, Don't change the order, first remove edges then nodes
                 tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
                 tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-                console.log("hasNode", { tmpEdges, tmpNodes });
+                // console.log("hasNode", { tmpEdges, tmpNodes });
               } else {
-                console.log("dont has", acu.newEdges);
+                // console.log("dont has", acu.newEdges);
                 // remove edges
                 const oldEdges = { ...acu.newEdges };
                 console.log(oldEdges);
@@ -454,6 +454,7 @@ const Dashboard = ({}: DashboardProps) => {
     //   oldNodes = removeDagNode(tempNode, oldNodes);
     //   tempNodes.delete(tempNode);
     // }
+    console.log("tempNodes", tempNodes);
     tempNodes.forEach(tempNode => {
       oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
       oldNodes = removeDagNode(g.current, tempNode, oldNodes);
@@ -1877,28 +1878,29 @@ const Dashboard = ({}: DashboardProps) => {
       reloadPermanentGraph();
     }
     console.log("After reloadPermanentGraph");
-    // let sidebarType: any = nodeBookState.selectionType;
-    // if (openPendingProposals) {
-    //   sidebarType = "PendingProposals";
-    // } else if (openChat) {
-    //   sidebarType = "Chat";
-    // } else if (openNotifications) {
-    //   sidebarType = "Notifications";
-    // } else if (openPresentations) {
-    //   sidebarType = "Presentations";
-    // } else if (openToolbar) {
-    //   sidebarType = "UserSettings";
-    // } else if (openSearch) {
-    //   sidebarType = "Search";
-    // } else if (openBookmarks) {
-    //   sidebarType = "Bookmarks";
-    // } else if (openRecentNodes) {
-    //   sidebarType = "RecentNodes";
-    // } else if (openTrends) {
-    //   sidebarType = "Trends";
-    // } else if (openMedia) {
-    //   sidebarType = "Media";
-    // }
+    let sidebarType: any = nodeBookState.selectionType;
+    if (openPendingProposals) {
+      sidebarType = "PendingProposals";
+    } else if (openChat) {
+      sidebarType = "Chat";
+    } else if (openNotifications) {
+      sidebarType = "Notifications";
+    } else if (openPresentations) {
+      sidebarType = "Presentations";
+      // } else if (openToolbar) {
+    } else if (nodeBookState.openToolbar) {
+      sidebarType = "UserSettings";
+    } else if (openSearch) {
+      sidebarType = "Search";
+    } else if (openBookmarks) {
+      sidebarType = "Bookmarks";
+    } else if (openRecentNodes) {
+      sidebarType = "RecentNodes";
+    } else if (openTrends) {
+      sidebarType = "Trends";
+    } else if (openMedia) {
+      sidebarType = "Media";
+    }
 
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
@@ -1927,13 +1929,17 @@ const Dashboard = ({}: DashboardProps) => {
       scrollToNode(nodeBookState.selectedNode);
     }
     console.log("After scrollToNode");
-    // CHECK: I commented this, please uncomment
-    // const userClosedSidebarLogRef = firebase.db.collection("userClosedSidebarLog").doc();
+    const userClosedSidebarLogRef = collection(db, "userClosedSidebarLog");
     // userClosedSidebarLogRef.set({
     //   uname: user.uname,
     //   sidebarType,
     //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
     // });
+    setDoc(doc(userClosedSidebarLogRef), {
+      uname: user.uname,
+      sidebarType,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
   }, [
     user,
     graph.nodes,
@@ -2177,28 +2183,28 @@ const Dashboard = ({}: DashboardProps) => {
       event.preventDefault();
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
-      console.log(1);
+      // console.log(1);
       const newNodeId = newId();
       setGraph(graph => {
-        console.log("setGraph:", graph);
+        // console.log("setGraph:", graph);
         const { nodes: oldNodes, edges } = graph;
         // debugger;
-        console.log(11, edges, oldNodes);
+        // console.log(11, edges, oldNodes);
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
-        console.log(12, changedNodes, oldNodes[nodeBookState.selectedNode]);
+        // console.log(12, changedNodes, oldNodes[nodeBookState.selectedNode]);
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
-        console.log(13);
+        // console.log(13);
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
 
-        console.log(14);
+        // console.log(14);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
-        console.log(15);
+        // console.log(15);
         const newChildNode: any = {
           isStudied: true,
           bookmarked: false,
@@ -2246,17 +2252,17 @@ const Dashboard = ({}: DashboardProps) => {
           ];
         }
 
-        console.log(2, { newNodeId, newChildNode });
+        // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
         const newNodes = setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {});
         if (!nodeBookState.selectedNode) return { nodes: newNodes, edges }; //CHECK: I add this to validate
-        console.log(3);
+        // console.log(3);
         const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
 
         // setEdges(oldEdges => {
         // });
-        console.log(4, { newNodes, newEdges });
+        // console.log(4, { newNodes, newEdges });
         setMapChanged(true);
         scrollToNode(newNodeId);
         return { nodes: newNodes, edges: newEdges };
