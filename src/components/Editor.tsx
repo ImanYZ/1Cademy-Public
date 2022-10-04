@@ -1,7 +1,7 @@
 import { Input, InputLabel, Switch, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import MarkdownRender from "./Markdown/MarkdownRender";
 
@@ -24,8 +24,6 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCall
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [focused, setFocused] = useState(false);
   // const inputRef = useRef(null);
-  useEffect(() => {}, []);
-
   const onChangeOption = (newOption: boolean) => {
     setOption(newOption ? "PREVIEW" : "EDIT");
   };
