@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -210,6 +210,7 @@ const Node = ({
   const previousRef = useRef<number>(0);
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
+
   const [contentCopy, setContentCopy] = useState(content);
 
   useEffect(() => {
@@ -265,6 +266,20 @@ const Node = ({
     [onHideNode, identifier]
   );
 
+  const onSetTitle = (newTitle: string) => {
+    setTitleCopy(newTitle);
+    startTransition(() => {
+      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+    });
+  };
+  const onSetContent = (newContent: string) => {
+    setContentCopy(newContent);
+    startTransition(() => {
+      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+      setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
+    });
+  };
   const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
 
   const toggleNodeHandler = useCallback(
@@ -502,8 +517,9 @@ const Node = ({
                 value={titleCopy}
                 // value={titleCopy}
                 // onChangeContent={setReason}
-                setValue={setTitleCopy}
+                setValue={onSetTitle}
                 onBlurCallback={onNodeTitleBLur}
+                // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
@@ -542,7 +558,7 @@ const Node = ({
               <Editor
                 label="Please edit the node content below:"
                 value={contentCopy}
-                setValue={setContentCopy}
+                setValue={onSetContent}
                 // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}

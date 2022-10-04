@@ -1541,9 +1541,9 @@ button.MuiTab-textColorInherit:focus {
   text-align: center;
 }
 
-.NewProposalIcons i {
+/* .NewProposalIcons i {
   margin-right: 4px;
-}
+} */
 
 /* ------------------------------------------- */
 /* proposal list styles */

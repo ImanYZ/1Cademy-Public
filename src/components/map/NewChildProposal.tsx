@@ -6,6 +6,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
+import { Box } from "@mui/material";
 import React, { useCallback } from "react";
 
 import { MemoizedMetaButton } from "./MetaButton";
@@ -34,8 +35,8 @@ const NewChildProposal = (props: NewChildProposalProps) => {
           props.openProposal !== "ProposeNew" + props.childNodeType + "ChildNode" ? proposeNewChildClick : undefined
         }
       >
-        <div className="NewProposalButton">
-          <div className="NewProposalIcons">
+        <Box className="NewProposalButton" sx={{ fontSize: "14px" }}>
+          <div className="`NewProposalIcons`">
             {/* <i className="material-icons orange-text">add</i> */}
             <AddIcon fontSize="small" />
             {/* local_library */}
@@ -53,7 +54,7 @@ const NewChildProposal = (props: NewChildProposalProps) => {
             {/* <i className={"material-icons orange-text"}>{props.icon}</i> */}
           </div>
           <div className="NewProposalButtonText">{props.childNodeType}</div>
-        </div>
+        </Box>
       </MemoizedMetaButton>
     </span>
   );
