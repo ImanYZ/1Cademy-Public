@@ -1,8 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fbAuth from "src/middlewares/fbAuth";
+import { INodeType } from "src/types/INodeType";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { addToPendingPropsNumsExcludingVoters, getNode, getVersion } from "../../utils";
 
+export type IDeleteVersionReqBody = {
+  data: {
+    versionId: string;
+    nodeType: INodeType;
+    nodeId: string;
+  };
+};
+
+// Why we are not running signalUserVersionNodes to be Deleted?
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     let batch = db.batch();
@@ -44,4 +55,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);
