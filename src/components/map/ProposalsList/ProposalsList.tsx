@@ -61,6 +61,8 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
+  // console.log("-> proposals", props.proposals);
+
   return !props.isRetrieving ? (
     props.proposals.map((proposal: any, proposalIdx: number) => {
       const proposalSummaries = proposalSummariesGenerator(proposal);
@@ -159,7 +161,7 @@ const ProposalsList = (props: ProposalsListProps) => {
           // THIS Show pending proposal and aproved proposals
           return (
             <ProposalItem
-              key="0"
+              key={proposal.id}
               proposal={proposal}
               selectProposal={props.selectProposal}
               proposalSummaries={proposalSummaries}

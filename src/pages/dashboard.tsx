@@ -1,5 +1,5 @@
 import CodeIcon from "@mui/icons-material/Code";
-import { Button, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
+import { Button, Divider, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import {
@@ -244,7 +244,7 @@ const Dashboard = ({}: DashboardProps) => {
   // temporal state with value from node to improve
   // when click in improve Node the copy of original Node is here
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
-  const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
+  // const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
   //
   const [showClusters, setShowClusters] = useState(false);
@@ -1763,7 +1763,7 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      console.log("[2.CHANGE NODE HIGHT 🚀]", { height, nodeId });
+      console.log(`[CHANGE NH 🚀] H:${height}, nId:${nodeId}`);
 
       // // if (value === nodes[nodeId].title) return;
       // const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
@@ -1868,7 +1868,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (!user) return;
 
-    setNodeToImprove(null); // CHECK: I added this to compare then
+    // setNodeToImprove(null); // CHECK: I added this to compare then
 
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
@@ -1968,7 +1968,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.selectedNode) return;
 
       setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
-      // reloadPermanentGraph();
+      reloadPermanentGraph();
 
       // CHECK: Improve this making the operations out of setNode,
       // when have nodes with new data
@@ -1996,7 +1996,7 @@ const Dashboard = ({}: DashboardProps) => {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
-        setNodeToImprove(thisNode); // CHECK: I added this to compare then
+        // setNodeToImprove(thisNode); // CHECK: I added this to compare then
         thisNode.editable = true;
         // setMapChanged(true);
         const newNodes = {
@@ -2106,8 +2106,12 @@ const Dashboard = ({}: DashboardProps) => {
           }
           newNode.parents = newParents;
         }
-        // const oldNode = allNodes[nodeBookState.selectedNode]
-        const oldNode = { ...nodeToImprove };
+        // if (nodeBookState.selectedNode) return
+
+        // const oldNode = allNodes[nodeBookState.selectedNode];
+        const oldNode = allNodes.find(cur => cur.node === nodeBookState.selectedNode);
+        if (!oldNode) return;
+        // const oldNode = { ...nodeToImprove };
         console.log({ newNode, oldNode });
         let isTheSame =
           newNode.title === oldNode.title &&
@@ -2465,7 +2469,7 @@ const Dashboard = ({}: DashboardProps) => {
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
       );
 
-      console.log("orderedProposals", orderedProposals);
+      // console.log("orderedProposals", orderedProposals);
       setProposals(orderedProposals);
       setIsRetrieving(false);
     },
@@ -2678,6 +2682,10 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
             </Box>
+
+            <Divider />
+
+            <Typography>Global states:</Typography>
             <Box>
               <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
               <Button onClick={() => console.log(graph.edges)}>edges</Button>
@@ -2698,9 +2706,20 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
             </Box>
             <Box>
-              <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button>
+              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+              <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+            </Box>
+
+            <Divider />
+
+            <Box>
+              {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
               <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
             </Box>
+
+            <Divider />
+
+            <Typography>Functions:</Typography>
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Toggle Open proposals
