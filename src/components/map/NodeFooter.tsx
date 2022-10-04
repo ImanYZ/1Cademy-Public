@@ -136,7 +136,7 @@ const NodeFooter = ({
 
   const selectPendingProposals = useCallback(
     (event: any) => {
-      selectNode(event, "Proposals");
+      selectNode(event, "Proposals"); // Pass correct data
     },
     [selectNode]
   );

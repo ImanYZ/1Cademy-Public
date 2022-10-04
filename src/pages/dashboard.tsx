@@ -454,7 +454,7 @@ const Dashboard = ({}: DashboardProps) => {
     //   oldNodes = removeDagNode(tempNode, oldNodes);
     //   tempNodes.delete(tempNode);
     // }
-    console.log("tempNodes", tempNodes);
+    console.log("--> reloadPermanten graph", tempNodes, changedNodes);
     tempNodes.forEach(tempNode => {
       oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
       oldNodes = removeDagNode(g.current, tempNode, oldNodes);
@@ -1870,6 +1870,24 @@ const Dashboard = ({}: DashboardProps) => {
 
     // setNodeToImprove(null); // CHECK: I added this to compare then
 
+    // const gg = () => {
+    //   if (!graph.nodes?[nodeBookState?.selectedNode]) return null;
+
+    //   return [nodeBookState.selectedNode].editable;
+    // };
+    // console.log("--------------------------<<< gg", gg());
+    // debugger;
+    console.log("selectionType", nodeBookState);
+    console.log(
+      'nodeBookState.selectionType === "AcceptedProposals"',
+      nodeBookState.selectionType === "AcceptedProposals"
+    );
+    console.log('nodeBookState.selectionType === "Proposals"', nodeBookState.selectionType === "Proposals");
+    console.log(
+      "first",
+      nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
+    );
+
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
       nodeBookState.selectionType === "Proposals" ||
@@ -1973,7 +1991,7 @@ const Dashboard = ({}: DashboardProps) => {
       // CHECK: Improve this making the operations out of setNode,
       // when have nodes with new data
       // update with setNodes
-      console.log("set Nodes and change editable to true");
+      console.log("set Nodes and change editable to true", nodeBookState);
       // setNodes(oldNodes => {
       //   if (!nodeBookState.selectedNode) return oldNodes;
 
@@ -2003,18 +2021,19 @@ const Dashboard = ({}: DashboardProps) => {
           ...oldNodes,
           [nodeBookState.selectedNode]: thisNode,
         };
+        console.log({ nodeBookState });
         return { nodes: newNodes, edges };
       });
       scrollToNode(nodeBookState.selectedNode);
+      console.log({ nodeBookState });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.selectedNode, reloadPermanentGraph]
+    [nodeBookState, reloadPermanentGraph, scrollToNode]
   );
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      console.log("[SELECT_NODE]");
+      console.log("[SELECT_NODE]", nodeBookState.choosingNode);
+
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           console.log("[select node]: will call reload permanent graph");
@@ -2185,6 +2204,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       console.log("[PROPOSE_NEW_CHILD]");
       event.preventDefault();
+      console.log(setOpenProposal, '"ProposeNew" + childNodeType + "ChildNode"');
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
       // console.log(1);
@@ -2283,7 +2303,7 @@ const Dashboard = ({}: DashboardProps) => {
       // setSelectionType(null);
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
-      nodeBookDispatch({ type: "setSelectionType", payload: null });
+      // nodeBookDispatch({ type: "setSelectionType", payload: null });
     },
     [nodeBookDispatch]
   );
