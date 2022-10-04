@@ -58,7 +58,6 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview }: EditorPr
 
   return (
     <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
-      <h6>OPTION: {option}</h6>
       {!readOnly && (
         <InputLabel htmlFor={inputId} sx={{ fontWeight: 490 }}>
           {label}
@@ -66,19 +65,14 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview }: EditorPr
       )}
 
       {!readOnly && (
-        <Box sx={{ display: "flex", justifyContent: "end", gap: "5px", py: "5px", border: "solid 2px royalBlue" }}>
-          <h6>
-            OPTION: {option} {option === "PREVIEW"}
-          </h6>
-          <Typography onClick={() => onChangeOption(option === "EDIT")}>Off</Typography>
-          <Switch
-            checked={option === "PREVIEW"}
-            onClick={() => {
-              localStorage.setItem("tmp-switch", option);
-              onChangeOption(option === "EDIT");
-            }}
-          />
-          <Typography onClick={() => onChangeOption(option === "PREVIEW")}>On</Typography>
+        <Box sx={{ display: "flex", justifyContent: "end", alignItems: "center" }}>
+          <Typography onClick={() => setOption("PREVIEW")} sx={{ cursor: "pointer", fontSize: "14px" }}>
+            Preview
+          </Typography>
+          <Switch checked={option === "EDIT"} onClick={() => onChangeOption(option === "EDIT")} size="small" />
+          <Typography onClick={() => setOption("EDIT")} sx={{ cursor: "pointer", fontSize: "14px" }}>
+            Edit
+          </Typography>
 
           {/* <Button
             color={"secondary"}
@@ -113,7 +107,7 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview }: EditorPr
             value={value}
             onChange={e => setValue(e.target.value)}
             // onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
-            sx={{ p: "0px", m: "0px", fontWeight: 400 }}
+            sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
           />
         ) : (
           <Box>
