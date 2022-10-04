@@ -1,4 +1,13 @@
-import { Autocomplete, Backdrop, Checkbox, CircularProgress, FormHelperText, Link, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Backdrop,
+  Checkbox,
+  CircularProgress,
+  FormHelperText,
+  Link,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, getDocs, getFirestore, query } from "firebase/firestore";
 import { FormikProps } from "formik";
@@ -167,8 +176,11 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
         <Box>
           <Box>
-            The data that is generated when you participate in 1Cademy will be used for research by investigators at the
-            University of Michigan School of Information. For more information, please read this{" "}
+            <Typography>
+              {" "}
+              The data that is generated when you participate in 1Cademy will be used for research by investigators at
+              the University of Michigan School of Information. For more information, please read this{" "}
+            </Typography>
             <Link
               onClick={() => {
                 setFieldValue("clickedConsent", true);
@@ -188,7 +200,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       </Box>
 
       <Box sx={{ mb: "16px" }}>
-        By clicking "Sign Up," you acknowledge that you agree to 1Cademy's{" "}
+        <Typography>By clicking "Sign Up," you acknowledge that you agree to 1Cademy's </Typography>
         <Link
           onClick={() => {
             setFieldValue("clickedTOS", true);

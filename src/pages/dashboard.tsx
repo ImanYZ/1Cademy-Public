@@ -1417,17 +1417,17 @@ const Dashboard = ({}: DashboardProps) => {
 
           const userNodeData = {
             changed: thisNode.changed || false,
-            correct: thisNode.corrects,
+            correct: thisNode.correct,
             createdAt: Timestamp.fromDate(thisNode.firstVisit),
             updatedAt: Timestamp.fromDate(new Date()),
             deleted: false,
-            isStudied: thisNode.studied,
+            isStudied: thisNode.isStudied,
             bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
             node: nodeId,
             open: false,
             user: username,
             visible: false,
-            wrong: thisNode.wrongs,
+            wrong: thisNode.wrong,
           };
           if (userNodeRef) {
             batch.set(userNodeRef, userNodeData);
