@@ -107,7 +107,7 @@ type NodeProps = {
   switchChoice: any; //
   deleteChoice: any; //
   addChoice: any; //
-  onNodeTitleBLur: any; //
+  onNodeTitleBLur: (newTitle: string) => void; //
   saveProposedChildNode: any; //
   saveProposedImprovement: any; //
   closeSideBar: any; //
@@ -503,7 +503,7 @@ const Node = ({
                 // value={titleCopy}
                 // onChangeContent={setReason}
                 setValue={setTitleCopy}
-                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
+                onBlurCallback={onNodeTitleBLur}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
@@ -543,7 +543,7 @@ const Node = ({
                 label="Please edit the node content below:"
                 value={contentCopy}
                 setValue={setContentCopy}
-                onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
+                // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}
               />

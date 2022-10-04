@@ -10,6 +10,8 @@ export const INITIAL_STATE: NodeBookState = {
   selectedTags: [],
   openToolbar: false,
   selectedUser: null,
+  searchQuery: "",
+  nodeTitleBlured: false,
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {
@@ -32,6 +34,10 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, openToolbar: action.payload };
     case "setSelectedUser":
       return { ...state, selectedUser: action.payload };
+    case "setSearchQuery":
+      return { ...state, searchQuery: action.payload };
+    case "setNodeTitleBlured":
+      return { ...state, nodeTitleBlured: action.payload };
     default:
       return { ...state };
   }

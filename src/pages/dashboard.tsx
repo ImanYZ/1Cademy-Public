@@ -2265,6 +2265,19 @@ const Dashboard = ({}: DashboardProps) => {
     [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph, graph]
   );
 
+  const onNodeTitleBlur = useCallback(
+    (newTitle: string) => {
+      setOpenSearch(true);
+      // setNodeTitleBlured(true); // this is not used in searcher
+      // setSearchQuery(newTitle);
+      // setSelectionType(null);
+      nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+      nodeBookDispatch({ type: "setSelectionType", payload: null });
+    },
+    [nodeBookDispatch]
+  );
+
   const fetchProposals = useCallback(
     async (
       setIsAdmin: (value: boolean) => void,
@@ -2792,7 +2805,7 @@ const Dashboard = ({}: DashboardProps) => {
                 switchChoice={switchChoice}
                 deleteChoice={deleteChoice}
                 addChoice={addChoice}
-                onNodeTitleBlur={() => console.log("onNodeTitleBlur")}
+                onNodeTitleBlur={onNodeTitleBlur}
                 saveProposedChildNode={() => console.log("saveProposedChildNod")}
                 saveProposedImprovement={saveProposedImprovement}
                 closeSideBar={closeSideBar}

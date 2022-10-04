@@ -20,7 +20,7 @@ export const Editor = ({ label, value, setValue, readOnly = true, sxPreview, onB
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
   const inputRef = useRef(null);
-  const [option, setOption] = useState<EditorOptions>(readOnly ? "PREVIEW" : "EDIT");
+  const [option, setOption] = useState<EditorOptions>("EDIT");
 
   // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   setValue(event.target.value);

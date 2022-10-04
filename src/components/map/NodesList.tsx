@@ -42,7 +42,7 @@ type NodeListProps = {
   switchChoice: any;
   deleteChoice: any;
   addChoice: any;
-  onNodeTitleBlur: any;
+  onNodeTitleBlur: (newTitle: string) => void;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
