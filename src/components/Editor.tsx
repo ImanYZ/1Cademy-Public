@@ -58,6 +58,7 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview }: EditorPr
 
   return (
     <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
+      <h6>OPTION: {option}</h6>
       {!readOnly && (
         <InputLabel htmlFor={inputId} sx={{ fontWeight: 490 }}>
           {label}
@@ -65,10 +66,19 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview }: EditorPr
       )}
 
       {!readOnly && (
-        <Box sx={{ display: "flex", justifyContent: "end", gap: "5px", py: "5px" }}>
-          <Typography>Off</Typography>
-          <Switch value={option} onClick={() => onChangeOption(option === "EDIT")} />
-          <Typography>On</Typography>
+        <Box sx={{ display: "flex", justifyContent: "end", gap: "5px", py: "5px", border: "solid 2px royalBlue" }}>
+          <h6>
+            OPTION: {option} {option === "PREVIEW"}
+          </h6>
+          <Typography onClick={() => onChangeOption(option === "EDIT")}>Off</Typography>
+          <Switch
+            checked={option === "PREVIEW"}
+            onClick={() => {
+              localStorage.setItem("tmp-switch", option);
+              onChangeOption(option === "EDIT");
+            }}
+          />
+          <Typography onClick={() => onChangeOption(option === "PREVIEW")}>On</Typography>
 
           {/* <Button
             color={"secondary"}
