@@ -1,13 +1,14 @@
 import { Input, InputLabel, Switch, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import MarkdownRender from "./Markdown/MarkdownRender";
 
 type EditorProps = {
   label: string;
   value: string;
+  focus?: boolean;
   readOnly: boolean;
   setValue: (value: string) => void;
   sxPreview?: SxProps<Theme>;
@@ -16,14 +17,22 @@ type EditorProps = {
 
 type EditorOptions = "EDIT" | "PREVIEW";
 
-export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCallback }: EditorProps) => {
+export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCallback, focus = false }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
-  const inputRef = useRef(null);
+  // const inputRef = useRef<HTMLElement>(null);
   const [option, setOption] = useState<EditorOptions>("EDIT");
+  const [focused, setFocused] = useState(false);
+  // const inputRef = useRef(null);
+  useEffect(() => {}, []);
 
   const onChangeOption = (newOption: boolean) => {
     setOption(newOption ? "PREVIEW" : "EDIT");
+  };
+  const onKeyEnter = (e: any) => {
+    if (e.keyCode === 13) {
+      onChangeOption(option === "EDIT");
+    }
   };
   // const handleMouseDown = (event: any) => {
   //   console.log('click in input', event)
@@ -55,11 +64,13 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCall
 
   const titleFocus = useCallback(
     (inputTitle: HTMLElement) => {
-      if (inputTitle && label === "Please enter the node title below:") {
-        inputTitle.focus();
-      }
+      if (!focus) return;
+      if (focused) return;
+      if (!inputTitle) return;
+      inputTitle.focus();
+      setFocused(true);
     },
-    [label]
+    [focus, focused]
   );
 
   const moveToEnd = useCallback((e: any) => {
@@ -80,13 +91,12 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCall
           {option === "EDIT" && !readOnly ? (
             <Input
               id={inputId}
-              ref={inputRef}
+              inputRef={titleFocus}
               fullWidth
               multiline
               value={value}
               onChange={e => setValue(e.target.value)}
               onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
-              inputRef={titleFocus}
               onFocus={moveToEnd}
               sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
             />
@@ -108,7 +118,12 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCall
             >
               Preview
             </Typography>
-            <Switch checked={option === "EDIT"} onClick={() => onChangeOption(option === "EDIT")} size="small" />
+            <Switch
+              checked={option === "EDIT"}
+              onClick={() => onChangeOption(option === "EDIT")}
+              size="small"
+              onKeyDown={onKeyEnter}
+            />
             <Typography onClick={() => setOption("EDIT")} sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490 }}>
               Edit
             </Typography>

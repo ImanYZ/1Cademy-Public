@@ -521,6 +521,7 @@ const Node = ({
                 onBlurCallback={onNodeTitleBLur}
                 // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
+                focus
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
               />
