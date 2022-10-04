@@ -469,7 +469,7 @@ const Node = ({
       // }
     >
       {/* INFO: uncomment this only on develope */}
-      {/* {identifier} */}
+      {identifier}
       {open ? (
         <>
           <div className="card-content">
