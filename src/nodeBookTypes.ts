@@ -48,6 +48,8 @@ export interface NodeBookState {
   readonly selectedTags: string[];
   readonly openToolbar: boolean;
   readonly selectedUser: SelectedUser | null;
+  readonly searchQuery: string;
+  readonly nodeTitleBlured: boolean;
 }
 
 export type SetSNodeAction = {
@@ -95,6 +97,16 @@ export type SetSelectedUserAction = {
   payload: SelectedUser | null;
 };
 
+export type SetSearchQueryAction = {
+  type: "setSearchQuery";
+  payload: string;
+};
+
+export type SetNodeTitleBluredAction = {
+  type: "setNodeTitleBlured";
+  payload: boolean;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -104,7 +116,9 @@ export type DispatchNodeBookActions =
   | SetSelectionTypeAction
   | SetSelectedTagsAction
   | SetOpenToolbar
-  | SetSelectedUserAction;
+  | SetSelectedUserAction
+  | SetSearchQueryAction
+  | SetNodeTitleBluredAction;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;

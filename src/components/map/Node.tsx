@@ -107,7 +107,7 @@ type NodeProps = {
   switchChoice: any; //
   deleteChoice: any; //
   addChoice: any; //
-  onNodeTitleBLur: any; //
+  onNodeTitleBLur: (newTitle: string) => void; //
   saveProposedChildNode: any; //
   saveProposedImprovement: any; //
   closeSideBar: any; //
@@ -518,6 +518,7 @@ const Node = ({
                 // value={titleCopy}
                 // onChangeContent={setReason}
                 setValue={onSetTitle}
+                onBlurCallback={onNodeTitleBLur}
                 // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
                 readOnly={!editable}
