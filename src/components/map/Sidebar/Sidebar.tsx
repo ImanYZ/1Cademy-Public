@@ -546,6 +546,15 @@ const Sidebar = (props: SidebarType) => {
               {/* <Presentations openLinkedNode={props.openLinkedNode} /> */}
               <h1>openPresentations</h1>
             </MemoizedSidebarWrapper>
+          ) : props.openSearch ? (
+            <MemoizedSidebarWrapper
+              headerImage={searcherHeaderImage}
+              title="Search Nodes"
+              scrollToTop={scrollToTop}
+              closeSideBar={props.closeSideBar}
+            >
+              <SearchList openLinkedNode={props.openLinkedNode} /* triggerQuerySearch={props.triggerQuerySearch}*/ />
+            </MemoizedSidebarWrapper>
           ) : props.selectionType === "Proposals" ? (
             <MemoizedSidebarWrapper
               headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
@@ -610,15 +619,6 @@ const Sidebar = (props: SidebarType) => {
                 showClusters={props.showClusters}
                 setShowClusters={props.setShowClusters}
               />
-            </MemoizedSidebarWrapper>
-          ) : props.openSearch ? (
-            <MemoizedSidebarWrapper
-              headerImage={searcherHeaderImage}
-              title="Search Nodes"
-              scrollToTop={scrollToTop}
-              closeSideBar={props.closeSideBar}
-            >
-              <SearchList openLinkedNode={props.openLinkedNode} /* triggerQuerySearch={props.triggerQuerySearch}*/ />
             </MemoizedSidebarWrapper>
           ) : props.openBookmarks ? (
             <MemoizedSidebarWrapper

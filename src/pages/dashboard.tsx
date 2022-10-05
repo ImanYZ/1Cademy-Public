@@ -1,5 +1,5 @@
 import CodeIcon from "@mui/icons-material/Code";
-import { Button, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
+import { Button, Divider, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import {
@@ -223,7 +223,7 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for if presentations is open
   const [openPresentations, setOpenPresentations] = useState(false);
 
-  // flag for is search is open
+  // // flag for is search is open
   // const [openToolbar, setOpenToolbar] = useState(false);
 
   // flag for is search is open
@@ -244,7 +244,7 @@ const Dashboard = ({}: DashboardProps) => {
   // temporal state with value from node to improve
   // when click in improve Node the copy of original Node is here
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
-  const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
+  // const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
   //
   const [showClusters, setShowClusters] = useState(false);
@@ -293,7 +293,7 @@ const Dashboard = ({}: DashboardProps) => {
             let tmpEdges = {};
 
             if (cur.nodeChangeType === "added") {
-              console.log("added");
+              // console.log("added");
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
               const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
@@ -301,7 +301,7 @@ const Dashboard = ({}: DashboardProps) => {
               tmpEdges = res.oldEdges;
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
-              console.log("modified");
+              // console.log("modified");
               const node = acu.newNodes[cur.node];
               if (!node) {
                 // <---  CHECK I change this from nodes
@@ -326,9 +326,9 @@ const Dashboard = ({}: DashboardProps) => {
             // I changed the reference from snapshot
             // so the NO visible nodes will come as modified and !visible
             if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-              console.log("removed", cur.node, g.current);
+              // console.log("removed", cur.node, g.current);
               if (g.current.hasNode(cur.node)) {
-                console.log("has Node");
+                // console.log("has Node");
                 g.current.nodes().forEach(function () {});
                 g.current.edges().forEach(function () {});
                 // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
@@ -336,9 +336,9 @@ const Dashboard = ({}: DashboardProps) => {
                 // !IMPORTANT, Don't change the order, first remove edges then nodes
                 tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
                 tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-                console.log("hasNode", { tmpEdges, tmpNodes });
+                // console.log("hasNode", { tmpEdges, tmpNodes });
               } else {
-                console.log("dont has", acu.newEdges);
+                // console.log("dont has", acu.newEdges);
                 // remove edges
                 const oldEdges = { ...acu.newEdges };
                 console.log(oldEdges);
@@ -454,6 +454,7 @@ const Dashboard = ({}: DashboardProps) => {
     //   oldNodes = removeDagNode(tempNode, oldNodes);
     //   tempNodes.delete(tempNode);
     // }
+    console.log("--> reloadPermanten graph", tempNodes, changedNodes);
     tempNodes.forEach(tempNode => {
       oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
       oldNodes = removeDagNode(g.current, tempNode, oldNodes);
@@ -1762,7 +1763,7 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      console.log("[2.CHANGE NODE HIGHT 🚀]", { height, nodeId });
+      console.log(`[CHANGE NH 🚀] H:${height}, nId:${nodeId}`);
 
       // // if (value === nodes[nodeId].title) return;
       // const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
@@ -1867,7 +1868,25 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (!user) return;
 
-    setNodeToImprove(null); // CHECK: I added this to compare then
+    // setNodeToImprove(null); // CHECK: I added this to compare then
+
+    // const gg = () => {
+    //   if (!graph.nodes?[nodeBookState?.selectedNode]) return null;
+
+    //   return [nodeBookState.selectedNode].editable;
+    // };
+    // console.log("--------------------------<<< gg", gg());
+    // debugger;
+    console.log("selectionType", nodeBookState);
+    console.log(
+      'nodeBookState.selectionType === "AcceptedProposals"',
+      nodeBookState.selectionType === "AcceptedProposals"
+    );
+    console.log('nodeBookState.selectionType === "Proposals"', nodeBookState.selectionType === "Proposals");
+    console.log(
+      "first",
+      nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
+    );
 
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
@@ -1877,28 +1896,29 @@ const Dashboard = ({}: DashboardProps) => {
       reloadPermanentGraph();
     }
     console.log("After reloadPermanentGraph");
-    // let sidebarType: any = nodeBookState.selectionType;
-    // if (openPendingProposals) {
-    //   sidebarType = "PendingProposals";
-    // } else if (openChat) {
-    //   sidebarType = "Chat";
-    // } else if (openNotifications) {
-    //   sidebarType = "Notifications";
-    // } else if (openPresentations) {
-    //   sidebarType = "Presentations";
-    // } else if (openToolbar) {
-    //   sidebarType = "UserSettings";
-    // } else if (openSearch) {
-    //   sidebarType = "Search";
-    // } else if (openBookmarks) {
-    //   sidebarType = "Bookmarks";
-    // } else if (openRecentNodes) {
-    //   sidebarType = "RecentNodes";
-    // } else if (openTrends) {
-    //   sidebarType = "Trends";
-    // } else if (openMedia) {
-    //   sidebarType = "Media";
-    // }
+    let sidebarType: any = nodeBookState.selectionType;
+    if (openPendingProposals) {
+      sidebarType = "PendingProposals";
+    } else if (openChat) {
+      sidebarType = "Chat";
+    } else if (openNotifications) {
+      sidebarType = "Notifications";
+    } else if (openPresentations) {
+      sidebarType = "Presentations";
+      // } else if (openToolbar) {
+    } else if (nodeBookState.openToolbar) {
+      sidebarType = "UserSettings";
+    } else if (openSearch) {
+      sidebarType = "Search";
+    } else if (openBookmarks) {
+      sidebarType = "Bookmarks";
+    } else if (openRecentNodes) {
+      sidebarType = "RecentNodes";
+    } else if (openTrends) {
+      sidebarType = "Trends";
+    } else if (openMedia) {
+      sidebarType = "Media";
+    }
 
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
@@ -1927,13 +1947,17 @@ const Dashboard = ({}: DashboardProps) => {
       scrollToNode(nodeBookState.selectedNode);
     }
     console.log("After scrollToNode");
-    // CHECK: I commented this, please uncomment
-    // const userClosedSidebarLogRef = firebase.db.collection("userClosedSidebarLog").doc();
+    const userClosedSidebarLogRef = collection(db, "userClosedSidebarLog");
     // userClosedSidebarLogRef.set({
     //   uname: user.uname,
     //   sidebarType,
     //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
     // });
+    setDoc(doc(userClosedSidebarLogRef), {
+      uname: user.uname,
+      sidebarType,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
   }, [
     user,
     graph.nodes,
@@ -1962,12 +1986,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.selectedNode) return;
 
       setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
-      // reloadPermanentGraph();
+      reloadPermanentGraph();
 
       // CHECK: Improve this making the operations out of setNode,
       // when have nodes with new data
       // update with setNodes
-      console.log("set Nodes and change editable to true");
+      console.log("set Nodes and change editable to true", nodeBookState);
       // setNodes(oldNodes => {
       //   if (!nodeBookState.selectedNode) return oldNodes;
 
@@ -1990,25 +2014,26 @@ const Dashboard = ({}: DashboardProps) => {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
-        setNodeToImprove(thisNode); // CHECK: I added this to compare then
+        // setNodeToImprove(thisNode); // CHECK: I added this to compare then
         thisNode.editable = true;
         // setMapChanged(true);
         const newNodes = {
           ...oldNodes,
           [nodeBookState.selectedNode]: thisNode,
         };
+        console.log({ nodeBookState });
         return { nodes: newNodes, edges };
       });
       scrollToNode(nodeBookState.selectedNode);
+      console.log({ nodeBookState });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.selectedNode, reloadPermanentGraph]
+    [nodeBookState, reloadPermanentGraph, scrollToNode]
   );
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      console.log("[SELECT_NODE]");
+      console.log("[SELECT_NODE]", nodeBookState.choosingNode);
+
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           console.log("[select node]: will call reload permanent graph");
@@ -2100,8 +2125,12 @@ const Dashboard = ({}: DashboardProps) => {
           }
           newNode.parents = newParents;
         }
-        // const oldNode = allNodes[nodeBookState.selectedNode]
-        const oldNode = { ...nodeToImprove };
+        // if (nodeBookState.selectedNode) return
+
+        // const oldNode = allNodes[nodeBookState.selectedNode];
+        const oldNode = allNodes.find(cur => cur.node === nodeBookState.selectedNode);
+        if (!oldNode) return;
+        // const oldNode = { ...nodeToImprove };
         console.log({ newNode, oldNode });
         let isTheSame =
           newNode.title === oldNode.title &&
@@ -2175,30 +2204,31 @@ const Dashboard = ({}: DashboardProps) => {
 
       console.log("[PROPOSE_NEW_CHILD]");
       event.preventDefault();
+      console.log(setOpenProposal, '"ProposeNew" + childNodeType + "ChildNode"');
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
-      console.log(1);
+      // console.log(1);
       const newNodeId = newId();
       setGraph(graph => {
-        console.log("setGraph:", graph);
+        // console.log("setGraph:", graph);
         const { nodes: oldNodes, edges } = graph;
         // debugger;
-        console.log(11, edges, oldNodes);
+        // console.log(11, edges, oldNodes);
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
-        console.log(12, changedNodes, oldNodes[nodeBookState.selectedNode]);
+        // console.log(12, changedNodes, oldNodes[nodeBookState.selectedNode]);
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
-        console.log(13);
+        // console.log(13);
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
 
-        console.log(14);
+        // console.log(14);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
-        console.log(15);
+        // console.log(15);
         const newChildNode: any = {
           isStudied: true,
           bookmarked: false,
@@ -2246,17 +2276,17 @@ const Dashboard = ({}: DashboardProps) => {
           ];
         }
 
-        console.log(2, { newNodeId, newChildNode });
+        // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
         const newNodes = setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {});
         if (!nodeBookState.selectedNode) return { nodes: newNodes, edges }; //CHECK: I add this to validate
-        console.log(3);
+        // console.log(3);
         const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
 
         // setEdges(oldEdges => {
         // });
-        console.log(4, { newNodes, newEdges });
+        // console.log(4, { newNodes, newEdges });
         setMapChanged(true);
         scrollToNode(newNodeId);
         return { nodes: newNodes, edges: newEdges };
@@ -2273,7 +2303,7 @@ const Dashboard = ({}: DashboardProps) => {
       // setSelectionType(null);
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
-      nodeBookDispatch({ type: "setSelectionType", payload: null });
+      // nodeBookDispatch({ type: "setSelectionType", payload: null });
     },
     [nodeBookDispatch]
   );
@@ -2459,7 +2489,7 @@ const Dashboard = ({}: DashboardProps) => {
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
       );
 
-      console.log("orderedProposals", orderedProposals);
+      // console.log("orderedProposals", orderedProposals);
       setProposals(orderedProposals);
       setIsRetrieving(false);
     },
@@ -2672,6 +2702,10 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
             </Box>
+
+            <Divider />
+
+            <Typography>Global states:</Typography>
             <Box>
               <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
               <Button onClick={() => console.log(graph.edges)}>edges</Button>
@@ -2692,9 +2726,20 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
             </Box>
             <Box>
-              <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button>
+              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+              <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+            </Box>
+
+            <Divider />
+
+            <Box>
+              {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
               <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
             </Box>
+
+            <Divider />
+
+            <Typography>Functions:</Typography>
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Toggle Open proposals
