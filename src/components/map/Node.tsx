@@ -464,7 +464,7 @@ const Node = ({
         left: left ? left : 1000,
         top: top ? top : 1000,
         width: width,
-        transition: "0.5s",
+        transition: "0.3s",
       }}
       // style={
       //   activeNode
