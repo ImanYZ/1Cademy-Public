@@ -32,8 +32,9 @@ const customJestConfig = {
   moduleNameMapper: {
     ...makeModuleNameMapper(SRC_PATH, TS_CONFIG_PATH),
     "^src/(.*)$": "<rootDir>/src/$1",
+    "^testUtils/(.*)$": "<rootDir>/testUtils/$1",
   },
-  moduleDirectories: ["node_modules", "src"],
+  moduleDirectories: ["node_modules", "src", "testUtils"],
 };
 
 module.exports = createJestConfig(customJestConfig);

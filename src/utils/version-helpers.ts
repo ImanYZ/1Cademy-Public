@@ -9,6 +9,7 @@ import {
   updateReputation,
 } from ".";
 import { NodeType } from "src/types";
+import { IPendingPropNum } from "src/types/IPendingPropNum";
 
 export const comPointTypes = [
   "comPoints",
@@ -151,49 +152,50 @@ export const addToPendingPropsNums = async ({
 }: any) => {
   let newBatch = batch;
   for (let tagId of tagIds) {
-    const communityUsersDocs = await convertToTGet(db.collection("users").where("tagIds", "array-contains", tagId), t);
-    for (let communityUserDoc of communityUsersDocs.docs) {
+    const communityUsersDocs = await convertToTGet(db.collection("users").where("tagId", "==", tagId), t);
+    const pendingPropsNumsDocs = await convertToTGet(db.collection("pendingPropsNums").where("tagId", "==", tagId), t);
+    const processedUnames = [];
+    // updating exisintg docs
+    for (let pendingPropsNumsDoc of pendingPropsNumsDocs.docs) {
+      const pendingPropsNumsDocData = pendingPropsNumsDoc.data() as IPendingPropNum;
+      processedUnames.push(pendingPropsNumsDocData.uname);
       // We should not increment the pendingPropsNums for the users who have already voted the pending proposal.
-      if (!voters.includes(communityUserDoc.id)) {
-        const pendingPropsNumsDocs = await convertToTGet(
-          db.collection("pendingPropsNums").where("uname", "==", communityUserDoc.id).where("tagId", "==", tagId),
-          t
-        );
-
-        if (pendingPropsNumsDocs.docs.length > 0) {
-          const pendingPropsNumsRef = db.collection("pendingPropsNums").doc(pendingPropsNumsDocs.docs[0].id);
-          const pendingPropsUpdate = {
-            pNums: admin.firestore.FieldValue.increment(value),
-          };
-          if (t) {
-            tWriteOperations.push({
-              objRef: pendingPropsNumsRef,
-              data: pendingPropsUpdate,
-              operationType: "update",
-            });
-          } else {
-            newBatch.update(pendingPropsNumsRef, pendingPropsUpdate);
-            [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-          }
-        } else if (value > 0) {
-          const pendingPropsNumsRef = db.collection("pendingPropsNums").doc();
-
-          const pendingProposalData = {
-            uname: communityUserDoc.id,
-            tagId,
-            pNum: value,
-          };
-          if (t) {
-            tWriteOperations.push({
-              objRef: pendingPropsNumsRef,
-              data: pendingProposalData,
-              opertaionType: "set",
-            });
-          } else {
-            newBatch.set(pendingPropsNumsRef, pendingProposalData);
-            [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-          }
+      if (!voters.includes(pendingPropsNumsDocData.uname)) {
+        const pendingPropsNumsRef = db.collection("pendingPropsNums").doc(pendingPropsNumsDoc.id);
+        const pendingPropsUpdate = {
+          pNum: pendingPropsNumsDocData.pNum == 0 && value < 0 ? 0 : admin.firestore.FieldValue.increment(value),
+        };
+        if (t) {
+          tWriteOperations.push({
+            objRef: pendingPropsNumsRef,
+            data: pendingPropsUpdate,
+            operationType: "update",
+          });
+        } else {
+          newBatch.update(pendingPropsNumsRef, pendingPropsUpdate);
+          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
         }
+      }
+    }
+    // create missing pending prop nums for users
+    for (let communityUserDoc of communityUsersDocs.docs) {
+      if (~processedUnames.indexOf(communityUserDoc.id)) continue;
+
+      const pendingPropsNumsRef = db.collection("pendingPropsNums").doc();
+      const pendingProposalData = {
+        uname: communityUserDoc.id,
+        tagId,
+        pNum: value < 0 ? 0 : value,
+      };
+      if (t) {
+        tWriteOperations.push({
+          objRef: pendingPropsNumsRef,
+          data: pendingProposalData,
+          opertaionType: "set",
+        });
+      } else {
+        newBatch.set(pendingPropsNumsRef, pendingProposalData);
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
       }
     }
   }
