@@ -779,11 +779,11 @@ const Dashboard = ({}: DashboardProps) => {
             thisNode.tagIds = [...thisNode.tagIds, nodeBookState.chosenNode.id];
             // thisNode.tags = [
             //   ...thisNode.tags,
-            //   {
+            //   {<Button onClick={() => console.log(nodeChanges)}>node changes</Button>
             //     node: nodeBookState.chosenNode.id,
             //     title: chosenNodeObj.title,
             //   },
-            // ];
+            // ];<Button onClick={() => console.log(nodeChanges)}>node changes</Button>
           } else if (nodeBookState.choosingNode.type === "Parent") {
             thisNode.parents = [
               ...thisNode.parents,
@@ -2821,8 +2821,6 @@ const Dashboard = ({}: DashboardProps) => {
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <NodesList
                 nodes={graph.nodes}
-                // nodeChanged={nodeChanged}
-                nodeChanged={() => console.log("this button will be deprecated!!")}
                 bookmark={bookmark}
                 markStudied={markStudied}
                 chosenNodeChanged={chosenNodeChanged}
