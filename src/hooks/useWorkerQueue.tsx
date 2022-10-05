@@ -23,7 +23,7 @@ type UseWorkerQueueProps = {
   setMapWidth: any;
   setMapHeight: any;
   setClusterNodes: any;
-  setMapChanged: any;
+  // setMapChanged: any;
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
@@ -35,7 +35,7 @@ export const useWorkerQueue = ({
   setMapWidth,
   setMapHeight,
   setClusterNodes,
-  setMapChanged,
+  // setMapChanged,
   mapWidth,
   mapHeight,
   allTags,
@@ -46,7 +46,7 @@ export const useWorkerQueue = ({
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
       console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
-      let mapChangedFlag = true;
+      // let mapChangedFlag = true;
       const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
@@ -56,7 +56,7 @@ export const useWorkerQueue = ({
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
 
       worker.postMessage({
-        mapChangedFlag,
+        // mapChangedFlag,
         oldClusterNodes,
         oldMapWidth,
         oldMapHeight,
@@ -71,7 +71,7 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
-        const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
+        const { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -125,11 +125,11 @@ export const useWorkerQueue = ({
           });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
-        setMapChanged(mapChangedFlag); // CHECK: if is used
+        // setMapChanged(mapChangedFlag); // CHECK: if is used
         setIsWorking(false);
       };
     },
-    [allTags, g, mapHeight, mapWidth, setClusterNodes, setGraph, setMapChanged, setMapHeight, setMapWidth]
+    [allTags, g, mapHeight, mapWidth, setClusterNodes, setGraph, setMapHeight, setMapWidth]
   );
 
   useEffect(() => {

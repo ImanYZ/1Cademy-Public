@@ -122,7 +122,7 @@ const Dashboard = ({}: DashboardProps) => {
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges /*setUserNodeChanges*/] = useState<UserNodes[]>([]);
   const [nodeChanges /*setNodeChanges*/] = useState<NodeChanges[]>([]);
-  const [mapChanged, setMapChanged] = useState(false);
+  // const [mapChanged, setMapChanged] = useState(false);
   // two collections (tables) in database, nodes and usernodes
   // nodes: collection of all data of each node
   // usernodes: collection of all data about each interaction between user and node
@@ -183,7 +183,7 @@ const Dashboard = ({}: DashboardProps) => {
     setMapWidth,
     setMapHeight,
     setClusterNodes,
-    setMapChanged,
+    // setMapChanged,
     mapWidth,
     mapHeight,
     allTags,
@@ -473,7 +473,7 @@ const Dashboard = ({}: DashboardProps) => {
     // setEdges(oldEdges);
     // setNodes(oldNodes);
     setGraph({ nodes: oldNodes, edges: oldEdges });
-    setMapChanged(true);
+    // setMapChanged(true);
   }, [graph, allTags]);
 
   const resetAddedRemovedParentsChildren = useCallback(() => {
@@ -867,7 +867,7 @@ const Dashboard = ({}: DashboardProps) => {
           // setChosenNodeTitle(null);
           // setChoosingType(null);
           scrollToNode(nodeId);
-          setMapChanged(true);
+          // setMapChanged(true);
 
           const newNodes = {
             ...oldNodes,
@@ -2287,7 +2287,7 @@ const Dashboard = ({}: DashboardProps) => {
         // setEdges(oldEdges => {
         // });
         // console.log(4, { newNodes, newEdges });
-        setMapChanged(true);
+        // setMapChanged(true);
         scrollToNode(newNodeId);
         return { nodes: newNodes, edges: newEdges };
       });
@@ -2721,7 +2721,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
               <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-              <Button onClick={() => console.log(mapChanged)}>map changed</Button>
+              {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
               <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
               <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
             </Box>
