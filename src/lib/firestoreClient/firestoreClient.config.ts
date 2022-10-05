@@ -1,7 +1,7 @@
 import { getAnalytics } from "firebase/analytics";
 import { getApps, initializeApp } from "firebase/app";
-import { connectAuthEmulator,getAuth } from "firebase/auth";
-import { connectFirestoreEmulator,getFirestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 
 export const initFirebaseClientSDK = () => {
   if (getApps().length <= 0) {

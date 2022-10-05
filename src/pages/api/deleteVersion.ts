@@ -13,7 +13,7 @@ export type IDeleteVersionReqBody = {
   };
 };
 
-// TODO: we are not removing {nodeType}Versions documents yet
+// TODO: we are not removing user{nodeType}Versions documents yet
 // Logic
 // If version is pending and owned by current user then delete
 // - If deleting version already
