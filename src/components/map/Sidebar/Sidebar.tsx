@@ -584,7 +584,7 @@ const Sidebar = (props: SidebarType) => {
               title="Pending Proposals"
               // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
-              noHeader
+              // noHeader
             >
               <PendingProposalList openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
