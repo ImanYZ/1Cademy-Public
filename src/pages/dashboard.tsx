@@ -3,6 +3,7 @@ import { Button, Divider, Drawer, IconButton, Modal, Tooltip, Typography } from 
 import { Box } from "@mui/system";
 import axios from "axios";
 import {
+  addDoc,
   collection,
   doc,
   DocumentData,
@@ -1472,7 +1473,154 @@ const Dashboard = ({}: DashboardProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodeBookState.choosingNode, user, graph, initNodeStatusChange /*navigateToFirstParent*/]
   );
-
+  const openAllChildren = useMemoizedCallback(
+    async (nodeId: string) => {
+      // console.log("In openAllChildren");
+      if (!choosingNode && user) {
+        setIsSubmitting(true);
+        let linkedNode = null;
+        let linkedNodeId = null;
+        let linkedNodeRef = null;
+        let userNodeRef = null;
+        let userNodeData = null;
+        const batch = writeBatch(db);
+        const thisNode = graph.nodes[nodeId];
+        try {
+          // let oldNodes = { ...graph.nodes };
+          // let oldEdges = { ...graph.edges };
+          // let oldAllNodes: any = { ...allNodes };
+          // let oldAllUserNodes = { ...allUserNodes };
+          for (let child of thisNode.children) {
+            linkedNodeId = child.node as string;
+            linkedNode = document.getElementById(linkedNodeId);
+            if (!linkedNode) {
+              // const nodeRef = firebase.db.collection("nodes").doc(linkedNodeId);
+              const nodeRef = doc(db, "nodes", linkedNodeId);
+              const nodeDoc = await getDoc(nodeRef);
+              if (nodeDoc.exists()) {
+                const thisNode: any = { ...nodeDoc.data(), id: linkedNodeId };
+                for (let chi of thisNode.children) {
+                  // linkedNodeRef = firebase.db.collection("nodes").doc(chi.node);
+                  linkedNodeRef = doc(db, "nodes", chi.node);
+                  // await firebase.batchUpdate(linkedNodeRef, {
+                  //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                  // });
+                  batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+                }
+                for (let parent of thisNode.parents) {
+                  // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+                  linkedNodeRef = doc(db, "nodes", parent.node);
+                  // await firebase.batchUpdate(linkedNodeRef, {
+                  //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                  // });
+                  batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+                }
+                // const userNodeQuery = firebase.db
+                //   .collection("userNodes")
+                //   .where("node", "==", linkedNodeId)
+                //   .where("user", "==", username)
+                //   .limit(1);
+                const userNodesRef = collection(db, "userNodes");
+                const userNodeQuery = query(
+                  userNodesRef,
+                  where("node", "==", linkedNodeId),
+                  where("user", "==", user.uname),
+                  limit(1)
+                );
+                // const userNodeDoc = await userNodeQuery.get();
+                const userNodeDoc = await getDocs(userNodeQuery);
+                // let userNodeId = null;
+                if (userNodeDoc.docs.length > 0) {
+                  // userNodeId = userNodeDoc.docs[0].id;
+                  // userNodeRef = firebase.db.collection("userNodes").doc(userNodeDoc.docs[0].id);
+                  userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
+                  userNodeData = userNodeDoc.docs[0].data();
+                  userNodeData.visible = true;
+                  userNodeData.updatedAt = Timestamp.fromDate(new Date());
+                  // await firebase.batchUpdate(userNodeRef, userNodeData);
+                  batch.update(userNodeRef, userNodeData);
+                } else {
+                  // userNodeRef = firebase.db.collection("userNodes").doc();
+                  // userNodeId = userNodeRef.id;
+                  userNodeData = {
+                    changed: true,
+                    correct: false,
+                    createdAt: Timestamp.fromDate(new Date()),
+                    updatedAt: Timestamp.fromDate(new Date()),
+                    deleted: false,
+                    isStudied: false,
+                    bookmarked: false,
+                    node: linkedNodeId,
+                    open: true,
+                    user: user.uname,
+                    visible: true,
+                    wrong: false,
+                  };
+                  // userNodeRef.set(userNodeData);
+                  userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
+                }
+                // await firebase.batchUpdate(nodeRef, {
+                //   viewers: thisNode.viewers + 1,
+                //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                // });
+                batch.update(nodeRef, {
+                  viewers: thisNode.viewers + 1,
+                  updatedAt: Timestamp.fromDate(new Date()),
+                });
+                // const userNodeLogRef = firebase.db.collection("userNodesLog").doc();
+                // const userNodeLogData = {
+                //   ...userNodeData,
+                //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                // };
+                // await firebase.batchSet(userNodeLogRef, userNodeLogData);
+                const userNodeLogRef = collection(db, "userNodesLog");
+                const userNodeLogData = {
+                  ...userNodeData,
+                  createdAt: Timestamp.fromDate(new Date()),
+                };
+                console.log("userNodesLog: ,", userNodeLogData);
+                batch.set(doc(userNodeLogRef), userNodeLogData);
+                // if data for the node is loaded
+                // let uNodeData = {
+                //   // load all data corresponsponding to the node on the map and userNode data from the database and add userNodeId for the change documentation
+                //   ...oldAllNodes[linkedNodeId],
+                //   ...userNodeData,
+                //   open: true,
+                // };
+                // if (userNodeId) {
+                //   uNodeData[userNodeId] = userNodeId;
+                // }
+                // ({ uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(
+                //   uNodeData,
+                //   oldNodes,
+                //   oldEdges,
+                //   oldAllNodes
+                // ));
+                // ({ oldNodes, oldEdges } = createOrUpdateNode(
+                //   uNodeData,
+                //   linkedNodeId,
+                //   oldNodes,
+                //   { ...oldEdges },
+                //   allTags
+                // ));
+                // oldAllNodes[linkedNodeId] = uNodeData;
+                // oldAllUserNodes = {
+                //   ...oldAllUserNodes,
+                //   [linkedNodeId]: userNodeData,
+                // };
+              }
+            }
+          }
+          // await firebase.commitBatch();
+          await batch.commit();
+          setIsSubmitting(false);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    },
+    [choosingNode, graph]
+  );
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       console.log("[TOGGLE_NODE]");
@@ -2827,7 +2975,7 @@ const Dashboard = ({}: DashboardProps) => {
                 referenceLabelChange={referenceLabelChange}
                 deleteLink={deleteLink}
                 openLinkedNode={openLinkedNode}
-                openAllChildren={() => console.log("open all children")}
+                openAllChildren={openAllChildren}
                 hideNodeHandler={hideNodeHandler}
                 hideOffsprings={hideOffsprings}
                 toggleNode={toggleNode}
