@@ -155,7 +155,8 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
           // border: "dashed 2px pink",
           display: "flex",
           alignItems: "cemter",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
+          gap: "5px",
           padding: "5px 0px",
         }}
       >
@@ -173,7 +174,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
           <div className={"customUserStatusTotalPoints"}>
-            <DoneIcon className="material-icons DoneIcon green-text" />
+            <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "20px" }} />
             <span style={{ fontSize: "14px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
             {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
           </div>

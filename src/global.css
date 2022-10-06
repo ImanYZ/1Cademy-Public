@@ -978,6 +978,7 @@
   visibility: visible;
   line-height: 16px;
   height: 41.2px;
+  font-size: 16px;
   overflow: visible;
   transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
   -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
@@ -987,7 +988,9 @@
 }
 
 #SidebarButtons {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   width: 64px;
   margin-left: 16px;
   transform-origin: top right;
@@ -1203,8 +1206,7 @@ button.MuiTab-textColorInherit:focus {
 
 .LeaderbaordIcon {
   font-size: 22px;
-  margin-left: 1.6px;
-  margin-bottom: -2.5px;
+  margin-top: 4px;
 }
 
 .MuiButtonBase-root.MuiTab-root.MuiTab-textColorInherit:hover {
