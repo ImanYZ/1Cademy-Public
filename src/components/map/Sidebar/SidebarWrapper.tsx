@@ -1,22 +1,29 @@
 // import "./SidebarWrapper.css";
-
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box } from "@mui/material";
 import Image from "next/image";
-import React from "react";
+import React, { useCallback, useRef } from "react";
 
 import { MemoizedMetaButton } from "../MetaButton";
 
 type SidebarWrapperProps = {
   headerImage: any;
   title: string;
-  scrollToTop: any;
+  // scrollToTop: any;
   closeSideBar: any;
   children: JSX.Element;
   noHeader?: any;
 };
 
 const SidebarWrapper = (props: SidebarWrapperProps) => {
+  const sidebarRef = useRef<any | null>(null);
+  const scrollToTop = useCallback(() => {
+    console.log(sidebarRef.current);
+    if (!sidebarRef.current) return;
+    sidebarRef.current.scrollTop = 0;
+  }, [sidebarRef]);
+
   return (
     <>
       <Box
@@ -35,7 +42,7 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
               <Image src={props.headerImage} alt={props.title + " Header Background"} />
               <div id="SidebarHeaderText">{props.title}</div>
             </div>
-            <div id="SidebarBody" style={{ overflowY: "auto" }}>
+            <div id="SidebarBody" ref={sidebarRef} style={{ overflowY: "auto", height: "100%" }}>
               {props.children}
             </div>
           </>
@@ -55,15 +62,17 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
                 <CloseIcon />
               </MemoizedMetaButton>
             </Box>
-            <div style={{ overflowY: "auto", height: "100%" }}>{props.children}</div>
+            <div ref={sidebarRef} style={{ overflowY: "auto", height: "100%" }}>
+              {props.children}
+            </div>
           </>
         )}
       </Box>
-      {/* <div id="ScrollToTop">
-        <MemoizedMetaButton onClick={props.scrollToTop} tooltip="Back to top." tooltipPosition="Left">
-          <i className="material-icons gray-text">arrow_upward</i>
+      <div id="ScrollToTop" style={{ marginBottom: "20px", marginLeft: "10px" }}>
+        <MemoizedMetaButton onClick={scrollToTop} tooltip="Back to top." tooltipPosition="left">
+          <ArrowUpwardIcon className="material-icons gray-text" />
         </MemoizedMetaButton>
-      </div> */}
+      </div>
     </>
   );
 };

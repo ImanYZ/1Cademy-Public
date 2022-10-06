@@ -257,9 +257,11 @@ const Sidebar = (props: SidebarType) => {
 
   const sidebarRef = useRef<any | null>(null);
 
-  const scrollToTop = useCallback(() => {
-    sidebarRef.current.scrollTop = 0;
-  }, [sidebarRef]);
+  // const scrollToTop = useCallback(() => {
+  //   console.log(sidebarRef.current);
+  //   if (!sidebarRef.current) return;
+  //   sidebarRef.current.scrollTop = 0;
+  // }, [sidebarRef]);
 
   const openSideBar = useCallback(
     async (sidebarType: string) => {
@@ -539,7 +541,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage={settings.theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
               title="Presentations"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               {/* CHECK: I commented this */}
@@ -550,7 +552,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage={searcherHeaderImage}
               title="Search Nodes"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               <SearchList openLinkedNode={props.openLinkedNode} /* triggerQuerySearch={props.triggerQuerySearch}*/ />
@@ -559,7 +561,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage={settings.theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
               title="Proposals"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               <Proposals
@@ -578,8 +580,9 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage={settings.theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
               title="Pending Proposals"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
+              noHeader
             >
               <PendingProposalList openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
@@ -587,7 +590,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage="" // CHECK: image{ChatRoomImage}
               title="Chat Room!"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               {/* CHECK: I commented this */}
@@ -598,7 +601,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage={settings.theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
               title="Notifications"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               <Notifications openLinkedNode={props.openLinkedNode} />
@@ -607,7 +610,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage=""
               title=""
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
               noHeader={true}
             >
@@ -624,7 +627,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage={settings.theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
               title="Bookmarks"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               <Bookmarks bookmarkedUserNodes={props.allNodes} openLinkedNode={props.openLinkedNode} />
@@ -633,7 +636,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage="" // CHECK image
               title="Citing Nodes"
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
               {/* CHECK: I commented this */}
@@ -644,7 +647,7 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper
               headerImage=""
               title=""
-              scrollToTop={scrollToTop}
+              // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
               noHeader={true}
             >
