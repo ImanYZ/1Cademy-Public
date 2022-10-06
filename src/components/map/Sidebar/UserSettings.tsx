@@ -1259,7 +1259,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
           </span>
         </div>
       </div>
-      <div id="SidebarBody" className="UserSettingsSidebarBody">
+      <div className="UserSettingsSidebarBody">
         <MemoizedSidebarTabs
           tabsTitle="User Mini-profile tabs"
           tabsItems={tabsItems(user, nodeBookState?.choosingNode?.id)}

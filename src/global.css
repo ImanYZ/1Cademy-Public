@@ -687,7 +687,7 @@
 #SidebarBody .collection {
   border-color: rgb(103, 103, 103);
   width: 100%;
-  height: 100%;
+  /* height: 90%; */
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
@@ -1233,7 +1233,7 @@ button.MuiTab-textColorInherit:focus {
   display: grid;
   grid-template-columns: auto auto;
   width: 415px;
-  height: 100%;
+  /* height: 100%; */
 }
 
 #MiniUserPrifileHeader #UserProfilePicture {
@@ -1782,7 +1782,7 @@ button.MuiTab-textColorInherit:focus {
   height: 100%;
   width: 100%;
   margin-top: 0px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 #SearchText {
@@ -1804,11 +1804,11 @@ button.MuiTab-textColorInherit:focus {
 #SearchBoxContainer {
   padding: 10px 10px 10px 10px;
   border-bottom: 1px solid #e1e1e1;
-  width: 430px;
+  /* width: 430px; */
 }
 
 #SearchQueryContainer {
-  width: 409px;
+  /* width: 409px; */
 }
 
 #SearchQueryContainer .MuiOutlinedInput-adornedEnd {
@@ -1898,13 +1898,14 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #nodeSelect fieldset {
-  height: 49px;
-  top: 0;
+  height: 50px;
+  top: -1px;
 }
 
 #nodesUpdatedSinceContainer {
   display: grid;
-  grid-template-columns: 205px 120px auto;
+  /* grid-template-columns: 205px 120px auto; */
+  grid-template-columns: 205px 1fr 1fr;
   margin-top: 13px;
   color: gray;
 }
