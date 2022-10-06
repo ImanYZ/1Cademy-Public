@@ -687,7 +687,7 @@
 #SidebarBody .collection {
   border-color: rgb(103, 103, 103);
   width: 100%;
-  height: 90%;
+  /* height: 90%; */
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
@@ -1804,11 +1804,11 @@ button.MuiTab-textColorInherit:focus {
 #SearchBoxContainer {
   padding: 10px 10px 10px 10px;
   border-bottom: 1px solid #e1e1e1;
-  width: 430px;
+  /* width: 430px; */
 }
 
 #SearchQueryContainer {
-  width: 409px;
+  /* width: 409px; */
 }
 
 #SearchQueryContainer .MuiOutlinedInput-adornedEnd {
@@ -1898,8 +1898,8 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #nodeSelect fieldset {
-  height: 49px;
-  top: 0;
+  height: 50px;
+  top: -1px;
 }
 
 #nodesUpdatedSinceContainer {

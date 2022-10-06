@@ -576,10 +576,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
       {!isRetrieving ? (
-        <ul
-          className="collection Proposals"
-          style={{ padding: "0px", margin: "0px", border: "solid 2px royalBlue", overflow: "hidden" }}
-        >
+        <ul className="collection Proposals" style={{ padding: "0px", margin: "0px", overflow: "hidden" }}>
           {searchResults.data.map((resNode, idx) => {
             return (
               // <h4 key={idx}>{resNode.title}</h4>
