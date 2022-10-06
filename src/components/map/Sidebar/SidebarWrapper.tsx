@@ -29,7 +29,7 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
       <Box
         // id="SidebarContainer"
         // className={props.noHeader ? "MiniUserProfileSidebar" : ""}
-        sx={{ position: "relative", height: "100%", marginTop: "0px", overflow: "hidden" }}
+        sx={{ position: "relative", height: "100vh", marginTop: "0px", overflow: "hidden" }}
       >
         {!props.noHeader ? (
           <>
@@ -42,7 +42,7 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
               <Image src={props.headerImage} alt={props.title + " Header Background"} />
               <div id="SidebarHeaderText">{props.title}</div>
             </div>
-            <div id="SidebarBody" ref={sidebarRef} style={{ overflowY: "auto", height: "100%" }}>
+            <div id="SidebarBody" ref={sidebarRef} style={{ overflowY: "auto", height: "calc(100vh - 130px)" }}>
               {props.children}
             </div>
           </>

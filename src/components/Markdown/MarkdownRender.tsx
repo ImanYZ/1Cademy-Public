@@ -20,7 +20,7 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
       rehypePlugins={[rehypeKatex]}
       className={customClass}
       components={{
-        p: ({ ...props }) => <Typography lineHeight={"inherit"} {...props} sx={{ ...sx }} />,
+        p: ({ ...props }) => <Typography lineHeight={"inherit"} {...props} sx={{ p: "0px", ...sx }} />,
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
