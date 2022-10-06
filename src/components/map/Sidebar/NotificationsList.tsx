@@ -217,7 +217,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                 >
                   <Box
                     className="NotificationNodeLink"
-                    sx={{ display: "flex", alignItems: "center", gap: "5px", padding: "10px" }}
+                    sx={{ display: "flex", alignItems: "center", gap: "5px", paddingY: "10px" }}
                   >
                     <LinkIcon className="grey-text" fontSize="inherit" />
                     <Editor
