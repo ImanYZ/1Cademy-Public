@@ -17,7 +17,7 @@ type NodeListProps = {
   referenceLabelChange: any;
   deleteLink: any;
   openLinkedNode: any;
-  openAllChikldren: any;
+  openAllChildren: any;
   hideNodeHandler: any;
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
