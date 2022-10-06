@@ -188,6 +188,12 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   );
 
   useEffect(() => {
+    setReason(user.reason ?? "");
+    setFoundFromOtherValue(user.foundFrom ?? "");
+    setGenderOtherValue(user.gender ?? "");
+  }, [user]);
+
+  useEffect(() => {
     const getLanguages = async () => {
       const ISO6391Obj = await import("iso-639-1");
       const allLanguages = [
@@ -1021,7 +1027,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                 identification="genderOtherValue"
                 initialValue={genderOtherValue} //TODO: important fill empty user field
                 onSubmit={(value: any) => changeAttr("gender")(value)}
-                setState={setGenderOtherValue}
+                setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })}
                 label="Please specify your gender."
               />
             )}
@@ -1153,7 +1159,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                 initialValue={foundFromOtherValue} //TODO: important fill empty user field
                 onSubmit={(value: any) => changeAttr("foundFrom")(value)}
                 // setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
-                setState={setFoundFromOtherValue}
+                setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
                 label="Please specify, How did you hear about us."
               />
             )}
@@ -1176,6 +1182,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   if (!user) return null;
 
   // const ltermPoints = lterm * ltermMaxDay + ltermDay;
+
   return !changingUsername ? (
     <>
       <div id="MiniUserPrifileHeader">

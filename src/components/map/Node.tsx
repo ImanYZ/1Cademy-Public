@@ -78,14 +78,6 @@ type NodeProps = {
   bookmarks: any; //
   bookmark: any; //
   markStudied: any; //
-  nodeChanged: (
-    nodeRef: any,
-    nodeId: string,
-    content: string | null,
-    title: string | null,
-    imageLoaded: boolean,
-    openPart: OpenPart
-  ) => void;
   chosenNodeChanged: any; //
   referenceLabelChange: any; //
   deleteLink: any; //
@@ -159,7 +151,6 @@ const Node = ({
   bookmarks,
   bookmark,
   markStudied,
-  nodeChanged,
   chosenNodeChanged,
   referenceLabelChange,
   deleteLink,
@@ -685,8 +676,6 @@ const Node = ({
                 reloadPermanentGrpah={reloadPermanentGrpah}
                 markStudied={markStudiedHandler} // x
                 bookmark={bookmarkHandler} // x
-                nodeChanged={nodeChanged}
-                // nodeChanged={locationSizeChange}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}
@@ -853,8 +842,6 @@ const Node = ({
                 reloadPermanentGrpah={reloadPermanentGrpah}
                 markStudied={markStudiedHandler} // x
                 bookmark={bookmarkHandler} // x
-                // nodeChanged={locationSizeChange}
-                nodeChanged={nodeChanged}
                 openNodePart={openNodePartHandler}
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}
