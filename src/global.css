@@ -696,10 +696,10 @@
 #SidebarBody .collection-item {
   background: none;
 }
-
+/*
 #SidebarBody .collection-item:hover {
   background: rgba(128, 128, 128, 0.13);
-}
+} */
 
 #SidebarBody .CenterredLoadingImage {
   width: 400px;
@@ -1390,11 +1390,11 @@ button.MuiTab-textColorInherit:focus {
 .LightMode .MetaButton:hover {
   color: rgba(0, 0, 0, 0.9) !important;
 }
-.MetaButton.Clickable:hover,
+/* .MetaButton.Clickable:hover,
 .MetaButton.Clickable:focus {
   background: rgba(255, 255, 255, 0.13);
   color: rgb(255, 255, 255) !important;
-}
+} */
 .LightMode .MetaButton.Clickable:hover,
 .LightMode .MetaButton.Clickable:focus {
   color: rgba(0, 0, 0, 0.9) !important;
@@ -1428,7 +1428,7 @@ button.MuiTab-textColorInherit:focus {
   /* -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   -moz-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22); */
-  box-shadow: 1px 0 10px 0 #bebebe;
+  box-shadow: 0 0 5px 0 #bebebe;
 }
 /*
 .MetaButton span {
@@ -2287,17 +2287,19 @@ button.MuiTab-textColorInherit:focus {
 
 #MarkAllRead {
   width: 100%;
-  height: 40px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
 }
 
-#MarkAllReadButton {
+/* #MarkAllReadButton {
   padding: 7px 130px;
   font-size: 19px;
-}
+} */
 
 #SidebarBody #MarkAllReadButton .material-icons {
-  font-size: 25px;
+  font-size: 20px;
 }
 
 /* -------------------------------------- */
@@ -2311,7 +2313,7 @@ button.MuiTab-textColorInherit:focus {
   height: 100%;
   /* margin-bottom: 19px;
   margin-left: 0px; */
-  min-height: 88px;
+  /* min-height: 88px; */
 }
 
 .NotificationBody .NotificationNodeLink {
@@ -2320,9 +2322,8 @@ button.MuiTab-textColorInherit:focus {
   margin-bottom: -10px;
 }
 
-.NotificationBody .NotificationNodeLink i {
-  font-size: 19px;
-  margin-bottom: -25px;
+.NotificationBody .NotificationNodeLink svg {
+  font-size: 20px;
 }
 
 .DeleteNotification {
@@ -2348,9 +2349,9 @@ button.MuiTab-textColorInherit:focus {
   margin-top: 0px !important;
 }
 
-.NotificationAction i {
-  font-size: 31px !important;
-}
+/* .NotificationAction svg {
+  font-size: 24px !important;
+} */
 
 .NotificationBody .NotificationNodeLink .ReadOnlyEditor {
   overflow: hidden;
