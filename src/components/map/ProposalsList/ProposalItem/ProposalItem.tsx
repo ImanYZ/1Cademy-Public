@@ -50,34 +50,28 @@ const ProposalItem = (props: any) => {
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time">{dayjs(props.proposal.createdAt).fromNow()}</div>
-        <div className="secondary-content" style={{ display: "flex", alignItems: "center" }}>
+        <div className="secondary-content" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal unhelpful."
             tooltipPosition="bottom-start"
-            // onClick={props.rateProposal} // CHECK: check this
           >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <CloseIcon fontSize="small" className={props.proposal.wrong ? "red-text" : "grey-text"} />
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+              <CloseIcon className={props.proposal.wrong ? "red-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
               <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal helpful."
             tooltipPosition="bottom-start"
-            // onClick={props.rateProposal} // CHECK: check this
           >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <DoneIcon fontSize="small" className={props.proposal.correct ? "green-text" : "grey-text"} />
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+              <DoneIcon className={props.proposal.correct ? "green-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
               <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
-          <MemoizedMetaButton
-            tooltip="# of 1Admins who have awarded this proposal."
-            tooltipPosition="bottom-start"
-            // onClick={props.rateProposal} // CHECK: check this
-          >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <GradeIcon fontSize="small" className={props.proposal.award ? "amber-text" : "grey-text"} />
+          <MemoizedMetaButton tooltip="# of 1Admins who have awarded this proposal." tooltipPosition="bottom-start">
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+              <GradeIcon className={props.proposal.award ? "amber-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
               <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
             </div>
           </MemoizedMetaButton>

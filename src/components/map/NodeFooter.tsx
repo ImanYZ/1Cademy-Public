@@ -535,7 +535,7 @@ const NodeFooter = ({
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "green" : "inherit" }} />
-                  <span>{shortenNumber(wrongNum, 2, false)}</span>
+                  <span>{shortenNumber(correctNum, 2, false)}</span>
                 </Box>
               </Box>
             </MemoizedMetaButton>

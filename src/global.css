@@ -765,7 +765,7 @@
 }
 
 .Proposals .collection-item .Time {
-  font-weight: 250;
+  /* font-weight: 750; */
   font-size: 10px !important;
 }
 
@@ -1439,16 +1439,16 @@ button.MuiTab-textColorInherit:focus {
 /* styles from sidebar wrapper */
 
 #SidebarContainer {
-  display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: 130px auto;
-  height: 100%;
-  margin-top: 0px;
+  /* display: grid; */
+  /* grid-template-columns: 100%; */
+  /* grid-template-rows: 130px auto; */
+  /* height: 100%;
+  margin-top: 0px; */
   /* overflow: hidden; */
 }
 
 #SidebarContainer.MiniUserProfileSidebar {
-  grid-template-rows: 220px 115px auto;
+  /* grid-template-rows: auto 115px auto; */
 }
 
 #SidebarHeader {
@@ -1468,7 +1468,7 @@ button.MuiTab-textColorInherit:focus {
   width: 100%;
   color: white;
   font-size: 40px;
-  font-weight: 250;
+  /* font-weight: 250; */
   background: linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%);
 }
 .LightMode #SidebarHeaderText {

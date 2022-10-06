@@ -141,8 +141,8 @@ const PendingProposalList = (props: PendingProposalListProps) => {
   }, [lastIndex, proposals.length]);
 
   return (
-    <div id="PendingProposalsContainer" style={{ height: "100%" }}>
-      <ul className="collection Proposals" style={{ padding: "0px" }}>
+    <div id="PendingProposalsContainer">
+      <ul className="collection Proposals" style={{ padding: "0px", overflow: "hidden" }}>
         {proposals.slice(0, lastIndex).map((proposal, idx) => {
           return <ProposalItem key={idx} proposal={proposal} openLinkedNode={props.openLinkedNode} showTitle={true} />;
         })}
