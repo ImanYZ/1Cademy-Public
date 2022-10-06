@@ -7,8 +7,6 @@ import React from "react";
 
 import { MemoizedMetaButton } from "../MetaButton";
 
-
-
 type SidebarWrapperProps = {
   headerImage: any;
   title: string;
@@ -21,37 +19,46 @@ type SidebarWrapperProps = {
 const SidebarWrapper = (props: SidebarWrapperProps) => {
   return (
     <>
-      <div
-        id="SidebarContainer"
-        className={props.noHeader ? "MiniUserProfileSidebar" : ""}
-        style={{ position: "relative" }}
+      <Box
+        // id="SidebarContainer"
+        // className={props.noHeader ? "MiniUserProfileSidebar" : ""}
+        sx={{ position: "relative", height: "100%", marginTop: "0px", overflow: "hidden" }}
       >
-        <Box id="SideBarClose" sx={{ position: "absolute", top: "10px", right: "10px" }}>
-          <MemoizedMetaButton onClick={props.closeSideBar} tooltip="Close the sidebar." tooltipPosition="left">
-            <CloseIcon />
-            {/* <div className="CloseButton">
-            <i className="material-icons">close</i>
-          </div> */}
-          </MemoizedMetaButton>
-        </Box>
         {!props.noHeader ? (
           <>
-            <div id="SidebarHeader">
-              {/* <img
-                id="SidebarHeaderImage"
-                src={props.headerImage}
-                alt={props.title + " Header Background"}
-                width="100%"
-              ></img> */}
+            <div id="SidebarHeader" style={{ position: "sticky", top: "0px", zIndex: 10, height: "130px" }}>
+              <Box id="SideBarClose" sx={{ top: "10px", right: "10px", position: "absolute" }}>
+                <MemoizedMetaButton onClick={props.closeSideBar} tooltip="Close the sidebar." tooltipPosition="left">
+                  <CloseIcon />
+                </MemoizedMetaButton>
+              </Box>
               <Image src={props.headerImage} alt={props.title + " Header Background"} />
               <div id="SidebarHeaderText">{props.title}</div>
             </div>
-            <div id="SidebarBody">{props.children}</div>
+            <div id="SidebarBody" style={{ overflowY: "auto" }}>
+              {props.children}
+            </div>
           </>
         ) : (
-          props.children
+          <>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "end",
+                width: "100%",
+                top: "10px",
+                right: "10px",
+                position: "sticky",
+              }}
+            >
+              <MemoizedMetaButton onClick={props.closeSideBar} tooltip="Close the sidebar." tooltipPosition="left">
+                <CloseIcon />
+              </MemoizedMetaButton>
+            </Box>
+            <div style={{ overflowY: "auto", height: "100%" }}>{props.children}</div>
+          </>
         )}
-      </div>
+      </Box>
       {/* <div id="ScrollToTop">
         <MemoizedMetaButton onClick={props.scrollToTop} tooltip="Back to top." tooltipPosition="Left">
           <i className="material-icons gray-text">arrow_upward</i>

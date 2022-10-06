@@ -1,6 +1,6 @@
 // import "./MetaButton.css";
 
-import { Tooltip, TooltipProps } from "@mui/material";
+import { Box, Tooltip, TooltipProps } from "@mui/material";
 import React, { useCallback } from "react";
 
 // import { useRecoilValue } from "recoil";
@@ -75,14 +75,17 @@ const MetaButton = (props: MetaButtonProps) => {
     );
   } else {
     return (
-      <span className={"MetaButton" + ("tooltip" in props && props.tooltip ? " Tooltip" : "")}>
-        {props.children}
-        {"tooltip" in props && props.tooltip && (
-          <span className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}>
-            {props.tooltip}
-          </span>
-        )}
-      </span>
+      <Tooltip title={props.tooltip ?? ""} placement={props.tooltipPosition || "bottom"}>
+        <Box className="MetaButton">{props.children}</Box>
+      </Tooltip>
+      // <span className={"MetaButton" + ("tooltip" in props && props.tooltip ? " Tooltip" : "")}>
+      //   {props.children}
+      //   {"tooltip" in props && props.tooltip && (
+      //     <span className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}>
+      //       {props.tooltip}
+      //     </span>
+      //   )}
+      // </span>
     );
   }
 };

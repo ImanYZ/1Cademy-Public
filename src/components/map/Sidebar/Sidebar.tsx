@@ -238,7 +238,7 @@ const Sidebar = (props: SidebarType) => {
   // const selectedUser = useRecoilValue(selectedUserState);
   // const theme = useRecoilValue(themeState);
 
-  const [{ user, reputation }] = useAuth();
+  const [{ user, reputation, settings }] = useAuth();
   const db = getFirestore();
 
   // const [selectionType] = useState("Proposals");
@@ -379,7 +379,7 @@ const Sidebar = (props: SidebarType) => {
 
   // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
 
-  let theme = "Dark";
+  // let theme = "Dark";
 
   const isHide =
     props.selectionType ||
@@ -423,7 +423,7 @@ const Sidebar = (props: SidebarType) => {
             // tooltipPosition="Right"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+              <img src={settings.theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
             </MemoizedMetaButton>
           </div>
           <MemoizedUserStatusIcon
@@ -537,7 +537,7 @@ const Sidebar = (props: SidebarType) => {
         <Suspense fallback={<div>loading...</div>}>
           {openPresentations ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
+              headerImage={settings.theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
               title="Presentations"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
@@ -557,7 +557,7 @@ const Sidebar = (props: SidebarType) => {
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Proposals" ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
+              headerImage={settings.theme === "Dark" ? referencesDarkTheme : referencesLightTheme} //CHECK: CHANGE this images
               title="Proposals"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
@@ -576,7 +576,7 @@ const Sidebar = (props: SidebarType) => {
             <h3>Comments</h3>
           ) : props.openPendingProposals ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
+              headerImage={settings.theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
               title="Pending Proposals"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
@@ -596,7 +596,7 @@ const Sidebar = (props: SidebarType) => {
             </MemoizedSidebarWrapper>
           ) : props.openNotifications ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
+              headerImage={settings.theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
               title="Notifications"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
@@ -622,7 +622,7 @@ const Sidebar = (props: SidebarType) => {
             </MemoizedSidebarWrapper>
           ) : props.openBookmarks ? (
             <MemoizedSidebarWrapper
-              headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
+              headerImage={settings.theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
               title="Bookmarks"
               scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
