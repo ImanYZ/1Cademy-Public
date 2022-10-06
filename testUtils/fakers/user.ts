@@ -110,3 +110,11 @@ export function getDefaultUser(params: IFakeUserOptions): IUser {
     updatedAt: new Date(),
   };
 }
+
+export function convertUserToTypeSchema(user: IUser) {
+  return {
+    username: user.uname,
+    name: `${user.fName} ${user.lName}`,
+    imageUrl: user.imageUrl,
+  };
+}
