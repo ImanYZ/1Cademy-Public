@@ -5,7 +5,7 @@ import institutionsAutocompleteHandler from "../../../src/pages/api/institutions
 import { createNode, getDefaultNode } from "../../../testUtils/fakers/node";
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
-import { institutionsData,MockData } from "../../../testUtils/mockCollections";
+import { institutionsData, MockData } from "../../../testUtils/mockCollections";
 describe("GET /api/institutionsAutocomplete", () => {
   const users = [getDefaultUser({}), createUser({})];
   const nodes = [
