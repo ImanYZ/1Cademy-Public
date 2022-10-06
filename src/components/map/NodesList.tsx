@@ -1,5 +1,5 @@
 import React from "react";
-import { FullNodeData, OpenPart } from "src/nodeBookTypes";
+import { FullNodeData } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
@@ -13,14 +13,6 @@ type NodeListProps = {
   // NODE_WIDTH: number,
   bookmark: any;
   markStudied: any;
-  nodeChanged: (
-    nodeRef: any,
-    nodeId: string,
-    content: string | null,
-    title: string | null,
-    imageLoaded: boolean,
-    openPart: OpenPart
-  ) => void;
   chosenNodeChanged: any;
   referenceLabelChange: any;
   deleteLink: any;
@@ -53,7 +45,6 @@ type NodeListProps = {
 
 const NodesList = ({
   nodes,
-  nodeChanged,
   bookmark,
   markStudied,
   chosenNodeChanged,
@@ -176,7 +167,6 @@ const NodesList = ({
             bookmarks={bookmarks}
             bookmark={bookmark}
             markStudied={markStudied}
-            nodeChanged={nodeChanged}
             chosenNodeChanged={chosenNodeChanged}
             referenceLabelChange={referenceLabelChange}
             deleteLink={deleteLink}

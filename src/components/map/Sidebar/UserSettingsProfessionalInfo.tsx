@@ -66,6 +66,12 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     if (!deMajor) return null;
     return majors.find(cur => cur.Major === deMajor) || null;
   };
+
+  useEffect(() => {
+    setOcupation(user.occupation ?? "");
+    setFieldOfInterest(user.fieldOfInterest ?? "");
+  }, [user]);
+
   useEffect(() => {
     const retrieveInstitutions = async () => {
       const db = getFirestore();
@@ -109,7 +115,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         identification="occupation"
         initialValue={ocupation} //TODO: important fill empty user field
         onSubmit={(value: string) => onSubmitField(user, "occupation", value)}
-        setState={setOcupation}
+        setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, occupation: value } })}
         label="Please specify your occupation."
       />
       <Autocomplete
@@ -160,7 +166,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         identification="fieldOfInterest"
         initialValue={fieldOfInterest}
         onSubmit={(value: string) => onSubmitField(user, "fieldOfInterest", value)}
-        setState={setFieldOfInterest}
+        setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, fieldOfInterest: value } })}
         label="Research field of interest (if any)"
       />
       {/* <TextField

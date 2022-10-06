@@ -5,7 +5,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import DraftsIcon from "@mui/icons-material/Drafts";
-import HeightIcon from "@mui/icons-material/Height";
 import ImageIcon from "@mui/icons-material/Image";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MailIcon from "@mui/icons-material/Mail";
@@ -66,7 +65,6 @@ type NodeFooterProps = {
   reloadPermanentGrpah: any;
   markStudied: any;
   bookmark: any;
-  nodeChanged: any;
   openNodePart: any;
   selectNode: any;
   correctNode: any;
@@ -114,7 +112,6 @@ const NodeFooter = ({
   reloadPermanentGrpah,
   markStudied,
   bookmark,
-  nodeChanged,
   openNodePart,
   selectNode,
   correctNode,
@@ -245,9 +242,6 @@ const NodeFooter = ({
             {!editable && !unaccepted ? (
               // Accepted nodes
               <>
-                <MemoizedMetaButton onClick={nodeChanged} tooltip="Adjust the node height." tooltipPosition="top">
-                  <HeightIcon sx={{ fontSize: "16px" }} />
-                </MemoizedMetaButton>
                 <MemoizedMetaButton
                   onClick={narrateNode}
                   tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
@@ -385,7 +379,7 @@ const NodeFooter = ({
               <>
                 <MemoizedMetaButton onClick={wrongNode} tooltip="Vote to delete node." tooltipPosition="top">
                   <>
-                    <CloseIcon sx={{ fontSize: "16px", color: markedCorrect ? "red" : "inherit" }} />
+                    <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit" }} />
                     <span>{shortenNumber(wrongNum, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
@@ -541,7 +535,7 @@ const NodeFooter = ({
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "green" : "inherit" }} />
-                  <span>{shortenNumber(wrongNum, 2, false)}</span>
+                  <span>{shortenNumber(correctNum, 2, false)}</span>
                 </Box>
               </Box>
             </MemoizedMetaButton>

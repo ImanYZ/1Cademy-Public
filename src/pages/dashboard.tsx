@@ -122,7 +122,7 @@ const Dashboard = ({}: DashboardProps) => {
   // used for triggering useEffect after nodes or usernodes change
   const [userNodeChanges /*setUserNodeChanges*/] = useState<UserNodes[]>([]);
   const [nodeChanges /*setNodeChanges*/] = useState<NodeChanges[]>([]);
-  const [mapChanged, setMapChanged] = useState(false);
+  // const [mapChanged, setMapChanged] = useState(false);
   // two collections (tables) in database, nodes and usernodes
   // nodes: collection of all data of each node
   // usernodes: collection of all data about each interaction between user and node
@@ -183,7 +183,7 @@ const Dashboard = ({}: DashboardProps) => {
     setMapWidth,
     setMapHeight,
     setClusterNodes,
-    setMapChanged,
+    // setMapChanged,
     mapWidth,
     mapHeight,
     allTags,
@@ -473,7 +473,7 @@ const Dashboard = ({}: DashboardProps) => {
     // setEdges(oldEdges);
     // setNodes(oldNodes);
     setGraph({ nodes: oldNodes, edges: oldEdges });
-    setMapChanged(true);
+    // setMapChanged(true);
   }, [graph, allTags]);
 
   const resetAddedRemovedParentsChildren = useCallback(() => {
@@ -779,11 +779,11 @@ const Dashboard = ({}: DashboardProps) => {
             thisNode.tagIds = [...thisNode.tagIds, nodeBookState.chosenNode.id];
             // thisNode.tags = [
             //   ...thisNode.tags,
-            //   {
+            //   {<Button onClick={() => console.log(nodeChanges)}>node changes</Button>
             //     node: nodeBookState.chosenNode.id,
             //     title: chosenNodeObj.title,
             //   },
-            // ];
+            // ];<Button onClick={() => console.log(nodeChanges)}>node changes</Button>
           } else if (nodeBookState.choosingNode.type === "Parent") {
             thisNode.parents = [
               ...thisNode.parents,
@@ -867,7 +867,7 @@ const Dashboard = ({}: DashboardProps) => {
           // setChosenNodeTitle(null);
           // setChoosingType(null);
           scrollToNode(nodeId);
-          setMapChanged(true);
+          // setMapChanged(true);
 
           const newNodes = {
             ...oldNodes,
@@ -1038,6 +1038,7 @@ const Dashboard = ({}: DashboardProps) => {
             }
             // await firebase.batchUpdate(nodeRef, changeNode);
             batch.update(nodeRef, changeNode);
+            console.log("userNodeLogData ", userNodeLogData);
             const userNodeLogRef = collection(db, "userNodesLog");
             // await firebase.batchSet(userNodeLogRef, userNodeLogData);
             batch.set(doc(userNodeLogRef), userNodeLogData);
@@ -1448,6 +1449,7 @@ const Dashboard = ({}: DashboardProps) => {
             changeNode.closedHeight = thisNode.closedHeight;
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
+          console.log("userNodeLogData", userNodeLogData);
           batch.update(nodeRef, changeNode);
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
@@ -1547,6 +1549,7 @@ const Dashboard = ({}: DashboardProps) => {
         } else {
           setOpenPart(partType);
           if (user) {
+            console.log("userNodePartsLog: ", user?.uname);
             const userNodePartsLogRef = collection(db, "userNodePartsLog");
             setDoc(doc(userNodePartsLogRef), {
               nodeId,
@@ -1690,6 +1693,7 @@ const Dashboard = ({}: DashboardProps) => {
             visible: true,
             wrong: thisNode.wrong,
           };
+          console.log("userNodeLogData, ", userNodeLogData);
           if ("openHeight" in thisNode) {
             userNodeLogData.height = thisNode.openHeight;
           } else if ("closedHeight" in thisNode) {
@@ -2287,7 +2291,7 @@ const Dashboard = ({}: DashboardProps) => {
         // setEdges(oldEdges => {
         // });
         // console.log(4, { newNodes, newEdges });
-        setMapChanged(true);
+        // setMapChanged(true);
         scrollToNode(newNodeId);
         return { nodes: newNodes, edges: newEdges };
       });
@@ -2721,7 +2725,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
               <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-              <Button onClick={() => console.log(mapChanged)}>map changed</Button>
+              {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
               <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
               <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
             </Box>
@@ -2821,8 +2825,6 @@ const Dashboard = ({}: DashboardProps) => {
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <NodesList
                 nodes={graph.nodes}
-                // nodeChanged={nodeChanged}
-                nodeChanged={() => console.log("this button will be deprecated!!")}
                 bookmark={bookmark}
                 markStudied={markStudied}
                 chosenNodeChanged={chosenNodeChanged}

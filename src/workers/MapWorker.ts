@@ -9,7 +9,7 @@ import { MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/
 import { ClusterNodes, EdgesData, FullNodesData } from "../nodeBookTypes";
 
 const layoutHandler = (
-  mapChangedFlag: boolean,
+  // mapChangedFlag: boolean,
   oldClusterNodes: ClusterNodes,
   oldMapWidth: number,
   oldMapHeight: any,
@@ -23,7 +23,7 @@ const layoutHandler = (
   // console.log("{ WORKER }", { oldNodes, oldEdges });
   let mapNewWidth, mapNewHeight;
   // while (mapChangedFlag) {
-  mapChangedFlag = false;
+  // mapChangedFlag = false;
 
   // DAGRE RECALCULATE LAYOUT
   // dagre.layout(dag1);
@@ -121,7 +121,7 @@ const layoutHandler = (
         if (oldMapWidth < mapNewHeight) {
           oldMapWidth = mapNewHeight;
         }
-        mapChangedFlag = true;
+        // mapChangedFlag = true;
       }
     }
     return null;
@@ -164,7 +164,7 @@ const layoutHandler = (
         const tmpEdge = { ...thisEdge, fromX: newFromX, fromY: newFromY, toX: newToX, toY: newToY };
         // oldEdges = setDagEdge(g, e.v, e.w, tmpEdge, oldEdges);
         oldEdges[e.v + "-" + e.w] = tmpEdge;
-        mapChangedFlag = true;
+        // mapChangedFlag = true;
       }
       return null;
     }
@@ -173,16 +173,16 @@ const layoutHandler = (
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
   console.log(`--------------->> ⌚TIMER: ${endTimer - startTimer}ms`);
-  return { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
+  return { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
 };
 
 onmessage = e => {
-  const { mapChangedFlag, oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, allTags, graph } = e.data;
+  const { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, allTags, graph } = e.data;
 
   const g = dagreUtils.mapObjectToGraph(graph);
 
   const workerResults = layoutHandler(
-    mapChangedFlag,
+    // mapChangedFlag,
     oldClusterNodes,
     oldMapWidth,
     oldMapHeight,
