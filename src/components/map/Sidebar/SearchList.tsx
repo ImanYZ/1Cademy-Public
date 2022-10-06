@@ -6,6 +6,7 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
 import {
+  Box,
   Checkbox,
   Chip,
   Divider,
@@ -17,7 +18,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  Stack,
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 // import "./SearchList.css";
@@ -512,32 +513,49 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             </span>
           )}
         </div>
-        <div id="nodesUpdatedSinceContainer" style={{ fontSize: "14px" }}>
+        <div
+          id="nodesUpdatedSinceContainer"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: "14px",
+          }}
+        >
           {/* Search in <span id="SearchNodesNum">{shortenNumber(filteredNodes.length, 2, false)}</span>{" "} */}
-          <Stack sx={{ gap: "10px" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
             Edited in past
-            <ValidatedInput
+            {/* <ValidatedInput
               identification="nodesUpdatedSince"
               type="number"
               onChange={setNodesUpdatedSinceClick}
               inputProps={{ min: 0, style: { width: "50px" } }}
               defaultValue={nodesUpdatedSince}
-            />{" "}
-            days
-          </Stack>
-          <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
-          <div id="SearchSortContainer">
-            <RecentNodesList
-              id="recentNodesList"
-              recentNodes={searchResults}
-              setRecentNodes={setSearchResults}
-              onlyTags={onlyTags}
-              sortOption={sortOption}
-              setSortOption={onChangeSortOptions}
-              sortDirection={sortDirection}
-              setSortDirection={onChangeSortDirection}
+            />{" "} */}
+            <TextField
+              type="number"
+              defaultValue={nodesUpdatedSince}
+              onChange={setNodesUpdatedSinceClick}
+              size="small"
+              sx={{ width: "76px", p: "0px" }}
+              inputProps={{ style: { padding: "4px 8px" } }}
             />
-          </div>
+            days
+          </Box>
+          <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
+          <RecentNodesList
+            id="recentNodesList"
+            recentNodes={searchResults}
+            setRecentNodes={setSearchResults}
+            onlyTags={onlyTags}
+            sortOption={sortOption}
+            setSortOption={onChangeSortOptions}
+            sortDirection={sortDirection}
+            setSortDirection={onChangeSortDirection}
+          />
+          {/* <div id="SearchSortContainer" style={{ border: "solid" }}>
+            
+          </div> */}
         </div>
         {/* <div id="SearchResutlsNumSortContainer">
         </div> */}
@@ -558,7 +576,10 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
       {!isRetrieving ? (
-        <ul className="collection Proposals" style={{ padding: "0px" }}>
+        <ul
+          className="collection Proposals"
+          style={{ padding: "0px", margin: "0px", border: "solid 2px royalBlue", overflow: "hidden" }}
+        >
           {searchResults.data.map((resNode, idx) => {
             return (
               // <h4 key={idx}>{resNode.title}</h4>
@@ -616,6 +637,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                   </div>
                 </div>
                 <div className="SearchResultTitle">
+                  {/* CHECK: here is causing problems to hide scroll */}
                   <Editor label="" readOnly={true} setValue={doNothing} value={resNode.title} />
                 </div>
               </li>
