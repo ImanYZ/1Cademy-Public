@@ -148,25 +148,25 @@ const NotificationsList = (props: NotificationsListProps) => {
                   marginTop: "8px",
                 }}
               >
-                <span className="NotificationAction">
+                <span className="NotificationAction" style={{ fontSize: "20px" }}>
                   {notification.oType === "Propo" ? (
-                    <EditIcon className="amber-text" />
+                    <EditIcon className="amber-text" fontSize="inherit" />
                   ) : notification.oType === "PropoAccept" ? (
-                    <EditIcon className="DoneIcon green-text" />
+                    <EditIcon className="DoneIcon green-text" fontSize="inherit" />
                   ) : notification.aType === "Correct" ? (
-                    <DoneIcon className="DoneIcon green-text" />
+                    <DoneIcon className="DoneIcon green-text" fontSize="inherit" />
                   ) : notification.aType === "CorrectRM" ? (
-                    <DoneIcon className="DoneIcon green-text Striked" />
+                    <DoneIcon className="DoneIcon green-text Striked" fontSize="inherit" />
                   ) : notification.aType === "Wrong" ? (
-                    <CloseIcon className="red-text" />
+                    <CloseIcon className="red-text" fontSize="inherit" />
                   ) : notification.aType === "WrongRM" ? (
-                    <CloseIcon className="red-text Striked" />
+                    <CloseIcon className="red-text Striked" fontSize="inherit" />
                   ) : notification.aType === "Award" ? (
-                    <EmojiEventsIcon className="amber-text" />
+                    <EmojiEventsIcon className="amber-text" fontSize="inherit" />
                   ) : notification.aType === "AwardRM" ? (
-                    <EmojiEventsIcon className="amber-text Striked" />
+                    <EmojiEventsIcon className="amber-text Striked" fontSize="inherit" />
                   ) : notification.aType === "Accepted" ? (
-                    <DoneAllIcon className="amber-text" />
+                    <DoneAllIcon className="amber-text" fontSize="inherit" />
                   ) : (
                     notification.aType === "Delete" && <DeleteForeverIcon className="red-text" />
                   )}

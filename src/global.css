@@ -2299,7 +2299,7 @@ button.MuiTab-textColorInherit:focus {
 } */
 
 #SidebarBody #MarkAllReadButton .material-icons {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 /* -------------------------------------- */
@@ -2322,9 +2322,8 @@ button.MuiTab-textColorInherit:focus {
   margin-bottom: -10px;
 }
 
-.NotificationBody .NotificationNodeLink i {
-  font-size: 19px;
-  margin-bottom: -25px;
+.NotificationBody .NotificationNodeLink svg {
+  font-size: 20px;
 }
 
 .DeleteNotification {
@@ -2350,9 +2349,9 @@ button.MuiTab-textColorInherit:focus {
   margin-top: 0px !important;
 }
 
-.NotificationAction svg {
+/* .NotificationAction svg {
   font-size: 24px !important;
-}
+} */
 
 .NotificationBody .NotificationNodeLink .ReadOnlyEditor {
   overflow: hidden;
