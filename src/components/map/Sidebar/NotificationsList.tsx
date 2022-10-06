@@ -8,7 +8,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { IconButton } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { doc, getFirestore, writeBatch } from "firebase/firestore";
@@ -115,7 +115,6 @@ const NotificationsList = (props: NotificationsListProps) => {
       }),
     [lastIndex, props.notifications.length]
   );
-
   return (
     <>
       {notifications.map(notification => {
@@ -124,11 +123,13 @@ const NotificationsList = (props: NotificationsListProps) => {
             className="collection-item Notifications"
             key={`Notification${notification.id}`}
             style={{
-              border: "solid 2px royalBlue",
+              // border: "solid 2px royalBlue",
               listStyle: "none",
-              padding: "10px",
-              display: "flex",
-              alignItems: "flex-end",
+              padding: "2px 10px",
+              borderBottom: "solid 1px white",
+              fontSize: "16px",
+              // display: "flex",
+              // alignItems: "flex-end",
             }}
             // onClick={event => {
             //   selectMessage(event, message.node);
@@ -139,90 +140,109 @@ const NotificationsList = (props: NotificationsListProps) => {
                   <UserHeader imageUrl={notification.imageUrl} />
                 </div> */}
             <div className="NotificationBody">
-              <span className="NotificationAction">
-                {notification.oType === "Propo" ? (
-                  <EditIcon className="amber-text" />
-                ) : notification.oType === "PropoAccept" ? (
-                  <EditIcon className="DoneIcon green-text" />
-                ) : notification.aType === "Correct" ? (
-                  <DoneIcon className="DoneIcon green-text" />
-                ) : notification.aType === "CorrectRM" ? (
-                  <DoneIcon className="DoneIcon green-text Striked" />
-                ) : notification.aType === "Wrong" ? (
-                  <CloseIcon className="red-text" />
-                ) : notification.aType === "WrongRM" ? (
-                  <CloseIcon className="red-text Striked" />
-                ) : notification.aType === "Award" ? (
-                  <EmojiEventsIcon className="amber-text" />
-                ) : notification.aType === "AwardRM" ? (
-                  <EmojiEventsIcon className="amber-text Striked" />
-                ) : notification.aType === "Accepted" ? (
-                  <DoneAllIcon className="amber-text" />
-                ) : (
-                  notification.aType === "Delete" && <DeleteForeverIcon className="red-text" />
-                )}
-              </span>
-              <span className="NotificationObject">
-                {notification.oType === "Proposal"
-                  ? " Your pending proposal "
-                  : notification.oType === "AccProposal"
-                  ? " Your accepted proposal "
-                  : notification.oType === "Node"
-                  ? " Your node " +
-                    (notification.aType === "Correct"
-                      ? "received a Correct mark!"
-                      : notification.aType === "CorrectRM"
-                      ? "lost a Correct mark!"
-                      : notification.aType === "Wrong"
-                      ? "received a Wrong mark!"
-                      : notification.aType === "WrongRM"
-                      ? "lost a Wrong mark!"
-                      : notification.aType === "Award"
-                      ? "received an Award!"
-                      : notification.aType === "AwardRM"
-                      ? "lost an Award!"
-                      : notification.aType === "Accept" && "just got accepted!")
-                  : notification.oType === "Propo"
-                  ? " Your node got a proposal for "
-                  : notification.oType === "PropoAccept" &&
-                    " Your node got an improvement for " +
-                      (notification.aType === "newChild"
-                        ? "a new Child!"
-                        : notification.aType.map((pType: any) => {
-                            <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
-                          }))}
-              </span>
-              <MemoizedMetaButton
-                onClick={() => openLinkedNodeClick(notification)}
-                // tooltip={
-                //   notification.aType === "Delete"
-                //     ? "The node is deleted."
-                //     : "Click to go to the corresponding node."
-                // }
-                // tooltipPosition="Right"
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: "8px",
+                }}
               >
-                <div className="NotificationNodeLink">
-                  <LinkIcon className="grey-text" />
-                  <Editor value={notification.title} readOnly={true} setValue={doNothing} label="" />
-                </div>
-              </MemoizedMetaButton>
-              <div className="title Time">{dayjs(notification.createdAt).fromNow()}</div>
-            </div>
-            <div>
-              <IconButton
-                onClick={() => checkNotification(notification.id, !props.checked)}
-                // tooltip={
-                //   "Click to " +
-                //   (props.checked ? "check" : "uncheck") +
-                //   " this notification."
-                // }
-                // tooltipPosition="Right"
-              >
-                {/* <i className={(!props.checked && "DoneIcon") + " grey-text"}>
-                  
+                <span className="NotificationAction">
+                  {notification.oType === "Propo" ? (
+                    <EditIcon className="amber-text" />
+                  ) : notification.oType === "PropoAccept" ? (
+                    <EditIcon className="DoneIcon green-text" />
+                  ) : notification.aType === "Correct" ? (
+                    <DoneIcon className="DoneIcon green-text" />
+                  ) : notification.aType === "CorrectRM" ? (
+                    <DoneIcon className="DoneIcon green-text Striked" />
+                  ) : notification.aType === "Wrong" ? (
+                    <CloseIcon className="red-text" />
+                  ) : notification.aType === "WrongRM" ? (
+                    <CloseIcon className="red-text Striked" />
+                  ) : notification.aType === "Award" ? (
+                    <EmojiEventsIcon className="amber-text" />
+                  ) : notification.aType === "AwardRM" ? (
+                    <EmojiEventsIcon className="amber-text Striked" />
+                  ) : notification.aType === "Accepted" ? (
+                    <DoneAllIcon className="amber-text" />
+                  ) : (
+                    notification.aType === "Delete" && <DeleteForeverIcon className="red-text" />
+                  )}
+                </span>
+                <span className="NotificationObject" style={{ justifySelf: "start" }}>
+                  {notification.oType === "Proposal"
+                    ? " Your pending proposal "
+                    : notification.oType === "AccProposal"
+                    ? " Your accepted proposal "
+                    : notification.oType === "Node"
+                    ? " Your node " +
+                      (notification.aType === "Correct"
+                        ? "received a Correct mark!"
+                        : notification.aType === "CorrectRM"
+                        ? "lost a Correct mark!"
+                        : notification.aType === "Wrong"
+                        ? "received a Wrong mark!"
+                        : notification.aType === "WrongRM"
+                        ? "lost a Wrong mark!"
+                        : notification.aType === "Award"
+                        ? "received an Award!"
+                        : notification.aType === "AwardRM"
+                        ? "lost an Award!"
+                        : notification.aType === "Accept" && "just got accepted!")
+                    : notification.oType === "Propo"
+                    ? " Your node got a proposal for "
+                    : notification.oType === "PropoAccept" &&
+                      " Your node got an improvement for " +
+                        (notification.aType === "newChild"
+                          ? "a new Child!"
+                          : notification.aType.map((pType: any) => {
+                              <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
+                            }))}
+                </span>
+                <Box className="title Time" sx={{ fontSize: "12px" }}>
+                  {dayjs(notification.createdAt).fromNow()}
+                </Box>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
+                <MemoizedMetaButton
+                  onClick={() => openLinkedNodeClick(notification)}
+                  // tooltip={
+                  //   notification.aType === "Delete"
+                  //     ? "The node is deleted."
+                  //     : "Click to go to the corresponding node."
+                  // }
+                  // tooltipPosition="Right"
+                >
+                  <Box
+                    className="NotificationNodeLink"
+                    sx={{ display: "flex", alignItems: "center", gap: "5px", padding: "10px" }}
+                  >
+                    <LinkIcon className="grey-text" fontSize="inherit" />
+                    <Editor
+                      value={notification.title ?? "Notification"}
+                      readOnly={true}
+                      setValue={doNothing}
+                      label=""
+                    />
+                  </Box>
+                </MemoizedMetaButton>
+                <IconButton
+                  onClick={() => checkNotification(notification.id, !props.checked)}
+                  // tooltip={
+                  //   "Click to " +
+                  //   (props.checked ? "check" : "uncheck") +
+                  //   " this notification."
+                  // }
+                  // tooltipPosition="Right"
+                >
+                  {/* <i className={(!props.checked && "DoneIcon") + " grey-text"}>
+
                 </i> */}
-                {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
-              </IconButton>
+                  {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
+                </IconButton>
+              </Box>
             </div>
           </li>
         );
