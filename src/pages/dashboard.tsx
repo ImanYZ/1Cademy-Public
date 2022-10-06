@@ -1038,6 +1038,7 @@ const Dashboard = ({}: DashboardProps) => {
             }
             // await firebase.batchUpdate(nodeRef, changeNode);
             batch.update(nodeRef, changeNode);
+            console.log("userNodeLogData ", userNodeLogData);
             const userNodeLogRef = collection(db, "userNodesLog");
             // await firebase.batchSet(userNodeLogRef, userNodeLogData);
             batch.set(doc(userNodeLogRef), userNodeLogData);
@@ -1448,6 +1449,7 @@ const Dashboard = ({}: DashboardProps) => {
             changeNode.closedHeight = thisNode.closedHeight;
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
+          console.log("userNodeLogData", userNodeLogData);
           batch.update(nodeRef, changeNode);
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
@@ -1547,6 +1549,7 @@ const Dashboard = ({}: DashboardProps) => {
         } else {
           setOpenPart(partType);
           if (user) {
+            console.log("userNodePartsLog: ", user?.uname);
             const userNodePartsLogRef = collection(db, "userNodePartsLog");
             setDoc(doc(userNodePartsLogRef), {
               nodeId,
@@ -1690,6 +1693,7 @@ const Dashboard = ({}: DashboardProps) => {
             visible: true,
             wrong: thisNode.wrong,
           };
+          console.log("userNodeLogData, ", userNodeLogData);
           if ("openHeight" in thisNode) {
             userNodeLogData.height = thisNode.openHeight;
           } else if ("closedHeight" in thisNode) {
