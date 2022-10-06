@@ -581,6 +581,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             return (
               // <h4 key={idx}>{resNode.title}</h4>
               <li
+                // TODO: the result comes from typesense, there are nodes, we need to fill with userNode studied data
                 className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
                 // key={`resNode${resNode.id}`}
                 key={`resNode${idx}`}
