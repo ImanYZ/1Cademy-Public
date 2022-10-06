@@ -1,4 +1,5 @@
 import DoneAllIcon from "@mui/icons-material/DoneAll";
+import { Box } from "@mui/system";
 import {
   collection,
   doc,
@@ -199,7 +200,7 @@ const Notifications = (props: NotificationsProps) => {
     {
       title: "Unread",
       content: (
-        <div>
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
           <div id="MarkAllRead">
             <MemoizedMetaButton onClick={() => checkAllNotification()}>
               <div id="MarkAllReadButton">
@@ -214,7 +215,7 @@ const Notifications = (props: NotificationsProps) => {
             openLinkedNode={props.openLinkedNode}
             checked={false}
           />
-        </div>
+        </Box>
       ),
     },
     {
