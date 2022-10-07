@@ -1,8 +1,9 @@
 // import "./PendingProposalsButton.css";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import { Badge, Box } from "@mui/material";
 import React, { useState } from "react";
 
-import shortenNumber from "../../../lib/utils/shortenNumber";
+// import shortenNumber from "../../../lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../MetaButton";
 
 type PendingProposalsButtonProps = {
@@ -21,13 +22,19 @@ const PendingProposalsButton = (props: PendingProposalsButtonProps) => {
       // tooltip="Click to open the list of pending proposals."
       // tooltipPosition="Right"
     >
-      <>
-        <FormatListBulletedIcon />
+      <Box>
+        <Badge
+          badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
+          color="error"
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        >
+          <FormatListBulletedIcon />
+        </Badge>
         <span className="SidebarDescription">Pending List</span>
-        {pendingProposalsLoaded && pendingProposalsNum > 0 && (
+        {/* {pendingProposalsLoaded && pendingProposalsNum > 0 && (
           <div className="NotificationsNum">{shortenNumber(pendingProposalsNum, 2, false)}</div>
-        )}
-      </>
+        )} */}
+      </Box>
     </MemoizedMetaButton>
   );
 };

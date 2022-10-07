@@ -1,6 +1,6 @@
 // import "./Sidebar.css";
 import SearchIcon from "@mui/icons-material/Search";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
@@ -425,7 +425,9 @@ const Sidebar = (props: SidebarType) => {
             // tooltipPosition="Right"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={settings.theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+              <Box sx={{ display: "grid", placeItems: "center" }}>
+                <img src={settings.theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+              </Box>
             </MemoizedMetaButton>
           </div>
           <MemoizedUserStatusIcon

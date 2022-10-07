@@ -46,7 +46,7 @@ const ProposalItem = (props: any) => {
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
       onClick={openLinkedNodeClick(props.proposal)}
-      style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
+      style={{ display: "flex", flexDirection: "column", padding: "10px 20px", borderBottom: "solid 1px white" }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time">{dayjs(props.proposal.createdAt).fromNow()}</div>
