@@ -14,6 +14,8 @@ import {
 
 import { SearchNodesResponse, SimpleNode, TimeWindowOption, TypesenseNodesSchema } from "../../knowledgeTypes";
 
+// Logic
+// - finding nodes from typesense with some query parameters
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const q = getQueryParameter(req.query.q) || "*";
   const upvotes = getQueryParameterAsBoolean(req.query.upvotes || String(homePageSortByDefaults.upvotes));

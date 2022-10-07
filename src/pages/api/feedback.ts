@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { db } from "../../lib/firestoreServer/admin";
 
+// Logic
+// - creating new feeddback in feedback collection
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { data } = req.body;

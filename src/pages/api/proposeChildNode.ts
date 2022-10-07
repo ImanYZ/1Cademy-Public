@@ -1,4 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fbAuth from "src/middlewares/fbAuth";
+import { INodeLink } from "src/types/INodeLink";
+import { INodeType } from "src/types/INodeType";
+import { IQuestionChoice } from "src/types/IQuestionChoice";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import {
@@ -14,6 +18,56 @@ import {
   updateReputation,
 } from "../../utils";
 
+export type IProposeChildNodePayload = {
+  data: {
+    parentId: string;
+    parentType: INodeType;
+    nodeType: INodeType;
+    children: INodeLink[];
+    title: string;
+    content: string;
+    nodeImage?: string;
+    nodeVideo?: string;
+    nodeAudio?: string;
+    parents: INodeLink[];
+    proposal: string;
+    referenceIds: string[];
+    references: string[];
+    referenceLabels: string[];
+    summary: string;
+    subType?: string | null; // not implemented yet
+    tagIds: string[];
+    tags: string[];
+    choices?: IQuestionChoice[]; // only comes with NodeType=Question
+  };
+};
+
+// TODO: why we are increasing reputation in parentType instead of nodeType (line no. 125)
+// TODO: passing parentType from payload (line no. 288)
+// TODO: version-helpers.ts, odd logic at line no. 924 (function only return possible tags and tagIds and haven't used those values)
+// TODO: find out why we are sending version proposer as admin to generateTagData function (line no. 210)
+// TODO: check if given node type is valid
+// TODO: check if parent node even exists
+// Logic
+// child node version should have choices array if child's nodeType=Question
+// check if version is approved ( versionNetVote (its child node in this case) >= parentNodeNetVote / 2 )
+// - if its not approved then
+//   - increase reputation of proposer and add nodeId, accepted=false and childType=payload.nodeType
+//   - increment versions count of parent node
+//   - increment notification count (pendingPropsNums) for each community member beside who is proposing version
+// - if its approved then
+//   - increase reputation of proposer and add nodeId (new node id), accepted=true and nodeType=payload.nodeType
+//   - create new node with given data
+//   - new node should have choices property if its NodeType=Question and createPractice (skipping practice test for now as its not implemented)
+//   - add child in children array of parent node
+//   - single all user nodes for parent node and flag them isStudied=false because, its a major change
+//   - create user node for new node and set user=proposer, isStudied=true, correct=true, open=true, visible=true
+//   - create user node log for new node
+// - create version doc (if approved it would be under new node and if not it would be under parent node with childType)
+// - create user node version for proposer and set correct=true
+// - create user node version log for proposer
+// - create notification for proposer, should have aType=newChild and set oType=Propo if version not get accepted and oType=PropoAccept if version get accepted
+// - increment notificationNums +1 for proposer
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   let nodeRef, nodeData, userNodesData, userNodesRefs;
   const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
@@ -231,7 +285,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       batch.set(userNodeLogRef, newUserNodeObj);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
-    const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType: req.body.data.parentType });
+    const { versionsColl, userVersionsColl }: any = getTypedCollections({
+      nodeType: newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType,
+    });
     // Now we have all the data we need in newVersion, so we can set the document.
     const versionRef = versionsColl.doc();
     batch.set(versionRef, newVersion);
@@ -273,4 +329,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

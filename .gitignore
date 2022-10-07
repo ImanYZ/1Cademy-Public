@@ -83,3 +83,6 @@ onecademy-1-firebase-adminsdk-x7tpw-442a7d8605.json
 
 
 # lib/firestore/firebaseConfig.js
+
+# docker-compose resources for dev
+tmp
