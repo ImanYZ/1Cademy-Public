@@ -29,11 +29,13 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 /* eslint-enable */
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/cont   ext/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
+import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
 import ClustersList from "../components/map/ClustersList";
 import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
@@ -2859,7 +2861,44 @@ const Dashboard = ({}: DashboardProps) => {
 
   return (
     <div className="MapContainer">
-      <div id="Map">
+      {settings.theme === "Dark" && (
+        <Box
+          data-testid="auth-layout"
+          sx={{
+            width: "100vw",
+            height: "100vh",
+            position: "fixed",
+            filter: "brightness(0.25)",
+            zIndex: -2,
+          }}
+        >
+          <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
+        </Box>
+      )}
+      {settings.theme === "Light" && (
+        <Box
+          data-testid="auth-layout"
+          sx={{
+            width: "100vw",
+            height: "100vh",
+            position: "fixed",
+            filter: "brightness(1.4)",
+            zIndex: -2,
+          }}
+        >
+          <Image alt="Library" src={lightModeLibraryImage} layout="fill" objectFit="cover" priority />
+        </Box>
+      )}
+      <Box
+        id="Map"
+        sx={{
+          background:
+            settings.background === "Color"
+              ? theme =>
+                  settings.theme === "Dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white
+              : undefined,
+        }}
+      >
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
           <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
@@ -3052,7 +3091,7 @@ const Dashboard = ({}: DashboardProps) => {
             </Modal> */}
           </Box>
         </Box>
-      </div>
+      </Box>
     </div>
   );
 };
