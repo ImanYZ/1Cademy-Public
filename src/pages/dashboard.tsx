@@ -21,7 +21,8 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -32,6 +33,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
+import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import ClustersList from "../components/map/ClustersList";
 import { LinksList } from "../components/map/LinksList";
 import NodesList from "../components/map/NodesList";
@@ -102,7 +104,7 @@ const Dashboard = ({}: DashboardProps) => {
   // GLOBAL STATES
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
-
+  console.log("LoadingImg:", LoadingImg);
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
@@ -207,7 +209,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /*userNodesLoaded*/ setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
-  const [, /*isSubmitting*/ setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
   // const [openProposals, setOpenProposals] = useState(false);
@@ -282,6 +284,16 @@ const Dashboard = ({}: DashboardProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [allTags, allTagsLoaded, db, user]
   );
+  //called whenever isSubmitting changes
+  // changes style of cursor
+
+  useEffect(() => {
+    if (isSubmitting) {
+      document.body.style.cursor = "wait";
+    } else {
+      document.body.style.cursor = "initial";
+    }
+  }, [isSubmitting]);
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
@@ -392,7 +404,7 @@ const Dashboard = ({}: DashboardProps) => {
       const userNodesSnapshot = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         if (!docChanges.length) return null;
-
+        setIsSubmitting(true);
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
@@ -431,6 +443,7 @@ const Dashboard = ({}: DashboardProps) => {
           // newNodes,
           // newEdges,
         });
+        setIsSubmitting(false);
         setUserNodesLoaded(true);
       });
       return () => userNodesSnapshot();
@@ -3008,23 +3021,30 @@ const Dashboard = ({}: DashboardProps) => {
                 setNodeParts={setNodeParts}
               />
             </MapInteractionCSS>
+            <Suspense fallback={<div></div>}>
+              <Modal
+                open={Boolean(openMedia)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+              >
+                <MapInteractionCSS>
+                  {/* TODO: change open Media variable to string to not validate */}
+                  {typeof openMedia === "string" && (
+                    <>
+                      {/* TODO: change to Next Image */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={openMedia} alt="Node image" className="responsive-img" />
+                    </>
+                  )}
+                </MapInteractionCSS>
+              </Modal>
+              {isSubmitting && (
+                <div className="CenterredLoadingImageContainer">
+                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                </div>
+              )}
+            </Suspense>
 
-            <Modal
-              open={Boolean(openMedia)}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <MapInteractionCSS>
-                {/* TODO: change open Media variable to string to not validate */}
-                {typeof openMedia === "string" && (
-                  <>
-                    {/* TODO: change to Next Image */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={openMedia} alt="Node image" className="responsive-img" />
-                  </>
-                )}
-              </MapInteractionCSS>
-            </Modal>
             {/* // <Modal onClick={closedSidebarClick("Media")}>
               //   <MapInteractionCSS>
               //     <img src={openMedia} alt="Node image" className="responsive-img" />
