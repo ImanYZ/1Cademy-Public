@@ -64,7 +64,7 @@ export const checkEmailInstitution = async (email: string, checkFirestore: boole
       if (checkFirestore) {
         const userDocs = await db.collection("users").where("email", "==", email).limit(1).get();
         if (userDocs.docs.length === 0) {
-          return "The user does not exist";
+          throw "The user does not exist";
         }
       } else {
         await admin.auth().getUserByEmail(email);
