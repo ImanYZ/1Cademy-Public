@@ -4,7 +4,7 @@ import UserTSSchema from "testUtils/typesenseMocks/users.schema";
 
 import contributorsAutocompleteHandler from "../../../src/pages/api/contributorsAutocomplete";
 import { createNode, getDefaultNode } from "../../../testUtils/fakers/node";
-import { convertUserToTypeSchema,createUser, getDefaultUser } from "../../../testUtils/fakers/user";
+import { convertUserToTypeSchema, createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";
 describe("GET /api/contributorsAutocomplete", () => {

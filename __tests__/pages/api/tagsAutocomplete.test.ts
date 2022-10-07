@@ -3,7 +3,7 @@ import { TypesenseMock } from "testUtils/typesenseMocks";
 import NodeTSSchema from "testUtils/typesenseMocks/nodes.schema";
 
 import tagsAutocompleteHandler from "../../../src/pages/api/tagsAutocomplete";
-import { convertNodeToTypeSchema,createNode, getDefaultNode } from "../../../testUtils/fakers/node";
+import { convertNodeToTypeSchema, createNode, getDefaultNode } from "../../../testUtils/fakers/node";
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";

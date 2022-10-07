@@ -23,7 +23,7 @@ describe("GET /api/signupValidation", () => {
 
   const institutions = [
     createInstitution({
-      domain: "umich.edu",
+      domain: "@umich.edu",
     }),
   ];
   const institutionsCollection = new MockData(institutions, "institutions");
@@ -50,6 +50,6 @@ describe("GET /api/signupValidation", () => {
     const res: any = HttpMock.createResponse();
     await signupValidationHandler(req, res);
     const result = JSON.parse(res._getData());
-    expect(Object.keys(result).length).toEqual(0);
+    expect(result.institutionName).toEqual(institutions[0].name);
   });
 });
