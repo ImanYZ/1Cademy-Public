@@ -1,5 +1,6 @@
 // import "./PendingProposalList.css";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Box } from "@mui/material";
 import { getDocs, getFirestore, limit, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -142,23 +143,40 @@ const PendingProposalList = (props: PendingProposalListProps) => {
 
   return (
     <div id="PendingProposalsContainer">
-      <ul className="collection Proposals" style={{ padding: "0px", overflow: "hidden" }}>
-        {proposals.slice(0, lastIndex).map((proposal, idx) => {
-          return <ProposalItem key={idx} proposal={proposal} openLinkedNode={props.openLinkedNode} showTitle={true} />;
-        })}
-        {/* CHECK, I changes pendingProposals to proposal */}
-        {proposals.length > lastIndex && (
-          <div id="ContinueButton">
-            <MemoizedMetaButton onClick={loadOlderProposalsClick}>
-              <>
-                <ExpandMoreIcon className="material-icons grey-text" />
-                Older Pending Proposals
-                <ExpandMoreIcon className="material-icons grey-text" />
-              </>
-            </MemoizedMetaButton>
-          </div>
-        )}
-      </ul>
+      {!proposals.length && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <h3>You don't have notifications</h3>
+        </Box>
+      )}
+
+      {!!proposals.length && (
+        <ul className="collection Proposals" style={{ padding: "0px", overflow: "hidden" }}>
+          {proposals.slice(0, lastIndex).map((proposal, idx) => {
+            return (
+              <ProposalItem key={idx} proposal={proposal} openLinkedNode={props.openLinkedNode} showTitle={true} />
+            );
+          })}
+          {/* CHECK, I changes pendingProposals to proposal */}
+          {proposals.length > lastIndex && (
+            <div id="ContinueButton">
+              <MemoizedMetaButton onClick={loadOlderProposalsClick}>
+                <>
+                  <ExpandMoreIcon className="material-icons grey-text" />
+                  Older Pending Proposals
+                  <ExpandMoreIcon className="material-icons grey-text" />
+                </>
+              </MemoizedMetaButton>
+            </div>
+          )}
+        </ul>
+      )}
     </div>
   );
 };
