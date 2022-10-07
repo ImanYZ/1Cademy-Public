@@ -29,7 +29,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 /* eslint-enable */
-import { useAuth } from "@/cont   ext/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
@@ -106,7 +106,7 @@ const Dashboard = ({}: DashboardProps) => {
   // GLOBAL STATES
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
-  console.log("LoadingImg:", LoadingImg);
+
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
@@ -276,7 +276,6 @@ const Dashboard = ({}: DashboardProps) => {
         // where("visible", "==", true),
         where("deleted", "==", false)
       );
-
       const killSnapshot = snapshot(q);
       return () => {
         killSnapshot();
@@ -406,7 +405,7 @@ const Dashboard = ({}: DashboardProps) => {
       const userNodesSnapshot = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         if (!docChanges.length) return null;
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
@@ -445,7 +444,7 @@ const Dashboard = ({}: DashboardProps) => {
           // newNodes,
           // newEdges,
         });
-        setIsSubmitting(false);
+        // setIsSubmitting(false);
         setUserNodesLoaded(true);
       });
       return () => userNodesSnapshot();
@@ -2829,16 +2828,16 @@ const Dashboard = ({}: DashboardProps) => {
         //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
         //     (oldNodes[sNode.id].corrects - oldNodes[sNode].wrongs) / 2
         //   ) {
-        //     proposalsTemp[proposalIdx].accepted = true
+        //     proposalsTemp[proposalIdx].accepted = true;
         //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
-        //       reloadPermanentGraph()
+        //       reloadPermanentGraph();
         //     }
         //   }
-        //   setProposals(proposalsTemp)
-        //   return oldNodes
-        // })
-        // setIsSubmitting(false)
-        // scrollToNode(sNode)
+        //   setProposals(proposalsTemp);
+        //   return oldNodes;
+        // });
+        setIsSubmitting(false);
+        // scrollToNode(sNode);
       }
       // event.currentTarget.blur();
     },
@@ -2947,6 +2946,9 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Toggle Open proposals
+              </Button>
+              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                Open Proposal
               </Button>
               <Button onClick={() => openNodeHandler("0FQjO6yByNeXOiYlRMvN")}>Open Node Handler</Button>
             </Box>
