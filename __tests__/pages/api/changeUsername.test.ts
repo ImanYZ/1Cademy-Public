@@ -523,46 +523,48 @@ describe("POST /api/changeUsername", () => {
     });
   });
 
-  it("check if new user equal old one ignore change username (need change this behaviour)", async () => {
-    const body = {
-      data: {
-        newUname: users[0].uname,
-      },
-    };
+  describe("", () => {
+    it("check if new user equal old one ignore change username (need change this behaviour)", async () => {
+      const body = {
+        data: {
+          newUname: users[0].uname,
+        },
+      };
 
-    const req: any = HttpMock.createRequest({
-      method: "POST",
-      body,
-      headers: {
-        authorization: "Bearer " + accessToken,
-      },
+      const req: any = HttpMock.createRequest({
+        method: "POST",
+        body,
+        headers: {
+          authorization: "Bearer " + accessToken,
+        },
+      });
+
+      const res = HttpMock.createResponse();
+      await changeUsernameHandler(req, res as any);
+
+      expect(res._getStatusCode()).toEqual(200);
     });
 
-    const res = HttpMock.createResponse();
-    await changeUsernameHandler(req, res as any);
+    it("check if new username already exist for someone else, throw error and respond with 500", async () => {
+      const body = {
+        data: {
+          newUname: users[1].uname,
+        },
+      };
 
-    expect(res._getStatusCode()).toEqual(200);
-  });
+      const req: any = HttpMock.createRequest({
+        method: "POST",
+        body,
+        headers: {
+          authorization: "Bearer " + accessToken,
+        },
+      });
 
-  it("check if new username already exist for someone else, throw error and respond with 500", async () => {
-    const body = {
-      data: {
-        newUname: users[1].uname,
-      },
-    };
+      const res = HttpMock.createResponse();
+      await changeUsernameHandler(req, res as any);
 
-    const req: any = HttpMock.createRequest({
-      method: "POST",
-      body,
-      headers: {
-        authorization: "Bearer " + accessToken,
-      },
+      expect(res._getStatusCode()).toEqual(500);
     });
-
-    const res = HttpMock.createResponse();
-    await changeUsernameHandler(req, res as any);
-
-    expect(res._getStatusCode()).toEqual(500);
   });
 
   describe("should be able to change username if request is valid", () => {
