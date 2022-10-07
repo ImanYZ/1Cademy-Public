@@ -1,9 +1,11 @@
 import { INodeLink } from "./INodeLink";
 import { INodeType } from "./INodeType";
+import { IQuestionChoice } from "./IQuestionChoice";
 
 export type INodeVersion = {
   documentId?: string;
   childType?: INodeType;
+  choices?: IQuestionChoice[];
   content: string;
   title: string;
   fullname: string;
