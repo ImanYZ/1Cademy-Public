@@ -1,14 +1,11 @@
 import HttpMock from "node-mocks-http";
-import { TypesenseMock } from "testUtils/typesenseMocks";
-import NodeTSSchema from "testUtils/typesenseMocks/nodes.schema";
 
-import fullReferencesAutocompleteHandler from "../../../src/pages/api/fullReferencesAutocomplete";
-import { convertNodeToTypeSchema,createNode, getDefaultNode } from "../../../testUtils/fakers/node";
+import nodeDataHandler from "../../../src/pages/api/nodeData";
+import { createNode, getDefaultNode } from "../../../testUtils/fakers/node";
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";
-
-describe("GET /api/fullReferencesAutocomplete", () => {
+describe("GET /api/nodeData", () => {
   const users = [getDefaultUser({}), createUser({})];
   const nodes = [
     getDefaultNode({
@@ -24,12 +21,9 @@ describe("GET /api/fullReferencesAutocomplete", () => {
   );
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
-  const nodesTSCollection = new TypesenseMock(
-    NodeTSSchema,
-    nodes.map(node => convertNodeToTypeSchema(node)),
-    "nodes"
-  );
-  const collects = [usersCollection, nodesCollection, nodesTSCollection];
+
+  const collects = [usersCollection, nodesCollection];
+
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
@@ -39,17 +33,14 @@ describe("GET /api/fullReferencesAutocomplete", () => {
     await Promise.all(collects.map(collect => collect.clean()));
   });
 
-  it("Should be able to search data from fullReferencesAutocomplete api with specific title", async () => {
-    let title = nodes[0].title;
+  it("Should be able to get node data from nodeData api with specific node id", async () => {
     const req: any = HttpMock.createRequest({
-      method: "GET",
+      method: "POST",
+      body: { nodeId: nodes[0].documentId },
     });
-    req.query["q"] = title;
     const res: any = HttpMock.createResponse();
-    await fullReferencesAutocompleteHandler(req, res);
+    await nodeDataHandler(req, res);
     const { results } = JSON.parse(res._getData());
-    results.map((result: any) => {
-      expect(true).toBe(result.title.includes(title));
-    });
+    expect(results).toMatchObject({ id: nodes[0].documentId });
   });
 });

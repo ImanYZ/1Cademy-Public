@@ -131,14 +131,14 @@ export function createNode(params: IFakeNodeOptions): INode {
   };
 }
 
-export function convertNodeToTypeSchema(node: INode) {
+export function convertNodeToTypeSchema(node: INode, params: any = {}) {
   const netVote = node.corrects - node.wrongs;
   return {
     changedAtMillis: node.updatedAt.getUTCMilliseconds(),
     updatedAt: Math.floor(node.updatedAt.getTime() / 1000),
     content: node.content,
     contributorsNames: node.contribNames,
-    mostHelpful: 0,
+    mostHelpful: params.mostHelpful ? params.mostHelpful : 0,
     corrects: node.corrects,
     wrongs: node.wrongs,
     netVotes: netVote && !isNaN(netVote) ? netVote : 0,

@@ -3,14 +3,15 @@ import { IInstitution } from "src/types/IInstitution";
 
 type IFakeInstitutionOptions = {
   documentId?: string;
+  domain?: string;
 };
 
 export function createInstitution(params: IFakeInstitutionOptions): IInstitution {
-  const { documentId } = params;
+  const { documentId, domain } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
     name: faker.company.name(),
-    domains: [faker.internet.domainName()],
+    domains: domain ? [domain] : [faker.internet.domainName()],
     logoURL: faker.image.imageUrl(),
     lat: parseFloat(faker.address.latitude()),
     lng: parseFloat(faker.address.longitude()),

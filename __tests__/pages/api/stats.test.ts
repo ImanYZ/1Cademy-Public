@@ -1,6 +1,5 @@
 import HttpMock from "node-mocks-http";
 
-import { db } from "../../../src/lib/firestoreServer/admin";
 import statsHandler from "../../../src/pages/api/stats";
 import { createStats } from "../../../testUtils/fakers/stats";
 import { MockData } from "../../../testUtils/mockCollections";
@@ -27,8 +26,7 @@ describe("GET /api/stats", () => {
   });
 
   it("Should be able to get stats with collection defined", async () => {
-    let statsDoc: any = await db.collection("stats").get();
-    let statsData = statsDoc.docs[0].data();
+    let statsData = stats[0];
     const req: any = HttpMock.createRequest({
       method: "GET",
     });

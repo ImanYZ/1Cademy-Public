@@ -48,7 +48,7 @@ describe("GET /api/searchAutoComplete", () => {
     await Promise.all(collects.map(collect => collect.clean()));
   });
 
-  it("Should be able to search autoComplete with specific title", async () => {
+  it("Should be able to search data from autoComplete api with specific title", async () => {
     const req: any = HttpMock.createRequest({
       method: "GET",
     });

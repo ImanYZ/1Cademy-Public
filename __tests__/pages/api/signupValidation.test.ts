@@ -1,14 +1,12 @@
 import HttpMock from "node-mocks-http";
-import { TypesenseMock } from "testUtils/typesenseMocks";
-import NodeTSSchema from "testUtils/typesenseMocks/nodes.schema";
 
-import fullReferencesAutocompleteHandler from "../../../src/pages/api/fullReferencesAutocomplete";
-import { convertNodeToTypeSchema,createNode, getDefaultNode } from "../../../testUtils/fakers/node";
+import signupValidationHandler from "../../../src/pages/api/signupValidation";
+import { createInstitution } from "../../../testUtils/fakers/institution";
+import { createNode, getDefaultNode } from "../../../testUtils/fakers/node";
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";
-
-describe("GET /api/fullReferencesAutocomplete", () => {
+describe("GET /api/signupValidation", () => {
   const users = [getDefaultUser({}), createUser({})];
   const nodes = [
     getDefaultNode({
@@ -22,14 +20,18 @@ describe("GET /api/fullReferencesAutocomplete", () => {
       corrects: 1,
     })
   );
+
+  const institutions = [
+    createInstitution({
+      domain: "umich.edu",
+    }),
+  ];
+  const institutionsCollection = new MockData(institutions, "institutions");
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
-  const nodesTSCollection = new TypesenseMock(
-    NodeTSSchema,
-    nodes.map(node => convertNodeToTypeSchema(node)),
-    "nodes"
-  );
-  const collects = [usersCollection, nodesCollection, nodesTSCollection];
+
+  const collects = [usersCollection, nodesCollection, institutionsCollection];
+
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
@@ -39,17 +41,15 @@ describe("GET /api/fullReferencesAutocomplete", () => {
     await Promise.all(collects.map(collect => collect.clean()));
   });
 
-  it("Should be able to search data from fullReferencesAutocomplete api with specific title", async () => {
-    let title = nodes[0].title;
+  it("Should be able to check signupValidation against institution with detail", async () => {
     const req: any = HttpMock.createRequest({
       method: "GET",
     });
-    req.query["q"] = title;
+    req.query.email = "haroon@umich.edu";
+    req.query.uname = "haroon";
     const res: any = HttpMock.createResponse();
-    await fullReferencesAutocompleteHandler(req, res);
-    const { results } = JSON.parse(res._getData());
-    results.map((result: any) => {
-      expect(true).toBe(result.title.includes(title));
-    });
+    await signupValidationHandler(req, res);
+    const result = JSON.parse(res._getData());
+    expect(Object.keys(result).length).toEqual(0);
   });
 });

@@ -4,6 +4,9 @@ import { getQueryParameter } from "@/lib/utils/utils";
 
 import { checkEmailInstitution, unameExists } from "./signup";
 
+// TODO: should be validate email based on domain that is exiting in institute.
+// Logic
+// - checking email and uname already exist or not
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const errors: { [key: string]: string } = {};

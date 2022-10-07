@@ -1,13 +1,14 @@
 import HttpMock from "node-mocks-http";
 import { TypesenseMock } from "testUtils/typesenseMocks";
-import UserTSSchema from "testUtils/typesenseMocks/users.schema";
+import NodeTSSchema from "testUtils/typesenseMocks/nodes.schema";
 
-import contributorsAutocompleteHandler from "../../../src/pages/api/contributorsAutocomplete";
-import { createNode, getDefaultNode } from "../../../testUtils/fakers/node";
-import { convertUserToTypeSchema,createUser, getDefaultUser } from "../../../testUtils/fakers/user";
+import tagsAutocompleteHandler from "../../../src/pages/api/tagsAutocomplete";
+import { convertNodeToTypeSchema,createNode, getDefaultNode } from "../../../testUtils/fakers/node";
+import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";
-describe("GET /api/contributorsAutocomplete", () => {
+
+describe("GET /api/tagsAutocomplete", () => {
   const users = [getDefaultUser({}), createUser({})];
   const nodes = [
     getDefaultNode({
@@ -21,16 +22,14 @@ describe("GET /api/contributorsAutocomplete", () => {
       corrects: 1,
     })
   );
-
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
   const nodesTSCollection = new TypesenseMock(
-    UserTSSchema,
-    users.map(user => convertUserToTypeSchema(user)),
-    "users"
+    NodeTSSchema,
+    nodes.map(node => convertNodeToTypeSchema(node)),
+    "nodes"
   );
   const collects = [usersCollection, nodesCollection, nodesTSCollection];
-
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
@@ -40,33 +39,41 @@ describe("GET /api/contributorsAutocomplete", () => {
     await Promise.all(collects.map(collect => collect.clean()));
   });
 
-  it("Should be able to get search data from contributorsAutocomplete api with specific name", async () => {
+  it("Should be able to search nodes from tagsAutocomplete api with isTag true with specific title", async () => {
+    let title = nodes[0].title;
     const req: any = HttpMock.createRequest({
       method: "GET",
     });
-    let name = `${users[0].fName} ${users[0].lName}`;
-    req.query["q"] = name;
+    req.query["q"] = title;
     const res: any = HttpMock.createResponse();
-    await contributorsAutocompleteHandler(req, res);
+    await tagsAutocompleteHandler(req, res);
     const { results } = JSON.parse(res._getData());
     results.map((result: any) => {
-      expect(result).toMatchObject({ name: name });
+      expect(result).toBe(title);
     });
   });
 
-  it("Should be able to get search data from contributorsAutocomplete api with default data", async () => {
-    const defaultContributors =
-      process.env.NODE_ENV === "production"
-        ? require("@/lib/datasets/defaultContributors.prod.json")
-        : require("@/lib/datasets/defaultContributors.dev.json");
+  it("Should be able to search nodes from tagsAutocomplete api with default data", async () => {
+    const defaultTags: any = [
+      "Study Conclusions",
+      "Classics",
+      "10 Usability Heuristics for User Interface Design",
+      "Data Science",
+      "Borderline Personality Disorder",
+      "Lemmatization",
+      "Social Perception",
+      "Library Science",
+      "Are Electronic Cigarettes Less Harmful than Traditional Cigarettes?",
+      "Cognitive Symptoms of Schizophrenia ",
+    ];
     const req: any = HttpMock.createRequest({
       method: "GET",
     });
     const res: any = HttpMock.createResponse();
-    await contributorsAutocompleteHandler(req, res);
+    await tagsAutocompleteHandler(req, res);
     const { results } = JSON.parse(res._getData());
     results.map((result: any, index: number) => {
-      expect(result).toMatchObject(defaultContributors[index]);
+      expect(result).toEqual(defaultTags[index]);
     });
   });
 });
