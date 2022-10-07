@@ -43,6 +43,9 @@ jobs:
         node-version: [16.x]
     steps:
       - uses: actions/checkout@v2
+      - uses: isbang/compose-action@v1.3.2
+        with:
+          compose-file: "./docker-compose.dev.yml"
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
