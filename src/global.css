@@ -95,7 +95,7 @@
 #SidebarBody .material-icons {
   line-height: 10px;
   margin-top: -2.5px;
-  font-size: 15.7px;
+  font-size: 16px;
 }
 .LearnBefore .material-icons,
 .LearnAfter .material-icons {
@@ -888,6 +888,13 @@
   /* margin-left: 7px;
   margin-right: 7px; */
 }
+#SidebarButtonsContainer:focus #UsersStatusList::-webkit-scrollbar,
+#SidebarButtonsContainer:hover #UsersStatusList::-webkit-scrollbar {
+  /* margin-left: -7px; */
+  /* margin-right: -400px;
+  padding-right: 400px; */
+  display: block;
+}
 #SidebarButtonsContainer:focus #UsersStatusList,
 #SidebarButtonsContainer:hover #UsersStatusList {
   /* margin-left: -7px; */
@@ -1056,6 +1063,7 @@
   position: relative;
   /* left: 25px;
   top: -19px; */
+  font-size: 15px;
   line-height: 0;
   height: 0;
   overflow: hidden;
@@ -1226,6 +1234,7 @@ button.MuiTab-textColorInherit:focus {
 
 #LeaderboardTag {
   /* margin-top: -10px; */
+  font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2414,6 +2423,15 @@ button.MuiTab-textColorInherit:focus {
   -moz-transition: margin-left 1s; /* Firefox */
   -webkit-transition: margin-left 1s; /*safari and chrome */
 }
+#UsersStatusList::-webkit-scrollbar {
+  width: 4px; /* Tamaño del scroll en vertical */
+  height: 4px; /* Tamaño del scroll en horizontal */
+  display: none;
+}
+#UsersStatusList::-webkit-scrollbar-thumb {
+  background: rgba(119, 119, 119, 0.692);
+  border-radius: 4px;
+}
 
 /* -------------------------------- */
 /* user setting sidebar styles */
@@ -2570,5 +2588,6 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #SidebarButtonsContainer:hover .customUserStatusTotalPoints {
-  display: block;
+  display: flex;
+  align-items: center;
 }

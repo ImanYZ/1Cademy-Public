@@ -29,10 +29,10 @@ export const NotificationsButton = ({ openSideBar, uncheckedNotificationsNum }: 
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
         <Badge
-          badgeContent={40}
+          badgeContent={uncheckedNotificationsNum ?? 0}
           color="error"
           anchorOrigin={{ vertical: "top", horizontal: "left" }}
-          sx={{ wordBreak: "normal" }}
+          sx={{ wordBreak: "normal", padding: "1px" }}
         >
           {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
         </Badge>

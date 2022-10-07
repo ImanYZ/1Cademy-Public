@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useState } from "react";
@@ -69,19 +70,19 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             // CHECK: I changed: node.id to node.userNodeId
             key={`node${node.userNodeId}`}
             onClick={() => openLinkedNode(node.node)}
-            style={{ listStyle: "none", padding: "10px" }}
+            style={{ listStyle: "none", padding: "10px", borderBottom: "solid 1px white" }}
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
-              <NodeTypeIcon nodeType={node.nodeType} />
-              <div className="right" style={{ display: "flex", gap: "10px" }}>
+              <NodeTypeIcon nodeType={node.nodeType} sx={{ fontSize: "16px" }} />
+              <div className="right" style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                 <MemoizedMetaButton
                 // tooltip="Creation or the last update of this node."
                 // tooltipPosition="TopLeft"
                 >
-                  <>
-                    <CreateIcon className="material-icons grey-text" />
+                  <Box sx={{ fontSize: "15px" }}>
+                    <CreateIcon className="material-icons grey-text" sx={{ fontSize: "16px" }} />
                     {dayjs(node.changedAt).fromNow()}
-                  </>
+                  </Box>
                   {/* </MetaButton>
           <MetaButton
             tooltip="# of improvement/child proposals on this node."

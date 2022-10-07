@@ -17,7 +17,12 @@ const BookmarksButton = ({ openSideBar, bookmarkUpdatesNum }: BookmarksButton) =
       // tooltipPosition="Right"
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
-        <Badge badgeContent={bookmarkUpdatesNum} color="error" anchorOrigin={{ vertical: "top", horizontal: "left" }}>
+        <Badge
+          badgeContent={bookmarkUpdatesNum ?? 0}
+          color="error"
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+          sx={{ wordBreak: "normal", padding: "1px" }}
+        >
           <BookmarkBorderIcon className="material-icons" />
         </Badge>
         <span className="SidebarDescription">Bookmarks</span>
