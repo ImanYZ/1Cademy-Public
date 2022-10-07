@@ -1,5 +1,5 @@
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import { Badge } from "@mui/material";
+import { Badge, Box } from "@mui/material";
 import React from "react";
 
 // import shortenNumber from "../../../lib/utils/shortenNumber";
@@ -16,15 +16,20 @@ const BookmarksButton = ({ openSideBar, bookmarkUpdatesNum }: BookmarksButton) =
       // tooltip="Click to open the bookmarked nodes' updates."
       // tooltipPosition="Right"
     >
-      <>
-        <Badge badgeContent={bookmarkUpdatesNum} color="error" anchorOrigin={{ vertical: "top", horizontal: "left" }}>
+      <Box>
+        <Badge
+          badgeContent={bookmarkUpdatesNum ?? 0}
+          color="error"
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+          sx={{ padding: "1px" }}
+        >
           <BookmarkBorderIcon className="material-icons" />
         </Badge>
         <span className="SidebarDescription">Bookmarks</span>
         {/* {bookmarkUpdatesNum > 0 && (
           <div className="NotificationsNum">{shortenNumber(bookmarkUpdatesNum, 2, false)}</div>
         )} */}
-      </>
+      </Box>
     </MemoizedMetaButton>
   );
 };
