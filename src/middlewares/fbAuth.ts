@@ -45,7 +45,7 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
       try {
         creditsData = await db
           .collection("credits")
-          .where("credits", "==", userData.deCredits)
+          // .where("credits", "==", userData.deCredits)
           .where("tagId", "==", userData.tagId)
           .limit(1)
           .get();
@@ -97,7 +97,7 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
       };
       return { status: 200, data: userData };
     }
-    errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag.title;
+    errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag;
     console.error(errorMessage);
     return { status: 500, data: errorMessage };
   } catch (err: any) {

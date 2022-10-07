@@ -1,8 +1,22 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fbAuth from "src/middlewares/fbAuth";
 
 import { admin, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { updateUserImageEverywhere } from "../../utils";
 
+// TODO: only allow white listed hosts to be used in image urls.
+// TODO: remove XSS vulnerability
+// Logic
+// - find user and update image url in users collection
+// - change user images in each collection that have user image
+//   - nodeComments (not implemented)
+//   - messages
+//   - notifications
+//   - presentations (not implemented)
+//   - comPoints, comMonthlyPoints, comWeeklyPoints, comOthersPoints, comOthMonPoints, comOthWeekPoints
+//   - schoolPoints, schoolMonthlyPoints, schoolWeeklyPoints, schoolOthersPoints, schoolOthMonPoints, schoolOthWeekPoints (not implemented)
+//   - {nodeType}Versions, {nodeType}VersionComments (comments not implemented)
+//   - nodes where this user is admin
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     let writeCounts = 0;
@@ -33,4 +47,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

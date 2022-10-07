@@ -12,8 +12,9 @@ type IFakeUserOptions = {
 
 export function createUser(params: IFakeUserOptions): IUser {
   const clickedConsent = faker.datatype.boolean();
+  const uname = params.uname ? params.uname : faker.internet.userName();
   return {
-    documentId: params.documentId ? params.documentId : faker.datatype.uuid(),
+    documentId: uname,
     fName: faker.hacker.noun(),
     lName: faker.hacker.noun(),
     tag: String(params.tag?.title), // community name
@@ -38,7 +39,7 @@ export function createUser(params: IFakeUserOptions): IUser {
     blocked: false,
     lang: "English",
     deCredits: faker.datatype.number({ precision: 0 }),
-    uname: params.uname ? params.uname : faker.internet.userName(),
+    uname: uname,
     email: faker.internet.email(),
     userId: faker.git.commitSha(),
     theme: faker.datatype.boolean() ? "Dark" : "Light",
@@ -107,5 +108,13 @@ export function getDefaultUser(params: IFakeUserOptions): IUser {
     reason: faker.hacker.phrase(),
     createdAt: new Date(),
     updatedAt: new Date(),
+  };
+}
+
+export function convertUserToTypeSchema(user: IUser) {
+  return {
+    username: user.uname,
+    name: `${user.fName} ${user.lName}`,
+    imageUrl: user.imageUrl,
   };
 }

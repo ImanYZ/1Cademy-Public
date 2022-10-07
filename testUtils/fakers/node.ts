@@ -1,4 +1,6 @@
 import { faker } from "@faker-js/faker";
+import { IUserNodeVersion } from "src/types/IUserNodeVersion";
+import { IUserNodeVersionLog } from "src/types/IUserNodeVersionLog";
 
 import { INode } from "../../src/types/INode";
 import { INodeContributor } from "../../src/types/INodeContributor";
@@ -131,6 +133,35 @@ export function createNode(params: IFakeNodeOptions): INode {
   };
 }
 
+export function convertNodeToTypeSchema(node: INode, params: any = {}) {
+  const netVote = node.corrects - node.wrongs;
+  return {
+    changedAtMillis: node.updatedAt.getUTCMilliseconds(),
+    updatedAt: Math.floor(node.updatedAt.getTime() / 1000),
+    content: node.content,
+    contributorsNames: node.contribNames,
+    mostHelpful: params.mostHelpful ? params.mostHelpful : 0,
+    corrects: node.corrects,
+    wrongs: node.wrongs,
+    netVotes: netVote && !isNaN(netVote) ? netVote : 0,
+    labelsReferences: node.referenceLabels,
+    institutionsNames: node.institNames,
+    nodeType: node.nodeType,
+    tags: node.tags,
+    title: node.title,
+    titlesReferences: node.references,
+    isTag: !!node.isTag,
+    institNames: node.institNames,
+    versions: node.versions,
+  };
+}
+
+export function convertNodeReferenceToTypeSchema(node: INode) {
+  return {
+    title: node.title,
+  };
+}
+
 export function getDefaultNode(params: IFakeNodeOptions): INode {
   const { admin } = params;
   return {
@@ -253,5 +284,50 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     updatedAt: new Date(),
     tags: tags ? tags.map(tag => tag.title) : [],
     tagIds: tags ? tags.map(tag => String(tag.documentId)) : [],
+  };
+}
+
+type IFakeUserNodeVersionOptions = {
+  documentId?: string;
+  node?: INode;
+  user?: IUser;
+  version?: INodeVersion;
+  correct?: boolean;
+  wrong?: boolean;
+  award?: boolean;
+};
+
+export function createUserNodeVersion(params: IFakeUserNodeVersionOptions): IUserNodeVersion {
+  const { documentId, node, user, version, correct, wrong, award } = params;
+  return {
+    documentId: documentId ? documentId : faker.datatype.uuid(),
+    award: !!award,
+    correct: !!correct,
+    wrong: !!wrong,
+    version: version ? String(version.documentId) : faker.datatype.uuid(), // version id
+    user: user ? String(user.documentId) : faker.datatype.uuid(),
+    opened: false,
+    nodeType: node ? node.nodeType : "Concept",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+type IFakeUserNodeVersionLogOptions = {
+  documentId?: string;
+  userNodeVersion?: IUserNodeVersion;
+};
+
+export function createUserNodeVersionLog(params: IFakeUserNodeVersionLogOptions): IUserNodeVersionLog {
+  const { documentId, userNodeVersion } = params;
+  return {
+    documentId: documentId ? documentId : faker.datatype.uuid(),
+    award: userNodeVersion ? userNodeVersion.award : false,
+    correct: userNodeVersion ? userNodeVersion.correct : false,
+    wrong: userNodeVersion ? userNodeVersion.wrong : false,
+    version: userNodeVersion ? userNodeVersion.version : faker.datatype.uuid(), // version id
+    user: userNodeVersion ? userNodeVersion.user : faker.datatype.uuid(),
+    nodeType: userNodeVersion ? userNodeVersion.nodeType : "Concept",
+    createdAt: new Date(),
   };
 }

@@ -5,6 +5,8 @@ import { getQueryParameter } from "@/lib/utils/utils";
 import { FilterValue } from "../../knowledgeTypes";
 import { getInstitutionsForAutocomplete } from "../../lib/firestoreServer/institutions";
 
+// Logic
+// - getting existing institutions from given institutions array from institution collection
 async function handler(req: NextApiRequest, res: NextApiResponse<FilterValue[]>) {
   try {
     const institutions = (getQueryParameter(req.query.institutions) || "").split(",").filter(el => el !== "");

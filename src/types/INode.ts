@@ -19,7 +19,9 @@ export type INode = {
     [key: string]: INodeContributor;
   };
   title: string;
-  nodeImage: string;
+  nodeImage?: string;
+  nodeVideo?: string;
+  nodeAudio?: string;
   comments: number;
   deleted: boolean;
   content: string;

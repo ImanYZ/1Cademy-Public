@@ -1,8 +1,27 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fbAuth from "src/middlewares/fbAuth";
+import { INodeType } from "src/types/INodeType";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { addToPendingPropsNumsExcludingVoters, getNode, getVersion } from "../../utils";
 
+export type IDeleteVersionReqBody = {
+  data: {
+    versionId: string;
+    nodeType: INodeType;
+    nodeId: string;
+  };
+};
+
+// TODO: we are not removing user{nodeType}Versions documents yet
+// Logic
+// If version is pending and owned by current user then delete
+// - If deleting version already
+//   - flag node version document as deleted
+//   - decrease node versions attribute by 1
+//   - decrement notification num for pending proposals if user haven't voted yet and community of version equal user's
+// - If not owned by user or already accepted ignore delete action
+//
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     let batch = db.batch();
@@ -44,4 +63,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

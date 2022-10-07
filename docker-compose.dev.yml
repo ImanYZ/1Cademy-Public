@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  typesense-dev:
+    container_name: typesense-dev
+    image: typesense/typesense:0.23.1
+    restart: always
+    ports:
+      - 8108:8108
+    volumes:
+      - ./tmp/data:/data
+    command: --data-dir /data --api-key=sxdEHas252dwAdu

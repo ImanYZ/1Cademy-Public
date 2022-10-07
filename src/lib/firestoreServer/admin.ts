@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import { cert, initializeApp } from "firebase-admin/app";
+import { App, cert, initializeApp } from "firebase-admin/app";
 import { DocumentReference, getFirestore, WriteBatch } from "firebase-admin/firestore";
 
 import { arrayToChunks } from "../../utils";
@@ -8,6 +8,8 @@ import { delay } from "../utils/utils";
 export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 
 require("dotenv").config();
+
+let app: App;
 
 if (!admin.apps.length) {
   let initializationConfigs: any = {
@@ -33,7 +35,7 @@ if (!admin.apps.length) {
       credential: admin.credential.applicationDefault(),
     };
   }
-  initializeApp(initializationConfigs);
+  app = initializeApp(initializationConfigs);
   getFirestore().settings({ ignoreUndefinedProperties: true });
 }
 const MAX_TRANSACTION_WRITES = 499;
@@ -113,4 +115,5 @@ export {
   type TWriteOperation,
   checkRestartBatchWriteCounts,
   MIN_ACCEPTED_VERSION_POINT_WEIGHT,
+  app,
 };

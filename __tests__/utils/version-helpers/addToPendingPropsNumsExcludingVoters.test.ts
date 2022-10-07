@@ -42,6 +42,6 @@ describe("addToPendingPropsNumsExcludingVoters", () => {
     await commitBatch(batch);
     const pendingPropsNumsDocs: any = await db.collection("pendingPropsNums").where("uname", "==", "1man").get();
     expect(writeCounts).toBeGreaterThan(0);
-    expect(pendingPropsNumsDocs.docs[0].data()).toMatchObject({ pNums: 1 });
+    expect(pendingPropsNumsDocs.docs[0].data()).toMatchObject({ pNum: 1 });
   });
 });
