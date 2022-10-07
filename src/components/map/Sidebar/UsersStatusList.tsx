@@ -332,7 +332,10 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   }, []);
 
   return (
-    <div id="UsersStatusList" style={{ height: scaledHeight }}>
+    <div
+      id="UsersStatusList"
+      style={{ height: scaledHeight, display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
       {renderUsersList(onlineUsersList, true)}
       {renderUsersList(usersList, false)}
     </div>

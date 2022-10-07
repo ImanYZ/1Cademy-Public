@@ -2,7 +2,7 @@
 // import { useRecoilValue } from "recoil";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import { Badge } from "@mui/material";
+import { Badge, Box } from "@mui/material";
 
 // import shortenNumber from "../../../lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../MetaButton";
@@ -27,8 +27,13 @@ export const NotificationsButton = ({ openSideBar, uncheckedNotificationsNum }: 
       // tooltip="Click to open the notifications."
       // tooltipPosition="Right"
     >
-      <>
-        <Badge badgeContent={4} color="error" anchorOrigin={{ vertical: "top", horizontal: "left" }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
+        <Badge
+          badgeContent={uncheckedNotificationsNum ?? 0}
+          color="error"
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+          sx={{ wordBreak: "normal", padding: "1px" }}
+        >
           {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
         </Badge>
         {/* {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />} */}
@@ -37,7 +42,7 @@ export const NotificationsButton = ({ openSideBar, uncheckedNotificationsNum }: 
         </i> */}
         <span className="SidebarDescription">Notifications</span>
         {/* {uncheckedNotificationsNum > 0 && <div className="">{shortenNumber(uncheckedNotificationsNum, 2, false)}</div>} */}
-      </>
+      </Box>
     </MemoizedMetaButton>
   );
 };
