@@ -883,13 +883,21 @@
 }
 #SidebarButtonsContainer:focus #SidebarButtons,
 #SidebarButtonsContainer:hover #SidebarButtons {
-  width: 130px;
-  margin-left: 7px;
-  margin-right: 7px;
+  width: 150px;
+  padding: 10px 8px;
+  /* margin-left: 7px;
+  margin-right: 7px; */
+}
+#SidebarButtonsContainer:focus #UsersStatusList::-webkit-scrollbar,
+#SidebarButtonsContainer:hover #UsersStatusList::-webkit-scrollbar {
+  /* margin-left: -7px; */
+  /* margin-right: -400px;
+  padding-right: 400px; */
+  display: block;
 }
 #SidebarButtonsContainer:focus #UsersStatusList,
 #SidebarButtonsContainer:hover #UsersStatusList {
-  margin-left: -7px;
+  /* margin-left: -7px; */
   /* margin-right: -400px;
   padding-right: 400px; */
 }
@@ -919,9 +927,12 @@
 }
 #SidebarButtonsContainer:focus .SidebarDescription,
 #SidebarButtonsContainer:hover .SidebarDescription {
+  display: flex;
+  align-items: center;
   visibility: visible;
   line-height: 16px;
-  height: 19px;
+  height: 24px;
+  /* height: auto; */
   transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
   -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
   -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
@@ -967,10 +978,14 @@
 }
 
 #LeaderboardChanger {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   visibility: hidden;
-  margin-left: 4px;
+  /* margin-left: 4px; */
   height: 0px;
-  width: 94px;
+  /* width: 94px; */
   font-size: 13px;
 }
 #SidebarButtonsContainer:focus #LeaderboardChanger,
@@ -991,8 +1006,10 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  width: 64px;
-  margin-left: 16px;
+  /* width: 64px; */
+  width: 80px;
+  /* margin-left: 16px; */
+  padding: 10px 16px;
   transform-origin: top right;
   transition: width 1s, margin-left 1s; /* vendorless fallback */
   -o-transition: width 1s, margin-left 1s; /* opera */
@@ -1004,10 +1021,11 @@
 #SidebarButtons .Logo {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 20px;
-  margin-left: -13px;
+  /* margin-left: -13px;
   margin-top: -4px;
-  margin-bottom: 4px;
+  margin-bottom: 4px; */
   transition: margin-left 1s; /* vendorless fallback */
   -o-transition: margin-left 1s; /* opera */
   -ms-transition: margin-left 1s; /* IE 10 */
@@ -1019,7 +1037,7 @@
   /* Check: I commented this */
   height: 91px;
   width: 79px;
-  margin: auto;
+  /* margin: auto; */
 }
 
 #SidebarButtons .preloader-wrapper {
@@ -1036,15 +1054,16 @@
 #SidebarButtons .MetaButton {
   display: block;
   line-height: 28px;
-  height: 37px;
+  /* height: 37px; */
   width: 130px;
 }
 
 .SidebarDescription {
   display: block;
   position: relative;
-  left: 25px;
-  top: -19px;
+  /* left: 25px;
+  top: -19px; */
+  font-size: 15px;
   line-height: 0;
   height: 0;
   overflow: hidden;
@@ -1083,7 +1102,7 @@
 }
 
 #UsersStatusList .SidebarButton {
-  left: -8px;
+  /* left: -8px; */
   top: 0px;
   direction: ltr;
   overflow: visible;
@@ -1206,7 +1225,7 @@ button.MuiTab-textColorInherit:focus {
 
 .LeaderbaordIcon {
   font-size: 22px;
-  margin-top: 4px;
+  /* margin-top: 4px; */
 }
 
 .MuiButtonBase-root.MuiTab-root.MuiTab-textColorInherit:hover {
@@ -1214,15 +1233,16 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #LeaderboardTag {
-  margin-top: -10px;
+  /* margin-top: -10px; */
+  font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-#LeaderboardType {
+/* #LeaderboardType {
   margin-bottom: -10px;
-}
+} */
 
 #SidebarButtons #MultipleChoiceBtnContainer {
   left: 137.5px;
@@ -2392,16 +2412,25 @@ button.MuiTab-textColorInherit:focus {
   overflow-y: auto;
   overflow-x: hidden;
   /* direction: rtl; */
-  direction: ltr;
-  margin-top: 0px;
-  padding-top: 4px;
+  /* direction: ltr; */
+  /* margin-top: 0px; */
+  /* padding-top: 4px; */
   /* margin-left: -16px; */
-  padding-left: 16px;
+  /* padding-left: 16px; */
   transition: margin-left 1s; /* vendorless fallback */
   -o-transition: margin-left 1s; /* opera */
   -ms-transition: margin-left 1s; /* IE 10 */
   -moz-transition: margin-left 1s; /* Firefox */
   -webkit-transition: margin-left 1s; /*safari and chrome */
+}
+#UsersStatusList::-webkit-scrollbar {
+  width: 4px; /* Tamaño del scroll en vertical */
+  height: 4px; /* Tamaño del scroll en horizontal */
+  display: none;
+}
+#UsersStatusList::-webkit-scrollbar-thumb {
+  background: rgba(119, 119, 119, 0.692);
+  border-radius: 4px;
 }
 
 /* -------------------------------- */
@@ -2559,5 +2588,6 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #SidebarButtonsContainer:hover .customUserStatusTotalPoints {
-  display: block;
+  display: flex;
+  align-items: center;
 }

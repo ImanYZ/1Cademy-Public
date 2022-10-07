@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Tooltip } from "@mui/material";
+import { Box, SxProps, Theme, Tooltip } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -25,6 +25,7 @@ type UserStatusIconProps = {
   totalNegatives?: any;
   totalPoints?: any;
   tagTitle?: string;
+  sx?: SxProps<Theme>;
 };
 
 const UserStatusIcon = (props: UserStatusIconProps) => {
@@ -147,17 +148,18 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   // this is with changes in styles
   return (
     <Tooltip title={getTooltipTitle()} placement="top">
-      <div
+      <Box
         // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
         className="SidebarButton"
         onClick={openUserInfo}
-        style={{
+        sx={{
           // border: "dashed 2px pink",
           display: "flex",
-          alignItems: "cemter",
+          alignItems: "center",
           justifyContent: "flex-start",
           gap: "5px",
           padding: "5px 0px",
+          ...props.sx,
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
@@ -174,12 +176,12 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
           <div className={"customUserStatusTotalPoints"}>
-            <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "20px" }} />
-            <span style={{ fontSize: "14px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
+            <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
+            <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
             {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
           </div>
         )}
-      </div>
+      </Box>
     </Tooltip>
   );
 };

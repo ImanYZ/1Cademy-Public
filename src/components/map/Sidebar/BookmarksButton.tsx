@@ -16,12 +16,12 @@ const BookmarksButton = ({ openSideBar, bookmarkUpdatesNum }: BookmarksButton) =
       // tooltip="Click to open the bookmarked nodes' updates."
       // tooltipPosition="Right"
     >
-      <Box>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
         <Badge
           badgeContent={bookmarkUpdatesNum ?? 0}
           color="error"
           anchorOrigin={{ vertical: "top", horizontal: "left" }}
-          sx={{ padding: "1px" }}
+          sx={{ wordBreak: "normal", padding: "1px" }}
         >
           <BookmarkBorderIcon className="material-icons" />
         </Badge>

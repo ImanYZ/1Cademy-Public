@@ -443,6 +443,7 @@ const Sidebar = (props: SidebarType) => {
             inUserBar={true}
             inNodeFooter={false}
             reloadPermanentGrpah={props.reloadPermanentGrpah}
+            sx={{ justifyContent: "center" }}
           />
 
           <Button id="SearchButton" onClick={openSideBarClick("Search")}>
@@ -474,7 +475,15 @@ const Sidebar = (props: SidebarType) => {
                 // }
                 // tooltipPosition="Right"
               >
-                <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    gap: "5px",
+                    height: "30px",
+                  }}
+                >
                   <div className="LeaderbaordIcon">🏆</div>
                   {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
                   {/* {!props.reputationsLoaded && (
@@ -495,9 +504,11 @@ const Sidebar = (props: SidebarType) => {
 
                   <div id="LeaderboardChanger" className="SidebarDescription">
                     <div id="LeaderboardTag">{user.tag}</div>
-                    <div id="LeaderboardType">{leaderboardType ? leaderboardType : "Leaderboard"}</div>
+                    <div id="LeaderboardType" style={{ fontSize: "12px" }}>
+                      {leaderboardType ? leaderboardType : "Leaderboard"}
+                    </div>
                   </div>
-                </>
+                </Box>
               </MemoizedMetaButton>
               {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
               {leaderboardType && (

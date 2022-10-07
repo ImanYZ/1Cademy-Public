@@ -27,12 +27,12 @@ export const NotificationsButton = ({ openSideBar, uncheckedNotificationsNum }: 
       // tooltip="Click to open the notifications."
       // tooltipPosition="Right"
     >
-      <Box>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
         <Badge
           badgeContent={uncheckedNotificationsNum ?? 0}
           color="error"
           anchorOrigin={{ vertical: "top", horizontal: "left" }}
-          sx={{ padding: "1px" }}
+          sx={{ wordBreak: "normal", padding: "1px" }}
         >
           {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
         </Badge>

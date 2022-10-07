@@ -22,7 +22,7 @@ const PendingProposalsButton = (props: PendingProposalsButtonProps) => {
       // tooltip="Click to open the list of pending proposals."
       // tooltipPosition="Right"
     >
-      <Box>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
         <Badge
           badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
           color="error"
