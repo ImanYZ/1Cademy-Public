@@ -115,6 +115,7 @@ const NotificationsList = (props: NotificationsListProps) => {
       }),
     [lastIndex, props.notifications.length]
   );
+
   return (
     <>
       {notifications.map(notification => {
@@ -125,7 +126,7 @@ const NotificationsList = (props: NotificationsListProps) => {
             style={{
               // border: "solid 2px royalBlue",
               listStyle: "none",
-              padding: "2px 10px",
+              padding: "10px 10px",
               borderBottom: "solid 1px white",
               fontSize: "16px",
               // display: "flex",

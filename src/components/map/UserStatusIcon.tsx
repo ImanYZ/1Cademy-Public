@@ -147,7 +147,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
 
   // this is with changes in styles
   return (
-    <Tooltip title={getTooltipTitle()} placement="top">
+    <Tooltip title={getTooltipTitle()} placement="right">
       <Box
         // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
         className="SidebarButton"

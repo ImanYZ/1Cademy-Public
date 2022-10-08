@@ -201,33 +201,63 @@ const Notifications = (props: NotificationsProps) => {
       title: "Unread",
       content: (
         <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <div id="MarkAllRead">
-            <MemoizedMetaButton onClick={() => checkAllNotification()}>
-              <div id="MarkAllReadButton">
-                {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
-                <DoneAllIcon className="material-icons DoneIcon green-text" />
-                <span>Mark All Read</span>
+          {!uncheckedNotifications.length && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <h3>You don't have notifications</h3>
+            </Box>
+          )}
+          {uncheckedNotifications.length > 0 && (
+            <>
+              <div id="MarkAllRead">
+                <MemoizedMetaButton onClick={() => checkAllNotification()}>
+                  <div id="MarkAllReadButton">
+                    {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
+                    <DoneAllIcon className="material-icons DoneIcon green-text" />
+                    <span>Mark All Read</span>
+                  </div>
+                </MemoizedMetaButton>
               </div>
-            </MemoizedMetaButton>
-          </div>
-          <NotificationsList
-            notifications={uncheckedNotifications}
-            openLinkedNode={props.openLinkedNode}
-            checked={false}
-          />
+              <NotificationsList
+                notifications={uncheckedNotifications}
+                openLinkedNode={props.openLinkedNode}
+                checked={false}
+              />
+            </>
+          )}
         </Box>
       ),
     },
     {
       title: "Read",
       content: (
-        <div>
-          <NotificationsList
-            notifications={checkedNotifications}
-            openLinkedNode={props.openLinkedNode}
-            checked={true}
-          />
-        </div>
+        <Box>
+          {!checkedNotifications.length && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <h3>You don't have notifications</h3>
+            </Box>
+          )}
+          {checkedNotifications.length > 0 && (
+            <NotificationsList
+              notifications={checkedNotifications}
+              openLinkedNode={props.openLinkedNode}
+              checked={true}
+            />
+          )}
+        </Box>
       ),
     },
   ];

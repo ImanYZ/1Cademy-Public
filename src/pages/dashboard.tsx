@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -33,6 +33,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
+import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
 import ClustersList from "../components/map/ClustersList";
@@ -210,7 +211,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /*userNodesLoaded*/ setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
-  const [, /*isSubmitting*/ setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
   // const [openProposals, setOpenProposals] = useState(false);
@@ -258,6 +259,42 @@ const Dashboard = ({}: DashboardProps) => {
   // FUNCTIONS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
+
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user) return;
+      if (!allTagsLoaded) return;
+
+      const userNodesRef = collection(db, "userNodes");
+      const q = query(
+        userNodesRef,
+        where("user", "==", user.uname),
+        // IMPORTANT: I commented this to call all
+        // visible: used to drag nodes in Notebook
+        // visible and invisible to show bookmarks
+        // where("visible", "==", true),
+        where("deleted", "==", false)
+      );
+      const killSnapshot = snapshot(q);
+      return () => {
+        killSnapshot();
+      };
+    },
+    // TODO: check dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allTags, allTagsLoaded, db, user]
+  );
+  //called whenever isSubmitting changes
+  // changes style of cursor
+
+  useEffect(() => {
+    if (isSubmitting) {
+      document.body.style.cursor = "wait";
+    } else {
+      document.body.style.cursor = "initial";
+    }
+  }, [isSubmitting]);
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
@@ -368,7 +405,7 @@ const Dashboard = ({}: DashboardProps) => {
       const userNodesSnapshot = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         if (!docChanges.length) return null;
-
+        // setIsSubmitting(true);
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
@@ -407,6 +444,7 @@ const Dashboard = ({}: DashboardProps) => {
           // newNodes,
           // newEdges,
         });
+        // setIsSubmitting(false);
         setUserNodesLoaded(true);
       });
       return () => userNodesSnapshot();
@@ -414,27 +452,27 @@ const Dashboard = ({}: DashboardProps) => {
     [allTags, db]
   );
 
-  useEffect(() => {
-    if (!db) return;
-    if (!user?.uname) return;
-    if (!allTagsLoaded) return;
+  // useEffect(() => {
+  //   if (!db) return;
+  //   if (!user?.uname) return;
+  //   if (!allTagsLoaded) return;
 
-    const userNodesRef = collection(db, "userNodes");
-    const q = query(
-      userNodesRef,
-      where("user", "==", user.uname),
-      // IMPORTANT: I commented this to call all
-      // visible: used to drag nodes in Notebook
-      // visible and invisible to show bookmarks
-      // where("visible", "==", true),
-      where("deleted", "==", false)
-    );
+  //   const userNodesRef = collection(db, "userNodes");
+  //   const q = query(
+  //     userNodesRef,
+  //     where("user", "==", user.uname),
+  //     // IMPORTANT: I commented this to call all
+  //     // visible: used to drag nodes in Notebook
+  //     // visible and invisible to show bookmarks
+  //     // where("visible", "==", true),
+  //     where("deleted", "==", false)
+  //   );
 
-    const killSnapshot = snapshot(q);
-    return () => {
-      killSnapshot();
-    };
-  }, [allTags, allTagsLoaded, db, snapshot, user?.uname]);
+  //   const killSnapshot = snapshot(q);
+  //   return () => {
+  //     killSnapshot();
+  //   };
+  // }, [allTags, allTagsLoaded, db, snapshot, user?.uname]);
 
   /**
    * Will revert the graph from last changes (temporal Nodes or other changes)
@@ -2812,16 +2850,16 @@ const Dashboard = ({}: DashboardProps) => {
         //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
         //     (oldNodes[sNode.id].corrects - oldNodes[sNode].wrongs) / 2
         //   ) {
-        //     proposalsTemp[proposalIdx].accepted = true
+        //     proposalsTemp[proposalIdx].accepted = true;
         //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
-        //       reloadPermanentGraph()
+        //       reloadPermanentGraph();
         //     }
         //   }
-        //   setProposals(proposalsTemp)
-        //   return oldNodes
-        // })
-        // setIsSubmitting(false)
-        // scrollToNode(sNode)
+        //   setProposals(proposalsTemp);
+        //   return oldNodes;
+        // });
+        setIsSubmitting(false);
+        // scrollToNode(sNode);
       }
       // event.currentTarget.blur();
     },
@@ -2930,6 +2968,9 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Toggle Open proposals
+              </Button>
+              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                Open Proposal
               </Button>
               <Button onClick={() => openNodeHandler("0FQjO6yByNeXOiYlRMvN")}>Open Node Handler</Button>
             </Box>
@@ -3043,23 +3084,30 @@ const Dashboard = ({}: DashboardProps) => {
                 setNodeParts={setNodeParts}
               />
             </MapInteractionCSS>
+            <Suspense fallback={<div></div>}>
+              <Modal
+                open={Boolean(openMedia)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+              >
+                <MapInteractionCSS>
+                  {/* TODO: change open Media variable to string to not validate */}
+                  {typeof openMedia === "string" && (
+                    <>
+                      {/* TODO: change to Next Image */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={openMedia} alt="Node image" className="responsive-img" />
+                    </>
+                  )}
+                </MapInteractionCSS>
+              </Modal>
+              {isSubmitting && (
+                <div className="CenterredLoadingImageContainer">
+                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                </div>
+              )}
+            </Suspense>
 
-            <Modal
-              open={Boolean(openMedia)}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <MapInteractionCSS>
-                {/* TODO: change open Media variable to string to not validate */}
-                {typeof openMedia === "string" && (
-                  <>
-                    {/* TODO: change to Next Image */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={openMedia} alt="Node image" className="responsive-img" />
-                  </>
-                )}
-              </MapInteractionCSS>
-            </Modal>
             {/* // <Modal onClick={closedSidebarClick("Media")}>
               //   <MapInteractionCSS>
               //     <img src={openMedia} alt="Node image" className="responsive-img" />

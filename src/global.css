@@ -678,10 +678,20 @@
   -moz-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
   box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
 }
-
+/*
 #SidebarBody {
   height: 100%;
-  /* overflow: hidden; */
+  overflow: hidden;comment <-
+} */
+
+#SidebarBody::-webkit-scrollbar {
+  width: 8px; /* Tamaño del scroll en vertical */
+  height: 8px; /* Tamaño del scroll en horizontal */
+}
+
+#SidebarBody::-webkit-scrollbar-thumb {
+  background: rgba(117, 117, 117, 0.453);
+  border-radius: 4px;
 }
 
 #SidebarBody .collection {
@@ -1254,7 +1264,9 @@ button.MuiTab-textColorInherit:focus {
 #MiniUserPrifileHeader {
   display: grid;
   grid-template-columns: auto auto;
+  column-gap: 10px;
   width: 415px;
+  padding-left: 10px;
   /* height: 100%; */
 }
 
@@ -1283,11 +1295,15 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #MiniUserPrifilePointsContainer .MiniUserProfilePoints {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
   height: 40px;
 }
 
 #MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
-  margin-left: 55px;
+  margin-left: 45px;
 }
 
 #MiniUserPrifilePointsContainer .MiniUserProfilePoints i,
@@ -2561,10 +2577,14 @@ button.MuiTab-textColorInherit:focus {
   border-radius: 100%;
   position: relative;
   margin-top: -190px;
-  margin-left: -1px;
+  /* margin-left: -1px; */
   z-index: 4;
 }
-.cont:after {
+.profileImage:hover {
+  cursor: pointer;
+  box-shadow: 0 0 16px 0 #bebebe;
+}
+/* .cont:after {
   position: absolute;
   display: block;
   height: 160px;
@@ -2575,10 +2595,10 @@ button.MuiTab-textColorInherit:focus {
   margin-top: -85px;
   margin-left: -70px;
   line-height: 160px;
-  font-size: 61px;
+  font-size: 24px;
   color: white;
   text-shadow: 0 0 0.5em black;
-}
+} */
 
 /* ----------------------------- */
 /* custom overrides */
