@@ -71,23 +71,27 @@ body.Image.LightMode {
 .CenterredLoadingImageContainer {
   display: flex;
   flex-direction: column;
-  position: fixed;
+  position: absolute;
   left: 0px;
   top: 0px;
-  min-height: 100vh;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   padding: 0px;
-  margin: 0 0 0 5.2%;
+  /* margin: 0 0 0 5.2%; */
   align-items: center;
   justify-content: center;
   z-index: 100;
+  border: "solid 2px red";
+  background: rgba(0, 0, 0, 0.452);
 }
 
 .CenterredLoadingImage {
   -webkit-appearance: none;
   appearance: none;
-  width: 28%;
-  margin-bottom: 10px;
+  width: 150px;
+  border: "solid 2px yellow";
+
+  /* margin-bottom: 10px; */
 }
 
 .FileUploadPercentage {

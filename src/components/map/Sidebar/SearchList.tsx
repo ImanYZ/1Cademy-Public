@@ -126,7 +126,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
 
   // const [filteredNodes, setFilteredNodes] = useState([]);
   // const [lastIndex, setLastIndex] = useState(13);
-  const [isRetrieving /* setIsRetrieving*/] = useState(false);
+  const [isRetrieving, setIsRetrieving] = useState(false);
   const [onlyTags /*setOnlyTags*/] = useState(true);
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
@@ -195,7 +195,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
     async (page: number, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
       // async (page: number = 1) => {
       console.log("[onSearch]");
-
+      setIsRetrieving(true);
       const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
         q: nodeBookState.searchQuery,
         nodeTypes,
@@ -216,6 +216,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         totalResults: res.numResults,
       });
       // };
+      setIsRetrieving(false);
     },
     [getTagsSelected, nodeBookState.searchQuery, nodesUpdatedSince, searchResults.data]
   );
