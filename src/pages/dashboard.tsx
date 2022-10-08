@@ -401,7 +401,9 @@ const Dashboard = ({}: DashboardProps) => {
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
         console.log("nodesData", nodesData);
+
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+
         // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook

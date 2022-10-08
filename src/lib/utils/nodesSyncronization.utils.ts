@@ -30,7 +30,14 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
     if (!nodeDoc.exists()) return null;
 
     const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
-    if (nData.deleted) return null;
+    // if (nData.deleted) return null;
+    if (nData.deleted) {
+      return {
+        cType: "removed",
+        nId: nodeDoc.id,
+        nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
+      };
+    }
 
     return {
       cType: "added",
