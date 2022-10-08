@@ -1,3 +1,4 @@
+import { INotificationNum } from "src/types/INotification";
 import { db } from "../../../src/lib/firestoreServer/admin";
 import { IComPoint } from "../../../src/types/IComPoint";
 import { INode, INodeVoteActionType } from "../../../src/types/INode";
@@ -273,6 +274,9 @@ describe("UpDownVoteNode", () => {
     const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
     const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+    const notificationsCollection = new MockData([], "notifications");
+    const notificationNumsCollection = new MockData([], "notificationNums");
+
     const collects = [
       usersCollection,
       nodesCollection,
@@ -290,6 +294,8 @@ describe("UpDownVoteNode", () => {
       otherReputationPointsCollection,
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
+      notificationsCollection,
+      notificationNumsCollection
     ];
 
     beforeEach(async () => {
@@ -696,6 +702,9 @@ describe("UpDownVoteNode", () => {
     const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
     const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+    const notificationsCollection = new MockData([], "notifications");
+    const notificationNumsCollection = new MockData([], "notificationNums");
+
     const collects = [
       usersCollection,
       nodesCollection,
@@ -713,6 +722,8 @@ describe("UpDownVoteNode", () => {
       otherReputationPointsCollection,
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
+      notificationsCollection,
+      notificationNumsCollection
     ];
 
     beforeEach(async () => {
@@ -1120,6 +1131,9 @@ describe("UpDownVoteNode", () => {
     const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
     const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+    const notificationsCollection = new MockData([], "notifications");
+    const notificationNumsCollection = new MockData([], "notificationNums");
+
     const collects = [
       usersCollection,
       nodesCollection,
@@ -1137,6 +1151,8 @@ describe("UpDownVoteNode", () => {
       otherReputationPointsCollection,
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
+      notificationsCollection,
+      notificationNumsCollection
     ];
 
     beforeEach(async () => {
@@ -1544,6 +1560,9 @@ describe("UpDownVoteNode", () => {
     const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
     const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+    const notificationsCollection = new MockData([], "notifications");
+    const notificationNumsCollection = new MockData([], "notificationNums");
+
     const collects = [
       usersCollection,
       nodesCollection,
@@ -1561,6 +1580,8 @@ describe("UpDownVoteNode", () => {
       otherReputationPointsCollection,
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
+      notificationsCollection,
+      notificationNumsCollection
     ];
 
     beforeEach(async () => {
@@ -1968,6 +1989,9 @@ describe("UpDownVoteNode", () => {
     const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
     const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+    const notificationsCollection = new MockData([], "notifications");
+    const notificationNumsCollection = new MockData([], "notificationNums");
+
     const collects = [
       usersCollection,
       nodesCollection,
@@ -1985,6 +2009,8 @@ describe("UpDownVoteNode", () => {
       otherReputationPointsCollection,
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
+      notificationsCollection,
+      notificationNumsCollection
     ];
 
     beforeEach(async () => {
@@ -2392,6 +2418,9 @@ describe("UpDownVoteNode", () => {
     const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
     const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+    const notificationsCollection = new MockData([], "notifications");
+    const notificationNumsCollection = new MockData([], "notificationNums");
+
     const collects = [
       usersCollection,
       nodesCollection,
@@ -2409,6 +2438,8 @@ describe("UpDownVoteNode", () => {
       otherReputationPointsCollection,
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
+      notificationsCollection,
+      notificationNumsCollection
     ];
 
     beforeEach(async () => {
@@ -3175,6 +3206,9 @@ describe("UpDownVoteNode", () => {
       const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
       const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
 
+      const notificationsCollection = new MockData([], "notifications");
+      const notificationNumsCollection = new MockData([], "notificationNums");
+
       const statusDocs = [];
       for (const user of users) {
         statusDocs.push({
@@ -3204,6 +3238,8 @@ describe("UpDownVoteNode", () => {
         otherMonthlyReputationPointsCollection,
         otherWeeklyReputationPointsCollection,
         userStatus,
+        notificationsCollection,
+        notificationNumsCollection
       ];
 
       beforeAll(async () => {
@@ -3231,13 +3267,14 @@ describe("UpDownVoteNode", () => {
         }
       });
 
-      // TODO: need to check notifications list and notificationNum
-
-      /* it("increase notifications count for proposers", async () => {
-        // where("nodeId", "==", node1.documentId)
+      it("increase notifications count for proposers", async () => {
         const notifications = (await db.collection("notifications").get()).docs;
-        console.log(notifications.length, "notifications.length")
-      }); */
+        expect(notifications.length).toEqual(1);
+        const notificationNums = (await db.collection("notificationNums").get()).docs;
+        expect(notificationNums.length).toEqual(1);
+        const notificationNumDoc = notificationNums[0].data() as INotificationNum;
+        expect(notificationNumDoc.nNum).toEqual(1);
+      });
     });
   });
 });
