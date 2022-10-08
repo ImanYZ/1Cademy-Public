@@ -373,7 +373,7 @@ const Dashboard = ({}: DashboardProps) => {
                 tmpNodes = { ...oldNodes };
               }
             }
-            console.log(" ->", { tmpNodes, tmpEdges });
+            // console.log(" ->", { tmpNodes, tmpEdges });
             return {
               // newNodes: { ...acu.newNodes, ...tmpNodes },
               // newEdges: { ...acu.newEdges, ...tmpEdges },
@@ -455,6 +455,28 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [allTags, db]
   );
+
+  // useEffect(() => {
+  //   if (!db) return;
+  //   if (!user?.uname) return;
+  //   if (!allTagsLoaded) return;
+
+  //   const userNodesRef = collection(db, "userNodes");
+  //   const q = query(
+  //     userNodesRef,
+  //     where("user", "==", user.uname),
+  //     // IMPORTANT: I commented this to call all
+  //     // visible: used to drag nodes in Notebook
+  //     // visible and invisible to show bookmarks
+  //     // where("visible", "==", true),
+  //     where("deleted", "==", false)
+  //   );
+
+  //   const killSnapshot = snapshot(q);
+  //   return () => {
+  //     killSnapshot();
+  //   };
+  // }, [allTags, allTagsLoaded, db, snapshot, user?.uname]);
 
   /**
    * Will revert the graph from last changes (temporal Nodes or other changes)

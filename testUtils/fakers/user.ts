@@ -12,7 +12,7 @@ type IFakeUserOptions = {
 
 export function createUser(params: IFakeUserOptions): IUser {
   const clickedConsent = faker.datatype.boolean();
-  const uname = params.uname ? params.uname : String(faker.internet.userName()).replace(/([\.\/]|__)/g, '');
+  const uname = params.uname ? params.uname : String(faker.internet.userName()).replace(/([\.\/]|__)/g, "");
   return {
     documentId: uname,
     fName: faker.hacker.noun(),
