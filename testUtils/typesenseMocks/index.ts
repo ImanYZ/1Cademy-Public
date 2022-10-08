@@ -14,6 +14,9 @@ export class TypesenseMock {
   public getCollection = () => this.collecion;
 
   public populate = async () => {
+    if(await clientTypesense.collections(this.collecion).exists()) {
+      await this.clean();
+    }
     await clientTypesense.collections().create({
       name: this.collecion,
       fields: this.schema,
