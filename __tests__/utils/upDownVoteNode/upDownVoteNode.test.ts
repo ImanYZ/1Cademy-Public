@@ -1,4 +1,5 @@
 import { INotificationNum } from "src/types/INotification";
+
 import { db } from "../../../src/lib/firestoreServer/admin";
 import { IComPoint } from "../../../src/types/IComPoint";
 import { INode, INodeVoteActionType } from "../../../src/types/INode";
@@ -295,7 +296,7 @@ describe("UpDownVoteNode", () => {
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
-      notificationNumsCollection
+      notificationNumsCollection,
     ];
 
     beforeEach(async () => {
@@ -723,7 +724,7 @@ describe("UpDownVoteNode", () => {
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
-      notificationNumsCollection
+      notificationNumsCollection,
     ];
 
     beforeEach(async () => {
@@ -1152,7 +1153,7 @@ describe("UpDownVoteNode", () => {
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
-      notificationNumsCollection
+      notificationNumsCollection,
     ];
 
     beforeEach(async () => {
@@ -1581,7 +1582,7 @@ describe("UpDownVoteNode", () => {
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
-      notificationNumsCollection
+      notificationNumsCollection,
     ];
 
     beforeEach(async () => {
@@ -2010,7 +2011,7 @@ describe("UpDownVoteNode", () => {
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
-      notificationNumsCollection
+      notificationNumsCollection,
     ];
 
     beforeEach(async () => {
@@ -2439,7 +2440,7 @@ describe("UpDownVoteNode", () => {
       otherMonthlyReputationPointsCollection,
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
-      notificationNumsCollection
+      notificationNumsCollection,
     ];
 
     beforeEach(async () => {
@@ -3239,7 +3240,7 @@ describe("UpDownVoteNode", () => {
         otherWeeklyReputationPointsCollection,
         userStatus,
         notificationsCollection,
-        notificationNumsCollection
+        notificationNumsCollection,
       ];
 
       beforeAll(async () => {
