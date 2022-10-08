@@ -133,7 +133,7 @@ export const useWorkerQueue = ({
   );
 
   useEffect(() => {
-    console.log("[queue]: useEffect", { graph });
+    // console.log("[queue]: useEffect", { graph });
     if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;

@@ -59,7 +59,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         left: 0,
         top: 0,
         firstVisit: cur.uNodeData.createdAt.toDate(),
-        lastVisit: cur.uNodeData.updatedAt.toDate(),
+        lastVisit: cur.uNodeData.updatedAt?.toDate() ?? new Date(),
         changedAt: nodeDataFound.nData.changedAt.toDate(),
         createdAt: nodeDataFound.nData.createdAt.toDate(),
         updatedAt: nodeDataFound.nData.updatedAt.toDate(),
