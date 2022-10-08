@@ -684,6 +684,16 @@
   /* overflow: hidden; */
 }
 
+#SidebarBody::-webkit-scrollbar {
+  width: 8px; /* Tamaño del scroll en vertical */
+  height: 8px; /* Tamaño del scroll en horizontal */
+}
+
+#SidebarBody::-webkit-scrollbar-thumb {
+  background: rgba(117, 117, 117, 0.453);
+  border-radius: 4px;
+}
+
 #SidebarBody .collection {
   border-color: rgb(103, 103, 103);
   width: 100%;
