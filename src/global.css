@@ -678,11 +678,11 @@
   -moz-box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
   box-shadow: -1px 0px 10px 0px rgba(190, 190, 190, 1);
 }
-
+/*
 #SidebarBody {
   height: 100%;
-  /* overflow: hidden; */
-}
+  overflow: hidden;comment <-
+} */
 
 #SidebarBody::-webkit-scrollbar {
   width: 8px; /* Tamaño del scroll en vertical */
