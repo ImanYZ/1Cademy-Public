@@ -523,48 +523,46 @@ describe("POST /api/changeUsername", () => {
     });
   });
 
-  describe("", () => {
-    it("check if new user equal old one ignore change username (need change this behaviour)", async () => {
-      const body = {
-        data: {
-          newUname: users[0].uname,
-        },
-      };
+  test("check if new user equal old one ignore change username (need change this behaviour)", async () => {
+    const body = {
+      data: {
+        newUname: users[0].uname,
+      },
+    };
 
-      const req: any = HttpMock.createRequest({
-        method: "POST",
-        body,
-        headers: {
-          authorization: "Bearer " + accessToken,
-        },
-      });
-
-      const res = HttpMock.createResponse();
-      await changeUsernameHandler(req, res as any);
-
-      expect(res._getStatusCode()).toEqual(200);
+    const req: any = HttpMock.createRequest({
+      method: "POST",
+      body,
+      headers: {
+        authorization: "Bearer " + accessToken,
+      },
     });
 
-    it("check if new username already exist for someone else, throw error and respond with 500", async () => {
-      const body = {
-        data: {
-          newUname: users[1].uname,
-        },
-      };
+    const res = HttpMock.createResponse();
+    await changeUsernameHandler(req, res as any);
 
-      const req: any = HttpMock.createRequest({
-        method: "POST",
-        body,
-        headers: {
-          authorization: "Bearer " + accessToken,
-        },
-      });
+    expect(res._getStatusCode()).toEqual(200);
+  });
 
-      const res = HttpMock.createResponse();
-      await changeUsernameHandler(req, res as any);
+  test("check if new username already exist for someone else, throw error and respond with 500", async () => {
+    const body = {
+      data: {
+        newUname: users[1].uname,
+      },
+    };
 
-      expect(res._getStatusCode()).toEqual(500);
+    const req: any = HttpMock.createRequest({
+      method: "POST",
+      body,
+      headers: {
+        authorization: "Bearer " + accessToken,
+      },
     });
+
+    const res = HttpMock.createResponse();
+    await changeUsernameHandler(req, res as any);
+
+    expect(res._getStatusCode()).toEqual(500);
   });
 
   describe("should be able to change username if request is valid", () => {
@@ -590,13 +588,13 @@ describe("POST /api/changeUsername", () => {
       expect(res._getStatusCode()).toEqual(200);
     });
 
-    it("create a new doc with new username in users collection and copy all of fields from old doc to new", async () => {
+    test("create a new doc with new username in users collection and copy all of fields from old doc to new", async () => {
       const userData = (await db.collection("users").doc(newUsername).get()).data() as IUser;
       expect(userData).not.toBeUndefined();
       expect(userData.uname).toEqual(newUsername);
     });
 
-    it("delete old user doc", async () => {
+    test("delete old user doc", async () => {
       const userData = (await db.collection("users").doc(users[0].uname).get()).data() as IUser;
       expect(userData).toBeUndefined();
     });
