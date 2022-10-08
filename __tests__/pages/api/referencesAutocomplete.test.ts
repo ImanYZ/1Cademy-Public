@@ -46,6 +46,7 @@ describe("GET /api/referencesAutocomplete", () => {
   );
   const collects = [usersCollection, nodesCollection, institutionsTSCollection];
   beforeEach(async () => {
+    await Promise.all(collects.map(collect => collect.clean()));
     await Promise.all(collects.map(collect => collect.populate()));
   });
 
