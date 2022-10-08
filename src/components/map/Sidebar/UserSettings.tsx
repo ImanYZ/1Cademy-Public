@@ -511,6 +511,10 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   //   [firebase, username]
   // );
 
+  /**
+   * Update user attribute in DB
+   * then create a log
+   */
   const changeAttr = useCallback(
     (
         attrName:

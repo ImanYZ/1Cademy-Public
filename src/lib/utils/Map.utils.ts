@@ -301,11 +301,11 @@ export const setDagNode = (
 
   // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
   if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
-    console.log("----sP---->>", { node, nodeTag: node.tagIds[0] }, [...g.nodes()]);
+    // console.log("----sP---->>", { node, nodeTag: node.tagIds[0] }, [...g.nodes()]);
     // setParent sets a cluster for the node with node Id
     // node.tags[0].node: node Id of the first tag from the node data
     g.setParent(nodeId, "Tag" + node.tagIds[0]);
-    console.log("nodes", [...g.nodes()]);
+    // console.log("nodes", [...g.nodes()]);
   }
 
   if (callback) {
