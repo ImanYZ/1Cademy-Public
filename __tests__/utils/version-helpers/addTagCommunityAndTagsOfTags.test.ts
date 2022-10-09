@@ -1,20 +1,30 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addTagCommunityAndTagsOfTags, getTypedCollections } from "../../../src/utils";
-import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { conceptVersionsData, MockData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("addTagCommunityAndTagsOfTags", () => {
+
+  const collects = [
+    conceptVersionsData, nodesData, tagsData, usersData
+  ];
+
+  collects.push(new MockData([], "comMonthlyPoints"))
+  collects.push(new MockData([], "comOthMonPoints"))
+  collects.push(new MockData([], "comOthWeekPoints"))
+  collects.push(new MockData([], "comOthersPoints"))
+  collects.push(new MockData([], "comPoints"))
+  collects.push(new MockData([], "comWeeklyPoints"))
+
   beforeEach(async () => {
-    await usersData.populate();
-    await nodesData.populate();
-    await tagsData.populate();
-    await conceptVersionsData.populate();
+    await Promise.all(
+      collects.map(collect => collect.populate())
+    );
   });
 
   afterEach(async () => {
-    await usersData.clean();
-    await nodesData.clean();
-    await tagsData.clean();
-    await conceptVersionsData.clean();
+    await Promise.all(
+      collects.map(collect => collect.clean())
+    );
   });
 
   it("should perform addTagCommunityAndTagsOfTags action on tags collection", async () => {

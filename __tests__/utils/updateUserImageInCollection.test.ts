@@ -52,131 +52,76 @@ import {
 
 describe("updateUserImageEverywhere", () => {
   const username = "A_wei";
+
+  const collects = [
+    nodesData,
+    userNodesData,
+
+    conceptVersionCommentsData,
+    conceptVersionsData,
+    userConceptVersionsData,
+    userConceptVersionCommentsData,
+
+    codeVersionCommentsData,
+    codeVersionsData,
+    userCodeVersionsData,
+    userCodeVersionCommentsData,
+
+    relationVersionCommentsData,
+    relationVersionsData,
+    userRelationVersionsData,
+    userRelationVersionCommentsData,
+
+    questionVersionCommentsData,
+    questionVersionsData,
+    userQuestionVersionsData,
+    userQuestionVersionCommentsData,
+
+    profileVersionCommentsData,
+    profileVersionsData,
+    userProfileVersionsData,
+    userProfileVersionCommentsData,
+
+    sequelVersionCommentsData,
+    sequelVersionsData,
+    userSequelVersionsData,
+    userSequelVersionCommentsData,
+
+    advertisementVersionCommentsData,
+    advertisementVersionsData,
+    userAdvertisementVersionsData,
+    userAdvertisementVersionCommentsData,
+
+    referenceVersionCommentsData,
+    referenceVersionsData,
+    userReferenceVersionsData,
+    userReferenceVersionCommentsData,
+
+    newsVersionCommentsData,
+    newsVersionsData,
+    userNewsVersionsData,
+    userNewsVersionCommentsData,
+
+    ideaVersionCommentsData,
+    ideaVersionsData,
+    userIdeaVersionsData,
+    userIdeaVersionCommentsData,
+
+    privateVersionCommentsData,
+    privateVersionsData,
+    userPrivateVersionsData,
+    userPrivateVersionCommentsData
+  ];
+
   beforeEach(async () => {
     await Promise.all(
-      [
-        nodesData,
-        userNodesData,
-
-        conceptVersionCommentsData,
-        conceptVersionsData,
-        userConceptVersionsData,
-        userConceptVersionCommentsData,
-
-        codeVersionCommentsData,
-        codeVersionsData,
-        userCodeVersionsData,
-        userCodeVersionCommentsData,
-
-        relationVersionCommentsData,
-        relationVersionsData,
-        userRelationVersionsData,
-        userRelationVersionCommentsData,
-
-        questionVersionCommentsData,
-        questionVersionsData,
-        userQuestionVersionsData,
-        userQuestionVersionCommentsData,
-
-        profileVersionCommentsData,
-        profileVersionsData,
-        userProfileVersionsData,
-        userProfileVersionCommentsData,
-
-        sequelVersionCommentsData,
-        sequelVersionsData,
-        userSequelVersionsData,
-        userSequelVersionCommentsData,
-
-        advertisementVersionCommentsData,
-        advertisementVersionsData,
-        userAdvertisementVersionsData,
-        userAdvertisementVersionCommentsData,
-
-        referenceVersionCommentsData,
-        referenceVersionsData,
-        userReferenceVersionsData,
-        userReferenceVersionCommentsData,
-
-        newsVersionCommentsData,
-        newsVersionsData,
-        userNewsVersionsData,
-        userNewsVersionCommentsData,
-
-        ideaVersionCommentsData,
-        ideaVersionsData,
-        userIdeaVersionsData,
-        userIdeaVersionCommentsData,
-
-        privateVersionCommentsData,
-        privateVersionsData,
-        userPrivateVersionsData,
-        userPrivateVersionCommentsData,
-      ].map(collect => collect.populate())
+      collects.map(collect => collect.populate())
     );
   });
 
   afterEach(async () => {
     await Promise.all(
-      [
-        nodesData,
-        userNodesData,
-
-        conceptVersionCommentsData,
-        conceptVersionsData,
-        userConceptVersionsData,
-        userConceptVersionCommentsData,
-
-        codeVersionCommentsData,
-        codeVersionsData,
-        userCodeVersionsData,
-        userCodeVersionCommentsData,
-
-        relationVersionCommentsData,
-        relationVersionsData,
-        userRelationVersionsData,
-        userRelationVersionCommentsData,
-
-        questionVersionCommentsData,
-        questionVersionsData,
-        userQuestionVersionsData,
-        userQuestionVersionCommentsData,
-
-        profileVersionCommentsData,
-        profileVersionsData,
-        userProfileVersionsData,
-        userProfileVersionCommentsData,
-
-        sequelVersionCommentsData,
-        sequelVersionsData,
-        userSequelVersionsData,
-        userSequelVersionCommentsData,
-
-        advertisementVersionCommentsData,
-        advertisementVersionsData,
-        userAdvertisementVersionsData,
-        userAdvertisementVersionCommentsData,
-
-        referenceVersionCommentsData,
-        referenceVersionsData,
-        userReferenceVersionsData,
-        userReferenceVersionCommentsData,
-
-        newsVersionCommentsData,
-        newsVersionsData,
-        userNewsVersionsData,
-        userNewsVersionCommentsData,
-
-        ideaVersionCommentsData,
-        ideaVersionsData,
-        userIdeaVersionsData,
-        userIdeaVersionCommentsData,
-
-        privateVersionCommentsData,
-        privateVersionsData,
-        userPrivateVersionsData,
-        userPrivateVersionCommentsData,
-      ].map(collect => collect.clean())
+      collects.map(collect => collect.clean())
     );
   });
 

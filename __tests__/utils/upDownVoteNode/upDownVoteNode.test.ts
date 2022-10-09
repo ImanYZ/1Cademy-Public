@@ -277,6 +277,7 @@ describe("UpDownVoteNode", () => {
 
     const notificationsCollection = new MockData([], "notifications");
     const notificationNumsCollection = new MockData([], "notificationNums");
+    const userNodesLogCollection = new MockData([], "userNodesLog");
 
     const collects = [
       usersCollection,
@@ -297,6 +298,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
+      userNodesLogCollection
     ];
 
     beforeEach(async () => {
@@ -705,6 +707,7 @@ describe("UpDownVoteNode", () => {
 
     const notificationsCollection = new MockData([], "notifications");
     const notificationNumsCollection = new MockData([], "notificationNums");
+    const userNodesLogCollection = new MockData([], "userNodesLog");
 
     const collects = [
       usersCollection,
@@ -725,6 +728,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
+      userNodesLogCollection
     ];
 
     beforeEach(async () => {
@@ -1134,6 +1138,7 @@ describe("UpDownVoteNode", () => {
 
     const notificationsCollection = new MockData([], "notifications");
     const notificationNumsCollection = new MockData([], "notificationNums");
+    const userNodesLogCollection = new MockData([], "userNodesLog");
 
     const collects = [
       usersCollection,
@@ -1154,6 +1159,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
+      userNodesLogCollection
     ];
 
     beforeEach(async () => {
@@ -1563,6 +1569,7 @@ describe("UpDownVoteNode", () => {
 
     const notificationsCollection = new MockData([], "notifications");
     const notificationNumsCollection = new MockData([], "notificationNums");
+    const userNodesLogCollection = new MockData([], "userNodesLog");
 
     const collects = [
       usersCollection,
@@ -1583,6 +1590,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
+      userNodesLogCollection
     ];
 
     beforeEach(async () => {
@@ -1992,6 +2000,7 @@ describe("UpDownVoteNode", () => {
 
     const notificationsCollection = new MockData([], "notifications");
     const notificationNumsCollection = new MockData([], "notificationNums");
+    const userNodesLogCollection = new MockData([], "userNodesLog");
 
     const collects = [
       usersCollection,
@@ -2012,6 +2021,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
+      userNodesLogCollection
     ];
 
     beforeEach(async () => {
@@ -2421,6 +2431,7 @@ describe("UpDownVoteNode", () => {
 
     const notificationsCollection = new MockData([], "notifications");
     const notificationNumsCollection = new MockData([], "notificationNums");
+    const userNodesLogCollection = new MockData([], "userNodesLog");
 
     const collects = [
       usersCollection,
@@ -2441,6 +2452,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
+      userNodesLogCollection
     ];
 
     beforeEach(async () => {
@@ -2881,6 +2893,7 @@ describe("UpDownVoteNode", () => {
       const otherReputationPointsCollection = new MockData(otherReputationPoints, "othersReputations");
       const otherMonthlyReputationPointsCollection = new MockData(otherMonthlyReputationPoints, "othMonReputations");
       const otherWeeklyReputationPointsCollection = new MockData(otherWeeklyReputationPoints, "othWeekReputations");
+      const userNodesLogCollection = new MockData([], "userNodesLog");
 
       const collects = [
         usersCollection,
@@ -2899,6 +2912,7 @@ describe("UpDownVoteNode", () => {
         otherReputationPointsCollection,
         otherMonthlyReputationPointsCollection,
         otherWeeklyReputationPointsCollection,
+        userNodesLogCollection
       ];
 
       beforeAll(async () => {
@@ -3209,6 +3223,7 @@ describe("UpDownVoteNode", () => {
 
       const notificationsCollection = new MockData([], "notifications");
       const notificationNumsCollection = new MockData([], "notificationNums");
+      const userNodesLogCollection = new MockData([], "userNodesLog");
 
       const statusDocs = [];
       for (const user of users) {
@@ -3241,6 +3256,7 @@ describe("UpDownVoteNode", () => {
         userStatus,
         notificationsCollection,
         notificationNumsCollection,
+        userNodesLogCollection
       ];
 
       beforeAll(async () => {

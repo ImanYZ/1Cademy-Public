@@ -5,23 +5,40 @@ import { getTypedCollections } from "../../../src/utils/getTypedCollections";
 import {
   conceptVersionCommentsData,
   conceptVersionsData,
+  MockData,
   nodesData,
   userConceptVersionsData,
 } from "../../../testUtils/mockCollections";
 
 describe("versionCreateUpdate", () => {
+
+  const collects = [
+    conceptVersionCommentsData,
+    conceptVersionsData,
+    nodesData,
+    userConceptVersionsData,
+  ];
+
+  collects.push(new MockData([], "comMonthlyPoints"))
+  collects.push(new MockData([], "comOthMonPoints"))
+  collects.push(new MockData([], "comOthWeekPoints"))
+  collects.push(new MockData([], "comOthersPoints"))
+  collects.push(new MockData([], "comPoints"))
+  collects.push(new MockData([], "comWeeklyPoints"))
+  collects.push(new MockData([], "monthlyReputations"))
+  collects.push(new MockData([], "othMonReputations"))
+  collects.push(new MockData([], "othWeekReputations"))
+  collects.push(new MockData([], "othersReputations"))
+  collects.push(new MockData([], "reputations"))
+  collects.push(new MockData([], "tags"))
+  collects.push(new MockData([], "weeklyReputations"))
+
   beforeEach(async () => {
-    await nodesData.populate();
-    await conceptVersionsData.populate();
-    await userConceptVersionsData.populate();
-    await conceptVersionCommentsData.populate();
+    await Promise.all(collects.map(collect => collect.populate()));
   });
 
   afterEach(async () => {
-    await nodesData.clean();
-    await conceptVersionsData.clean();
-    await userConceptVersionsData.clean();
-    await conceptVersionCommentsData.clean();
+    await Promise.all(collects.map(collect => collect.clean()));
   });
 
   it("should perform versionCreateUpdate action with accepted version", async () => {
