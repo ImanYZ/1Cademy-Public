@@ -28,6 +28,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
+import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -3078,10 +3079,11 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenMedia={setOpenMedia}
             allNodes={allNodes.filter(cur => cur.bookmarked)}
           />
+          <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} />
           <Box
             sx={{
               position: "fixed",
-              bottom: "10px",
+              top: "10px",
               right: "10px",
               zIndex: "1300",
               background: "#123",

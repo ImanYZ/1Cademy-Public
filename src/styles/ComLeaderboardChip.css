@@ -1,0 +1,62 @@
+.ComLeaderboardChip {
+  line-height: 40.9px;
+  direction: ltr;
+  transition: all 2.2s; /* vendorless fallback */
+  -o-transition: all 2.2s; /* opera */
+  -ms-transition: all 2.2s; /* IE 10 */
+  -moz-transition: all 2.2s; /* Firefox */
+  -webkit-transition: all 2.2s; /*safari and chrome */
+  display: inline-block;
+  position: relative;
+  background-color: #333;
+  border-radius: 10px;
+  /* margin: 10px; */
+  width: 130px;
+  height: 55px;
+  padding: 7px;
+  flex-shrink: 0;
+}
+.LightMode .ComLeaderboardChip {
+  background-color: #dcdcdc;
+}
+
+.ComLeaderboardChip.GainedPoint {
+  -webkit-box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
+  -moz-box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
+  box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
+}
+.ComLeaderboardChip.LostPoint {
+  -webkit-box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
+  -moz-box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
+  box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
+}
+
+.ComLeaderboardChip .TooltipText {
+  line-height: 22px;
+}
+
+.ComLeaderboardChipNum {
+  font-family: "KaTeX_Main";
+  color: #dcdcdc;
+  display: inline-block;
+  margin-left: 4px;
+  margin-right: 7px;
+  font-size: 31px;
+  vertical-align: top;
+}
+.LightMode .ComLeaderboardChipNum {
+  color: #454545;
+}
+
+.ComLeaderboardChipDesc {
+  color: rgb(190, 190, 190);
+  display: inline-block;
+  line-height: 19px;
+  width: 85px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.LightMode .ComLeaderboardChipDesc {
+  color: #454545;
+}

@@ -115,6 +115,7 @@ export const loadReputationsData = (
   if (!reputationsQuery) return;
 
   const reputationsSnapshot = onSnapshot(reputationsQuery, async snapshot => {
+    console.log("SNAPSHOT RAN ");
     const docChanges = snapshot.docChanges();
 
     if (docChanges.length > 0) {
@@ -158,11 +159,17 @@ export const loadReputationsData = (
           }
         }
       }
+      console.log("reputationsDictTemp ", reputationsDictTemp);
       setReputationsDict({ ...reputationsDictTemp });
     }
+    console.log("FINISHED");
     setReputationsLoaded(true);
   });
-  return () => reputationsSnapshot();
+
+  return () => {
+    console.log("SNAP KILLED");
+    return reputationsSnapshot();
+  };
 };
 
 // setting the node type and visibility of a parent node inside a child
