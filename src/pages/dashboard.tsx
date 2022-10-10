@@ -279,6 +279,7 @@ const Dashboard = ({}: DashboardProps) => {
       );
       const killSnapshot = snapshot(q);
       return () => {
+        // TODO: here we need to remove nodes cause will come node again
         killSnapshot();
       };
     },
@@ -410,7 +411,10 @@ const Dashboard = ({}: DashboardProps) => {
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
+        console.log("nodesData", nodesData);
+
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+
         // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook
@@ -1972,15 +1976,14 @@ const Dashboard = ({}: DashboardProps) => {
       setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         const choice = { ...choices[choiceIdx] };
+        console.log("----->>> choice", choice);
         choice.choice = value;
         choices[choiceIdx] = choice;
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: We are using changeNodeHight and is called automatically when Height change
-      // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts /*, adjustNodeHeight*/]
+    [setNodeParts]
   );
 
   const changeFeedback = useCallback(
@@ -1994,10 +1997,8 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
-      // CHECK: We are using changeNodeHight and is called automatically when Height change
-      // adjustNodeHeight(nodeRef, nodeId)
     },
-    [setNodeParts /*, adjustNodeHeight*/]
+    [setNodeParts]
   );
 
   const switchChoice = useCallback(
@@ -2495,6 +2496,71 @@ const Dashboard = ({}: DashboardProps) => {
       // nodeBookDispatch({ type: "setSelectionType", payload: null });
     },
     [nodeBookDispatch]
+  );
+
+  const saveProposedChildNode = useMemoizedCallback(
+    (newNodeId, summary, reason) => {
+      nodeBookDispatch({ type: "setChoosingNode", payload: null });
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+
+      // setChoosingNode(false);
+      // setChosenNode(null);
+      // setChosenNodeTitle(null);
+      const newNode = graph.nodes[newNodeId];
+
+      if (!newNode.title) return console.log("title required");
+      if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) return console.log("choices required");
+
+      if (/*newNode.nodeType !== "" &&*/ newNodeId) {
+        let referencesOK = true;
+        if (
+          (newNode.nodeType === "Concept" ||
+            newNode.nodeType === "Relation" ||
+            newNode.nodeType === "Question" ||
+            newNode.nodeType === "News") &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
+        }
+        if (referencesOK) {
+          if (newNode.title !== "" && newNode.title !== "Replace this new node title!" && newNode.tags.length !== 0) {
+            const postData: any = {
+              ...newNode,
+              parentId: newNode.parents[0].node,
+              parentType: graph.nodes[newNode.parents[0].node].nodeType,
+              summary: summary,
+              proposal: reason,
+            };
+            delete postData.isStudied;
+            delete postData.bookmarked;
+            delete postData.isNew;
+            delete postData.correct;
+            delete postData.updatedAt;
+            delete postData.open;
+            delete postData.visible;
+            delete postData.deleted;
+            delete postData.wrong;
+            delete postData.createdAt;
+            delete postData.firstVisit;
+            delete postData.lastVisit;
+            delete postData.versions;
+            delete postData.viewers;
+            delete postData.comments;
+            delete postData.wrongs;
+            delete postData.corrects;
+            delete postData.studied;
+            delete postData.editable;
+            delete postData.left;
+            delete postData.top;
+            delete postData.height;
+            setIsSubmitting(true);
+            getMapGraph("/proposeChildNode", postData);
+            scrollToNode(newNode.parents[0].node);
+          }
+        }
+      }
+    },
+    [graph.nodes, getMapGraph]
   );
 
   const fetchProposals = useCallback(
@@ -3079,7 +3145,7 @@ const Dashboard = ({}: DashboardProps) => {
                 deleteChoice={deleteChoice}
                 addChoice={addChoice}
                 onNodeTitleBlur={onNodeTitleBlur}
-                saveProposedChildNode={() => console.log("saveProposedChildNod")}
+                saveProposedChildNode={saveProposedChildNode}
                 saveProposedImprovement={saveProposedImprovement}
                 closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
