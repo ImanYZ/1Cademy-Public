@@ -10,10 +10,11 @@
   position: relative;
   background-color: #333;
   border-radius: 10px;
-  margin: 10px;
+  /* margin: 10px; */
   width: 130px;
   height: 55px;
   padding: 7px;
+  flex-shrink: 0;
 }
 .LightMode .ComLeaderboardChip {
   background-color: #dcdcdc;

@@ -3,6 +3,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import RemoveIcon from "@mui/icons-material/Remove";
+import { Box, Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { preventEventPropagation } from "@/lib/utils/eventHandlers";
@@ -58,31 +59,51 @@ const ComLeaderboardChip = (props: ComLeaderboardChipProps) => {
   }, [props.totalPoints, props.totalPositives, props.totalNegatives]);
 
   return (
-    <div
-      className={"ComLeaderboardChip Tooltip" + (pointsGained ? " GainedPoint" : "") + (pointsLost ? " LostPoint" : "")}
-      // onClick={openUserInfo}
-    >
-      <div className="ComLeaderboardChipNum">{props.idx + 1}</div>
-      <div className="ComLeaderboardChipDesc">
-        {props.comTitle}
+    <Tooltip
+      placement="top"
+      title={
+        <Box
+          onClick={preventEventPropagation}
+          sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}
+        >
+          {props.comTitle}
 
-        <div>
-          {/* <i className="material-icons DoneIcon green-text">done</i> */}
-          <DoneIcon className="green-text" />
-          {shortenNumber(props.totalPoints, 2, false)}
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            {shortenNumber(props.totalPositives, 2, false) + " "}
+            {/* <i className="material-icons DoneIcon green-text">done</i> <i className="material-icons gray-text">remove</i>{" "} */}
+            <DoneIcon className="green-text" />
+            <RemoveIcon className="gray-text" /> <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
+            {/* <i className="material-icons red-text">close</i> */}
+            <CloseIcon className="red-text" />
+          </Box>
+        </Box>
+      }
+    >
+      <div
+        className={
+          "ComLeaderboardChip Tooltip" + (pointsGained ? " GainedPoint" : "") + (pointsLost ? " LostPoint" : "")
+        }
+        // onClick={openUserInfo}
+      >
+        <div className="ComLeaderboardChipNum">{props.idx + 1}</div>
+        <div className="ComLeaderboardChipDesc">
+          {props.comTitle}
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              fontSize: "14px",
+              gap: "4px",
+            }}
+          >
+            {/* <i className="material-icons DoneIcon green-text">done</i> */}
+            <DoneIcon className="green-text" />
+            {shortenNumber(props.totalPoints, 2, false)}
+          </Box>
         </div>
       </div>
-      <span className="TooltipText Top" onClick={preventEventPropagation}>
-        {props.comTitle}
-        <br></br>
-        {shortenNumber(props.totalPositives, 2, false) + " "}
-        {/* <i className="material-icons DoneIcon green-text">done</i> <i className="material-icons gray-text">remove</i>{" "} */}
-        <DoneIcon className="green-text" />
-        <RemoveIcon className="gray-text" /> <span>{shortenNumber(props.totalNegatives, 2, false)} </span>
-        {/* <i className="material-icons red-text">close</i> */}
-        <CloseIcon className="red-text" />
-      </span>
-    </div>
+    </Tooltip>
   );
 };
 
