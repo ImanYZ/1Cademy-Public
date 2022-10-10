@@ -235,7 +235,14 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
         </div>
         <Box
           className="ComLeaderbaordItems"
-          sx={{ display: "flex", alignItems: "center", gap: "10px", height: "inherit" }}
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+            height: "inherit",
+          }}
         >
           {comLeaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={openComLeaderboardTypes} />}
           {comPoints.length > 0 ? (
@@ -258,9 +265,7 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
               );
             })
           ) : (
-            <div id="CenterredLoadingImageComLeaderboard">
-              <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
-            </div>
+            <Image className="" src={LoadingImg} alt="Loading" />
           )}
         </Box>
       </div>
