@@ -2510,7 +2510,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!newNode.title) return console.log("title required");
       if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) return console.log("choices required");
 
-      if (newNode.nodeType !== "" && newNodeId) {
+      if (/*newNode.nodeType !== "" &&*/ newNodeId) {
         let referencesOK = true;
         if (
           (newNode.nodeType === "Concept" ||
