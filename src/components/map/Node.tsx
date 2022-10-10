@@ -592,7 +592,7 @@ const Node = ({
                     {choices.map((choice, idx) => {
                       return (
                         <QuestionChoices
-                          key={identifier + "Choice" + idx + choice.choice}
+                          key={identifier + "Choice" + idx}
                           identifier={identifier}
                           nodeRef={nodeRef}
                           editable={editable}

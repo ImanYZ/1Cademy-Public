@@ -55,7 +55,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
     setFeedbackCopy(newFeedback);
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      props.changeChoice(props.nodeRef, props.identifier, newFeedback, props.idx);
+      props.changeFeedback(props.nodeRef, props.identifier, newFeedback, props.idx);
     });
   };
 

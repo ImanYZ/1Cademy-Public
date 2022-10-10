@@ -75,7 +75,7 @@ const ProposalsList = (props: ProposalsListProps) => {
       const proposalSummaries = proposalSummariesGenerator(proposal);
 
       if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
-        if (props.openProposal !== proposal.id) {
+        if (props.openProposal === proposal.id) {
           let adminTooltip = "# of 1Admins who have awarded this proposal.";
           if (!props.isAdmin) {
             adminTooltip += " You cannot give this proposal an award, because you are not the 1Admin of this node.";
