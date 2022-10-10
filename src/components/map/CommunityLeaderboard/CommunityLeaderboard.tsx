@@ -217,13 +217,14 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
             ? "ComLeaderboardContainerOthersMonthly"
             : ""
         }
+        style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", border: "solid 2px yellow" }}
       >
         <div id="ComLeaderboardMinimizer">
           <MemoizedMetaButton onClick={openComLeaderboard}>
             {comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}
           </MemoizedMetaButton>
         </div>
-        <div id="ComLeaderbaordChanger">
+        <div id="ComLeaderbaordChanger" style={{ border: "solid 2px red" }}>
           <MemoizedMetaButton onClick={openComLeaderboardTypes}>
             <>
               <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
