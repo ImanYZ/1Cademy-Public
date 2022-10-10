@@ -157,11 +157,13 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
 
   const updateStatesByCountry = useCallback(
     async (currentCountry: string | null) => {
-      if (!currentCountry) return [];
-
+      console.log("updateStatesByCountry", 1, currentCountry);
+      if (!currentCountry) return setStates([]);
+      console.log("updateStatesByCountry", 2, countries);
       const countryObject = countries.find(cur => cur.name === currentCountry);
-      if (!countryObject) return [];
-
+      if (!countryObject) return setStates([]);
+      console.log("updateStatesByCountry", 3);
+      console.log("countryObject", countryObject);
       const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
       const { State } = await import("country-state-city");
       setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
@@ -171,14 +173,21 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
 
   const updateCitiesByState = useCallback(
     async (currentState: string | null) => {
-      if (!user?.country) return [];
-      if (!currentState) return [];
+      console.log("updateCitiesByState", 2);
+      // if (!user?.country) return [];
+      if (!currentState) return setCities([]);
 
+      console.log("updateCitiesByState", 3);
       const currentCountry = countries.find(cur => cur.name === user.country);
-      if (!currentCountry) return [];
+      if (!currentCountry) {
+        setStates([]);
+        setCities([]);
+        return;
+      }
 
+      console.log("updateCitiesByState", 4);
       const stateObject = states.find(cur => cur.name === currentState);
-      if (!stateObject) return [];
+      if (!stateObject) return setCities([]);
 
       const defaultCountry: ICity = { name: "Prefer not to say", countryCode: "", stateCode: "" };
       const { City } = await import("country-state-city");
@@ -223,57 +232,40 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   }, []);
 
   useEffect(() => {
-    // if (CSCByGeolocation) return;
+    updateStatesByCountry(user.country || null);
+  }, [updateStatesByCountry, user.country]);
+
+  useEffect(() => {
+    updateCitiesByState(user.state || null);
+  }, [updateCitiesByState, user.state]);
+
+  useEffect(() => {
+    if (!countries.length) return;
+
     const getCSCByGeolocation = async () => {
       try {
-        if (user.country && user.state) {
-          if (!states.length) {
-            await updateStatesByCountry(user.country);
-          }
-          if (!cities.length) {
-            await updateCitiesByState(user.state);
-          }
-          console.log("user data was updated");
-          return;
-        } else {
-          console.log("will set data by ip");
-          const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=b1a57107845644e2b5e8688727eacb0e");
-          if (!res.data) return;
-          const { country_name, state_prov, city } = res.data;
-          if (!countries.filter(cur => cur.name === country_name)) return;
-          dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
-          const userRef = doc(db, "users", user.uname);
-          await updateDoc(userRef, { country: country_name, state: state_prov, city: city });
-        }
+        if (user.country || user.state || user.city) return;
+
+        const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=b1a57107845644e2b5e8688727eacb0e");
+        if (!res.data) return;
+
+        const { country_name, state_prov, city } = res.data;
+        const isValidCountry = countries.filter(cur => cur.name === country_name);
+        if (!isValidCountry) return;
+
+        const userRef = doc(db, "users", user.uname);
+        await updateDoc(userRef, { country: country_name, state: state_prov, city: city });
+
+        console.log("wiil call set Timeout");
+
+        dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
       } catch (err) {
         console.log("cant autocomplete country state city");
       }
     };
     getCSCByGeolocation();
-  }, [cities.length, countries, db, dispatch, states.length, updateCitiesByState, updateStatesByCountry, user]);
+  }, [countries, db, dispatch, user]);
 
-  // const onChangeCountry = async (_: any, value: string | null) => {
-  //   if (!user) return;
-
-  //   dispatch({
-  //     type: "setAuthUser",
-  //     payload: { ...user, country: value ?? undefined, state: undefined, city: undefined },
-  //   });
-  //   // setFieldValue("country", value);
-  //   // setFieldValue("state", null);
-  //   // setFieldValue("city", null);
-  //   await updateStatesByCountry(value);
-  // };
-
-  // const onChangeState = async (_: any, value: string | null) => {
-  //   if (!user) return;
-
-  //   dispatch({ type: "setAuthUser", payload: { ...user, state: value ?? undefined, city: undefined } });
-  //   // setFieldValue("state", value);
-  //   // setFieldValue("city", null);
-
-  //   await updateCitiesByState(value);
-  // };
   useEffect(() => {
     const total =
       userReputation.cnCorrects -
@@ -511,6 +503,10 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   //   [firebase, username]
   // );
 
+  /**
+   * Update user attribute in DB
+   * then create a log
+   */
   const changeAttr = useCallback(
     (
         attrName:
@@ -685,24 +681,25 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
           changeAttr("country")("");
           changeAttr("state")("");
           changeAttr("city")("");
-          updateStatesByCountry(null);
+          // updateStatesByCountry(null);
         } else {
           const country = event.target.value.split(";")[0];
-          dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value } });
+
+          dispatch({ type: "setAuthUser", payload: { ...user, country: event.target.value, state: "", city: "" } });
           changeAttr("country")(country);
-          updateStatesByCountry(country);
+          changeAttr("state")("");
+          changeAttr("city")("");
         }
       } else if (event.target.name === "state") {
         if (!event.target.value) {
           dispatch({ type: "setAuthUser", payload: { ...user, state: "", city: "" } });
           changeAttr("state")("");
           changeAttr("city")("");
-          updateCitiesByState(null);
         } else {
           const state = event.target.value.split(";")[0];
-          dispatch({ type: "setAuthUser", payload: { ...user, state: event.target.value } });
+          dispatch({ type: "setAuthUser", payload: { ...user, state: event.target.value, city: "" } });
           changeAttr("state")(state);
-          updateCitiesByState(state);
+          changeAttr("city")("");
         }
       } else if (event.target.name === "city") {
         if (!event.target.value) {
@@ -723,7 +720,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
         changeAttr("birthDate")(newDate);
       }
     },
-    [changeAttr, dispatch, genderOtherValue, updateCitiesByState, updateStatesByCountry, user]
+    [changeAttr, dispatch, genderOtherValue, user]
   );
 
   // const onGenderOtherValueChange = event => setGenderOtherValue(event.target.value);

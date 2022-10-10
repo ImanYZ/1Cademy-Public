@@ -1,3 +1,4 @@
+import { Box } from "@mui/system";
 import { getAuth, updateProfile } from "firebase/auth";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -6,7 +7,7 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import { postWithToken } from "../../../lib/mapApi";
 // import { newId } from "../../../lib/utils/newid";
-import { MemoizedMetaButton } from "../MetaButton";
+// import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
 
 // import { firebaseState, imageUrlState, uidState } from "../../../../store/AuthAtoms";
@@ -116,30 +117,57 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
   }, [isUploading, inputEl]);
 
   return (
-    <div id="UserProfilePicture">
-      <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />
-      <MemoizedMetaButton
-        round={true}
-        onClick={handleEditImage}
-        tooltip="Change your profile picture."
-        tooltipPosition="right"
+    <Box>
+      {/* <Box>
+        <input
+          type="file"
+          ref={inputEl}
+          onChange={handleImageChange}
+          accept="image/png, image/jpg, image/jpeg"
+          hidden
+        />
+
+      </Box> */}
+      <Box
+        id=""
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <div className="UserAvatar UserStatusIcon">
+        <input
+          type="file"
+          ref={inputEl}
+          onChange={handleImageChange}
+          accept="image/png, image/jpg, image/jpeg"
+          hidden
+        />
+        <Box
+          // round={true}
+          onClick={handleEditImage}
+          // tooltip="Change your profile picture."
+          // tooltipPosition="right"
+          sx={{ position: "relative", width: "170px", height: "170px", padding: "5px" }}
+        >
           {/* TODO: change with NextJs image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            className="profileImage"
             src={userImage}
-            style={{ width: imageWidth, height: imageHeight }}
+            style={{ width: imageWidth, height: imageHeight, borderRadius: "50%" }}
             alt="1Cademist Profile Picture"
             onLoad={setImageSize}
           />
-        </div>
-      </MemoizedMetaButton>
-      {isUploading && (
-        <PercentageLoader percentage={percentageUploaded} radius={85} widthInPx="200px" heightInPx="200px" />
-      )}
-      {imageUrlError && <div className="errorMessage">{imageUrlError}</div>}
-    </div>
+          {isUploading && (
+            <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="170px" heightInPx="170px" />
+          )}
+        </Box>
+
+        {imageUrlError && <div className="errorMessage">{imageUrlError}</div>}
+      </Box>
+    </Box>
   );
 };
 

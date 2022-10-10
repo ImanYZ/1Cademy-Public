@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import React from "react";
 
 type PercentageLoaderProps = {
@@ -9,12 +10,16 @@ type PercentageLoaderProps = {
 const PercentageLoader = (props: PercentageLoaderProps) => {
   return (
     <>
-      <div className="cont" data-pct={props.percentage} style={{ width: props.widthInPx, height: props.heightInPx }}>
-        <svg className="svg" width="200" height="200" version="1.1">
+      <div
+        className="cont"
+        data-pct={props.percentage}
+        style={{ width: props.widthInPx, height: props.heightInPx, position: "absolute", bottom: "0px" }}
+      >
+        <svg className="svg" width="170px" height="170px" version="1.1">
           <circle
             r={props.radius}
-            cx="98.5"
-            cy="96.1"
+            cx="80"
+            cy="85"
             fill="transparent"
             strokeDasharray="565.48"
             strokeDashoffset="0"
@@ -22,8 +27,8 @@ const PercentageLoader = (props: PercentageLoaderProps) => {
           <circle
             className="bar"
             r={props.radius}
-            cx="98.5"
-            cy="96.1"
+            cx="80"
+            cy="85"
             fill="transparent"
             strokeDasharray="565.48"
             strokeDashoffset="0"
@@ -33,6 +38,23 @@ const PercentageLoader = (props: PercentageLoaderProps) => {
           ></circle>
         </svg>
       </div>
+      <Box
+        style={{
+          width: props.widthInPx,
+          height: props.heightInPx,
+          position: "absolute",
+          bottom: "0px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "white",
+          fontSize: "32px",
+          textShadow: "0 0 .125em black",
+        }}
+        className="cont"
+      >
+        {props.percentage} %
+      </Box>
     </>
   );
 };
