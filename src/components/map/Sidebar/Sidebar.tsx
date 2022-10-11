@@ -1,8 +1,8 @@
 // import "./Sidebar.css";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { addDoc, collection, doc, getFirestore, onSnapshot, setDoc, Timestamp } from "firebase/firestore";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
@@ -167,6 +167,7 @@ type SidebarType = {
   reloadPermanentGrpah: any;
   showClusters: boolean;
   setShowClusters: (newValue: boolean) => void;
+  mapRendered: boolean;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -254,6 +255,7 @@ const Sidebar = (props: SidebarType) => {
   // const [openBookmarks] = useState(false);
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
+  const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
 
   const sidebarRef = useRef<any | null>(null);
 
@@ -262,6 +264,31 @@ const Sidebar = (props: SidebarType) => {
   //   if (!sidebarRef.current) return;
   //   sidebarRef.current.scrollTop = 0;
   // }, [sidebarRef]);
+
+  useEffect(() => {
+    if (!props.mapRendered) return;
+    if (!user) return;
+
+    console.log("GET NTIFICATION NUMS", user.uname);
+    const notificationNumbersQuery = doc(db, "notificationNums", user.uname);
+    console.log("will create snapshot");
+    const killSnapshot = onSnapshot(notificationNumbersQuery, async snapshot => {
+      console.log("onSnapshot", 111);
+      if (!snapshot.exists()) return;
+      console.log(222);
+      setUncheckedNotificationsNum(snapshot.data().nNum);
+      // setNotificationNumsLoaded(true);
+    });
+    // const notificationsQuery = db.collection("notificationNums").doc(user.uname);
+    // notificationNumbersQuery.notificationsSnapshot = notificationsQuery.onSnapshot(function (docSnapshot) {
+    //   if (docSnapshot.exists) {
+    //     // setUncheckedNotificationsNum(docSnapshot.data().nNum);
+    //     // setNotificationNumsLoaded(true);
+    //   }
+    // });
+    // }, 1300);
+    return () => killSnapshot();
+  }, [db, props.mapRendered, user]);
 
   const openSideBar = useCallback(
     async (sidebarType: string) => {
@@ -451,7 +478,7 @@ const Sidebar = (props: SidebarType) => {
             <span className="SidebarDescription">Search</span>
           </Button>
 
-          <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={20} />
+          <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={uncheckedNotificationsNum} />
           <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
           <PendingProposalsButton openSideBar={openSideBar} />
 

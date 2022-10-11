@@ -3078,6 +3078,7 @@ const Dashboard = ({}: DashboardProps) => {
             openTrends={openTrends}
             setOpenMedia={setOpenMedia}
             allNodes={allNodes.filter(cur => cur.bookmarked)}
+            mapRendered={true}
           />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} />
           <Box
