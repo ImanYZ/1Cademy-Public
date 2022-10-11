@@ -6,15 +6,14 @@ import { createCredit } from "testUtils/fakers/credit";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 
+import { DocumentSnapshot } from "firebase-admin/firestore";
 import { admin, db } from "src/lib/firestoreServer/admin";
 import rateVersionHandler, { IRateVersionPayload } from "src/pages/api/rateVersion";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
-import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
-import { IPendingPropNum } from "src/types/IPendingPropNum";
-import { IQuestionChoice } from "src/types/IQuestionChoice";
-import { IReputation } from "src/types/IReputationPoint";
+import { INotification } from "src/types/INotification";
+import { ITag } from "src/types/ITag";
 import { IUserNode } from "src/types/IUserNode";
 import { getTypedCollections } from "src/utils";
 import { createNode, createNodeVersion, createUserNodeVersion, getDefaultNode } from "testUtils/fakers/node";
@@ -22,14 +21,8 @@ import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
-import { ITag } from "src/types/ITag";
-import { DocumentSnapshot } from "firebase-admin/firestore";
-import { IPractice } from "src/types/IPractice";
-import { where } from "firebase/firestore";
-import { INotification } from "src/types/INotification";
 
 describe("POST /api/rateVersion", () => {
-
   describe("if version was previously accepted", () => {
     let res: MockResponse<any>;
 
@@ -70,7 +63,7 @@ describe("POST /api/rateVersion", () => {
         user: users[1],
         node: nodes[0],
         correct: false,
-        wrong: false
+        wrong: false,
       }),
     ];
     const nodeVersions = [
@@ -144,19 +137,22 @@ describe("POST /api/rateVersion", () => {
       new MockData([], "userNodesLog"),
       new MockData([], "userVersionsLog"),
       new MockData([], "tags"),
-      
-      new MockData([
-        {
-          documentId: users[0].documentId,
-          state: "online",
-          last_online: new Date()
-        },
-        {
-          documentId: users[1].documentId,
-          state: "online",
-          last_online: new Date()
-        }
-      ], "status")
+
+      new MockData(
+        [
+          {
+            documentId: users[0].documentId,
+            state: "online",
+            last_online: new Date(),
+          },
+          {
+            documentId: users[1].documentId,
+            state: "online",
+            last_online: new Date(),
+          },
+        ],
+        "status"
+      ),
     ];
 
     const nodesCollection = new MockData(nodes, "nodes");
@@ -165,7 +161,7 @@ describe("POST /api/rateVersion", () => {
     collects.push(userNodesCollection);
 
     let accessToken: string = "";
-    
+
     beforeAll(async () => {
       const user = await auth.createUser({
         email: users[0].email,
@@ -198,7 +194,7 @@ describe("POST /api/rateVersion", () => {
           nodeType: nodes[0].nodeType,
           award: false,
           correct: true,
-          wrong: false
+          wrong: false,
         } as IRateVersionPayload,
       });
 
@@ -214,33 +210,34 @@ describe("POST /api/rateVersion", () => {
     let nodeData: INode;
 
     it("select admin based on maxRating", async () => {
-      nodeData = (await db.collection("nodes").doc(String(nodes[0].documentId)).get()).data() as INode
+      nodeData = (await db.collection("nodes").doc(String(nodes[0].documentId)).get()).data() as INode;
       expect(nodeData.admin).toEqual(users[1].uname);
     });
 
     it("update node if admin was changed or/and maxVersionRating was changed", async () => {
       expect(nodeData.maxVersionRating).toEqual(3);
-    })
+    });
 
     // TODO: need to comment this when we use setImmediate
     it("single a user nodes with major=false", async () => {
-      const userNodes = await db.collection("userNodes")
+      const userNodes = await db
+        .collection("userNodes")
         .where("user", "==", String(users[1].documentId))
-        .where("node", "==", String(nodes[0].documentId)).get();
+        .where("node", "==", String(nodes[0].documentId))
+        .get();
       const userNodeData = userNodes.docs[0].data() as IUserNode;
-      expect(userNodeData.nodeChanges?.maxVersionRating).toEqual(3)
-    })
+      expect(userNodeData.nodeChanges?.maxVersionRating).toEqual(3);
+    });
 
     describe("create notification", () => {
-      it("if version was previously accepted oType=AccProposal", async() => {
-        const notifications = await db.collection("notifications")
-          .where("uname", "==", users[1].uname).get()
+      it("if version was previously accepted oType=AccProposal", async () => {
+        const notifications = await db.collection("notifications").where("uname", "==", users[1].uname).get();
         const notification = notifications.docs[0].data() as INotification;
-        expect(notification.oType).toEqual("AccProposal")
-        expect(notification.aType).toEqual("Correct")
-      })
-    })
-  })
+        expect(notification.oType).toEqual("AccProposal");
+        expect(notification.aType).toEqual("Correct");
+      });
+    });
+  });
 
   describe("if version getting accepted now", () => {
     describe("if its an improvement", () => {
@@ -265,7 +262,7 @@ describe("POST /api/rateVersion", () => {
           admin: users[0],
           isTag: true,
           corrects: 1,
-          parents: [nodes[0]]
+          parents: [nodes[0]],
         })
       );
 
@@ -275,7 +272,7 @@ describe("POST /api/rateVersion", () => {
           admin: users[1],
           isTag: false,
           corrects: 1,
-          parents: [nodes[1]]
+          parents: [nodes[1]],
         })
       );
 
@@ -283,14 +280,14 @@ describe("POST /api/rateVersion", () => {
         node: nodes[2].documentId,
         title: nodes[2].title,
         label: "",
-        type: nodes[2].nodeType
-      } as INodeLink)
+        type: nodes[2].nodeType,
+      } as INodeLink);
 
       nodes[0].children.push({
         node: String(nodes[1].documentId),
         title: nodes[1].title,
-        type: nodes[1].nodeType
-      })
+        type: nodes[1].nodeType,
+      });
 
       // setting default community to default user
       users[0].tag = nodes[0].title;
@@ -306,7 +303,7 @@ describe("POST /api/rateVersion", () => {
           user: users[1],
           node: nodes[0],
           correct: false,
-          wrong: false
+          wrong: false,
         }),
       ];
       const nodeVersions = [
@@ -323,9 +320,9 @@ describe("POST /api/rateVersion", () => {
           accepted: false,
           proposer: users[1],
           corrects: 3,
-          tags: [ nodes[0] ],
+          tags: [nodes[0]],
           parents: [nodes[0]],
-          children: [nodes[2]]
+          children: [nodes[2]],
         }),
       ];
 
@@ -367,8 +364,8 @@ describe("POST /api/rateVersion", () => {
           title: nodes[0].title,
           deleted: true,
           createdAt: new Date(),
-          updatedAt: new Date()
-        } as ITag
+          updatedAt: new Date(),
+        } as ITag,
       ];
 
       const collects = [
@@ -396,19 +393,22 @@ describe("POST /api/rateVersion", () => {
         new MockData([], "userNodesLog"),
         new MockData([], "userVersionsLog"),
         new MockData(tags, "tags"),
-        
-        new MockData([
-          {
-            documentId: users[0].documentId,
-            state: "online",
-            last_online: new Date()
-          },
-          {
-            documentId: users[1].documentId,
-            state: "online",
-            last_online: new Date()
-          }
-        ], "status")
+
+        new MockData(
+          [
+            {
+              documentId: users[0].documentId,
+              state: "online",
+              last_online: new Date(),
+            },
+            {
+              documentId: users[1].documentId,
+              state: "online",
+              last_online: new Date(),
+            },
+          ],
+          "status"
+        ),
       ];
 
       const nodesCollection = new MockData(nodes, "nodes");
@@ -417,7 +417,7 @@ describe("POST /api/rateVersion", () => {
       collects.push(userNodesCollection);
 
       let accessToken: string = "";
-      
+
       beforeAll(async () => {
         const user = await auth.createUser({
           email: users[0].email,
@@ -450,7 +450,7 @@ describe("POST /api/rateVersion", () => {
             nodeType: nodes[1].nodeType,
             award: false,
             correct: true,
-            wrong: false
+            wrong: false,
           } as IRateVersionPayload,
         });
 
@@ -466,19 +466,19 @@ describe("POST /api/rateVersion", () => {
       let nodeData: INode;
 
       it("select admin based on maxRating", async () => {
-        nodeData = (await db.collection("nodes").doc(String(nodes[1].documentId)).get()).data() as INode
+        nodeData = (await db.collection("nodes").doc(String(nodes[1].documentId)).get()).data() as INode;
         expect(nodeData.admin).toEqual(users[1].uname);
       });
 
       it("update node props (admin and props that are present in version)", async () => {
         expect(nodeData.title).toEqual(nodeVersions[1].title);
-      })
+      });
 
       it("create/set delete=false on tag doc that was tagged in this node and communities reputation docs", async () => {
         const tagDoc = await db.collection("tags").doc(String(tags[0].documentId)).get();
         const tagDocData = tagDoc.data() as ITag;
         expect(tagDocData.deleted).toEqual(false);
-      })
+      });
 
       // TODO: not checking reference type node and isTag=true
       it("if node title has been changed, change it every where title can be present (tags, nodes.children[x].title, nodes.parents[x].title, community docs and reputation docs)", async () => {
@@ -488,7 +488,7 @@ describe("POST /api/rateVersion", () => {
         const childNodeData = childNode.data() as INode;
         expect(parentNodeData.children[0].title).toEqual(nodeVersions[1].title);
         expect(childNodeData.parents[0].title).toEqual(nodeVersions[1].title);
-      })
+      });
 
       // Not checking these soon I will detach this with main process
       /* it("add {node id,title,nodeType} in parentNode.children and signal all parent nodes as major=true", async () => {
@@ -508,22 +508,19 @@ describe("POST /api/rateVersion", () => {
       }) */
 
       describe("create notification", () => {
-        it("if version was not previously accepted then set oType=Proposal", async() => {
-          const notifications = await db.collection("notifications")
-            .where("uname", "==", users[1].uname).get()
+        it("if version was not previously accepted then set oType=Proposal", async () => {
+          const notifications = await db.collection("notifications").where("uname", "==", users[1].uname).get();
           const notification = notifications.docs[0].data() as INotification;
-          expect(notification.oType).toEqual("Proposal")
-        })
-    
-        it("aType values according voting action", async() => {
-          const notifications = await db.collection("notifications")
-            .where("uname", "==", users[1].uname).get()
-          const notification = notifications.docs[0].data() as INotification;
-          expect(notification.aType).toEqual("Accept")
-        })
-      })
+          expect(notification.oType).toEqual("Proposal");
+        });
 
-    })
+        it("aType values according voting action", async () => {
+          const notifications = await db.collection("notifications").where("uname", "==", users[1].uname).get();
+          const notification = notifications.docs[0].data() as INotification;
+          expect(notification.aType).toEqual("Accept");
+        });
+      });
+    });
 
     describe("if its not an improvement and a child node", () => {
       let res: MockResponse<any>;
@@ -547,7 +544,7 @@ describe("POST /api/rateVersion", () => {
           admin: users[0],
           isTag: true,
           corrects: 1,
-          parents: [nodes[0]]
+          parents: [nodes[0]],
         })
       );
 
@@ -557,7 +554,7 @@ describe("POST /api/rateVersion", () => {
           admin: users[1],
           isTag: false,
           corrects: 1,
-          parents: [nodes[1]]
+          parents: [nodes[1]],
         })
       );
 
@@ -565,14 +562,14 @@ describe("POST /api/rateVersion", () => {
         node: nodes[2].documentId,
         title: nodes[2].title,
         label: "",
-        type: nodes[2].nodeType
-      } as INodeLink)
+        type: nodes[2].nodeType,
+      } as INodeLink);
 
       nodes[0].children.push({
         node: String(nodes[1].documentId),
         title: nodes[1].title,
-        type: nodes[1].nodeType
-      })
+        type: nodes[1].nodeType,
+      });
 
       // setting default community to default user
       users[0].tag = nodes[0].title;
@@ -588,14 +585,14 @@ describe("POST /api/rateVersion", () => {
           user: users[1],
           node: nodes[0],
           correct: false,
-          wrong: false
+          wrong: false,
         }),
         // to check delete=true edge case
         createUserNode({
           user: users[0],
           node: nodes[1],
           correct: true,
-          wrong: false
+          wrong: false,
         }),
       ];
       const nodeVersions = [
@@ -613,10 +610,9 @@ describe("POST /api/rateVersion", () => {
           proposer: users[1],
           childType: "Question",
           corrects: 3,
-          tags: [ nodes[0] ],
+          tags: [nodes[0]],
           parents: [nodes[0]],
           children: [nodes[2]],
-          
         }),
       ];
 
@@ -658,8 +654,8 @@ describe("POST /api/rateVersion", () => {
           title: nodes[0].title,
           deleted: true,
           createdAt: new Date(),
-          updatedAt: new Date()
-        } as ITag
+          updatedAt: new Date(),
+        } as ITag,
       ];
 
       const collects = [
@@ -690,28 +686,34 @@ describe("POST /api/rateVersion", () => {
         new MockData([], "userQuestionVersions"),
 
         new MockData(tags, "tags"),
-        
-        new MockData([
-          {
-            documentId: users[0].documentId,
-            state: "online",
-            last_online: new Date()
-          },
-          {
-            documentId: users[1].documentId,
-            state: "online",
-            last_online: new Date()
-          }
-        ], "status"),
 
-        new MockData([
-          createUserNodeVersion({
-            node: nodes[1],
-            user: users[1],
-            version: nodeVersions[1],
-            correct: true
-          })
-        ], "userConceptVersions")
+        new MockData(
+          [
+            {
+              documentId: users[0].documentId,
+              state: "online",
+              last_online: new Date(),
+            },
+            {
+              documentId: users[1].documentId,
+              state: "online",
+              last_online: new Date(),
+            },
+          ],
+          "status"
+        ),
+
+        new MockData(
+          [
+            createUserNodeVersion({
+              node: nodes[1],
+              user: users[1],
+              version: nodeVersions[1],
+              correct: true,
+            }),
+          ],
+          "userConceptVersions"
+        ),
       ];
 
       const nodesCollection = new MockData(nodes, "nodes");
@@ -720,7 +722,7 @@ describe("POST /api/rateVersion", () => {
       collects.push(userNodesCollection);
 
       let accessToken: string = "";
-      
+
       beforeAll(async () => {
         const user = await auth.createUser({
           email: users[0].email,
@@ -753,7 +755,7 @@ describe("POST /api/rateVersion", () => {
             nodeType: nodes[1].nodeType,
             award: false,
             correct: true,
-            wrong: false
+            wrong: false,
           } as IRateVersionPayload,
         });
 
@@ -769,54 +771,56 @@ describe("POST /api/rateVersion", () => {
       let nodeData: INode;
 
       it("select admin based on maxRating", async () => {
-        nodeData = (await db.collection("nodes").doc(String(nodes[1].documentId)).get()).data() as INode
+        nodeData = (await db.collection("nodes").doc(String(nodes[1].documentId)).get()).data() as INode;
         expect(nodeData.admin).toEqual(users[1].uname);
       });
 
       let newNode: DocumentSnapshot<any>;
 
       it("create a new node", async () => {
-        newNode = (await db.collection("nodes").orderBy("createdAt", "desc").limit(1).get()).docs[0]
+        newNode = (await db.collection("nodes").orderBy("createdAt", "desc").limit(1).get()).docs[0];
         const newNodeData = newNode.data() as INode;
-        expect(newNodeData.title).toEqual(nodeVersions[1].title)
-      })
+        expect(newNodeData.title).toEqual(nodeVersions[1].title);
+      });
 
       it("add parent node (node where this new node was proposed as version) in new node", async () => {
         const newNodeData = newNode.data() as INode;
-        expect(newNodeData.parents[0].node).toEqual(nodes[1].documentId)
-      })
+        expect(newNodeData.parents[0].node).toEqual(nodes[1].documentId);
+      });
 
       let newNodeVersion: DocumentSnapshot<any>;
 
       it("create version for new node that is accepted", async () => {
         const newNodeData = newNode.data() as INode;
         const { versionsColl } = getTypedCollections({
-          nodeType: newNodeData.nodeType
+          nodeType: newNodeData.nodeType,
         });
-        const newNodeVersions = await db.collection(versionsColl.id).where("node", "==", newNode.id).get()
-        expect(newNodeVersions.docs.length).toEqual(1)
+        const newNodeVersions = await db.collection(versionsColl.id).where("node", "==", newNode.id).get();
+        expect(newNodeVersions.docs.length).toEqual(1);
         newNodeVersion = newNodeVersions.docs[0];
-      })
+      });
 
       it("create user version in relative nodeType user version collection", async () => {
         const newNodeData = newNode.data() as INode;
         const { userVersionsColl } = getTypedCollections({
-          nodeType: newNodeData.nodeType
+          nodeType: newNodeData.nodeType,
         });
-        const newUserNodeVersions = await db.collection(userVersionsColl.id)
+        const newUserNodeVersions = await db
+          .collection(userVersionsColl.id)
           .where("version", "==", newNodeVersion.id)
           .where("user", "==", users[1].uname)
-          .get()
-        expect(newUserNodeVersions.docs.length).toEqual(1)
-      })
+          .get();
+        expect(newUserNodeVersions.docs.length).toEqual(1);
+      });
 
       it("create practice if childType was Question (we are not testing it right now)", async () => {
-        const practices = await db.collection("practice")
+        const practices = await db
+          .collection("practice")
           .where("node", "==", newNode.id)
           .where("user", "==", users[1].uname)
           .get();
-        expect(practices.docs.length).toEqual(1)
-      })
+        expect(practices.docs.length).toEqual(1);
+      });
 
       // Not checking this soon I will detach this with main process
       /* it("signal user nodes where child was proposed as major=true", async () => {
@@ -826,44 +830,40 @@ describe("POST /api/rateVersion", () => {
       describe("if version is approved and it has childType", () => {
         it("flag version as deleted", async () => {
           const { versionsColl } = getTypedCollections({
-            nodeType: nodes[1].nodeType
-          })
-          const versions = await db.collection(versionsColl.id)
-            .where("node", "==", nodes[1].documentId)
-            .get()
-          const versionData = versions.docs[0].data() as INodeVersion
-          expect(versionData.deleted).toEqual(true)
-        })
-    
+            nodeType: nodes[1].nodeType,
+          });
+          const versions = await db.collection(versionsColl.id).where("node", "==", nodes[1].documentId).get();
+          const versionData = versions.docs[0].data() as INodeVersion;
+          expect(versionData.deleted).toEqual(true);
+        });
+
         it("flag user version as deleted", async () => {
           const { userVersionsColl } = getTypedCollections({
-            nodeType: nodes[1].nodeType
-          })
-          const userVersions = await db.collection(userVersionsColl.id)
+            nodeType: nodes[1].nodeType,
+          });
+          const userVersions = await db
+            .collection(userVersionsColl.id)
             .where("version", "==", nodeVersions[1].documentId)
             .where("user", "==", users[1].uname)
-            .get()
-          const versionData = userVersions.docs[0].data() as INodeVersion
-          expect(versionData.deleted).toEqual(true)
-        })
-      })
-    
-      describe("create notification", () => {
-        it("if version was not previously accepted then set oType=Proposal", async() => {
-          const notifications = await db.collection("notifications")
-            .where("uname", "==", users[1].uname).get()
-          const notification = notifications.docs[0].data() as INotification;
-          expect(notification.oType).toEqual("Proposal")
-        })
-    
-        it("aType values according voting action", async() => {
-          const notifications = await db.collection("notifications")
-            .where("uname", "==", users[1].uname).get()
-          const notification = notifications.docs[0].data() as INotification;
-          expect(notification.aType).toEqual("Accept")
-        })
-      })
+            .get();
+          const versionData = userVersions.docs[0].data() as INodeVersion;
+          expect(versionData.deleted).toEqual(true);
+        });
+      });
 
-    })
-  })
+      describe("create notification", () => {
+        it("if version was not previously accepted then set oType=Proposal", async () => {
+          const notifications = await db.collection("notifications").where("uname", "==", users[1].uname).get();
+          const notification = notifications.docs[0].data() as INotification;
+          expect(notification.oType).toEqual("Proposal");
+        });
+
+        it("aType values according voting action", async () => {
+          const notifications = await db.collection("notifications").where("uname", "==", users[1].uname).get();
+          const notification = notifications.docs[0].data() as INotification;
+          expect(notification.aType).toEqual("Accept");
+        });
+      });
+    });
+  });
 });

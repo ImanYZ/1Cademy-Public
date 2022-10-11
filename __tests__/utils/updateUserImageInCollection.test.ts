@@ -110,19 +110,15 @@ describe("updateUserImageEverywhere", () => {
     privateVersionCommentsData,
     privateVersionsData,
     userPrivateVersionsData,
-    userPrivateVersionCommentsData
+    userPrivateVersionCommentsData,
   ];
 
   beforeEach(async () => {
-    await Promise.all(
-      collects.map(collect => collect.populate())
-    );
+    await Promise.all(collects.map(collect => collect.populate()));
   });
 
   afterEach(async () => {
-    await Promise.all(
-      collects.map(collect => collect.clean())
-    );
+    await Promise.all(collects.map(collect => collect.clean()));
   });
 
   it("Should be able to update user profile image everywhere", async () => {

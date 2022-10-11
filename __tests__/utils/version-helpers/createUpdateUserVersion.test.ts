@@ -5,12 +5,9 @@ import { getTypedCollections } from "../../../src/utils/getTypedCollections";
 import { MockData, userConceptVersionsData } from "../../../testUtils/mockCollections";
 
 describe("createUpdateUserVersion", () => {
+  const collects = [userConceptVersionsData];
 
-  const collects = [
-    userConceptVersionsData
-  ];
-
-  collects.push(new MockData([], "userVersionsLog"))
+  collects.push(new MockData([], "userVersionsLog"));
 
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));

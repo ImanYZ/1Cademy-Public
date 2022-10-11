@@ -161,7 +161,7 @@ describe("POST /api/proposeChildNode", () => {
     new MockData([], "userNodesLog"),
     new MockData([], "userQuestionVersions"),
     new MockData([], "userVersionsLog"),
-    new MockData([], "tags")
+    new MockData([], "tags"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");

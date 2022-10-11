@@ -298,7 +298,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
-      userNodesLogCollection
+      userNodesLogCollection,
     ];
 
     beforeEach(async () => {
@@ -728,7 +728,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
-      userNodesLogCollection
+      userNodesLogCollection,
     ];
 
     beforeEach(async () => {
@@ -1159,7 +1159,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
-      userNodesLogCollection
+      userNodesLogCollection,
     ];
 
     beforeEach(async () => {
@@ -1590,7 +1590,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
-      userNodesLogCollection
+      userNodesLogCollection,
     ];
 
     beforeEach(async () => {
@@ -2021,7 +2021,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
-      userNodesLogCollection
+      userNodesLogCollection,
     ];
 
     beforeEach(async () => {
@@ -2452,7 +2452,7 @@ describe("UpDownVoteNode", () => {
       otherWeeklyReputationPointsCollection,
       notificationsCollection,
       notificationNumsCollection,
-      userNodesLogCollection
+      userNodesLogCollection,
     ];
 
     beforeEach(async () => {
@@ -2912,7 +2912,7 @@ describe("UpDownVoteNode", () => {
         otherReputationPointsCollection,
         otherMonthlyReputationPointsCollection,
         otherWeeklyReputationPointsCollection,
-        userNodesLogCollection
+        userNodesLogCollection,
       ];
 
       beforeAll(async () => {
@@ -3256,7 +3256,7 @@ describe("UpDownVoteNode", () => {
         userStatus,
         notificationsCollection,
         notificationNumsCollection,
-        userNodesLogCollection
+        userNodesLogCollection,
       ];
 
       beforeAll(async () => {

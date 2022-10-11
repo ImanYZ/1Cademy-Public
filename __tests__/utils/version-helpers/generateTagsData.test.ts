@@ -3,20 +3,14 @@ import { generateTagsData, getTypedCollections } from "../../../src/utils";
 import { conceptVersionsData, MockData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
 
 describe("generateTagsData", () => {
+  const collects = [usersData, nodesData, tagsData, conceptVersionsData];
 
-  const collects = [
-    usersData,
-    nodesData,
-    tagsData,
-    conceptVersionsData
-  ];
-
-  collects.push(new MockData([], "comMonthlyPoints"))
-  collects.push(new MockData([], "comOthMonPoints"))
-  collects.push(new MockData([], "comOthWeekPoints"))
-  collects.push(new MockData([], "comOthersPoints"))
-  collects.push(new MockData([], "comPoints"))
-  collects.push(new MockData([], "comWeeklyPoints"))
+  collects.push(new MockData([], "comMonthlyPoints"));
+  collects.push(new MockData([], "comOthMonPoints"));
+  collects.push(new MockData([], "comOthWeekPoints"));
+  collects.push(new MockData([], "comOthersPoints"));
+  collects.push(new MockData([], "comPoints"));
+  collects.push(new MockData([], "comWeeklyPoints"));
 
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
