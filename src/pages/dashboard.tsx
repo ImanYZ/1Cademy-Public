@@ -59,7 +59,7 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
-  getSelectionText,
+  // getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
   NODE_HEIGHT,
@@ -103,7 +103,7 @@ type DashboardProps = {};
  *
  *  --- render nodes
  */
-let arrowKeyMapTransitionInitialized = false;
+// let arrowKeyMapTransitionInitialized = false;
 const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -267,64 +267,64 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   // called after first time map is rendered
-  useEffect(() => {
-    window.location.hash = "no-back-button";
+  // useEffect(() => {
+  //   window.location.hash = "no-back-button";
 
-    // Again because Google Chrome doesn't insert
-    // the first hash into the history
-    window.location.hash = "Again-No-back-button";
+  //   // Again because Google Chrome doesn't insert
+  //   // the first hash into the history
+  //   window.location.hash = "Again-No-back-button";
 
-    window.onhashchange = function () {
-      window.location.hash = "no-back-button";
-    };
+  //   window.onhashchange = function () {
+  //     window.location.hash = "no-back-button";
+  //   };
 
-    window.onbeforeunload = function (e) {
-      e = e || window.event;
+  //   window.onbeforeunload = function (e) {
+  //     e = e || window.event;
 
-      // For IE and Firefox prior to version 4
-      if (e) {
-        e.returnValue = "Do you want to close 1Cademy?";
-      }
+  //     // For IE and Firefox prior to version 4
+  //     if (e) {
+  //       e.returnValue = "Do you want to close 1Cademy?";
+  //     }
 
-      // For Safari
-      return "Do you want to close 1Cademy?";
-    };
+  //     // For Safari
+  //     return "Do you want to close 1Cademy?";
+  //   };
 
-    // movement through map using keyboard arrow keys
-    document.addEventListener("keydown", event => {
-      if (!document.activeElement) return;
-      if (
-        // mapHovered &&
-        getSelectionText() === "" &&
-        document.activeElement.tagName !== "TEXTAREA" &&
-        document.activeElement.tagName !== "INPUT" &&
-        !arrowKeyMapTransitionInitialized
-      ) {
-        arrowKeyMapTransitionInitialized = true;
-        setMapInteractionValue(oldValue => {
-          const translationValue = { ...oldValue.translation };
-          switch (event.key) {
-            case "ArrowLeft":
-              translationValue.x += 10;
-              break;
-            case "ArrowRight":
-              translationValue.x -= 10;
-              break;
-            case "ArrowUp":
-              translationValue.y += 10;
-              break;
-            case "ArrowDown":
-              translationValue.y -= 10;
-              break;
-          }
-          setTimeout(() => {
-            arrowKeyMapTransitionInitialized = false;
-          }, 10);
-          return { scale: oldValue.scale, translation: translationValue };
-        });
-      }
-    });
-  }, []);
+  //   // movement through map using keyboard arrow keys
+  //   document.addEventListener("keydown", event => {
+  //     if (!document.activeElement) return;
+  //     if (
+  //       // mapHovered &&
+  //       getSelectionText() === "" &&
+  //       document.activeElement.tagName !== "TEXTAREA" &&
+  //       document.activeElement.tagName !== "INPUT" &&
+  //       !arrowKeyMapTransitionInitialized
+  //     ) {
+  //       arrowKeyMapTransitionInitialized = true;
+  //       setMapInteractionValue(oldValue => {
+  //         const translationValue = { ...oldValue.translation };
+  //         switch (event.key) {
+  //           case "ArrowLeft":
+  //             translationValue.x += 10;
+  //             break;
+  //           case "ArrowRight":
+  //             translationValue.x -= 10;
+  //             break;
+  //           case "ArrowUp":
+  //             translationValue.y += 10;
+  //             break;
+  //           case "ArrowDown":
+  //             translationValue.y -= 10;
+  //             break;
+  //         }
+  //         setTimeout(() => {
+  //           arrowKeyMapTransitionInitialized = false;
+  //         }, 10);
+  //         return { scale: oldValue.scale, translation: translationValue };
+  //       });
+  //     }
+  //   });
+  // }, []);
 
   useEffect(
     () => {
@@ -3026,14 +3026,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   const edgeIds = Object.keys(graph.edges);
 
-  const navigateWhenNotScrolling = useCallback(
-    newMapInteractionValue => {
-      if (!scrollToNodeInitialized) {
-        return setMapInteractionValue(newMapInteractionValue);
-      }
-    },
-    [scrollToNodeInitialized]
-  );
+  // const navigateWhenNotScrolling = useCallback(
+  //   newMapInteractionValue => {
+  //     if (!scrollToNodeInitialized) {
+  //       return setMapInteractionValue(newMapInteractionValue);
+  //     }
+  //   },
+  //   [scrollToNodeInitialized]
+  // );
   return (
     <div className="MapContainer">
       {settings.theme === "Dark" && (
@@ -3204,8 +3204,9 @@ const Dashboard = ({}: DashboardProps) => {
           >
             <MapInteractionCSS
               textIsHovered={mapHovered}
-              /*identifier={'xdf'}*/ value={mapInteractionValue}
-              onChange={navigateWhenNotScrolling}
+              /*identifier={'xdf'}*/
+              // value={mapInteractionValue}
+              // onChange={navigateWhenNotScrolling}
             >
               {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
