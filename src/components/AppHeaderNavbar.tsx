@@ -112,18 +112,6 @@ const AppAppBar: FC<Props> = ({
               <AppHeaderSearchBar />
             </Box>
           )}
-          {/* <Button onClick={handleSignout}>TEMP: Sign out button </Button> */}
-          {isSignedIn ? (
-            <Button onClick={handleSignout} sx={{ color: theme => theme.palette.common.white }}>
-              <LogoutIcon />
-              Sign Out
-            </Button>
-          ) : (
-            <Button onClick={onRedirectToSignin} sx={{ color: theme => theme.palette.common.white }}>
-              <LoginIcon />
-              Sign In
-            </Button>
-          )}
 
           {showApply && (
             <LightTooltip title="Apply to join 1Cademy">
@@ -148,6 +136,22 @@ const AppAppBar: FC<Props> = ({
                 APPLY!
               </Button>
             </LightTooltip>
+          )}
+
+          {isSignedIn ? (
+            <Tooltip title="Sign Out">
+              <IconButton onClick={handleSignout} sx={{ color: theme => theme.palette.common.white }}>
+                <LogoutIcon />
+                {/* Sign Out */}
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Sign In">
+              <IconButton onClick={onRedirectToSignin} sx={{ color: theme => theme.palette.common.white }}>
+                <LoginIcon />
+                {/* Sign In */}
+              </IconButton>
+            </Tooltip>
           )}
 
           {showMenu && (
