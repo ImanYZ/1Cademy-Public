@@ -207,6 +207,19 @@ describe("POST /api/proposeNodeImprovement", () => {
     weeklyReputationPointsCollection,
     notificationsCollection,
     new MockData(tags, "tags"),
+
+    new MockData([], "comPoints"),
+    new MockData([], "comMonthlyPoints"),
+    new MockData([], "comWeeklyPoints"),
+    new MockData([], "comOthersPoints"),
+    new MockData([], "comOthMonPoints"),
+    new MockData([], "comOthWeekPoints"),
+
+    new MockData([], "notificationNums"),
+    new MockData([], "userConceptVersions"),
+    new MockData([], "userVersionsLog"),
+
+    new MockData([], "monthlyReputations")
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
