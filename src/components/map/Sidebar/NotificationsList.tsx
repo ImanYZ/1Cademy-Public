@@ -11,7 +11,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Box, IconButton } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { doc, getFirestore, writeBatch } from "firebase/firestore";
+import { doc, getFirestore, increment, writeBatch } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
@@ -82,15 +82,16 @@ const NotificationsList = (props: NotificationsListProps) => {
       // await firebase.batchUpdate(notificationRef, { checked: value });
 
       // // update notificationNums
-      // const notificationNumsRef = doc(db, "notificationNums", user.uname);
+      const notificationNumsRef = doc(db, "notificationNums", user.uname);
       // // const notificationNumsRef = firebase.db.collection("notificationNums").doc(username);
 
-      // const nNum = value ? firestore.FieldValue.increment(1) : firestore.FieldValue.increment(-1);
+      // const nNum = value ? increment(1) : increment(-1);
+      const incrementValue = value ? -1 : 1;
       // // let nNum = firestore.FieldValue.increment(1);
       // // if (!value) {
       // //   nNum = firebase.firestore.FieldValue.increment(-1);
       // // }
-      // batch.update(notificationNumsRef, { nNum });
+      batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
       // // await firebase.batchUpdate(notificationNumsRef, { nNum });
       // // await firebase.commitBatch();
 
@@ -129,17 +130,8 @@ const NotificationsList = (props: NotificationsListProps) => {
               padding: "10px 10px",
               borderBottom: "solid 1px white",
               fontSize: "16px",
-              // display: "flex",
-              // alignItems: "flex-end",
             }}
-            // onClick={event => {
-            //   selectMessage(event, message.node);
-            // }}
           >
-            {/* <div className="title Username">{notification.uname}</div>
-                <div className="NotificationUserAvatar">
-                  <UserHeader imageUrl={notification.imageUrl} />
-                </div> */}
             <div className="NotificationBody">
               <Box
                 sx={{

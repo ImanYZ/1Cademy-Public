@@ -179,6 +179,11 @@ const Notifications = (props: NotificationsProps) => {
       // doc.data() is never undefined for query doc snapshots
       // console.log(notificationDoc.id, " => ", notificationDoc.data());
     });
+
+    // update notifications nums
+
+    const notificationNumsRef = doc(db, "notificationNums", user.uname);
+    batch.update(notificationNumsRef, { nNum: 0 });
     await batch.commit();
 
     // TODO: Important set notificationNums to 0
