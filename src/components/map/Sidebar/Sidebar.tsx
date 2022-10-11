@@ -183,6 +183,8 @@ type SidebarType = {
   showClusters: boolean;
   setShowClusters: (newValue: boolean) => void;
   mapRendered: boolean;
+  pendingProposalsLoaded: boolean;
+  setPendingProposalsLoaded: (newValue: boolean) => void;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -272,7 +274,7 @@ const Sidebar = (props: SidebarType) => {
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
   const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
-  const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
+  // const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
   const [proposals, setProposals] = useState<any[]>([]);
 
   const sidebarRef = useRef<any | null>(null);
@@ -391,7 +393,7 @@ const Sidebar = (props: SidebarType) => {
           // setPendingProposals({ ...versions });
           // temporalProposals.push(temporalProposals)
         }
-        setPendingProposalsLoaded(true);
+        props.setPendingProposalsLoaded(true);
       });
       versionsSnapshots.push(versionsSnapshot);
     }
@@ -597,7 +599,7 @@ const Sidebar = (props: SidebarType) => {
           <PendingProposalsButton
             openSideBar={openSideBar}
             pendingProposalsNum={pendingProposalsNum}
-            pendingProposalsLoaded={pendingProposalsLoaded}
+            pendingProposalsLoaded={props.pendingProposalsLoaded}
           />
 
           {/* <PresentationsButton openSideBar={openSideBar} />

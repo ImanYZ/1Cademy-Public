@@ -28,9 +28,10 @@ const comLBTypes = ["Weekly", "Monthly", "All Time", "Self-votes", "Others' Vote
 
 type CommunityLeaderboardProps = {
   userTagId: string;
+  pendingProposalsLoaded: boolean;
 };
 
-const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
+const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLeaderboardProps) => {
   //object of all users' community Points
   // object of all users' weekly community Points
   const [comPointsWeeklyDict, setComPointsWeeklyDict] = useState({});
@@ -48,7 +49,7 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
   const [comLeaderboardTypeOpen, setComLeaderboardTypeOpen] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(true);
 
-  const [pendingProposalsLoaded /*setPendingProposalsLoaded*/] = useState(true);
+  // const [pendingProposalsLoaded /*setPendingProposalsLoaded*/] = useState(true);
   const [comPointsLoaded, setComPointsLoaded] = useState(false);
   const [comPointsMonthlyLoaded, setComPointsMonthlyLoaded] = useState(false);
   const [comPointsWeeklyLoaded, setComPointsWeeklyLoaded] = useState(false);
