@@ -10,6 +10,7 @@ import {
 } from ".";
 import { NodeType } from "src/types";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
+import { IQuestionChoice } from "src/types/IQuestionChoice";
 
 export const comPointTypes = [
   "comPoints",
@@ -418,7 +419,7 @@ export const changeNodeTitle = async ({
     }
 
     [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-      newBatch,
+      batch: newBatch,
       linkedId: parent.node,
       nodeChanges: linkedDataChanges,
       major: false,
@@ -626,6 +627,16 @@ export const changeNodeTitle = async ({
 
 // Push the new or updated tag and comPoints documents to linkedNodesRefs and linkedNodesData
 // Should be called when adding a tag to a node.
+// Logic
+// find node in tags, comPoints, comMonthlyPoints, comWeeklyPoints, comOthersPoints, comOthMonPoints and comOthWeekPoints
+// - if docs already present then
+//   - set deleted=false
+//   - increase nodesNum by 1 if its tags collection
+//   - set isTag=true in node doc
+// - if docs not exists already
+//   - if its a tag collection, fetch direct tags (it skip nested tags that are linked with tag's children nodes)
+//   - if its a tag collection, set isTag=true in node doc
+//   - if its not tag collection initialize community points doc with given admin attributes
 export const addTagCommunityAndTagsOfTags = async ({
   batch,
   tagNodeId,
@@ -636,6 +647,8 @@ export const addTagCommunityAndTagsOfTags = async ({
   aChooseUname,
   currentTimestamp,
   writeCounts,
+  t,
+  tWriteOperations,
 }: any) => {
   let newBatch = batch;
   await tagsAndCommPoints({
@@ -660,11 +673,22 @@ export const addTagCommunityAndTagsOfTags = async ({
           const tagNodeRef = db.collection("nodes").doc(tagNodeId);
           const tagNodeDoc = await tagNodeRef.get();
           const tagNodeData: any = tagNodeDoc.data();
-          await newBatch.update(tagNodeRef, {
-            isTag: true,
-            updatedAt: currentTimestamp,
-          });
-          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+          if (t) {
+            tWriteOperations.push({
+              objRef: tagNodeRef,
+              data: {
+                isTag: true,
+                updatedAt: currentTimestamp,
+              },
+              operationType: "update",
+            });
+          } else {
+            await newBatch.update(tagNodeRef, {
+              isTag: true,
+              updatedAt: currentTimestamp,
+            });
+            [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+          }
           tagNewData = {
             ...getDirectTags({ nodeTagIds: tagNodeData.tagIds, nodeTags: tagNodeData.tags, tagsOfNodes: null }),
             // Number of the nodes tagging this tag.
@@ -683,14 +707,30 @@ export const addTagCommunityAndTagsOfTags = async ({
           delete tagNewData.isAdmin;
         }
       }
-      await newBatch.set(tagRef, tagNewData);
-      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      if (t) {
+        tWriteOperations.push({
+          objRef: tagRef,
+          data: tagNewData,
+          operationType: "set",
+        });
+      } else {
+        await newBatch.set(tagRef, tagNewData);
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      }
     },
   });
   return [newBatch, writeCounts];
 };
 
 // Should be called when deleting a tag from a node.
+// Logic
+// set shouldRemove=true if nodesNum went 0 for tag document (against given nodeId that is tag)
+// if shouldRemove=true
+// - flag tag document as deleted
+// - flag comPoints, comMonthlyPoints, comWeeklyPoints, comOthersPoints, comOthMonPoints, comOthWeekPoints as deleted for this node id that is tag
+// - set isTag=false for this node
+// - fetch all tag docs that this node id present in tagIds prop
+//   - splice/remove tagId from tagIds array
 export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
   batch,
   tagNodeId,
@@ -761,11 +801,22 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
       const tagNodeIdx = taggingtagData.tagIds.findIndex((tId: any) => tId === tagNodeId);
       taggingtagData.tagIds.splice(tagNodeIdx, 1);
       taggingtagData.tags.splice(tagNodeIdx, 1);
-      newBatch.update(taggingtagRef, {
-        tagIds: taggingtagData.tagIds,
-        tags: taggingtagData.tags,
-      });
-      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      if (t) {
+        tWriteOperations.push({
+          objRef: taggingtagRef,
+          data: {
+            tagIds: taggingtagData.tagIds,
+            tags: taggingtagData.tags,
+          },
+          operationType: "update",
+        });
+      } else {
+        newBatch.update(taggingtagRef, {
+          tagIds: taggingtagData.tagIds,
+          tags: taggingtagData.tags,
+        });
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      }
     }
   }
   return [newBatch, writeCounts];
@@ -791,8 +842,8 @@ export const generateTagsOfTags = async ({ nodeId, tagIds, tags, nodeUpdates }: 
       const { tagData } = await getTagRefData(tagId);
       const generatedTags = await generateTagsOfTags({
         nodeId: tagId,
-        tagIds: tagData.tagIds,
-        tags: tagData.tags,
+        tagIds: tagData ? tagData.tagIds : [],
+        tags: tagData ? tagData.tags : [],
         nodeUpdates,
       });
       for (let gTagIdx = 0; gTagIdx < generatedTags.tagIds.length; gTagIdx++) {
@@ -911,6 +962,8 @@ export const generateTagsData = async ({
           aChooseUname,
           currentTimestamp,
           writeCounts,
+          t,
+          tWriteOperations,
         });
         if (nodeTagData) {
           // Add the tag to the list of tags on nodeTag (the tag corresponding to nodeId).
@@ -935,17 +988,39 @@ export const generateTagsData = async ({
       }
     }
   }
+
   if (isTag && Object.keys(tagUpdates).length > 0) {
     if (nodeTagData) {
-      await newBatch.update(nodeTagRef, tagUpdates);
+      if (t) {
+        tWriteOperations.push({
+          objRef: nodeTagRef,
+          data: tagUpdates,
+          operationType: "update",
+        });
+      } else {
+        await newBatch.update(nodeTagRef, tagUpdates);
+      }
     } else {
       const node = await db.collection("nodes").doc(nodeId).get();
       const nodeData: any = node.data();
-      await newBatch.set(nodeTagRef, {
-        ...tagUpdates,
-        title: nodeData.title,
-        node: node.id,
-      });
+      if (t) {
+        tWriteOperations.push({
+          objRef: nodeTagRef,
+          data: {
+            ...tagUpdates,
+            title: nodeData.title,
+            node: node.id,
+          },
+          operationType: "set",
+        });
+      } else {
+        await newBatch.set(nodeTagRef, {
+          ...tagUpdates,
+          title: nodeData.title,
+          node: node.id,
+        });
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      }
     }
     [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
@@ -990,8 +1065,11 @@ export const updateProposersReputationsOnNode = ({
   versionRating,
   newMaxVersionRating,
   adminPoints,
+  adminNode,
+  aImgUrl,
+  aFullname,
+  aChooseUname,
 }: any) => {
-  let adminNode, aImgUrl, aFullname, aChooseUname;
   let newVersionRating = newMaxVersionRating;
   let points = adminPoints;
   if (versionData.proposer in proposersReputationsOnNode) {
@@ -1053,6 +1131,10 @@ export const getCumulativeProposerVersionRatingsOnNode = async ({
       versionRating,
       newMaxVersionRating,
       adminPoints,
+      adminNode: nodeAdmin,
+      aImgUrl: imageUrl,
+      aFullname: name,
+      aChooseUname: userName,
     });
     newMaxVersionRating = newVersionRating;
     adminPoints = points;
@@ -1068,6 +1150,9 @@ export const getCumulativeProposerVersionRatingsOnNode = async ({
       versionRating: updatingVersionRating,
       newMaxVersionRating,
       adminPoints,
+      aImgUrl: imageUrl,
+      aFullname: name,
+      aChooseUname: userName,
     });
     newMaxVersionRating = newVersionRating;
     adminPoints = points;
@@ -1178,10 +1263,10 @@ export const versionCreateUpdate = async ({
     accepted,
   } = versionData;
 
-  let choices;
+  let choices: IQuestionChoice[] = [];
   let newBatch = batch;
   if (nodeType === "Question") {
-    choices = versionData.choices;
+    choices = versionData.choices as IQuestionChoice[];
   }
   // If the version is deleted, the user should have not been able to vote on it.
   if (!deleted) {
@@ -1308,7 +1393,7 @@ export const versionCreateUpdate = async ({
         //  if proposal is an improvement
         if (!childType) {
           nodeUpdates = {
-            ...nodeUpdates,
+            ...nodeUpdates, // admin related fields and maxVersionRating
             children,
             content,
             nodeImage,
@@ -1330,8 +1415,8 @@ export const versionCreateUpdate = async ({
           if (nodeType === "Question") {
             nodeUpdates.choices = choices;
           }
-          [batch, writeCounts] = await generateTagsData({
-            batch,
+          [newBatch, writeCounts] = await generateTagsData({
+            batch: newBatch,
             nodeId,
             isTag: nodeData.isTag,
             nodeUpdates,
@@ -1375,7 +1460,7 @@ export const versionCreateUpdate = async ({
           }
           let linkedNode, linkedNodeChanges;
           for (let addedParent of addedParents) {
-            linkedNode = await getNode({ ...addedParent, t });
+            linkedNode = await getNode({ nodeId: addedParent, t });
             linkedNodeChanges = {
               children: [...linkedNode.nodeData.children, { node: nodeId, title, label: "", type: nodeType }],
               studied: 0,
@@ -1406,7 +1491,7 @@ export const versionCreateUpdate = async ({
             });
           }
           for (let addedChild of addedChildren) {
-            linkedNode = await getNode({ ...addedChild, t });
+            linkedNode = await getNode({ nodeId: addedChild, t });
             linkedNodeChanges = {
               parents: [...linkedNode.nodeData.parents, { node: nodeId, title, label: "", type: nodeType }],
               studied: 0,
@@ -1435,7 +1520,7 @@ export const versionCreateUpdate = async ({
             });
           }
           for (let removedParent of removedParents) {
-            linkedNode = await getNode({ ...removedParent, t });
+            linkedNode = await getNode({ nodeId: removedParent, t });
             linkedNodeChanges = {
               children: linkedNode.nodeData.children.filter((l: any) => l.node !== nodeId),
               studied: 0,
@@ -1466,7 +1551,7 @@ export const versionCreateUpdate = async ({
             });
           }
           for (let removedChild of removedChildren) {
-            linkedNode = await getNode({ ...removedChild, t });
+            linkedNode = await getNode({ nodeId: removedChild, t });
             linkedNodeChanges = {
               parents: linkedNode.nodeData.parents.filter((l: any) => l.node !== nodeId),
               studied: 0,
@@ -1668,7 +1753,7 @@ export const versionCreateUpdate = async ({
           }
 
           nodeUpdates = {
-            ...nodeUpdates,
+            ...nodeUpdates, // admin related props
             changedAt: currentTimestamp,
             children: [...nodeData.children, { node: childNodeRef.id, title: title, label: "", type: childType }],
             // For the proposer and the voter, it's marked as studied.
@@ -1676,6 +1761,7 @@ export const versionCreateUpdate = async ({
             studied: 0,
           };
 
+          // it will only update admin
           if (t) {
             tWriteOperations.push({
               objRef: nodeRef,

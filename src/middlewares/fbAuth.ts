@@ -106,8 +106,12 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
   }
 };
 
+export type CustomNextApiRequest = NextApiRequest & {
+  user: any;
+}
+
 const fbAuth = (handler: NextApiHandler) => {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
+  return async (req: CustomNextApiRequest, res: NextApiResponse) => {
     try {
       let token = (req.headers.authorization || req.headers.Authorization || "") as string;
       token = token.replace("Bearer ", "");
@@ -125,6 +129,7 @@ const fbAuth = (handler: NextApiHandler) => {
 
       req.body.data.user = user;
       req.body.data.user.userData = data;
+      req.user = user;
       await handler(req, res);
     } catch (error) {
       return res.status(500).json({ error });
