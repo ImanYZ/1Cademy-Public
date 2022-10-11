@@ -59,7 +59,7 @@ export type IRateVersionPayload = {
   award: boolean;
   correct: boolean;
   wrong: boolean;
-}
+};
 
 // TODO: not checking if ids are invalid (Line no. 116)
 // TODO: we are only deleting user node version for voter on accepting and ignoring others
@@ -157,7 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         t,
       });
 
-      if(req.body.correct) {
+      if (req.body.correct) {
         correct = userVersionData?.correct ? -1 : 1;
         wrong = !userVersionData?.correct && userVersionData?.wrong ? -1 : 0;
       } else {

@@ -4,10 +4,10 @@ import { firstWeekMonthDays } from "../../src/utils";
 import {
   conceptVersionsData,
   monthlyReputationsData,
+  othersReputationsData,
   othMonReputationsData,
   othWeekReputationsData,
   reputationsData,
-  othersReputationsData,
   weeklyReputationsData,
 } from "../../testUtils/mockCollections";
 
@@ -21,7 +21,7 @@ describe("rewriteReputationDocs", () => {
     othWeekReputationsData,
     reputationsData,
     othersReputationsData,
-    weeklyReputationsData
+    weeklyReputationsData,
   ];
 
   beforeEach(async () => {

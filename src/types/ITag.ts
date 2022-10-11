@@ -7,4 +7,4 @@ export type ITag = {
   deleted?: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
+};

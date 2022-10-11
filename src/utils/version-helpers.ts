@@ -726,7 +726,7 @@ export const addTagCommunityAndTagsOfTags = async ({
 // Logic
 // set shouldRemove=true if nodesNum went 0 for tag document (against given nodeId that is tag)
 // if shouldRemove=true
-// - flag tag document as deleted 
+// - flag tag document as deleted
 // - flag comPoints, comMonthlyPoints, comWeeklyPoints, comOthersPoints, comOthMonPoints, comOthWeekPoints as deleted for this node id that is tag
 // - set isTag=false for this node
 // - fetch all tag docs that this node id present in tagIds prop
@@ -963,7 +963,7 @@ export const generateTagsData = async ({
           currentTimestamp,
           writeCounts,
           t,
-          tWriteOperations
+          tWriteOperations,
         });
         if (nodeTagData) {
           // Add the tag to the list of tags on nodeTag (the tag corresponding to nodeId).
@@ -1065,7 +1065,10 @@ export const updateProposersReputationsOnNode = ({
   versionRating,
   newMaxVersionRating,
   adminPoints,
-  adminNode, aImgUrl, aFullname, aChooseUname
+  adminNode,
+  aImgUrl,
+  aFullname,
+  aChooseUname,
 }: any) => {
   let newVersionRating = newMaxVersionRating;
   let points = adminPoints;
@@ -1129,7 +1132,9 @@ export const getCumulativeProposerVersionRatingsOnNode = async ({
       newMaxVersionRating,
       adminPoints,
       adminNode: nodeAdmin,
-      aImgUrl: imageUrl, aFullname: name, aChooseUname: userName
+      aImgUrl: imageUrl,
+      aFullname: name,
+      aChooseUname: userName,
     });
     newMaxVersionRating = newVersionRating;
     adminPoints = points;
@@ -1145,7 +1150,9 @@ export const getCumulativeProposerVersionRatingsOnNode = async ({
       versionRating: updatingVersionRating,
       newMaxVersionRating,
       adminPoints,
-      aImgUrl: imageUrl, aFullname: name, aChooseUname: userName
+      aImgUrl: imageUrl,
+      aFullname: name,
+      aChooseUname: userName,
     });
     newMaxVersionRating = newVersionRating;
     adminPoints = points;
@@ -1753,7 +1760,7 @@ export const versionCreateUpdate = async ({
             // studied: 2,
             studied: 0,
           };
-          
+
           // it will only update admin
           if (t) {
             tWriteOperations.push({

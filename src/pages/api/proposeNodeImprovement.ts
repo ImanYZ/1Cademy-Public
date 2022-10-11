@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fbAuth from "../../middlewares/fbAuth";
 
-import { admin, checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import {
   addToPendingPropsNums,
   compareChoices,
@@ -11,6 +12,21 @@ import {
   proposalNotification,
   versionCreateUpdate,
 } from "../../utils";
+
+// Logic
+// - getting versionsColl, userVersionsColl based on nodeType
+// - processing versionCreateUpdate based on nodeType
+//   - if version is not deleted then user can perform vote
+//    - calling updating reputation method
+//      - updating reputation and community increment basaed on tag ids
+//    - getting user version based on nodeType, versionID, uname and voter
+//    - checking is version approved based on wrongs and corrects
+//    - if versionData is accepted
+//      - getting newMaxVersionRating, adminPoints, nodeAdmin, aImgUrl, aFullname, aChooseUname from getCumulativeProposerVersionRatingsOnNode method
+//      - proposal was accepted previously, not accepted just now
+//        - schoolPoints, schoolMonthlyPoints, schoolWeeklyPoints, schoolOthersPoints, schoolOthMonPoints, schoolOthWeekPoints (not implemented)
+//     - {nodeType}Versions, {nodeType}VersionComments (comments not implemented)
+//     - nodes where this user is Admin
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -40,12 +56,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       removedParents,
       removedChildren,
     } = data || {};
+
     const { userData } = user || {};
     let batch = db.batch();
     let writeCounts = 0;
 
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-    const { nodeData, nodeRef } = await getNode(id);
+    const { nodeData, nodeRef } = await getNode({ nodeId: id });
     const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
     const versionRef = versionsColl.doc();
     const versionData: any = {
@@ -219,7 +236,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       currentTimestamp,
       writeCounts,
     });
-
+    await commitBatch(batch);
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error(err);
@@ -227,4 +244,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

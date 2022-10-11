@@ -11,27 +11,21 @@ import {
 } from "../../../testUtils/mockCollections";
 
 describe("versionCreateUpdate", () => {
+  const collects = [conceptVersionCommentsData, conceptVersionsData, nodesData, userConceptVersionsData];
 
-  const collects = [
-    conceptVersionCommentsData,
-    conceptVersionsData,
-    nodesData,
-    userConceptVersionsData,
-  ];
-
-  collects.push(new MockData([], "comMonthlyPoints"))
-  collects.push(new MockData([], "comOthMonPoints"))
-  collects.push(new MockData([], "comOthWeekPoints"))
-  collects.push(new MockData([], "comOthersPoints"))
-  collects.push(new MockData([], "comPoints"))
-  collects.push(new MockData([], "comWeeklyPoints"))
-  collects.push(new MockData([], "monthlyReputations"))
-  collects.push(new MockData([], "othMonReputations"))
-  collects.push(new MockData([], "othWeekReputations"))
-  collects.push(new MockData([], "othersReputations"))
-  collects.push(new MockData([], "reputations"))
-  collects.push(new MockData([], "tags"))
-  collects.push(new MockData([], "weeklyReputations"))
+  collects.push(new MockData([], "comMonthlyPoints"));
+  collects.push(new MockData([], "comOthMonPoints"));
+  collects.push(new MockData([], "comOthWeekPoints"));
+  collects.push(new MockData([], "comOthersPoints"));
+  collects.push(new MockData([], "comPoints"));
+  collects.push(new MockData([], "comWeeklyPoints"));
+  collects.push(new MockData([], "monthlyReputations"));
+  collects.push(new MockData([], "othMonReputations"));
+  collects.push(new MockData([], "othWeekReputations"));
+  collects.push(new MockData([], "othersReputations"));
+  collects.push(new MockData([], "reputations"));
+  collects.push(new MockData([], "tags"));
+  collects.push(new MockData([], "weeklyReputations"));
 
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
