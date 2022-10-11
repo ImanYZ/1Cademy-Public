@@ -113,10 +113,10 @@ describe("versionCreateUpdate", () => {
     let updatedNodeDoc: any = await db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL").get();
     expect(writeCounts).toBeGreaterThan(0);
     expect(updatedNodeDoc.data()).toMatchObject({
-      versions: nodeDoc.data().versions + 1,
+      versions: nodeDoc.data().versions,
       adminPoints: 2,
       admin: "A_wei",
-      studied: 0,
+      studied: 2,
     });
   });
 });
