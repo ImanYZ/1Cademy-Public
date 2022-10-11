@@ -39,7 +39,7 @@ import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
 import ClustersList from "../components/map/ClustersList";
 import { LinksList } from "../components/map/LinksList";
-import NodesList from "../components/map/NodesList";
+import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -3210,7 +3210,7 @@ const Dashboard = ({}: DashboardProps) => {
             >
               {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
-              <NodesList
+              <MemoizedNodeList
                 nodes={graph.nodes}
                 bookmark={bookmark}
                 markStudied={markStudied}
