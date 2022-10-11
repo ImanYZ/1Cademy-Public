@@ -145,6 +145,7 @@ export function createNode(params: IFakeNodeOptions): INode {
 export function convertNodeToTypeSchema(node: INode, params: any = {}) {
   const netVote = node.corrects - node.wrongs;
   return {
+    id: node.documentId,
     changedAtMillis: node.updatedAt.getUTCMilliseconds(),
     updatedAt: Math.floor(node.updatedAt.getTime() / 1000),
     content: node.content,

@@ -68,15 +68,6 @@ describe("POST /api/proposeNodeImprovement", () => {
     })
   );
 
-  //   nodes.push(
-  //     createNode({
-  //       admin: users[0],
-  //       isTag: true,
-  //       corrects: 1,
-  //       tags: [nodes[0]],
-  //     })
-  //   );
-
   nodes.push(
     createNode({
       admin: users[0],
@@ -86,28 +77,15 @@ describe("POST /api/proposeNodeImprovement", () => {
     })
   );
 
-  // 3rd node
   nodes.push(
     createNode({
       admin: users[0],
       isTag: false,
       corrects: 1,
       parents: [nodes[1]],
+      tags: []
     })
   );
-
-  nodes[1].children.push({
-    node: nodes[2].documentId,
-    title: nodes[2].title,
-    label: "",
-    type: nodes[2].nodeType,
-  } as INodeLink);
-
-  nodes[0].children.push({
-    node: String(nodes[1].documentId),
-    title: nodes[1].title,
-    type: nodes[1].nodeType,
-  });
 
   // setting default community to default user
   users[0].tag = nodes[0].title;
@@ -123,10 +101,10 @@ describe("POST /api/proposeNodeImprovement", () => {
       user: users[1],
       node: nodes[0],
       correct: false,
-      wrong: false,
-      isStudied: true, // for test edge case
+      wrong: false
     }),
   ];
+
   const nodeVersions = [
     // first accepted proposal
     createNodeVersion({
@@ -139,14 +117,14 @@ describe("POST /api/proposeNodeImprovement", () => {
       children: [nodes[2]],
     }),
     createNodeVersion({
-      node: nodes[1],
+      node: nodes[2],
       accepted: false,
-      proposer: users[1],
-      corrects: 3,
-      tags: [nodes[0]],
-      parents: [nodes[0]],
-      children: [nodes[2]],
-    }),
+      proposer: users[0],
+      corrects: 1,
+      tags: [ nodes[0] ],
+      parents: [ nodes[0] ],
+      children: [nodes[1] ],
+    })
   ];
 
   const credits = [
@@ -250,14 +228,20 @@ describe("POST /api/proposeNodeImprovement", () => {
         },
         body: {
           data: {
-            ...nodes[0],
-            title: nodeVersions[0].title,
-            tagIds: nodeVersions[0].tagIds,
-            tags: nodeVersions[0].tags,
-            id: nodes[0].documentId,
-            addedParents: [],
-            addedChildren: [],
-            removedParents: [],
+            ...nodes[2],
+            title: "RANDOM TITLE",
+            tagIds: [nodes[0].documentId],
+            tags: [nodes[0].title],
+            id: nodes[2].documentId,
+            addedParents: [
+              String(nodes[0].documentId)
+            ],
+            addedChildren: [
+              String(nodes[1].documentId)
+            ],
+            removedParents: [
+              String(nodes[1].documentId)
+            ],
             removedChildren: [],
           },
         },
@@ -278,36 +262,33 @@ describe("POST /api/proposeNodeImprovement", () => {
     });
 
     it("should be check changedTags=true", async () => {
-      let version = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
-      let versionData: any = {};
-      if (typeof version.docs[1] === "undefined") {
-        versionData = version.docs[0];
-      } else {
-        versionData = version.docs[1];
-      }
-      expect(versionData.data()?.changedTags).toBe(true);
+      let versions = await db.collection("conceptVersions")
+        .where("title", "==", "RANDOM TITLE")
+        .where("node", "==", nodes[2].documentId)
+        .where("proposer", "==", users[0].uname)
+        .get();
+      let versionData = versions.docs[0].data();
+      expect(versionData?.changedTags).toBe(true);
     });
 
     it("should be check addedTags=true", async () => {
-      let version = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
-      let versionData: any = {};
-      if (typeof version.docs[1] === "undefined") {
-        versionData = version.docs[0];
-      } else {
-        versionData = version.docs[1];
-      }
-      expect(versionData.data()?.addedTags).toBe(true);
+      let versions = await db.collection("conceptVersions")
+        .where("title", "==", "RANDOM TITLE")
+        .where("node", "==", nodes[2].documentId)
+        .where("proposer", "==", users[0].uname)
+        .get();
+      let versionData = versions.docs[0].data();
+      expect(versionData?.addedTags).toBe(true);
     });
 
     it("should be check changedTitle=true", async () => {
-      let version = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
-      let versionData: any = {};
-      if (typeof version.docs[1] === "undefined") {
-        versionData = version.docs[0];
-      } else {
-        versionData = version.docs[1];
-      }
-      expect(versionData.data()?.changedTitle).toBe(true);
+      let versions = await db.collection("conceptVersions")
+        .where("title", "==", "RANDOM TITLE")
+        .where("node", "==", nodes[2].documentId)
+        .where("proposer", "==", users[0].uname)
+        .get();
+      let versionData = versions.docs[0].data();
+      expect(versionData?.changedTitle).toBe(true);
     });
 
     it("increase reputation of proposer", async () => {
@@ -376,19 +357,19 @@ describe("POST /api/proposeNodeImprovement", () => {
     describe("if version getting accepted now", () => {
       describe("if its an improvement", () => {
         it("increase version points of node admin", async () => {
-          const nodeDoc = await db.collection("nodes").doc(nodes[0].documentId).get();
+          const nodeDoc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
           expect(nodeDoc.data()?.versions).toBeGreaterThan(0);
           expect(nodeDoc.data()?.adminPoints).toBeGreaterThan(0);
           expect(nodeDoc.data()?.maxVersionRating).toBeGreaterThan(0);
         });
 
         it("select admin based on maxRating", async () => {
-          nodeData = (await db.collection("nodes").doc(String(nodes[0].documentId)).get()).data() as INode;
+          nodeData = (await db.collection("nodes").doc(String(nodes[2].documentId)).get()).data() as INode;
           expect(nodeData.admin).toEqual(users[0].uname);
         });
 
         it("update node props (admin and props that are present in version)", async () => {
-          expect(nodeData.title).toEqual(nodeVersions[0].title);
+          expect(nodeData.title).toEqual("RANDOM TITLE");
         });
 
         it("create/set delete=false on tag doc that was tagged in this node and communities reputation docs", async () => {
@@ -407,7 +388,14 @@ describe("POST /api/proposeNodeImprovement", () => {
           it("aType values according voting action", async () => {
             const notifications = await db.collection("notifications").where("uname", "==", users[0].uname).get();
             const notification = notifications.docs[0].data() as INotification;
-            expect(notification.aType).toEqual(["changedTitle", "addedTags", "changedTags"]);
+            expect(notification.aType).toEqual([
+              'changedTitle',
+              'addedTags',
+              'changedTags',
+              'addedParents',
+              'addedChildren',
+              'removedParents'
+            ]);
           });
         });
       });

@@ -419,7 +419,7 @@ export const changeNodeTitle = async ({
     }
 
     [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-      newBatch,
+      batch: newBatch,
       linkedId: parent.node,
       nodeChanges: linkedDataChanges,
       major: false,
@@ -1415,8 +1415,8 @@ export const versionCreateUpdate = async ({
           if (nodeType === "Question") {
             nodeUpdates.choices = choices;
           }
-          [batch, writeCounts] = await generateTagsData({
-            batch,
+          [newBatch, writeCounts] = await generateTagsData({
+            batch: newBatch,
             nodeId,
             isTag: nodeData.isTag,
             nodeUpdates,
