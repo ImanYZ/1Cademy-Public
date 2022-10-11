@@ -59,8 +59,10 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
+  getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
+  NODE_HEIGHT,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -101,6 +103,7 @@ type DashboardProps = {};
  *
  *  --- render nodes
  */
+let arrowKeyMapTransitionInitialized = false;
 const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -262,6 +265,66 @@ const Dashboard = ({}: DashboardProps) => {
   // FUNCTIONS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
+
+  // called after first time map is rendered
+  useEffect(() => {
+    window.location.hash = "no-back-button";
+
+    // Again because Google Chrome doesn't insert
+    // the first hash into the history
+    window.location.hash = "Again-No-back-button";
+
+    window.onhashchange = function () {
+      window.location.hash = "no-back-button";
+    };
+
+    window.onbeforeunload = function (e) {
+      e = e || window.event;
+
+      // For IE and Firefox prior to version 4
+      if (e) {
+        e.returnValue = "Do you want to close 1Cademy?";
+      }
+
+      // For Safari
+      return "Do you want to close 1Cademy?";
+    };
+
+    // movement through map using keyboard arrow keys
+    document.addEventListener("keydown", event => {
+      if (!document.activeElement) return;
+      if (
+        // mapHovered &&
+        getSelectionText() === "" &&
+        document.activeElement.tagName !== "TEXTAREA" &&
+        document.activeElement.tagName !== "INPUT" &&
+        !arrowKeyMapTransitionInitialized
+      ) {
+        arrowKeyMapTransitionInitialized = true;
+        setMapInteractionValue(oldValue => {
+          const translationValue = { ...oldValue.translation };
+          switch (event.key) {
+            case "ArrowLeft":
+              translationValue.x += 10;
+              break;
+            case "ArrowRight":
+              translationValue.x -= 10;
+              break;
+            case "ArrowUp":
+              translationValue.y += 10;
+              break;
+            case "ArrowDown":
+              translationValue.y -= 10;
+              break;
+          }
+          setTimeout(() => {
+            arrowKeyMapTransitionInitialized = false;
+          }, 10);
+          return { scale: oldValue.scale, translation: translationValue };
+        });
+      }
+    });
+  }, []);
 
   useEffect(
     () => {
@@ -613,16 +676,27 @@ const Dashboard = ({}: DashboardProps) => {
   // );
   const scrollToNode = useCallback(
     (nodeId: string) => {
+      console.log(1);
+      // console.log(6);
+      // console.log(7);
+
       if (!scrollToNodeInitialized) {
+        console.log(2);
+
         setTimeout(() => {
+          const currentNode = graph.nodes[nodeId];
+          // if(currentNode.height===NODE_HEIGHT)
           const originalNode = document.getElementById(nodeId);
           if (
             originalNode &&
             "offsetLeft" in originalNode &&
             originalNode.offsetLeft !== 0 &&
             "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0
+            originalNode.offsetTop !== 0 &&
+            currentNode?.height !== NODE_HEIGHT
           ) {
+            console.log(3);
+
             setScrollToNodeInitialized(true);
             setTimeout(() => {
               setScrollToNodeInitialized(false);
@@ -630,6 +704,8 @@ const Dashboard = ({}: DashboardProps) => {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             setMapInteractionValue(() => {
+              console.log(4);
+              console.log("POS: ", window.innerWidth, window.innerHeight);
               // const translateLeft =
               //   (XOFFSET - originalNode.offsetLeft) * oldValue.scale;
               // const translateTop =
@@ -643,12 +719,13 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
+            console.log("RECURSIVE");
             scrollToNode(nodeId);
           }
         }, 400);
       }
     },
-    [scrollToNodeInitialized]
+    [graph.nodes, scrollToNodeInitialized]
   );
 
   // DEPRECATED: LOAD USER NODES, check new improvement flow, please
@@ -1368,12 +1445,12 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
 
           await batch.commit();
-          scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+            scrollToNode(nodeId);
             // setSelectedNode(nodeId);
-          }, 400);
+          }, 750);
         } catch (err) {
           console.error(err);
         }
@@ -2949,6 +3026,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   const edgeIds = Object.keys(graph.edges);
 
+  const navigateWhenNotScrolling = useCallback(
+    newMapInteractionValue => {
+      if (!scrollToNodeInitialized) {
+        return setMapInteractionValue(newMapInteractionValue);
+      }
+    },
+    [scrollToNodeInitialized]
+  );
   return (
     <div className="MapContainer">
       {settings.theme === "Dark" && (
@@ -3117,7 +3202,11 @@ const Dashboard = ({}: DashboardProps) => {
             className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
             onMouseOver={mapContentMouseOver}
           >
-            <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
+            <MapInteractionCSS
+              textIsHovered={mapHovered}
+              /*identifier={'xdf'}*/ value={mapInteractionValue}
+              onChange={navigateWhenNotScrolling}
+            >
               {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <NodesList
