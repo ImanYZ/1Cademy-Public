@@ -180,6 +180,8 @@ const Dashboard = ({}: DashboardProps) => {
   const [removedParents, setRemovedParents] = useState<string[]>([]);
   const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
+  const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
+
   const g = useRef(dagreUtils.createGraph());
 
   const { addTask, queue } = useWorkerQueue({
@@ -3058,6 +3060,8 @@ const Dashboard = ({}: DashboardProps) => {
             reloadPermanentGrpah={reloadPermanentGraph}
             showClusters={showClusters}
             setShowClusters={setShowClusters}
+            pendingProposalsLoaded={pendingProposalsLoaded}
+            setPendingProposalsLoaded={setPendingProposalsLoaded}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
@@ -3078,8 +3082,9 @@ const Dashboard = ({}: DashboardProps) => {
             openTrends={openTrends}
             setOpenMedia={setOpenMedia}
             allNodes={allNodes.filter(cur => cur.bookmarked)}
+            mapRendered={true}
           />
-          <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} />
+          <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           <Box
             sx={{
               position: "fixed",

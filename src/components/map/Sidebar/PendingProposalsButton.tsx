@@ -1,20 +1,22 @@
 // import "./PendingProposalsButton.css";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { Badge, Box } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
 
 // import shortenNumber from "../../../lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../MetaButton";
 
 type PendingProposalsButtonProps = {
   openSideBar: any;
+  pendingProposalsNum: number;
+  pendingProposalsLoaded: boolean;
 };
 
 const PendingProposalsButton = (props: PendingProposalsButtonProps) => {
   // const pendingProposalsNum = useRecoilValue(pendingProposalsNumState);
   // const pendingProposalsLoaded = useRecoilValue(pendingP
-  const [pendingProposalsLoaded] = useState(true);
-  const [pendingProposalsNum] = useState(0);
+  // const [pendingProposalsLoaded] = useState(true);
+  // const [pendingProposalsNum] = useState(0);
 
   return (
     <MemoizedMetaButton
@@ -24,7 +26,7 @@ const PendingProposalsButton = (props: PendingProposalsButtonProps) => {
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}>
         <Badge
-          badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
+          badgeContent={props.pendingProposalsLoaded ? props.pendingProposalsNum ?? 0 : 0}
           color="error"
           anchorOrigin={{ vertical: "top", horizontal: "left" }}
           sx={{ padding: "1px" }}

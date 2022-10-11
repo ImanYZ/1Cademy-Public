@@ -28,9 +28,10 @@ const comLBTypes = ["Weekly", "Monthly", "All Time", "Self-votes", "Others' Vote
 
 type CommunityLeaderboardProps = {
   userTagId: string;
+  pendingProposalsLoaded: boolean;
 };
 
-const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
+const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLeaderboardProps) => {
   //object of all users' community Points
   // object of all users' weekly community Points
   const [comPointsWeeklyDict, setComPointsWeeklyDict] = useState({});
@@ -48,7 +49,7 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
   const [comLeaderboardTypeOpen, setComLeaderboardTypeOpen] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(true);
 
-  const [pendingProposalsLoaded /*setPendingProposalsLoaded*/] = useState(true);
+  // const [pendingProposalsLoaded /*setPendingProposalsLoaded*/] = useState(true);
   const [comPointsLoaded, setComPointsLoaded] = useState(false);
   const [comPointsMonthlyLoaded, setComPointsMonthlyLoaded] = useState(false);
   const [comPointsWeeklyLoaded, setComPointsWeeklyLoaded] = useState(false);
@@ -57,35 +58,35 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
 
   useEffect(() => {
     if (db && userTagId && pendingProposalsLoaded) {
-      console.log("[Com 1]:In reputationsOthersMonthlyLoaded useEffect");
+      // console.log("[Com 1]:In reputationsOthersMonthlyLoaded useEffect");
       loadReputationsData(db, true, "All Time", userTagId, setComPointsDict, setComPointsLoaded);
     }
   }, [db, pendingProposalsLoaded, setComPointsLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsLoaded) {
-      console.log("[Com 2]:In comPointsLoaded useEffect");
+      // console.log("[Com 2]:In comPointsLoaded useEffect");
       loadReputationsData(db, true, "Monthly", userTagId, setComPointsMonthlyDict, setComPointsMonthlyLoaded);
     }
   }, [db, comPointsLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsMonthlyLoaded) {
-      console.log("[Com 3]:In comPointsMonthlyLoaded useEffect");
+      // console.log("[Com 3]:In comPointsMonthlyLoaded useEffect");
       loadReputationsData(db, true, "Weekly", userTagId, setComPointsWeeklyDict, setComPointsWeeklyLoaded);
     }
   }, [db, comPointsMonthlyLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsWeeklyLoaded) {
-      console.log("[Com 4]:In comPointsWeeklyLoaded useEffect");
+      // console.log("[Com 4]:In comPointsWeeklyLoaded useEffect");
       loadReputationsData(db, true, "Others", userTagId, setComPointsOthersDict, setComPointsOthersLoaded);
     }
   }, [db, comPointsWeeklyLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsOthersLoaded) {
-      console.log("[Com 5]:In comPointsOthersLoaded useEffect");
+      // console.log("[Com 5]:In comPointsOthersLoaded useEffect");
       loadReputationsData(
         db,
         true,
@@ -99,7 +100,7 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
 
   const loadReputationPoints = useCallback((comPsDict: any, comPsDict2: any = null) => {
     const comPs = [];
-    console.log("COM POINTS comPsDict, ", comPsDict);
+    // console.log("COM POINTS comPsDict, ", comPsDict);
     for (let comId in comPsDict) {
       const newComObj = { ...comPsDict[comId], tagId: comId };
       if (comPsDict2) {
@@ -119,48 +120,48 @@ const CommunityLeaderboard = ({ userTagId }: CommunityLeaderboardProps) => {
         }
       }
     }
-    console.log("COM POINTS, ", comPs);
+    // console.log("COM POINTS, ", comPs);
     setComPoints(comPs.slice(0, 9));
   }, []);
 
   useEffect(() => {
     if (comLeaderboardType === "All Time") {
-      console.log("[Com 6]:comPointsDict", comPointsDict);
+      // console.log("[Com 6]:comPointsDict", comPointsDict);
       loadReputationPoints(comPointsDict);
     }
   }, [comLeaderboardType, comPointsDict]);
 
   useEffect(() => {
     if (comLeaderboardType === "Monthly") {
-      console.log("[Com 7]:");
+      // console.log("[Com 7]:");
       loadReputationPoints(comPointsMonthlyDict);
     }
   }, [comLeaderboardType, comPointsMonthlyDict]);
 
   useEffect(() => {
     if (comLeaderboardType === "Weekly") {
-      console.log("[Com 8]:");
+      // console.log("[Com 8]:");
       loadReputationPoints(comPointsWeeklyDict);
     }
   }, [comLeaderboardType, comPointsWeeklyDict]);
 
   useEffect(() => {
     if (comLeaderboardType === "Self-votes") {
-      console.log("[Com 9]:");
+      // console.log("[Com 9]:");
       loadReputationPoints(comPointsDict, comPointsOthersDict);
     }
   }, [comLeaderboardType, comPointsDict, comPointsOthersDict]);
 
   useEffect(() => {
     if (comLeaderboardType === "Others' Votes") {
-      console.log("[Com 10]:");
+      // console.log("[Com 10]:");
       loadReputationPoints(comPointsOthersDict);
     }
   }, [comLeaderboardType, comPointsOthersDict]);
 
   useEffect(() => {
     if (comLeaderboardType === "Others Monthly") {
-      console.log("[Com 11]:");
+      // console.log("[Com 11]:");
       loadReputationPoints(comPointsOthersMonthlyDict);
     }
   }, [comLeaderboardType, comPointsOthersMonthlyDict]);

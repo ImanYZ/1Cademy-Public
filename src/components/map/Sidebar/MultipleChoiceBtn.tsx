@@ -12,7 +12,7 @@ type MultipleChoiceBtnProps = {
 };
 
 const MultipleChoiceBtn = (props: MultipleChoiceBtnProps) => {
-  console.log("-------------->> props", props);
+  // console.log("-------------->> props", props);
   return (
     <div id="MultipleChoiceBtnContainer">
       {props.choices.map(choice => {

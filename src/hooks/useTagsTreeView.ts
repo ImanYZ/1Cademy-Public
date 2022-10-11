@@ -33,7 +33,10 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     let oldAllTagsCopy = { ...oldTags };
     for (let change of docChanges) {
       const cType = change.type;
-      const tagData = change.doc.data() as Tag;
+      // const tagData = change.doc.data() as Tag;
+      let tagData = change.doc.data() as Tag;
+      tagData.tagIds = tagData.tagIds ?? [];
+      tagData.tags = tagData.tags ?? [];
       const nodeId = tagData.node;
       if (tagData.deleted || cType === "removed") {
         // applyTagRemove(oldAllTagsCopy, nodeId, dagreLoaded);
