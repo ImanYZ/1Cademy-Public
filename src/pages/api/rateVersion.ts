@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { INodeType } from "src/types/INodeType";
 
 import { admin, db } from "../../lib/firestoreServer/admin";
 import fbAuth from "../../middlewares/fbAuth";
@@ -50,8 +51,58 @@ import {
   done as an atomic transaction.
 */
 
+export type IRateVersionPayload = {
+  nodeId: string;
+  versionId: string;
+  nodeType: INodeType;
+  uname?: string; // its removed from req as its coming from auth now
+  award: boolean;
+  correct: boolean;
+  wrong: boolean;
+}
+
+// TODO: not checking if ids are invalid (Line no. 116)
+// TODO: we are only deleting user node version for voter on accepting and ignoring others
+// Logic
+// calculate removed parents, removed children and added parents, added children
+// calculate correct and wrong (not doing properly .i.e -1,1, -1, 1, )
+// then run versionCreateUpdate
+// - if version was previously accepted
+//   - select admin based on maxRating
+//   - update node if admin was changed or/and maxVersionRating was changed
+//   - single a user nodes with major=false
+// - if version getting accepted now
+//   - if its an improvement
+//     - select admin based on maxRating
+//     - update node props (admin and props that are present in version)
+//     - generateTagsData
+//     - create/set delete=false on tag doc that was tagged in this node and communities reputation docs
+//     - if node title has been changed, change it every where title can be present (tags, nodes.children[x].title, nodes.parents[x].title, community docs and reputation docs)
+//     - add {node id,title,nodeType} in parentNode.children and signal all parent nodes as major=true
+//     - add {node id, title, nodeType} in childNode.parents and signal all child nodes as major=true
+//     - remove {node id,title,nodeType} from removedParentNode.children and signal all removed parent nodes as major=true
+//     - remove {node id,title,nodeType} from removedChildNode.parents and signal all removed child nodes as major=true
+//     - *signal all users related to improved node as major=true (missing logic - we are sending single using changeNodeTitle when title changes)
+//   - if its not an improvement and a child node
+//     - create a new node
+//     - select admin based on maxRating
+//     - add parent node (node where this new node was proposed as version) in new node
+//     - generateTagsData
+//     - create version for new node that is accepted
+//     - create user version in relative nodeType user version collection
+//     - create practice if childType was Question (we are not testing it right now)
+//     - signal user nodes where child was proposed as major=true
+// if version is approved and it has childType
+//   - flag version as deleted
+//   - flag user version as deleted
+// createUpdateUserVersion
+// create notification
+// - if version was previously accepted oType=AccProposal
+//   - if not then set oType=Proposal
+// - aType values according voting action
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const { uname } = req.body?.data?.user?.userData;
     const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
 
     await db.runTransaction(async t => {
@@ -74,7 +125,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let childType = "childType" in versionData ? versionData.childType : false;
 
       for (let parent of versionData.parents) {
-        if (!nodeData.parents.some((p: any) => p.node === parent.node)) {
+        if (nodeData.parents.findIndex((p: any) => p.node === parent.node) === -1) {
           addedParents.push(parent.node);
         }
       }
@@ -83,18 +134,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // and removedChildren from the clientside because a version was being created.
       // In this function, we have to manually generate them.
       for (let parent of nodeData.parents) {
-        if (!versionData.parents.some((p: any) => p.node === parent.node)) {
+        if (versionData.parents.findIndex((p: any) => p.node === parent.node) === -1) {
           removedParents.push(parent.node);
         }
       }
 
       for (let child of versionData.children) {
-        if (!nodeData.children.some((c: any) => c.node === child.node)) {
+        if (nodeData.children.findIndex((c: any) => c.node === child.node) === -1) {
           addedChildren.push(child.node);
         }
       }
       for (let child of nodeData.children) {
-        if (!versionData.children.some((c: any) => c.node === child.node)) {
+        if (versionData.children.findIndex((c: any) => c.node === child.node) === -1) {
           removedChildren.push(child.node);
         }
       }
@@ -102,14 +153,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { userVersionData, userVersionRef } = await getUserVersion({
         versionId: req.body.versionId,
         nodeType: req.body.nodeType,
-        uname: req.body.uname,
+        uname,
         t,
       });
 
-      correct = req.body.correct ? 1 : 0;
-      wrong = req.body.wrong ? 1 : 0;
+      if(req.body.correct) {
+        correct = userVersionData?.correct ? -1 : 1;
+        wrong = !userVersionData?.correct && userVersionData?.wrong ? -1 : 0;
+      } else {
+        correct = !userVersionData?.wrong && userVersionData?.correct ? -1 : 0;
+        wrong = userVersionData?.wrong ? -1 : 1;
+      }
 
-      award = nodeData.admin === req.body.uname && versionData.proposer !== req.body.uname && req.body.award ? 1 : 0;
+      award = nodeData.admin === uname && versionData.proposer !== uname && req.body.award ? 1 : 0;
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
@@ -121,7 +177,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         versionData,
         newVersion: false,
         childType,
-        voter: req.body.uname,
+        voter: uname,
         correct,
         wrong,
         award,
@@ -156,7 +212,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           createdAt: currentTimestamp,
           updatedAt: currentTimestamp,
           version: req.body.versionId,
-          user: req.body.uname,
+          user: uname,
           wrong: wrong === 1,
         };
       } else {
@@ -197,7 +253,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let notificationData = {
         proposer: versionData.proposer,
-        uname: req.body.uname,
+        uname,
         imageUrl: req.body.data.user.userData.imageUrl,
         fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
         chooseUname: req.body.data.user.userData.chooseUname,

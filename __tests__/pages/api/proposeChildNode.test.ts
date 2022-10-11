@@ -133,6 +133,8 @@ describe("POST /api/proposeChildNode", () => {
   const reputationsCollection = new MockData(reputations, "reputations");
   const notificationsCollection = new MockData([], "notifications");
 
+  // TODO: need to check reputations, community points, tags, questionVersions, practice
+
   const collects = [
     usersCollection,
     creditsCollection,
