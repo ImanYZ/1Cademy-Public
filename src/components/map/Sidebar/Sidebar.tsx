@@ -1,7 +1,19 @@
 // import "./Sidebar.css";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, onSnapshot, setDoc, Timestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  limit,
+  onSnapshot,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
@@ -23,7 +35,9 @@ import notificationsLightTheme from "../../../../public/notifications-light-them
 import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-light-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
+import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
 import { FullNodeData, UsersStatus } from "../../../nodeBookTypes";
+import { NodeType } from "../../../types";
 // import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
 import { MemoizedMetaButton } from "../MetaButton";
 // import LoadingImg from "../../../assets/AnimatediconLoop.gif";
@@ -126,6 +140,7 @@ import UsersStatusList from "./UsersStatusList";
 // const UserInfo = React.lazy(() => import("./UsersStatus/UserInfo/UserInfo"));
 
 const lBTypes = ["Weekly", "Monthly", "All Time", "Others' Votes", "Others Monthly"];
+const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 type SidebarType = {
   // reputationsLoaded: any;
@@ -256,6 +271,9 @@ const Sidebar = (props: SidebarType) => {
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
+  const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
+  const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
+  const [proposals, setProposals] = useState<any[]>([]);
 
   const sidebarRef = useRef<any | null>(null);
 
@@ -269,13 +287,11 @@ const Sidebar = (props: SidebarType) => {
     if (!props.mapRendered) return;
     if (!user) return;
 
-    console.log("GET NTIFICATION NUMS", user.uname);
     const notificationNumbersQuery = doc(db, "notificationNums", user.uname);
-    console.log("will create snapshot");
+
     const killSnapshot = onSnapshot(notificationNumbersQuery, async snapshot => {
-      console.log("onSnapshot", 111);
       if (!snapshot.exists()) return;
-      console.log(222);
+
       setUncheckedNotificationsNum(snapshot.data().nNum);
       // setNotificationNumsLoaded(true);
     });
@@ -289,6 +305,104 @@ const Sidebar = (props: SidebarType) => {
     // }, 1300);
     return () => killSnapshot();
   }, [db, props.mapRendered, user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // if (firebase) {
+    const versionsSnapshots: any[] = [];
+    const versions: { [key: string]: any } = {};
+    for (let nodeType of NODE_TYPES_ARRAY) {
+      const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
+      if (!versionsColl || !userVersionsColl) continue;
+
+      const versionsQuery = query(
+        versionsColl,
+        where("accepted", "==", false),
+        where("tagIds", "array-contains", user.tagId),
+        where("deleted", "==", false)
+      );
+
+      const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (docChanges.length > 0) {
+          // const temporalProposals:any[] = []
+          for (let change of docChanges) {
+            const versionId = change.doc.id;
+            const versionData = change.doc.data();
+            if (change.type === "removed") {
+              delete versions[versionId];
+            }
+            if (change.type === "added" || change.type === "modified") {
+              versions[versionId] = {
+                ...versionData,
+                id: versionId,
+                createdAt: versionData.createdAt.toDate(),
+                award: false,
+                correct: false,
+                wrong: false,
+              };
+              delete versions[versionId].deleted;
+              delete versions[versionId].updatedAt;
+
+              const q = query(
+                userVersionsColl,
+                where("version", "==", versionId),
+                where("user", "==", user.uname),
+                limit(1)
+              );
+
+              const userVersionsDocs = await getDocs(q);
+
+              // const userVersionsDocs = await userVersionsColl
+              //   .where("version", "==", versionId)
+              //   .where("user", "==", user.uname)
+              //   .limit(1)
+              //   .get();
+
+              for (let userVersionsDoc of userVersionsDocs.docs) {
+                const userVersion = userVersionsDoc.data();
+                delete userVersion.version;
+                delete userVersion.updatedAt;
+                delete userVersion.createdAt;
+                delete userVersion.user;
+                versions[versionId] = {
+                  ...versions[versionId],
+                  ...userVersion,
+                };
+              }
+            }
+          }
+          let unevaluatedPendingProposalsNum = 0;
+          for (let pendingP of Object.values(versions)) {
+            if (!pendingP.correct && !pendingP.wrong) {
+              unevaluatedPendingProposalsNum++;
+            }
+          }
+          setPendingProposalsNum(unevaluatedPendingProposalsNum);
+
+          const pendingProposals = { ...versions };
+          const proposalsTemp = Object.values(pendingProposals);
+          const orderredProposals = proposalsTemp.sort(
+            (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+          );
+          setProposals(orderredProposals);
+          // setProposals(orderredProposals.slice(0, lastIndex));
+          // setPendingProposals({ ...versions });
+          // temporalProposals.push(temporalProposals)
+        }
+        setPendingProposalsLoaded(true);
+      });
+      versionsSnapshots.push(versionsSnapshot);
+    }
+    ``;
+    return () => {
+      for (let vSnapshot of versionsSnapshots) {
+        vSnapshot();
+      }
+    };
+    // }
+  }, [db, user]);
 
   const openSideBar = useCallback(
     async (sidebarType: string) => {
@@ -480,7 +594,11 @@ const Sidebar = (props: SidebarType) => {
 
           <NotificationsButton openSideBar={openSideBar} uncheckedNotificationsNum={uncheckedNotificationsNum} />
           <BookmarksButton openSideBar={openSideBar} bookmarkUpdatesNum={bookmarkUpdatesNum} />
-          <PendingProposalsButton openSideBar={openSideBar} />
+          <PendingProposalsButton
+            openSideBar={openSideBar}
+            pendingProposalsNum={pendingProposalsNum}
+            pendingProposalsLoaded={pendingProposalsLoaded}
+          />
 
           {/* <PresentationsButton openSideBar={openSideBar} />
           <MemoizedMetaButton
@@ -624,7 +742,7 @@ const Sidebar = (props: SidebarType) => {
               closeSideBar={props.closeSideBar}
               // noHeader
             >
-              <PendingProposalList openLinkedNode={props.openLinkedNode} />
+              <PendingProposalList proposals={proposals} openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : openChat ? (
             <MemoizedSidebarWrapper

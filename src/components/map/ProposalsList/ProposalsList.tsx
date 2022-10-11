@@ -48,6 +48,7 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
+  console.log("ProposalsList", { props });
   const [user] = useAuth();
 
   const username = user.user?.uname;
