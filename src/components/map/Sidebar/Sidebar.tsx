@@ -408,7 +408,7 @@ const Sidebar = (props: SidebarType) => {
 
   const openSideBar = useCallback(
     async (sidebarType: string) => {
-      console.log("------------------>> sidebarType", sidebarType, user);
+      // console.log("------------------>> sidebarType", sidebarType, user);
       if (!user) return;
       console.log("has user");
       // console.log("In openSideBar");
