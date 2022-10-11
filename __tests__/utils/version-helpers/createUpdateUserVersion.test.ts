@@ -2,15 +2,19 @@ import { commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { createUpdateUserVersion } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { userConceptVersionsData } from "../../../testUtils/mockCollections";
+import { MockData, userConceptVersionsData } from "../../../testUtils/mockCollections";
 
 describe("createUpdateUserVersion", () => {
+  const collects = [userConceptVersionsData];
+
+  collects.push(new MockData([], "userVersionsLog"));
+
   beforeEach(async () => {
-    await userConceptVersionsData.populate();
+    await Promise.all(collects.map(collect => collect.populate()));
   });
 
   afterEach(async () => {
-    await userConceptVersionsData.clean();
+    await Promise.all(collects.map(collect => collect.clean()));
   });
 
   it("should perform createUpdateUserVersion action sepecifc nodeType", async () => {

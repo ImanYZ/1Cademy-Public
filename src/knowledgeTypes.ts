@@ -151,6 +151,7 @@ export type SimpleNode = {
   contributors: { fullName: string; imageUrl: string; username: string }[];
   institutions: { name: string }[];
   versions: number;
+  studied?: boolean;
 };
 
 export type ResponseAutocompleteFullTags = {

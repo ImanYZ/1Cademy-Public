@@ -133,12 +133,35 @@ describe("POST /api/proposeChildNode", () => {
   const reputationsCollection = new MockData(reputations, "reputations");
   const notificationsCollection = new MockData([], "notifications");
 
+  // TODO: need to check reputations, community points, tags, questionVersions, practice
+
   const collects = [
     usersCollection,
     creditsCollection,
     nodeVersionsCollection,
     reputationsCollection,
     notificationsCollection,
+    new MockData([], "monthlyReputations"),
+    new MockData([], "weeklyReputations"),
+    new MockData([], "othersReputations"),
+    new MockData([], "othMonReputations"),
+    new MockData([], "othWeekReputations"),
+
+    new MockData([], "comPoints"),
+    new MockData([], "comMonthlyPoints"),
+    new MockData([], "comWeeklyPoints"),
+    new MockData([], "comOthersPoints"),
+    new MockData([], "comOthMonPoints"),
+    new MockData([], "comOthWeekPoints"),
+
+    new MockData([], "notificationNums"),
+    new MockData([], "practice"),
+    new MockData([], "questionVersions"),
+    new MockData([], "userConceptVersions"),
+    new MockData([], "userNodesLog"),
+    new MockData([], "userQuestionVersions"),
+    new MockData([], "userVersionsLog"),
+    new MockData([], "tags"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");

@@ -7,9 +7,13 @@ import { SearchNodesResponse, SimpleNode, TypesenseNodesSchema } from "../../kno
 // import { SortDirection, SortValues } from "../../noteBookTypes";
 import { NodeType } from "../../types";
 import { SortDirection, SortValues } from "../../nodeBookTypes";
+import { db } from "@/lib/firestoreServer/admin";
+import fbAuth from "src/middlewares/fbAuth";
+import { IUserNode } from "src/types/IUserNode";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const { q = "*", nodeTypes = [], tags = [], nodesUpdatedSince, sortOption, sortDirection, page } = req.body;
+  const { uname } = req.body.data?.user?.userData;
 
   try {
     const typesenseClient = getTypesenseClient();
@@ -27,7 +31,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       .documents()
       .search(searchParameters);
 
-    const allPostsData = (searchResults.hits ?? []).map(
+    let allPostsData = (searchResults.hits ?? []).map(
       (el): SimpleNode => ({
         id: el.document.id,
         title: el.document.title,
@@ -45,6 +49,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       })
     );
 
+    const nodeIds = allPostsData.map((post) => post.id)
+    let userStudiedNodes: {[key: string]: boolean} = {};
+    const userNodes = await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get()
+    for(const userNode of userNodes.docs) {
+      const userNodeData = userNode.data() as IUserNode;
+      userStudiedNodes[userNodeData.node] = !!userNodeData?.isStudied
+    }
+
+    for(let postData of allPostsData) {
+      postData.studied = userStudiedNodes.hasOwnProperty(postData.id) && userStudiedNodes[postData.id];
+    }
+
     res.status(200).json({
       data: allPostsData || [],
       page: searchResults.page,
@@ -57,7 +73,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
   }
 }
 
-export default handler;
+export default fbAuth(handler);
 
 const buildFilter = (nodeTypes: NodeType, tags: string[], nodesUpdatedSince: number) => {
   const filters = [];

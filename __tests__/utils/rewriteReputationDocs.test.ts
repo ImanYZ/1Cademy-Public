@@ -4,6 +4,7 @@ import { firstWeekMonthDays } from "../../src/utils";
 import {
   conceptVersionsData,
   monthlyReputationsData,
+  othersReputationsData,
   othMonReputationsData,
   othWeekReputationsData,
   reputationsData,
@@ -12,22 +13,23 @@ import {
 
 describe("rewriteReputationDocs", () => {
   let node = "OR8UsmsxmeExHG8ekkIY";
+
+  const collects = [
+    conceptVersionsData,
+    monthlyReputationsData,
+    othMonReputationsData,
+    othWeekReputationsData,
+    reputationsData,
+    othersReputationsData,
+    weeklyReputationsData,
+  ];
+
   beforeEach(async () => {
-    await conceptVersionsData.populate();
-    await reputationsData.populate();
-    await monthlyReputationsData.populate();
-    await weeklyReputationsData.populate();
-    await othMonReputationsData.populate();
-    await othWeekReputationsData.populate();
+    await Promise.all(collects.map(collect => collect.populate()));
   });
 
   afterEach(async () => {
-    await conceptVersionsData.clean();
-    await reputationsData.clean();
-    await monthlyReputationsData.clean();
-    await weeklyReputationsData.clean();
-    await othMonReputationsData.clean();
-    await othWeekReputationsData.clean();
+    await Promise.all(collects.map(collect => collect.clean()));
   });
 
   it("Should return write counts grater than 0 in case of reputations", async () => {
