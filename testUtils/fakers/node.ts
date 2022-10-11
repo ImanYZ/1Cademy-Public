@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { IUserNodeVersionLog } from "src/types/IUserNodeVersionLog";
 
@@ -26,6 +27,7 @@ type IFakeNodeOptions = {
   isTag?: boolean;
   proposers?: IUser[];
   admin?: IUser;
+  choices?: IQuestionChoice[];
 };
 
 type IFakeNodeVersionOptions = {
@@ -43,6 +45,7 @@ type IFakeNodeVersionOptions = {
   addedParents?: boolean;
   removedParents?: boolean;
   viewers?: number;
+  choices?: IQuestionChoice[];
 };
 
 export function createNode(params: IFakeNodeOptions): INode {
@@ -69,6 +72,11 @@ export function createNode(params: IFakeNodeOptions): INode {
       }
     }
   }
+  
+  const {
+    choices
+  } = params;
+
   return {
     documentId: params.documentId ? params.documentId : faker.datatype.uuid(),
     aChooseUname: params.admin ? params.admin.chooseUname : faker.datatype.boolean(),
@@ -86,6 +94,7 @@ export function createNode(params: IFakeNodeOptions): INode {
     comments: faker.datatype.number({ precision: 0 }),
     deleted: false,
     content: faker.datatype.string(),
+    choices: choices ? choices : [],
     viewers: params.userNodes ? params.userNodes.length : 0,
     versions: params.versions ? params.versions.length : 0,
     tags: params.tags ? params.tags.map(tag => tag.title) : [],
@@ -105,7 +114,7 @@ export function createNode(params: IFakeNodeOptions): INode {
             ({
               node: parent.documentId,
               title: parent.title,
-              nodeType: parent.nodeType,
+              type: parent.nodeType,
             } as INodeLink)
         )
       : [],
@@ -115,7 +124,7 @@ export function createNode(params: IFakeNodeOptions): INode {
             ({
               node: child.documentId,
               title: child.title,
-              nodeType: child.nodeType,
+              type: child.nodeType,
             } as INodeLink)
         )
       : [],
@@ -230,6 +239,7 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     tags,
     corrects,
     wrongs,
+    choices
   } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
@@ -243,7 +253,7 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
             ({
               node: child.documentId,
               title: child.title,
-              nodeType: child.nodeType,
+              type: child.nodeType,
             } as INodeLink)
         )
       : [],
@@ -252,13 +262,14 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     imageUrl: faker.image.imageUrl(),
     chooseUname: !!proposer?.chooseUname,
     node: node ? String(node.documentId) : faker.datatype.uuid(),
+    choices: choices ? choices : [],
     parents: parents
       ? parents.map(
           parent =>
             ({
               node: parent.documentId,
               title: parent.title,
-              nodeType: parent.nodeType,
+              type: parent.nodeType,
             } as INodeLink)
         )
       : [],

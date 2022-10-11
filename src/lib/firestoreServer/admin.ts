@@ -61,6 +61,7 @@ export const commitBatch = async (batch: WriteBatch): Promise<[WriteBatch, numbe
   try {
     return makeCommitBatch(batch);
   } catch (err) {
+    console.log(err, "batch errr");
     await delay(4000);
     // we removed this condition so that it keeps trying until transaction is committed
     // if (isFirestoreDeadlineError(err))
