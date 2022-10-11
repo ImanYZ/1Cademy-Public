@@ -1,6 +1,7 @@
 @import url("./styles/app.css");
 @import url("./styles/reactMarkdown.css");
-
+@import url("./styles/ComLeaderboard.css");
+@import url("./styles/ComLeaderboardChip.css");
 :root {
   --navbar-height: 70px;
   --footer-height: 309px;
