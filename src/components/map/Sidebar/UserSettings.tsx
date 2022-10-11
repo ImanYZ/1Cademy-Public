@@ -410,7 +410,8 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
         // setIsSubmitting(true); // TODO: enable submitting global state
         try {
           // await firebase.idToken();
-          await postWithToken(`changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          console.log("CALLING API", nodeBookState.chosenNode.id);
+          await postWithToken(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
 
           // await axios.post(`/changeDefaultTag/${chosenNode}`);
           // setTag({ node: chosenNode, title: chosenNodeTitle });
