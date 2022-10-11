@@ -20,7 +20,7 @@ import {
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import { createUserNode } from "../../../testUtils/fakers/userNode";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
-import { conceptVersionsData,MockData } from "../../../testUtils/mockCollections";
+import { conceptVersionsData, MockData } from "../../../testUtils/mockCollections";
 
 describe("POST /api/wrongNode", () => {
   const users = [getDefaultUser({}), createUser({})];
