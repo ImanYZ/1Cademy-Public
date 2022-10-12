@@ -326,47 +326,10 @@ const Dashboard = ({}: DashboardProps) => {
   //   });
   // }, []);
 
-  useEffect(
-    () => {
-      if (!db) return;
-      if (!user) return;
-      if (!allTagsLoaded) return;
-
-      const userNodesRef = collection(db, "userNodes");
-      const q = query(
-        userNodesRef,
-        where("user", "==", user.uname),
-        // IMPORTANT: I commented this to call all
-        // visible: used to drag nodes in Notebook
-        // visible and invisible to show bookmarks
-        // where("visible", "==", true),
-        where("deleted", "==", false)
-      );
-      const killSnapshot = snapshot(q);
-      return () => {
-        // TODO: here we need to remove nodes cause will come node again
-        killSnapshot();
-      };
-    },
-    // TODO: check dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allTags, allTagsLoaded, db, user]
-  );
-  //called whenever isSubmitting changes
-  // changes style of cursor
-
-  useEffect(() => {
-    if (isSubmitting) {
-      document.body.style.cursor = "wait";
-    } else {
-      document.body.style.cursor = "initial";
-    }
-  }, [isSubmitting]);
-
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
-        console.log("[FILL DAGRE]", { fullNodes, currentNodes, currentEdges });
+        console.log("[FILL DAGRE]:::", { fullNodes, currentNodes, currentEdges });
         // debugger
         return fullNodes.reduce(
           (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
@@ -484,6 +447,10 @@ const Dashboard = ({}: DashboardProps) => {
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook
         const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+        // const mergedVisibleFullNodes = visibleFullNodes.map(cur=>{
+        //   const {lef} = nodes[cur.node]
+        //   {...cur,left:}
+        // })
         // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
 
         setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
@@ -497,7 +464,15 @@ const Dashboard = ({}: DashboardProps) => {
         //   // })
         // });
         setGraph(({ nodes, edges }) => {
-          const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edges);
+          // Here we are merging with previous nodes left and top
+          const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+            const tmpNode = nodes[cur.node];
+            if (!tmpNode) return cur;
+
+            return { ...cur, left: tmpNode.left ?? 0, top: tmpNode.top ?? 0 };
+          });
+          // here we are filling dagger
+          const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
           console.log({ newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
         });
@@ -505,7 +480,7 @@ const Dashboard = ({}: DashboardProps) => {
         //   setNodes(newNodes);
         //   return newEdges;
         // });
-        console.log(" -> userNodesSnapshot:", {
+        console.log(" -> userNodesSnapshot:sdf:", {
           userNodeChanges,
           nodeIds,
           nodesData,
@@ -521,6 +496,42 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [allTags, db]
   );
+
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (!allTagsLoaded) return;
+
+      const userNodesRef = collection(db, "userNodes");
+      const q = query(
+        userNodesRef,
+        where("user", "==", user.uname),
+        // IMPORTANT: I commented this to call all
+        // visible: used to drag nodes in Notebook
+        // visible and invisible to show bookmarks
+        // where("visible", "==", true),
+        where("deleted", "==", false)
+      );
+      const killSnapshot = snapshot(q);
+      return () => {
+        //   // TODO: here we need to remove nodes cause will come node again
+        killSnapshot();
+      };
+    },
+    [allTagsLoaded, db, snapshot, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  //called whenever isSubmitting changes
+  // changes style of cursor
+
+  useEffect(() => {
+    if (isSubmitting) {
+      document.body.style.cursor = "wait";
+    } else {
+      document.body.style.cursor = "initial";
+    }
+  }, [isSubmitting]);
 
   // useEffect(() => {
   //   if (!db) return;
@@ -561,7 +572,7 @@ const Dashboard = ({}: DashboardProps) => {
     //   oldNodes = removeDagNode(tempNode, oldNodes);
     //   tempNodes.delete(tempNode);
     // }
-    console.log("--> reloadPermanten graph", tempNodes, changedNodes);
+    console.log("=--> reloadPermanten graph", tempNodes, changedNodes);
     tempNodes.forEach(tempNode => {
       oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
       oldNodes = removeDagNode(g.current, tempNode, oldNodes);
