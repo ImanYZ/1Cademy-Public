@@ -1,4 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, IconButton, Tab, Tabs } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
@@ -21,15 +23,26 @@ type Props = {
   showSearch: boolean;
   onCloseMenu: () => void;
   onShowMenu: () => void;
+  isSignedIn: boolean;
 };
-const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch = false, onCloseMenu, onShowMenu }) => {
+const AppAppBar: FC<Props> = ({
+  showApply = true,
+  showMenu = false,
+  showSearch = false,
+  onCloseMenu,
+  onShowMenu,
+  isSignedIn,
+}) => {
   const router = useRouter();
 
-  const handleSignout = () => {
+  const handleSignout = async () => {
     //TODO: Remove thhis button before deploying
-    getAuth().signOut();
+    await getAuth().signOut();
+    router.push("/signin");
   };
-
+  const onRedirectToSignin = () => {
+    router.push("/signin");
+  };
   const getTabSelected = () => {
     const tabSelected = SECTIONS.findIndex(cur => cur.route === router.route);
     return tabSelected >= 0 ? tabSelected : false;
@@ -99,7 +112,7 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
               <AppHeaderSearchBar />
             </Box>
           )}
-          <Button onClick={handleSignout}>TEMP: Sign out button </Button>
+
           {showApply && (
             <LightTooltip title="Apply to join 1Cademy">
               <Button
@@ -123,6 +136,22 @@ const AppAppBar: FC<Props> = ({ showApply = true, showMenu = false, showSearch =
                 APPLY!
               </Button>
             </LightTooltip>
+          )}
+
+          {isSignedIn ? (
+            <Tooltip title="Sign Out">
+              <IconButton onClick={handleSignout} sx={{ color: theme => theme.palette.common.white }}>
+                <LogoutIcon />
+                {/* Sign Out */}
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Sign In">
+              <IconButton onClick={onRedirectToSignin} sx={{ color: theme => theme.palette.common.white }}>
+                <LoginIcon />
+                {/* Sign In */}
+              </IconButton>
+            </Tooltip>
           )}
 
           {showMenu && (

@@ -2233,9 +2233,9 @@ button.MuiTab-textColorInherit:focus {
   width: 16px;
 }
 
-.MuiButtonBase-root.MuiIconButton-root {
+/* .MuiButtonBase-root.MuiIconButton-root {
   color: #ffffff;
-}
+} */
 
 .searchSelect .MuiFormControlLabel-root {
   margin-right: 0;
@@ -2295,13 +2295,13 @@ button.MuiTab-textColorInherit:focus {
   border-color: #454545;
 }
 
-.LightMode #recentNodesList .MuiInputBase-root,
+/* .LightMode #recentNodesList .MuiInputBase-root,
 .LightMode .searchSelect .MuiListItemText-primary,
 .LightMode .MuiButtonBase-root.MuiIconButton-root,
 .LightMode .searchIcon svg,
 .LightMode #recentNodesList svg {
   color: #454545;
-}
+} */
 
 .LightMode .MuiButtonBase-root.MuiIconButton-root.Mui-checked,
 .LightMode .searchIcon.selected svg,
