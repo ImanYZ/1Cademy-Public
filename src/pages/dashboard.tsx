@@ -1176,6 +1176,7 @@ const Dashboard = ({}: DashboardProps) => {
             batch.set(doc(userNodeLogRef), userNodeLogData);
           }
           // await firebase.commitBatch();
+
           await batch.commit();
           let oldNodes = { ...graph.nodes };
           let oldEdges = { ...graph.edges };
@@ -1586,6 +1587,8 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+          console.log(`[CHANGE NH 🚀] H:${0}, nId:${nodeId}`);
+          addTask({ id: nodeId, height: 0 });
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
           // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
