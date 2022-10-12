@@ -29,7 +29,7 @@ const PendingProposalsButton = (props: PendingProposalsButtonProps) => {
           badgeContent={props.pendingProposalsLoaded ? props.pendingProposalsNum ?? 0 : 0}
           color="error"
           anchorOrigin={{ vertical: "top", horizontal: "left" }}
-          sx={{ padding: "1px" }}
+          sx={{ padding: "1px", wordBreak: "normal" }}
         >
           <FormatListBulletedIcon />
         </Badge>

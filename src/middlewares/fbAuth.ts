@@ -108,7 +108,7 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
 
 export type CustomNextApiRequest = NextApiRequest & {
   user: any;
-}
+};
 
 const fbAuth = (handler: NextApiHandler) => {
   return async (req: CustomNextApiRequest, res: NextApiResponse) => {

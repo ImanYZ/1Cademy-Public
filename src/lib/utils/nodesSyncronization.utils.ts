@@ -66,7 +66,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         left: 0,
         top: 0,
         firstVisit: cur.uNodeData.createdAt.toDate(),
-        lastVisit: cur.uNodeData.updatedAt?.toDate() ?? new Date(),
+        lastVisit: cur.uNodeData.updatedAt?.toDate() ?? cur.uNodeData.createdAt.toDate(),
         changedAt: nodeDataFound.nData.changedAt.toDate(),
         createdAt: nodeDataFound.nData.createdAt.toDate(),
         updatedAt: nodeDataFound.nData.updatedAt.toDate(),
@@ -75,6 +75,8 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         referenceLabels: nodeDataFound.nData.referenceLabels || [],
         tags: nodeDataFound.nData.tags || [],
         tagIds: nodeDataFound.nData.tagIds || [],
+        // parents:nodeDataFound.nData.parents??[],
+        // children:node
       };
       if (nodeDataFound.nData.nodeType !== "Question") {
         fullNodeData.choices = [];

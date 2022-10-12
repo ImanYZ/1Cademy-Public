@@ -49,15 +49,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       })
     );
 
-    const nodeIds = allPostsData.map((post) => post.id)
-    let userStudiedNodes: {[key: string]: boolean} = {};
-    const userNodes = await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get()
-    for(const userNode of userNodes.docs) {
+    const nodeIds = allPostsData.map(post => post.id);
+    let userStudiedNodes: { [key: string]: boolean } = {};
+    const userNodes = await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get();
+    for (const userNode of userNodes.docs) {
       const userNodeData = userNode.data() as IUserNode;
-      userStudiedNodes[userNodeData.node] = !!userNodeData?.isStudied
+      userStudiedNodes[userNodeData.node] = !!userNodeData?.isStudied;
     }
 
-    for(let postData of allPostsData) {
+    for (let postData of allPostsData) {
       postData.studied = userStudiedNodes.hasOwnProperty(postData.id) && userStudiedNodes[postData.id];
     }
 
