@@ -3217,6 +3217,22 @@ const Dashboard = ({}: DashboardProps) => {
               {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
             </Box>
 
+            <button
+              onClick={() => {
+                setGraph(({ nodes, edges }) => {
+                  return {
+                    nodes: {
+                      ...nodes,
+                      ["owiurXq2sPdbHTC3zWHq"]: { ...nodes["owiurXq2sPdbHTC3zWHq"], title: Math.random().toString() },
+                    },
+                    edges,
+                  };
+                });
+              }}
+            >
+              Settitle
+            </button>
+
             <Box sx={{ float: "right" }}>
               <Tooltip title={"Watch geek data"}>
                 <>
