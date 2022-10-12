@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
-import { postWithToken } from "../../../lib/mapApi";
+import { Post } from "../../../lib/mapApi";
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
@@ -93,7 +93,7 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
               await updateProfile(userAuthObj, {
                 photoURL: imageGeneratedUrl,
               });
-              await postWithToken("/user/image", postData); // update userImage in everywhere
+              await Post("/user/image", postData); // update userImage in everywhere
               setImageUrlError(false);
               setIsUploading(false);
               setUserImage(imageGeneratedUrl);
