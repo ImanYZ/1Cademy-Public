@@ -468,10 +468,19 @@ const Dashboard = ({}: DashboardProps) => {
           // Here we are merging with previous nodes left and top
           const visibleFullNodesMerged = visibleFullNodes.map(cur => {
             const tmpNode = nodes[cur.node];
-            if (!tmpNode) return cur;
 
-            return { ...cur, left: tmpNode.left ?? 0, top: tmpNode.top ?? 0 };
+            const hasParent = cur.parents.length;
+            const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+
+            const leftParent = nodeParent?.left ?? 0;
+            const topParent = nodeParent?.top ?? 0;
+
+            return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
           });
+
+          // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
+          //   if(cur.nodeChangeType==='modified' &&)
+          // })
           // here we are filling dagger
           const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
           console.log({ newNodes, newEdges });
