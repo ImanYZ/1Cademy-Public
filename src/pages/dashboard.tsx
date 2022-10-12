@@ -175,7 +175,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
-  const [, /*openProposal*/ setOpenProposal] = useState<string | boolean>(false);
+  const [openProposal, setOpenProposal] = useState<string | boolean>(false);
 
   // when proposing improvements, lists of added/removed parent/child links
   const [addedParents, setAddedParents] = useState<string[]>([]);
@@ -2866,7 +2866,106 @@ const Dashboard = ({}: DashboardProps) => {
 
   /////////////////////////////////////////////////////
   // Inner functions
+  const selectProposal = useMemoizedCallback(
+    (event, proposal) => {
+      // console.log("In selectProposal");
+      console.log("proposal", proposal);
 
+      if (!user?.uname) return;
+      console.log("selectedNOde: ", nodeBookState.selectedNode);
+      // const selectedNode = nodeBookState.selectedNode;
+      event.preventDefault();
+      setOpenProposal(proposal.id);
+      reloadPermanentGraph();
+      setGraph(({ nodes: oldNodes, edges }) => {
+        if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
+        if (!(nodeBookState.selectedNode in changedNodes)) {
+          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+        }
+        const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+        if ("childType" in proposal && proposal.childType !== "") {
+          //here builds de child proposal and draws it
+          const newNodeId = newId();
+          tempNodes.add(newNodeId);
+          const newChildNode = {
+            unaccepted: true,
+            isStudied: false,
+            bookmarked: false,
+            id: newNodeId,
+            correct: false,
+            updatedAt: proposal.createdAt,
+            open: true,
+            user: user.uname,
+            admin: proposal.proposer,
+            aImgUrl: proposal.imageUrl,
+            aChooseUname: proposal.chooseUname,
+            aFullname: proposal.fullname,
+            visible: true,
+            deleted: false,
+            wrong: false,
+            createdAt: proposal.createdAt,
+            firstVisit: proposal.createdAt,
+            lastVisit: proposal.createdAt,
+            versions: 1,
+            viewers: 1,
+            children: proposal.children,
+            nodeType: proposal.childType,
+            parents: proposal.parents,
+            comments: 0,
+            tags: proposal.tags,
+            title: proposal.title,
+            wrongs: 0,
+            corrects: 1,
+            content: proposal.content,
+            nodeImage: proposal.nodeImage,
+            studied: 1,
+            references: proposal.references,
+            choices: [],
+            // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
+            editable: false,
+            width: NODE_WIDTH,
+          };
+          if (proposal.childType === "Question") {
+            newChildNode.choices = proposal.choices;
+          }
+          const newNodes = setDagNode(g.current, newNodeId, newChildNode, oldNodes, allTags, null);
+          const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
+          scrollToNode(newNodeId);
+          return { nodes: newNodes, edges: newEdges };
+          // return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
+          //   setEdges(oldEdges => {
+          //     return setDagEdge(selectedNode, newNodeId, { label: "" }, { ...oldEdges });
+          //   });
+          //   setMapChanged(true);
+          // });
+        } else {
+          //here builds the proposal
+          const oldEdges = compareAndUpdateNodeLinks(g.current, thisNode, nodeBookState.selectedNode, proposal, edges);
+          // setEdges(oldEdges => {
+          //   return compareAndUpdateNodeLinks(thisNode, selectedNode, proposal, {
+          //     ...oldEdges,
+          //   });
+          // });
+          thisNode.title = proposal.title;
+          thisNode.content = proposal.content;
+          thisNode.nodeImage = proposal.nodeImage;
+          thisNode.references = proposal.references;
+          thisNode.children = proposal.children;
+          thisNode.parents = proposal.parents;
+          thisNode.tags = proposal.tags;
+          if (proposal.nodeType === "Question") {
+            thisNode.choices = proposal.choices;
+          }
+          // setMapChanged(true);
+          const newNodes = setDagNode(g.current, nodeBookState.selectedNode, thisNode, oldNodes, allTags, null);
+          // return setDagNode(selectedNode, thisNode, { ...oldNodes }, null);
+          return { nodes: newNodes, edges: oldEdges };
+        }
+      });
+      if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+    },
+    [user?.uname, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
+  );
   const mapContentMouseOver = useCallback((event: any) => {
     if (
       // event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
@@ -3166,7 +3265,7 @@ const Dashboard = ({}: DashboardProps) => {
             fetchProposals={fetchProposals}
             rateProposal={rateProposal}
             openLinkedNode={openLinkedNode}
-            selectProposal={() => console.log("selectProposal")}
+            selectProposal={selectProposal}
             deleteProposal={() => console.log("deleteProposal")}
             closeSideBar={closeSideBar}
             proposeNewChild={proposeNewChild}
@@ -3179,6 +3278,7 @@ const Dashboard = ({}: DashboardProps) => {
             setShowClusters={setShowClusters}
             pendingProposalsLoaded={pendingProposalsLoaded}
             setPendingProposalsLoaded={setPendingProposalsLoaded}
+            openProposal={openProposal}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
@@ -3216,23 +3316,6 @@ const Dashboard = ({}: DashboardProps) => {
               <Typography>Queue Workers</Typography>
               {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
             </Box>
-
-            <button
-              onClick={() => {
-                setGraph(({ nodes, edges }) => {
-                  return {
-                    nodes: {
-                      ...nodes,
-                      ["owiurXq2sPdbHTC3zWHq"]: { ...nodes["owiurXq2sPdbHTC3zWHq"], title: Math.random().toString() },
-                    },
-                    edges,
-                  };
-                });
-              }}
-            >
-              Settitle
-            </button>
-
             <Box sx={{ float: "right" }}>
               <Tooltip title={"Watch geek data"}>
                 <>
@@ -3256,7 +3339,7 @@ const Dashboard = ({}: DashboardProps) => {
               // value={mapInteractionValue}
               // onChange={navigateWhenNotScrolling}
             >
-              {showClusters && <ClustersList clusterNodes={clusterNodes} />}
+              1{showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <MemoizedNodeList
                 nodes={graph.nodes}

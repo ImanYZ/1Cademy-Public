@@ -185,6 +185,7 @@ type SidebarType = {
   mapRendered: boolean;
   pendingProposalsLoaded: boolean;
   setPendingProposalsLoaded: (newValue: boolean) => void;
+  openProposal: string;
 };
 
 const Sidebar = (props: SidebarType) => {

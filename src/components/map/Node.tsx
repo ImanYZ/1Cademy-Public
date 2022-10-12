@@ -900,8 +900,8 @@ const Node = ({
   );
 };
 
-export const MemoizedNode = Node;
-// export const MemoizedNode = React.memo(Node);
+// export const MemoizedNode = Node;
+export const MemoizedNode = React.memo(Node);
 
 // export default React.memo(Node);
 // export default React.memo(Node, (prevProps, nextProps) => {

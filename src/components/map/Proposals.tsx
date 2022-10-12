@@ -38,6 +38,7 @@ type ProposalsProps = {
   selectProposal: any;
   deleteProposal: any;
   proposeNewChild: any;
+  openProposal: string;
 };
 
 const Proposals = (props: ProposalsProps) => {

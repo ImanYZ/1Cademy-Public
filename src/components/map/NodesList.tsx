@@ -203,8 +203,8 @@ const NodesList = ({
   );
 };
 // export default NodesList;
-export const MemoizedNodeList = NodesList;
-// export const MemoizedNodeList = React.memo(NodesList);
+// export const MemoizedNodeList = NodesList;
+export const MemoizedNodeList = React.memo(NodesList);
 
 // import React from "react";
 // import { useRecoilValue } from "recoil";
