@@ -30,9 +30,11 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
   const setImageSize = useCallback(({ target: img }: { target: any }) => {
     if (img.offsetHeight > img.offsetWidth) {
       setImageWidth("100%");
-      setImageHeight("auto");
+      setImageHeight("100%");
+      // setImageHeight("auto");
     } else {
-      setImageWidth("auto");
+      // setImageWidth("auto");
+      setImageWidth("100%");
       setImageHeight("100%");
     }
   }, []);
