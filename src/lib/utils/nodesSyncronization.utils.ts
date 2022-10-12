@@ -75,6 +75,8 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         referenceLabels: nodeDataFound.nData.referenceLabels || [],
         tags: nodeDataFound.nData.tags || [],
         tagIds: nodeDataFound.nData.tagIds || [],
+        // parents:nodeDataFound.nData.parents??[],
+        // children:node
       };
       if (nodeDataFound.nData.nodeType !== "Question") {
         fullNodeData.choices = [];
