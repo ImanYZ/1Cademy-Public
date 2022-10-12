@@ -185,6 +185,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
 
+  const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
   const { addTask, queue } = useWorkerQueue({
@@ -522,6 +523,16 @@ const Dashboard = ({}: DashboardProps) => {
     [allTagsLoaded, db, snapshot, user?.uname]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
+
+  useEffect(() => {
+    const currentLengthNodes = Object.keys(graph.nodes).length;
+    if (currentLengthNodes < previousLengthNodes.current) {
+      // call worker to rerender all
+      console.log(`[CHANGE NH 🚀] RECALCULATE`);
+      addTask(null);
+    }
+    previousLengthNodes.current = currentLengthNodes;
+  }, [addTask, graph.nodes]);
   //called whenever isSubmitting changes
   // changes style of cursor
 
@@ -1587,8 +1598,6 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
-          console.log(`[CHANGE NH 🚀] H:${0}, nId:${nodeId}`);
-          addTask({ id: nodeId, height: 0 });
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
           // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
@@ -3196,7 +3205,7 @@ const Dashboard = ({}: DashboardProps) => {
           >
             <Box sx={{ border: "dashed 1px royalBlue" }}>
               <Typography>Queue Workers</Typography>
-              {queue.map(cur => ` 👷‍♂️ ${cur.height} `)}
+              {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
             </Box>
 
             <Box sx={{ float: "right" }}>
