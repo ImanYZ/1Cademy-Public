@@ -24,7 +24,7 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import { use1AcademyTheme } from "../../../context/ThemeContext";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
 import { Reputation, User } from "../../../knowledgeTypes";
-import { postWithToken } from "../../../lib/mapApi";
+import { Post } from "../../../lib/mapApi";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "../../../lib/utils/constants";
 import { ToUpperCaseEveryWord } from "../../../lib/utils/utils";
 // import { ChoosingType } from "../../../nodeBookTypes";
@@ -411,7 +411,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
         try {
           // await firebase.idToken();
           console.log("CALLING API", nodeBookState.chosenNode.id);
-          await postWithToken(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
 
           // await axios.post(`/changeDefaultTag/${chosenNode}`);
           // setTag({ node: chosenNode, title: chosenNodeTitle });

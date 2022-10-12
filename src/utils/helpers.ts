@@ -13,10 +13,10 @@ export const firstWeekMonthDays = (thisDate?: any) => {
   return { firstWeekDay, firstMonthDay };
 };
 
-export type DetachCallback = () => Promise<void>
+export type DetachCallback = () => Promise<void>;
 
 // we defined it like this because, we need to control behaviour of this in tests
 // maybe we implement queues from it in future
 export const detach = async (callback: DetachCallback) => {
-  setImmediate(callback)
-}
+  setImmediate(callback);
+};

@@ -11,8 +11,8 @@ export const postWithToken = async (mapUrl: string, postData: any = {}): Promise
   return response.data;
 };
 
-// export const updateCorrectNode = async (): Promise<ResponseAutocompleteTags> => {
-//   const token = await getIdToken()
-//   const response = await API.get("/api/tagsAutocomplete", { headers: { Authorization: token ? `Bearer ${token}` : '' }, params: { q: tagName } })
-//   return response.data
-// }
+export const Post = async <R extends unknown>(mapUrl: string, postData: any = {}): Promise<R> => {
+  const token = await getIdToken();
+  const response = await API.post(`/api${mapUrl}`, { ...postData }, { headers: { Authorization: `Bearer ${token}` } });
+  return response.data;
+};

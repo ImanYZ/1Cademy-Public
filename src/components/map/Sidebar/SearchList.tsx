@@ -20,7 +20,7 @@ import {
   SelectChangeEvent,
   TextField,
 } from "@mui/material";
-import axios from "axios";
+// import axios from "axios";
 // import "./SearchList.css";
 // import Chip from "@material-ui/core/Chip";
 // import Divider from "@material-ui/core/Divider";
@@ -60,6 +60,7 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import ValidatedInput from "../../../../Editor/ValidatedInput/ValidatedInput";
 // import TagSearch from "../../../../PublicComps/TagSearch/TagSearch";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
+import { Post } from "../../../lib/mapApi";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { SortDirection, SortValues } from "../../../nodeBookTypes";
 // import { SortDirection, SortValues } from "../../../noteBookTypes";
@@ -193,30 +194,44 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
 
   const onSearch = useCallback(
     async (page: number, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
-      // async (page: number = 1) => {
-      console.log("[onSearch]");
-      setIsRetrieving(true);
-      const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
-        q: nodeBookState.searchQuery,
-        nodeTypes,
-        tags: getTagsSelected().map(cur => cur.title),
-        nodesUpdatedSince,
-        sortOption,
-        sortDirection,
-        page,
-      });
+      try {
+        // async (page: number = 1) => {
+        console.log("[onSearch]");
+        setIsRetrieving(true);
+        const data: SearchResult = await Post("/searchNodesInNotebook", {
+          q: nodeBookState.searchQuery,
+          nodeTypes,
+          tags: getTagsSelected().map(cur => cur.title),
+          nodesUpdatedSince,
+          sortOption,
+          sortDirection,
+          page,
+        });
+        // const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
+        //   q: nodeBookState.searchQuery,
+        //   nodeTypes,
+        //   tags: getTagsSelected().map(cur => cur.title),
+        //   nodesUpdatedSince,
+        //   sortOption,
+        //   sortDirection,
+        //   page,
+        // });
 
-      console.log("data", data.data);
-      const res = data.data;
-      const newData = page === 1 ? res.data : [...searchResults.data, ...res.data];
-      setSearchResults({
-        data: newData,
-        lastPageLoaded: res.page,
-        totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
-        totalResults: res.numResults,
-      });
-      // };
-      setIsRetrieving(false);
+        console.log("data", data.data);
+        const res = data.data;
+        const newData = page === 1 ? res.data : [...searchResults.data, ...res.data];
+        setSearchResults({
+          data: newData,
+          lastPageLoaded: res.page,
+          totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
+          totalResults: res.numResults,
+        });
+        // };
+        setIsRetrieving(false);
+      } catch (err) {
+        console.log(err);
+        setIsRetrieving(false);
+      }
     },
     [getTagsSelected, nodeBookState.searchQuery, nodesUpdatedSince, searchResults.data]
   );
