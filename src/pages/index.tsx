@@ -1,9 +1,8 @@
 import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/system";
-import { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { ComponentType, useEffect, useRef, useState } from "react";
+import { ComponentType, ReactNode, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
 import HomeFilter, { HomeFilterRef } from "@/components/HomeFilter";
@@ -17,8 +16,9 @@ import {
   homePageSortByDefaults,
 } from "@/lib/utils/utils";
 
+import PublicLayout from "../components/layouts/PublicLayout";
 import { useOnScreen } from "../hooks/useOnScreen";
-import { FilterValue, SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
+import { FilterValue, NextPageWithLayout, SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
 import { brandingLightTheme } from "../lib/theme/brandingTheme";
 
 export const PagesNavbar: ComponentType<any> = dynamic(() => import("@/components/PagesNavbar").then(m => m.default), {
@@ -36,7 +36,7 @@ const MasonryNodes: ComponentType<any> = dynamic(() => import("@/components/Maso
   ssr: false,
 });
 
-const HomePage: NextPage = () => {
+const HomePage: NextPageWithLayout = () => {
   const router = useRouter();
   const upvotes = getQueryParameterAsBoolean(router.query.upvotes || String(homePageSortByDefaults.upvotes));
   const mostRecent = getQueryParameterAsBoolean(router.query.mostRecent || String(homePageSortByDefaults.mostRecent));
@@ -164,4 +164,7 @@ const HomePage: NextPage = () => {
   );
 };
 
+HomePage.getLayout = (page: ReactNode) => {
+  return <PublicLayout>{page}</PublicLayout>;
+};
 export default HomePage;
