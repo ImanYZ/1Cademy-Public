@@ -27,6 +27,7 @@ import LinkingButton from "./LinkingButton";
 import { ReferenceLabelInput } from "./ReferenceLabelInput";
 
 const separateURL = (text: string): [boolean, any] => {
+  console.log("separateURL", text);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex);
   if (matches && matches.length > 0) {
@@ -200,7 +201,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               let refTitle = reference.title;
               let urlRefLabel = [false, false];
               if ("label" in reference && reference.label !== "") {
-                const separatedURL = separateURL(reference.label);
+                const separatedURL = separateURL(reference.label ?? "");
                 if (separatedURL[0]) {
                   urlRefLabel = separatedURL;
                 } else {
