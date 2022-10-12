@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Omit --production flag for TypeScript devDependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY src ./src
 COPY public ./public
