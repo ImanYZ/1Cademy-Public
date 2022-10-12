@@ -172,7 +172,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     linkedNodeID={parent.node}
                     linkedNodeTitle={parent.title}
                     linkedNodeType="parent"
-                    nodeType={parent.nodeType}
+                    nodeType={parent.type}
                     visible={parent.visible}
                   />
                   {props.editable && props.parents.length > 1 && (
@@ -365,7 +365,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     linkedNodeID={child.node}
                     linkedNodeTitle={child.title}
                     linkedNodeType="child"
-                    nodeType={child.nodeType}
+                    nodeType={child.type}
                     visible={child.visible}
                   />
                   {props.editable && (

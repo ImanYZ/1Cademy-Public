@@ -361,7 +361,7 @@ label {
 
 .MuiInputLabel-root.MuiInputLabel-root,
 .MuiInputBase-input {
-  color: #f6f6f6;
+  /* color: #f6f6f6; */
 }
 .LightMode .MuiInputLabel-root.MuiInputLabel-root,
 .LightMode .MuiInputBase-input {
@@ -601,7 +601,7 @@ select:-webkit-autofill:focus {
 .MuiListItem-root .MuiSvgIcon-root,
 .MuiAutocomplete-option .MuiSvgIcon-root,
 .MuiTreeItem-root .MuiSvgIcon-root {
-  fill: #f0f0f0;
+  /* fill: #f0f0f0; */
 }
 
 .LightMode .MuiListItem-root .MuiSvgIcon-root,

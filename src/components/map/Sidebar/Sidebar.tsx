@@ -650,7 +650,9 @@ const Sidebar = (props: SidebarType) => {
                     )} */}
 
                   <div id="LeaderboardChanger" className="SidebarDescription">
-                    <div id="LeaderboardTag">{user.tag}</div>
+                    <div id="LeaderboardTag" style={{ textOverflow: "ellipsis", width: "90px" }}>
+                      {user.tag}
+                    </div>
                     <div id="LeaderboardType" style={{ fontSize: "12px" }}>
                       {leaderboardType ? leaderboardType : "Leaderboard"}
                     </div>

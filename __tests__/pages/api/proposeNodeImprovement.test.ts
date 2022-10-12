@@ -92,7 +92,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       isTag: false,
       corrects: 1,
       parents: [nodes[1]],
-      tags: []
+      tags: [],
     })
   );
 
@@ -110,7 +110,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       user: users[1],
       node: nodes[0],
       correct: false,
-      wrong: false
+      wrong: false,
     }),
   ];
 
@@ -130,10 +130,10 @@ describe("POST /api/proposeNodeImprovement", () => {
       accepted: false,
       proposer: users[0],
       corrects: 1,
-      tags: [ nodes[0] ],
-      parents: [ nodes[0] ],
-      children: [nodes[1] ],
-    })
+      tags: [nodes[0]],
+      parents: [nodes[0]],
+      children: [nodes[1]],
+    }),
   ];
 
   const credits = [
@@ -206,7 +206,7 @@ describe("POST /api/proposeNodeImprovement", () => {
     new MockData([], "userConceptVersions"),
     new MockData([], "userVersionsLog"),
 
-    new MockData([], "monthlyReputations")
+    new MockData([], "monthlyReputations"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -242,15 +242,9 @@ describe("POST /api/proposeNodeImprovement", () => {
             tagIds: [nodes[0].documentId],
             tags: [nodes[0].title],
             id: nodes[2].documentId,
-            addedParents: [
-              String(nodes[0].documentId)
-            ],
-            addedChildren: [
-              String(nodes[1].documentId)
-            ],
-            removedParents: [
-              String(nodes[1].documentId)
-            ],
+            addedParents: [String(nodes[0].documentId)],
+            addedChildren: [String(nodes[1].documentId)],
+            removedParents: [String(nodes[1].documentId)],
             removedChildren: [],
           },
         },
@@ -271,7 +265,8 @@ describe("POST /api/proposeNodeImprovement", () => {
     });
 
     it("should be check changedTags=true", async () => {
-      let versions = await db.collection("conceptVersions")
+      let versions = await db
+        .collection("conceptVersions")
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -281,7 +276,8 @@ describe("POST /api/proposeNodeImprovement", () => {
     });
 
     it("should be check addedTags=true", async () => {
-      let versions = await db.collection("conceptVersions")
+      let versions = await db
+        .collection("conceptVersions")
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -291,7 +287,8 @@ describe("POST /api/proposeNodeImprovement", () => {
     });
 
     it("should be check changedTitle=true", async () => {
-      let versions = await db.collection("conceptVersions")
+      let versions = await db
+        .collection("conceptVersions")
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -398,12 +395,12 @@ describe("POST /api/proposeNodeImprovement", () => {
             const notifications = await db.collection("notifications").where("uname", "==", users[0].uname).get();
             const notification = notifications.docs[0].data() as INotification;
             expect(notification.aType).toEqual([
-              'changedTitle',
-              'addedTags',
-              'changedTags',
-              'addedParents',
-              'addedChildren',
-              'removedParents'
+              "changedTitle",
+              "addedTags",
+              "changedTags",
+              "addedParents",
+              "addedChildren",
+              "removedParents",
             ]);
           });
         });
