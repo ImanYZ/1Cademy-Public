@@ -1,12 +1,12 @@
 jest.mock("src/utils/helpers", () => {
-  const original = jest.requireActual("src/utils/helpers")
+  const original = jest.requireActual("src/utils/helpers");
   return {
     ...original,
     detach: jest.fn().mockImplementation(async (callback: any) => {
-      return callback()
-    })
-  }
-})
+      return callback();
+    }),
+  };
+});
 
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";

@@ -1,6 +1,6 @@
 import API from "@/lib/utils/axiosConfig";
 
-import { ResponseAutocompleteTags } from "../knowledgeTypes";
+import { ResponseAutocompleteTags, ResponseUploadImage } from "../knowledgeTypes";
 import { getIdToken } from "./firestoreClient/auth";
 
 // Will send to and endpoint like this:
@@ -8,6 +8,16 @@ import { getIdToken } from "./firestoreClient/auth";
 export const postWithToken = async (mapUrl: string, postData: any = {}): Promise<ResponseAutocompleteTags> => {
   const token = await getIdToken();
   const response = await API.post(`/api${mapUrl}`, { ...postData }, { headers: { Authorization: `Bearer ${token}` } });
+  return response.data;
+};
+
+export const postImageWithToken = async (mapUrl: string, postData: any = {}): Promise<ResponseUploadImage> => {
+  const token = await getIdToken();
+  const response = await API.post(
+    `/api${mapUrl}`,
+    { ...postData },
+    { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+  );
   return response.data;
 };
 

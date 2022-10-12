@@ -2581,6 +2581,13 @@ button.MuiTab-textColorInherit:focus {
   /* margin-left: -1px; */
   z-index: 4;
 }
+.profileImage {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center center;
+}
 .profileImage:hover {
   cursor: pointer;
   box-shadow: 0 0 16px 0 #bebebe;

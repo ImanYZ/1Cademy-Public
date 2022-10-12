@@ -119,8 +119,8 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
         currentTimestamp,
         writeCounts,
       });
-      await commitBatch(batch)
-    })
+      await commitBatch(batch);
+    });
 
     // Delete the node from the list of children of each parent node
     for (let parentLink of nodeData.parents) {
@@ -147,8 +147,8 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           currentTimestamp,
           writeCounts,
         });
-        await commitBatch(batch)
-      })
+        await commitBatch(batch);
+      });
     }
     // Delete the node from the list of parents of each child node
     for (let childLink of nodeData.children) {
@@ -175,7 +175,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           currentTimestamp,
           writeCounts,
         });
-        await commitBatch(batch)
+        await commitBatch(batch);
       });
     }
     //  retrieve all the nodes that are tagging this current node, then remove current node from their list of tags
@@ -211,15 +211,15 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
               currentTimestamp,
               writeCounts,
             });
-            await commitBatch(batch)
-          })
+            await commitBatch(batch);
+          });
         }
       }
       [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId, writeCounts });
     }
 
     // TODO: move these to queue
-    await detach(async() => {
+    await detach(async () => {
       let batch = db.batch();
       let writeCounts = 0;
       //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
@@ -237,8 +237,8 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         }
       }
-      await commitBatch(batch)
-    })
+      await commitBatch(batch);
+    });
     //  query all the nodes that are referencing current node with nodeId
     if (nodeData.nodeType === "Reference") {
       const citingNodesRefs = db.collection("nodes").where("referenceIds", "array-contains", nodeId);
@@ -273,7 +273,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
               currentTimestamp,
               writeCounts,
             });
-            await commitBatch(batch)
+            await commitBatch(batch);
           });
         }
       }
@@ -440,7 +440,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
         currentTimestamp,
         writeCounts,
       });
-      await commitBatch(batch)
+      await commitBatch(batch);
     });
   }
   batch.update(nodeRef, nodeChanges);
