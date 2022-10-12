@@ -16,6 +16,7 @@ import {
   signalAllUserNodesChanges,
   updateReputation,
 } from ".";
+import { detach } from "./helpers";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -104,16 +105,22 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   //  if the new change yields node with more downvotes than upvotes, DELETE
   if (nodeData.corrects + correctChange < nodeData.wrongs + wrongChange) {
     deleteNode = true;
-    [batch, writeCounts] = await signalAllUserNodesChanges({
-      batch,
-      userNodesRefs,
-      userNodesData,
-      nodeChanges: {},
-      major: true,
-      deleted: deleteNode,
-      currentTimestamp,
-      writeCounts,
-    });
+    // TODO: move these to queue
+    detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await signalAllUserNodesChanges({
+        batch,
+        userNodesRefs,
+        userNodesData,
+        nodeChanges: {},
+        major: true,
+        deleted: deleteNode,
+        currentTimestamp,
+        writeCounts,
+      });
+      await commitBatch(batch)
+    })
 
     // Delete the node from the list of children of each parent node
     for (let parentLink of nodeData.parents) {
@@ -128,14 +135,20 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       };
       batch.update(parentNode.nodeRef, nodeChanges);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-        batch,
-        linkedId: parentId,
-        nodeChanges,
-        major: true,
-        currentTimestamp,
-        writeCounts,
-      });
+      // TODO: move these to queue
+      detach(async () => {
+        let batch = db.batch();
+        let writeCounts = 0;
+        [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+          batch,
+          linkedId: parentId,
+          nodeChanges,
+          major: true,
+          currentTimestamp,
+          writeCounts,
+        });
+        await commitBatch(batch)
+      })
     }
     // Delete the node from the list of parents of each child node
     for (let childLink of nodeData.children) {
@@ -150,13 +163,19 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       };
       batch.update(childNode.nodeRef, nodeChanges);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-        batch,
-        linkedId: childId,
-        nodeChanges,
-        major: true,
-        currentTimestamp,
-        writeCounts,
+      // TODO: move these to queue
+      detach(async () => {
+        let batch = db.batch();
+        let writeCounts = 0;
+        [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+          batch,
+          linkedId: childId,
+          nodeChanges,
+          major: true,
+          currentTimestamp,
+          writeCounts,
+        });
+        await commitBatch(batch)
       });
     }
     //  retrieve all the nodes that are tagging this current node, then remove current node from their list of tags
@@ -180,33 +199,46 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           };
           batch.update(taggedNodeRef, nodeChanges);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-            batch,
-            linkedId: taggedNodeDoc.id,
-            nodeChanges,
-            major: true,
-            currentTimestamp,
-            writeCounts,
-          });
+          // TODO: move these to queue
+          detach(async () => {
+            let batch = db.batch();
+            let writeCounts = 0;
+            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+              batch,
+              linkedId: taggedNodeDoc.id,
+              nodeChanges,
+              major: true,
+              currentTimestamp,
+              writeCounts,
+            });
+            await commitBatch(batch)
+          })
         }
       }
       [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId, writeCounts });
     }
-    //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
-    //  if such nodes exist, set isTag property to false
-    for (let tagId of nodeData.tagIds) {
-      const taggedNodeDocs = await db
-        .collection("nodes")
-        .where("tagIds", "array-contains", tagId)
-        .where("deleted", "==", false)
-        .get();
-      if (taggedNodeDocs.docs.length <= 1) {
-        [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId: tagId, writeCounts });
-        const tagNodeRef = db.collection("nodes").doc(tagId);
-        batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+    // TODO: move these to queue
+    detach(async() => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
+      //  if such nodes exist, set isTag property to false
+      for (let tagId of nodeData.tagIds) {
+        const taggedNodeDocs = await db
+          .collection("nodes")
+          .where("tagIds", "array-contains", tagId)
+          .where("deleted", "==", false)
+          .get();
+        if (taggedNodeDocs.docs.length <= 1) {
+          [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId: tagId, writeCounts });
+          const tagNodeRef = db.collection("nodes").doc(tagId);
+          batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
       }
-    }
+      await commitBatch(batch)
+    })
     //  query all the nodes that are referencing current node with nodeId
     if (nodeData.nodeType === "Reference") {
       const citingNodesRefs = db.collection("nodes").where("referenceIds", "array-contains", nodeId);
@@ -229,13 +261,19 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           };
           batch.update(citingNodeRef, nodeChanges);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-            batch,
-            linkedId: citingNodeDoc.id,
-            nodeChanges,
-            major: true,
-            currentTimestamp,
-            writeCounts,
+          // TODO: move these to queue
+          detach(async () => {
+            let batch = db.batch();
+            let writeCounts = 0;
+            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+              batch,
+              linkedId: citingNodeDoc.id,
+              nodeChanges,
+              major: true,
+              currentTimestamp,
+              writeCounts,
+            });
+            await commitBatch(batch)
           });
         }
       }
@@ -388,15 +426,21 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   if (deleteNode) {
     nodeChanges.deleted = true;
   } else {
-    [batch, writeCounts] = await signalAllUserNodesChanges({
-      batch,
-      userNodesRefs,
-      userNodesData,
-      nodeChanges,
-      major: false,
-      deleted: false,
-      currentTimestamp,
-      writeCounts,
+    // TODO: move these to queue
+    detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await signalAllUserNodesChanges({
+        batch,
+        userNodesRefs,
+        userNodesData,
+        nodeChanges,
+        major: false,
+        deleted: false,
+        currentTimestamp,
+        writeCounts,
+      });
+      await commitBatch(batch)
     });
   }
   batch.update(nodeRef, nodeChanges);
