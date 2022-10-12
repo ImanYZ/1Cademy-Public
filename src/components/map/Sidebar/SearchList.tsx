@@ -9,6 +9,7 @@ import {
   Box,
   Checkbox,
   Chip,
+  CircularProgress,
   Divider,
   FormControl,
   IconButton,
@@ -32,7 +33,6 @@ import {
 // import algoliasearch from "algoliasearch";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Image from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 
 // import {
@@ -46,7 +46,6 @@ import React, { useCallback, useEffect, useState } from "react";
 // } from "react-instantsearch-dom";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import Worker from "worker-loader!./searchWorker.js"; // eslint-disable-line import/no-webpack-loader-syntax
-import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { useNodeBook } from "../../../context/NodeBookContext";
 // import Modal from "../../../../../containers/Modal/Modal";
 // import { firebaseState, tagState, usernameState } from "../../../../../store/AuthAtoms";
@@ -585,93 +584,94 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       </InstantSearch> */}
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
-      {!isRetrieving ? (
-        <ul className="collection Proposals" style={{ padding: "0px", margin: "0px", overflow: "hidden" }}>
-          {searchResults.data.map((resNode, idx) => {
-            return (
-              // <h4 key={idx}>{resNode.title}</h4>
-              <li
-                // TODO: the result comes from typesense, there are nodes, we need to fill with userNode studied data
-                className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
-                // key={`resNode${resNode.id}`}
-                key={`resNode${idx}`}
-                // onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
-                onClick={() => openLinkedNode(resNode.id)}
-                style={{ listStyle: "none", padding: "10px" }}
-              >
-                <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
-                  <NodeTypeIcon nodeType={resNode.nodeType} />
-                  <div className="right" style={{ display: "flex", gap: "10px" }}>
-                    <MemoizedMetaButton
-                    // tooltip="Creation or the last update of this node."
-                    // tooltipPosition="BottomLeft"
-                    >
-                      <>
-                        {/* <i className="material-icons grey-text">event_available</i> */}
-                        <EventAvailableIcon className="material-icons grey-text" />
-                        <span>{dayjs(resNode.changedAt).fromNow()}</span>
-                      </>
-                    </MemoizedMetaButton>
-                    <MemoizedMetaButton
-                    // tooltip="# of improvement/child proposals on this node."
-                    // tooltipPosition="BottomLeft"
-                    >
-                      <>
-                        {/* <i className="material-icons grey-text">create</i> */}
-                        <CreateIcon className="material-icons grey-text" />
-                        <span>{shortenNumber(resNode.versions, 2, false)}</span>
-                      </>
-                    </MemoizedMetaButton>
-                    <MemoizedMetaButton
-                    // tooltip="# of 1Cademists who have found this node unhelpful."
-                    // tooltipPosition="BottomLeft"
-                    >
-                      <>
-                        {/* <i className="material-icons grey-text">close</i> */}
-                        <CloseIcon className="material-icons grey-text" />
-                        <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
-                      </>
-                    </MemoizedMetaButton>
-                    <MemoizedMetaButton
-                    // tooltip="# of 1Cademists who have found this node helpful."
-                    // tooltipPosition="BottomLeft"
-                    >
-                      <>
-                        {/* <i className="material-icons DoneIcon grey-text">done</i> */}
-                        <DoneIcon className="material-icons DoneIcon grey-text" />
-                        <span>{shortenNumber(resNode.corrects, 2, false)}</span>
-                      </>
-                    </MemoizedMetaButton>
-                  </div>
+
+      <ul className="collection Proposals" style={{ padding: "0px", margin: "0px", overflow: "hidden" }}>
+        {searchResults.data.map((resNode, idx) => {
+          return (
+            // <h4 key={idx}>{resNode.title}</h4>
+            <li
+              // TODO: the result comes from typesense, there are nodes, we need to fill with userNode studied data
+              className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
+              // key={`resNode${resNode.id}`}
+              key={`resNode${idx}`}
+              // onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
+              onClick={() => openLinkedNode(resNode.id)}
+              style={{ listStyle: "none", padding: "10px" }}
+            >
+              <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
+                <NodeTypeIcon nodeType={resNode.nodeType} />
+                <div className="right" style={{ display: "flex", gap: "10px" }}>
+                  <MemoizedMetaButton
+                  // tooltip="Creation or the last update of this node."
+                  // tooltipPosition="BottomLeft"
+                  >
+                    <>
+                      {/* <i className="material-icons grey-text">event_available</i> */}
+                      <EventAvailableIcon className="material-icons grey-text" />
+                      <span>{dayjs(resNode.changedAt).fromNow()}</span>
+                    </>
+                  </MemoizedMetaButton>
+                  <MemoizedMetaButton
+                  // tooltip="# of improvement/child proposals on this node."
+                  // tooltipPosition="BottomLeft"
+                  >
+                    <>
+                      {/* <i className="material-icons grey-text">create</i> */}
+                      <CreateIcon className="material-icons grey-text" />
+                      <span>{shortenNumber(resNode.versions, 2, false)}</span>
+                    </>
+                  </MemoizedMetaButton>
+                  <MemoizedMetaButton
+                  // tooltip="# of 1Cademists who have found this node unhelpful."
+                  // tooltipPosition="BottomLeft"
+                  >
+                    <>
+                      {/* <i className="material-icons grey-text">close</i> */}
+                      <CloseIcon className="material-icons grey-text" />
+                      <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
+                    </>
+                  </MemoizedMetaButton>
+                  <MemoizedMetaButton
+                  // tooltip="# of 1Cademists who have found this node helpful."
+                  // tooltipPosition="BottomLeft"
+                  >
+                    <>
+                      {/* <i className="material-icons DoneIcon grey-text">done</i> */}
+                      <DoneIcon className="material-icons DoneIcon grey-text" />
+                      <span>{shortenNumber(resNode.corrects, 2, false)}</span>
+                    </>
+                  </MemoizedMetaButton>
                 </div>
-                <div className="SearchResultTitle">
-                  {/* CHECK: here is causing problems to hide scroll */}
-                  <Editor label="" readOnly={true} setValue={doNothing} value={resNode.title} />
-                </div>
-              </li>
-            );
-          })}
-          {searchResults.lastPageLoaded < searchResults.totalPage && (
-            <div id="ContinueButton">
-              <MemoizedMetaButton
-                onClick={() => onSearch(searchResults.lastPageLoaded + 1, sortOption, sortDirection, nodeTypes)}
-                // tooltip="Load older search results"
-                // tooltipPosition="Right"
-              >
-                <>
-                  <ExpandMoreIcon className="material-icons grey-text" />
-                  <span>Older search results</span>
-                  <ExpandMoreIcon className="material-icons grey-text" />
-                </>
-              </MemoizedMetaButton>
-            </div>
-          )}
-        </ul>
-      ) : (
-        <div className="CenterredLoadingImageSidebar">
-          <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" />
-        </div>
-      )}
+              </div>
+              <div className="SearchResultTitle">
+                {/* CHECK: here is causing problems to hide scroll */}
+                <Editor label="" readOnly={true} setValue={doNothing} value={resNode.title} />
+              </div>
+            </li>
+          );
+        })}
+        {/* <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" /> */}
+        {isRetrieving && (
+          <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
+            <CircularProgress />
+          </Box>
+        )}
+        {searchResults.lastPageLoaded < searchResults.totalPage && (
+          <div id="ContinueButton">
+            <MemoizedMetaButton
+              onClick={() => onSearch(searchResults.lastPageLoaded + 1, sortOption, sortDirection, nodeTypes)}
+              // tooltip="Load older search results"
+              // tooltipPosition="Right"
+            >
+              <>
+                <ExpandMoreIcon className="material-icons grey-text" />
+                <span>Older search results</span>
+                <ExpandMoreIcon className="material-icons grey-text" />
+              </>
+            </MemoizedMetaButton>
+          </div>
+        )}
+      </ul>
     </div>
   );
 };
