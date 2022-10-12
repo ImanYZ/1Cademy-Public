@@ -1,3 +1,13 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers")
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      callback()
+    })
+  }
+})
+
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import HttpMock, { MockResponse } from "node-mocks-http";
@@ -9,7 +19,6 @@ initFirebaseClientSDK();
 import { admin, db } from "src/lib/firestoreServer/admin";
 import proposeNodeImprovementHandler from "src/pages/api/proposeNodeImprovement";
 import { INode } from "src/types/INode";
-import { INodeLink } from "src/types/INodeLink";
 import { INotification } from "src/types/INotification";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IReputation } from "src/types/IReputationPoint";
