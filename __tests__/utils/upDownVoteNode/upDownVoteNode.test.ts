@@ -1,3 +1,13 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers")
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback()
+    })
+  }
+})
+
 import { INotificationNum } from "src/types/INotification";
 
 import { db } from "../../../src/lib/firestoreServer/admin";
