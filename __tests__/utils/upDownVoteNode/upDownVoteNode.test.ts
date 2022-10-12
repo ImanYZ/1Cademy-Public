@@ -3,7 +3,7 @@ jest.mock("src/utils/helpers", () => {
   return {
     ...original,
     detach: jest.fn().mockImplementation(async (callback: any) => {
-      callback()
+      return callback()
     })
   }
 })

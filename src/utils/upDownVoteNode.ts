@@ -106,7 +106,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   if (nodeData.corrects + correctChange < nodeData.wrongs + wrongChange) {
     deleteNode = true;
     // TODO: move these to queue
-    detach(async () => {
+    await detach(async () => {
       let batch = db.batch();
       let writeCounts = 0;
       [batch, writeCounts] = await signalAllUserNodesChanges({
@@ -136,7 +136,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       batch.update(parentNode.nodeRef, nodeChanges);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       // TODO: move these to queue
-      detach(async () => {
+      await detach(async () => {
         let batch = db.batch();
         let writeCounts = 0;
         [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
@@ -164,7 +164,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       batch.update(childNode.nodeRef, nodeChanges);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       // TODO: move these to queue
-      detach(async () => {
+      await detach(async () => {
         let batch = db.batch();
         let writeCounts = 0;
         [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
@@ -200,7 +200,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           batch.update(taggedNodeRef, nodeChanges);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           // TODO: move these to queue
-          detach(async () => {
+          await detach(async () => {
             let batch = db.batch();
             let writeCounts = 0;
             [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
@@ -219,7 +219,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     }
 
     // TODO: move these to queue
-    detach(async() => {
+    await detach(async() => {
       let batch = db.batch();
       let writeCounts = 0;
       //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
@@ -262,7 +262,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           batch.update(citingNodeRef, nodeChanges);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           // TODO: move these to queue
-          detach(async () => {
+          await detach(async () => {
             let batch = db.batch();
             let writeCounts = 0;
             [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
@@ -427,7 +427,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     nodeChanges.deleted = true;
   } else {
     // TODO: move these to queue
-    detach(async () => {
+    await detach(async () => {
       let batch = db.batch();
       let writeCounts = 0;
       [batch, writeCounts] = await signalAllUserNodesChanges({
