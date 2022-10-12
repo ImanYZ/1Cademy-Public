@@ -11,7 +11,8 @@ export const postWithToken = async (mapUrl: string, postData: any = {}): Promise
   return response.data;
 };
 
-export const Post = async <R extends unknown>(mapUrl: string, postData: any = {}): Promise<R> => {
+// extends unknown
+export const Post = async <R>(mapUrl: string, postData: any = {}): Promise<R> => {
   const token = await getIdToken();
   const response = await API.post(`/api${mapUrl}`, { ...postData }, { headers: { Authorization: `Bearer ${token}` } });
   return response.data;

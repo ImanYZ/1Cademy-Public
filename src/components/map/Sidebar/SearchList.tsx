@@ -60,6 +60,7 @@ import { useNodeBook } from "../../../context/NodeBookContext";
 // import ValidatedInput from "../../../../Editor/ValidatedInput/ValidatedInput";
 // import TagSearch from "../../../../PublicComps/TagSearch/TagSearch";
 import { useTagsTreeView } from "../../../hooks/useTagsTreeView";
+import { SearchNodesResponse } from "../../../knowledgeTypes";
 import { Post } from "../../../lib/mapApi";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { SortDirection, SortValues } from "../../../nodeBookTypes";
@@ -86,13 +87,6 @@ dayjs.extend(relativeTime);
 
 type SearchListProps = {
   openLinkedNode: any;
-};
-
-type SearchResult = {
-  data: any[];
-  numResults: number;
-  page: number;
-  perPage: number;
 };
 
 type Pagination = {
@@ -198,7 +192,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         // async (page: number = 1) => {
         console.log("[onSearch]");
         setIsRetrieving(true);
-        const data: SearchResult = await Post("/searchNodesInNotebook", {
+        const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q: nodeBookState.searchQuery,
           nodeTypes,
           tags: getTagsSelected().map(cur => cur.title),
@@ -218,13 +212,13 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         // });
 
         console.log("data", data.data);
-        const res = data.data;
-        const newData = page === 1 ? res.data : [...searchResults.data, ...res.data];
+
+        const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
         setSearchResults({
           data: newData,
-          lastPageLoaded: res.page,
-          totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
-          totalResults: res.numResults,
+          lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+          totalResults: data.numResults,
         });
         // };
         setIsRetrieving(false);
