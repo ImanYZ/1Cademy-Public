@@ -110,6 +110,7 @@
 .ComLeaderbaordItems {
   overflow-x: auto;
   overflow-y: hidden;
+  padding-left: 160px;
 }
 .ComLeaderbaordItems::-webkit-scrollbar {
   width: 8px; /* Tamaño del scroll en vertical */
