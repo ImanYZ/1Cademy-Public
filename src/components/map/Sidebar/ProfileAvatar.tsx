@@ -3,6 +3,7 @@ import { getAuth } from "firebase/auth";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { postImageWithToken, postWithToken } from "../../../lib/mapApi";
+import { imageLoaded } from "../../../lib/utils/utils";
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
@@ -69,15 +70,16 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           setPercentageUploaded(30);
           const { imageUrl } = await postImageWithToken("/uploadImage", formData);
           setPercentageUploaded(50);
-
-          //Setting the url everywhere in the DB
-          await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
+          await imageLoaded(imageUrl);
           setPercentageUploaded(100);
 
-          //Showing profile picture on frontend
           setImageUrlError(false);
           setIsUploading(false);
           setUserImage(imageUrl);
+          //Setting the url everywhere in the DB
+          await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
+
+          //Showing profile picture on frontend
 
           // const picturesFolder = "ProfilePictures/";
           // const imageNameSplit = image.name.split(".");

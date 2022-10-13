@@ -272,3 +272,15 @@ export const delay = async (time: number) => {
     }, time);
   });
 };
+
+export const imageLoaded = async (imageUrl: any) => {
+  return new Promise(resolve => {
+    fetch(imageUrl).then(res => {
+      if (res.status === 200) {
+        resolve(true);
+      } else {
+        resolve(imageLoaded(imageUrl));
+      }
+    });
+  });
+};
