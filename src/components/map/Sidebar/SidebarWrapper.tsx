@@ -62,7 +62,7 @@ const SidebarWrapper = (props: SidebarWrapperProps) => {
                 <CloseIcon />
               </MemoizedMetaButton>
             </Box>
-            <div ref={sidebarRef} style={{ overflowY: "auto", height: "100%", border: "solid 2px yellow" }}>
+            <div ref={sidebarRef} style={{ overflowY: "auto", height: "100%" }}>
               {props.children}
             </div>
           </>
