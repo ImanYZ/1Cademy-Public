@@ -51,7 +51,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
 
     const nodeIds = allPostsData.map(post => post.id);
     let userStudiedNodes: { [key: string]: boolean } = {};
-    const userNodes = await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get();
+    const userNodes = nodeIds?.length
+      ? await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get()
+      : { docs: [] };
     for (const userNode of userNodes.docs) {
       const userNodeData = userNode.data() as IUserNode;
       userStudiedNodes[userNodeData.node] = !!userNodeData?.isStudied;
@@ -68,7 +70,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       perPage: homePageSortByDefaults.perPage,
     });
   } catch (error) {
-    console.error(error);
     res.status(500);
   }
 }
