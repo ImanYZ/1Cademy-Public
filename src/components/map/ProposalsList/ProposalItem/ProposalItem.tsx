@@ -2,6 +2,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
+import { Paper } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -42,11 +43,12 @@ const ProposalItem = (props: any) => {
   }
 
   return (
-    <li
+    <Paper
+      elevation={3}
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
       onClick={openLinkedNodeClick(props.proposal)}
-      style={{ display: "flex", flexDirection: "column", padding: "10px 20px", borderBottom: "solid 1px white" }}
+      style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time">{dayjs(props.proposal.createdAt).fromNow()}</div>
@@ -94,7 +96,7 @@ const ProposalItem = (props: any) => {
               )}
         </div>
       </div>
-    </li>
+    </Paper>
   );
 };
 
