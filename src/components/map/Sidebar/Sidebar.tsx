@@ -185,6 +185,7 @@ type SidebarType = {
   mapRendered: boolean;
   pendingProposalsLoaded: boolean;
   setPendingProposalsLoaded: (newValue: boolean) => void;
+  openProposal: string;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -734,6 +735,7 @@ const Sidebar = (props: SidebarType) => {
                 deleteProposal={props.deleteProposal}
                 // editHistory={false}
                 proposeNewChild={props.proposeNewChild}
+                openProposal={props.openProposal}
               />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Comments" ? (

@@ -49,8 +49,13 @@ const ProposalItem = (props: any) => {
       style={{ display: "flex", flexDirection: "column", padding: "10px 20px", borderBottom: "solid 1px white" }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div className="title Time">{dayjs(props.proposal.createdAt).fromNow()}</div>
-        <div className="secondary-content" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="title Time" style={{ fontSize: "12px" }}>
+          {dayjs(props.proposal.createdAt).fromNow()}
+        </div>
+        <div
+          className="secondary-content"
+          style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "16px" }}
+        >
           <MemoizedMetaButton
             tooltip="# of 1Cademists who have found this proposal unhelpful."
             tooltipPosition="bottom-start"

@@ -203,7 +203,10 @@ const Node = ({
   const [titleCopy, setTitleCopy] = useState(title);
 
   const [contentCopy, setContentCopy] = useState(content);
-
+  useEffect(() => {
+    setTitleCopy(title);
+    setContentCopy(content);
+  }, [title, content]);
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
@@ -426,7 +429,7 @@ const Node = ({
   if (!user) {
     return null;
   }
-
+  console.log(2, title);
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
     <div
@@ -897,6 +900,7 @@ const Node = ({
   );
 };
 
+// export const MemoizedNode = Node;
 export const MemoizedNode = React.memo(Node);
 
 // export default React.memo(Node);
