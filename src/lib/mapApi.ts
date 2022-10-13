@@ -32,4 +32,3 @@ export const Post = async <R>(mapUrl: string, postData: any = {}): Promise<R> =>
   const response = await API.post(`/api${mapUrl}`, { ...postData }, { headers: { Authorization: `Bearer ${token}` } });
   return response.data;
 };
-
