@@ -24,38 +24,45 @@ const bucket = storage(app).bucket(process.env.NEXT_PUBLIC_STORAGE_BUCKET);
 handler.use(uploader.single("file"));
 
 handler.post(async (req, res) => {
-  const { file } = req;
+  try {
+    const { file } = req;
 
-  const uid = req.user?.uid as string;
+    const uid = req.user?.uid as string;
 
-  const originalname = String(file?.originalname);
-  const originalname_parts = originalname.split(".");
-  const file_ext = originalname_parts.pop() as string;
+    const originalname = String(file?.originalname);
+    const originalname_parts = originalname.split(".");
+    const file_ext = originalname_parts.pop() as string;
 
-  const allowed_exts = ["svg", "jpg", "jpeg", "png", "gif"];
+    const allowed_exts = ["svg", "jpg", "jpeg", "png", "gif"];
 
-  if (!~allowed_exts.indexOf(file_ext)) {
-    return res.status(400).json({
-      message: "invalid image supplied!",
+    if (!~allowed_exts.indexOf(file_ext)) {
+      return res.status(400).json({
+        message: "invalid image supplied!",
+      });
+    }
+
+    const basePath = `uploads/images/${uid}/${new Date().getTime()}`;
+
+    let uploadedPath = `${basePath}/${originalname_parts.join(".")}`;
+    if (file_ext !== "svg") {
+      uploadedPath += "_430x1300";
+    }
+    uploadedPath += `.${file_ext}`;
+
+    const filePath = `${basePath}/${originalname}`;
+
+    const uploadedFile = bucket.file(filePath);
+    await uploadedFile.save(file?.buffer as Buffer);
+
+    res.status(200).json({
+      imageUrl: `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_STORAGE_BUCKET}/${uploadedPath}`,
+    });
+  } catch (e: any) {
+    console.log(e?.message, e?.trace);
+    res.status(500).json({
+      message: e.message,
     });
   }
-
-  const basePath = `uploads/images/${uid}/${new Date().getTime()}`;
-
-  let uploadedPath = `${basePath}/${originalname_parts.join(".")}`;
-  if (file_ext !== "svg") {
-    uploadedPath += "_430x1300";
-  }
-  uploadedPath += `.${file_ext}`;
-
-  const filePath = `${basePath}/${originalname}`;
-
-  const uploadedFile = bucket.file(filePath);
-  await uploadedFile.save(file?.buffer as Buffer);
-
-  res.status(200).json({
-    imageUrl: `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_STORAGE_BUCKET}/${uploadedPath}`,
-  });
 });
 
 export default fbAuth(handler);
