@@ -298,6 +298,9 @@ describe("POST /api/wrongNode", () => {
     otherReputationPointsCollection,
     otherMonthlyReputationPointsCollection,
     otherWeeklyReputationPointsCollection,
+    new MockData([], "notificationNums"),
+    new MockData([], "notifications"),
+    new MockData([], "userNodesLog"),
   ];
   const positiveFields = [
     // for Concept nodes
@@ -384,9 +387,9 @@ describe("POST /api/wrongNode", () => {
     req.query.nodeId = nodes[0].documentId;
     res = HttpMock.createResponse();
     await wrongNodeHandler(req, res as any);
-    nodeDoc = await db.collection("nodes").doc(nodes[0].documentId).get();
-    node1Doc = await db.collection("nodes").doc(nodes[1].documentId).get();
-    node2Doc = await db.collection("nodes").doc(nodes[2].documentId).get();
+    nodeDoc = await db.collection("nodes").doc(String(nodes[0].documentId)).get();
+    node1Doc = await db.collection("nodes").doc(String(nodes[1].documentId)).get();
+    node2Doc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
     //versionDoc = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
   });
 

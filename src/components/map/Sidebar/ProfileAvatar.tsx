@@ -1,11 +1,8 @@
 import { Box } from "@mui/system";
-import { getAuth, updateProfile } from "firebase/auth";
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { postImageWithToken, postWithToken } from "../../../lib/mapApi";
 
-import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
-
-import { Post } from "../../../lib/mapApi";
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
@@ -22,20 +19,20 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [imageUrlError, setImageUrlError] = useState<string | boolean>(false);
-  const [imageWidth, setImageWidth] = useState("100%");
-  const [imageHeight, setImageHeight] = useState("auto");
+  // const [imageWidth, setImageWidth] = useState("100%");
+  // const [imageHeight, setImageHeight] = useState("auto");
 
   const inputEl = useRef<HTMLInputElement>(null);
 
-  const setImageSize = useCallback(({ target: img }: { target: any }) => {
-    if (img.offsetHeight > img.offsetWidth) {
-      setImageWidth("100%");
-      setImageHeight("auto");
-    } else {
-      setImageWidth("auto");
-      setImageHeight("100%");
-    }
-  }, []);
+  // const setImageSize = useCallback(({ target: img }: { target: any }) => {
+  //   if (img.offsetHeight > img.offsetWidth) {
+  //     setImageWidth("100%");
+  //     setImageHeight("auto");
+  //   } else {
+  //     setImageWidth("auto");
+  //     setImageHeight("100%");
+  //   }
+  // }, []);
 
   useEffect(() => {
     setImageUrlError(
@@ -48,10 +45,10 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
   }, [userImage]);
 
   const handleImageChange = useCallback(
-    (event: any) => {
+    async (event: any) => {
       try {
         event.preventDefault();
-        const storage = getStorage();
+        // const storage = getStorage();
         const auth = getAuth();
 
         const userAuthObj = auth.currentUser;
@@ -64,42 +61,59 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
         } else {
           setIsUploading(true);
-          const picturesFolder = "ProfilePictures/";
-          const imageNameSplit = image.name.split(".");
-          const imageExtension = imageNameSplit[imageNameSplit.length - 1];
-          let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
-          const storageRef = ref(storage, picturesFolder + imageFileName);
-          console.log("imageFileName", imageFileName);
-          const task = uploadBytesResumable(storageRef, image);
-          task.on(
-            "state_changed",
-            function progress(snapshot) {
-              setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
-            },
-            function error(err) {
-              console.error("Image Upload Error: ", err);
-              setIsUploading(false);
-              setImageUrlError(
-                "There is an error with uploading your picture. Please upload your profile picture again! If the problem persists, please try another picture."
-              );
-            },
-            async function complete() {
-              let imageGeneratedUrl = await getDownloadURL(storageRef);
-              imageGeneratedUrl = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
-              // TODO: REQUEST TO BACKEND
-              const postData = {
-                imageUrl: imageGeneratedUrl,
-              };
-              await updateProfile(userAuthObj, {
-                photoURL: imageGeneratedUrl,
-              });
-              await Post("/user/image", postData); // update userImage in everywhere
-              setImageUrlError(false);
-              setIsUploading(false);
-              setUserImage(imageGeneratedUrl);
-              setPercentageUploaded(100);
-            }
-          );
+          // Uploading image by calling this API
+          const formData = {
+            file: event.target.files[0],
+          };
+          setPercentageUploaded(30);
+          const { imageUrl } = await postImageWithToken("/uploadImage", formData);
+          setPercentageUploaded(50);
+
+          //Setting the url everywhere in the DB
+          await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
+          setPercentageUploaded(100);
+
+          //Showing profile picture on frontend
+          setImageUrlError(false);
+          setIsUploading(false);
+          setUserImage(imageUrl);
+
+          // const picturesFolder = "ProfilePictures/";
+          // const imageNameSplit = image.name.split(".");
+          // const imageExtension = imageNameSplit[imageNameSplit.length - 1];
+          // let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
+          // const storageRef = ref(storage, picturesFolder + imageFileName);
+          // console.log("imageFileName", imageFileName);
+          // const task = uploadBytesResumable(storageRef, image);
+          // task.on(
+          //   "state_changed",
+          //   function progress(snapshot) {
+          //     setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
+          //   },
+          //   function error(err) {
+          //     console.error("Image Upload Error: ", err);
+          //     setIsUploading(false);
+          //     setImageUrlError(
+          //       "There is an error with uploading your picture. Please upload your profile picture again! If the problem persists, please try another picture."
+          //     );
+          //   },
+          //   async function complete() {
+          //     let imageGeneratedUrl = await getDownloadURL(storageRef);
+          //     imageGeneratedUrl = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
+          //     // TODO: REQUEST TO BACKEND
+          //     const postData = {
+          //       imageUrl: imageGeneratedUrl,
+          //     };
+          //     await updateProfile(userAuthObj, {
+          //       photoURL: imageGeneratedUrl,
+          //     });
+          //     await postWithToken("/user/image", postData); // update userImage in everywhere
+          //     setImageUrlError(false);
+          //     setIsUploading(false);
+          //     setUserImage(imageGeneratedUrl);
+          //     setPercentageUploaded(100);
+          //   }
+          // );
         }
       } catch (err) {
         console.error("Image Upload Error: ", err);
@@ -155,10 +169,9 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="profileImage"
+            // style={{ width: imageWidth, height: imageHeight, borderRadius: "50%" }}
             src={userImage}
-            style={{ width: imageWidth, height: imageHeight, borderRadius: "50%" }}
             alt="1Cademist Profile Picture"
-            onLoad={setImageSize}
           />
           {isUploading && (
             <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="170px" heightInPx="170px" />
