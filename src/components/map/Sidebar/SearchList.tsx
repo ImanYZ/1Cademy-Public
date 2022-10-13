@@ -17,6 +17,7 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
+  Paper,
   Select,
   SelectChangeEvent,
   TextField,
@@ -34,6 +35,8 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useState } from "react";
+
+import { useAuth } from "@/context/AuthContext";
 
 // import {
 //   ClearRefinements,
@@ -101,6 +104,8 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const firebase = useRecoilValue(firebaseState);
   // const username = useRecoilValue(usernameState);
   // const tag = useRecoilValue(tagState);
+  const [{ settings }] = useAuth();
+
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
   const [nodesUpdatedSince, setNodesUpdatedSince] = useState(1000);
@@ -563,7 +568,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             setSortDirection={onChangeSortDirection}
           />
           {/* <div id="SearchSortContainer" style={{ border: "solid" }}>
-            
+
           </div> */}
         </div>
         {/* <div id="SearchResutlsNumSortContainer">
@@ -585,18 +590,35 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
 
-      <ul className="collection Proposals" style={{ padding: "0px", margin: "0px", overflow: "hidden" }}>
+      <ul
+        className="collection Proposals"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+          padding: "0px",
+          margin: "0px",
+          overflow: "hidden",
+        }}
+      >
         {searchResults.data.map((resNode, idx) => {
           return (
             // <h4 key={idx}>{resNode.title}</h4>
-            <li
+            <Paper
+              elevation={3}
               // TODO: the result comes from typesense, there are nodes, we need to fill with userNode studied data
-              className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
+              // className={"collection-item" + ("studied" in resNode && resNode.studied ? " Studied" : " NotStudied")}
               // key={`resNode${resNode.id}`}
               key={`resNode${idx}`}
               // onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
               onClick={() => openLinkedNode(resNode.id)}
-              style={{ listStyle: "none", padding: "10px" }}
+              style={{
+                listStyle: "none",
+                padding: "10px",
+                borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
+                cursor: "pointer",
+                background: settings.theme === "Dark" ? "#1f1f1f" : "#f0f0f0",
+              }}
             >
               <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
                 <NodeTypeIcon nodeType={resNode.nodeType} />
@@ -647,7 +669,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                 {/* CHECK: here is causing problems to hide scroll */}
                 <Editor label="" readOnly={true} setValue={doNothing} value={resNode.title} />
               </div>
-            </li>
+            </Paper>
           );
         })}
         {/* <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" /> */}

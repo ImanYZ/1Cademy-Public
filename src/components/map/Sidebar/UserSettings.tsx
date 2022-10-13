@@ -8,7 +8,7 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Autocomplete, Box, FormControlLabel, FormGroup, Switch, TextField } from "@mui/material";
+import { Autocomplete, Box, FormControlLabel, FormGroup, LinearProgress, Switch, TextField } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
@@ -125,6 +125,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
   const [changingUsername /*, setChangingUsername*/] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
 
@@ -411,8 +412,9 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
         try {
           // await firebase.idToken();
           console.log("CALLING API", nodeBookState.chosenNode.id);
+          setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
-
+          setIsLoading(false);
           // await axios.post(`/changeDefaultTag/${chosenNode}`);
           // setTag({ node: chosenNode, title: chosenNodeTitle });
           dispatch({
@@ -420,6 +422,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
             payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
           });
         } catch (err) {
+          setIsLoading(false);
           console.error(err);
           // window.location.reload();
         }
@@ -783,6 +786,8 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon id="tagChangeIcon" className="material-icons deep-orange-text" />
                   {user.tag}
+
+                  {isLoading && <LinearProgress />}
                 </div>
               </MemoizedMetaButton>
             </div>
