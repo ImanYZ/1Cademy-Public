@@ -53,104 +53,111 @@ const Notifications = (props: NotificationsProps) => {
   const [uncheckedNotifications, setUncheckedNotifications] = useState<Notification[]>([]);
 
   const snapshot = useCallback((q: Query<DocumentData>) => {
-    const notificationsSnapshot = onSnapshot(q, snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (!docChanges.length) return null;
+    const notificationsSnapshot = onSnapshot(
+      q,
+      snapshot => {
+        console.log("[sns:notificationsSnapshot]");
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) return null;
 
-      // const checkedNotificationsDict: any = checkedNotifications.reduce((acu, cur) => {
-      //   return { ...acu, [cur.id]: cur };
-      // }, {});
+        // const checkedNotificationsDict: any = checkedNotifications.reduce((acu, cur) => {
+        //   return { ...acu, [cur.id]: cur };
+        // }, {});
 
-      // const uncheckedNotificationsDict: any = uncheckedNotifications.reduce((acu, cur) => {
-      //   return { ...acu, [cur.id]: cur };
-      // }, {});
-      // debugger;
+        // const uncheckedNotificationsDict: any = uncheckedNotifications.reduce((acu, cur) => {
+        //   return { ...acu, [cur.id]: cur };
+        // }, {});
+        // debugger;
 
-      const checkedNotificationsDict: any = {};
-      const uncheckedNotificationsDict: any = {};
+        const checkedNotificationsDict: any = {};
+        const uncheckedNotificationsDict: any = {};
 
-      for (let change of docChanges) {
-        const notificationId = change.doc.id;
-        const { aType, checked, createdAt, imageUrl, fullname, chooseUname, nodeId, title, oType, uname } =
-          change.doc.data();
-        if (change.type === "removed") {
-          if (checked) {
-            delete checkedNotificationsDict[notificationId];
-          } else {
-            delete uncheckedNotificationsDict[notificationId];
-          }
-        }
-        if (change.type === "added" || change.type === "modified") {
-          if (checked) {
-            // will add in checkedNotificationsDict
-            checkedNotificationsDict[notificationId] = {
-              aType,
-              createdAt: createdAt.toDate(),
-              imageUrl,
-              fullname,
-              chooseUname,
-              nodeId,
-              title,
-              oType,
-              uname,
-            };
-            if (notificationId in uncheckedNotificationsDict) {
+        for (let change of docChanges) {
+          const notificationId = change.doc.id;
+          const { aType, checked, createdAt, imageUrl, fullname, chooseUname, nodeId, title, oType, uname } =
+            change.doc.data();
+          if (change.type === "removed") {
+            if (checked) {
+              delete checkedNotificationsDict[notificationId];
+            } else {
               delete uncheckedNotificationsDict[notificationId];
             }
-          } else {
-            // will add in uncheckedNotificationsDict
-            uncheckedNotificationsDict[notificationId] = {
-              aType,
-              createdAt: createdAt.toDate(),
-              imageUrl,
-              fullname,
-              chooseUname,
-              nodeId,
-              title,
-              oType,
-              uname,
-            };
-            if (notificationId in checkedNotificationsDict) {
-              delete checkedNotificationsDict[notificationId];
+          }
+          if (change.type === "added" || change.type === "modified") {
+            if (checked) {
+              // will add in checkedNotificationsDict
+              checkedNotificationsDict[notificationId] = {
+                aType,
+                createdAt: createdAt.toDate(),
+                imageUrl,
+                fullname,
+                chooseUname,
+                nodeId,
+                title,
+                oType,
+                uname,
+              };
+              if (notificationId in uncheckedNotificationsDict) {
+                delete uncheckedNotificationsDict[notificationId];
+              }
+            } else {
+              // will add in uncheckedNotificationsDict
+              uncheckedNotificationsDict[notificationId] = {
+                aType,
+                createdAt: createdAt.toDate(),
+                imageUrl,
+                fullname,
+                chooseUname,
+                nodeId,
+                title,
+                oType,
+                uname,
+              };
+              if (notificationId in checkedNotificationsDict) {
+                delete checkedNotificationsDict[notificationId];
+              }
             }
           }
         }
-      }
-      const checkedNotificationsTemp: Notification[] = [];
-      for (let notificationId in checkedNotificationsDict) {
-        checkedNotificationsTemp.push({
-          id: notificationId,
-          ...checkedNotificationsDict[notificationId],
-        });
-      }
-      checkedNotificationsTemp.sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
+        const checkedNotificationsTemp: Notification[] = [];
+        for (let notificationId in checkedNotificationsDict) {
+          checkedNotificationsTemp.push({
+            id: notificationId,
+            ...checkedNotificationsDict[notificationId],
+          });
+        }
+        checkedNotificationsTemp.sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
 
-      const uncheckedNotificationsTemp: Notification[] = [];
-      for (let notificationId in uncheckedNotificationsDict) {
-        uncheckedNotificationsTemp.push({
-          id: notificationId,
-          ...uncheckedNotificationsDict[notificationId],
-        });
-      }
-      uncheckedNotificationsTemp.sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
+        const uncheckedNotificationsTemp: Notification[] = [];
+        for (let notificationId in uncheckedNotificationsDict) {
+          uncheckedNotificationsTemp.push({
+            id: notificationId,
+            ...uncheckedNotificationsDict[notificationId],
+          });
+        }
+        uncheckedNotificationsTemp.sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
 
-      setCheckedNotifications(oldCheckedNotifications => {
-        const validValues = oldCheckedNotifications.filter(
-          cur => !uncheckedNotificationsTemp.some(c => c.id === cur.id)
-        );
-        const newValues = checkedNotificationsTemp;
-        return [...validValues, ...newValues].sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
-      });
-      // setCheckedNotifications([...checkedNotificationsTemp]);
-      // setUncheckedNotifications([...uncheckedNotificationsTemp]);
-      setUncheckedNotifications(oldUncheckedNotifications => {
-        const validValues = oldUncheckedNotifications.filter(
-          cur => !checkedNotificationsTemp.some(c => c.id === cur.id)
-        );
-        const newValues = uncheckedNotificationsTemp;
-        return [...validValues, ...newValues].sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
-      });
-    });
+        setCheckedNotifications(oldCheckedNotifications => {
+          const validValues = oldCheckedNotifications.filter(
+            cur => !uncheckedNotificationsTemp.some(c => c.id === cur.id)
+          );
+          const newValues = checkedNotificationsTemp;
+          return [...validValues, ...newValues].sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
+        });
+        // setCheckedNotifications([...checkedNotificationsTemp]);
+        // setUncheckedNotifications([...uncheckedNotificationsTemp]);
+        setUncheckedNotifications(oldUncheckedNotifications => {
+          const validValues = oldUncheckedNotifications.filter(
+            cur => !checkedNotificationsTemp.some(c => c.id === cur.id)
+          );
+          const newValues = uncheckedNotificationsTemp;
+          return [...validValues, ...newValues].sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
+        });
+      },
+      error => {
+        console.error(error);
+      }
+    );
     return () => notificationsSnapshot();
   }, []);
 

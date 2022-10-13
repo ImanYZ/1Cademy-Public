@@ -292,12 +292,18 @@ const Sidebar = (props: SidebarType) => {
 
     const notificationNumbersQuery = doc(db, "notificationNums", user.uname);
 
-    const killSnapshot = onSnapshot(notificationNumbersQuery, async snapshot => {
-      if (!snapshot.exists()) return;
+    const killSnapshot = onSnapshot(
+      notificationNumbersQuery,
+      async snapshot => {
+        if (!snapshot.exists()) return;
 
-      setUncheckedNotificationsNum(snapshot.data().nNum);
-      // setNotificationNumsLoaded(true);
-    });
+        setUncheckedNotificationsNum(snapshot.data().nNum);
+        // setNotificationNumsLoaded(true);
+      },
+      error => {
+        console.error(error);
+      }
+    );
     // const notificationsQuery = db.collection("notificationNums").doc(user.uname);
     // notificationNumbersQuery.notificationsSnapshot = notificationsQuery.onSnapshot(function (docSnapshot) {
     //   if (docSnapshot.exists) {
@@ -326,76 +332,82 @@ const Sidebar = (props: SidebarType) => {
         where("deleted", "==", false)
       );
 
-      const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
-        const docChanges = snapshot.docChanges();
-        if (docChanges.length > 0) {
-          // const temporalProposals:any[] = []
-          for (let change of docChanges) {
-            const versionId = change.doc.id;
-            const versionData = change.doc.data();
-            if (change.type === "removed") {
-              delete versions[versionId];
-            }
-            if (change.type === "added" || change.type === "modified") {
-              versions[versionId] = {
-                ...versionData,
-                id: versionId,
-                createdAt: versionData.createdAt.toDate(),
-                award: false,
-                correct: false,
-                wrong: false,
-              };
-              delete versions[versionId].deleted;
-              delete versions[versionId].updatedAt;
-
-              const q = query(
-                userVersionsColl,
-                where("version", "==", versionId),
-                where("user", "==", user.uname),
-                limit(1)
-              );
-
-              const userVersionsDocs = await getDocs(q);
-
-              // const userVersionsDocs = await userVersionsColl
-              //   .where("version", "==", versionId)
-              //   .where("user", "==", user.uname)
-              //   .limit(1)
-              //   .get();
-
-              for (let userVersionsDoc of userVersionsDocs.docs) {
-                const userVersion = userVersionsDoc.data();
-                delete userVersion.version;
-                delete userVersion.updatedAt;
-                delete userVersion.createdAt;
-                delete userVersion.user;
+      const versionsSnapshot = onSnapshot(
+        versionsQuery,
+        async snapshot => {
+          const docChanges = snapshot.docChanges();
+          if (docChanges.length > 0) {
+            // const temporalProposals:any[] = []
+            for (let change of docChanges) {
+              const versionId = change.doc.id;
+              const versionData = change.doc.data();
+              if (change.type === "removed") {
+                delete versions[versionId];
+              }
+              if (change.type === "added" || change.type === "modified") {
                 versions[versionId] = {
-                  ...versions[versionId],
-                  ...userVersion,
+                  ...versionData,
+                  id: versionId,
+                  createdAt: versionData.createdAt.toDate(),
+                  award: false,
+                  correct: false,
+                  wrong: false,
                 };
+                delete versions[versionId].deleted;
+                delete versions[versionId].updatedAt;
+
+                const q = query(
+                  userVersionsColl,
+                  where("version", "==", versionId),
+                  where("user", "==", user.uname),
+                  limit(1)
+                );
+
+                const userVersionsDocs = await getDocs(q);
+
+                // const userVersionsDocs = await userVersionsColl
+                //   .where("version", "==", versionId)
+                //   .where("user", "==", user.uname)
+                //   .limit(1)
+                //   .get();
+
+                for (let userVersionsDoc of userVersionsDocs.docs) {
+                  const userVersion = userVersionsDoc.data();
+                  delete userVersion.version;
+                  delete userVersion.updatedAt;
+                  delete userVersion.createdAt;
+                  delete userVersion.user;
+                  versions[versionId] = {
+                    ...versions[versionId],
+                    ...userVersion,
+                  };
+                }
               }
             }
-          }
-          let unevaluatedPendingProposalsNum = 0;
-          for (let pendingP of Object.values(versions)) {
-            if (!pendingP.correct && !pendingP.wrong) {
-              unevaluatedPendingProposalsNum++;
+            let unevaluatedPendingProposalsNum = 0;
+            for (let pendingP of Object.values(versions)) {
+              if (!pendingP.correct && !pendingP.wrong) {
+                unevaluatedPendingProposalsNum++;
+              }
             }
-          }
-          setPendingProposalsNum(unevaluatedPendingProposalsNum);
+            setPendingProposalsNum(unevaluatedPendingProposalsNum);
 
-          const pendingProposals = { ...versions };
-          const proposalsTemp = Object.values(pendingProposals);
-          const orderredProposals = proposalsTemp.sort(
-            (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
-          );
-          setProposals(orderredProposals);
-          // setProposals(orderredProposals.slice(0, lastIndex));
-          // setPendingProposals({ ...versions });
-          // temporalProposals.push(temporalProposals)
+            const pendingProposals = { ...versions };
+            const proposalsTemp = Object.values(pendingProposals);
+            const orderredProposals = proposalsTemp.sort(
+              (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+            );
+            setProposals(orderredProposals);
+            // setProposals(orderredProposals.slice(0, lastIndex));
+            // setPendingProposals({ ...versions });
+            // temporalProposals.push(temporalProposals)
+          }
+          props.setPendingProposalsLoaded(true);
+        },
+        error => {
+          console.error(error);
         }
-        props.setPendingProposalsLoaded(true);
-      });
+      );
       versionsSnapshots.push(versionsSnapshot);
     }
     ``;

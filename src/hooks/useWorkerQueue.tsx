@@ -97,7 +97,7 @@ export const useWorkerQueue = ({
         setClusterNodes(oldClusterNodes);
 
         setGraph(({ nodes, edges }) => {
-          // console.log("[queue]: setNodes", { nodes });
+          console.log("[queue]: setNodes", { nodes, oldNodes });
           const nodesCopy = { ...nodes };
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];

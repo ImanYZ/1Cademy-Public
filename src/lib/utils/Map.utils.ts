@@ -114,57 +114,63 @@ export const loadReputationsData = (
 
   if (!reputationsQuery) return;
 
-  const reputationsSnapshot = onSnapshot(reputationsQuery, async snapshot => {
-    console.log("SNAPSHOT RAN ");
-    const docChanges = snapshot.docChanges();
+  const reputationsSnapshot = onSnapshot(
+    reputationsQuery,
+    async snapshot => {
+      console.log("SNAPSHOT RAN ");
+      const docChanges = snapshot.docChanges();
 
-    if (docChanges.length > 0) {
-      for (let change of docChanges) {
-        const reputationData = change.doc.data();
-        let uname, isAdmin, admin, adminPoints, aImgUrl, aFullname, aChooseUname;
-        if (isCommunity) {
-          admin = reputationData.admin;
-          adminPoints = reputationData.adminPoints;
-          aImgUrl = reputationData.aImgUrl;
-          aFullname = reputationData.aFullname;
-          aChooseUname = reputationData.aChooseUname;
-          delete reputationData.admin;
-          delete reputationData.adminPoints;
-          delete reputationData.aImgUrl;
-          delete reputationData.aFullname;
-          delete reputationData.aChooseUname;
-        } else {
-          uname = reputationData.uname;
-          isAdmin = reputationData.isAdmin;
-          delete reputationData.uname;
-          delete reputationData.isAdmin;
-        }
-
-        if (change.type === "added" || change.type === "modified") {
+      if (docChanges.length > 0) {
+        for (let change of docChanges) {
+          const reputationData = change.doc.data();
+          let uname, isAdmin, admin, adminPoints, aImgUrl, aFullname, aChooseUname;
           if (isCommunity) {
-            reputationsDictTemp[reputationData.tagId] = {
-              ...reputationData,
-              tagId: reputationData.tagId,
-              admin,
-              adminPoints,
-              aImgUrl,
-              aFullname,
-              aChooseUname,
-            };
+            admin = reputationData.admin;
+            adminPoints = reputationData.adminPoints;
+            aImgUrl = reputationData.aImgUrl;
+            aFullname = reputationData.aFullname;
+            aChooseUname = reputationData.aChooseUname;
+            delete reputationData.admin;
+            delete reputationData.adminPoints;
+            delete reputationData.aImgUrl;
+            delete reputationData.aFullname;
+            delete reputationData.aChooseUname;
           } else {
-            reputationsDictTemp[uname] = {
-              ...reputationData,
-              isAdmin,
-            };
+            uname = reputationData.uname;
+            isAdmin = reputationData.isAdmin;
+            delete reputationData.uname;
+            delete reputationData.isAdmin;
+          }
+
+          if (change.type === "added" || change.type === "modified") {
+            if (isCommunity) {
+              reputationsDictTemp[reputationData.tagId] = {
+                ...reputationData,
+                tagId: reputationData.tagId,
+                admin,
+                adminPoints,
+                aImgUrl,
+                aFullname,
+                aChooseUname,
+              };
+            } else {
+              reputationsDictTemp[uname] = {
+                ...reputationData,
+                isAdmin,
+              };
+            }
           }
         }
+        console.log("reputationsDictTemp ", reputationsDictTemp);
+        setReputationsDict({ ...reputationsDictTemp });
       }
-      console.log("reputationsDictTemp ", reputationsDictTemp);
-      setReputationsDict({ ...reputationsDictTemp });
+      console.log("FINISHED");
+      setReputationsLoaded(true);
+    },
+    error => {
+      console.error(error);
     }
-    console.log("FINISHED");
-    setReputationsLoaded(true);
-  });
+  );
 
   return () => {
     console.log("SNAP KILLED");
@@ -322,6 +328,7 @@ export const setDagNode = (
   // Candidate for removal!
   // copyNode: creates copy of the object
   // copies the other attributes of the node (attributes not necessary for dagre object)
+  console.log("setdag node");
   newNode = copyNode(node);
   // ***************************************************************
   // id is deleted because nodeId will be used as key in oldNodes
@@ -488,9 +495,7 @@ export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, e
   return oldEdges;
 };
 
-// for hiding nodes in the map
-export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any, oldEdges: any) => {
-  // for every parent
+export const updateVisibleInParentList = (nodeId: string, oldNodes: any, visible: boolean) => {
   for (let parent of oldNodes[nodeId].parents) {
     // if parent is visible on map
     if (parent.node in oldNodes) {
@@ -501,15 +506,20 @@ export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string,
         ...oldNodes[parent.node],
         children: [...oldNodes[parent.node].children],
       };
+      console.log("1oldNodes[parent.node]", oldNodes[parent.node].children[childIdx].visible);
       // update the child node of the parent node and make its visibility false
       oldNodes[parent.node].children[childIdx] = {
         ...oldNodes[parent.node].children[childIdx],
-        visible: false,
-        nodeType: oldNodes[nodeId].nodeType,
+        visible,
+        // nodeType: oldNodes[nodeId].nodeType,
       };
+      console.log("2oldNodes[parent.node]", oldNodes[parent.node].children[childIdx].visible);
     }
   }
-  // for every child
+  return oldNodes;
+};
+
+export const updateVisibleInChildrenList = (nodeId: string, oldNodes: any, visible: boolean) => {
   for (let child of oldNodes[nodeId].children) {
     // if child is visible on map
     if (child.node in oldNodes) {
@@ -523,17 +533,26 @@ export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string,
       // update the parent node of the child node and make its visibility false
       oldNodes[child.node].parents[parentIdx] = {
         ...oldNodes[child.node].parents[parentIdx],
-        visible: false,
-        nodeType: oldNodes[nodeId].nodeType,
+        visible,
+        // nodeType: oldNodes[nodeId].nodeType,
       };
     }
   }
 
+  return oldNodes;
+};
+
+// for hiding nodes in the map
+export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any, oldEdges: any) => {
+  let oldNodesCopy = { ...oldNodes };
+  oldNodesCopy = updateVisibleInParentList(nodeId, oldNodesCopy, false);
+  oldNodesCopy = updateVisibleInChildrenList(nodeId, oldNodesCopy, false);
+
   // remove edges from this node to every other node
   oldEdges = removeDagAllEdges(g, nodeId, { ...oldEdges });
   // removes the node itself
-  oldNodes = removeDagNode(g, nodeId, oldNodes);
-  return { oldNodes, oldEdges };
+  oldNodesCopy = removeDagNode(g, nodeId, oldNodesCopy);
+  return { oldNodes: oldNodesCopy, oldEdges };
 };
 
 // for showing a hidden node
@@ -545,30 +564,39 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
     // determines whether children are shown or hidden on map for setting child icons green or orange
     const child = uNodeData.children[childIdx];
     // change the visible attribute for each child node
+    console.log("uNodeData.child", child);
     uNodeData.children[childIdx] = {
       ...uNodeData.children[childIdx],
       // whether the child is currently visible on the map
       // visible: child.node in oldAllNodes && "visible" in oldAllNodes[child.node] && oldAllNodes[child.node].visible
       visible: child.node in oldNodes && "visible" in oldNodes[child.node] && oldNodes[child.node].visible,
+      // visible: true,
     };
+    console.log("uNodeData.child res", uNodeData.children[childIdx]);
   }
   uNodeData.parents = [...uNodeData.parents];
   for (let parentIdx = 0; parentIdx < uNodeData.parents.length; parentIdx++) {
     // determines whether parents are shown or hidden on map for setting parent icons green or orange
     const parent = uNodeData.parents[parentIdx];
     // change the visible attribute for each parent node
+    console.log("uNodeData.parent", parent);
     uNodeData.parents[parentIdx] = {
       ...uNodeData.parents[parentIdx],
       // whether the parent is currently visible on the map
       visible: parent.node in oldNodes && "visible" in oldNodes[parent.node] && oldNodes[parent.node].visible,
+      // visible: true,
     };
+    console.log("uNodeData.parent res", uNodeData.parents[parentIdx]);
   }
-  // for every child
+  console.log("uNodeData", uNodeData);
+  // this update visible in every Node children
   for (let child of uNodeData.children) {
     // if child is visible on map
     if (child.node in oldNodes) {
       // find index of nodeId in list of parents of child
-      const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === uNodeData.id);
+      // const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === uNodeData.id);
+      const parentIdx = oldNodes[child.node].parents.findIndex((p: any) => p.node === uNodeData.node);
+      // console.log("Idx: parent", oldNodes[child.node].parents, parentIdx);
       // copy list of parents for child node in oldNodes
       oldNodes[child.node] = {
         ...oldNodes[child.node],
@@ -578,16 +606,20 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
       oldNodes[child.node].parents[parentIdx] = {
         ...oldNodes[child.node].parents[parentIdx],
         visible: true,
-        nodeType: uNodeData.nodeType,
+        // nodeType: uNodeData.nodeType,
       };
     }
   }
-  // for every parent
+  // this update visible in every Node parent
   for (let parent of uNodeData.parents) {
     // if parent is visible on map
     if (parent.node in oldNodes) {
       // find index of nodeId in list of children of parent
-      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === uNodeData.id);
+
+      // const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === uNodeData.id);
+      const childIdx = oldNodes[parent.node].children.findIndex((c: any) => c.node === uNodeData.node);
+      // console.log("Idx: child", oldNodes[parent.node].children, childIdx);
+
       // copy list of children for parent node in oldNodes
       oldNodes[parent.node] = {
         ...oldNodes[parent.node],
@@ -597,7 +629,7 @@ export const makeNodeVisibleInItsLinks = (uNodeData: any, oldNodes: any, oldEdge
       oldNodes[parent.node].children[childIdx] = {
         ...oldNodes[parent.node].children[childIdx],
         visible: true,
-        nodeType: uNodeData.nodeType,
+        // nodeType: uNodeData.nodeType,
       };
     }
   }
@@ -770,7 +802,7 @@ export const createOrUpdateNode = (
 // this works correctly in dashboard with array but,
 // don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
-  // console.log("\n----->\n -> NODE HERE:", node.parents);
+  console.log("\n----->\n -> NODE HERE:", node);
   let newNode = { ...node };
   newNode.parents = [];
   for (let parent of node.parents) {

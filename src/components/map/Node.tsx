@@ -429,7 +429,7 @@ const Node = ({
   if (!user) {
     return null;
   }
-  console.log(2, title);
+  // console.log(2, title);
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
     <div

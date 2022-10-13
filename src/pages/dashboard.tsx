@@ -70,6 +70,8 @@ import {
   setDagNode,
   setNewParentChildrenEdges,
   tempNodes,
+  updateVisibleInChildrenList,
+  updateVisibleInParentList,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
@@ -339,7 +341,10 @@ const Dashboard = ({}: DashboardProps) => {
 
             if (cur.nodeChangeType === "added") {
               // console.log("added");
+              // const nodesParentUpdated = updateVisibleInParentList(cur.node, acu.newNodes, true);
+              // const nodesChildrenUpdated = updateVisibleInChildrenList(cur.node, nodesParentUpdated, true);
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+              console.log("added:", oldNodes);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
               const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
               tmpNodes = res.oldNodes;
@@ -350,7 +355,10 @@ const Dashboard = ({}: DashboardProps) => {
               const node = acu.newNodes[cur.node];
               if (!node) {
                 // <---  CHECK I change this from nodes
-                const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
+                const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+                // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
+                const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
+                console.log("modified:", res.oldNodes);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
               } else {
@@ -372,15 +380,18 @@ const Dashboard = ({}: DashboardProps) => {
             // so the NO visible nodes will come as modified and !visible
             if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
               // console.log("removed", cur.node, g.current);
+              const nodesParentUpdated = updateVisibleInParentList(cur.node, acu.newNodes, false);
+              const nodesChildrenUpdated = updateVisibleInChildrenList(cur.node, nodesParentUpdated, false);
               if (g.current.hasNode(cur.node)) {
                 // console.log("has Node");
-                g.current.nodes().forEach(function () {});
-                g.current.edges().forEach(function () {});
+                // g.current.nodes().forEach(function () {});
+                // g.current.edges().forEach(function () {});
                 // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
 
                 // !IMPORTANT, Don't change the order, first remove edges then nodes
+
                 tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
-                tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
+                tmpNodes = removeDagNode(g.current, cur.node, nodesChildrenUpdated);
                 // console.log("hasNode", { tmpEdges, tmpNodes });
               } else {
                 // console.log("dont has", acu.newEdges);
@@ -403,7 +414,7 @@ const Dashboard = ({}: DashboardProps) => {
                 tmpNodes = { ...oldNodes };
               }
             }
-            // console.log(" ->", { tmpNodes, tmpEdges });
+            console.log(" ->", { tmpNodes, tmpEdges });
             return {
               // newNodes: { ...acu.newNodes, ...tmpNodes },
               // newEdges: { ...acu.newEdges, ...tmpEdges },
@@ -433,75 +444,83 @@ const Dashboard = ({}: DashboardProps) => {
         );
       };
 
-      const userNodesSnapshot = onSnapshot(q, async snapshot => {
-        const docChanges = snapshot.docChanges();
-        if (!docChanges.length) return null;
-        // setIsSubmitting(true);
-        const userNodeChanges = getUserNodeChanges(docChanges);
-        const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-        const nodesData = await getNodes(db, nodeIds);
-        console.log("nodesData", nodesData);
+      const userNodesSnapshot = onSnapshot(
+        q,
+        async snapshot => {
+          const docChanges = snapshot.docChanges();
+          if (!docChanges.length) return null;
+          // setIsSubmitting(true);
+          const userNodeChanges = getUserNodeChanges(docChanges);
+          const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
+          const nodesData = await getNodes(db, nodeIds);
+          console.log("nodesData", nodesData);
 
-        const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+          const fullNodes = buildFullNodes(userNodeChanges, nodesData);
 
-        // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
-        // here set All Full Nodes to use in bookmarks
-        // here set visible Full Nodes to draw Nodes in notebook
-        const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-        // const mergedVisibleFullNodes = visibleFullNodes.map(cur=>{
-        //   const {lef} = nodes[cur.node]
-        //   {...cur,left:}
-        // })
-        // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
-
-        setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-        // setNodes(newNodes);
-        // setEdges(newEdges);
-        // setNodes(nodes => {
-        //   const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edgesRef.current);
-        //   setEdges(newEdges);
-        //   return newNodes;
-        //   // setEdges(edges=>{
-        //   // })
-        // });
-        setGraph(({ nodes, edges }) => {
-          // Here we are merging with previous nodes left and top
-          const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-            const tmpNode = nodes[cur.node];
-
-            const hasParent = cur.parents.length;
-            const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-
-            const leftParent = nodeParent?.left ?? 0;
-            const topParent = nodeParent?.top ?? 0;
-
-            return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
-          });
-
-          // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
-          //   if(cur.nodeChangeType==='modified' &&)
+          // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
+          // here set All Full Nodes to use in bookmarks
+          // here set visible Full Nodes to draw Nodes in notebook
+          const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+          // const mergedVisibleFullNodes = visibleFullNodes.map(cur=>{
+          //   const {lef} = nodes[cur.node]
+          //   {...cur,left:}
           // })
-          // here we are filling dagger
-          const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-          console.log({ newNodes, newEdges });
-          return { nodes: newNodes, edges: newEdges };
-        });
-        // setEdges(edges => {
-        //   setNodes(newNodes);
-        //   return newEdges;
-        // });
-        console.log(" -> userNodesSnapshot:sdf:", {
-          userNodeChanges,
-          nodeIds,
-          nodesData,
-          fullNodes,
-          visibleFullNodes,
-          // newNodes,
-          // newEdges,
-        });
-        // setIsSubmitting(false);
-        setUserNodesLoaded(true);
-      });
+          // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
+
+          setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+          // setNodes(newNodes);
+          // setEdges(newEdges);
+          // setNodes(nodes => {
+          //   const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edgesRef.current);
+          //   setEdges(newEdges);
+          //   return newNodes;
+          //   // setEdges(edges=>{
+          //   // })
+          // });
+          setGraph(({ nodes, edges }) => {
+            // Here we are merging with previous nodes left and top
+            const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+              const tmpNode = nodes[cur.node];
+
+              const hasParent = cur.parents.length;
+              const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+
+              const leftParent = nodeParent?.left ?? 0;
+              const topParent = nodeParent?.top ?? 0;
+
+              return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
+            });
+            console.log({ nodes, visibleFullNodesMerged });
+
+            // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
+            //   if(cur.nodeChangeType==='modified' &&)
+            // })
+            // here we are filling dagger
+            console.log("-----> nodes", nodes);
+            const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
+            console.log({ newNodes, newEdges });
+            return { nodes: newNodes, edges: newEdges };
+          });
+          // setEdges(edges => {
+          //   setNodes(newNodes);
+          //   return newEdges;
+          // });
+          console.log(" -> userNodesSnapshot:sdf:", {
+            userNodeChanges,
+            nodeIds,
+            nodesData,
+            fullNodes,
+            visibleFullNodes,
+            // newNodes,
+            // newEdges,
+          });
+          // setIsSubmitting(false);
+          setUserNodesLoaded(true);
+        },
+        error => {
+          console.error(error);
+        }
+      );
       return () => userNodesSnapshot();
     },
     [allTags, db]
@@ -2868,6 +2887,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal) => {
+      console.log("[selectProposal]");
       if (!user?.uname) return;
       // const selectedNode = nodeBookState.selectedNode;
       event.preventDefault();
@@ -2878,11 +2898,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
+        console.log("oldNodes[nodeBookState.selectedNode]", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
         if ("childType" in proposal && proposal.childType !== "") {
           //here builds de child proposal and draws it
           const newNodeId = newId();
           tempNodes.add(newNodeId);
+          console.log("---->> proposal", proposal);
           const newChildNode = {
             unaccepted: true,
             isStudied: false,
@@ -2908,6 +2930,8 @@ const Dashboard = ({}: DashboardProps) => {
             nodeType: proposal.childType,
             parents: proposal.parents,
             comments: 0,
+            // tags: proposal.tags,
+            tagIds: proposal.tagIds,
             tags: proposal.tags,
             title: proposal.title,
             wrongs: 0,
@@ -2915,6 +2939,8 @@ const Dashboard = ({}: DashboardProps) => {
             content: proposal.content,
             nodeImage: proposal.nodeImage,
             studied: 1,
+            referenceIds: proposal.referenceIds,
+            referenceLabels: proposal.referenceLabels,
             references: proposal.references,
             choices: [],
             // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
@@ -3221,6 +3247,9 @@ const Dashboard = ({}: DashboardProps) => {
   //   },
   //   [scrollToNodeInitialized]
   // );
+
+  console.log("-->> Nodes", graph.nodes);
+
   return (
     <div className="MapContainer">
       {settings.theme === "Dark" && (

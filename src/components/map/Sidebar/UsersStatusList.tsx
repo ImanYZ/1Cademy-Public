@@ -126,26 +126,32 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
     const usersDictTemp: { [key: string]: any } = {};
     const usersQuery = query(collection(db, "users"), where("tagId", "==", user.tagId));
-    const usersSnapshot = onSnapshot(usersQuery, async snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (!docChanges.length) return;
+    const usersSnapshot = onSnapshot(
+      usersQuery,
+      async snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) return;
 
-      for (let change of docChanges) {
-        if (change.type === "added" || change.type === "modified") {
-          const userId = change.doc.id;
-          const { fName, lName, createdAt, imageUrl, chooseUname, uname } = change.doc.data();
-          usersDictTemp[uname] = {
-            createdAt,
-            imageUrl,
-            fullname: fName + " " + lName,
-            chooseUname,
-            userId,
-          };
+        for (let change of docChanges) {
+          if (change.type === "added" || change.type === "modified") {
+            const userId = change.doc.id;
+            const { fName, lName, createdAt, imageUrl, chooseUname, uname } = change.doc.data();
+            usersDictTemp[uname] = {
+              createdAt,
+              imageUrl,
+              fullname: fName + " " + lName,
+              chooseUname,
+              userId,
+            };
+          }
         }
+        setUsersDict({ ...usersDictTemp });
+        setUsersDictLoaded(true);
+      },
+      error => {
+        console.error(error);
       }
-      setUsersDict({ ...usersDictTemp });
-      setUsersDictLoaded(true);
-    });
+    );
     return () => usersSnapshot();
     // }
   }, [db, user]);
@@ -199,25 +205,31 @@ const UsersStatusList = (props: UsersStatusListProps) => {
       const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
       // const usersStatusQuery = firebase.db.collection("status").where("state", "==", "online");
 
-      const usersStatusSnapshot = onSnapshot(usersStatusQuery, snapshot => {
-        const docChanges = snapshot.docChanges();
-        if (docChanges.length > 0) {
-          setOnlineUsers(oOnlineUsers => {
-            const onlineUsersSet = new Set(oOnlineUsers);
-            for (let change of docChanges) {
-              const { user } = change.doc.data();
-              if (change.type === "removed") {
-                onlineUsersSet.delete(user);
-              } else if (change.type === "added" || change.type === "modified") {
-                onlineUsersSet.add(user);
+      const usersStatusSnapshot = onSnapshot(
+        usersStatusQuery,
+        snapshot => {
+          const docChanges = snapshot.docChanges();
+          if (docChanges.length > 0) {
+            setOnlineUsers(oOnlineUsers => {
+              const onlineUsersSet = new Set(oOnlineUsers);
+              for (let change of docChanges) {
+                const { user } = change.doc.data();
+                if (change.type === "removed") {
+                  onlineUsersSet.delete(user);
+                } else if (change.type === "added" || change.type === "modified") {
+                  onlineUsersSet.add(user);
+                }
               }
-            }
-            // return [...onlineUsersSet];
-            return Array.from(onlineUsersSet);
-          });
+              // return [...onlineUsersSet];
+              return Array.from(onlineUsersSet);
+            });
+          }
+          setUsersOnlineStatusLoaded(true);
+        },
+        error => {
+          console.error(error);
         }
-        setUsersOnlineStatusLoaded(true);
-      });
+      );
       return () => usersStatusSnapshot();
     }
   }, [db, reputationsOthersMonthlyLoaded]);

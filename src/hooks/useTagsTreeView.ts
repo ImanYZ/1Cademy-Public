@@ -57,13 +57,19 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     const tagsRef = collection(db, "tags");
     const q = query(tagsRef);
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (!docChanges.length) return;
-      const newTagsTreeView = applyTagsTreeViewChanges(tagsTreeView, docChanges);
-      setTagsTreeView(newTagsTreeView);
-      setAllTagsLoaded(true);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) return;
+        const newTagsTreeView = applyTagsTreeViewChanges(tagsTreeView, docChanges);
+        setTagsTreeView(newTagsTreeView);
+        setAllTagsLoaded(true);
+      },
+      error => {
+        console.error(error);
+      }
+    );
 
     return () => unsubscribe();
     // Disable this line, if add tagsTreeView as dependencies will get in a loop
