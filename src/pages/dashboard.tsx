@@ -3155,19 +3155,34 @@ const Dashboard = ({}: DashboardProps) => {
         //   console.error(err);
         //   // window.location.reload();
         // }
+        setGraph(({ nodes: oldNodes, edges }) => {
+          if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
+          if (
+            proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
+            (oldNodes[nodeBookState.selectedNode].corrects - oldNodes[nodeBookState.selectedNode].wrongs) / 2
+          ) {
+            proposalsTemp[proposalIdx].accepted = true;
+            if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
+              reloadPermanentGraph();
+            }
+          }
+          setProposals(proposalsTemp);
+          return { nodes: oldNodes, edges };
+        });
         // setNodes(oldNodes => {
         //   if (
         //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
         //     (oldNodes[sNode.id].corrects - oldNodes[sNode].wrongs) / 2
         //   ) {
         //     proposalsTemp[proposalIdx].accepted = true;
-        //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
+        //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx childType !== "") {
         //       reloadPermanentGraph();
         //     }
         //   }
         //   setProposals(proposalsTemp);
         //   return oldNodes;
         // });
+
         setIsSubmitting(false);
         // scrollToNode(sNode);
       }
