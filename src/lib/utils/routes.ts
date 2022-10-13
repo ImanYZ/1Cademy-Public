@@ -5,6 +5,7 @@ const ROUTES = {
   signIn: "/signin",
   signUp: "/signup",
   forgotpassword: "/forgot-password",
+  dashboard: "/dashboard",
 };
 
 export default ROUTES;

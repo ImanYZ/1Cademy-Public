@@ -38,6 +38,7 @@ type ProposalsProps = {
   selectProposal: any;
   deleteProposal: any;
   proposeNewChild: any;
+  openProposal: string;
 };
 
 const Proposals = (props: ProposalsProps) => {
@@ -90,7 +91,7 @@ const Proposals = (props: ProposalsProps) => {
             deleteProposal={props.deleteProposal}
             editHistory={false}
             proposeNewChild={props.proposeNewChild}
-            openProposal={openProposal}
+            openProposal={props.openProposal}
             isAdmin={isAdmin}
             isRetrieving={isRetrieving}
           />
@@ -111,7 +112,7 @@ const Proposals = (props: ProposalsProps) => {
             deleteProposal={props.deleteProposal}
             editHistory={true}
             proposeNewChild={props.proposeNewChild}
-            openProposal={openProposal}
+            openProposal={props.openProposal}
             isAdmin={isAdmin}
             isRetrieving={isRetrieving}
           />

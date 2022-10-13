@@ -793,10 +793,10 @@
   /* min-height: 0px !important; */
 }
 
-.secondary-content {
+/* .secondary-content {
   top: 10px !important;
   right: 13px !important;
-}
+} */
 
 .NoProposals {
   margin-left: 10px;
@@ -1628,10 +1628,10 @@ button.MuiTab-textColorInherit:focus {
   margin-right: -22px !important;
 }
 
-.secondary-content {
+/* .secondary-content {
   top: 10px !important;
   right: 13px !important;
-}
+} */
 
 .NoProposals {
   margin-left: 10px;

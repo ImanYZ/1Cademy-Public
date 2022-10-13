@@ -78,6 +78,7 @@ const NodesList = ({
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
+  console.log(1, nodes);
   return (
     <>
       {Object.keys(nodes).map(nId => {
@@ -202,6 +203,7 @@ const NodesList = ({
   );
 };
 // export default NodesList;
+// export const MemoizedNodeList = NodesList;
 export const MemoizedNodeList = React.memo(NodesList);
 
 // import React from "react";

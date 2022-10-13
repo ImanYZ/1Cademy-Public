@@ -1,17 +1,17 @@
 import { NodeType } from "../../knowledgeTypes";
 
 export const NODE_TYPE_OPTIONS: NodeType[] = [
-  NodeType.Advertisement,
+  // NodeType.Advertisement,
   NodeType.Code,
   NodeType.Concept,
   NodeType.Idea,
-  NodeType.News,
-  NodeType.Private,
-  NodeType.Profile,
+  // NodeType.News,
+  // NodeType.Private,
+  // NodeType.Profile,
   NodeType.Question,
   NodeType.Reference,
   NodeType.Relation,
-  NodeType.Sequel,
+  // NodeType.Sequel,
 ];
 
 export const GENDER_VALUES = ["Male", "Female", "Not listed (Please specify)", "Prefer not to say"];
