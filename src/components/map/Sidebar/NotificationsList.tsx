@@ -8,7 +8,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { doc, getFirestore, increment, writeBatch } from "firebase/firestore";
@@ -121,14 +121,15 @@ const NotificationsList = (props: NotificationsListProps) => {
     <>
       {notifications.map(notification => {
         return (
-          <li
+          <Paper
+            elevation={3}
             className="collection-item Notifications"
             key={`Notification${notification.id}`}
             style={{
               // border: "solid 2px royalBlue",
               listStyle: "none",
               padding: "10px 10px",
-              borderBottom: "solid 1px white",
+
               fontSize: "16px",
             }}
           >
@@ -237,7 +238,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                 </IconButton>
               </Box>
             </div>
-          </li>
+          </Paper>
         );
       })}
       {props.notifications.length > lastIndex && (

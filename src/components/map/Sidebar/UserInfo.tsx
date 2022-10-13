@@ -6,6 +6,7 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
+import { Box } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -96,7 +97,7 @@ const UserInfo = (props: any) => {
           {
             title: "Proposals",
             content: (
-              <>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div className="ChartTitle">Proposals in chronological order</div>
                 {proposals.map((proposal, idx) => {
                   return (
@@ -110,7 +111,7 @@ const UserInfo = (props: any) => {
                     )
                   );
                 })}
-              </>
+              </Box>
             ),
           },
         ];

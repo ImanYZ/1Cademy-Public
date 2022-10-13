@@ -759,7 +759,7 @@
 
 .collection .collection-item {
   cursor: pointer;
-  border-bottom: 1px solid #e0e0e0;
+  /* border-bottom: 1px solid #e0e0e0; */
 }
 
 .collection .collection-item.Studied {
