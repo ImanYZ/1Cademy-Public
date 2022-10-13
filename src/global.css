@@ -1180,10 +1180,10 @@
   background-color: #f44336;
   color: white;
 }
-
+/*
 .LightMode #SidebarBody .collection .collection-item {
   border-bottom: 1px solid #b4b4b4;
-}
+} */
 
 .ShowHideSidebarSection {
   color: rgb(190, 190, 190) !important;
