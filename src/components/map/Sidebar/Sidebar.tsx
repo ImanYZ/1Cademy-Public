@@ -735,6 +735,7 @@ const Sidebar = (props: SidebarType) => {
                 deleteProposal={props.deleteProposal}
                 // editHistory={false}
                 proposeNewChild={props.proposeNewChild}
+                openProposal={props.openProposal}
               />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Comments" ? (

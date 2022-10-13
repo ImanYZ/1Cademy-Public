@@ -91,7 +91,7 @@ const Proposals = (props: ProposalsProps) => {
             deleteProposal={props.deleteProposal}
             editHistory={false}
             proposeNewChild={props.proposeNewChild}
-            openProposal={openProposal}
+            openProposal={props.openProposal}
             isAdmin={isAdmin}
             isRetrieving={isRetrieving}
           />
@@ -112,7 +112,7 @@ const Proposals = (props: ProposalsProps) => {
             deleteProposal={props.deleteProposal}
             editHistory={true}
             proposeNewChild={props.proposeNewChild}
-            openProposal={openProposal}
+            openProposal={props.openProposal}
             isAdmin={isAdmin}
             isRetrieving={isRetrieving}
           />

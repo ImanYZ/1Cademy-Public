@@ -1,7 +1,7 @@
 import CodeIcon from "@mui/icons-material/Code";
 import { Button, Divider, Drawer, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import axios from "axios";
+// import axios from "axios";
 import {
   addDoc,
   collection,
@@ -46,7 +46,7 @@ import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken } from "../lib/firestoreClient/auth";
-import { postWithToken } from "../lib/mapApi";
+import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
@@ -175,7 +175,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
-  const [openProposal, setOpenProposal] = useState<string | boolean>(false);
+  const [openProposal, setOpenProposal] = useState<string>("");
 
   // when proposing improvements, lists of added/removed parent/child links
   const [addedParents, setAddedParents] = useState<string[]>([]);
@@ -2868,11 +2868,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal) => {
-      // console.log("In selectProposal");
-      console.log("proposal", proposal);
-
       if (!user?.uname) return;
-      console.log("selectedNOde: ", nodeBookState.selectedNode);
       // const selectedNode = nodeBookState.selectedNode;
       event.preventDefault();
       setOpenProposal(proposal.id);
@@ -2965,6 +2961,37 @@ const Dashboard = ({}: DashboardProps) => {
       if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
     },
     [user?.uname, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
+  );
+
+  const deleteProposal = useCallback(
+    async (event: any, proposals: any, setProposals: any, proposalId: string, proposalIdx: number) => {
+      if (!choosingNode) {
+        if (!nodeBookState.selectedNode) return;
+        reloadPermanentGraph();
+        const postData = {
+          versionId: proposalId,
+          nodeType: selectedNodeType,
+          nodeId: nodeBookState.selectedNode,
+        };
+        setIsSubmitting(true);
+        await postWithToken("/deleteVersion", postData);
+        // let responseObj;
+        // try {
+        //   await firebase.idToken();
+        //   responseObj = await axios.post("/deleteVersion", postData);
+        // } catch (err) {
+        //   console.error(err);
+        //   // window.location.reload();
+        // }
+        let proposalsTemp = [...proposals];
+        proposalsTemp.splice(proposalIdx, 1);
+        setProposals(proposalsTemp);
+        setIsSubmitting(false);
+        scrollToNode(nodeBookState.selectedNode);
+      }
+      // event.currentTarget.blur();
+    },
+    [choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
   );
   const mapContentMouseOver = useCallback((event: any) => {
     if (
@@ -3116,12 +3143,18 @@ const Dashboard = ({}: DashboardProps) => {
         setIsSubmitting(true);
         // let responseObj;
         try {
-          await idToken();
-          /*responseObj = */ await axios.post("/rateVersion", postData);
-        } catch (err) {
-          console.error(err);
-          // window.location.reload();
+          await Post("/rateVersion", postData);
+        } catch (error) {
+          console.error(error);
+          setIsSubmitting(false);
         }
+        // try {
+        //   await idToken();
+        //   /*responseObj = */ await axios.post("/rateVersion", postData);
+        // } catch (err) {
+        //   console.error(err);
+        //   // window.location.reload();
+        // }
         // setNodes(oldNodes => {
         //   if (
         //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
@@ -3266,7 +3299,7 @@ const Dashboard = ({}: DashboardProps) => {
             rateProposal={rateProposal}
             openLinkedNode={openLinkedNode}
             selectProposal={selectProposal}
-            deleteProposal={() => console.log("deleteProposal")}
+            deleteProposal={deleteProposal}
             closeSideBar={closeSideBar}
             proposeNewChild={proposeNewChild}
             // --------------------------- others
