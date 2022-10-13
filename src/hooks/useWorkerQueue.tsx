@@ -9,7 +9,7 @@ import { ClusterNodes, EdgeData, EdgesData, FullNodeData, FullNodesData } from "
 export type Task = {
   id: string;
   height: number;
-};
+} | null;
 
 type UseWorkerQueueProps = {
   g: MutableRefObject<graphlib.Graph<{}>>;
@@ -140,7 +140,12 @@ export const useWorkerQueue = ({
 
     // CREATE WORKER with Nodes and Nodes changed
     console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
-    const individualNodeChanges: FullNodeData[] = queue.map(cur => ({ ...graph.nodes[cur.id], height: cur.height }));
+    const individualNodeChanges: FullNodeData[] = queue
+      .map(cur => {
+        if (!cur) return null;
+        return { ...graph.nodes[cur.id], height: cur.height };
+      })
+      .flatMap(cur => cur || []);
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags);
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);

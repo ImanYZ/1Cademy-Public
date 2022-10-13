@@ -390,7 +390,7 @@ export const setDagNodes = (
   // (clusters are based on nodes' first tags)
 
   individualNodeChanges.forEach(cur => {
-    if (!cur?.tagIds.length) return;
+    if (!cur?.tagIds?.length) return;
     if (!(cur.tagIds[0] in allTags)) return;
     g.setParent(cur.node, "Tag" + cur.tagIds[0]);
   });

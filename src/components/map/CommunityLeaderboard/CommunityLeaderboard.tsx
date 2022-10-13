@@ -47,7 +47,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
   const [comPoints, setComPoints] = useState<any[]>([]);
   const [comLeaderboardType, setComLeaderboardType] = useState("Weekly");
   const [comLeaderboardTypeOpen, setComLeaderboardTypeOpen] = useState(false);
-  const [comLeaderboardOpen, setComLeaderboardOpen] = useState(true);
+  const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
   // const [pendingProposalsLoaded /*setPendingProposalsLoaded*/] = useState(true);
   const [comPointsLoaded, setComPointsLoaded] = useState(false);

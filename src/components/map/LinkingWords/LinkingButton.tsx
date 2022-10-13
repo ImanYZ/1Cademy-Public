@@ -48,7 +48,11 @@ const LinkingButton = (props: LinkingButtonProps) => {
       }
     >
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <NodeTypeIcon nodeType={props.nodeType} tooltipPlacement={"left"} sx={{ fontSize: "16px" }} />
+        <NodeTypeIcon
+          nodeType={props.nodeType}
+          tooltipPlacement={"left"}
+          sx={{ fontSize: "16px", color: props.visible ? "#00E676" : "#f9a825", pr: "4px" }}
+        />
         <Editor
           readOnly={true}
           setValue={doNothing}

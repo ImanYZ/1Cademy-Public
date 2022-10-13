@@ -1,9 +1,9 @@
 import { Box } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-
 import { postImageWithToken, postWithToken } from "../../../lib/mapApi";
 import { imageLoaded } from "../../../lib/utils/utils";
+
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
@@ -62,7 +62,6 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
         } else {
           setIsUploading(true);
-
           // Uploading image by calling this API
           const formData = {
             file: event.target.files[0],

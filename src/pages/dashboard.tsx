@@ -38,7 +38,7 @@ import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
 import ClustersList from "../components/map/ClustersList";
 import { LinksList } from "../components/map/LinksList";
-import NodesList from "../components/map/NodesList";
+import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -58,8 +58,10 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
+  // getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
+  NODE_HEIGHT,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -101,6 +103,7 @@ type DashboardProps = {};
  *
  *  --- render nodes
  */
+// let arrowKeyMapTransitionInitialized = false;
 const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -182,6 +185,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
 
+  const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
   const { addTask, queue } = useWorkerQueue({
@@ -263,47 +267,70 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  useEffect(
-    () => {
-      if (!db) return;
-      if (!user) return;
-      if (!allTagsLoaded) return;
+  // called after first time map is rendered
+  // useEffect(() => {
+  //   window.location.hash = "no-back-button";
 
-      const userNodesRef = collection(db, "userNodes");
-      const q = query(
-        userNodesRef,
-        where("user", "==", user.uname),
-        // IMPORTANT: I commented this to call all
-        // visible: used to drag nodes in Notebook
-        // visible and invisible to show bookmarks
-        // where("visible", "==", true),
-        where("deleted", "==", false)
-      );
-      const killSnapshot = snapshot(q);
-      return () => {
-        // TODO: here we need to remove nodes cause will come node again
-        killSnapshot();
-      };
-    },
-    // TODO: check dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allTags, allTagsLoaded, db, user]
-  );
-  //called whenever isSubmitting changes
-  // changes style of cursor
+  //   // Again because Google Chrome doesn't insert
+  //   // the first hash into the history
+  //   window.location.hash = "Again-No-back-button";
 
-  useEffect(() => {
-    if (isSubmitting) {
-      document.body.style.cursor = "wait";
-    } else {
-      document.body.style.cursor = "initial";
-    }
-  }, [isSubmitting]);
+  //   window.onhashchange = function () {
+  //     window.location.hash = "no-back-button";
+  //   };
+
+  //   window.onbeforeunload = function (e) {
+  //     e = e || window.event;
+
+  //     // For IE and Firefox prior to version 4
+  //     if (e) {
+  //       e.returnValue = "Do you want to close 1Cademy?";
+  //     }
+
+  //     // For Safari
+  //     return "Do you want to close 1Cademy?";
+  //   };
+
+  //   // movement through map using keyboard arrow keys
+  //   document.addEventListener("keydown", event => {
+  //     if (!document.activeElement) return;
+  //     if (
+  //       // mapHovered &&
+  //       getSelectionText() === "" &&
+  //       document.activeElement.tagName !== "TEXTAREA" &&
+  //       document.activeElement.tagName !== "INPUT" &&
+  //       !arrowKeyMapTransitionInitialized
+  //     ) {
+  //       arrowKeyMapTransitionInitialized = true;
+  //       setMapInteractionValue(oldValue => {
+  //         const translationValue = { ...oldValue.translation };
+  //         switch (event.key) {
+  //           case "ArrowLeft":
+  //             translationValue.x += 10;
+  //             break;
+  //           case "ArrowRight":
+  //             translationValue.x -= 10;
+  //             break;
+  //           case "ArrowUp":
+  //             translationValue.y += 10;
+  //             break;
+  //           case "ArrowDown":
+  //             translationValue.y -= 10;
+  //             break;
+  //         }
+  //         setTimeout(() => {
+  //           arrowKeyMapTransitionInitialized = false;
+  //         }, 10);
+  //         return { scale: oldValue.scale, translation: translationValue };
+  //       });
+  //     }
+  //   });
+  // }, []);
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
-        console.log("[FILL DAGRE]", { fullNodes, currentNodes, currentEdges });
+        console.log("[FILL DAGRE]:::", { fullNodes, currentNodes, currentEdges });
         // debugger
         return fullNodes.reduce(
           (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
@@ -421,6 +448,10 @@ const Dashboard = ({}: DashboardProps) => {
         // here set All Full Nodes to use in bookmarks
         // here set visible Full Nodes to draw Nodes in notebook
         const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+        // const mergedVisibleFullNodes = visibleFullNodes.map(cur=>{
+        //   const {lef} = nodes[cur.node]
+        //   {...cur,left:}
+        // })
         // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
 
         setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
@@ -434,7 +465,24 @@ const Dashboard = ({}: DashboardProps) => {
         //   // })
         // });
         setGraph(({ nodes, edges }) => {
-          const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edges);
+          // Here we are merging with previous nodes left and top
+          const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+            const tmpNode = nodes[cur.node];
+
+            const hasParent = cur.parents.length;
+            const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+
+            const leftParent = nodeParent?.left ?? 0;
+            const topParent = nodeParent?.top ?? 0;
+
+            return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
+          });
+
+          // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
+          //   if(cur.nodeChangeType==='modified' &&)
+          // })
+          // here we are filling dagger
+          const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
           console.log({ newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
         });
@@ -442,7 +490,7 @@ const Dashboard = ({}: DashboardProps) => {
         //   setNodes(newNodes);
         //   return newEdges;
         // });
-        console.log(" -> userNodesSnapshot:", {
+        console.log(" -> userNodesSnapshot:sdf:", {
           userNodeChanges,
           nodeIds,
           nodesData,
@@ -458,6 +506,52 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [allTags, db]
   );
+
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (!allTagsLoaded) return;
+
+      const userNodesRef = collection(db, "userNodes");
+      const q = query(
+        userNodesRef,
+        where("user", "==", user.uname),
+        // IMPORTANT: I commented this to call all
+        // visible: used to drag nodes in Notebook
+        // visible and invisible to show bookmarks
+        // where("visible", "==", true),
+        where("deleted", "==", false)
+      );
+      const killSnapshot = snapshot(q);
+      return () => {
+        //   // TODO: here we need to remove nodes cause will come node again
+        killSnapshot();
+      };
+    },
+    [allTagsLoaded, db, snapshot, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+
+  useEffect(() => {
+    const currentLengthNodes = Object.keys(graph.nodes).length;
+    if (currentLengthNodes < previousLengthNodes.current) {
+      // call worker to rerender all
+      console.log(`[CHANGE NH 🚀] RECALCULATE`);
+      addTask(null);
+    }
+    previousLengthNodes.current = currentLengthNodes;
+  }, [addTask, graph.nodes]);
+  //called whenever isSubmitting changes
+  // changes style of cursor
+
+  useEffect(() => {
+    if (isSubmitting) {
+      document.body.style.cursor = "wait";
+    } else {
+      document.body.style.cursor = "initial";
+    }
+  }, [isSubmitting]);
 
   // useEffect(() => {
   //   if (!db) return;
@@ -498,7 +592,7 @@ const Dashboard = ({}: DashboardProps) => {
     //   oldNodes = removeDagNode(tempNode, oldNodes);
     //   tempNodes.delete(tempNode);
     // }
-    console.log("--> reloadPermanten graph", tempNodes, changedNodes);
+    console.log("=--> reloadPermanten graph", tempNodes, changedNodes);
     tempNodes.forEach(tempNode => {
       oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
       oldNodes = removeDagNode(g.current, tempNode, oldNodes);
@@ -613,16 +707,27 @@ const Dashboard = ({}: DashboardProps) => {
   // );
   const scrollToNode = useCallback(
     (nodeId: string) => {
+      console.log(1);
+      // console.log(6);
+      // console.log(7);
+
       if (!scrollToNodeInitialized) {
+        console.log(2);
+
         setTimeout(() => {
+          const currentNode = graph.nodes[nodeId];
+          // if(currentNode.height===NODE_HEIGHT)
           const originalNode = document.getElementById(nodeId);
           if (
             originalNode &&
             "offsetLeft" in originalNode &&
             originalNode.offsetLeft !== 0 &&
             "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0
+            originalNode.offsetTop !== 0 &&
+            currentNode?.height !== NODE_HEIGHT
           ) {
+            console.log(3);
+
             setScrollToNodeInitialized(true);
             setTimeout(() => {
               setScrollToNodeInitialized(false);
@@ -630,6 +735,8 @@ const Dashboard = ({}: DashboardProps) => {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             setMapInteractionValue(() => {
+              console.log(4);
+              console.log("POS: ", window.innerWidth, window.innerHeight);
               // const translateLeft =
               //   (XOFFSET - originalNode.offsetLeft) * oldValue.scale;
               // const translateTop =
@@ -643,12 +750,13 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
+            console.log("RECURSIVE");
             scrollToNode(nodeId);
           }
         }, 400);
       }
     },
-    [scrollToNodeInitialized]
+    [graph.nodes, scrollToNodeInitialized]
   );
 
   // DEPRECATED: LOAD USER NODES, check new improvement flow, please
@@ -1088,6 +1196,7 @@ const Dashboard = ({}: DashboardProps) => {
             batch.set(doc(userNodeLogRef), userNodeLogData);
           }
           // await firebase.commitBatch();
+
           await batch.commit();
           let oldNodes = { ...graph.nodes };
           let oldEdges = { ...graph.edges };
@@ -1368,12 +1477,12 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
 
           await batch.commit();
-          scrollToNode(nodeId);
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+            scrollToNode(nodeId);
             // setSelectedNode(nodeId);
-          }, 400);
+          }, 750);
         } catch (err) {
           console.error(err);
         }
@@ -2957,6 +3066,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   const edgeIds = Object.keys(graph.edges);
 
+  // const navigateWhenNotScrolling = useCallback(
+  //   newMapInteractionValue => {
+  //     if (!scrollToNodeInitialized) {
+  //       return setMapInteractionValue(newMapInteractionValue);
+  //     }
+  //   },
+  //   [scrollToNodeInitialized]
+  // );
   return (
     <div className="MapContainer">
       {settings.theme === "Dark" && (
@@ -3105,7 +3222,7 @@ const Dashboard = ({}: DashboardProps) => {
           >
             <Box sx={{ border: "dashed 1px royalBlue" }}>
               <Typography>Queue Workers</Typography>
-              {queue.map(cur => ` 👷‍♂️ ${cur.height} `)}
+              {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
             </Box>
 
             <Box sx={{ float: "right" }}>
@@ -3125,10 +3242,15 @@ const Dashboard = ({}: DashboardProps) => {
             className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
             onMouseOver={mapContentMouseOver}
           >
-            <MapInteractionCSS textIsHovered={mapHovered} /*identifier={'xdf'}*/>
+            <MapInteractionCSS
+              textIsHovered={mapHovered}
+              /*identifier={'xdf'}*/
+              // value={mapInteractionValue}
+              // onChange={navigateWhenNotScrolling}
+            >
               {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
-              <NodesList
+              <MemoizedNodeList
                 nodes={graph.nodes}
                 bookmark={bookmark}
                 markStudied={markStudied}

@@ -5,6 +5,8 @@ import Box from "@mui/material/Box";
 import dynamic from "next/dynamic";
 import React, { ComponentType, FC, ReactNode, useState } from "react";
 
+import { useAuth } from "@/context/AuthContext";
+
 import AppHeaderNavbar from "./AppHeaderNavbar";
 import AppMenuMovil from "./AppMenuMovil";
 import FeedbackForm from "./FeedbackForm";
@@ -27,6 +29,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
   const [showMenu, setShowMenu] = useState(false);
   const onCloseMenu = () => setShowMenu(false);
   const onShowMenu = () => setShowMenu(true);
+  const [{ isAuthenticated }] = useAuth();
 
   const onSendFeedback = () => {
     setShowMenu(false);
@@ -36,7 +39,13 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
   return (
     <>
       <Head title={title} description={description} />
-      <AppHeaderNavbar showMenu={showMenu} onCloseMenu={onCloseMenu} onShowMenu={onShowMenu} showSearch={showSearch} />
+      <AppHeaderNavbar
+        showMenu={showMenu}
+        onCloseMenu={onCloseMenu}
+        onShowMenu={onShowMenu}
+        showSearch={showSearch}
+        isSignedIn={isAuthenticated}
+      />
       {showMenu && <AppMenuMovil onSendFeedback={onSendFeedback} />}
       <Box
         component="main"

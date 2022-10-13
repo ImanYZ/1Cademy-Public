@@ -1,10 +1,14 @@
-import { admin } from "@/lib/firestoreServer/admin";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.config";
+
+import { admin } from "@/lib/firestoreServer/admin";
 initFirebaseClientSDK();
 
 import { faker } from "@faker-js/faker";
 import HttpMock from "node-mocks-http";
+import { createCredit } from "testUtils/fakers/credit";
+import { createReputationPoints } from "testUtils/fakers/reputation-point";
+import { createUserNode } from "testUtils/fakers/userNode";
 import { TypesenseMock } from "testUtils/typesenseMocks";
 import NodeTSSchema from "testUtils/typesenseMocks/nodes.schema";
 
@@ -13,9 +17,6 @@ import { convertNodeToTypeSchema, createNode, getDefaultNode } from "../../../te
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";
-import { createCredit } from "testUtils/fakers/credit";
-import { createReputationPoints } from "testUtils/fakers/reputation-point";
-import { createUserNode } from "testUtils/fakers/userNode";
 
 describe("POST /api/searchNodesInNotebook", () => {
   let accessToken: string = "";
@@ -46,8 +47,8 @@ describe("POST /api/searchNodesInNotebook", () => {
       user: users[0],
       node: nodes[0],
       isStudied: true,
-      correct: true
-    })
+      correct: true,
+    }),
   ];
 
   const auth = admin.auth();
@@ -62,20 +63,28 @@ describe("POST /api/searchNodesInNotebook", () => {
     "nodes"
   );
   const collects = [
-    usersCollection, nodesCollection, nodesTSCollection,
+    usersCollection,
+    nodesCollection,
+    nodesTSCollection,
     new MockData(userNodes, "userNodes"),
-    new MockData([
-      createCredit({
-        credits: 100,
-        tag: nodes[0],
-      }),
-    ], "credits"),
-    new MockData([
-      createReputationPoints({
-        tag: nodes[0],
-        user: users[0],
-      }),
-    ], "reputations")
+    new MockData(
+      [
+        createCredit({
+          credits: 100,
+          tag: nodes[0],
+        }),
+      ],
+      "credits"
+    ),
+    new MockData(
+      [
+        createReputationPoints({
+          tag: nodes[0],
+          user: users[0],
+        }),
+      ],
+      "reputations"
+    ),
   ];
 
   beforeEach(async () => {
@@ -100,7 +109,7 @@ describe("POST /api/searchNodesInNotebook", () => {
     const req: any = HttpMock.createRequest({
       method: "POST",
       headers: {
-        authorization: "Bearer " + accessToken
+        authorization: "Bearer " + accessToken,
       },
       body: { q: nodes[0].title },
     });

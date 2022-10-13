@@ -177,6 +177,20 @@ export function getThemedComponents(theme: Theme): {
           },
         ],
       },
+      // MuiAutocomplete: {
+      //   styleOverrides: {
+      //     root: {
+      //       "&": { color: "blue", background: "red" },
+      //       "&.MuiInputLabel": {
+      //         color: theme.palette.mode === "light" ? common.darkGrayBackground : common.white,
+      //       },
+      //       // ".Mui-focuced": {
+      //       //   color: theme.palette.mode === "light" ? common.darkGrayBackground : common.white,
+      //       // },
+      //       // color: theme.palette.mode === "light" ? common.darkGrayBackground : common.white,
+      //     },
+      //   },
+      // },
       MuiCardContent: {
         styleOverrides: {
           root: {
@@ -225,6 +239,13 @@ export function getThemedComponents(theme: Theme): {
           },
         },
       },
+      // MuiInputLabel: {
+      //   styleOverrides: {
+      //     root: {
+      //       color: theme.palette.mode === "dark" ? "red" : "blue",
+      //     },
+      //   },
+      // },
       MuiTab: {
         styleOverrides: {
           root: {
