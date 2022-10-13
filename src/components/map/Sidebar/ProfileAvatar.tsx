@@ -1,9 +1,9 @@
 import { Box } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
 import { postImageWithToken, postWithToken } from "../../../lib/mapApi";
 import { imageLoaded } from "../../../lib/utils/utils";
-
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
