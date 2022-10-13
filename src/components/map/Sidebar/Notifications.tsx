@@ -219,7 +219,7 @@ const Notifications = (props: NotificationsProps) => {
             </Box>
           )}
           {uncheckedNotifications.length > 0 && (
-            <>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <div id="MarkAllRead">
                 <MemoizedMetaButton onClick={() => checkAllNotification()}>
                   <div id="MarkAllReadButton">
@@ -234,7 +234,7 @@ const Notifications = (props: NotificationsProps) => {
                 openLinkedNode={props.openLinkedNode}
                 checked={false}
               />
-            </>
+            </Box>
           )}
         </Box>
       ),

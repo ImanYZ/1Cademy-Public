@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -61,16 +62,17 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
   }, [getBookmarksProcessed, lastIndex]);
 
   return (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       {getBookmarksProcessed()
         .slice(0, lastIndex)
         .map((node: any) => (
-          <li
+          <Paper
+            elevation={3}
             className="CollapsedProposal collection-item"
             // CHECK: I changed: node.id to node.userNodeId
             key={`node${node.userNodeId}`}
             onClick={() => openLinkedNode(node.node)}
-            style={{ listStyle: "none", padding: "10px", borderBottom: "solid 1px white" }}
+            style={{ listStyle: "none", padding: "10px" }}
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
               <NodeTypeIcon nodeType={node.nodeType} sx={{ fontSize: "16px" }} />
@@ -113,7 +115,7 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             <div className="SearchResultTitle">
               <Editor readOnly={true} setValue={doNothing} value={node.title} label="" />
             </div>
-          </li>
+          </Paper>
         ))}
       {getBookmarksProcessed().length > lastIndex && (
         <div id="ContinueButton">
@@ -130,6 +132,6 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
           </MemoizedMetaButton>
         </div>
       )}
-    </>
+    </Box>
   );
 };
