@@ -12,6 +12,7 @@ const handler = nextConnect({
 });
 
 const uploader = multer({
+  storage: multer.memoryStorage(),
   limits: {
     fieldNameSize: 1024, // 1 KB
     fileSize: 1048576, // 1MB
