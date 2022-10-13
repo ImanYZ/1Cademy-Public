@@ -163,6 +163,13 @@ export type ResponseAutocompleteTags = {
   results?: string[];
   errorMessage?: string;
 };
+
+export type ResponseUploadImage = {
+  imageUrl?: any;
+  message?: string;
+  errorMessage?: string;
+};
+
 export type ResponseAutocompleteNodes = {
   results?: string[];
   errorMessage?: string;
