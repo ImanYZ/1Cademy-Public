@@ -2209,9 +2209,9 @@ button.MuiTab-textColorInherit:focus {
   max-width: 100px;
 }
 
-#recentNodesList svg {
+/* #recentNodesList svg {
   color: #ffffff;
-}
+} */
 
 #recentNodesList .MuiSelect-root {
   padding: 7px 27px 7px 10px;
@@ -2226,7 +2226,7 @@ button.MuiTab-textColorInherit:focus {
   font-family: Roboto;
   font-size: 14px;
   line-height: 16px;
-  color: #ffffff;
+  /* color: #ffffff; */
 }
 
 .searchCheckbox svg {
@@ -2248,7 +2248,7 @@ button.MuiTab-textColorInherit:focus {
 
 .searchIcon svg {
   font-size: 16px;
-  color: #ffffff;
+  /* color: #ffffff; */
   margin-right: 0px;
   margin-bottom: -2px;
 }
