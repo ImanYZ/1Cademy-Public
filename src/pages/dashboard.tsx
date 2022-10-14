@@ -2240,6 +2240,7 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenRecentNodes(false);
     setOpenTrends(false);
     setOpenMedia(false);
+    setOpenProposal("");
     if (
       nodeBookState.selectedNode &&
       nodeBookState.selectedNode !== "" &&

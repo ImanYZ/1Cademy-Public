@@ -89,7 +89,6 @@ const ProposalsList = (props: ProposalsListProps) => {
                 " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
             }
           }
-          // console.warn("CHECK THIS PLEASE, WHERE IS USED");
           return (
             <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
               {/* <UserHeader imageUrl={proposal.imageUrl} /> */}

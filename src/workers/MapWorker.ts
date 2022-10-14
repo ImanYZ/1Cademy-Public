@@ -136,7 +136,7 @@ const layoutHandler = (
     // const toNode = g.node(e.w) as any;
     const fromNode = oldNodes[e.v];
     const toNode = oldNodes[e.w];
-    console.log("[w]", { e, from: fromNode.node, to: toNode.node });
+
     if (
       "left" in fromNode &&
       "top" in fromNode &&
@@ -150,7 +150,7 @@ const layoutHandler = (
       const newToX = toNode.left;
       const newToY = toNode.top + Math.floor(toNode.height / 2);
       const thisEdge = oldEdges[e.v + "-" + e.w];
-      console.log("[w]", 1);
+
       if (
         !("fromX" in thisEdge) ||
         !("fromY" in thisEdge) ||
@@ -161,7 +161,6 @@ const layoutHandler = (
         Math.abs(thisEdge.toX - newToX) >= MIN_CHANGE ||
         Math.abs(thisEdge.toY - newToY) >= MIN_CHANGE
       ) {
-        console.log("[w]", 2);
         const tmpEdge = { ...thisEdge, fromX: newFromX, fromY: newFromY, toX: newToX, toY: newToY };
         // oldEdges = setDagEdge(g, e.v, e.w, tmpEdge, oldEdges);
         oldEdges[e.v + "-" + e.w] = tmpEdge;
@@ -173,7 +172,7 @@ const layoutHandler = (
   // }
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
-  console.log(`--------------->> ⌚TIMER: ${endTimer - startTimer}ms`);
+  console.log(`⌚[Map Worker]: ${endTimer - startTimer}ms`);
   return { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
 };
 
