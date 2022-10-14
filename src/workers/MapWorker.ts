@@ -172,7 +172,7 @@ const layoutHandler = (
   // }
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
-  console.log(`--------------->> ⌚TIMER: ${endTimer - startTimer}ms`);
+  console.log(`⌚[Map Worker]: ${endTimer - startTimer}ms`);
   return { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
 };
 

@@ -198,7 +198,8 @@ const Node = ({
   const [reason, setReason] = useState("");
 
   const nodeRef = useRef(null);
-  const previousRef = useRef<number>(0);
+  const previousHeightRef = useRef<number>(0);
+  const previousTopRef = useRef<string>("0px");
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
 
@@ -210,10 +211,14 @@ const Node = ({
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
+        // console.log("entries", identifier, entries[0].target?.style?.top);
+
         const { blockSize } = entries[0].borderBoxSize[0];
+        const topPosition = (entries[0].target as any)?.style?.top;
         // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
-        const isSimilar = blockSize === previousRef.current;
-        previousRef.current = blockSize;
+        const isSimilar = blockSize === previousHeightRef.current && topPosition === previousTopRef.current;
+        previousHeightRef.current = blockSize;
+        previousTopRef.current = topPosition;
         if (isSimilar) return;
 
         changeNodeHight(identifier, blockSize);
@@ -429,7 +434,7 @@ const Node = ({
   if (!user) {
     return null;
   }
-  console.log(2, title);
+  // console.log(2, title);
   return (
     // const boxShadowCSS = boxShadowCSSGenerator(selectionType);
     <div

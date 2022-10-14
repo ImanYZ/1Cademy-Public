@@ -411,7 +411,7 @@ const Sidebar = (props: SidebarType) => {
     async (sidebarType: string) => {
       // console.log("------------------>> sidebarType", sidebarType, user);
       if (!user) return;
-      console.log("has user");
+      // console.log("has user");
       // console.log("In openSideBar");
       if (sidebarType === "PendingProposals") {
         props.setOpenPendingProposals(true);
@@ -426,10 +426,8 @@ const Sidebar = (props: SidebarType) => {
       } else if (sidebarType === "UserSettings") {
         props.setOpenToolbar(true);
       } else if (sidebarType === "Search") {
-        console.log("is search");
         props.setOpenSearch(true);
       } else if (sidebarType === "Bookmarks") {
-        console.log("is bookmarks");
         props.setOpenBookmarks(true);
       } else if (sidebarType === "RecentNodes") {
         props.setOpenRecentNodes(true);
