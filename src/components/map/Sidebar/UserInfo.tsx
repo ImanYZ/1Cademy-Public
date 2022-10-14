@@ -270,8 +270,8 @@ const UserInfo = (props: any) => {
   return (
     <>
       <div id="MiniUserPrifileHeader">
-        <div id="MiniUserPrifileAboveProfilePicture"></div>
-        <div id="MiniUserPrifileFullProfileLink"></div>
+        {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
+        <div id="MiniUserPrifileFullProfileLink"></div> */}
         <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
         <div id="MiniUserPrifileIdentity">
           <div id="MiniUserPrifileName">

@@ -1189,8 +1189,8 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   return !changingUsername ? (
     <>
       <div id="MiniUserPrifileHeader">
-        <div id="MiniUserPrifileAboveProfilePicture"></div>
-        <div id="MiniUserPrifileFullProfileLink"></div>
+        {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
+        <div id="MiniUserPrifileFullProfileLink"></div> */}
         <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
 
         <div id="MiniUserPrifileIdentity">
@@ -1198,10 +1198,10 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
           <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
           <div id="MiniUserPrifileTag">
             {/* <i className="material-icons grey-text">local_offer</i> */}
-            <LocalOfferIcon className="material-icons grey-text" />
+            <LocalOfferIcon className="material-icons grey-text" style={{ marginRight: "12px" }} />
             <span>{user.tag}</span>
           </div>
-          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "5px" }}>
+          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "10px" }}>
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
