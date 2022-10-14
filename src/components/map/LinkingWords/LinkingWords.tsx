@@ -185,7 +185,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         tooltipPosition="right"
                       >
                         {/* <i className="material-icons grey-text">delete_forever</i> */}
-                        <DeleteForeverIcon />
+                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                       </MemoizedMetaButton>
                     </div>
                   )}
