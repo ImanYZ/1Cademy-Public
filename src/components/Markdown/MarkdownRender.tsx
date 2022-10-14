@@ -1,6 +1,6 @@
 import "katex/dist/katex.min.css";
 
-import { Typography } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React, { FC } from "react";
 import ReactMarkdown from "react-markdown";
@@ -23,6 +23,10 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
         p: ({ ...props }) => (
           <Typography lineHeight={"inherit"} {...props} sx={{ p: "0px", wordBreak: "break-word", ...sx }} />
         ),
+        a: ({ ...props }) => {
+          console.log(props);
+          return <Link href={props.href}>{props.children}</Link>;
+        },
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
