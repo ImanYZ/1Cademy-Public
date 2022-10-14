@@ -1201,7 +1201,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
             <LocalOfferIcon className="material-icons grey-text" style={{ marginRight: "12px" }} />
             <span>{user.tag}</span>
           </div>
-          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "10px" }}>
+          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}

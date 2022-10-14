@@ -1300,12 +1300,12 @@ button.MuiTab-textColorInherit:focus {
   justify-content: flex-start;
   align-items: center;
   align-content: center;
-  gap: 16 px;
+  gap: 12px;
   height: 40px;
 }
 
 #MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
-  margin-left: 45px;
+  margin-left: 50px;
 }
 
 #MiniUserPrifilePointsContainer .MiniUserProfilePoints svg,
