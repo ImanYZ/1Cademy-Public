@@ -57,6 +57,7 @@ handler.post(async (req, res) => {
     });
   } catch (e: any) {
     console.log(e?.message, e?.trace);
+    console.log(e);
     res.status(500).json({
       message: e.message,
     });
