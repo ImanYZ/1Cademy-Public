@@ -2892,7 +2892,7 @@ const Dashboard = ({}: DashboardProps) => {
           //here builds de child proposal and draws it
           console.log("👶 typechild", 1);
           tempNodes.add(newNodeId);
-          const newChildNode: FullNodeData & { unaccepted: boolean } = {
+          const newChildNode: any = {
             unaccepted: true,
             isStudied: false,
             bookmarked: false,
