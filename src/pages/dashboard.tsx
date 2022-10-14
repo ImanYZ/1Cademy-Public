@@ -943,6 +943,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.chosenNode.id,
                 title: chosenNodeObj.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (!(nodeBookState.chosenNode.id in changedNodes)) {
@@ -954,6 +955,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.choosingNode.id,
                 title: thisNode.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (removedParents.includes(nodeBookState.chosenNode.id)) {
@@ -980,6 +982,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.chosenNode.id,
                 title: chosenNodeObj.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (!(nodeBookState.chosenNode.id in changedNodes)) {
@@ -991,6 +994,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.choosingNode.id,
                 title: thisNode.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
@@ -2412,7 +2416,7 @@ const Dashboard = ({}: DashboardProps) => {
               node: child.node,
               title: child.title,
               label: child.label,
-              // type: child.nodeType, // CHECK: I commented this
+              type: child.type,
             });
           }
           newNode.children = newChildren;
@@ -2422,7 +2426,7 @@ const Dashboard = ({}: DashboardProps) => {
               node: parent.node,
               title: parent.title,
               label: parent.label,
-              // type: parent.nodeType, // CHECK: I commented this
+              type: parent.type,
             });
           }
           newNode.parents = newParents;

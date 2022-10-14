@@ -97,7 +97,7 @@ const Proposals = (props: ProposalsProps) => {
           />
         </ul>
       ) : (
-        <div style={{ width: "100%", border: "solid", display: "flex", justifyContent: "center", padding: "20px" }}>
+        <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
           <CircularProgress />
         </div>
       ),
@@ -121,7 +121,7 @@ const Proposals = (props: ProposalsProps) => {
           />
         </ul>
       ) : (
-        <div style={{ width: "100%", border: "solid", display: "flex", justifyContent: "center", padding: "20px" }}>
+        <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
           <CircularProgress />
         </div>
       ),
