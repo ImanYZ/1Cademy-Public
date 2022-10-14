@@ -253,6 +253,13 @@ export function getThemedComponents(theme: Theme): {
           },
         },
       },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            background: theme.palette.mode === "dark" ? "#303134" : "#f0f0f0",
+          },
+        },
+      },
     },
   };
 }
