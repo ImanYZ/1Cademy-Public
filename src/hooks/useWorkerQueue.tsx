@@ -97,7 +97,7 @@ export const useWorkerQueue = ({
         setClusterNodes(oldClusterNodes);
 
         setGraph(({ nodes, edges }) => {
-          console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
+          // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];
@@ -153,7 +153,7 @@ export const useWorkerQueue = ({
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker]);
 
   const addTask = (newTask: Task) => {
-    console.log("addTask", newTask);
+    // console.log("addTask", newTask);
     // console.log("[queue]: add task\n", queue);
     setQueue(queue => [...queue, newTask]);
   };

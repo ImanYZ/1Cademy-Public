@@ -386,7 +386,7 @@ const Dashboard = ({}: DashboardProps) => {
                 // console.log("dont has", acu.newEdges);
                 // remove edges
                 const oldEdges = { ...acu.newEdges };
-                console.log(oldEdges);
+                // console.log(oldEdges);
                 Object.keys(oldEdges).forEach(key => {
                   if (key.includes(cur.node)) {
                     delete oldEdges[key];
@@ -440,7 +440,7 @@ const Dashboard = ({}: DashboardProps) => {
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
-        console.log("nodesData", nodesData);
+        console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
 
@@ -1853,7 +1853,7 @@ const Dashboard = ({}: DashboardProps) => {
         } else {
           setOpenPart(partType);
           if (user) {
-            console.log("userNodePartsLog: ", user?.uname);
+            // console.log("userNodePartsLog: ", user?.uname);
             const userNodePartsLogRef = collection(db, "userNodePartsLog");
             setDoc(doc(userNodePartsLogRef), {
               nodeId,
@@ -2169,7 +2169,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Sidebar Functions
 
   const closeSideBar = useMemoizedCallback(() => {
-    console.log("In closeSideBar");
+    console.log("[In closeSideBar]");
 
     if (!user) return;
 
@@ -2182,16 +2182,16 @@ const Dashboard = ({}: DashboardProps) => {
     // };
     // console.log("--------------------------<<< gg", gg());
     // debugger;
-    console.log("selectionType", nodeBookState);
-    console.log(
-      'nodeBookState.selectionType === "AcceptedProposals"',
-      nodeBookState.selectionType === "AcceptedProposals"
-    );
-    console.log('nodeBookState.selectionType === "Proposals"', nodeBookState.selectionType === "Proposals");
-    console.log(
-      "first",
-      nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
-    );
+    // console.log("selectionType", nodeBookState);
+    // console.log(
+    //   'nodeBookState.selectionType === "AcceptedProposals"',
+    //   nodeBookState.selectionType === "AcceptedProposals"
+    // );
+    // console.log('nodeBookState.selectionType === "Proposals"', nodeBookState.selectionType === "Proposals");
+    // console.log(
+    //   "first",
+    //   nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
+    // );
 
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
@@ -2200,7 +2200,7 @@ const Dashboard = ({}: DashboardProps) => {
     ) {
       reloadPermanentGraph();
     }
-    console.log("After reloadPermanentGraph");
+    // console.log("After reloadPermanentGraph");
     let sidebarType: any = nodeBookState.selectionType;
     if (openPendingProposals) {
       sidebarType = "PendingProposals";
@@ -2252,7 +2252,7 @@ const Dashboard = ({}: DashboardProps) => {
     ) {
       scrollToNode(nodeBookState.selectedNode);
     }
-    console.log("After scrollToNode");
+    // console.log("After scrollToNode");
     const userClosedSidebarLogRef = collection(db, "userClosedSidebarLog");
     // userClosedSidebarLogRef.set({
     //   uname: user.uname,
