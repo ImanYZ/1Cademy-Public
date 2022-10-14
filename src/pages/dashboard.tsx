@@ -2339,7 +2339,7 @@ const Dashboard = ({}: DashboardProps) => {
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       console.log("[SELECT_NODE]", nodeBookState.choosingNode);
-
+      console.log("chosenType", chosenType);
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           console.log("[select node]: will call reload permanent graph");
@@ -2364,7 +2364,10 @@ const Dashboard = ({}: DashboardProps) => {
           resetAddedRemovedParentsChildren();
           event.currentTarget.blur();
         } else {
-          console.log("[select node]: set NodeId");
+          console.log("[select node]: set NodeId", nodeType);
+
+          setOpenSearch(false);
+
           setSelectedNodeType(nodeType);
           nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
