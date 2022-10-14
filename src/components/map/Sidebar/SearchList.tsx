@@ -34,7 +34,7 @@ import {
 // import algoliasearch from "algoliasearch";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -132,6 +132,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   const [sortOption, setSortOption] = useState<SortValues>("DATE_MODIFIED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
+  const [search, setSearch] = useState<string>("");
   // useEffect(() => {
   //   setFilteredNodes((oFilteredNodes) => {
   //     const oldFilteredNodes = [];
@@ -246,7 +247,10 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   const handleChange = useCallback(
     (event: any) => {
       event.persist();
-      nodeBookDispatch({ type: "setSearchQuery", payload: event.target.value });
+      setSearch(event.target.value);
+      startTransition(() => {
+        nodeBookDispatch({ type: "setSearchQuery", payload: event.target.value });
+      });
       // setSearchQuery(event.target.value);
     },
     [nodeBookDispatch]
@@ -262,6 +266,14 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
     onSearch(1, sortOption, newSortDirection, nodeTypes);
   };
 
+  const onSearchEnter = useCallback(
+    (event: any) => {
+      if (event.charCode === 13) {
+        onSearch(1, sortOption, sortDirection, nodeTypes);
+      }
+    },
+    [nodeTypes, onSearch, sortDirection, sortOption]
+  );
   // useEffect(() => {
   //   onSearch();
   // }, [onSearch, sortDirection]);
@@ -421,7 +433,8 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             name="SearchQuery"
             type="text"
             onChange={handleChange}
-            value={nodeBookState.searchQuery}
+            value={search}
+            onKeyPress={onSearchEnter}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
