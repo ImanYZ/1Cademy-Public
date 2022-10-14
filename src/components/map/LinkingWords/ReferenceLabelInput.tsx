@@ -17,7 +17,7 @@ export const ReferenceLabelInput = ({
 }: ReferenceLabelInputProps) => {
   const [labelCopy, setLabelCopy] = useState(reference.label);
 
-  const onChange = e => {
+  const onChange = (e: any) => {
     setLabelCopy(e.target.value);
     startTransition(() => referenceLabelChangeHandler(e.target.value));
   };
