@@ -132,7 +132,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   const [sortOption, setSortOption] = useState<SortValues>("DATE_MODIFIED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
   // useEffect(() => {
   //   setFilteredNodes((oFilteredNodes) => {
   //     const oldFilteredNodes = [];

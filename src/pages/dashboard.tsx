@@ -268,64 +268,64 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   // called after first time map is rendered
-  // useEffect(() => {
-  //   window.location.hash = "no-back-button";
+  useEffect(() => {
+    window.location.hash = "no-back-button";
 
-  //   // Again because Google Chrome doesn't insert
-  //   // the first hash into the history
-  //   window.location.hash = "Again-No-back-button";
+    // Again because Google Chrome doesn't insert
+    // the first hash into the history
+    window.location.hash = "Again-No-back-button";
 
-  //   window.onhashchange = function () {
-  //     window.location.hash = "no-back-button";
-  //   };
+    window.onhashchange = function () {
+      window.location.hash = "no-back-button";
+    };
 
-  //   window.onbeforeunload = function (e) {
-  //     e = e || window.event;
+    window.onbeforeunload = function (e) {
+      e = e || window.event;
 
-  //     // For IE and Firefox prior to version 4
-  //     if (e) {
-  //       e.returnValue = "Do you want to close 1Cademy?";
-  //     }
+      // For IE and Firefox prior to version 4
+      if (e) {
+        e.returnValue = "Do you want to close 1Cademy?";
+      }
 
-  //     // For Safari
-  //     return "Do you want to close 1Cademy?";
-  //   };
+      // For Safari
+      return "Do you want to close 1Cademy?";
+    };
 
-  //   // movement through map using keyboard arrow keys
-  //   document.addEventListener("keydown", event => {
-  //     if (!document.activeElement) return;
-  //     if (
-  //       // mapHovered &&
-  //       getSelectionText() === "" &&
-  //       document.activeElement.tagName !== "TEXTAREA" &&
-  //       document.activeElement.tagName !== "INPUT" &&
-  //       !arrowKeyMapTransitionInitialized
-  //     ) {
-  //       arrowKeyMapTransitionInitialized = true;
-  //       setMapInteractionValue(oldValue => {
-  //         const translationValue = { ...oldValue.translation };
-  //         switch (event.key) {
-  //           case "ArrowLeft":
-  //             translationValue.x += 10;
-  //             break;
-  //           case "ArrowRight":
-  //             translationValue.x -= 10;
-  //             break;
-  //           case "ArrowUp":
-  //             translationValue.y += 10;
-  //             break;
-  //           case "ArrowDown":
-  //             translationValue.y -= 10;
-  //             break;
-  //         }
-  //         setTimeout(() => {
-  //           arrowKeyMapTransitionInitialized = false;
-  //         }, 10);
-  //         return { scale: oldValue.scale, translation: translationValue };
-  //       });
-  //     }
-  //   });
-  // }, []);
+    // movement through map using keyboard arrow keys
+    // document.addEventListener("keydown", event => {
+    //   if (!document.activeElement) return;
+    //   if (
+    //     // mapHovered &&
+    //     getSelectionText() === "" &&
+    //     document.activeElement.tagName !== "TEXTAREA" &&
+    //     document.activeElement.tagName !== "INPUT" &&
+    //     !arrowKeyMapTransitionInitialized
+    //   ) {
+    //     arrowKeyMapTransitionInitialized = true;
+    //     setMapInteractionValue(oldValue => {
+    //       const translationValue = { ...oldValue.translation };
+    //       switch (event.key) {
+    //         case "ArrowLeft":
+    //           translationValue.x += 10;
+    //           break;
+    //         case "ArrowRight":
+    //           translationValue.x -= 10;
+    //           break;
+    //         case "ArrowUp":
+    //           translationValue.y += 10;
+    //           break;
+    //         case "ArrowDown":
+    //           translationValue.y -= 10;
+    //           break;
+    //       }
+    //       setTimeout(() => {
+    //         arrowKeyMapTransitionInitialized = false;
+    //       }, 10);
+    //       return { scale: oldValue.scale, translation: translationValue };
+    //     });
+    //   }
+    // });
+  }, []);
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
@@ -3230,7 +3230,7 @@ const Dashboard = ({}: DashboardProps) => {
             width: "100vw",
             height: "100vh",
             position: "fixed",
-            filter: "brightness(0.25)",
+            // filter: "brightness(0.25)",
             zIndex: -2,
           }}
         >
@@ -3244,7 +3244,7 @@ const Dashboard = ({}: DashboardProps) => {
             width: "100vw",
             height: "100vh",
             position: "fixed",
-            filter: "brightness(1.4)",
+            // filter: "brightness(1.4)",
             zIndex: -2,
           }}
         >
@@ -3395,7 +3395,7 @@ const Dashboard = ({}: DashboardProps) => {
               // value={mapInteractionValue}
               // onChange={navigateWhenNotScrolling}
             >
-              1{showClusters && <ClustersList clusterNodes={clusterNodes} />}
+              {showClusters && <ClustersList clusterNodes={clusterNodes} />}
               <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <MemoizedNodeList
                 nodes={graph.nodes}

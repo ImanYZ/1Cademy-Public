@@ -31,7 +31,6 @@ const FirebaseUserManagementPage: NextPage<Props> = ({ mode, hasErrors, email })
           width: "100vw",
           height: "100vh",
           position: "fixed",
-          filter: "brightness(0.25)",
           zIndex: -2,
         }}
       >

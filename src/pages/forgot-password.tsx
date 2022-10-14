@@ -65,7 +65,7 @@ const ForgotPasswordPage: NextPage = () => {
           width: "100vw",
           height: "100vh",
           position: "fixed",
-          filter: "brightness(0.25)",
+          // filter: "brightness(0.25)",
           zIndex: -2,
         }}
       >
