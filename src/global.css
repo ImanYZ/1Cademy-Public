@@ -747,8 +747,10 @@
 }
 
 #ContinueButton {
-  margin-left: 130px;
-  margin-bottom: 25px;
+  /* margin-left: 130px;
+  margin-bottom: 25px; */
+  margin: auto;
+  padding: 10px;
 }
 
 .NodeChangeTime {

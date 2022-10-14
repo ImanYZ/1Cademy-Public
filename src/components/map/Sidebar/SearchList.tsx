@@ -609,7 +609,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          padding: "0px",
+          padding: "10px",
           margin: "0px",
           overflow: "hidden",
         }}

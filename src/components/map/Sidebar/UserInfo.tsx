@@ -109,7 +109,7 @@ const UserInfo = (props: any) => {
           {
             title: "Proposals",
             content: (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}>
                 <div className="ChartTitle">Proposals in chronological order</div>
                 {proposals.slice(0, lastIndex).map((proposal, idx) => {
                   return (
