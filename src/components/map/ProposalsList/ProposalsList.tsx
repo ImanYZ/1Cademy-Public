@@ -75,9 +75,7 @@ const ProposalsList = (props: ProposalsListProps) => {
   return !props.isRetrieving ? (
     props.proposals.map((proposal: any, proposalIdx: number) => {
       const proposalSummaries = proposalSummariesGenerator(proposal);
-      {
-        console.log("proposalSummaries", proposalSummaries);
-      }
+
       if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
         if (props.openProposal === proposal.id) {
           let adminTooltip = "# of 1Admins who have awarded this proposal.";
@@ -91,7 +89,7 @@ const ProposalsList = (props: ProposalsListProps) => {
                 " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
             }
           }
-          console.warn("CHECK THIS PLEASE, WHERE IS USED");
+          // console.warn("CHECK THIS PLEASE, WHERE IS USED");
           return (
             <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
               {/* <UserHeader imageUrl={proposal.imageUrl} /> */}

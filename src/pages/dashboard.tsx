@@ -2873,15 +2873,19 @@ const Dashboard = ({}: DashboardProps) => {
       event.preventDefault();
       setOpenProposal(proposal.id);
       reloadPermanentGraph();
+      console.log("----------->> beafore graph");
+      const newNodeId = newId();
       setGraph(({ nodes: oldNodes, edges }) => {
+        console.log("----------->> after graph");
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+        console.log("proposal", proposal);
         if ("childType" in proposal && proposal.childType !== "") {
           //here builds de child proposal and draws it
-          const newNodeId = newId();
+          console.log("👶 typechild", 1);
           tempNodes.add(newNodeId);
           const newChildNode = {
             unaccepted: true,
@@ -2908,14 +2912,17 @@ const Dashboard = ({}: DashboardProps) => {
             nodeType: proposal.childType,
             parents: proposal.parents,
             comments: 0,
+            tagIds: proposal.tagIds,
             tags: proposal.tags,
+            referenceIds: proposal.referenceIds,
+            referenceLabels: proposal.referenceLabels,
+            references: proposal.references,
             title: proposal.title,
             wrongs: 0,
             corrects: 1,
             content: proposal.content,
             nodeImage: proposal.nodeImage,
             studied: 1,
-            references: proposal.references,
             choices: [],
             // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
             editable: false,
@@ -2924,9 +2931,17 @@ const Dashboard = ({}: DashboardProps) => {
           if (proposal.childType === "Question") {
             newChildNode.choices = proposal.choices;
           }
-          const newNodes = setDagNode(g.current, newNodeId, newChildNode, oldNodes, allTags, null);
-          const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
+          console.log("typechild", 2, newChildNode);
+          let newNodes = { ...oldNodes };
+          let newEdges = { ...edges };
+          const nodeN = g.current.node(newNodeId);
+          if (!nodeN) {
+            console.log("set dag Node", nodeN);
+            newNodes = setDagNode(g.current, newNodeId, newChildNode, newNodes, allTags, null);
+            newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...newEdges });
+          }
           scrollToNode(newNodeId);
+          console.log("typechild", 3, { newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
           // return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
           //   setEdges(oldEdges => {
@@ -2935,6 +2950,8 @@ const Dashboard = ({}: DashboardProps) => {
           //   setMapChanged(true);
           // });
         } else {
+          console.log("🎃 improvments proposal", { proposal });
+          // improvments
           //here builds the proposal
           const oldEdges = compareAndUpdateNodeLinks(g.current, thisNode, nodeBookState.selectedNode, proposal, edges);
           // setEdges(oldEdges => {
