@@ -1,9 +1,7 @@
 import nextConnect from "next-connect";
 import multer from "multer";
-
-import { app } from "../../lib/firestoreServer/admin";
+import admin from "firebase-admin";
 import fbAuth from "src/middlewares/fbAuth";
-import { storage } from "firebase-admin";
 
 const handler = nextConnect({
   onNoMatch(req: any, res: any) {
@@ -19,7 +17,7 @@ const uploader = multer({
   },
 });
 
-const bucket = storage(app).bucket(process.env.NEXT_PUBLIC_STORAGE_BUCKET);
+const bucket = admin.storage().bucket(process.env.NEXT_PUBLIC_STORAGE_BUCKET);
 
 handler.use(uploader.single("file"));
 
