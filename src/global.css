@@ -1300,7 +1300,7 @@ button.MuiTab-textColorInherit:focus {
   justify-content: flex-start;
   align-items: center;
   align-content: center;
-  gap: 12px;
+  /* gap: 12px; */
   height: 40px;
 }
 

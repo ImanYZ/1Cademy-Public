@@ -6,11 +6,11 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
+// import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { useAuth } from "../../../context/AuthContext";
 import { useNodeBook } from "../../../context/NodeBookContext";
 import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
@@ -280,12 +280,12 @@ const UserInfo = (props: any) => {
               : nodeBookState.selectedUser.fullName}
           </div>
           {sUserObj && (
-            <>
-              <div id="MiniUserPrifiletag">
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <Box sx={{ display: "flex", gap: "8px" }}>
                 <LocalOfferIcon className="material-icons grey-text" />
                 <span>{sUserObj.tag}</span>
-              </div>
-              <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "5px" }}>
+              </Box>
+              <Box sx={{ display: "flex", gap: "8px" }}>
                 {/* <img src={sUserObj.instLogo} alt={sUserObj.deInstit + " logo"} width="25px" /> */}
                 <OptimizedAvatar
                   imageUrl={sUserObj.instLogo}
@@ -294,12 +294,12 @@ const UserInfo = (props: any) => {
                   renderAsAvatar={false}
                 />
                 <span>{sUserObj.deInstit}</span>
-              </div>
-              <div id="MiniUserPrifileTotalPoints">
+              </Box>
+              <Box sx={{ display: "flex", gap: "8px" }}>
                 <DoneIcon className="material-icons DoneIcon green-text" />
                 <span>{shortenNumber(sUserObj.totalPoints, 2, false)}</span>
-              </div>
-            </>
+              </Box>
+            </Box>
           )}
         </div>
       </div>
@@ -356,7 +356,8 @@ const UserInfo = (props: any) => {
           <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems} />
         ) : (
           <div className="CenterredLoadingImageSidebar">
-            <img className="CenterredLoadingImage" src={LoadingImg.src} alt="Loading" />
+            {/* <img className="CenterredLoadingImage" src={LoadingImg.src} alt="Loading" /> */}
+            <CircularProgress />
           </div>
         )}
       </div>
