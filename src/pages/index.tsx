@@ -43,6 +43,7 @@ const HomePage: NextPageWithLayout = () => {
   const [sortedByType, setSortedByType] = useState<SortTypeWindowOption>(
     getDefaultSortedByType({ mostRecent, upvotes })
   );
+  const [openAdvanceFilter, setOpenAdvanceFilter] = useState(false);
 
   const homeSearchRef = useRef<HomeSearchRef>(null);
   const homeFilterRef = useRef<HomeFilterRef>(null);
@@ -135,16 +136,23 @@ const HomePage: NextPageWithLayout = () => {
   return (
     <ThemeProvider theme={brandingLightTheme}>
       <PagesNavbar showSearch={!isIntersecting}>
-        <HomeSearch sx={{ mt: "var(--navbar-height)" }} onSearch={handleSearch} ref={homeSearchRef} />
+        <HomeSearch
+          sx={{ mt: "var(--navbar-height)" }}
+          onSearch={handleSearch}
+          ref={homeSearchRef}
+          setOpenAdvanceFilter={setOpenAdvanceFilter}
+        />
         <Container sx={{ py: 10 }}>
-          <HomeFilter
-            onTagsChange={handleTagsChange}
-            onInstitutionsChange={handleInstitutionsChange}
-            onContributorsChange={handleContributorsChange}
-            onNodeTypesChange={handleNodeTypesChange}
-            onReferencesChange={handleReferencesChange}
-            ref={homeFilterRef}
-          ></HomeFilter>
+          {openAdvanceFilter && (
+            <HomeFilter
+              onTagsChange={handleTagsChange}
+              onInstitutionsChange={handleInstitutionsChange}
+              onContributorsChange={handleContributorsChange}
+              onNodeTypesChange={handleNodeTypesChange}
+              onReferencesChange={handleReferencesChange}
+              ref={homeFilterRef}
+            ></HomeFilter>
+          )}
           <SortByFilters
             sortedByType={sortedByType}
             handleByType={handleByType}

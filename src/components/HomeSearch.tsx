@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SxProps, Theme } from "@mui/system";
 import Image from "next/image";
@@ -13,6 +14,7 @@ import Stats from "./Stats";
 type HomeSearchProps = {
   sx?: SxProps<Theme>;
   onSearch: (text: string) => void;
+  setOpenAdvanceFilter: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type HomeSearchRef = {
@@ -20,7 +22,7 @@ export type HomeSearchRef = {
   containerRef: MutableRefObject<HTMLDivElement | null>;
 };
 
-const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch }, ref) => {
+const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch, setOpenAdvanceFilter }, ref) => {
   const beginFiltersRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -33,6 +35,9 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
     containerRef,
   }));
 
+  const handleOpenFilter = () => {
+    setOpenAdvanceFilter(prev => !prev);
+  };
   return (
     <Box
       ref={beginFiltersRef}
@@ -75,8 +80,25 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch },
         >
           <Image src={logoHero} alt="1Cademy Logo" width="421px" height="130px" />
         </Box>
-        <Box ref={containerRef} sx={{ width: "100%", mt: { xs: 15, md: 5 } }}>
+        <Box ref={containerRef} sx={{ width: "100%", display: "flex", gap: "5px", mt: { xs: 15, md: 5 } }}>
           <SearchInput onSearch={onSearch}></SearchInput>
+          <Button
+            variant="contained"
+            onClick={handleOpenFilter}
+            sx={{
+              color: theme => theme.palette.common.black,
+              background: theme => theme.palette.common.white,
+              height: "55px",
+              fontSize: 16,
+              fontWeight: "700",
+              my: "auto",
+              paddingX: "30px",
+              borderRadius: 1,
+              textAlign: "center",
+            }}
+          >
+            ADVANCE
+          </Button>
         </Box>
         <Stats />
       </Box>
