@@ -1883,13 +1883,29 @@ const Dashboard = ({}: DashboardProps) => {
    * This will update reference label and will update the required node
    * without call sync or worker (thats good)
    */
+  // const referenceLabelChange = useCallback(
+  //   (event: any, nodeId: string, referenceIdx: number) => {
+  //     console.log("[REFERENCE_LABEL_CHANGE]", { event, nodeId, referenceIdx });
+  //     event.persist();
+  //     const thisNode = { ...graph.nodes[nodeId] };
+  //     let referenceLabelsCopy = [...thisNode.referenceLabels];
+  //     referenceLabelsCopy[referenceIdx] = event.target.value;
+  //     thisNode.referenceLabels = referenceLabelsCopy;
+  //     // setNodes({ ...nodes, [nodeId]: thisNode });
+  //     setGraph({
+  //       nodes: { ...graph.nodes, [nodeId]: thisNode },
+  //       edges: graph.edges,
+  //     });
+  //   },
+  //   [graph /*setNodeParts*/]
+  // );
   const referenceLabelChange = useCallback(
-    (event: any, nodeId: string, referenceIdx: number) => {
-      console.log("[REFERENCE_LABEL_CHANGE]", { event, nodeId, referenceIdx });
-      event.persist();
+    (newLabel: string, nodeId: string, referenceIdx: number) => {
+      console.log("[REFERENCE_LABEL_CHANGE]", { newLabel, nodeId, referenceIdx });
+      // event.persist();
       const thisNode = { ...graph.nodes[nodeId] };
       let referenceLabelsCopy = [...thisNode.referenceLabels];
-      referenceLabelsCopy[referenceIdx] = event.target.value;
+      referenceLabelsCopy[referenceIdx] = newLabel;
       thisNode.referenceLabels = referenceLabelsCopy;
       // setNodes({ ...nodes, [nodeId]: thisNode });
       setGraph({

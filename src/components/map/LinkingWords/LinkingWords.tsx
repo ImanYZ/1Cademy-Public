@@ -27,18 +27,16 @@ import LinkingButton from "./LinkingButton";
 import { ReferenceLabelInput } from "./ReferenceLabelInput";
 
 const separateURL = (text: string): [boolean, any] => {
-  console.log("separateURL", text);
+  // console.log("separateURL", text);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex);
   if (matches && matches.length > 0) {
     return [
       true,
       // eslint-disable-next-line react/jsx-key
-      <p>
-        <Link href={matches[0]} target="_blank" rel="noreferrer">
-          Open the URL in new tab.
-        </Link>
-      </p>,
+      <Link href={matches[0]} target="_blank" rel="noreferrer">
+        Open the URL in new tab.
+      </Link>,
     ];
   } else {
     return [false, text];
@@ -86,14 +84,19 @@ const LinkingWords = (props: LinkingWordsProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.chosenNode]);
 
+  // const referenceLabelChangeHandler = useCallback(
+  //   (idx: any) => {
+  //     return (event: any) => {
+  //       console.log("is called");
+  //       return props.referenceLabelChange(event, idx);
+  //     };
+  //   },
+  //   // TODO: check dependencies to remove eslint-disable-next-line
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [props.referenceLabelChange]
+  // );
   const referenceLabelChangeHandler = useCallback(
-    (idx: any) => {
-      return (event: any) => {
-        return props.referenceLabelChange(event, idx);
-      };
-    },
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    (newLabel: string, idx: number) => props.referenceLabelChange(newLabel, props.identifier, idx),
     [props.referenceLabelChange]
   );
 
@@ -215,6 +218,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     onClick={props.openLinkedNode}
                     // nodeID={props.identifier}
                     linkedNodeID={reference.node}
+                    // linkedNodeTitle={refTitle+(reference.label?':'+{reference.label}:'')}
                     linkedNodeTitle={refTitle}
                     linkedNodeType="reference"
                     iClassName="menu_book"
@@ -228,8 +232,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           id: props.identifier + "LinkTo" + reference.node + "Label",
                           name: props.identifier + "LinkTo" + reference.node + "Label",
                         }}
-                        referenceLabelChangeHandler={() => referenceLabelChangeHandler(idx)}
+                        referenceLabelChangeHandler={(newLabel: string) => referenceLabelChangeHandler(newLabel, idx)}
                         reference={reference}
+                        sx={{ mt: "10px" }}
                       />
                       {/* <TextField
                         key={props.identifier + "LinkTo" + reference.node + "Label"}

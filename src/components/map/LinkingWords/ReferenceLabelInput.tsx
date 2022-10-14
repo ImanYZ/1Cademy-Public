@@ -1,29 +1,39 @@
 import { TextField } from "@mui/material";
-import React, { useState } from "react";
+import { SxProps, Theme } from "@mui/system";
+import React, { startTransition, useState } from "react";
 
 type ReferenceLabelInputProps = {
   reference: any;
-  referenceLabelChangeHandler: any;
+  referenceLabelChangeHandler: (newLabel: string) => void;
   inputProperties: { id: string; name: string };
+  sx?: SxProps<Theme>;
 };
 
 export const ReferenceLabelInput = ({
   reference,
   referenceLabelChangeHandler,
   inputProperties,
+  sx,
 }: ReferenceLabelInputProps) => {
   const [labelCopy, setLabelCopy] = useState(reference.label);
 
+  const onChange = e => {
+    setLabelCopy(e.target.value);
+    startTransition(() => referenceLabelChangeHandler(e.target.value));
+  };
+
   return (
-    <TextField
-      id={inputProperties.id}
-      name={inputProperties.name}
-      type="text"
-      value={labelCopy}
-      onChange={e => setLabelCopy(e.target.value)}
-      onBlur={referenceLabelChangeHandler}
-      label="Enter page # or voice/video time"
-      size="small"
-    />
+    <>
+      <TextField
+        id={inputProperties.id}
+        name={inputProperties.name}
+        type="text"
+        value={labelCopy}
+        onChange={onChange}
+        label="Enter page # or voice/video time"
+        size="small"
+        sx={sx}
+      />
+    </>
   );
 };
