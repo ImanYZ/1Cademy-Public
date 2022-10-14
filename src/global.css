@@ -704,9 +704,9 @@
   scroll-behavior: smooth;
 }
 
-#SidebarBody .collection-item {
-  background: none;
-}
+/* #SidebarBody .collection-item {
+  background: #303134;
+} */
 /*
 #SidebarBody .collection-item:hover {
   background: rgba(128, 128, 128, 0.13);

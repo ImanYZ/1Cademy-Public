@@ -617,7 +617,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                 padding: "10px",
                 borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
                 cursor: "pointer",
-                background: settings.theme === "Dark" ? "#1f1f1f" : "#f0f0f0",
+                background: settings.theme === "Dark" ? "#303134" : "#f0f0f0",
               }}
             >
               <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
