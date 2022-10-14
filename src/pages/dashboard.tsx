@@ -707,12 +707,12 @@ const Dashboard = ({}: DashboardProps) => {
   // );
   const scrollToNode = useCallback(
     (nodeId: string) => {
-      console.log(1);
+      // console.log(1);
       // console.log(6);
       // console.log(7);
 
       if (!scrollToNodeInitialized) {
-        console.log(2);
+        // console.log(2);
 
         setTimeout(() => {
           const currentNode = graph.nodes[nodeId];
@@ -726,7 +726,7 @@ const Dashboard = ({}: DashboardProps) => {
             originalNode.offsetTop !== 0 &&
             currentNode?.height !== NODE_HEIGHT
           ) {
-            console.log(3);
+            // console.log(3);
 
             setScrollToNodeInitialized(true);
             setTimeout(() => {
@@ -735,8 +735,8 @@ const Dashboard = ({}: DashboardProps) => {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             setMapInteractionValue(() => {
-              console.log(4);
-              console.log("POS: ", window.innerWidth, window.innerHeight);
+              // console.log(4);
+              // console.log("POS: ", window.innerWidth, window.innerHeight);
               // const translateLeft =
               //   (XOFFSET - originalNode.offsetLeft) * oldValue.scale;
               // const translateTop =
@@ -750,7 +750,7 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
-            console.log("RECURSIVE");
+            // console.log("RECURSIVE");
             scrollToNode(nodeId);
           }
         }, 400);
@@ -2887,11 +2887,11 @@ const Dashboard = ({}: DashboardProps) => {
           //here builds de child proposal and draws it
           console.log("👶 typechild", 1);
           tempNodes.add(newNodeId);
-          const newChildNode = {
+          const newChildNode: FullNodeData & { unaccepted: boolean } = {
             unaccepted: true,
             isStudied: false,
             bookmarked: false,
-            id: newNodeId,
+            // id: newNodeId,
             correct: false,
             updatedAt: proposal.createdAt,
             open: true,
@@ -2927,19 +2927,34 @@ const Dashboard = ({}: DashboardProps) => {
             // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
             editable: false,
             width: NODE_WIDTH,
+            node: newNodeId,
           };
           if (proposal.childType === "Question") {
             newChildNode.choices = proposal.choices;
           }
           console.log("typechild", 2, newChildNode);
           let newNodes = { ...oldNodes };
-          let newEdges = { ...edges };
+          let newEdges: any = { ...edges };
           const nodeN = g.current.node(newNodeId);
+          // ------------------- this is required to simulate pure function
           if (!nodeN) {
             console.log("set dag Node", nodeN);
             newNodes = setDagNode(g.current, newNodeId, newChildNode, newNodes, allTags, null);
             newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...newEdges });
+          } else {
+            // add node
+            const newNode = copyNode(newChildNode);
+            newNodes[newNodeId] = newNode;
+
+            // add edge
+            const from = nodeBookState.selectedNode;
+            const to = newNodeId;
+            if (g.current.hasNode(from) && g.current.hasNode(to)) {
+              const edgeId = from + "-" + to;
+              newEdges[edgeId] = { label: "" };
+            }
           }
+          // << ----------------
           scrollToNode(newNodeId);
           console.log("typechild", 3, { newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
