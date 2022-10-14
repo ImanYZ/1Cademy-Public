@@ -1,6 +1,7 @@
 import CodeIcon from "@mui/icons-material/Code";
 import DoneIcon from "@mui/icons-material/Done";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
@@ -18,6 +19,7 @@ import { justADate } from "../../../lib/utils/justADate";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { NodeType } from "../../../types";
 import OptimizedAvatar from "../../OptimizedAvatar";
+import { MemoizedMetaButton } from "../MetaButton";
 import ProposalItem from "../ProposalsList/ProposalItem/ProposalItem";
 import RoundImage from "../RoundImage";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
@@ -35,6 +37,7 @@ const NODE_TYPE_ARRAY: NodeType[] = [
   "News",
   "Idea",
 ];
+const ELEMENTS_PER_PAGE = 13;
 
 const UserInfo = (props: any) => {
   // const firebase = useRecoilValue(firebaseState);
@@ -53,6 +56,7 @@ const UserInfo = (props: any) => {
   // // const [proposalsTaggedPerDay, setProposalsTaggedPerDay] = useState([]);
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [sUserObj, setSUserObj] = useState<any | null>(null);
+  const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
 
   useEffect(() => {
     // get institutions and update instLogo from setSUserObj
@@ -81,6 +85,14 @@ const UserInfo = (props: any) => {
     }
   }, [db, sUserObj]);
 
+  const loadOlderProposalsClick = useCallback(() => {
+    console.log("load");
+    if (lastIndex >= proposals.length) return;
+    setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
+  }, [lastIndex, proposals.length]);
+
+  console.log({ lastIndex });
+
   const tabsItems = useMemo(() => {
     return !user
       ? []
@@ -99,7 +111,7 @@ const UserInfo = (props: any) => {
             content: (
               <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div className="ChartTitle">Proposals in chronological order</div>
-                {proposals.map((proposal, idx) => {
+                {proposals.slice(0, lastIndex).map((proposal, idx) => {
                   return (
                     proposal.title && (
                       <ProposalItem
@@ -111,11 +123,27 @@ const UserInfo = (props: any) => {
                     )
                   );
                 })}
+                {/* pagination */}
+                {proposals.length > lastIndex && (
+                  <div id="ContinueButton" style={{ padding: "10px 0px" }}>
+                    <MemoizedMetaButton
+                      onClick={loadOlderProposalsClick}
+                      // tooltip={"Load older " + (props.updates ? "updated" : "studied") + " bookmarks."}
+                      // tooltipPosition="Right"
+                    >
+                      <>
+                        <ExpandMoreIcon className="material-icons grey-text" />
+                        Older Proposals
+                        <ExpandMoreIcon className="material-icons grey-text" />
+                      </>
+                    </MemoizedMetaButton>
+                  </div>
+                )}
               </Box>
             ),
           },
         ];
-  }, [proposals, proposalsPerDay, props.openLinkedNode, user]);
+  }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, props.openLinkedNode, settings.theme, user]);
 
   const fetchProposals = useCallback(async () => {
     if (!nodeBookState.selectedUser) return;
