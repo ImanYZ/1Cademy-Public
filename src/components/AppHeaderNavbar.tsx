@@ -1,6 +1,4 @@
 import CloseIcon from "@mui/icons-material/Close";
-import LoginIcon from "@mui/icons-material/Login";
-import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, IconButton, Tab, Tabs } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
@@ -139,19 +137,47 @@ const AppAppBar: FC<Props> = ({
           )}
 
           {isSignedIn ? (
-            <Tooltip title="Sign Out">
-              <IconButton onClick={handleSignout} sx={{ color: theme => theme.palette.common.white }}>
-                <LogoutIcon />
-                {/* Sign Out */}
-              </IconButton>
-            </Tooltip>
+            <LightTooltip title="Sign Out">
+              <Button
+                variant="outlined"
+                onClick={handleSignout}
+                sx={{
+                  color: theme => theme.palette.common.white,
+                  borderColor: theme => theme.palette.common.white,
+                  minWidth: "116px",
+                  display: { xs: "none", md: "block" },
+                  fontSize: 16,
+                  fontWeight: "700",
+
+                  my: "auto",
+                  borderRadius: 40,
+                  textAlign: "center",
+                  width: "152px",
+                }}
+              >
+                SIGN OUT
+              </Button>
+            </LightTooltip>
           ) : (
-            <Tooltip title="Sign In">
-              <IconButton onClick={onRedirectToSignin} sx={{ color: theme => theme.palette.common.white }}>
-                <LoginIcon />
-                {/* Sign In */}
-              </IconButton>
-            </Tooltip>
+            <LightTooltip title="Sign In/Out">
+              <Button
+                variant="outlined"
+                onClick={onRedirectToSignin}
+                sx={{
+                  color: theme => theme.palette.common.white,
+                  borderColor: theme => theme.palette.common.white,
+                  minWidth: "120px",
+                  display: { xs: "none", md: "block" },
+                  fontSize: 16,
+                  fontWeight: "700",
+                  my: "auto",
+                  borderRadius: 40,
+                  textAlign: "center",
+                }}
+              >
+                SIGN IN/UP
+              </Button>
+            </LightTooltip>
           )}
 
           {showMenu && (
