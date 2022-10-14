@@ -78,7 +78,7 @@ const NodesList = ({
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
-  console.log(1, nodes);
+  // console.log(1, nodes);
   return (
     <>
       {Object.keys(nodes).map(nId => {

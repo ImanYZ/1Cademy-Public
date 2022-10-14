@@ -386,7 +386,7 @@ const Dashboard = ({}: DashboardProps) => {
                 // console.log("dont has", acu.newEdges);
                 // remove edges
                 const oldEdges = { ...acu.newEdges };
-                console.log(oldEdges);
+                // console.log(oldEdges);
                 Object.keys(oldEdges).forEach(key => {
                   if (key.includes(cur.node)) {
                     delete oldEdges[key];
@@ -440,7 +440,7 @@ const Dashboard = ({}: DashboardProps) => {
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
-        console.log("nodesData", nodesData);
+        console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
 
@@ -707,12 +707,12 @@ const Dashboard = ({}: DashboardProps) => {
   // );
   const scrollToNode = useCallback(
     (nodeId: string) => {
-      console.log(1);
+      // console.log(1);
       // console.log(6);
       // console.log(7);
 
       if (!scrollToNodeInitialized) {
-        console.log(2);
+        // console.log(2);
 
         setTimeout(() => {
           const currentNode = graph.nodes[nodeId];
@@ -726,7 +726,7 @@ const Dashboard = ({}: DashboardProps) => {
             originalNode.offsetTop !== 0 &&
             currentNode?.height !== NODE_HEIGHT
           ) {
-            console.log(3);
+            // console.log(3);
 
             setScrollToNodeInitialized(true);
             setTimeout(() => {
@@ -735,8 +735,8 @@ const Dashboard = ({}: DashboardProps) => {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             setMapInteractionValue(() => {
-              console.log(4);
-              console.log("POS: ", window.innerWidth, window.innerHeight);
+              // console.log(4);
+              // console.log("POS: ", window.innerWidth, window.innerHeight);
               // const translateLeft =
               //   (XOFFSET - originalNode.offsetLeft) * oldValue.scale;
               // const translateTop =
@@ -750,7 +750,7 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
-            console.log("RECURSIVE");
+            // console.log("RECURSIVE");
             scrollToNode(nodeId);
           }
         }, 400);
@@ -943,6 +943,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.chosenNode.id,
                 title: chosenNodeObj.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (!(nodeBookState.chosenNode.id in changedNodes)) {
@@ -954,6 +955,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.choosingNode.id,
                 title: thisNode.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (removedParents.includes(nodeBookState.chosenNode.id)) {
@@ -980,6 +982,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.chosenNode.id,
                 title: chosenNodeObj.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (!(nodeBookState.chosenNode.id in changedNodes)) {
@@ -991,6 +994,7 @@ const Dashboard = ({}: DashboardProps) => {
                 node: nodeBookState.choosingNode.id,
                 title: thisNode.title,
                 label: "",
+                type: chosenNodeObj.nodeType,
               },
             ];
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
@@ -1849,7 +1853,7 @@ const Dashboard = ({}: DashboardProps) => {
         } else {
           setOpenPart(partType);
           if (user) {
-            console.log("userNodePartsLog: ", user?.uname);
+            // console.log("userNodePartsLog: ", user?.uname);
             const userNodePartsLogRef = collection(db, "userNodePartsLog");
             setDoc(doc(userNodePartsLogRef), {
               nodeId,
@@ -2165,7 +2169,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Sidebar Functions
 
   const closeSideBar = useMemoizedCallback(() => {
-    console.log("In closeSideBar");
+    console.log("[In closeSideBar]");
 
     if (!user) return;
 
@@ -2178,16 +2182,16 @@ const Dashboard = ({}: DashboardProps) => {
     // };
     // console.log("--------------------------<<< gg", gg());
     // debugger;
-    console.log("selectionType", nodeBookState);
-    console.log(
-      'nodeBookState.selectionType === "AcceptedProposals"',
-      nodeBookState.selectionType === "AcceptedProposals"
-    );
-    console.log('nodeBookState.selectionType === "Proposals"', nodeBookState.selectionType === "Proposals");
-    console.log(
-      "first",
-      nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
-    );
+    // console.log("selectionType", nodeBookState);
+    // console.log(
+    //   'nodeBookState.selectionType === "AcceptedProposals"',
+    //   nodeBookState.selectionType === "AcceptedProposals"
+    // );
+    // console.log('nodeBookState.selectionType === "Proposals"', nodeBookState.selectionType === "Proposals");
+    // console.log(
+    //   "first",
+    //   nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
+    // );
 
     if (
       nodeBookState.selectionType === "AcceptedProposals" ||
@@ -2196,7 +2200,7 @@ const Dashboard = ({}: DashboardProps) => {
     ) {
       reloadPermanentGraph();
     }
-    console.log("After reloadPermanentGraph");
+    // console.log("After reloadPermanentGraph");
     let sidebarType: any = nodeBookState.selectionType;
     if (openPendingProposals) {
       sidebarType = "PendingProposals";
@@ -2240,6 +2244,7 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenRecentNodes(false);
     setOpenTrends(false);
     setOpenMedia(false);
+    setOpenProposal("");
     if (
       nodeBookState.selectedNode &&
       nodeBookState.selectedNode !== "" &&
@@ -2247,7 +2252,7 @@ const Dashboard = ({}: DashboardProps) => {
     ) {
       scrollToNode(nodeBookState.selectedNode);
     }
-    console.log("After scrollToNode");
+    // console.log("After scrollToNode");
     const userClosedSidebarLogRef = collection(db, "userClosedSidebarLog");
     // userClosedSidebarLogRef.set({
     //   uname: user.uname,
@@ -2411,7 +2416,7 @@ const Dashboard = ({}: DashboardProps) => {
               node: child.node,
               title: child.title,
               label: child.label,
-              // type: child.nodeType, // CHECK: I commented this
+              type: child.type,
             });
           }
           newNode.children = newChildren;
@@ -2421,7 +2426,7 @@ const Dashboard = ({}: DashboardProps) => {
               node: parent.node,
               title: parent.title,
               label: parent.label,
-              // type: parent.nodeType, // CHECK: I commented this
+              type: parent.type,
             });
           }
           newNode.parents = newParents;
@@ -2873,21 +2878,25 @@ const Dashboard = ({}: DashboardProps) => {
       event.preventDefault();
       setOpenProposal(proposal.id);
       reloadPermanentGraph();
+      console.log("----------->> beafore graph");
+      const newNodeId = newId();
       setGraph(({ nodes: oldNodes, edges }) => {
+        console.log("----------->> after graph");
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
         if (!(nodeBookState.selectedNode in changedNodes)) {
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+        console.log("proposal", proposal);
         if ("childType" in proposal && proposal.childType !== "") {
           //here builds de child proposal and draws it
-          const newNodeId = newId();
+          console.log("👶 typechild", 1);
           tempNodes.add(newNodeId);
-          const newChildNode = {
+          const newChildNode: any = {
             unaccepted: true,
             isStudied: false,
             bookmarked: false,
-            id: newNodeId,
+            // id: newNodeId,
             correct: false,
             updatedAt: proposal.createdAt,
             open: true,
@@ -2908,25 +2917,51 @@ const Dashboard = ({}: DashboardProps) => {
             nodeType: proposal.childType,
             parents: proposal.parents,
             comments: 0,
+            tagIds: proposal.tagIds,
             tags: proposal.tags,
+            referenceIds: proposal.referenceIds,
+            referenceLabels: proposal.referenceLabels,
+            references: proposal.references,
             title: proposal.title,
             wrongs: 0,
             corrects: 1,
             content: proposal.content,
             nodeImage: proposal.nodeImage,
             studied: 1,
-            references: proposal.references,
             choices: [],
             // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
             editable: false,
             width: NODE_WIDTH,
+            node: newNodeId,
           };
           if (proposal.childType === "Question") {
             newChildNode.choices = proposal.choices;
           }
-          const newNodes = setDagNode(g.current, newNodeId, newChildNode, oldNodes, allTags, null);
-          const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
+          console.log("typechild", 2, newChildNode);
+          let newNodes = { ...oldNodes };
+          let newEdges: any = { ...edges };
+          const nodeN = g.current.node(newNodeId);
+          // ------------------- this is required to simulate pure function
+          if (!nodeN) {
+            console.log("set dag Node", nodeN);
+            newNodes = setDagNode(g.current, newNodeId, newChildNode, newNodes, allTags, null);
+            newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...newEdges });
+          } else {
+            // add node
+            const newNode = copyNode(newChildNode);
+            newNodes[newNodeId] = newNode;
+
+            // add edge
+            const from = nodeBookState.selectedNode;
+            const to = newNodeId;
+            if (g.current.hasNode(from) && g.current.hasNode(to)) {
+              const edgeId = from + "-" + to;
+              newEdges[edgeId] = { label: "" };
+            }
+          }
+          // << ----------------
           scrollToNode(newNodeId);
+          console.log("typechild", 3, { newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
           // return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
           //   setEdges(oldEdges => {
@@ -2935,6 +2970,8 @@ const Dashboard = ({}: DashboardProps) => {
           //   setMapChanged(true);
           // });
         } else {
+          console.log("🎃 improvments proposal", { proposal });
+          // improvments
           //here builds the proposal
           const oldEdges = compareAndUpdateNodeLinks(g.current, thisNode, nodeBookState.selectedNode, proposal, edges);
           // setEdges(oldEdges => {

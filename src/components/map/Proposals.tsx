@@ -2,6 +2,7 @@
 
 // import { TabPanel } from "@mui/lab";
 // import { Box, Tab, Tabs } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { useNodeBook } from "../../context/NodeBookContext";
@@ -79,7 +80,7 @@ const Proposals = (props: ProposalsProps) => {
   const tabsItems = [
     {
       title: "Pending Proposals",
-      content: (
+      content: !isRetrieving ? (
         <ul
           className="collection"
           style={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
@@ -96,14 +97,17 @@ const Proposals = (props: ProposalsProps) => {
             proposeNewChild={props.proposeNewChild}
             openProposal={props.openProposal}
             isAdmin={isAdmin}
-            isRetrieving={isRetrieving}
           />
         </ul>
+      ) : (
+        <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
+          <CircularProgress />
+        </div>
       ),
     },
     {
       title: "Approved Proposals",
-      content: (
+      content: !isRetrieving ? (
         <ul
           className="collection"
           style={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
@@ -120,9 +124,12 @@ const Proposals = (props: ProposalsProps) => {
             proposeNewChild={props.proposeNewChild}
             openProposal={props.openProposal}
             isAdmin={isAdmin}
-            isRetrieving={isRetrieving}
           />
         </ul>
+      ) : (
+        <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
+          <CircularProgress />
+        </div>
       ),
     },
   ];

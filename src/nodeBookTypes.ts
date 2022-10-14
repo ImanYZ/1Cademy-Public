@@ -170,6 +170,7 @@ export type NodeFireStore = {
     node: string;
     label: string;
     title: string;
+    type: string;
   }[];
   choices: KnowledgeChoice[];
   closedHeight?: number;
@@ -196,7 +197,12 @@ export type NodeFireStore = {
   maxVersionRating?: number;
   nodeImage?: string;
   nodeType: NodeType;
-  parents: { node: string; label: string; title: string }[];
+  parents: {
+    node: string;
+    label: string;
+    title: string;
+    type: string;
+  }[];
   referenceIds: string[];
   referenceLabels: string[];
   references: string[];

@@ -158,7 +158,7 @@ const Notifications = (props: NotificationsProps) => {
     if (!db) return;
     if (!user) return;
 
-    console.log("In username, mapRendered useEffect");
+    // console.log("In username, mapRendered useEffect");
 
     const ref = collection(db, "notifications");
     const q = query(ref, where("proposer", "==", user.uname));
