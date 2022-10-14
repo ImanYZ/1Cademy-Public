@@ -55,7 +55,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
             width: "100vw",
             height: "100vh",
             position: "fixed",
-            filter: "brightness(0.25)",
+            // filter: "brightness(0.25)",
             zIndex: -2,
           }}
         >
@@ -69,7 +69,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
             width: "100vw",
             height: "100vh",
             position: "fixed",
-            filter: "brightness(1.4)",
+            // filter: "brightness(1.4)",
             zIndex: -2,
           }}
         >
@@ -119,7 +119,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   layout="fill"
                   objectFit="cover"
                   priority
-                  style={{ filter: "brightness(0.6)" }}
+                  style={{ filter: "blur(4px)" }}
                 />
               )}
               {settings.background === "Image" && settings.theme === "Light" && (
@@ -129,7 +129,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   layout="fill"
                   objectFit="cover"
                   priority
-                  style={{ filter: "brightness(1.4) blur(4px)" }}
+                  style={{ filter: "blur(4px)" }}
                 />
               )}
               <Box

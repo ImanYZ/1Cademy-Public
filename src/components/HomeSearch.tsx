@@ -59,7 +59,7 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch, s
       }}
     >
       <Image
-        style={{ filter: "brightness(.6)" }}
+        // style={{ filter: "brightness(.6)" }}
         alt="1cademy library"
         src={heroImage}
         layout="fill"

@@ -81,7 +81,10 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Pending Proposals",
       content: !isRetrieving ? (
-        <ul className="collection" style={{ padding: "0px", margin: "0px" }}>
+        <ul
+          className="collection"
+          style={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
+        >
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
@@ -105,7 +108,10 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Approved Proposals",
       content: !isRetrieving ? (
-        <ul className="collection" style={{ padding: "0px", margin: "0px" }}>
+        <ul
+          className="collection"
+          style={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
+        >
           <ProposalsList
             proposals={proposals}
             setProposals={setProposals}

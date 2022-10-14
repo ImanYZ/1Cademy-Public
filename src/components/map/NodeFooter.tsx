@@ -516,6 +516,8 @@ const NodeFooter = ({
               alignItems: "center",
               fontWeight: "normal",
               fontSize: "13px",
+              gap: "4px",
+              marginBottom: "4px",
             }}
           >
             <MemoizedMetaButton

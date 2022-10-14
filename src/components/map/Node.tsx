@@ -340,13 +340,21 @@ const Node = ({
     [uploadNodeImage, nodeRef, identifier]
   );
 
-  const referenceLabelChangeHandler = useCallback(
-    (event: any, referenceIdx: string) => {
-      console.log("referenceLabelChangeHandler", { event, identifier, referenceIdx });
-      return referenceLabelChange(event, identifier, referenceIdx);
-    },
-    [referenceLabelChange, identifier]
-  );
+  // const referenceLabelChangeHandler = useCallback(
+  //   (event: any, referenceIdx: string) => {
+  //     console.log("referenceLabelChangeHandler", { event, identifier, referenceIdx });
+  //     return referenceLabelChange(event, identifier, referenceIdx);
+  //   },
+  //   [referenceLabelChange, identifier]
+  // );
+
+  // const referenceLabelChangeHandler = useCallback(
+  //   (newLabel: string, nodeId: string, referenceIdx: number) => {
+  //     // console.log("referenceLabelChangeHandler", { event, identifier, referenceIdx });
+  //     return referenceLabelChange(event, identifier, referenceIdx);
+  //   },
+  //   [referenceLabelChange, identifier]
+  // );
 
   const deleteLinkHandler = useCallback(
     (linkIdx: any, linkType: any) => deleteLink(identifier, linkIdx, linkType),
@@ -483,7 +491,7 @@ const Node = ({
       // }
     >
       {/* INFO: uncomment this only on develope */}
-      {identifier}
+      {/* {identifier} */}
       {open ? (
         <>
           <div className="card-content">
@@ -754,7 +762,7 @@ const Node = ({
               parents={parents}
               nodesChildren={nodesChildren}
               chosenNodeChanged={chosenNodeChanged}
-              referenceLabelChange={referenceLabelChangeHandler}
+              referenceLabelChange={referenceLabelChange}
               deleteLink={deleteLinkHandler}
               openLinkedNode={openLinkedNode}
               openAllChildren={openAllChildren}
