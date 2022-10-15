@@ -1,7 +1,7 @@
 import nextConnect from "next-connect";
 import multer from "multer";
-import admin from "firebase-admin";
 import fbAuth from "src/middlewares/fbAuth";
+import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 
 const handler = nextConnect({
   onNoMatch(req: any, res: any) {
@@ -17,7 +17,7 @@ const uploader = multer({
   },
 });
 
-const bucket = admin.storage().bucket(process.env.NEXT_PUBLIC_STORAGE_BUCKET);
+// const bucket = admin.storage().bucket(process.env.NEXT_PUBLIC_STORAGE_BUCKET);
 
 handler.use(uploader.single("file"));
 
@@ -40,17 +40,18 @@ handler.post(async (req, res) => {
     }
 
     const basePath = `uploads/images/${uid}/${new Date().getTime()}`;
-
     let uploadedPath = `${basePath}/${originalname_parts.join(".")}`;
     if (file_ext !== "svg") {
       uploadedPath += "_430x1300";
     }
     uploadedPath += `.${file_ext}`;
 
-    const filePath = `${basePath}/${originalname}`;
-
-    const uploadedFile = bucket.file(filePath);
-    await uploadedFile.save(file?.buffer as Buffer);
+    // const filePath = `${basePath}/${originalname}`;
+    // const uploadedFile = bucket.file(filePath);
+    // await uploadedFile.save(file?.buffer as Buffer);
+    const storage = getStorage();
+    const storageRef = ref(storage, uploadedPath);
+    await uploadBytesResumable(storageRef, file?.buffer as Buffer, { customMetadata: { uid: uid } });
 
     res.status(200).json({
       imageUrl: `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_STORAGE_BUCKET}/${uploadedPath}`,
