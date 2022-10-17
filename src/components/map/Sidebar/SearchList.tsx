@@ -629,8 +629,11 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                 mx: "10px",
               }}
             >
-              <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
-                <NodeTypeIcon nodeType={resNode.nodeType} />
+              <div
+                className="SidebarNodeTypeIcon"
+                style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}
+              >
+                <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
                 <div className="right" style={{ display: "flex", gap: "10px" }}>
                   <MemoizedMetaButton
                   // tooltip="Creation or the last update of this node."
