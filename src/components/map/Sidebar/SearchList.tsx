@@ -129,7 +129,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   const [onlyTags /*setOnlyTags*/] = useState(true);
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
-  const [sortOption, setSortOption] = useState<SortValues>("DATE_MODIFIED");
+  const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
