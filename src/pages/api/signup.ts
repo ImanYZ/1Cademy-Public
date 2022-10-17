@@ -42,8 +42,8 @@ const addPracticeQuestions = async (
 
 export const unameExists = async (uname: string) => {
   try {
-    const userDoc = await db.collection("users").doc(uname).get();
-    if (userDoc.exists) {
+    const userDoc = await db.collection("users").where("uname", "==", uname).get();
+    if (userDoc.docs.length > 0) {
       return true;
     }
     return false;
