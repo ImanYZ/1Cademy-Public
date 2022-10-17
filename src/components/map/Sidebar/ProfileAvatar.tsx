@@ -1,8 +1,11 @@
 import { Box } from "@mui/system";
 import { getAuth } from "firebase/auth";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { postImageWithToken, postWithToken } from "../../../lib/mapApi";
+import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
+
+import { postWithToken } from "../../../lib/mapApi";
 import { imageLoaded } from "../../../lib/utils/utils";
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
@@ -49,7 +52,7 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
     async (event: any) => {
       try {
         event.preventDefault();
-        // const storage = getStorage();
+        const storage = getStorage();
         const auth = getAuth();
 
         const userAuthObj = auth.currentUser;
@@ -63,59 +66,57 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
         } else {
           setIsUploading(true);
           // Uploading image by calling this API
-          const formData = {
-            file: event.target.files[0],
-          };
-          setPercentageUploaded(30);
-          const { imageUrl } = await postImageWithToken("/uploadImage", formData);
-          setPercentageUploaded(50);
-          await imageLoaded(imageUrl);
-          setPercentageUploaded(100);
+          // const formData = {
+          //   file: event.target.files[0],
+          // };
+          // setPercentageUploaded(30);
+          // const { imageUrl } = await postImageWithToken("/uploadImage", formData);
+          // setPercentageUploaded(50);
+          // await imageLoaded(imageUrl);
+          // setPercentageUploaded(100);
 
-          setImageUrlError(false);
-          setIsUploading(false);
-          setUserImage(imageUrl);
+          // setImageUrlError(false);
+          // setIsUploading(false);
+          // setUserImage(imageUrl);
           //Setting the url everywhere in the DB
-          await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
+          //await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
 
           //Showing profile picture on frontend
 
-          // const picturesFolder = "ProfilePictures/";
-          // const imageNameSplit = image.name.split(".");
-          // const imageExtension = imageNameSplit[imageNameSplit.length - 1];
-          // let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
-          // const storageRef = ref(storage, picturesFolder + imageFileName);
-          // console.log("imageFileName", imageFileName);
-          // const task = uploadBytesResumable(storageRef, image);
-          // task.on(
-          //   "state_changed",
-          //   function progress(snapshot) {
-          //     setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
-          //   },
-          //   function error(err) {
-          //     console.error("Image Upload Error: ", err);
-          //     setIsUploading(false);
-          //     setImageUrlError(
-          //       "There is an error with uploading your picture. Please upload your profile picture again! If the problem persists, please try another picture."
-          //     );
-          //   },
-          //   async function complete() {
-          //     let imageGeneratedUrl = await getDownloadURL(storageRef);
-          //     imageGeneratedUrl = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
-          //     // TODO: REQUEST TO BACKEND
-          //     const postData = {
-          //       imageUrl: imageGeneratedUrl,
-          //     };
-          //     await updateProfile(userAuthObj, {
-          //       photoURL: imageGeneratedUrl,
-          //     });
-          //     await postWithToken("/user/image", postData); // update userImage in everywhere
-          //     setImageUrlError(false);
-          //     setIsUploading(false);
-          //     setUserImage(imageGeneratedUrl);
-          //     setPercentageUploaded(100);
-          //   }
-          // );
+          const picturesFolder = "ProfilePictures/";
+          const imageNameSplit = image.name.split(".");
+          const imageExtension = imageNameSplit[imageNameSplit.length - 1];
+          let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
+          const storageRef = ref(storage, picturesFolder + imageFileName);
+          console.log("imageFileName", imageFileName);
+          const task = uploadBytesResumable(storageRef, image);
+          task.on(
+            "state_changed",
+            function progress(snapshot) {
+              setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
+            },
+            function error(err) {
+              console.error("Image Upload Error: ", err);
+              setIsUploading(false);
+              setImageUrlError(
+                "There is an error with uploading your picture. Please upload your profile picture again! If the problem persists, please try another picture."
+              );
+            },
+            async function complete() {
+              let imageGeneratedUrl = await getDownloadURL(storageRef);
+              imageGeneratedUrl = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
+              // TODO: REQUEST TO BACKEND
+              // const postData = {
+              //   imageUrl: imageGeneratedUrl,
+              // };
+              await imageLoaded(imageGeneratedUrl);
+              setImageUrlError(false);
+              setIsUploading(false);
+              setUserImage(imageGeneratedUrl);
+              setPercentageUploaded(100);
+              await postWithToken("/updateUserImageInDB", { imageUrl: imageGeneratedUrl });
+            }
+          );
         }
       } catch (err) {
         console.error("Image Upload Error: ", err);

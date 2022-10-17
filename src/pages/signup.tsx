@@ -205,14 +205,13 @@ const SignUpPage: NextPageWithLayout = () => {
       formik.setErrors(formikErrors);
     }
 
-    if (data.results?.institutionName) {
+    if (isValid && data.results?.institutionName) {
       formik.setFieldValue("institution", data.results.institutionName);
     }
     // if(isValid){
     //   const domain = formik.values.email.split('@')[1]
     //   formik.setFieldValue('institution',)
     // }
-
     return isValid;
   };
 
