@@ -255,7 +255,14 @@ export type FullNodesData = { [key: string]: FullNodeData };
 export type EdgesData = { [key: string]: EdgeData };
 
 export type SortDirection = "ASCENDING" | "DESCENDING";
-export type SortValues = "LAST_VIEWED" | "DATE_MODIFIED" | "PROPOSALS" | "UP_VOTES" | "DOWN_VOTES" | "NET_NOTES" | null;
+export type SortValues =
+  | "LAST_VIEWED"
+  | "DATE_MODIFIED"
+  | "PROPOSALS"
+  | "UP_VOTES"
+  | "DOWN_VOTES"
+  | "NET_NOTES"
+  | "NOT_SELECTED";
 export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "Others Monthly";
 
 export type Cluster = {
