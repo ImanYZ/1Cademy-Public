@@ -1643,8 +1643,8 @@ button.MuiTab-textColorInherit:focus {
 /* ------------------------- */
 /* siteBar tabs styles */
 #SidebarTabsContainer {
-  display: grid;
-  grid-template-rows: 49px auto;
+  /* display: grid;
+  grid-template-rows: 49px auto; */
   width: 100%;
   height: 100%;
 }

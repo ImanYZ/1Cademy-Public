@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -89,7 +90,7 @@ const ProposalsList = (props: ProposalsListProps) => {
         return (
           <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
             {/* <UserHeader imageUrl={proposal.imageUrl} /> */}
-            <Box sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
+            <Paper elevation={3} sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
               <Box
                 // className="secondary-content"
                 sx={{
@@ -190,7 +191,7 @@ const ProposalsList = (props: ProposalsListProps) => {
                   <Editor label="" readOnly value={proposal.proposal} setValue={() => {}}></Editor>
                 </div>
               </Box>
-            </Box>
+            </Paper>
 
             {/* <CommentsList proposal={proposal} /> */}
           </li>

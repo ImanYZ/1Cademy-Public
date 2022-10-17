@@ -2484,8 +2484,10 @@ const Dashboard = ({}: DashboardProps) => {
         // if (nodeBookState.selectedNode) return
 
         // const oldNode = allNodes[nodeBookState.selectedNode];
-        const oldNode = allNodes.find(cur => cur.node === nodeBookState.selectedNode);
-        if (!oldNode) return;
+        // const oldNode = allNodes.find(cur => cur.node === nodeBookState.selectedNode);
+        const keyFound = Object.keys(allNodes).find(key => allNodes[key].node === nodeBookState.selectedNode);
+        if (!keyFound) return;
+        const oldNode = allNodes[keyFound];
         // const oldNode = { ...nodeToImprove };
         console.log({ newNode, oldNode });
         let isTheSame =

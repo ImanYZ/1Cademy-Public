@@ -125,12 +125,12 @@ const NotificationsList = (props: NotificationsListProps) => {
             elevation={3}
             className="collection-item Notifications"
             key={`Notification${notification.id}`}
-            style={{
+            sx={{
               // border: "solid 2px royalBlue",
               listStyle: "none",
-              padding: "10px 10px",
-
+              px: "10px",
               fontSize: "16px",
+              mx: "10px",
             }}
           >
             <div className="NotificationBody">
