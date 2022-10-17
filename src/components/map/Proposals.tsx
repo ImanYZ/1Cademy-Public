@@ -2,7 +2,7 @@
 
 // import { TabPanel } from "@mui/lab";
 // import { Box, Tab, Tabs } from "@mui/material";
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { useNodeBook } from "../../context/NodeBookContext";
@@ -81,9 +81,10 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Pending Proposals",
       content: !isRetrieving ? (
-        <ul
+        <Box
+          component="ul"
           className="collection"
-          style={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
+          sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}
         >
           <ProposalsList
             proposals={proposals}
@@ -98,7 +99,7 @@ const Proposals = (props: ProposalsProps) => {
             openProposal={props.openProposal}
             isAdmin={isAdmin}
           />
-        </ul>
+        </Box>
       ) : (
         <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
           <CircularProgress />
@@ -108,9 +109,10 @@ const Proposals = (props: ProposalsProps) => {
     {
       title: "Approved Proposals",
       content: !isRetrieving ? (
-        <ul
+        <Box
+          component="ul"
           className="collection"
-          style={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
+          sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}
         >
           <ProposalsList
             proposals={proposals}
@@ -125,7 +127,7 @@ const Proposals = (props: ProposalsProps) => {
             openProposal={props.openProposal}
             isAdmin={isAdmin}
           />
-        </ul>
+        </Box>
       ) : (
         <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
           <CircularProgress />

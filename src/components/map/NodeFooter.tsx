@@ -71,11 +71,12 @@ type NodeFooterProps = {
   wrongNode: any;
   uploadNodeImage: any;
   user: User;
+  citations: { [key: string]: Set<string> };
 };
 
 const NodeFooter = ({
   open,
-  // identifier,
+  identifier,
   // activeNode,
   citationsSelected,
   // proposalsSelected,
@@ -118,6 +119,7 @@ const NodeFooter = ({
   wrongNode,
   uploadNodeImage,
   user,
+  citations,
 }: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -164,6 +166,13 @@ const NodeFooter = ({
   const uploadImageClicked = useCallback(() => {
     inputEl?.current?.click();
   }, [inputEl]);
+
+  const selectCitations = useCallback(
+    (event: any) => {
+      selectNode(event, "Citations");
+    },
+    [selectNode]
+  );
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "10px" }}>
@@ -317,7 +326,7 @@ const NodeFooter = ({
             {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
                 <MemoizedMetaButton
-                  onClick={() => console.log("selectCitations")}
+                  onClick={selectCitations}
                   tooltip="View nodes that have cited this node."
                   tooltipPosition="top"
                 >
@@ -333,7 +342,7 @@ const NodeFooter = ({
                         <MenuBookIcon sx={{ fontSize: "16px" }} />
                       </>
                     )}
-                    <span>{shortenNumber(10, 2, false)}</span>
+                    <span>{shortenNumber(citations[identifier]?.size ?? 0, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
 

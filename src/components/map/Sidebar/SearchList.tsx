@@ -36,8 +36,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { startTransition, useCallback, useEffect, useState } from "react";
 
-import { useAuth } from "@/context/AuthContext";
-
 // import {
 //   ClearRefinements,
 //   Configure,
@@ -104,7 +102,6 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   // const firebase = useRecoilValue(firebaseState);
   // const username = useRecoilValue(usernameState);
   // const tag = useRecoilValue(tagState);
-  const [{ settings }] = useAuth();
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
@@ -603,14 +600,13 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
 
-      <ul
+      <Box
         className="collection Proposals"
-        style={{
+        sx={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          padding: "0px",
-          margin: "0px",
+          paddingY: "5px",
           overflow: "hidden",
         }}
       >
@@ -625,16 +621,19 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
               key={`resNode${idx}`}
               // onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
               onClick={() => openLinkedNode(resNode.id)}
-              style={{
+              sx={{
                 listStyle: "none",
                 padding: "10px",
                 borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
                 cursor: "pointer",
-                background: settings.theme === "Dark" ? "#303134" : "#f0f0f0",
+                mx: "10px",
               }}
             >
-              <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
-                <NodeTypeIcon nodeType={resNode.nodeType} />
+              <div
+                className="SidebarNodeTypeIcon"
+                style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}
+              >
+                <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
                 <div className="right" style={{ display: "flex", gap: "10px" }}>
                   <MemoizedMetaButton
                   // tooltip="Creation or the last update of this node."
@@ -706,7 +705,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             </MemoizedMetaButton>
           </div>
         )}
-      </ul>
+      </Box>
     </div>
   );
 };

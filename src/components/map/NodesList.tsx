@@ -41,6 +41,7 @@ type NodeListProps = {
   reloadPermanentGrpah: any;
   setOpenMedia: (imagUrl: string) => void;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
+  citations: { [key: string]: Set<string> };
 };
 
 const NodesList = ({
@@ -75,6 +76,7 @@ const NodesList = ({
   reloadPermanentGrpah,
   setOpenMedia,
   setNodeParts,
+  citations,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -196,6 +198,7 @@ const NodesList = ({
             reloadPermanentGrpah={reloadPermanentGrpah}
             setOpenMedia={setOpenMedia}
             setNodeParts={setNodeParts}
+            citations={citations}
           />
         );
       })}

@@ -1,7 +1,7 @@
 import dagre from "dagre";
 import { collection, Firestore, onSnapshot, query, where } from "firebase/firestore";
 
-import { EdgesData, FullNodeData, FullNodesData } from "../../nodeBookTypes";
+import { EdgesData, FullNodeData, FullNodesData, NodeFireStore } from "../../nodeBookTypes";
 
 // import { FullNodeData } from "../../noteBookTypes";
 
@@ -22,7 +22,7 @@ export const changedNodes: any = {};
 // object of sets
 // keys: reference node ids
 // values: set of node ids that are citing this reference
-// export const citations = {};
+export const citations: { [key: string]: Set<string> } = {};
 // set of all ids of allTags nodes
 
 const firstWeekDay = (thisDate?: any) => {
@@ -231,23 +231,25 @@ export const setTypeVisibilityOfChildInsideParent = (oldNodes: any, nodeId: stri
 };
 
 // for every node downloaded from the database
-// export const addReference = (nodeId, nodeData) => {
-//   if (nodeData.nodeType === "Reference") {
-//     if (!(nodeId in citations)) {
-//       citations[nodeId] = new Set();
-//     }
-//   }
-//   // for listing the set of nodes that cite this reference
-//   for (let refObj of nodeData.references) {
-//     const refNode = refObj.node;
-//     // if reference does not exist in citations then add it
-//     if (!(refNode in citations)) {
-//       citations[refNode] = new Set();
-//     }
-//     // add nodeId to the set of nodes that are citing the reference node
-//     citations[refNode].add(nodeId);
-//   }
-// };
+export const addReference = (nodeId: string, nodeData: NodeFireStore) => {
+  console.log("addReference");
+  if (nodeData.nodeType === "Reference") {
+    if (!(nodeId in citations)) {
+      citations[nodeId] = new Set();
+    }
+  }
+  // for listing the set of nodes that cite this reference
+  // nodeData.references
+  nodeData.referenceIds.forEach(cur => {
+    // const refNode = nodeData.referenceIds[idx]
+    // if reference does not exist in citations then add it
+    if (!(cur in citations)) {
+      citations[cur] = new Set();
+    }
+    // add nodeId to the set of nodes that are citing the reference node
+    citations[cur].add(nodeId);
+  });
+};
 
 // ???
 export const getDependentNodes = (dependents: any[], necessaryNodeIds: string[], dependentNodeIds: string[]) => {

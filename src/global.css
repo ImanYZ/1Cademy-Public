@@ -747,8 +747,10 @@
 }
 
 #ContinueButton {
-  margin-left: 130px;
-  margin-bottom: 25px;
+  /* margin-left: 130px;
+  margin-bottom: 25px; */
+  margin: auto;
+  padding: 10px;
 }
 
 .NodeChangeTime {
@@ -1641,8 +1643,8 @@ button.MuiTab-textColorInherit:focus {
 /* ------------------------- */
 /* siteBar tabs styles */
 #SidebarTabsContainer {
-  display: grid;
-  grid-template-rows: 49px auto;
+  /* display: grid;
+  grid-template-rows: 49px auto; */
   width: 100%;
   height: 100%;
 }

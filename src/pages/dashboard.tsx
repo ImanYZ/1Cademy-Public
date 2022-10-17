@@ -51,7 +51,9 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
+  addReference,
   changedNodes,
+  citations,
   compare2Nodes,
   compareAndUpdateNodeLinks,
   compareChoices,
@@ -144,7 +146,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
 
-  const [allNodes, setAllNodes] = useState<FullNodeData[]>([]);
+  const [allNodes, setAllNodes] = useState<FullNodesData>({});
 
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
@@ -417,21 +419,44 @@ const Dashboard = ({}: DashboardProps) => {
         );
       };
 
-      const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodeData[]) => {
+      // const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodeData[]) => {
+      //   return newAllNodes.reduce(
+      //     (acu, cur) => {
+      //       if (cur.nodeChangeType === "added") {
+      //         return [...acu, cur];
+      //       }
+      //       if (cur.nodeChangeType === "modified") {
+      //         return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
+      //       }
+      //       if (cur.nodeChangeType === "removed") {
+      //         return acu.filter(c => c.userNodeId !== cur.userNodeId);
+      //       }
+      //       return acu;
+      //     },
+      //     [...currentAllNodes]
+      //   );
+      // };
+
+      const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
         return newAllNodes.reduce(
           (acu, cur) => {
-            if (cur.nodeChangeType === "added") {
-              return [...acu, cur];
+            if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+              return { ...acu, [cur.node]: cur };
             }
-            if (cur.nodeChangeType === "modified") {
-              return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
-            }
+            // if (cur.nodeChangeType === "modified") {
+            //   return {...acu,[cur.node]:cur}
+            //   // return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
+            // }
             if (cur.nodeChangeType === "removed") {
-              return acu.filter(c => c.userNodeId !== cur.userNodeId);
+              // delete acu['sdsds']
+              const tmp = { ...acu };
+              delete tmp[cur.node];
+              return tmp;
+              // return acu.filter(c => c.userNodeId !== cur.userNodeId);
             }
             return acu;
           },
-          [...currentAllNodes]
+          { ...currentAllNodes }
         );
       };
 
@@ -442,6 +467,11 @@ const Dashboard = ({}: DashboardProps) => {
         const userNodeChanges = getUserNodeChanges(docChanges);
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
+
+        nodesData.forEach(cur => {
+          if (!cur?.nData.nodeType || !cur.nData.references) return;
+          addReference(cur.nId, cur.nData);
+        });
         console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
@@ -2389,6 +2419,7 @@ const Dashboard = ({}: DashboardProps) => {
           setSelectedNodeType(nodeType);
           nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          console.log("end");
           // setSelectedNode(nodeId);
         }
       }
@@ -2455,8 +2486,10 @@ const Dashboard = ({}: DashboardProps) => {
         // if (nodeBookState.selectedNode) return
 
         // const oldNode = allNodes[nodeBookState.selectedNode];
-        const oldNode = allNodes.find(cur => cur.node === nodeBookState.selectedNode);
-        if (!oldNode) return;
+        // const oldNode = allNodes.find(cur => cur.node === nodeBookState.selectedNode);
+        const keyFound = Object.keys(allNodes).find(key => allNodes[key].node === nodeBookState.selectedNode);
+        if (!keyFound) return;
+        const oldNode = allNodes[keyFound];
         // const oldNode = { ...nodeToImprove };
         console.log({ newNode, oldNode });
         let isTheSame =
@@ -3289,6 +3322,8 @@ const Dashboard = ({}: DashboardProps) => {
   //   },
   //   [scrollToNodeInitialized]
   // );
+
+  console.log("dashboard render");
   return (
     <div className="MapContainer">
       {settings.theme === "Dark" && (
@@ -3369,6 +3404,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Box>
               {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
               <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+              <Button onClick={() => console.log(citations)}>citations</Button>
             </Box>
 
             <Divider />
@@ -3381,7 +3417,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                 Open Proposal
               </Button>
-              <Button onClick={() => openNodeHandler("0FQjO6yByNeXOiYlRMvN")}>Open Node Handler</Button>
+              <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
             </Box>
           </Drawer>
           <MemoizedSidebar
@@ -3403,6 +3439,7 @@ const Dashboard = ({}: DashboardProps) => {
             pendingProposalsLoaded={pendingProposalsLoaded}
             setPendingProposalsLoaded={setPendingProposalsLoaded}
             openProposal={openProposal}
+            citations={citations}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
@@ -3422,7 +3459,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenTrends={setOpenTrends}
             openTrends={openTrends}
             setOpenMedia={setOpenMedia}
-            allNodes={allNodes.filter(cur => cur.bookmarked)}
+            allNodes={allNodes}
             mapRendered={true}
           />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
@@ -3500,6 +3537,7 @@ const Dashboard = ({}: DashboardProps) => {
                 closeSideBar={closeSideBar}
                 reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
                 setNodeParts={setNodeParts}
+                citations={citations}
               />
             </MapInteractionCSS>
             <Suspense fallback={<div></div>}>

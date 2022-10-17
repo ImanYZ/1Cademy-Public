@@ -18,6 +18,7 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
+import citation from "../../../../public/citations.jpg";
 // import ChatRoomImage from "../../../assets/ChatRoom.jpg";
 // import RecentNodesImage from "../../../assets/RecentNodes.jpg";
 // import RecentNodesLightModeImage from "../../../assets/lightmode_sort.jpg";
@@ -36,7 +37,7 @@ import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-light-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
 import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
-import { FullNodeData, UsersStatus } from "../../../nodeBookTypes";
+import { FullNodesData, UsersStatus } from "../../../nodeBookTypes";
 import { NodeType } from "../../../types";
 // import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
 import { MemoizedMetaButton } from "../MetaButton";
@@ -45,6 +46,7 @@ import Proposals from "../Proposals";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 import Bookmarks from "./Bookmarks";
 import BookmarksButton from "./BookmarksButton";
+import { MemoizedCitations } from "./Citations";
 import MultipleChoiceBtn from "./MultipleChoiceBtn";
 import Notifications from "./Notifications";
 import { NotificationsButton } from "./NotificationsButton";
@@ -178,7 +180,7 @@ type SidebarType = {
   selectionType: any;
   setSNode: any;
   selectedUser: any;
-  allNodes: FullNodeData[];
+  allNodes: FullNodesData;
   reloadPermanentGrpah: any;
   showClusters: boolean;
   setShowClusters: (newValue: boolean) => void;
@@ -186,6 +188,10 @@ type SidebarType = {
   pendingProposalsLoaded: boolean;
   setPendingProposalsLoaded: (newValue: boolean) => void;
   openProposal: string;
+  citations: { [key: string]: Set<string> };
+  // openLinkedNode: any;
+  // selectedNode: string;
+  // allNodes: any;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -540,10 +546,22 @@ const Sidebar = (props: SidebarType) => {
   openMedia*/
 
   const bookmarkUpdatesNum = useMemo(() => {
-    return props.allNodes.filter(cur => cur.changed || !cur.isStudied).length;
+    console.log("bookmarkUpdatesNum");
+    return Object.keys(props.allNodes)
+      .map(key => props.allNodes[key])
+      .filter(cur => cur.changed || !cur.isStudied).length;
+  }, [props.allNodes]);
+
+  const bookmarkedUserNodes = useMemo(() => {
+    console.log("bookmarkedUserNodes");
+    return Object.keys(props.allNodes)
+      .map(key => props.allNodes[key])
+      .filter(cur => cur.bookmarked);
   }, [props.allNodes]);
 
   if (!user || !reputation) return null;
+
+  console.log("sidebar");
 
   return (
     <>
@@ -793,18 +811,18 @@ const Sidebar = (props: SidebarType) => {
               // scrollToTop={scrollToTop}
               closeSideBar={props.closeSideBar}
             >
-              <Bookmarks bookmarkedUserNodes={props.allNodes} openLinkedNode={props.openLinkedNode} />
+              <Bookmarks bookmarkedUserNodes={bookmarkedUserNodes} openLinkedNode={props.openLinkedNode} />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "Citations" ? (
-            <MemoizedSidebarWrapper
-              headerImage="" // CHECK image
-              title="Citing Nodes"
-              // scrollToTop={scrollToTop}
-              closeSideBar={props.closeSideBar}
-            >
+            <MemoizedSidebarWrapper headerImage={citation} title="Citing Nodes" closeSideBar={props.closeSideBar}>
               {/* CHECK: I commented this */}
               {/* <CitationsList openLinkedNode={props.openLinkedNode} /> */}
-              <h2>CitationsList here</h2>
+              <MemoizedCitations
+                citations={props.citations}
+                allNodes={props.allNodes}
+                openLinkedNode={props.openLinkedNode}
+                // selectedNode={no}
+              />
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "UserInfo" ? (
             <MemoizedSidebarWrapper

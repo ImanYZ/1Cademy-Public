@@ -239,8 +239,9 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           sx={{
             width: "100%",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             alignItems: "center",
+            // flexWrap: "wrap",
             gap: "10px",
             height: "inherit",
           }}
