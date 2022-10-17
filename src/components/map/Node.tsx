@@ -867,6 +867,7 @@ const Node = ({
                 wrongNode={wrongNodeHandler}
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
+                citations={citations}
               />
               {/* <NodeFooter
                 open={false}
