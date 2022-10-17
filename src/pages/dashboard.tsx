@@ -21,6 +21,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
@@ -32,6 +33,7 @@ import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderbo
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
@@ -45,7 +47,7 @@ import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken } from "../lib/firestoreClient/auth";
-import { Post, postImageWithToken, postWithToken } from "../lib/mapApi";
+import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
@@ -3082,9 +3084,17 @@ const Dashboard = ({}: DashboardProps) => {
   // }, []);
 
   const uploadNodeImage = useCallback(
-    async (event: any, nodeRef: any, nodeId: string, isUploading: boolean, setIsUploading: any) => {
+    (
+      event: any,
+      nodeRef: any,
+      nodeId: string,
+      isUploading: boolean,
+      setIsUploading: any,
+      setPercentageUploaded: any
+    ) => {
       if (!user) return;
       console.log("[UPLOAD NODE IMAGES]");
+      const storage = getStorage();
       if (!isUploading && !choosingNode) {
         try {
           event.preventDefault();
@@ -3100,59 +3110,61 @@ const Dashboard = ({}: DashboardProps) => {
             setIsSubmitting(true);
             setIsUploading(true);
 
-            const formData = {
-              file: event.target.files[0],
-            };
-            const { imageUrl } = await postImageWithToken("/uploadImage", formData);
-            await imageLoaded(imageUrl);
-            setIsSubmitting(false);
-            setIsUploading(false);
+            // const formData = {
+            //   file: event.target.files[0],
+            // };
+            // const { imageUrl } = await postImageWithToken("/uploadImage", formData);
+            // await imageLoaded(imageUrl);
+            // setIsSubmitting(false);
+            // setIsUploading(false);
 
-            if (imageUrl && imageUrl !== "") {
-              setNodeParts(nodeId, (thisNode: any) => {
-                thisNode.nodeImage = imageUrl;
-                return { ...thisNode };
-              });
-            }
+            // if (imageUrl && imageUrl !== "") {
+            //   setNodeParts(nodeId, (thisNode: any) => {
+            //     thisNode.nodeImage = imageUrl;
+            //     return { ...thisNode };
+            //   });
+            // }
+
             // const rootURL = "https://storage.googleapis.com/onecademy-dev.appspot.com/"
-            // const picturesFolder = "UploadedImages/";
-            // const imageNameSplit = image.name.split(".");
-            // const imageExtension = imageNameSplit[imageNameSplit.length - 1];
-            // let imageFileName = user.userId + "/" + new Date().toUTCString() + "." + imageExtension;
+            const picturesFolder = "UploadedImages/";
+            const imageNameSplit = image.name.split(".");
+            const imageExtension = imageNameSplit[imageNameSplit.length - 1];
+            let imageFileName = user.userId + "/" + new Date().toUTCString() + "." + imageExtension;
 
-            // console.log("picturesFolder + imageFileName", picturesFolder + imageFileName);
-            // const storageRef = ref(storage, picturesFolder + imageFileName);
+            console.log("picturesFolder + imageFileName", picturesFolder + imageFileName);
+            const storageRef = ref(storage, picturesFolder + imageFileName);
 
-            // const task = uploadBytesResumable(storageRef, image);
-            // task.on(
-            //   "state_changed",
-            //   function progress(snapshot: any) {
-            //     setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
-            //   },
-            //   function error(err: any) {
-            //     console.error("Image Upload Error: ", err);
-            //     setIsSubmitting(false);
-            //     setIsUploading(false);
-            //     alert(
-            //       "There is an error with uploading your image. Please upload it again! If the problem persists, please try another image."
-            //     );
-            //   },
-            //   async function complete() {
-            //     console.log("storageRef", storageRef);
-            //     const imageGeneratedUrl = await getDownloadURL(storageRef);
-            //     const imageUrlFixed = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
-            //     console.log("---> imageGeneratedUrl", imageUrlFixed);
-            //     setIsSubmitting(false);
-            //     setIsUploading(false);
-            //     if (imageUrlFixed && imageUrlFixed !== "") {
-            //       setNodeParts(nodeId, (thisNode: any) => {
-            //         thisNode.nodeImage = imageUrlFixed;
-            //         return { ...thisNode };
-            //       });
-            //     }
-            //     setPercentageUploaded(100);
-            //   }
-            // );
+            const task = uploadBytesResumable(storageRef, image);
+            task.on(
+              "state_changed",
+              function progress(snapshot: any) {
+                setPercentageUploaded(Math.ceil((100 * snapshot.bytesTransferred) / snapshot.totalBytes));
+              },
+              function error(err: any) {
+                console.error("Image Upload Error: ", err);
+                setIsSubmitting(false);
+                setIsUploading(false);
+                alert(
+                  "There is an error with uploading your image. Please upload it again! If the problem persists, please try another image."
+                );
+              },
+              async function complete() {
+                console.log("storageRef", storageRef);
+                const imageGeneratedUrl = await getDownloadURL(storageRef);
+                const imageUrlFixed = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
+                console.log("---> imageGeneratedUrl", imageUrlFixed);
+                setIsSubmitting(false);
+                setIsUploading(false);
+                await imageLoaded(imageUrlFixed);
+                if (imageUrlFixed && imageUrlFixed !== "") {
+                  setNodeParts(nodeId, (thisNode: any) => {
+                    thisNode.nodeImage = imageUrlFixed;
+                    return { ...thisNode };
+                  });
+                }
+                setPercentageUploaded(100);
+              }
+            );
           }
         } catch (err) {
           console.error("Image Upload Error: ", err);
