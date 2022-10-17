@@ -106,6 +106,7 @@ type NodeProps = {
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
+  citations: { [key: string]: Set<string> };
 };
 const Node = ({
   identifier,
@@ -179,6 +180,7 @@ const Node = ({
   reloadPermanentGrpah,
   setOpenMedia,
   setNodeParts,
+  citations,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -698,6 +700,7 @@ const Node = ({
                 wrongNode={wrongNodeHandler}
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
+                citations={citations}
               />
               {/* <NodeFooter
                 open={true}

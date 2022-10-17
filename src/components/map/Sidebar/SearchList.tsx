@@ -603,13 +603,13 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       {/* Widgets */}
       {/* <Divider orientation="horizontal" /> */}
 
-      <ul
+      <Box
         className="collection Proposals"
-        style={{
+        sx={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          padding: "10px",
+          px: "4px",
           margin: "0px",
           overflow: "hidden",
         }}
@@ -706,7 +706,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
             </MemoizedMetaButton>
           </div>
         )}
-      </ul>
+      </Box>
     </div>
   );
 };
