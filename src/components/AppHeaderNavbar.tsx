@@ -104,7 +104,7 @@ const AppAppBar: FC<Props> = ({
             </LightTooltip>
           ))}
         </Tabs>
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
           {(router.route !== "/" || (router.route === "/" && showSearch)) && (
             <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
               <AppHeaderSearchBar />
@@ -129,6 +129,7 @@ const AppAppBar: FC<Props> = ({
                   my: "auto",
                   borderRadius: 40,
                   textAlign: "center",
+                  marginRight: "10px",
                 }}
               >
                 APPLY!
