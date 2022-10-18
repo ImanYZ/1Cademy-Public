@@ -41,7 +41,7 @@ export const useWorkerQueue = ({
   allTags,
 }: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
-  const [isWorking, setIsWorking] = useState(false);
+  const [isQueueWorking, setIsWorking] = useState(false);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
@@ -134,7 +134,7 @@ export const useWorkerQueue = ({
 
   useEffect(() => {
     // console.log("[queue]: useEffect", { graph });
-    if (isWorking) return;
+    if (isQueueWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
 
@@ -150,7 +150,7 @@ export const useWorkerQueue = ({
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker]);
+  }, [allTags, g, graph, isQueueWorking, queue, recalculateGraphWithWorker]);
 
   const addTask = (newTask: Task) => {
     // console.log("addTask", newTask);
@@ -158,5 +158,5 @@ export const useWorkerQueue = ({
     setQueue(queue => [...queue, newTask]);
   };
 
-  return { addTask, queue };
+  return { addTask, queue, isQueueWorking };
 };

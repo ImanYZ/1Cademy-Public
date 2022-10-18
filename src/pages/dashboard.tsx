@@ -62,6 +62,7 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
+  getSelectionText,
   // getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
@@ -107,7 +108,7 @@ type DashboardProps = {};
  *
  *  --- render nodes
  */
-// let arrowKeyMapTransitionInitialized = false;
+let arrowKeyMapTransitionInitialized = false;
 const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -192,7 +193,7 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
-  const { addTask, queue } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking } = useWorkerQueue({
     g,
     graph,
     setGraph,
@@ -296,39 +297,39 @@ const Dashboard = ({}: DashboardProps) => {
     };
 
     // movement through map using keyboard arrow keys
-    // document.addEventListener("keydown", event => {
-    //   if (!document.activeElement) return;
-    //   if (
-    //     // mapHovered &&
-    //     getSelectionText() === "" &&
-    //     document.activeElement.tagName !== "TEXTAREA" &&
-    //     document.activeElement.tagName !== "INPUT" &&
-    //     !arrowKeyMapTransitionInitialized
-    //   ) {
-    //     arrowKeyMapTransitionInitialized = true;
-    //     setMapInteractionValue(oldValue => {
-    //       const translationValue = { ...oldValue.translation };
-    //       switch (event.key) {
-    //         case "ArrowLeft":
-    //           translationValue.x += 10;
-    //           break;
-    //         case "ArrowRight":
-    //           translationValue.x -= 10;
-    //           break;
-    //         case "ArrowUp":
-    //           translationValue.y += 10;
-    //           break;
-    //         case "ArrowDown":
-    //           translationValue.y -= 10;
-    //           break;
-    //       }
-    //       setTimeout(() => {
-    //         arrowKeyMapTransitionInitialized = false;
-    //       }, 10);
-    //       return { scale: oldValue.scale, translation: translationValue };
-    //     });
-    //   }
-    // });
+    document.addEventListener("keydown", event => {
+      if (!document.activeElement) return;
+      if (
+        // mapHovered &&
+        getSelectionText() === "" &&
+        document.activeElement.tagName !== "TEXTAREA" &&
+        document.activeElement.tagName !== "INPUT" &&
+        !arrowKeyMapTransitionInitialized
+      ) {
+        arrowKeyMapTransitionInitialized = true;
+        setMapInteractionValue(oldValue => {
+          const translationValue = { ...oldValue.translation };
+          switch (event.key) {
+            case "ArrowLeft":
+              translationValue.x += 10;
+              break;
+            case "ArrowRight":
+              translationValue.x -= 10;
+              break;
+            case "ArrowUp":
+              translationValue.y += 10;
+              break;
+            case "ArrowDown":
+              translationValue.y -= 10;
+              break;
+          }
+          setTimeout(() => {
+            arrowKeyMapTransitionInitialized = false;
+          }, 10);
+          return { scale: oldValue.scale, translation: translationValue };
+        });
+      }
+    });
   }, []);
 
   const snapshot = useCallback(
@@ -756,7 +757,8 @@ const Dashboard = ({}: DashboardProps) => {
             originalNode.offsetLeft !== 0 &&
             "offsetTop" in originalNode &&
             originalNode.offsetTop !== 0 &&
-            currentNode?.height !== NODE_HEIGHT
+            currentNode?.height !== NODE_HEIGHT &&
+            !isQueueWorking
           ) {
             // console.log(3);
 
@@ -788,7 +790,21 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [graph.nodes, scrollToNodeInitialized]
+    [graph.nodes, isQueueWorking, scrollToNodeInitialized]
+  );
+
+  const navigateToFirstParent = useCallback(
+    (nodeId: string) => {
+      const parents: any = g.current.predecessors(nodeId);
+      console.log("navigateToFirstParent", parents);
+      if (!parents.length) return;
+      setTimeout(() => {
+        scrollToNode(parents[0]);
+        // // setSelectedNode(parents[0]);
+        nodeBookDispatch({ type: "setSelectedNode", payload: parents[0] });
+      }, 1500);
+    },
+    [nodeBookDispatch, scrollToNode]
   );
 
   // DEPRECATED: LOAD USER NODES, check new improvement flow, please
@@ -1598,7 +1614,8 @@ const Dashboard = ({}: DashboardProps) => {
       const username = user?.uname;
       if (!nodeBookState.choosingNode) {
         // setIsHiding(true);
-        // navigateToFirstParent(nodeId);
+        console.log("call navigate");
+        navigateToFirstParent(nodeId);
         if (username) {
           // try {
 
