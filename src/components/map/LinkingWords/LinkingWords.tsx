@@ -169,7 +169,12 @@ const LinkingWords = (props: LinkingWordsProps) => {
             <strong>Parents (Prerequisites)</strong>
             {props.parents.map((parent: any, idx: number) => {
               return (
-                <div key={props.identifier + "LinkTo" + parent.node}>
+                <div
+                  style={{
+                    margin: "5px 5px 0px 5px",
+                  }}
+                  key={props.identifier + "LinkTo" + parent.node}
+                >
                   <LinkingButton
                     onClick={props.openLinkedNode}
                     // nodeID={props.identifier}
@@ -212,7 +217,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 }
               }
               return (
-                <div key={props.identifier + "LinkTo" + reference.node + "DIV"} className="ReferenceLink">
+                <div
+                  style={{
+                    margin: "5px 5px 0px 5px",
+                  }}
+                  key={props.identifier + "LinkTo" + reference.node + "DIV"}
+                  className="ReferenceLink"
+                >
                   <LinkingButton
                     key={props.identifier + "LinkTo" + reference.node}
                     onClick={props.openLinkedNode}
@@ -320,7 +331,12 @@ const LinkingWords = (props: LinkingWordsProps) => {
             <strong>Tags</strong>
             {props.tags.map((tag: any, idx: number) => {
               return (
-                <div key={props.identifier + "LinkTo" + tag.node + "DIV"}>
+                <div
+                  style={{
+                    margin: "5px 5px 0px 5px",
+                  }}
+                  key={props.identifier + "LinkTo" + tag.node + "DIV"}
+                >
                   <LinkingButton
                     key={props.identifier + "LinkTo" + tag.node}
                     onClick={props.openLinkedNode}
@@ -363,7 +379,12 @@ const LinkingWords = (props: LinkingWordsProps) => {
             <strong>Children (Follow-ups)</strong>
             {props.nodesChildren.map((child: any, idx: number) => {
               return (
-                <div key={props.identifier + "LinkTo" + child.node + "DIV"}>
+                <div
+                  style={{
+                    margin: "5px 5px 0px 5px",
+                  }}
+                  key={props.identifier + "LinkTo" + child.node + "DIV"}
+                >
                   <LinkingButton
                     key={props.identifier + "LinkTo" + child.node}
                     onClick={props.openLinkedNode}
