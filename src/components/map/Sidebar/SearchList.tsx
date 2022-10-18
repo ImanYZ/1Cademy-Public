@@ -415,7 +415,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
                 setAllTags={setAllTags}
                 chosenTags={chosenTags}
                 setChosenTags={setChosenTags}
-                sx={{ maxHeight: "200px", height: "200px" }}
+                sx={{ maxHeight: "235px", height: "235px" }}
                 multiple
               />
               {/* CHECK: add tag searcher */}
