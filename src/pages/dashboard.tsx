@@ -66,7 +66,6 @@ import {
   // getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
-  NODE_HEIGHT,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -274,31 +273,33 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   const scrollToNode = useCallback(
-    (nodeId: string) => {
-      // console.log(1);
-      // console.log(6);
-      // console.log(7);
+    (nodeId: string, tries = 0) => {
+      console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
+      if (tries === 50) return;
 
-      if (!scrollToNodeInitialized) {
-        // console.log(2);
+      if (!scrollToNodeInitialized || queueFinished) {
+        console.log("scroll to node");
 
         setTimeout(() => {
-          const currentNode = graph.nodes[nodeId];
+          // const currentNode = graph.nodes[nodeId];
           // if(currentNode.height===NODE_HEIGHT)
           const originalNode = document.getElementById(nodeId);
+
           if (
             originalNode &&
             "offsetLeft" in originalNode &&
             originalNode.offsetLeft !== 0 &&
             "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0 &&
-            currentNode?.height !== NODE_HEIGHT &&
-            !isQueueWorking
+            originalNode.offsetTop !== 0
+            // currentNode?.height !== NODE_HEIGHT &&
+            // queueFinished
           ) {
             // console.log(3);
 
+            console.log("is calling setScrollToNodeInitialized to true");
             setScrollToNodeInitialized(true);
             setTimeout(() => {
+              console.log("is calling setScrollToNodeInitialized to false");
               setScrollToNodeInitialized(false);
             }, 1300);
 
@@ -319,15 +320,17 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
-            // console.log("RECURSIVE");
-            scrollToNode(nodeId);
+            console.log("RECURSIVE1", nodeId);
+            console.log({ originalNode, queueFinished });
+            scrollToNode(nodeId, tries + 1);
           }
         }, 400);
       }
     },
-    [graph.nodes, isQueueWorking, scrollToNodeInitialized]
+    [queueFinished, scrollToNodeInitialized]
   );
 
+  //  bd => state (first render)
   useEffect(() => {
     // setTimeout(() => {
     console.log("iitial scroll");
@@ -669,6 +672,7 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [isSubmitting]);
 
+  // state => bd
   useEffect(() => {
     const changeSelectedNode = async () => {
       console.log("changeSelectedNode");
@@ -855,19 +859,27 @@ const Dashboard = ({}: DashboardProps) => {
   //   [nodeChanges]
   // );
 
-  const navigateToFirstParent = useCallback(
-    (nodeId: string) => {
-      const parents: any = g.current.predecessors(nodeId);
-      console.log("navigateToFirstParent", parents);
-      if (!parents.length) return;
-      setTimeout(() => {
-        scrollToNode(parents[0]);
-        // // setSelectedNode(parents[0]);
-        nodeBookDispatch({ type: "setSelectedNode", payload: parents[0] });
-      }, 1500);
-    },
-    [nodeBookDispatch, scrollToNode]
-  );
+  // const navigateToFirstParent = useCallback(
+  //   (nodeId: string) => {
+  //     const parents: any = g.current.predecessors(nodeId);
+  //     console.log("navigateToFirstParent", parents);
+  //     if (!parents.length) return;
+  //     setTimeout(() => {
+  //       scrollToNode(parents[0]);
+  //       // // setSelectedNode(parents[0]);
+  //       nodeBookDispatch({ type: "setSelectedNode", payload: parents[0] });
+  //     }, 1500);
+  //   },
+  //   [nodeBookDispatch, scrollToNode]
+  // );
+
+  const getFirstParent = (childId: string) => {
+    const parents: any = g.current.predecessors(childId);
+    console.log("navigateToFirstParent", parents);
+    if (!parents) return null;
+    if (!parents.length) return null;
+    return parents[0];
+  };
 
   // DEPRECATED: LOAD USER NODES, check new improvement flow, please
   // useEffect(() => {})
@@ -1642,7 +1654,7 @@ const Dashboard = ({}: DashboardProps) => {
   const initNodeStatusChange = useCallback(
     (nodeId: string, userNodeId: string) => {
       // setSelectedNode(nodeId);
-      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+      // nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK this
       // setSelectedNodeType(null);
       // setSelectionType(null);
       // setOpenPendingProposals(false);
@@ -1677,7 +1689,10 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.choosingNode) {
         // setIsHiding(true);
         console.log("call navigate");
-        navigateToFirstParent(nodeId);
+        // navigateToFirstParent(nodeId);
+        const parentNode = getFirstParent(nodeId);
+        console.log("hideNodeHandler:parent", parentNode);
+
         if (username) {
           // try {
 
@@ -1722,6 +1737,7 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+          console.log("1");
 
           // CHECK: I commented this, because the SYNC will call hideNodeAndItsLinks
           // const { oldNodes: newNodes, oldEdges: newEdges } = hideNodeAndItsLinks(nodeId, { ...nodes }, { ...edges })
@@ -1736,6 +1752,10 @@ const Dashboard = ({}: DashboardProps) => {
           //console.error(err);
           //}
         }
+        console.log("------->>> will call nodeBookDispatch", parentNode);
+        nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
+        scrollToNode(parentNode);
+        // // setSelectedNode(parents[0]);
       }
     },
     // TODO: CHECK dependencies
@@ -3554,6 +3574,10 @@ const Dashboard = ({}: DashboardProps) => {
             <Box sx={{ border: "dashed 1px royalBlue" }}>
               <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
               {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+            </Box>
+            <Box sx={{ border: "dashed 1px royalBlue" }}>
+              <Typography>SN: {nodeBookState.selectedNode}</Typography>
+              <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
             </Box>
             <Box sx={{ float: "right" }}>
               <Tooltip title={"Watch geek data"}>
