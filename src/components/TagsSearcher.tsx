@@ -227,13 +227,14 @@ const TagsSearcher = ({
         value={Object.values(allTags).filter((tag: any) => tag.checked)}
         onChange={setAutocomplete}
         ChipProps={{ className: "chip", variant: "outlined" }}
-        ListboxProps={{ id: "autocompleteList" }}
+        ListboxProps={{ id: "autocompleteList", className: "modelInSearchTags" }}
         options={Object.values(allTags)}
         getOptionLabel={(tag: TagTreeView) => tag.title}
         renderOption={setAutocompleteOptions}
         renderTags={() => ""}
         renderInput={setAutocompleteInput}
         fullWidth
+        sx={{ marginTop: "5px", marginBottom: "5px" }}
       />
       <Box id="FilterTagsTreeView">
         <TreeView
