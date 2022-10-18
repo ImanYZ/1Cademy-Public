@@ -1,5 +1,5 @@
 import { graphlib } from "dagre";
-import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useState } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils, GraphObject } from "../lib/utils/dagre.util";
@@ -42,6 +42,7 @@ export const useWorkerQueue = ({
 }: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
   const [isQueueWorking, setIsWorking] = useState(false);
+  const [didWork, setDidWork] = useState(false);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
@@ -96,6 +97,7 @@ export const useWorkerQueue = ({
         setMapHeight(oldMapHeight);
         setClusterNodes(oldClusterNodes);
 
+        setDidWork(true);
         setGraph(({ nodes, edges }) => {
           // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
@@ -158,5 +160,12 @@ export const useWorkerQueue = ({
     setQueue(queue => [...queue, newTask]);
   };
 
-  return { addTask, queue, isQueueWorking };
+  const queueFinished = useMemo(() => {
+    if (!didWork) return false; // it dident execute a task before
+    if (queue.length) return false; // it has pendient tasks
+    if (isQueueWorking) return false; // is working now
+    return true;
+  }, [didWork, isQueueWorking, queue.length]);
+
+  return { addTask, queue, isQueueWorking, queueFinished };
 };

@@ -178,7 +178,6 @@ type SidebarType = {
   setOpenMedia: any;
   // --------------------------- Others
   selectionType: any;
-  setSNode: any;
   selectedUser: any;
   allNodes: FullNodesData;
   reloadPermanentGrpah: any;
@@ -561,7 +560,7 @@ const Sidebar = (props: SidebarType) => {
 
   if (!user || !reputation) return null;
 
-  console.log("sidebar");
+  // console.log("sidebar");
 
   return (
     <>
