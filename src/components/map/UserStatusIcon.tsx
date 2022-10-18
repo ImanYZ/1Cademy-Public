@@ -167,7 +167,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
-            sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
+            sx={{ border: "none", width: "28px", height: "28px", position: "static", cursor: "pointer" }}
           />
           {!props.inNodeFooter && (
             <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
