@@ -39,7 +39,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
 import ClustersList from "../components/map/ClustersList";
-import { LinksList } from "../components/map/LinksList";
+import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
@@ -3314,14 +3314,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   const edgeIds = Object.keys(graph.edges);
 
-  // const navigateWhenNotScrolling = useCallback(
-  //   newMapInteractionValue => {
-  //     if (!scrollToNodeInitialized) {
-  //       return setMapInteractionValue(newMapInteractionValue);
-  //     }
-  //   },
-  //   [scrollToNodeInitialized]
-  // );
+  const navigateWhenNotScrolling = useCallback(
+    newMapInteractionValue => {
+      if (!scrollToNodeInitialized) {
+        return setMapInteractionValue(newMapInteractionValue);
+      }
+    },
+    [scrollToNodeInitialized]
+  );
 
   console.log("dashboard render");
   return (
@@ -3497,11 +3497,11 @@ const Dashboard = ({}: DashboardProps) => {
             <MapInteractionCSS
               textIsHovered={mapHovered}
               /*identifier={'xdf'}*/
-              // value={mapInteractionValue}
-              // onChange={navigateWhenNotScrolling}
+              value={mapInteractionValue}
+              onChange={navigateWhenNotScrolling}
             >
               {showClusters && <ClustersList clusterNodes={clusterNodes} />}
-              <LinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
+              <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <MemoizedNodeList
                 nodes={graph.nodes}
                 bookmark={bookmark}

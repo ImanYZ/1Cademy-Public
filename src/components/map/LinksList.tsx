@@ -1,5 +1,6 @@
 import React from "react";
 
+import { compareEdgeIds } from "../../lib/utils/Map.utils";
 import Line from "./Line/Line";
 
 type LinkListProps = {
@@ -25,6 +26,16 @@ export const LinksList = ({ edgeIds, edges }: LinkListProps) => {
     </>
   );
 };
+
+export const MemoizedLinksList = React.memo(LinksList, (prev, next) => {
+  return (
+    compareEdgeIds(prev.edgeIds, next.edgeIds) &&
+    prev.edges.fromX === next.edges.fromX &&
+    prev.edges.fromY === next.edges.fromY &&
+    prev.edges.toX === next.edges.toX &&
+    prev.edges.toY === next.edges.toY
+  ); /*&& compareEdges(prev.edges, next.edges);*/
+});
 
 // import React from "react";
 

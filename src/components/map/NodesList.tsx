@@ -2,7 +2,7 @@ import React from "react";
 import { FullNodeData } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { NODE_WIDTH } from "@/lib/utils/Map.utils";
+import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
 
 // import { FullNodeData } from "../../noteBookTypes";
 import { MemoizedNode } from "./Node";
@@ -207,7 +207,9 @@ const NodesList = ({
 };
 // export default NodesList;
 // export const MemoizedNodeList = NodesList;
-export const MemoizedNodeList = React.memo(NodesList);
+export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
+  return compareNodes(prev.nodes, next.nodes);
+});
 
 // import React from "react";
 // import { useRecoilValue } from "recoil";
