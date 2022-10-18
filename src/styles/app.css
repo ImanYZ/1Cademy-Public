@@ -548,7 +548,7 @@ i {
 #tagModal #ModalBody {
   position: fixed;
   width: 364px;
-  height: 340px;
+  height: 350px;
   left: 430px;
   top: 139px;
 
@@ -624,4 +624,8 @@ select:-webkit-autofill:focus {
 
 .Striked {
   text-decoration: line-through grey;
+}
+.modelInSearchTags {
+  margin-top: 5px !important;
+  height: 235px;
 }
