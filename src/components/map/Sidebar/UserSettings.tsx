@@ -107,11 +107,11 @@ const doNothing = () => {};
 type UserSettingProps = {
   user: User;
   userReputation: Reputation;
-  showClusters: boolean;
-  setShowClusters: (oClusters: boolean) => void;
+  showClusters?: boolean;
+  setShowClusters?: (oClusters: boolean) => void;
 };
 
-const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -437,15 +437,15 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
     setDefaultTag();
   }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
-  const showHideClusters = useCallback(() => {
-    const userFieldLogRef = doc(collection(db, "userClustersLog"));
-    setDoc(userFieldLogRef, {
-      uname: user.uname,
-      open: !showClusters,
-      createdAt: Timestamp.fromDate(new Date()),
-    });
-    setShowClusters(!showClusters);
-  }, [db, setShowClusters, showClusters, user.uname]);
+  // const showHideClusters = useCallback(() => {
+  //   const userFieldLogRef = doc(collection(db, "userClustersLog"));
+  //   setDoc(userFieldLogRef, {
+  //     uname: user.uname,
+  //     open: !showClusters,
+  //     createdAt: Timestamp.fromDate(new Date()),
+  //   });
+  //   setShowClusters(!showClusters);
+  // }, [db, setShowClusters, showClusters, user.uname]);
 
   // ------------------->> THIS IS NOT USED
   // const closedSidebarClick = useCallback(
@@ -775,13 +775,16 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
   //   return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
   // };
 
-  const tabsItems = (user: User, choosingNodeId?: string) => {
+  const tabsItems = (user: User) => {
     return [
       {
         title: "Account",
         content: (
-          <div id="AccountSettings">
-            <div className="AccountSettingsButtons">
+          <div
+            id="AccountSettings"
+            style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
+          >
+            {/*<div className="AccountSettingsButtons">
               <MemoizedMetaButton onClick={() => choosingNodeClick("tag")}>
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon id="tagChangeIcon" className="material-icons deep-orange-text" />
@@ -791,12 +794,12 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                 </div>
               </MemoizedMetaButton>
             </div>
-            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+             CHECK I change  choosingNode to {nodeBookState.choosingNode?.id
             {choosingNodeId === "tag" && (
               <Suspense fallback={<div></div>}>
                 <div id="tagModal">
                   <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
-                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> 
                     <MemoizedTagsSearcher
                       setChosenTags={setChosenTags}
                       chosenTags={chosenTags}
@@ -807,7 +810,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                   </Modal>
                 </div>
               </Suspense>
-            )}
+            )}*/}
             {/* <UserSettingsSwitches
               theme={theme}
               handleThemeSwitch={handleThemeSwitch}
@@ -872,13 +875,13 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
             </FormGroup>
             {/* {props.showHideClusters && (
 
-            )} */}
+            )} 
             <FormGroup row>
-              {/* <FormControl className="select RowSwitch">
+              <FormControl className="select RowSwitch">
                 <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />
                 <div className="RowSwitchItem">Clusters:</div>
                 <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
-              </FormControl> */}
+              </FormControl>
               <FormControlLabel
                 control={
                   <Switch
@@ -890,7 +893,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                 }
                 label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
             <MemoizedInputSave
               identification="fNameInput"
               initialValue={user.fName || ""} //TODO: important fill empty user field
@@ -1198,8 +1201,35 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
           <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
           <div id="MiniUserPrifileTag">
             {/* <i className="material-icons grey-text">local_offer</i> */}
-            <LocalOfferIcon className="material-icons grey-text" style={{ marginRight: "12px" }} />
-            <span>{user.tag}</span>
+            <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
+              <div className="AccountSettingsButton">
+                <LocalOfferIcon
+                  sx={{ marginRight: "8px" }}
+                  id="tagChangeIcon"
+                  className="material-icons deep-orange-text"
+                />
+                {user.tag}
+
+                {isLoading && <LinearProgress />}
+              </div>
+            </MemoizedMetaButton>
+            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+            {nodeBookState?.choosingNode?.id === "tag" && (
+              <Suspense fallback={<div></div>}>
+                <div id="tagModal">
+                  <Modal style={{ top: "85px" }} onClick={closeTagSelector} returnLeft={true} noBackground={true}>
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    <MemoizedTagsSearcher
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "235px", height: "235px" }}
+                    />
+                  </Modal>
+                </div>
+              </Suspense>
+            )}
           </div>
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
             <OptimizedAvatar
@@ -1263,10 +1293,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
         </div>
       </div>
       <div className="UserSettingsSidebarBody">
-        <MemoizedSidebarTabs
-          tabsTitle="User Mini-profile tabs"
-          tabsItems={tabsItems(user, nodeBookState?.choosingNode?.id)}
-        />
+        <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems(user)} />
       </div>
     </>
   ) : (
