@@ -37,7 +37,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
   }, [imageUrl]);
 
   // render an Avatar with the firth Letter
-  if (!checkIfFileExist) {
+  if (!checkIfFileExist || !imageUrl) {
     return (
       <Avatar
         sx={{
@@ -69,7 +69,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           ...sx,
         }}
       >
-        <Image src={imageUrl!} alt={name} width="33px" height="24px" quality={40} />
+        <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
       </Box>
     );
   }
@@ -90,7 +90,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
         }}
       >
         <Image
-          src={imageUrl!}
+          src={imageUrl}
           alt={name}
           width="46px"
           height="46px"
@@ -107,7 +107,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
   // render an image without border
   return (
     <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center", ...sx }}>
-      <Image src={imageUrl!} alt={name} width="33px" height="24px" quality={40} />
+      <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
     </Box>
   );
 };
