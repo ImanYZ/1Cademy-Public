@@ -22,7 +22,7 @@ type UseWorkerQueueProps = {
   >;
   setMapWidth: any;
   setMapHeight: any;
-  setClusterNodes: any;
+  // setClusterNodes: any;
   // setMapChanged: any;
   mapWidth: number;
   mapHeight: number;
@@ -34,7 +34,7 @@ export const useWorkerQueue = ({
   setGraph,
   setMapWidth,
   setMapHeight,
-  setClusterNodes,
+  // setClusterNodes,
   // setMapChanged,
   mapWidth,
   mapHeight,
@@ -71,7 +71,15 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
-        const { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
+        const {
+          /*mapChangedFlag,*/
+          // oldClusterNodes,
+          oldMapWidth,
+          oldMapHeight,
+          oldNodes,
+          oldEdges,
+          graph,
+        } = e.data;
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -94,7 +102,7 @@ export const useWorkerQueue = ({
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
-        setClusterNodes(oldClusterNodes);
+        // setClusterNodes(oldClusterNodes);
 
         setGraph(({ nodes, edges }) => {
           // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
@@ -129,7 +137,16 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
     },
-    [allTags, g, mapHeight, mapWidth, setClusterNodes, setGraph, setMapHeight, setMapWidth]
+    [
+      allTags,
+      g,
+      mapHeight,
+      mapWidth,
+      // setClusterNodes,
+      setGraph,
+      setMapHeight,
+      setMapWidth,
+    ]
   );
 
   useEffect(() => {
