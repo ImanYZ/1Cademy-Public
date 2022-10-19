@@ -97,12 +97,16 @@ export const NodeItem = ({ node, userId, onHideNode, identifier }: NodeItemProps
     [onHideNode, identifier, setIsHiding]
   );
   const CloseCard = () => {
+    setTimeout(() => {
+      setPaddingTop("0");
+    }, 100);
     return (
       <IconButton onClick={hideNodeHandler} sx={{ position: "absolute", top: "4px", right: "4px" }}>
         <CloseIcon />
       </IconButton>
     );
   };
+
   return (
     <Card data-testid="node-item" sx={{ width: "100%", ":hover": { boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.2)" } }}>
       <NextLink passHref href={getNodePageUrl(node.title || "", node.id)}>

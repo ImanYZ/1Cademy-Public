@@ -501,9 +501,8 @@ const Node = ({
               {editable && isNew && (
                 <>
                   {/* New Node with inputs */}
-                  <p className="NewChildProposalWarning">Before proposing,</p>
-                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                    <span>- Search </span>
+                  <p className="NewChildProposalWarning">
+                    Before proposing, <span> Search </span>
                     <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
                     <span> to ensure the node does not exist.</span>
                   </p>

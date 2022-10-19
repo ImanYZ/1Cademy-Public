@@ -38,17 +38,17 @@ export const getTypedCollections = (db: Firestore, nodeType: NodeType) => {
     userVersionsColl = collection(db, "userIdeaVersions");
     versionsCommentsColl = collection(db, "ideaVersionComments");
     userVersionsCommentsColl = collection(db, "userIdeaVersionComments");
-  } else if (nodeType === "Profile") {
-    versionsColl = collection(db, "profileVersions");
-    userVersionsColl = collection(db, "userProfileVersions");
-    versionsCommentsColl = collection(db, "profileVersionComments");
-    userVersionsCommentsColl = collection(db, "userProfileVersionComments");
-  } else if (nodeType === "Sequel") {
-    versionsColl = collection(db, "sequelVersions");
-    userVersionsColl = collection(db, "userSequelVersions");
-    versionsCommentsColl = collection(db, "sequelVersionComments");
-    userVersionsCommentsColl = collection(db, "userSequelVersionComments");
-  } else if (nodeType === "Advertisement") {
+    // } else if (nodeType === "Profile") {
+    //   versionsColl = collection(db, "profileVersions");
+    //   userVersionsColl = collection(db, "userProfileVersions");
+    //   versionsCommentsColl = collection(db, "profileVersionComments");
+    //   userVersionsCommentsColl = collection(db, "userProfileVersionComments");
+    // } else if (nodeType === "Sequel") {
+    //   versionsColl = collection(db, "sequelVersions");
+    //   userVersionsColl = collection(db, "userSequelVersions");
+    //   versionsCommentsColl = collection(db, "sequelVersionComments");
+    //   userVersionsCommentsColl = collection(db, "userSequelVersionComments");
+    // } else if (nodeType === "Advertisement") {
     versionsColl = collection(db, "advertisementVersions");
     userVersionsColl = collection(db, "userAdvertisementVersions");
     versionsCommentsColl = collection(db, "advertisementVersionComments");

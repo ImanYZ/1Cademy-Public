@@ -3,7 +3,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "@/lib/firestoreServer/admin";
 import { buildProposal } from "@/lib/proposal";
 
-import { NodeType, ProposalInput } from "../../knowledgeTypes";
+import { ProposalInput } from "../../knowledgeTypes";
+import { NodeType } from "src/types";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -11,42 +12,42 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const nodeType = req.body.nodeType as NodeType;
 
     let proposalNameCollection = "";
-    if (nodeType === NodeType.Advertisement) {
-      proposalNameCollection = "advertisementVersions";
-    }
-    if (nodeType === NodeType.Code) {
+    // if (nodeType === NodeType.Advertisement) {
+    //   proposalNameCollection = "advertisementVersions";
+    // }
+    if (nodeType === "Code") {
       proposalNameCollection = "codeVersions";
     }
-    if (nodeType === NodeType.Concept) {
+    if (nodeType === "Concept") {
       proposalNameCollection = "conceptVersions";
     }
-    if (nodeType === NodeType.Idea) {
+    if (nodeType === "Idea") {
       proposalNameCollection = "ideaVersions";
     }
-    if (nodeType === NodeType.News) {
+    if (nodeType === "News") {
       proposalNameCollection = "newsVersions";
     }
-    if (nodeType === NodeType.Private) {
-      proposalNameCollection = "privateVersions";
-    }
-    if (nodeType === NodeType.Profile) {
-      proposalNameCollection = "profileVersions";
-    }
-    if (nodeType === NodeType.Question) {
+    // if (nodeType === NodeType.Private) {
+    //   proposalNameCollection = "privateVersions";
+    // }
+    // if (nodeType === NodeType.Profile) {
+    //   proposalNameCollection = "profileVersions";
+    // }
+    if (nodeType === "Question") {
       proposalNameCollection = "questionVersions";
     }
-    if (nodeType === NodeType.Reference) {
+    if (nodeType === "Reference") {
       proposalNameCollection = "referenceVersions";
     }
-    if (nodeType === NodeType.Relation) {
+    if (nodeType === "Relation") {
       proposalNameCollection = "relationVersions";
     }
-    if (nodeType === NodeType.Sequel) {
-      proposalNameCollection = "sequelVersions";
-    }
-    if (nodeType === NodeType.Tag) {
-      proposalNameCollection = "tagVersions";
-    }
+    // if (nodeType === NodeType.Sequel) {
+    //   proposalNameCollection = "sequelVersions";
+    // }
+    // if (nodeType === NodeType.Tag) {
+    //   proposalNameCollection = "tagVersions";
+    // }
 
     if (!proposalNameCollection) {
       return res.status(400).json({ errorMessage: "Cannot send feedback" });
