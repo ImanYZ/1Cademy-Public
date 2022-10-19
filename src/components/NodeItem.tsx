@@ -1,4 +1,5 @@
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CloseIcon from "@mui/icons-material/Close";
 import { Avatar, CardActionArea, Collapse, Grid, IconButton } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -13,7 +14,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import NextLink from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { getInstitutionsByName } from "@/lib/firestoreClient/institutions";
 import ROUTES from "@/lib/utils/routes";
@@ -36,13 +37,19 @@ type InstitutionData = {
 
 type NodeItemProps = {
   node: SimpleNode;
+  userId?: string | null;
+  onHideNode?: any;
+  identifier?: string;
 };
 
-export const NodeItem = ({ node }: NodeItemProps) => {
+export const NodeItem = ({ node, userId, onHideNode, identifier }: NodeItemProps) => {
   const [expanded, setExpanded] = useState(false);
   const [institutionsData, setInstitutionsData] = useState<InstitutionData[]>([]);
   const [paddingTop, setPaddingTop] = useState("0");
-
+  const [
+    // isHiding,
+    setIsHiding,
+  ] = useState(false);
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
@@ -81,13 +88,35 @@ export const NodeItem = ({ node }: NodeItemProps) => {
       </IconButton>
     );
   };
-
+  const hideNodeHandler = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onHideNode(identifier, setIsHiding);
+    },
+    [onHideNode, identifier, setIsHiding]
+  );
+  const CloseCard = () => {
+    return (
+      <IconButton onClick={hideNodeHandler} sx={{ position: "absolute", top: "4px", right: "4px" }}>
+        <CloseIcon />
+      </IconButton>
+    );
+  };
   return (
     <Card data-testid="node-item" sx={{ width: "100%", ":hover": { boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.2)" } }}>
       <NextLink passHref href={getNodePageUrl(node.title || "", node.id)}>
         <Link underline="none" color="inherit">
           <CardActionArea sx={{ pt: { xs: 4, lg: 6 }, px: { xs: 5, lg: 10 }, pb: 2 }}>
-            <CardHeader sx={{ p: 0, pb: 5 }} title={<MarkdownRender text={node.title || ""} />}></CardHeader>
+            <CardHeader
+              sx={{ p: 0, pb: 5 }}
+              title={
+                <Box>
+                  <MarkdownRender text={node.title || ""} />
+                  {userId && <CloseCard />}
+                </Box>
+              }
+            ></CardHeader>
 
             <CardContent sx={{ p: 0, height: "100%" }}>
               <Typography variant="body1" fontSize="0.9rem" component="div">

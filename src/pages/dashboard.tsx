@@ -278,7 +278,7 @@ const Dashboard = ({}: DashboardProps) => {
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
       console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
-      if (tries === 50) return;
+      if (tries === 10) return;
 
       if (!scrollToNodeInitialized || queueFinished) {
         console.log("scroll to node");
@@ -3765,7 +3765,13 @@ const Dashboard = ({}: DashboardProps) => {
                       return simpleNode;
                     })
                     .map((simpleNode: SimpleNode) => (
-                      <NodeItem key={simpleNode.id} node={simpleNode} />
+                      <NodeItem
+                        key={simpleNode.id}
+                        node={simpleNode}
+                        userId={user?.userId}
+                        identifier={simpleNode.id}
+                        onHideNode={hideNodeHandler}
+                      />
                     ))}
                 </Masonry>
               </Container>
