@@ -140,21 +140,24 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
         <div
           className="collapsible-header"
           onClick={choiceClick}
-          style={{ display: "flex", cursor: "pointer", border: "solid 1px white" }}
+          style={{ display: "flex", cursor: "pointer", alignItems: "center" }}
         >
           {choicesOpen[props.idx] ? (
             props.choice.correct ? (
-              <DoneIcon className="green-text" />
+              <DoneIcon className="green-text" sx={{ marginRight: "8px" }} />
             ) : (
-              <CloseIcon className="red-text" />
+              <CloseIcon className="red-text" sx={{ marginRight: "8px" }} />
             )
           ) : (
-            <CheckBoxOutlineBlankIcon />
+            <CheckBoxOutlineBlankIcon sx={{ marginRight: "8px" }} />
           )}
           <Editor label="" readOnly={true} value={props.choice.choice} setValue={doNothing} />
         </div>
         {choicesOpen[props.idx] && (
-          <div className="collapsible-body" style={{ display: "block", border: "solid 1px white" }}>
+          <div
+            className="collapsible-body"
+            style={{ display: "block", borderBottom: "solid 1px #fff", paddingLeft: "32px" }}
+          >
             <Editor label="" readOnly={true} value={props.choice.feedback} setValue={doNothing} />
           </div>
         )}
