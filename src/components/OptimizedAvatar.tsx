@@ -1,8 +1,8 @@
 import { Avatar, Box } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Image from "next/image";
-import React, { FC } from "react";
-
+import React, { FC, useEffect, useState } from "react";
 type Props = {
   name?: string;
   imageUrl?: string;
@@ -12,8 +12,32 @@ type Props = {
 };
 
 const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
+  const [checkIfFileExist, setCheckIfFileExist] = useState(false);
+  useEffect(() => {
+    if (imageUrl) {
+      const checkIfImageExists = async () => {
+        const storage = getStorage();
+        const storageRef = ref(storage, imageUrl);
+
+        getDownloadURL(storageRef)
+          .then(() => {
+            setCheckIfFileExist(true);
+          })
+          .catch(error => {
+            if (error.code === "storage/object-not-found") {
+              setCheckIfFileExist(false);
+            } else {
+              return Promise.reject(error);
+            }
+          });
+      };
+
+      checkIfImageExists();
+    }
+  }, [imageUrl]);
+
   // render an Avatar with the firth Letter
-  if (!imageUrl) {
+  if (!checkIfFileExist) {
     return (
       <Avatar
         sx={{
@@ -45,7 +69,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           ...sx,
         }}
       >
-        <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
+        <Image src={imageUrl!} alt={name} width="33px" height="24px" quality={40} />
       </Box>
     );
   }
@@ -66,7 +90,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
         }}
       >
         <Image
-          src={imageUrl}
+          src={imageUrl!}
           alt={name}
           width="46px"
           height="46px"
@@ -83,7 +107,7 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
   // render an image without border
   return (
     <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", justifyContent: "center", ...sx }}>
-      <Image src={imageUrl} alt={name} width="33px" height="24px" quality={40} />
+      <Image src={imageUrl!} alt={name} width="33px" height="24px" quality={40} />
     </Box>
   );
 };
