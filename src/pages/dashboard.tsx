@@ -3447,7 +3447,7 @@ const Dashboard = ({}: DashboardProps) => {
   const edgeIds = Object.keys(graph.edges);
 
   const navigateWhenNotScrolling = useCallback(
-    newMapInteractionValue => {
+    (newMapInteractionValue: any) => {
       if (!scrollToNodeInitialized) {
         return setMapInteractionValue(newMapInteractionValue);
       }
