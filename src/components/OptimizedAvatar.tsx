@@ -1,8 +1,8 @@
 import { Avatar, Box } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Image from "next/image";
-import React, { FC } from "react";
-
+import React, { FC, useEffect, useState } from "react";
 type Props = {
   name?: string;
   imageUrl?: string;
@@ -12,17 +12,52 @@ type Props = {
 };
 
 const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
+  const [checkIfFileExist, setCheckIfFileExist] = useState(false);
+  useEffect(() => {
+    if (imageUrl) {
+      const checkIfImageExists = async () => {
+        const storage = getStorage();
+        const storageRef = ref(storage, imageUrl);
+
+        getDownloadURL(storageRef)
+          .then(() => {
+            setCheckIfFileExist(true);
+          })
+          .catch(error => {
+            if (error.code === "storage/object-not-found") {
+              setCheckIfFileExist(false);
+            } else {
+              return Promise.reject(error);
+            }
+          });
+      };
+
+      checkIfImageExists();
+    }
+  }, [imageUrl]);
+
+  const getInstitutions = (instName: string, index: number): string => {
+    if (!instName?.split(" ")[index]) return "";
+    if (instName?.split(" ")[index].length < 3) {
+      const _index = index + 1;
+      return getInstitutions(instName, _index);
+    } else {
+      return instName.split(" ")[index];
+    }
+  };
+
   // render an Avatar with the firth Letter
-  if (!imageUrl) {
+  if (!checkIfFileExist || !imageUrl) {
     return (
       <Avatar
         sx={{
-          width: "50px",
-          height: "50px",
+          width: "40px",
+          height: "40px",
           ...sx,
         }}
       >
         {name.charAt(0)}
+        {getInstitutions(name, 1)?.charAt(0)}
       </Avatar>
     );
   }

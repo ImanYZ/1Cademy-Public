@@ -6,11 +6,15 @@ import { dagreUtils } from "../lib/utils/dagre.util";
 // import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
 // import { ClusterNodes } from "../noteBookTypes";
 import { MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
-import { ClusterNodes, EdgesData, FullNodesData } from "../nodeBookTypes";
+import {
+  // ClusterNodes,
+  EdgesData,
+  FullNodesData,
+} from "../nodeBookTypes";
 
 const layoutHandler = (
   // mapChangedFlag: boolean,
-  oldClusterNodes: ClusterNodes,
+  // oldClusterNodes: ClusterNodes,
   oldMapWidth: number,
   oldMapHeight: any,
   oldNodes: FullNodesData,
@@ -28,66 +32,66 @@ const layoutHandler = (
   // DAGRE RECALCULATE LAYOUT
   // dagre.layout(dag1);
   dagre.layout(g);
-  const clusterRegions: {
-    [key: string]: {
-      yMin: number;
-      yMax: number;
-      xMin: number;
-      xMax: number;
-      title: string;
-    };
-  } = {};
+  // const clusterRegions: {
+  //   [key: string]: {
+  //     yMin: number;
+  //     yMax: number;
+  //     xMin: number;
+  //     xMax: number;
+  //     title: string;
+  //   };
+  // } = {};
 
-  // Iterate oldNodes and find the cluster boundary
-  // and update their size
-  // if not existe create the cluster
-  for (let nId in oldNodes) {
-    //  if the node belongs to a cluster
-    if ("tagIds" in oldNodes[nId] && oldNodes[nId].tagIds.length > 0 && oldNodes[nId].tagIds[0] in allTags) {
-      //  nodeN is the object corresponding to this node in dagr
-      // const nodeN = dag1.node(nId);
-      const nodeN = g.node(nId);
-      if (oldNodes[nId].tagIds[0] in clusterRegions) {
-        //  if the cluster is defined, update its bounds
-        if (clusterRegions[oldNodes[nId].tagIds[0]].yMin > nodeN.y - nodeN.height / 2) {
-          clusterRegions[oldNodes[nId].tagIds[0]].yMin = nodeN.y - nodeN.height / 2;
-        }
-        if (clusterRegions[oldNodes[nId].tagIds[0]].yMax < nodeN.y + nodeN.height / 2) {
-          clusterRegions[oldNodes[nId].tagIds[0]].yMax = nodeN.y + nodeN.height / 2;
-        }
-        if (clusterRegions[oldNodes[nId].tagIds[0]].xMin > nodeN.x - nodeN.width / 2) {
-          clusterRegions[oldNodes[nId].tagIds[0]].xMin = nodeN.x - nodeN.width / 2;
-        }
-        if (clusterRegions[oldNodes[nId].tagIds[0]].xMax < nodeN.x + nodeN.width / 2) {
-          clusterRegions[oldNodes[nId].tagIds[0]].xMax = nodeN.x + nodeN.width / 2;
-        }
-      } else {
-        //  define a cluster
-        clusterRegions[oldNodes[nId].tagIds[0]] = {
-          yMin: nodeN.y - nodeN.height / 2,
-          yMax: nodeN.y + nodeN.height / 2,
-          xMin: nodeN.x - nodeN.width / 2,
-          xMax: nodeN.x + nodeN.width / 2,
-          title: oldNodes[nId].tags[0], // CHECK I added this
-        };
-      }
-    }
-  }
+  // // Iterate oldNodes and find the cluster boundary
+  // // and update their size
+  // // if not existe create the cluster
+  // for (let nId in oldNodes) {
+  //   //  if the node belongs to a cluster
+  //   if ("tagIds" in oldNodes[nId] && oldNodes[nId].tagIds.length > 0 && oldNodes[nId].tagIds[0] in allTags) {
+  //     //  nodeN is the object corresponding to this node in dagr
+  //     // const nodeN = dag1.node(nId);
+  //     const nodeN = g.node(nId);
+  //     if (oldNodes[nId].tagIds[0] in clusterRegions) {
+  //       //  if the cluster is defined, update its bounds
+  //       if (clusterRegions[oldNodes[nId].tagIds[0]].yMin > nodeN.y - nodeN.height / 2) {
+  //         clusterRegions[oldNodes[nId].tagIds[0]].yMin = nodeN.y - nodeN.height / 2;
+  //       }
+  //       if (clusterRegions[oldNodes[nId].tagIds[0]].yMax < nodeN.y + nodeN.height / 2) {
+  //         clusterRegions[oldNodes[nId].tagIds[0]].yMax = nodeN.y + nodeN.height / 2;
+  //       }
+  //       if (clusterRegions[oldNodes[nId].tagIds[0]].xMin > nodeN.x - nodeN.width / 2) {
+  //         clusterRegions[oldNodes[nId].tagIds[0]].xMin = nodeN.x - nodeN.width / 2;
+  //       }
+  //       if (clusterRegions[oldNodes[nId].tagIds[0]].xMax < nodeN.x + nodeN.width / 2) {
+  //         clusterRegions[oldNodes[nId].tagIds[0]].xMax = nodeN.x + nodeN.width / 2;
+  //       }
+  //     } else {
+  //       //  define a cluster
+  //       clusterRegions[oldNodes[nId].tagIds[0]] = {
+  //         yMin: nodeN.y - nodeN.height / 2,
+  //         yMax: nodeN.y + nodeN.height / 2,
+  //         xMin: nodeN.x - nodeN.width / 2,
+  //         xMax: nodeN.x + nodeN.width / 2,
+  //         title: oldNodes[nId].tags[0], // CHECK I added this
+  //       };
+  //     }
+  //   }
+  // }
 
   // Update OldClusterNodes
-  for (let cNode in clusterRegions) {
-    // const nodeN = dag1.node("Tag" + cNode) as any;
-    // console.log('  --- ---- --- >>', nodeN)
-    oldClusterNodes[cNode] = {
-      id: cNode,
-      x: clusterRegions[cNode].xMin + XOFFSET,
-      y: clusterRegions[cNode].yMin + YOFFSET,
-      width: clusterRegions[cNode].xMax - clusterRegions[cNode].xMin,
-      height: clusterRegions[cNode].yMax - clusterRegions[cNode].yMin,
-      title: clusterRegions[cNode].title,
-      // title: nodeN.title,// CHECK I commented this, because we will use the title setted
-    };
-  }
+  // for (let cNode in clusterRegions) {
+  //   // const nodeN = dag1.node("Tag" + cNode) as any;
+  //   // console.log('  --- ---- --- >>', nodeN)
+  //   oldClusterNodes[cNode] = {
+  //     id: cNode,
+  //     x: clusterRegions[cNode].xMin + XOFFSET,
+  //     y: clusterRegions[cNode].yMin + YOFFSET,
+  //     width: clusterRegions[cNode].xMax - clusterRegions[cNode].xMin,
+  //     height: clusterRegions[cNode].yMax - clusterRegions[cNode].yMin,
+  //     title: clusterRegions[cNode].title,
+  //     // title: nodeN.title,// CHECK I commented this, because we will use the title setted
+  //   };
+  // }
 
   // ITERATE oldNodes
   // get every node (nodeN) calculated by dagre
@@ -173,17 +177,34 @@ const layoutHandler = (
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
   console.log(`⌚[Map Worker]: ${endTimer - startTimer}ms`);
-  return { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph };
+  return {
+    /*mapChangedFlag,*/
+    // oldClusterNodes,
+    oldMapWidth,
+    oldMapHeight,
+    oldNodes,
+    oldEdges,
+    graph,
+  };
 };
 
 onmessage = e => {
-  const { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, allTags, graph } = e.data;
+  const {
+    /*mapChangedFlag,*/
+    // oldClusterNodes,
+    oldMapWidth,
+    oldMapHeight,
+    oldNodes,
+    oldEdges,
+    allTags,
+    graph,
+  } = e.data;
 
   const g = dagreUtils.mapObjectToGraph(graph);
 
   const workerResults = layoutHandler(
     // mapChangedFlag,
-    oldClusterNodes,
+    // oldClusterNodes,
     oldMapWidth,
     oldMapHeight,
     oldNodes,

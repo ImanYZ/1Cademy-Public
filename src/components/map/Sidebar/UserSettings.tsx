@@ -107,12 +107,12 @@ const doNothing = () => {};
 type UserSettingProps = {
   user: User;
   userReputation: Reputation;
-  showClusters: boolean;
-  setShowClusters: (oClusters: boolean) => void;
+  // showClusters: boolean;
+  // setShowClusters: (oClusters: boolean) => void;
   scrollToNode: (nodeId: string) => void;
 };
 
-const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scrollToNode }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -438,15 +438,15 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
     setDefaultTag();
   }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
-  const showHideClusters = useCallback(() => {
-    const userFieldLogRef = doc(collection(db, "userClustersLog"));
-    setDoc(userFieldLogRef, {
-      uname: user.uname,
-      open: !showClusters,
-      createdAt: Timestamp.fromDate(new Date()),
-    });
-    setShowClusters(!showClusters);
-  }, [db, setShowClusters, showClusters, user.uname]);
+  // const showHideClusters = useCallback(() => {
+  //   const userFieldLogRef = doc(collection(db, "userClustersLog"));
+  //   setDoc(userFieldLogRef, {
+  //     uname: user.uname,
+  //     open: !showClusters,
+  //     createdAt: Timestamp.fromDate(new Date()),
+  //   });
+  //   setShowClusters(!showClusters);
+  // }, [db, setShowClusters, showClusters, user.uname]);
 
   // ------------------->> THIS IS NOT USED
   // const closedSidebarClick = useCallback(
@@ -899,7 +899,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
                 <div className="RowSwitchItem">Clusters:</div>
                 <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
               </FormControl> */}
-              <FormControlLabel
+              {/* <FormControlLabel
                 control={
                   <Switch
                     // checked={!values.chooseUname}
@@ -909,7 +909,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
                   />
                 }
                 label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
-              />
+              /> */}
             </FormGroup>
             <FormGroup>
               <FormControlLabel
@@ -1243,7 +1243,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px" }}
+              sx={{ width: "25px", height: "25px", fontSize: "16px" }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}

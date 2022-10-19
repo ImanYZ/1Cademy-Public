@@ -307,7 +307,7 @@ const UserInfo = (props: any) => {
                 <OptimizedAvatar
                   imageUrl={sUserObj.instLogo}
                   name={sUserObj.deInstit + " logo"}
-                  sx={{ width: "25px", height: "25px" }}
+                  sx={{ width: "25px", height: "25px", fontSize: "15px" }}
                   renderAsAvatar={false}
                 />
                 <span>{sUserObj.deInstit}</span>

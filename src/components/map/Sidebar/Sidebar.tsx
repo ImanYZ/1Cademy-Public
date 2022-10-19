@@ -181,8 +181,8 @@ type SidebarType = {
   selectedUser: any;
   allNodes: FullNodesData;
   reloadPermanentGrpah: any;
-  showClusters: boolean;
-  setShowClusters: (newValue: boolean) => void;
+  // showClusters: boolean;
+  // setShowClusters: (newValue: boolean) => void;
   mapRendered: boolean;
   pendingProposalsLoaded: boolean;
   setPendingProposalsLoaded: (newValue: boolean) => void;
@@ -800,8 +800,8 @@ const Sidebar = (props: SidebarType) => {
                 userReputation={
                   reputation
                 } /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */
-                showClusters={props.showClusters}
-                setShowClusters={props.setShowClusters}
+                // showClusters={props.showClusters}
+                // setShowClusters={props.setShowClusters}
                 scrollToNode={props.scrollToNode}
               />
             </MemoizedSidebarWrapper>
