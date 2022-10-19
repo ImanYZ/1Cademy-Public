@@ -1,16 +1,18 @@
-import { NodeType } from "../../knowledgeTypes";
+// import { NodeType } from "../../knowledgeTypes";
+
+import { NodeType } from "src/types";
 
 export const NODE_TYPE_OPTIONS: NodeType[] = [
   // NodeType.Advertisement,
-  NodeType.Code,
-  NodeType.Concept,
-  NodeType.Idea,
+  "Code",
+  "Concept",
+  "Idea",
   // NodeType.News,
   // NodeType.Private,
   // NodeType.Profile,
-  NodeType.Question,
-  NodeType.Reference,
-  NodeType.Relation,
+  "Question",
+  "Reference",
+  "Relation",
   // NodeType.Sequel,
 ];
 

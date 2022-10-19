@@ -191,6 +191,7 @@ type SidebarType = {
   // openLinkedNode: any;
   // selectedNode: string;
   // allNodes: any;
+  scrollToNode: (nodeId: string) => void;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -801,6 +802,7 @@ const Sidebar = (props: SidebarType) => {
                 } /*openPractice={props.openPractice} setOpenPractice={props.setOpenPractice} */
                 showClusters={props.showClusters}
                 setShowClusters={props.setShowClusters}
+                scrollToNode={props.scrollToNode}
               />
             </MemoizedSidebarWrapper>
           ) : props.openBookmarks ? (

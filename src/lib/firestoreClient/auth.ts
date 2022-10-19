@@ -9,7 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import { Reputation, User, UserBackground, UserTheme } from "src/knowledgeTypes";
+import { Reputation, User, UserBackground, UserTheme, UserView } from "src/knowledgeTypes";
 
 export const signUp = async (name: string, email: string, password: string) => {
   const newUser = await createUserWithEmailAndPassword(getAuth(), email, password);
@@ -56,6 +56,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
   let user: User | null = null;
   let reputationsData: Reputation | null = null;
   let theme: UserTheme = "Dark";
+  let view: UserView = "Graph";
   let background: UserBackground = "Color";
   const db = getFirestore();
 
@@ -102,6 +103,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
     };
 
     theme = userData.theme;
+    view = "view" in userData ? userData.view : "Graph";
     background = "background" in userData ? userData.background : "Image";
 
     const reputationRef = collection(db, "reputations");
@@ -124,5 +126,5 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
     }
   }
 
-  return { user, reputation: reputationsData, theme, background };
+  return { user, reputation: reputationsData, theme, background, view };
 };

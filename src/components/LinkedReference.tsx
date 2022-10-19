@@ -3,10 +3,11 @@ import { IconButton, Link, ListItem, ListItemButton, ListItemText, Theme, Toolti
 import { Box, SxProps } from "@mui/system";
 import LinkNext from "next/link";
 import { FC, ReactNode } from "react";
+import { NodeType } from "src/types";
 
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
-import { NodeType } from "../knowledgeTypes";
+// import { NodeType } from "../knowledgeTypes";
 import HtmlTooltip from "./HtmlTooltip";
 import MarkdownRender from "./Markdown/MarkdownRender";
 

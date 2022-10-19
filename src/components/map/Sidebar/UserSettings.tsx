@@ -109,9 +109,10 @@ type UserSettingProps = {
   userReputation: Reputation;
   showClusters: boolean;
   setShowClusters: (oClusters: boolean) => void;
+  scrollToNode: (nodeId: string) => void;
 };
 
-const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scrollToNode }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -528,6 +529,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
           | "reason"
           | "foundFrom"
           | "birthDate"
+          | "view"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -589,7 +591,9 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
           case "birthDate":
             userLogCollection = "userBirthDayLog";
             break;
-
+          case "view":
+            userLogCollection = "userViewLog";
+            break;
           default:
           // code block
         }
@@ -620,6 +624,22 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
       dispatch({ type: "setTheme", payload: newTheme });
     },
     [changeAttr, dispatch, settings.theme]
+  );
+  const handleViewSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newView = settings.view === "Graph" ? "Masonry" : "Graph";
+      changeAttr("view")(newView);
+      // setTheme(newTheme);
+      dispatch({ type: "setView", payload: newView });
+
+      if (newView === "Graph") {
+        setTimeout(() => {
+          if (nodeBookState?.selectedNode) scrollToNode(nodeBookState.selectedNode);
+        }, 1500);
+      }
+    },
+    [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode, settings.view]
   );
 
   const handleBackgroundSwitch = useCallback(
@@ -889,6 +909,24 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                   />
                 }
                 label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={values.theme === "Dark"}
+                    checked={settings.view === "Graph"}
+                    onChange={handleViewSwitch}
+                    // onChange={() => {
+                    //   // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
+                    //   // setThemeMode(settings.theme === "light" ? "dark" : "light");
+                    //   // dispatch({ type: "setTheme", payload: settings.theme === "Light" ? "Dark" : "Light" });
+                    //   handleThemeSwitch();
+                    // }}
+                  />
+                }
+                label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
               />
             </FormGroup>
             <MemoizedInputSave

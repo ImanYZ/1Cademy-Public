@@ -75,6 +75,10 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         referenceLabels: nodeDataFound.nData.referenceLabels || [],
         tags: nodeDataFound.nData.tags || [],
         tagIds: nodeDataFound.nData.tagIds || [],
+        contributors: nodeDataFound.nData.contributors ?? {},
+        contribNames: nodeDataFound.nData.contribNames ?? [],
+        institutions: nodeDataFound.nData.institutions ?? {},
+        institNames: nodeDataFound.nData.institNames ?? [],
         // parents:nodeDataFound.nData.parents??[],
         // children:node
       };

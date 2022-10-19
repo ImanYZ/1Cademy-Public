@@ -4,20 +4,22 @@ import { AppProps } from "next/app";
 import { NextPage } from "next/types";
 import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
-export enum NodeType {
-  "Relation" = "Relation",
-  "Concept" = "Concept",
-  "Code" = "Code",
-  "Reference" = "Reference",
-  "Idea" = "Idea",
-  "Question" = "Question",
-  "Profile" = "Profile",
-  "Sequel" = "Sequel",
-  "Advertisement" = "Advertisement",
-  "News" = "News",
-  "Private" = "Private",
-  "Tag" = "Tag",
-}
+import { NodeType } from "./types";
+
+// export enum NodeType {
+//   "Relation" = "Relation",
+//   "Concept" = "Concept",
+//   "Code" = "Code",
+//   "Reference" = "Reference",
+//   "Idea" = "Idea",
+//   "Question" = "Question",
+//   "Profile" = "Profile",
+//   "Sequel" = "Sequel",
+//   "Advertisement" = "Advertisement",
+//   "News" = "News",
+//   "Private" = "Private",
+//   "Tag" = "Tag",
+// }
 
 export type KnowledgeNodeContributor = {
   fullname?: string;
@@ -341,6 +343,8 @@ export type ProposalInput = {
 
 export type UserTheme = "Dark" | "Light";
 
+export type UserView = "Graph" | "Masonry";
+
 export type UserBackground = "Color" | "Image";
 
 export type User = {
@@ -388,8 +392,9 @@ export type User = {
 };
 
 export type userSettings = {
-  background: "Image" | "Color";
+  background: UserBackground;
   theme: UserTheme;
+  view: UserView;
 };
 
 export type Reputation = {
@@ -461,7 +466,7 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
-  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground };
+  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground; view: UserView };
 };
 
 export type SetThemeAction = {
@@ -477,13 +482,17 @@ export type SetAuthUserAction = {
   type: "setAuthUser";
   payload: User;
 };
+export type SetViewAction = {
+  type: "setView";
+  payload: UserView;
+};
 export type DispatchAuthActions =
   | AuthLogoutSuccessAction
   | AuthLoginSuccessAction
   | SetThemeAction
   | SetBackgroundAction
-  | SetAuthUserAction;
-
+  | SetAuthUserAction
+  | SetViewAction;
 export type SignUpValidation = {
   uname?: string;
   email?: string;

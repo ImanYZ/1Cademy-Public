@@ -8,6 +8,7 @@ export const INITIAL_STATE: AuthState = {
   settings: {
     background: "Image",
     theme: "Dark",
+    view: "Graph",
   },
 };
 
@@ -22,7 +23,7 @@ function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
         ...state,
         ...action.payload,
         isAuthenticated: true,
-        settings: { theme: action.payload.theme, background: action.payload.background },
+        settings: { theme: action.payload.theme, background: action.payload.background, view: action.payload.view },
         isAuthInitialized: true,
       };
     case "setTheme":
@@ -33,6 +34,8 @@ function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
       return { ...state, settings: { ...state.settings, background: action.payload } };
     case "setAuthUser":
       return { ...state, user: action.payload };
+    case "setView":
+      return { ...state, settings: { ...state.settings, view: action.payload } };
   }
 }
 const toggleThemeHTML = (theme: UserTheme) => {

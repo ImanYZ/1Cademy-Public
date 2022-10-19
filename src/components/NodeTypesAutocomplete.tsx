@@ -5,11 +5,12 @@ import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
+import { NodeType } from "src/types";
 
 import { NODE_TYPE_OPTIONS } from "@/lib/utils/constants";
 import { getQueryParameter } from "@/lib/utils/utils";
 
-import { NodeType } from "../knowledgeTypes";
+// import { NodeType } from "../knowledgeTypes";
 import NodeTypeIcon from "./NodeTypeIcon";
 
 type Props = {
