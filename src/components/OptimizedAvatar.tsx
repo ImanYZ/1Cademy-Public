@@ -36,17 +36,28 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
     }
   }, [imageUrl]);
 
+  const getInstitutions = (instName: string, index: number): string => {
+    if (!instName?.split(" ")[index]) return "";
+    if (instName?.split(" ")[index].length < 3) {
+      const _index = index + 1;
+      return getInstitutions(instName, _index);
+    } else {
+      return instName.split(" ")[index];
+    }
+  };
+
   // render an Avatar with the firth Letter
   if (!checkIfFileExist || !imageUrl) {
     return (
       <Avatar
         sx={{
-          width: "50px",
-          height: "50px",
+          width: "40px",
+          height: "40px",
           ...sx,
         }}
       >
         {name.charAt(0)}
+        {getInstitutions(name, 1)?.charAt(0)}
       </Avatar>
     );
   }
