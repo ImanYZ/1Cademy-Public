@@ -171,7 +171,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               return (
                 <div
                   style={{
-                    margin: "5px 5px 0px 5px",
+                    margin: "5px 5px 0px 0px",
                   }}
                   key={props.identifier + "LinkTo" + parent.node}
                 >
@@ -219,7 +219,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               return (
                 <div
                   style={{
-                    margin: "5px 5px 0px 5px",
+                    margin: "5px 5px 0px 0px",
                   }}
                   key={props.identifier + "LinkTo" + reference.node + "DIV"}
                   className="ReferenceLink"
@@ -333,7 +333,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               return (
                 <div
                   style={{
-                    margin: "5px 5px 0px 5px",
+                    margin: "5px 5px 0px 0px",
                   }}
                   key={props.identifier + "LinkTo" + tag.node + "DIV"}
                 >
@@ -381,7 +381,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               return (
                 <div
                   style={{
-                    margin: "5px 5px 0px 5px",
+                    margin: "5px 5px 0px 0px",
                   }}
                   key={props.identifier + "LinkTo" + child.node + "DIV"}
                 >

@@ -21,6 +21,7 @@ type MetaButtonProps = {
   onClick?: any;
   onDoubleClick?: any;
   round?: boolean;
+  style?: any;
 };
 
 const MetaButton = (props: MetaButtonProps) => {
@@ -60,6 +61,7 @@ const MetaButton = (props: MetaButtonProps) => {
           // disabled={isSubmitting}
           onClick={metaButtonClick}
           onDoubleClick={handleDoubleClick}
+          style={props?.style}
         >
           {props.children}
           {/* {"tooltip" in props && props.tooltip && (

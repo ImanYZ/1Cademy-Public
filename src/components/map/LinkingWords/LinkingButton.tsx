@@ -46,6 +46,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
           ? "right"
           : "left"
       }
+      style={{ padding: "0px" }}
     >
       <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px" }}>
         <NodeTypeIcon
