@@ -38,7 +38,7 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
-import ClustersList from "../components/map/ClustersList";
+// import ClustersList from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
@@ -164,7 +164,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   // object of cluster boundaries
-  const [clusterNodes, setClusterNodes] = useState({});
+  // const [clusterNodes, setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -198,7 +198,7 @@ const Dashboard = ({}: DashboardProps) => {
     setGraph,
     setMapWidth,
     setMapHeight,
-    setClusterNodes,
+    // setClusterNodes,
     // setMapChanged,
     mapWidth,
     mapHeight,
@@ -263,7 +263,8 @@ const Dashboard = ({}: DashboardProps) => {
   // const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
   //
-  const [showClusters, setShowClusters] = useState(false);
+
+  // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
   // ---------------------------------------------------------------------
@@ -3569,8 +3570,8 @@ const Dashboard = ({}: DashboardProps) => {
             selectionType={nodeBookState.selectionType}
             selectedUser={selectedUser}
             reloadPermanentGrpah={reloadPermanentGraph}
-            showClusters={showClusters}
-            setShowClusters={setShowClusters}
+            // showClusters={showClusters}
+            // setShowClusters={setShowClusters}
             pendingProposalsLoaded={pendingProposalsLoaded}
             setPendingProposalsLoaded={setPendingProposalsLoaded}
             openProposal={openProposal}
@@ -3639,7 +3640,7 @@ const Dashboard = ({}: DashboardProps) => {
               value={mapInteractionValue}
               onChange={navigateWhenNotScrolling}
             >
-              {showClusters && <ClustersList clusterNodes={clusterNodes} />}
+              {/* {showClusters && <ClustersList clusterNodes={clusterNodes} />} */}
               <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
               <MemoizedNodeList
                 nodes={graph.nodes}
