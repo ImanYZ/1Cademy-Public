@@ -1,10 +1,11 @@
+import { NodeType } from "src/types";
+
 import API from "@/lib/utils/axiosConfig";
 
 import {
   FeedbackInput,
   FilterValue,
   KnowledgeNode,
-  NodeType,
   ProposalInput,
   ResponseAPI,
   ResponseAutocompleteFilter,

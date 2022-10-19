@@ -4,22 +4,22 @@ import { AppProps } from "next/app";
 import { NextPage } from "next/types";
 import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
-// import { NodeType } from "./types";
+import { NodeType } from "./types";
 
-export enum NodeType {
-  "Relation" = "Relation",
-  "Concept" = "Concept",
-  "Code" = "Code",
-  "Reference" = "Reference",
-  "Idea" = "Idea",
-  "Question" = "Question",
-  "Profile" = "Profile",
-  "Sequel" = "Sequel",
-  "Advertisement" = "Advertisement",
-  "News" = "News",
-  "Private" = "Private",
-  "Tag" = "Tag",
-}
+// export enum NodeType {
+//   "Relation" = "Relation",
+//   "Concept" = "Concept",
+//   "Code" = "Code",
+//   "Reference" = "Reference",
+//   "Idea" = "Idea",
+//   "Question" = "Question",
+//   "Profile" = "Profile",
+//   "Sequel" = "Sequel",
+//   "Advertisement" = "Advertisement",
+//   "News" = "News",
+//   "Private" = "Private",
+//   "Tag" = "Tag",
+// }
 
 export type KnowledgeNodeContributor = {
   fullname?: string;
