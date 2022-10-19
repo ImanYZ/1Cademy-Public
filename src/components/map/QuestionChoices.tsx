@@ -154,7 +154,10 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <Editor label="" readOnly={true} value={props.choice.choice} setValue={doNothing} />
         </div>
         {choicesOpen[props.idx] && (
-          <div className="collapsible-body" style={{ display: "block", border: "solid 1px white", padding: "5px" }}>
+          <div
+            className="collapsible-body"
+            style={{ display: "block", borderBottom: "solid 1px #fff", paddingLeft: "32px" }}
+          >
             <Editor label="" readOnly={true} value={props.choice.feedback} setValue={doNothing} />
           </div>
         )}
