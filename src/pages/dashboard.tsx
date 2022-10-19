@@ -1144,7 +1144,9 @@ const Dashboard = ({}: DashboardProps) => {
           // setChosenNode(null);
           // setChosenNodeTitle(null);
           // setChoosingType(null);
-          scrollToNode(nodeId);
+          setTimeout(() => {
+            scrollToNode(nodeId);
+          }, 1500);
           // setMapChanged(true);
 
           const newNodes = {
@@ -1234,7 +1236,10 @@ const Dashboard = ({}: DashboardProps) => {
           thisNode.tags.splice(linkIdx, 1);
           thisNode.tagIds.splice(linkIdx, 1);
         }
-        scrollToNode(nodeId);
+        setTimeout(() => {
+          scrollToNode(nodeId);
+        }, 1500);
+
         oldNodes[nodeId] = thisNode;
         return { nodes: oldNodes, edges: newEdges };
       });
@@ -1242,6 +1247,20 @@ const Dashboard = ({}: DashboardProps) => {
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [addedParents, removedParents, addedChildren, removedChildren]
+  );
+
+  const nodeClicked = useCallback(
+    (event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
+      // console.log("In nodeClicked");
+      if (nodeBookState.selectionType !== "AcceptedProposals" && nodeBookState.selectionType !== "Proposals") {
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        // nodeBookDispatch({type:'setSelectedNode',payload:nodeId)
+        // setSelectedNode(nodeId);
+        setSelectedNodeType(nodeType);
+        setOpenPart("LinkingWords");
+      }
+    },
+    [nodeBookDispatch, nodeBookState.selectionType]
   );
 
   const setNodeParts = useMemoizedCallback((nodeId, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -1336,7 +1355,9 @@ const Dashboard = ({}: DashboardProps) => {
         } catch (err) {
           console.error(err);
         }
-        scrollToNode(nodeId);
+        setTimeout(() => {
+          scrollToNode(nodeId);
+        }, 1500);
         setIsSubmitting(false);
       }
     },
@@ -1608,7 +1629,7 @@ const Dashboard = ({}: DashboardProps) => {
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             scrollToNode(nodeId);
             // setSelectedNode(nodeId);
-          }, 750);
+          }, 1500);
         } catch (err) {
           console.error(err);
         }
@@ -1754,7 +1775,10 @@ const Dashboard = ({}: DashboardProps) => {
         }
         console.log("------->>> will call nodeBookDispatch", parentNode);
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
-        scrollToNode(parentNode);
+        setTimeout(() => {
+          scrollToNode(parentNode);
+        }, 1500);
+
         // // setSelectedNode(parents[0]);
       }
     },
@@ -2724,6 +2748,8 @@ const Dashboard = ({}: DashboardProps) => {
           editable: true,
           width: NODE_WIDTH,
           node: newNodeId,
+          left: thisNode.left,
+          top: thisNode.top,
         };
         if (childNodeType === "Question") {
           newChildNode.choices = [
@@ -2747,7 +2773,9 @@ const Dashboard = ({}: DashboardProps) => {
         // });
         // console.log(4, { newNodes, newEdges });
         // setMapChanged(true);
-        scrollToNode(newNodeId);
+        setTimeout(() => {
+          scrollToNode(newNodeId);
+        }, 1500);
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3113,7 +3141,9 @@ const Dashboard = ({}: DashboardProps) => {
             }
           }
           // << ----------------
-          scrollToNode(newNodeId);
+          setTimeout(() => {
+            scrollToNode(newNodeId);
+          }, 1500);
           console.log("typechild", 3, { newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
           // return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
@@ -3618,7 +3648,7 @@ const Dashboard = ({}: DashboardProps) => {
                 toggleNode={toggleNode}
                 openNodePart={openNodePart}
                 selectNode={selectNode}
-                nodeClicked={() => console.log("nodeClicked--->>>>")}
+                nodeClicked={nodeClicked} // CHECK when is used
                 correctNode={correctNode}
                 wrongNode={wrongNode}
                 uploadNodeImage={uploadNodeImage}
@@ -3637,7 +3667,7 @@ const Dashboard = ({}: DashboardProps) => {
                 saveProposedChildNode={saveProposedChildNode}
                 saveProposedImprovement={saveProposedImprovement}
                 closeSideBar={closeSideBar}
-                reloadPermanentGrpah={() => console.log("reloadPermanentGrpah")}
+                reloadPermanentGrpah={reloadPermanentGraph}
                 setNodeParts={setNodeParts}
                 citations={citations}
               />
