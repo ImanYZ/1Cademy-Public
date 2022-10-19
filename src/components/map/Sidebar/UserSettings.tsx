@@ -107,11 +107,11 @@ const doNothing = () => {};
 type UserSettingProps = {
   user: User;
   userReputation: Reputation;
-  showClusters: boolean;
-  setShowClusters: (oClusters: boolean) => void;
+  // showClusters: boolean;
+  // setShowClusters: (oClusters: boolean) => void;
 };
 
-const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -437,15 +437,15 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
     setDefaultTag();
   }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
-  const showHideClusters = useCallback(() => {
-    const userFieldLogRef = doc(collection(db, "userClustersLog"));
-    setDoc(userFieldLogRef, {
-      uname: user.uname,
-      open: !showClusters,
-      createdAt: Timestamp.fromDate(new Date()),
-    });
-    setShowClusters(!showClusters);
-  }, [db, setShowClusters, showClusters, user.uname]);
+  // const showHideClusters = useCallback(() => {
+  //   const userFieldLogRef = doc(collection(db, "userClustersLog"));
+  //   setDoc(userFieldLogRef, {
+  //     uname: user.uname,
+  //     open: !showClusters,
+  //     createdAt: Timestamp.fromDate(new Date()),
+  //   });
+  //   setShowClusters(!showClusters);
+  // }, [db, setShowClusters, showClusters, user.uname]);
 
   // ------------------->> THIS IS NOT USED
   // const closedSidebarClick = useCallback(
@@ -879,7 +879,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                 <div className="RowSwitchItem">Clusters:</div>
                 <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
               </FormControl> */}
-              <FormControlLabel
+              {/* <FormControlLabel
                 control={
                   <Switch
                     // checked={!values.chooseUname}
@@ -889,7 +889,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters }: U
                   />
                 }
                 label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
-              />
+              /> */}
             </FormGroup>
             <MemoizedInputSave
               identification="fNameInput"

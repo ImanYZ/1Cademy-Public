@@ -4,7 +4,13 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils, GraphObject } from "../lib/utils/dagre.util";
 import { setDagNodes } from "../lib/utils/Map.utils";
-import { ClusterNodes, EdgeData, EdgesData, FullNodeData, FullNodesData } from "../nodeBookTypes";
+import {
+  // ClusterNodes,
+  EdgeData,
+  EdgesData,
+  FullNodeData,
+  FullNodesData,
+} from "../nodeBookTypes";
 
 export type Task = {
   id: string;
@@ -22,7 +28,7 @@ type UseWorkerQueueProps = {
   >;
   setMapWidth: any;
   setMapHeight: any;
-  setClusterNodes: any;
+  // setClusterNodes: any;
   // setMapChanged: any;
   mapWidth: number;
   mapHeight: number;
@@ -34,7 +40,7 @@ export const useWorkerQueue = ({
   setGraph,
   setMapWidth,
   setMapHeight,
-  setClusterNodes,
+  // setClusterNodes,
   // setMapChanged,
   mapWidth,
   mapHeight,
@@ -48,7 +54,7 @@ export const useWorkerQueue = ({
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
       console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
       // let mapChangedFlag = true;
-      const oldClusterNodes: ClusterNodes = {};
+      // const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
       let oldNodes = { ...nodesToRecalculate };
@@ -58,7 +64,7 @@ export const useWorkerQueue = ({
 
       worker.postMessage({
         // mapChangedFlag,
-        oldClusterNodes,
+        // oldClusterNodes,
         oldMapWidth,
         oldMapHeight,
         oldNodes,
@@ -72,7 +78,15 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
-        const { /*mapChangedFlag,*/ oldClusterNodes, oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
+        const {
+          /*mapChangedFlag,*/
+          // oldClusterNodes,
+          oldMapWidth,
+          oldMapHeight,
+          oldNodes,
+          oldEdges,
+          graph,
+        } = e.data;
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -95,7 +109,7 @@ export const useWorkerQueue = ({
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
-        setClusterNodes(oldClusterNodes);
+        // setClusterNodes(oldClusterNodes);
 
         setDidWork(true);
         setGraph(({ nodes, edges }) => {
@@ -131,7 +145,16 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
     },
-    [allTags, g, mapHeight, mapWidth, setClusterNodes, setGraph, setMapHeight, setMapWidth]
+    [
+      allTags,
+      g,
+      mapHeight,
+      mapWidth,
+      // setClusterNodes,
+      setGraph,
+      setMapHeight,
+      setMapWidth,
+    ]
   );
 
   useEffect(() => {
