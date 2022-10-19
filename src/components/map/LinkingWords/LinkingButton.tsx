@@ -47,14 +47,14 @@ const LinkingButton = (props: LinkingButtonProps) => {
           : "left"
       }
     >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px" }}>
         <NodeTypeIcon
           nodeType={props.nodeType}
           tooltipPlacement={"left"}
+          fontSize={"inherit"}
           sx={{
-            fontSize: "16px",
+            marginRight: "4px",
             color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
-            pr: "4px",
           }}
         />
         <Editor
@@ -62,7 +62,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
           setValue={doNothing}
           label={""}
           value={props.linkedNodeTitle}
-          sxPreview={{ fontSize: "14px" }}
+          sxPreview={{ fontSize: "14px", lineHeight: "1.5" }}
         />
         {/* CHECK: I commented this, please uncomment this */}
         {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}

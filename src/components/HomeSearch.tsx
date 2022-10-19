@@ -80,18 +80,19 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch, s
         >
           <Image src={logoHero} alt="1Cademy Logo" width="421px" height="130px" />
         </Box>
-        <Box ref={containerRef} sx={{ width: "100%", display: "flex", gap: "5px", mt: { xs: 15, md: 5 } }}>
+        <Box ref={containerRef} sx={{ width: "100%", display: "flex", mt: { xs: 15, md: 5 } }}>
           <SearchInput onSearch={onSearch}></SearchInput>
           <Button
             variant="contained"
             onClick={handleOpenFilter}
             sx={{
-              color: theme => theme.palette.common.black,
-              background: theme => theme.palette.common.white,
+              color: theme => theme.palette.common.white,
+              background: theme => theme.palette.common.orange,
               height: "55px",
               fontSize: 16,
               fontWeight: "700",
               my: "auto",
+              marginLeft: "5px",
               paddingX: "30px",
               borderRadius: 1,
               textAlign: "center",
