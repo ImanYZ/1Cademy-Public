@@ -1943,6 +1943,7 @@ const Dashboard = ({}: DashboardProps) => {
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
           console.log("[TOGGLE_NODE]", thisNode);
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           const changeNode: any = {
             updatedAt: Timestamp.fromDate(new Date()),
@@ -2076,6 +2077,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.choosingNode) {
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           let studiedNum = 0;
           if ("studied" in thisNode) {
@@ -2133,6 +2135,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.choosingNode) {
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           // let bookmarks = 0;
           // if ("bookmarks" in thisNode) {
