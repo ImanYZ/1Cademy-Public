@@ -1,6 +1,7 @@
 import { CollectionReference, DocumentData } from "firebase-admin/firestore";
+import { NodeType } from "src/types";
 import { db } from "../lib/firestoreServer/admin";
-import { NodeType } from "../types";
+// import { NodeType } from "../types";
 
 type GetTypedCollectionsParam = { nodeType: NodeType };
 
@@ -33,21 +34,21 @@ export const getTypedCollections = ({ nodeType }: GetTypedCollectionsParam): Get
     userVersionsColl = db.collection("userQuestionVersions");
     versionsCommentsColl = db.collection("questionVersionComments");
     userVersionsCommentsColl = db.collection("userQuestionVersionComments");
-  } else if (nodeType === "Profile") {
-    versionsColl = db.collection("profileVersions");
-    userVersionsColl = db.collection("userProfileVersions");
-    versionsCommentsColl = db.collection("profileVersionComments");
-    userVersionsCommentsColl = db.collection("userProfileVersionComments");
-  } else if (nodeType === "Sequel") {
-    versionsColl = db.collection("sequelVersions");
-    userVersionsColl = db.collection("userSequelVersions");
-    versionsCommentsColl = db.collection("sequelVersionComments");
-    userVersionsCommentsColl = db.collection("userSequelVersionComments");
-  } else if (nodeType === "Advertisement") {
-    versionsColl = db.collection("advertisementVersions");
-    userVersionsColl = db.collection("userAdvertisementVersions");
-    versionsCommentsColl = db.collection("advertisementVersionComments");
-    userVersionsCommentsColl = db.collection("userAdvertisementVersionComments");
+    // } else if (nodeType === "Profile") {
+    //   versionsColl = db.collection("profileVersions");
+    //   userVersionsColl = db.collection("userProfileVersions");
+    //   versionsCommentsColl = db.collection("profileVersionComments");
+    //   userVersionsCommentsColl = db.collection("userProfileVersionComments");
+    // } else if (nodeType === "Sequel") {
+    //   versionsColl = db.collection("sequelVersions");
+    //   userVersionsColl = db.collection("userSequelVersions");
+    //   versionsCommentsColl = db.collection("sequelVersionComments");
+    //   userVersionsCommentsColl = db.collection("userSequelVersionComments");
+    // } else if (nodeType === "Advertisement") {
+    //   versionsColl = db.collection("advertisementVersions");
+    //   userVersionsColl = db.collection("userAdvertisementVersions");
+    //   versionsCommentsColl = db.collection("advertisementVersionComments");
+    //   userVersionsCommentsColl = db.collection("userAdvertisementVersionComments");
   } else if (nodeType === "Reference") {
     versionsColl = db.collection("referenceVersions");
     userVersionsColl = db.collection("userReferenceVersions");
