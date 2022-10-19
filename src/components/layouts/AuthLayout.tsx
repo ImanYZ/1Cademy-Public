@@ -55,7 +55,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
             width: "100vw",
             height: "100vh",
             position: "fixed",
-            // filter: "brightness(0.25)",
+            filter: "brightness(1.95)",
             zIndex: -2,
           }}
         >
@@ -95,6 +95,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
             color: theme => theme.palette.common.white,
             background: theme =>
               settings.theme === "Dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white,
+            // backgroundImage: `url(${settings.theme === "Dark" ? darkModeLibraryImage.src : lightModeLibraryImage.src})`,
           }}
         >
           {/* left panel */}
@@ -119,7 +120,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   layout="fill"
                   objectFit="cover"
                   priority
-                  style={{ filter: "blur(4px)" }}
+                  // style={{ filter: "blur(4px)" }}
                 />
               )}
               {settings.background === "Image" && settings.theme === "Light" && (
