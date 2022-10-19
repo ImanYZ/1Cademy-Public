@@ -1299,6 +1299,7 @@ const Dashboard = ({}: DashboardProps) => {
         try {
           for (let offspring of offsprings) {
             const thisNode = graph.nodes[offspring];
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             const { nodeRef, userNodeRef } = initNodeStatusChange(offspring, thisNode.userNodeId);
             const userNodeData = {
               changed: thisNode.changed,
@@ -1925,6 +1926,9 @@ const Dashboard = ({}: DashboardProps) => {
           // await firebase.commitBatch();
           await batch.commit();
           setIsSubmitting(false);
+          setTimeout(() => {
+            scrollToNode(nodeId);
+          }, 1500);
         } catch (err) {
           console.error(err);
         }
@@ -3677,7 +3681,7 @@ const Dashboard = ({}: DashboardProps) => {
                   </MapInteractionCSS>
                 </>
               </Modal>
-              {isSubmitting && (
+              {(isSubmitting || !queueFinished) && (
                 <div className="CenterredLoadingImageContainer">
                   <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
                 </div>
