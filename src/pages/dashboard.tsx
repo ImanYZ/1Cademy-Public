@@ -36,8 +36,6 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
-import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
 import ClustersList from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
@@ -3455,37 +3453,8 @@ const Dashboard = ({}: DashboardProps) => {
     [scrollToNodeInitialized]
   );
 
-  // console.log("dashboard render");
   return (
     <div className="MapContainer">
-      {settings.theme === "Dark" && (
-        <Box
-          data-testid="auth-layout"
-          sx={{
-            width: "100vw",
-            height: "100vh",
-            position: "fixed",
-            // filter: "brightness(0.25)",
-            zIndex: -2,
-          }}
-        >
-          <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
-        </Box>
-      )}
-      {settings.theme === "Light" && (
-        <Box
-          data-testid="auth-layout"
-          sx={{
-            width: "100vw",
-            height: "100vh",
-            position: "fixed",
-            // filter: "brightness(1.4)",
-            zIndex: -2,
-          }}
-        >
-          <Image alt="Library" src={lightModeLibraryImage} layout="fill" objectFit="cover" priority />
-        </Box>
-      )}
       <Box
         id="Map"
         sx={{
