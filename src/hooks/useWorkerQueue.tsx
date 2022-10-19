@@ -4,7 +4,13 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils, GraphObject } from "../lib/utils/dagre.util";
 import { setDagNodes } from "../lib/utils/Map.utils";
-import { ClusterNodes, EdgeData, EdgesData, FullNodeData, FullNodesData } from "../nodeBookTypes";
+import {
+  // ClusterNodes,
+  EdgeData,
+  EdgesData,
+  FullNodeData,
+  FullNodesData,
+} from "../nodeBookTypes";
 
 export type Task = {
   id: string;
@@ -48,7 +54,7 @@ export const useWorkerQueue = ({
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
       console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
       // let mapChangedFlag = true;
-      const oldClusterNodes: ClusterNodes = {};
+      // const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
       let oldNodes = { ...nodesToRecalculate };
@@ -58,7 +64,7 @@ export const useWorkerQueue = ({
 
       worker.postMessage({
         // mapChangedFlag,
-        oldClusterNodes,
+        // oldClusterNodes,
         oldMapWidth,
         oldMapHeight,
         oldNodes,
