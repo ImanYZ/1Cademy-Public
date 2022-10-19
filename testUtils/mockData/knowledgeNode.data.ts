@@ -169,8 +169,7 @@
 //       title: "Pathogenesis of COVID-19",
 //       content:
 //         "Retrospective epidemiological studies using clinical data and experimental molecular biologies studies have revealed biomarkers of COVID-19.  These elements not only reveal how COVID-19 mechanistically affects the body, but they may also be risk factors for developing severe symptoms and act as targets for pharmacological intervention.  They include:\n\n- A1AT protection\n- ACE2 expression and activity\n- ADAM17 sheddase activity\n- Furin protease activity\n- Irregular respiratory function\n- Pro-inflammatory cytokine concentration in the plasma\n- TMPRSS2 serine protease genetic variation\n- Variation in genetic susceptibility to SARS-CoV-2\n- Viral interactions with glycosaminoglycans\n- Nsp (Non-specific Protein) Activity\n- Neuropilin-1 expression\n",
-//       nodeImage:
-//         "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/UploadedImages%2FBWR3EEVNIdX7V3IqT57yAGj7tdX2%2FWed%2C%2008%20Jul%202020%2001%3A08%3A21%20GMT.gif?alt=media&token=1b6b26ab-273e-4ca8-af79-66611ebfa180",
+//       nodeImage:"",
 //       nodeType: "",
 //     },
 //     {
