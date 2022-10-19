@@ -1205,7 +1205,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px" }}
+              sx={{ width: "25px", height: "25px", fontSize: "16px" }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}

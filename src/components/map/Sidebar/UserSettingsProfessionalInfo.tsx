@@ -136,7 +136,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
           <li {...props}>
             <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
-            {option.name}
+            <div style={{ paddingLeft: "10px" }}>{option.name}</div>
           </li>
         )}
         isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
