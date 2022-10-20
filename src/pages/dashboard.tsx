@@ -1,6 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
-import { Masonry } from "@mui/lab";
 import { Button, Container, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 // import axios from "axios";
@@ -31,6 +30,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { ViewMasonry } from "@/components/map/ViewMasonry";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -45,7 +45,7 @@ import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
-import { NodeChanges, SimpleNode } from "../knowledgeTypes";
+import { NodeChanges } from "../knowledgeTypes";
 import { idToken } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
@@ -3704,53 +3704,8 @@ const Dashboard = ({}: DashboardProps) => {
           {settings.view === "Masonry" && (
             <Box>
               <Container>
-                <Masonry sx={{ my: 4, mx: { md: "0px" } }} columns={{ xm: 1, md: 2 }} spacing={4} defaultHeight={450}>
-                  {/* {isLoading && renderLoadingSkeletons()} */}
-
-                  {Object.keys(graph.nodes)
-                    .map(key => graph.nodes[key])
-                    .map(fullNode => {
-                      console.log("fullNode", fullNode);
-                      const simpleNode: SimpleNode = {
-                        id: fullNode.node,
-                        choices: fullNode.choices,
-                        contributors: Object.keys(fullNode.contributors).map(key => ({
-                          fullName: fullNode.contributors[key].fullname,
-                          imageUrl: fullNode.contributors[key].imageUrl,
-                          username: key,
-                        })),
-                        institutions: Object.keys(fullNode.institutions).map(key => ({ name: key })),
-                        nodeType: fullNode.nodeType,
-                        tags: fullNode.tags,
-                        versions: fullNode.versions ?? 0,
-                        changedAt: fullNode.changedAt.toString(),
-                        content: fullNode.content,
-                        corrects: fullNode.corrects,
-                        nodeImage: fullNode.nodeImage,
-                        studied: fullNode.isStudied,
-                        title: fullNode.title,
-                        wrongs: fullNode.wrongs,
-                      };
-                      return simpleNode;
-                    })
-                    .map((simpleNode: SimpleNode) => (
-                      <NodeItem
-                        key={simpleNode.id}
-                        node={simpleNode}
-                        userId={user?.userId}
-                        identifier={simpleNode.id}
-                        onHideNode={hideNodeHandler}
-                      />
-                    ))}
-                </Masonry>
+                <ViewMasonry nodes={graph.nodes} userId={user?.userId} hideNodeHandler={hideNodeHandler} />
               </Container>
-              <Suspense fallback={<div></div>}>
-                {isSubmitting && (
-                  <div className="CenterredLoadingImageContainer">
-                    <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
-                  </div>
-                )}
-              </Suspense>
             </Box>
           )}
         </Box>

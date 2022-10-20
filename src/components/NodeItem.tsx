@@ -97,9 +97,6 @@ export const NodeItem = ({ node, userId, onHideNode, identifier }: NodeItemProps
     [onHideNode, identifier, setIsHiding]
   );
   const CloseCard = () => {
-    setTimeout(() => {
-      setPaddingTop("0");
-    }, 100);
     return (
       <IconButton onClick={hideNodeHandler} sx={{ position: "absolute", top: "4px", right: "4px" }}>
         <CloseIcon />
