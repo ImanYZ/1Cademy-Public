@@ -203,17 +203,18 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
   );
 
   return (
-    <div
+    <Box
       id="ComLeaderboardMain"
       className={comLeaderboardOpen ? undefined : "Minimized"}
+      sx={{ width: { xs: "70%", md: "90%" } }}
       // style={{ border: "solid 2px red" }}
     >
       {/* <div id="ComLeaderboardSidebarOverlap"></div> */}
-      <div id="ComLeaderboardMinimizer">
+      <Box id="ComLeaderboardMinimizer">
         <MemoizedMetaButton onClick={openComLeaderboard}>
           <Box sx={{ paddingRight: "5px" }}>{comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}</Box>
         </MemoizedMetaButton>
-      </div>
+      </Box>
       <div
         id="ComLeaderboardContainer"
         className={
@@ -229,7 +230,16 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
       >
         <div id="ComLeaderbaordChanger">
           <MemoizedMetaButton onClick={openComLeaderboardTypes}>
-            <Box sx={{ display: "flex", gap: "10px", alignItems: "center", paddingY: "5px", paddingLeft: "5px" }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                gap: { xs: "0px", md: "0px", lg: "10px", xl: "10px" },
+                alignItems: "center",
+                paddingY: "5px",
+                paddingLeft: "5px",
+              }}
+            >
               <div id="ComLeaderbaordChangerIcon">🏆</div>
               <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
             </Box>
@@ -272,7 +282,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           )}
         </Box>
       </div>
-    </div>
+    </Box>
   );
 };
 
