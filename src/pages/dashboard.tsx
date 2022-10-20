@@ -184,6 +184,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [removedParents, setRemovedParents] = useState<string[]>([]);
   const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
+  const [firstLoading, setFirstLoading] = useState(true);
   const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
 
   const previousLengthNodes = useRef(0);
@@ -347,6 +348,9 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("userNodesLoaded", userNodesLoaded);
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
+        if (queueFinished) {
+          setFirstLoading(false);
+        }
       }
     }, 1000);
   }, [
@@ -3704,10 +3708,25 @@ const Dashboard = ({}: DashboardProps) => {
                   </MapInteractionCSS>
                 </>
               </Modal>
-              {(isSubmitting || !queueFinished) && (
+              {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
                 <div className="CenterredLoadingImageContainer">
-                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                  <Image
+                    className="CenterredLoadingImage"
+                    loading="lazy"
+                    src={LoadingImg}
+                    alt="Loading"
+                    width={250}
+                    height={250}
+                  />
                 </div>
+              )}
+              {!Object.keys(graph.nodes).length && (
+                <>
+                  <div id="ChoosingNodeMessage">
+                    <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
+                    <p>Please open nodes using searching bar</p>
+                  </div>
+                </>
               )}
             </Suspense>
 
