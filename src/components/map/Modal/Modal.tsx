@@ -15,6 +15,7 @@ type ModalProps = {
   returnDown?: any;
   onClick: any;
   noBackground?: any;
+  style?: any;
 };
 
 const Modal = ({ onClick, ...props }: ModalProps) => {
@@ -27,7 +28,7 @@ const Modal = ({ onClick, ...props }: ModalProps) => {
 
   const ModalBody = () => {
     return (
-      <div id="ModalBody">
+      <div id="ModalBody" style={props.style}>
         <div id="ModalContent" className={props.returnLeft || props.returnDown ? "ModalWithReturnContent" : undefined}>
           {props.children}
 
