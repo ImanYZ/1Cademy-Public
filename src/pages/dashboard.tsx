@@ -51,9 +51,9 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
-  addReference,
   changedNodes,
   citations,
+  COLUMN_GAP,
   compare2Nodes,
   compareAndUpdateNodeLinks,
   compareChoices,
@@ -333,22 +333,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   //  bd => state (first render)
   useEffect(() => {
-    // setTimeout(() => {
-    console.log("iitial scroll");
-    if (user?.sNode === nodeBookState.selectedNode) return;
-    // if (queue.length) return;
-    console.log("iitial scroll 1");
-    if (!firstScrollToNode && queueFinished) {
-      if (!user?.sNode) return;
-      console.log("iitial scroll 2 (queueFinished)");
-      nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-      console.log("userNodesLoaded", userNodesLoaded);
-      scrollToNode(user.sNode);
-      setFirstScrollToNode(true);
-    }
-    // }, 1000);
+    setTimeout(() => {
+      console.log("--->> FStN", { firstScrollToNode, queueFinished });
+      if (user?.sNode === nodeBookState.selectedNode) return;
+
+      // if (queue.length) return;
+      // console.log("iitial scroll 1");
+      if (!firstScrollToNode && queueFinished) {
+        if (!user?.sNode) return;
+        const selectedNode = graph.nodes[user?.sNode];
+        if (!selectedNode) return;
+        if (selectedNode.top === 0) return;
+
+        console.log("--->> FStN:OK", { queueFinished, node: graph.nodes[user.sNode] });
+        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        // console.log("userNodesLoaded", userNodesLoaded);
+        scrollToNode(user.sNode);
+        setFirstScrollToNode(true);
+      }
+    }, 1000);
   }, [
     firstScrollToNode,
+    graph.nodes,
     isQueueWorking,
     nodeBookDispatch,
     nodeBookState.selectedNode,
@@ -556,10 +562,11 @@ const Dashboard = ({}: DashboardProps) => {
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
 
-        nodesData.forEach(cur => {
-          if (!cur?.nData.nodeType || !cur.nData.references) return;
-          addReference(cur.nId, cur.nData);
-        });
+        // nodesData.forEach(cur => {
+        //   if (!cur?.nData.nodeType || !cur.nData.references) return;
+        //   addReference(cur.nId, cur.nData);
+        // });
+
         console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
@@ -591,11 +598,15 @@ const Dashboard = ({}: DashboardProps) => {
 
             const hasParent = cur.parents.length;
             const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-
-            const leftParent = nodeParent?.left ?? 0;
             const topParent = nodeParent?.top ?? 0;
 
-            return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
+            const leftParent = nodeParent?.left ?? 0;
+
+            return {
+              ...cur,
+              left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+              top: tmpNode?.top ?? topParent,
+            };
           });
 
           // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
@@ -640,7 +651,7 @@ const Dashboard = ({}: DashboardProps) => {
         // IMPORTANT: I commented this to call all
         // visible: used to drag nodes in Notebook
         // visible and invisible to show bookmarks
-        // where("visible", "==", true),
+        where("visible", "==", true),
         where("deleted", "==", false)
       );
       const killSnapshot = snapshot(q);
@@ -3473,61 +3484,63 @@ const Dashboard = ({}: DashboardProps) => {
         }}
       >
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
-        <Box sx={{ width: "100vw", height: "100vh", overflowX: "hidden" }}>
-          <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
-            {/* Data from map, don't REMOVE */}
-            <Box>
-              Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
-            </Box>
+        <Box sx={{ width: "100vw", height: "100vh" }}>
+          {process.env.NODE_ENV === "development" && (
+            <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
+              {/* Data from map, don't REMOVE */}
+              <Box>
+                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Typography>Global states:</Typography>
-            <Box>
-              <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-              <Button onClick={() => console.log(graph.edges)}>edges</Button>
-              <Button onClick={() => console.log(allTags)}>allTags</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-              <Button onClick={() => console.log(user)}>user</Button>
-              <Button onClick={() => console.log(settings)}>setting</Button>
-              <Button onClick={() => console.log(reputation)}>reputation</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-              {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
-              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-              <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
-            </Box>
+              <Typography>Global states:</Typography>
+              <Box>
+                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+                <Button onClick={() => console.log(graph.edges)}>edges</Button>
+                <Button onClick={() => console.log(allTags)}>allTags</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
+                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.log(user)}>user</Button>
+                <Button onClick={() => console.log(settings)}>setting</Button>
+                <Button onClick={() => console.log(reputation)}>reputation</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
+                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+                <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+                <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Box>
-              {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
-              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
-              <Button onClick={() => console.log(citations)}>citations</Button>
-            </Box>
+              <Box>
+                {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
+                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+                <Button onClick={() => console.log(citations)}>citations</Button>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Typography>Functions:</Typography>
-            <Box>
-              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                Toggle Open proposals
-              </Button>
-              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                Open Proposal
-              </Button>
-              <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
-            </Box>
-          </Drawer>
+              <Typography>Functions:</Typography>
+              <Box>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Toggle Open proposals
+                </Button>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Open Proposal
+                </Button>
+                <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+              </Box>
+            </Drawer>
+          )}
           <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -3547,6 +3560,7 @@ const Dashboard = ({}: DashboardProps) => {
             setPendingProposalsLoaded={setPendingProposalsLoaded}
             openProposal={openProposal}
             citations={citations}
+            selectedNode={nodeBookState.selectedNode}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
@@ -3571,34 +3585,36 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode={scrollToNode}
           />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          <Box
-            sx={{
-              position: "fixed",
-              top: "10px",
-              right: "10px",
-              zIndex: "1300",
-              background: "#123",
-              color: "white",
-            }}
-          >
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-              {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+          {process.env.NODE_ENV === "development" && (
+            <Box
+              sx={{
+                position: "fixed",
+                top: "10px",
+                right: "10px",
+                zIndex: "1300",
+                background: "#123",
+                color: "white",
+              }}
+            >
+              <Box sx={{ border: "dashed 1px royalBlue" }}>
+                <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
+                {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+              </Box>
+              <Box sx={{ border: "dashed 1px royalBlue" }}>
+                <Typography>SN: {nodeBookState.selectedNode}</Typography>
+                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
+              </Box>
+              <Box sx={{ float: "right" }}>
+                <Tooltip title={"Watch geek data"}>
+                  <>
+                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                      <CodeIcon color="warning" />
+                    </IconButton>
+                  </>
+                </Tooltip>
+              </Box>
             </Box>
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>SN: {nodeBookState.selectedNode}</Typography>
-              <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
-            </Box>
-            <Box sx={{ float: "right" }}>
-              <Tooltip title={"Watch geek data"}>
-                <>
-                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon color="warning" />
-                  </IconButton>
-                </>
-              </Tooltip>
-            </Box>
-          </Box>
+          )}
 
           {/* end Data from map */}
           {settings.view === "Graph" && (

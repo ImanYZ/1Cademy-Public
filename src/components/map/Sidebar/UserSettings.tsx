@@ -107,9 +107,9 @@ const doNothing = () => {};
 type UserSettingProps = {
   user: User;
   userReputation: Reputation;
+  scrollToNode: (nodeId: string) => void;
   // showClusters: boolean;
   // setShowClusters: (oClusters: boolean) => void;
-  scrollToNode: (nodeId: string) => void;
 };
 
 const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) => {
@@ -795,13 +795,16 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
   //   return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
   // };
 
-  const tabsItems = (user: User, choosingNodeId?: string) => {
+  const tabsItems = (user: User) => {
     return [
       {
         title: "Account",
         content: (
-          <div id="AccountSettings">
-            <div className="AccountSettingsButtons">
+          <div
+            id="AccountSettings"
+            style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
+          >
+            {/*<div className="AccountSettingsButtons">
               <MemoizedMetaButton onClick={() => choosingNodeClick("tag")}>
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon id="tagChangeIcon" className="material-icons deep-orange-text" />
@@ -811,12 +814,12 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
                 </div>
               </MemoizedMetaButton>
             </div>
-            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+             CHECK I change  choosingNode to {nodeBookState.choosingNode?.id
             {choosingNodeId === "tag" && (
               <Suspense fallback={<div></div>}>
                 <div id="tagModal">
                   <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
-                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} />
                     <MemoizedTagsSearcher
                       setChosenTags={setChosenTags}
                       chosenTags={chosenTags}
@@ -827,7 +830,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
                   </Modal>
                 </div>
               </Suspense>
-            )}
+            )}*/}
             {/* <UserSettingsSwitches
               theme={theme}
               handleThemeSwitch={handleThemeSwitch}
@@ -892,14 +895,14 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
             </FormGroup>
             {/* {props.showHideClusters && (
 
-            )} */}
+            )}
             <FormGroup row>
-              {/* <FormControl className="select RowSwitch">
+              <FormControl className="select RowSwitch">
                 <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />
                 <div className="RowSwitchItem">Clusters:</div>
                 <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
-              </FormControl> */}
-              {/* <FormControlLabel
+              </FormControl>
+              <FormControlLabel
                 control={
                   <Switch
                     // checked={!values.chooseUname}
@@ -909,8 +912,8 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
                   />
                 }
                 label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
-              /> */}
-            </FormGroup>
+              />
+            </FormGroup> */}
             <FormGroup>
               <FormControlLabel
                 control={
@@ -1236,8 +1239,35 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
           <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
           <div id="MiniUserPrifileTag">
             {/* <i className="material-icons grey-text">local_offer</i> */}
-            <LocalOfferIcon className="material-icons grey-text" style={{ marginRight: "12px" }} />
-            <span>{user.tag}</span>
+            <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
+              <div className="AccountSettingsButton">
+                <LocalOfferIcon
+                  sx={{ marginRight: "8px" }}
+                  id="tagChangeIcon"
+                  className="material-icons deep-orange-text"
+                />
+                {user.tag}
+
+                {isLoading && <LinearProgress />}
+              </div>
+            </MemoizedMetaButton>
+            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+            {nodeBookState?.choosingNode?.id === "tag" && (
+              <Suspense fallback={<div></div>}>
+                <div id="tagModal">
+                  <Modal style={{ top: "85px" }} onClick={closeTagSelector} returnLeft={true} noBackground={true}>
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    <MemoizedTagsSearcher
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "235px", height: "235px" }}
+                    />
+                  </Modal>
+                </div>
+              </Suspense>
+            )}
           </div>
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
             <OptimizedAvatar
@@ -1301,10 +1331,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
         </div>
       </div>
       <div className="UserSettingsSidebarBody">
-        <MemoizedSidebarTabs
-          tabsTitle="User Mini-profile tabs"
-          tabsItems={tabsItems(user, nodeBookState?.choosingNode?.id)}
-        />
+        <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems(user)} />
       </div>
     </>
   ) : (

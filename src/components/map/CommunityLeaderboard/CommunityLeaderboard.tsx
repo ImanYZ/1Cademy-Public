@@ -120,6 +120,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
         }
       }
     }
+    comPs.sort((a, b) => b.totalPoints - a.totalPoints);
     // console.log("COM POINTS, ", comPs);
     setComPoints(comPs.slice(0, 9));
   }, []);
@@ -255,7 +256,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
                   idx={idx}
                   comTitle={comObj.tag}
                   // uname={comObj.admin}
-                  totalPoints={comObj.adminPoints}
+                  totalPoints={comObj.totalPoints}
                   // imageUrl={comObj.aImgUrl}
                   // fullname={comObj.aFullname}
                   // chooseUname={comObj.aChooseUname}

@@ -493,7 +493,7 @@ const Node = ({
       // }
     >
       {/* INFO: uncomment this only on develope */}
-      {identifier}
+      {process.env.NODE_ENV === "development" && identifier}
       {open ? (
         <>
           <div className="card-content">

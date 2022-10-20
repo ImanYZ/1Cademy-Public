@@ -76,7 +76,6 @@ type NodeFooterProps = {
 
 const NodeFooter = ({
   open,
-  identifier,
   // activeNode,
   citationsSelected,
   // proposalsSelected,
@@ -119,7 +118,6 @@ const NodeFooter = ({
   wrongNode,
   uploadNodeImage,
   user,
-  citations,
 }: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -342,7 +340,7 @@ const NodeFooter = ({
                         <MenuBookIcon sx={{ fontSize: "16px" }} />
                       </>
                     )}
-                    <span>{shortenNumber(citations[identifier]?.size ?? 0, 2, false)}</span>
+                    {/* <span>{shortenNumber(citations[identifier]?.size ?? 0, 2, false)}</span> */}
                   </>
                 </MemoizedMetaButton>
 
