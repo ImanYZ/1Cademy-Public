@@ -47,7 +47,7 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
-  console.log("ProposalsList", { props });
+  // console.log("ProposalsList", { props });
   const [user] = useAuth();
 
   const username = user.user?.uname;
@@ -69,7 +69,7 @@ const ProposalsList = (props: ProposalsListProps) => {
   );
 
   // console.log("-> proposals", props.proposals);
-  console.log("props.openProposal ", props.proposals);
+  // console.log("props.openProposal ", props.proposals);
 
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);

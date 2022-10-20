@@ -19,7 +19,7 @@ type SidebarWrapperProps = {
 const SidebarWrapper = (props: SidebarWrapperProps) => {
   const sidebarRef = useRef<any | null>(null);
   const scrollToTop = useCallback(() => {
-    console.log(sidebarRef.current);
+    // console.log(sidebarRef.current);
     if (!sidebarRef.current) return;
     sidebarRef.current.scrollTop = 0;
   }, [sidebarRef]);

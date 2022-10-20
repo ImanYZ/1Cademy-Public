@@ -52,7 +52,7 @@ export const useWorkerQueue = ({
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
-      console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
+      // console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
       // let mapChangedFlag = true;
       // const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
@@ -164,7 +164,7 @@ export const useWorkerQueue = ({
     if (!g?.current) return;
 
     // CREATE WORKER with Nodes and Nodes changed
-    console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
+    // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
     const individualNodeChanges: FullNodeData[] = queue
       .map(cur => {
         if (!cur) return null;

@@ -440,7 +440,7 @@ const Sidebar = (props: SidebarType) => {
 
   useEffect(() => {
     if (!user) return;
-    console.log("get bookmarks");
+    // console.log("get bookmarks");
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -451,7 +451,7 @@ const Sidebar = (props: SidebarType) => {
     );
 
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
-      console.log("on snapshot");
+      // console.log("on snapshot");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return null;
 
@@ -465,11 +465,11 @@ const Sidebar = (props: SidebarType) => {
       });
 
       const bookmarksNodeIds = bookmarksUserNodes.map(cur => cur.uNodeData.node);
-      console.log({ bookmarksNodeIds });
+      // console.log({ bookmarksNodeIds });
       const bookmarksNodesData = await getNodes(db, bookmarksNodeIds);
-      console.log({ bookmarksNodesData });
+      // console.log({ bookmarksNodesData });
       const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData);
-      console.log({ fullNodes });
+      // console.log({ fullNodes });
       setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
     });
     return () => bookmarkSnapshot();
@@ -478,7 +478,7 @@ const Sidebar = (props: SidebarType) => {
   const openSideBar = useCallback(
     async (sidebarType: string) => {
       // console.log("------------------>> sidebarType", sidebarType, user);
-      console.log("Open sidebar");
+      // console.log("Open sidebar");
       if (!user) return;
       // console.log("has user");
       // console.log("In openSideBar");
@@ -526,7 +526,7 @@ const Sidebar = (props: SidebarType) => {
 
   const openSideBarClick = useCallback(
     (sidebarType: string) => (event: any) => {
-      console.log("click openSideBarClick", sidebarType);
+      // console.log("click openSideBarClick", sidebarType);
       openSideBar(sidebarType);
       event.currentTarget.blur();
       event.stopPropagation();
@@ -562,7 +562,7 @@ const Sidebar = (props: SidebarType) => {
 
   const changeLeaderboard = useCallback(
     async (lBType: any, username: string) => {
-      console.log("==>> changeLeaderboard", lBType, username);
+      // console.log("==>> changeLeaderboard", lBType, username);
       setLeaderboardType(lBType);
       setLeaderboardTypeOpen(false);
 
@@ -608,14 +608,14 @@ const Sidebar = (props: SidebarType) => {
   openMedia*/
 
   const bookmarkUpdatesNum = useMemo(() => {
-    console.log("bookmarkUpdatesNum");
+    // console.log("bookmarkUpdatesNum");
     return Object.keys(props.allNodes)
       .map(key => props.allNodes[key])
       .filter(cur => cur.changed || !cur.isStudied).length;
   }, [props.allNodes]);
 
   const bookmarkedUserNodes = useMemo(() => {
-    console.log("bookmarkedUserNodes");
+    // console.log("bookmarkedUserNodes");
     return Object.keys(bookmarks).map(key => bookmarks[key]);
   }, [bookmarks]);
 

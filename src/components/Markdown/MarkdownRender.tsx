@@ -24,7 +24,7 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
           <Typography lineHeight={"inherit"} {...props} sx={{ p: "0px", wordBreak: "break-word", ...sx }} />
         ),
         a: ({ ...props }) => {
-          console.log(props);
+          // console.log(props);
           return <Link href={props.href}>{props.children}</Link>;
         },
         code({ inline, className, children, ...props }) {

@@ -159,13 +159,13 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
 
   const updateStatesByCountry = useCallback(
     async (currentCountry: string | null) => {
-      console.log("updateStatesByCountry", 1, currentCountry);
+      // console.log("updateStatesByCountry", 1, currentCountry);
       if (!currentCountry) return setStates([]);
-      console.log("updateStatesByCountry", 2, countries);
+      // console.log("updateStatesByCountry", 2, countries);
       const countryObject = countries.find(cur => cur.name === currentCountry);
       if (!countryObject) return setStates([]);
-      console.log("updateStatesByCountry", 3);
-      console.log("countryObject", countryObject);
+      // console.log("updateStatesByCountry", 3);
+      // console.log("countryObject", countryObject);
       const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
       const { State } = await import("country-state-city");
       setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
@@ -175,11 +175,11 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
 
   const updateCitiesByState = useCallback(
     async (currentState: string | null) => {
-      console.log("updateCitiesByState", 2);
+      // console.log("updateCitiesByState", 2);
       // if (!user?.country) return [];
       if (!currentState) return setCities([]);
 
-      console.log("updateCitiesByState", 3);
+      // console.log("updateCitiesByState", 3);
       const currentCountry = countries.find(cur => cur.name === user.country);
       if (!currentCountry) {
         setStates([]);
@@ -187,7 +187,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
         return;
       }
 
-      console.log("updateCitiesByState", 4);
+      // console.log("updateCitiesByState", 4);
       const stateObject = states.find(cur => cur.name === currentState);
       if (!stateObject) return setCities([]);
 
@@ -258,11 +258,11 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
         const userRef = doc(db, "users", user.uname);
         await updateDoc(userRef, { country: country_name, state: state_prov, city: city });
 
-        console.log("wiil call set Timeout");
+        // console.log("wiil call set Timeout");
 
         dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
       } catch (err) {
-        console.log("cant autocomplete country state city");
+        // console.log("cant autocomplete country state city");
       }
     };
     getCSCByGeolocation();
@@ -412,7 +412,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
         // setIsSubmitting(true); // TODO: enable submitting global state
         try {
           // await firebase.idToken();
-          console.log("CALLING API", nodeBookState.chosenNode.id);
+          // console.log("CALLING API", nodeBookState.chosenNode.id);
           setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
           setIsLoading(false);

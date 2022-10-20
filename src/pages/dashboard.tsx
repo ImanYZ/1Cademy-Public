@@ -272,11 +272,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
-      console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
+      // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
       if (tries === 50) return;
 
       if (!scrollToNodeInitialized || queueFinished) {
-        console.log("scroll to node");
+        // console.log("scroll to node");
 
         setTimeout(() => {
           // const currentNode = graph.nodes[nodeId];
@@ -294,10 +294,10 @@ const Dashboard = ({}: DashboardProps) => {
           ) {
             // console.log(3);
 
-            console.log("is calling setScrollToNodeInitialized to true");
+            // console.log("is calling setScrollToNodeInitialized to true");
             setScrollToNodeInitialized(true);
             setTimeout(() => {
-              console.log("is calling setScrollToNodeInitialized to false");
+              // console.log("is calling setScrollToNodeInitialized to false");
               setScrollToNodeInitialized(false);
             }, 1300);
 
@@ -318,8 +318,8 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
-            console.log("RECURSIVE1", nodeId);
-            console.log({ originalNode, queueFinished });
+            // console.log("RECURSIVE1", nodeId);
+            // console.log({ originalNode, queueFinished });
             scrollToNode(nodeId, tries + 1);
           }
         }, 400);
@@ -331,7 +331,7 @@ const Dashboard = ({}: DashboardProps) => {
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
-      console.log("--->> FStN", { firstScrollToNode, queueFinished });
+      // console.log("--->> FStN", { firstScrollToNode, queueFinished });
       if (user?.sNode === nodeBookState.selectedNode) return;
 
       // if (queue.length) return;
@@ -342,7 +342,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
 
-        console.log("--->> FStN:OK", { queueFinished, node: graph.nodes[user.sNode] });
+        // console.log("--->> FStN:OK", { queueFinished, node: graph.nodes[user.sNode] });
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
         // console.log("userNodesLoaded", userNodesLoaded);
         scrollToNode(user.sNode);
@@ -425,7 +425,7 @@ const Dashboard = ({}: DashboardProps) => {
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
-        console.log("[FILL DAGRE]:::", { fullNodes, currentNodes, currentEdges });
+        // console.log("[FILL DAGRE]:::", { fullNodes, currentNodes, currentEdges });
         // debugger
         return fullNodes.reduce(
           (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
@@ -564,7 +564,7 @@ const Dashboard = ({}: DashboardProps) => {
         //   addReference(cur.nId, cur.nData);
         // });
 
-        console.log("Nodes Data", { nodesData });
+        // console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
 
@@ -611,22 +611,22 @@ const Dashboard = ({}: DashboardProps) => {
           // })
           // here we are filling dagger
           const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-          console.log({ newNodes, newEdges });
+          // console.log({ newNodes, newEdges });
           return { nodes: newNodes, edges: newEdges };
         });
         // setEdges(edges => {
         //   setNodes(newNodes);
         //   return newEdges;
         // });
-        console.log(" -> userNodesSnapshot:sdf:", {
-          userNodeChanges,
-          nodeIds,
-          nodesData,
-          fullNodes,
-          visibleFullNodes,
-          // newNodes,
-          // newEdges,
-        });
+        // console.log(" -> userNodesSnapshot:sdf:", {
+        //   userNodeChanges,
+        //   nodeIds,
+        //   nodesData,
+        //   fullNodes,
+        //   visibleFullNodes,
+        //   // newNodes,
+        //   // newEdges,
+        // });
         // setIsSubmitting(false);
         setUserNodesLoaded(true);
       });

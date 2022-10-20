@@ -167,7 +167,7 @@ export const loadReputationsData = (
   });
 
   return () => {
-    console.log("SNAP KILLED");
+    // console.log("SNAP KILLED");
     return reputationsSnapshot();
   };
 };
