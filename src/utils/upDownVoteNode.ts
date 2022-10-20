@@ -356,66 +356,74 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     }
   }
 
-  for (let proposer in changedProposers) {
-    // Updating the proposer reputation points.
-    [batch, writeCounts] = await updateReputation({
-      batch,
-      uname: proposer,
-      imageUrl: changedProposers[proposer].imageUrl,
-      fullname: changedProposers[proposer].fullname,
-      chooseUname: changedProposers[proposer].chooseUname,
-      tagIds: nodeData.tagIds,
-      tags: nodeData.tags,
-      nodeType: nodeData.nodeType,
-      correctVal: changedProposers[proposer].correctVal,
-      wrongVal: changedProposers[proposer].wrongVal,
-      instVal: 0,
-      ltermVal: 0,
-      ltermDayVal: 0,
-      voter: uname,
-      writeCounts,
-    });
-    // Notifying the proposer about gaining or losing a point.
-    const notificationRef = db.collection("notifications").doc();
-    const notificationData = {
-      proposer,
-      uname,
-      imageUrl,
-      fullname,
-      chooseUname,
-      nodeId,
-      title: nodeData.title,
-      // Origin type
-      oType: "Node",
-      // Action type
-      aType: "",
-      checked: false,
-      createdAt: currentTimestamp,
-      updatedAt: currentTimestamp,
-    };
-    if (deleteNode) {
-      notificationData.aType = "Delete";
-    } else {
-      if (actionType === "Correct") {
-        if (correct) {
-          notificationData.aType = "CorrectRM";
-        } else {
-          notificationData.aType = "Correct";
-        }
-      } else if (actionType === "Wrong") {
-        if (wrong) {
-          notificationData.aType = "WrongRM";
-        } else {
-          notificationData.aType = "Wrong";
+  await detach(async () => {
+    let batch = db.batch();
+    let writeCounts = 0;
+
+    for (let proposer in changedProposers) {
+      // Updating the proposer reputation points.
+      [batch, writeCounts] = await updateReputation({
+        batch,
+        uname: proposer,
+        imageUrl: changedProposers[proposer].imageUrl,
+        fullname: changedProposers[proposer].fullname,
+        chooseUname: changedProposers[proposer].chooseUname,
+        tagIds: nodeData.tagIds,
+        tags: nodeData.tags,
+        nodeType: nodeData.nodeType,
+        correctVal: changedProposers[proposer].correctVal,
+        wrongVal: changedProposers[proposer].wrongVal,
+        instVal: 0,
+        ltermVal: 0,
+        ltermDayVal: 0,
+        voter: uname,
+        writeCounts,
+      });
+      // Notifying the proposer about gaining or losing a point.
+      const notificationRef = db.collection("notifications").doc();
+      const notificationData = {
+        proposer,
+        uname,
+        imageUrl,
+        fullname,
+        chooseUname,
+        nodeId,
+        title: nodeData.title,
+        // Origin type
+        oType: "Node",
+        // Action type
+        aType: "",
+        checked: false,
+        createdAt: currentTimestamp,
+        updatedAt: currentTimestamp,
+      };
+      if (deleteNode) {
+        notificationData.aType = "Delete";
+      } else {
+        if (actionType === "Correct") {
+          if (correct) {
+            notificationData.aType = "CorrectRM";
+          } else {
+            notificationData.aType = "Correct";
+          }
+        } else if (actionType === "Wrong") {
+          if (wrong) {
+            notificationData.aType = "WrongRM";
+          } else {
+            notificationData.aType = "Wrong";
+          }
         }
       }
+      if (notificationData.aType !== "") {
+        batch.set(notificationRef, notificationData);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, writeCounts });
+      }
     }
-    if (notificationData.aType !== "") {
-      batch.set(notificationRef, notificationData);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, writeCounts });
-    }
-  }
+
+    await commitBatch(batch);
+  });
+
   // Updating the node document accordingly.
   const nodeChanges: any = {
     updatedAt: currentTimestamp,
