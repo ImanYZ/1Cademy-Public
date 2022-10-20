@@ -37,7 +37,8 @@ import referencesDarkTheme from "../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../public/references-light-theme.jpg";
 import { useAuth } from "../../../context/AuthContext";
 import { getTypedCollections } from "../../../lib/utils/getTypedCollections";
-import { FullNodesData, UsersStatus } from "../../../nodeBookTypes";
+import { buildFullNodes, getNodes } from "../../../lib/utils/nodesSyncronization.utils";
+import { FullNodeData, FullNodesData, UserNodeChanges, UserNodesData, UsersStatus } from "../../../nodeBookTypes";
 import { NodeType } from "../../../types";
 // import { FullNodeData, UsersStatus } from "../../../noteBookTypes";
 import { MemoizedMetaButton } from "../MetaButton";
@@ -188,8 +189,9 @@ type SidebarType = {
   setPendingProposalsLoaded: (newValue: boolean) => void;
   openProposal: string;
   citations: { [key: string]: Set<string> };
+
   // openLinkedNode: any;
-  // selectedNode: string;
+  selectedNode: string | null;
   // allNodes: any;
 };
 
@@ -282,6 +284,7 @@ const Sidebar = (props: SidebarType) => {
   const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
   // const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
   const [proposals, setProposals] = useState<any[]>([]);
+  const [bookmarks, setBookmarks] = useState<FullNodesData>({});
 
   const sidebarRef = useRef<any | null>(null);
 
@@ -410,6 +413,66 @@ const Sidebar = (props: SidebarType) => {
       }
     };
     // }
+  }, [db, user]);
+
+  const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
+    return newAllNodes.reduce(
+      (acu, cur) => {
+        if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+          return { ...acu, [cur.node]: cur };
+        }
+        // if (cur.nodeChangeType === "modified") {
+        //   return {...acu,[cur.node]:cur}
+        //   // return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
+        // }
+        if (cur.nodeChangeType === "removed") {
+          // delete acu['sdsds']
+          const tmp = { ...acu };
+          delete tmp[cur.node];
+          return tmp;
+          // return acu.filter(c => c.userNodeId !== cur.userNodeId);
+        }
+        return acu;
+      },
+      { ...currentAllNodes }
+    );
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    console.log("get bookmarks");
+
+    const userNodesRef = collection(db, "userNodes");
+    const q = query(
+      userNodesRef,
+      where("user", "==", user.uname),
+      where("bookmarked", "==", true),
+      where("deleted", "==", false)
+    );
+
+    const bookmarkSnapshot = onSnapshot(q, async snapshot => {
+      console.log("on snapshot");
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) return null;
+
+      const bookmarksUserNodes: UserNodeChanges[] = docChanges.map((cur): UserNodeChanges => {
+        return {
+          cType: cur.type,
+          uNodeId: cur.doc.id,
+          uNodeData: cur.doc.data() as UserNodesData,
+          // id: cur.doc.id, data: cur.doc.data()
+        };
+      });
+
+      const bookmarksNodeIds = bookmarksUserNodes.map(cur => cur.uNodeData.node);
+      console.log({ bookmarksNodeIds });
+      const bookmarksNodesData = await getNodes(db, bookmarksNodeIds);
+      console.log({ bookmarksNodesData });
+      const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData);
+      console.log({ fullNodes });
+      setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
+    });
+    return () => bookmarkSnapshot();
   }, [db, user]);
 
   const openSideBar = useCallback(
@@ -553,10 +616,8 @@ const Sidebar = (props: SidebarType) => {
 
   const bookmarkedUserNodes = useMemo(() => {
     console.log("bookmarkedUserNodes");
-    return Object.keys(props.allNodes)
-      .map(key => props.allNodes[key])
-      .filter(cur => cur.bookmarked);
-  }, [props.allNodes]);
+    return Object.keys(bookmarks).map(key => bookmarks[key]);
+  }, [bookmarks]);
 
   if (!user || !reputation) return null;
 
@@ -816,12 +877,17 @@ const Sidebar = (props: SidebarType) => {
             <MemoizedSidebarWrapper headerImage={citation} title="Citing Nodes" closeSideBar={props.closeSideBar}>
               {/* CHECK: I commented this */}
               {/* <CitationsList openLinkedNode={props.openLinkedNode} /> */}
-              <MemoizedCitations
-                citations={props.citations}
-                allNodes={props.allNodes}
-                openLinkedNode={props.openLinkedNode}
-                // selectedNode={no}
-              />
+              {props.selectedNode ? (
+                <MemoizedCitations
+                  // citations={props.citations}// CHECK: please remove this, this comes from addReference
+                  allNodes={props.allNodes}
+                  openLinkedNode={props.openLinkedNode}
+                  identifier={props.selectedNode}
+                  // selectedNode={no}
+                />
+              ) : (
+                <p>Ups: identifier was not selected</p>
+              )}
             </MemoizedSidebarWrapper>
           ) : props.selectionType === "UserInfo" ? (
             <MemoizedSidebarWrapper
