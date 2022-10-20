@@ -493,7 +493,7 @@ const Node = ({
       // }
     >
       {/* INFO: uncomment this only on develope */}
-      {process.env.NODE_ENV === "development" && identifier}
+      {/* {process.env.NODE_ENV === "development" && identifier} */}
       {open ? (
         <>
           <div className="card-content">
@@ -501,9 +501,11 @@ const Node = ({
               {editable && isNew && (
                 <>
                   {/* New Node with inputs */}
-                  <p className="NewChildProposalWarning">Before proposing,</p>
-                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                    <span>- Search </span>
+                  <p
+                    className="NewChildProposalWarning"
+                    style={{ display: "flex", alignItems: "center", marginTop: "0" }}
+                  >
+                    <span> Before proposing search </span>
                     <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
                     <span> to ensure the node does not exist.</span>
                   </p>

@@ -184,6 +184,8 @@ const Dashboard = ({}: DashboardProps) => {
   const [removedParents, setRemovedParents] = useState<string[]>([]);
   const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
+  const [firstLoading, setFirstLoading] = useState(true);
+
   const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
 
   const previousLengthNodes = useRef(0);
@@ -331,6 +333,9 @@ const Dashboard = ({}: DashboardProps) => {
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
+      if (queueFinished) {
+        setFirstLoading(false);
+      }
       console.log("--->> FStN", { firstScrollToNode, queueFinished });
       if (user?.sNode === nodeBookState.selectedNode) return;
 
@@ -3697,7 +3702,7 @@ const Dashboard = ({}: DashboardProps) => {
                   </MapInteractionCSS>
                 </>
               </Modal>
-              {(isSubmitting || !queueFinished) && (
+              {(isSubmitting || (!queueFinished && firstLoading)) && (
                 <div className="CenterredLoadingImageContainer">
                   <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
                 </div>

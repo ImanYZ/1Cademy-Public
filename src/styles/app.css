@@ -486,14 +486,14 @@ h4,
 i {
   color: #f0f0f0;
 }
-.LightMode p,
+/* .LightMode p,
 .LightMode h1,
 .LightMode h2,
 .LightMode h3,
 .LightMode h4,
 .LightMode i {
   color: #454545;
-}
+} */
 
 /* check: I commented this, this is spoiling the h2 in markdown render  */
 
