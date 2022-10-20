@@ -3704,7 +3704,14 @@ const Dashboard = ({}: DashboardProps) => {
               </Modal>
               {(isSubmitting || (!queueFinished && firstLoading)) && (
                 <div className="CenterredLoadingImageContainer">
-                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                  <Image
+                    className="CenterredLoadingImage"
+                    src={LoadingImg}
+                    alt="Loading"
+                    loading="lazy"
+                    width={250}
+                    height={250}
+                  />
                 </div>
               )}
             </Suspense>
