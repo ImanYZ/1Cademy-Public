@@ -2,9 +2,9 @@
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import Image from "next/image";
+// import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // import { User } from "src/knowledgeTypes";
@@ -13,7 +13,7 @@ import { loadReputationsData } from "@/lib/utils/Map.utils";
 
 // import React, { useCallback, useEffect, useMemo, useState } from "react";
 // import { useRecoilValue } from "recoil";
-import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
+// import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { MemoizedMetaButton } from "../MetaButton";
 import MultipleChoiceBtn from "../Sidebar/MultipleChoiceBtn";
 import { MemoizedComLeaderboardChip } from "./ComLeaderboardChip/ComLeaderboardChip";
@@ -278,7 +278,8 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
               );
             })
           ) : (
-            <Image className="" src={LoadingImg} alt="Loading" />
+            // <Image className="" src={LoadingImg} alt="Loading" />
+            <CircularProgress />
           )}
         </Box>
       </div>

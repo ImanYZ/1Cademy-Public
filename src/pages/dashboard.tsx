@@ -333,9 +333,6 @@ const Dashboard = ({}: DashboardProps) => {
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
-      if (queueFinished) {
-        setFirstLoading(false);
-      }
       console.log("--->> FStN", { firstScrollToNode, queueFinished });
       if (user?.sNode === nodeBookState.selectedNode) return;
 
@@ -353,7 +350,10 @@ const Dashboard = ({}: DashboardProps) => {
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
       }
-    }, 1000);
+      if (queueFinished) {
+        setFirstLoading(false);
+      }
+    }, 1500);
   }, [
     firstScrollToNode,
     graph.nodes,
