@@ -1,7 +1,7 @@
 // import "./Line.css";
 
 import { Box } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { Point } from "../../../knowledgeTypes";
 
@@ -14,19 +14,7 @@ type LineProps = {
 };
 
 const Line = (props: LineProps) => {
-  const [showArrow, setShowArrow] = useState(false);
-
-  useEffect(() => {
-    const arrowTimeout = setTimeout(() => {
-      setShowArrow(true);
-    }, 1000);
-
-    return () => {
-      clearTimeout(arrowTimeout);
-    };
-  }, []);
-
-  // console.log('props',props)
+  console.log("->edges:props", props);
 
   let from = props.from;
   let to = props.to;
@@ -59,31 +47,27 @@ const Line = (props: LineProps) => {
   }
 
   return (
-    <>
-      {showArrow && (
-        <Box
-          style={{
-            ...style,
-            position: "absolute",
-            textAlign: "center",
-            height: "0px",
-            borderBottom: "2.5px solid rgb(1, 211, 106)",
-            transition: "0.5s",
-          }}
-        >
-          <div className="RightArrow" style={rightArrowStyle}></div>
-          <div className="Line">
-            {props.label}
-            {/* <Draft
+    <Box
+      style={{
+        ...style,
+        position: "absolute",
+        textAlign: "center",
+        height: "0px",
+        borderBottom: "2.5px solid rgb(1, 211, 106)",
+        transition: "0.5s",
+      }}
+    >
+      <div className="RightArrow" style={rightArrowStyle}></div>
+      <div className="Line">
+        {props.label}
+        {/* <Draft
             onChange={doNothing}
             node_id={props.identifier}
             content={label}
             stylable={false}
           /> */}
-          </div>
-        </Box>
-      )}
-    </>
+      </div>
+    </Box>
   );
 };
 

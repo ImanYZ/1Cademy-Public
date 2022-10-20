@@ -681,6 +681,7 @@ export const createOrUpdateNode = (
   oldEdges: EdgesData,
   allTags: any
 ) => {
+  console.log("create or update new Node:", newNode);
   // CHECK: object.children was node by I changed with newNode
   for (let childIdx = 0; childIdx < newNode.children.length; childIdx++) {
     const child = newNode.children[childIdx];
@@ -721,13 +722,48 @@ export const createOrUpdateNode = (
     // adds newNode to dagre object and to oldNodes
     // null: no callback
     oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
+    //   {
+    //     "fromX": 1160,
+    //     "fromY": 776.75,
+    //     "toX": 1350,
+    //     "toY": 1175
+    // }
     // creates edges from newNode to children nodes
+
+    // const newFromX = fromNode.left + NODE_WIDTH;
+    //   const newFromY = fromNode.top + Math.floor(fromNode.height / 2);
+    //   const newToX = toNode.left;
+    //   const newToY = toNode.top + Math.floor(toNode.height / 2);
     for (let child of newNode.children) {
-      oldEdges = setDagEdge(g, nodeId, child.node, { label: child.label }, oldEdges);
+      oldEdges = setDagEdge(
+        g,
+        nodeId,
+        child.node,
+        {
+          label: child.label,
+          fromX: newNode.left,
+          fromY: newNode.top,
+          toX: newNode.left + NODE_WIDTH,
+          toY: newNode.top,
+        },
+        oldEdges
+      );
     }
     // creates edges from parent nodes to newNode
     for (let parent of newNode.parents) {
-      oldEdges = setDagEdge(g, parent.node, nodeId, { label: parent.label }, oldEdges);
+      oldEdges = setDagEdge(
+        g,
+        parent.node,
+        nodeId,
+        {
+          label: parent.label,
+          fromX: newNode.left - COLUMN_GAP,
+          fromY: newNode.top,
+          toX: newNode.left,
+          toY: newNode.top,
+        },
+        oldEdges
+      );
     }
     // if node is currently visible
   } else {
@@ -764,6 +800,7 @@ export const createOrUpdateNode = (
       oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
     }
   }
+  console.log("->edge:previus", oldEdges);
   return { oldNodes, oldEdges };
 };
 
