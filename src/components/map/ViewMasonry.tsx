@@ -12,6 +12,7 @@ type ViewMasonryProps = {
 };
 export const ViewMasonry = ({ nodes, hideNodeHandler, userId }: ViewMasonryProps) => {
   const [simpleNodes, setSimpleNodes] = useState<SimpleNode[]>([]);
+
   useEffect(() => {
     const tmpSimpleNodes = Object.keys(nodes)
       .map(key => nodes[key])
@@ -39,10 +40,7 @@ export const ViewMasonry = ({ nodes, hideNodeHandler, userId }: ViewMasonryProps
         };
         return simpleNode;
       });
-
-    setTimeout(() => {
-      setSimpleNodes(tmpSimpleNodes);
-    }, 500);
+    setSimpleNodes(tmpSimpleNodes);
   }, [nodes]);
 
   return (
