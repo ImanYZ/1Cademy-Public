@@ -786,11 +786,22 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
 
   if (shouldRemove) {
     const nodeRef = db.collection("nodes").doc(tagNodeId);
-    await newBatch.update(nodeRef, {
-      updatedAt: currentTimestamp,
-      isTag: false,
-    });
-    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+    if (t) {
+      tWriteOperations.push({
+        objRef: nodeRef,
+        data: {
+          updatedAt: currentTimestamp,
+          isTag: false,
+        },
+        operationType: "update",
+      });
+    } else {
+      newBatch.update(nodeRef, {
+        updatedAt: currentTimestamp,
+        isTag: false,
+      });
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+    }
 
     // Delete the corresponding tag of tags documents from the tags collection.
     const taggingtagDocs = await db.collection("tags").where("tagIds", "array-contains", tagNodeId).get();

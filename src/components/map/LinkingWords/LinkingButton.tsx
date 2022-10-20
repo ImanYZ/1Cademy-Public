@@ -1,3 +1,5 @@
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Box } from "@mui/material";
 import React, { useCallback } from "react";
 
@@ -49,6 +51,25 @@ const LinkingButton = (props: LinkingButtonProps) => {
       style={{ padding: "0px" }}
     >
       <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px" }}>
+        {props.iClassName == "local_offer" ? (
+          <LocalOfferIcon
+            sx={{
+              marginRight: "4px",
+              fontSize: "16px",
+              color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
+            }}
+          />
+        ) : props.iClassName == "menu_book" ? (
+          <MenuBookIcon
+            sx={{
+              marginRight: "4px",
+              fontSize: "16px",
+              color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
+            }}
+          />
+        ) : (
+          ""
+        )}
         <NodeTypeIcon
           nodeType={props.nodeType}
           tooltipPlacement={"left"}

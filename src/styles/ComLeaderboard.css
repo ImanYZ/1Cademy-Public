@@ -6,7 +6,6 @@
   right: 0px;
   bottom: 0px;
   height: 85px;
-  width: 90%;
   z-index: 1;
   transition: width 1s ease-in-out; /* vendorless fallback */
   -o-transition: width 1s; /* opera */
@@ -44,7 +43,7 @@
   left: 0;
   top: 0;
   width: 40px;
-  height: 85px;
+  height: 90px;
   padding-right: 10px;
   border-radius: 10px 0px 0px 10px;
   background-color: rgb(31, 31, 31);
@@ -69,7 +68,7 @@
 #ComLeaderbaordChangerText {
   color: #dcdcdc;
   font-size: 16px;
-  width: 100px;
+  width: 63px;
   text-align: center;
   font-weight: bold;
   /* margin-bottom: 4px; */
