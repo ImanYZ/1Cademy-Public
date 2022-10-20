@@ -48,9 +48,9 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
-  addReference,
   changedNodes,
   citations,
+  COLUMN_GAP,
   compare2Nodes,
   compareAndUpdateNodeLinks,
   compareChoices,
@@ -553,10 +553,11 @@ const Dashboard = ({}: DashboardProps) => {
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
 
-        nodesData.forEach(cur => {
-          if (!cur?.nData.nodeType || !cur.nData.references) return;
-          addReference(cur.nId, cur.nData);
-        });
+        // nodesData.forEach(cur => {
+        //   if (!cur?.nData.nodeType || !cur.nData.references) return;
+        //   addReference(cur.nId, cur.nData);
+        // });
+
         console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
@@ -588,11 +589,15 @@ const Dashboard = ({}: DashboardProps) => {
 
             const hasParent = cur.parents.length;
             const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-
-            const leftParent = nodeParent?.left ?? 0;
             const topParent = nodeParent?.top ?? 0;
 
-            return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
+            const leftParent = nodeParent?.left ?? 0;
+
+            return {
+              ...cur,
+              left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+              top: tmpNode?.top ?? topParent,
+            };
           });
 
           // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
@@ -637,7 +642,7 @@ const Dashboard = ({}: DashboardProps) => {
         // IMPORTANT: I commented this to call all
         // visible: used to drag nodes in Notebook
         // visible and invisible to show bookmarks
-        // where("visible", "==", true),
+        where("visible", "==", true),
         where("deleted", "==", false)
       );
       const killSnapshot = snapshot(q);
@@ -3544,6 +3549,7 @@ const Dashboard = ({}: DashboardProps) => {
             setPendingProposalsLoaded={setPendingProposalsLoaded}
             openProposal={openProposal}
             citations={citations}
+            selectedNode={nodeBookState.selectedNode}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
