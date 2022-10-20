@@ -4,8 +4,6 @@ import { AppProps } from "next/app";
 import { NextPage } from "next/types";
 import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
-import { NodeType as NodeTypes } from "./types";
-
 export enum NodeType {
   "Relation" = "Relation",
   "Concept" = "Concept",
@@ -145,7 +143,7 @@ export type SimpleNode = {
   changedAt?: string;
   content?: string;
   choices: KnowledgeChoice[];
-  nodeType: NodeType | NodeTypes;
+  nodeType: NodeType;
   nodeImage?: string;
   corrects?: number;
   wrongs?: number;

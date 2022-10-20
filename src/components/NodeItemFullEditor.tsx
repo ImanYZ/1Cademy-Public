@@ -26,11 +26,11 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FieldArray, Formik, FormikErrors, FormikHelpers } from "formik";
 import { FC, ReactNode } from "react";
-import { NodeType } from "src/types";
 
+// import { NodeType } from "src/types";
 import { NODE_TYPE_OPTIONS } from "@/lib/utils/constants";
 
-import { KnowledgeChoice, KnowledgeNode } from "../knowledgeTypes";
+import { KnowledgeChoice, KnowledgeNode, NodeType } from "../knowledgeTypes";
 import MarkdownRender from "./Markdown/MarkdownRender";
 import { MarkdownHelper } from "./MarkdownHelper";
 import NodeTypeIcon from "./NodeTypeIcon";

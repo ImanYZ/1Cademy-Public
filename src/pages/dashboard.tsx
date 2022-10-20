@@ -45,7 +45,7 @@ import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
-import { NodeChanges, SimpleNode } from "../knowledgeTypes";
+import { NodeChanges } from "../knowledgeTypes";
 import { idToken } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
@@ -80,7 +80,7 @@ import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodes
 import { imageLoaded } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
-import { NodeType } from "../types";
+import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
@@ -3734,7 +3734,7 @@ const Dashboard = ({}: DashboardProps) => {
                     .map(key => graph.nodes[key])
                     .map(fullNode => {
                       console.log("fullNode", fullNode);
-                      const simpleNode: SimpleNode = {
+                      const simpleNode: SimpleNode2 = {
                         id: fullNode.node,
                         choices: fullNode.choices,
                         contributors: Object.keys(fullNode.contributors).map(key => ({
@@ -3756,7 +3756,7 @@ const Dashboard = ({}: DashboardProps) => {
                       };
                       return simpleNode;
                     })
-                    .map((simpleNode: SimpleNode) => (
+                    .map((simpleNode: SimpleNode2) => (
                       <NodeItem
                         key={simpleNode.id}
                         node={simpleNode}

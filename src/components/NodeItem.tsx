@@ -15,12 +15,12 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
+import { SimpleNode2 } from "src/types";
 
 import { getInstitutionsByName } from "@/lib/firestoreClient/institutions";
 import ROUTES from "@/lib/utils/routes";
 import { getNodePageUrl } from "@/lib/utils/utils";
 
-import { SimpleNode } from "../knowledgeTypes";
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
 import NodeVotes from "./NodeVotes";
@@ -36,7 +36,7 @@ type InstitutionData = {
 };
 
 type NodeItemProps = {
-  node: SimpleNode;
+  node: SimpleNode2;
   userId?: string | null;
   onHideNode?: any;
   identifier?: string;
