@@ -330,22 +330,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   //  bd => state (first render)
   useEffect(() => {
-    // setTimeout(() => {
-    console.log("iitial scroll");
-    if (user?.sNode === nodeBookState.selectedNode) return;
-    // if (queue.length) return;
-    console.log("iitial scroll 1");
-    if (!firstScrollToNode && queueFinished) {
-      if (!user?.sNode) return;
-      console.log("iitial scroll 2 (queueFinished)");
-      nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-      console.log("userNodesLoaded", userNodesLoaded);
-      scrollToNode(user.sNode);
-      setFirstScrollToNode(true);
-    }
-    // }, 1000);
+    setTimeout(() => {
+      console.log("--->> FStN", { firstScrollToNode, queueFinished });
+      if (user?.sNode === nodeBookState.selectedNode) return;
+
+      // if (queue.length) return;
+      // console.log("iitial scroll 1");
+      if (!firstScrollToNode && queueFinished) {
+        if (!user?.sNode) return;
+        const selectedNode = graph.nodes[user?.sNode];
+        if (!selectedNode) return;
+        if (selectedNode.top === 0) return;
+
+        console.log("--->> FStN:OK", { queueFinished, node: graph.nodes[user.sNode] });
+        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        // console.log("userNodesLoaded", userNodesLoaded);
+        scrollToNode(user.sNode);
+        setFirstScrollToNode(true);
+      }
+    }, 1000);
   }, [
     firstScrollToNode,
+    graph.nodes,
     isQueueWorking,
     nodeBookDispatch,
     nodeBookState.selectedNode,
@@ -3476,60 +3482,62 @@ const Dashboard = ({}: DashboardProps) => {
       >
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
-          <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
-            {/* Data from map, don't REMOVE */}
-            <Box>
-              Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
-            </Box>
+          {process.env.NODE_ENV === "development" && (
+            <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
+              {/* Data from map, don't REMOVE */}
+              <Box>
+                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Typography>Global states:</Typography>
-            <Box>
-              <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-              <Button onClick={() => console.log(graph.edges)}>edges</Button>
-              <Button onClick={() => console.log(allTags)}>allTags</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-              <Button onClick={() => console.log(user)}>user</Button>
-              <Button onClick={() => console.log(settings)}>setting</Button>
-              <Button onClick={() => console.log(reputation)}>reputation</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-              {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
-              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-              <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
-            </Box>
+              <Typography>Global states:</Typography>
+              <Box>
+                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+                <Button onClick={() => console.log(graph.edges)}>edges</Button>
+                <Button onClick={() => console.log(allTags)}>allTags</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
+                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.log(user)}>user</Button>
+                <Button onClick={() => console.log(settings)}>setting</Button>
+                <Button onClick={() => console.log(reputation)}>reputation</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
+                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+                <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+                <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Box>
-              {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
-              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
-              <Button onClick={() => console.log(citations)}>citations</Button>
-            </Box>
+              <Box>
+                {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
+                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+                <Button onClick={() => console.log(citations)}>citations</Button>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Typography>Functions:</Typography>
-            <Box>
-              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                Toggle Open proposals
-              </Button>
-              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                Open Proposal
-              </Button>
-              <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
-            </Box>
-          </Drawer>
+              <Typography>Functions:</Typography>
+              <Box>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Toggle Open proposals
+                </Button>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Open Proposal
+                </Button>
+                <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+              </Box>
+            </Drawer>
+          )}
           <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -3573,34 +3581,36 @@ const Dashboard = ({}: DashboardProps) => {
             mapRendered={true}
           />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          <Box
-            sx={{
-              position: "fixed",
-              top: "10px",
-              right: "10px",
-              zIndex: "1300",
-              background: "#123",
-              color: "white",
-            }}
-          >
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-              {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+          {process.env.NODE_ENV === "development" && (
+            <Box
+              sx={{
+                position: "fixed",
+                top: "10px",
+                right: "10px",
+                zIndex: "1300",
+                background: "#123",
+                color: "white",
+              }}
+            >
+              <Box sx={{ border: "dashed 1px royalBlue" }}>
+                <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
+                {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+              </Box>
+              <Box sx={{ border: "dashed 1px royalBlue" }}>
+                <Typography>SN: {nodeBookState.selectedNode}</Typography>
+                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
+              </Box>
+              <Box sx={{ float: "right" }}>
+                <Tooltip title={"Watch geek data"}>
+                  <>
+                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                      <CodeIcon color="warning" />
+                    </IconButton>
+                  </>
+                </Tooltip>
+              </Box>
             </Box>
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>SN: {nodeBookState.selectedNode}</Typography>
-              <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
-            </Box>
-            <Box sx={{ float: "right" }}>
-              <Tooltip title={"Watch geek data"}>
-                <>
-                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon color="warning" />
-                  </IconButton>
-                </>
-              </Tooltip>
-            </Box>
-          </Box>
+          )}
 
           {/* end Data from map */}
           <Box
