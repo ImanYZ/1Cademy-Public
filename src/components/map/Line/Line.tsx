@@ -14,8 +14,6 @@ type LineProps = {
 };
 
 const Line = (props: LineProps) => {
-  // console.log('props',props)
-
   let from = props.from;
   let to = props.to;
   if (!props.leftDirection && to.x < from.x) {
@@ -58,15 +56,7 @@ const Line = (props: LineProps) => {
       }}
     >
       <div className="RightArrow" style={rightArrowStyle}></div>
-      <div className="Line">
-        {props.label}
-        {/* <Draft
-          onChange={doNothing}
-          node_id={props.identifier}
-          content={label}
-          stylable={false}
-        /> */}
-      </div>
+      <div className="Line">{props.label}</div>
     </Box>
   );
 };

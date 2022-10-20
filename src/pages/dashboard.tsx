@@ -433,7 +433,6 @@ const Dashboard = ({}: DashboardProps) => {
             let tmpEdges = {};
 
             if (cur.nodeChangeType === "added") {
-              // console.log("added");
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
               const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
@@ -441,7 +440,6 @@ const Dashboard = ({}: DashboardProps) => {
               tmpEdges = res.oldEdges;
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
-              // console.log("modified");
               const node = acu.newNodes[cur.node];
               if (!node) {
                 // <---  CHECK I change this from nodes
@@ -466,7 +464,6 @@ const Dashboard = ({}: DashboardProps) => {
             // I changed the reference from snapshot
             // so the NO visible nodes will come as modified and !visible
             if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-              // console.log("removed", cur.node, g.current);
               if (g.current.hasNode(cur.node)) {
                 // console.log("has Node");
                 g.current.nodes().forEach(function () {});
@@ -594,6 +591,10 @@ const Dashboard = ({}: DashboardProps) => {
             const tmpNode = nodes[cur.node];
 
             const hasParent = cur.parents.length;
+            // IMPROVE: we need to pass the parent which open the node
+            // to use his current position
+            // in this case we are checking first parent
+            // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
             const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
             const topParent = nodeParent?.top ?? 0;
 
@@ -611,7 +612,7 @@ const Dashboard = ({}: DashboardProps) => {
           // })
           // here we are filling dagger
           const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-          console.log({ newNodes, newEdges });
+
           return { nodes: newNodes, edges: newEdges };
         });
         // setEdges(edges => {
@@ -3600,6 +3601,12 @@ const Dashboard = ({}: DashboardProps) => {
                 <Typography>SN: {nodeBookState.selectedNode}</Typography>
                 <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
               </Box>
+              {/* <Box>
+                Edges:
+                {Object.keys(graph.edges).map(
+                  k => `${graph.edges[k].fromX},${graph.edges[k].fromY} -> ${graph.edges[k].toX},${graph.edges[k].toY}`
+                )}
+              </Box> */}
               <Box sx={{ float: "right" }}>
                 <Tooltip title={"Watch geek data"}>
                   <>
