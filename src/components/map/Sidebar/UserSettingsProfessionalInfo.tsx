@@ -1,4 +1,5 @@
 import { Autocomplete, Box, TextField } from "@mui/material";
+import { common } from "@mui/material/colors";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import React, { HTMLAttributes, useEffect, useState } from "react";
 import { Institution, Major, User } from "src/knowledgeTypes";
@@ -135,7 +136,13 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         )}
         renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
           <li {...props}>
-            <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
+            <OptimizedAvatar
+              name={option.name}
+              imageUrl={option.logoURL}
+              contained
+              renderAsAvatar={false}
+              sx={{ backgroundColor: "#ff9800", color: common.white }}
+            />
             <div style={{ paddingLeft: "10px" }}>{option.name}</div>
           </li>
         )}
