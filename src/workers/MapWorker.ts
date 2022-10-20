@@ -3,6 +3,7 @@ import dagre from "dagre";
 
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils } from "../lib/utils/dagre.util";
+import { devLog } from "../lib/utils/develop.util";
 // import { setDagEdge, setDagNode } from "../lib/utils/Map.utils";
 // import { ClusterNodes } from "../noteBookTypes";
 import { MAP_RIGHT_GAP, MIN_CHANGE, NODE_WIDTH, XOFFSET, YOFFSET } from "../lib/utils/Map.utils";
@@ -176,7 +177,8 @@ const layoutHandler = (
   // }
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
-  console.log(`⌚[Map Worker]: ${endTimer - startTimer}ms`);
+  devLog("⌚:Map Worker", `${endTimer - startTimer}ms`);
+  // console.log(`⌚[Map Worker]: ${endTimer - startTimer}ms`);
   return {
     /*mapChangedFlag,*/
     // oldClusterNodes,
