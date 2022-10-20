@@ -721,13 +721,37 @@ export const createOrUpdateNode = (
     // adds newNode to dagre object and to oldNodes
     // null: no callback
     oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
-    // creates edges from newNode to children nodes
+
     for (let child of newNode.children) {
-      oldEdges = setDagEdge(g, nodeId, child.node, { label: child.label }, oldEdges);
+      oldEdges = setDagEdge(
+        g,
+        nodeId,
+        child.node,
+        {
+          label: child.label,
+          fromX: newNode.left,
+          fromY: newNode.top,
+          toX: newNode.left - COLUMN_GAP,
+          toY: newNode.top,
+        },
+        oldEdges
+      );
     }
     // creates edges from parent nodes to newNode
     for (let parent of newNode.parents) {
-      oldEdges = setDagEdge(g, parent.node, nodeId, { label: parent.label }, oldEdges);
+      oldEdges = setDagEdge(
+        g,
+        parent.node,
+        nodeId,
+        {
+          label: parent.label,
+          fromX: newNode.left - COLUMN_GAP,
+          fromY: newNode.top,
+          toX: newNode.left,
+          toY: newNode.top,
+        },
+        oldEdges
+      );
     }
     // if node is currently visible
   } else {
@@ -764,6 +788,7 @@ export const createOrUpdateNode = (
       oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
     }
   }
+
   return { oldNodes, oldEdges };
 };
 
