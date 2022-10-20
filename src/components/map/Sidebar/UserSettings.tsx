@@ -9,6 +9,7 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Autocomplete, Box, FormControlLabel, FormGroup, LinearProgress, Switch, TextField } from "@mui/material";
+import { common } from "@mui/material/colors";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
@@ -107,12 +108,10 @@ const doNothing = () => {};
 type UserSettingProps = {
   user: User;
   userReputation: Reputation;
-  showClusters: boolean;
-  setShowClusters: (oClusters: boolean) => void;
   scrollToNode: (nodeId: string) => void;
 };
 
-const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scrollToNode }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -438,15 +437,15 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
     setDefaultTag();
   }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
-  const showHideClusters = useCallback(() => {
-    const userFieldLogRef = doc(collection(db, "userClustersLog"));
-    setDoc(userFieldLogRef, {
-      uname: user.uname,
-      open: !showClusters,
-      createdAt: Timestamp.fromDate(new Date()),
-    });
-    setShowClusters(!showClusters);
-  }, [db, setShowClusters, showClusters, user.uname]);
+  // const showHideClusters = useCallback(() => {
+  //   const userFieldLogRef = doc(collection(db, "userClustersLog"));
+  //   setDoc(userFieldLogRef, {
+  //     uname: user.uname,
+  //     open: !showClusters,
+  //     createdAt: Timestamp.fromDate(new Date()),
+  //   });
+  //   setShowClusters(!showClusters);
+  // }, [db, setShowClusters, showClusters, user.uname]);
 
   // ------------------->> THIS IS NOT USED
   // const closedSidebarClick = useCallback(
@@ -795,13 +794,16 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
   //   return { ...allTags, [user.tagId]: { ...foundTag, checked: true } };
   // };
 
-  const tabsItems = (user: User, choosingNodeId?: string) => {
+  const tabsItems = (user: User) => {
     return [
       {
         title: "Account",
         content: (
-          <div id="AccountSettings">
-            <div className="AccountSettingsButtons">
+          <div
+            id="AccountSettings"
+            style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
+          >
+            {/*<div className="AccountSettingsButtons">
               <MemoizedMetaButton onClick={() => choosingNodeClick("tag")}>
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon id="tagChangeIcon" className="material-icons deep-orange-text" />
@@ -811,12 +813,12 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
                 </div>
               </MemoizedMetaButton>
             </div>
-            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+             CHECK I change  choosingNode to {nodeBookState.choosingNode?.id
             {choosingNodeId === "tag" && (
               <Suspense fallback={<div></div>}>
                 <div id="tagModal">
                   <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
-                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} />
                     <MemoizedTagsSearcher
                       setChosenTags={setChosenTags}
                       chosenTags={chosenTags}
@@ -827,7 +829,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
                   </Modal>
                 </div>
               </Suspense>
-            )}
+            )}*/}
             {/* <UserSettingsSwitches
               theme={theme}
               handleThemeSwitch={handleThemeSwitch}
@@ -882,39 +884,6 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
               <FormControlLabel
                 control={
                   <Switch
-                    // checked={!values.chooseUname}
-                    checked={!user.chooseUname}
-                    onChange={e => handlesChooseUnameSwitch(e, user)}
-                  />
-                }
-                label={`Display name: ${getDisplayNameValue(user)}`}
-              />
-            </FormGroup>
-            {/* {props.showHideClusters && (
-
-            )} */}
-            <FormGroup row>
-              {/* <FormControl className="select RowSwitch">
-                <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />
-                <div className="RowSwitchItem">Clusters:</div>
-                <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
-              </FormControl> */}
-              <FormControlLabel
-                control={
-                  <Switch
-                    // checked={!values.chooseUname}
-                    checked={showClusters}
-                    // onChange={e => console.log("handlesChooseUnameSwitch(e, user)")}
-                    onChange={showHideClusters}
-                  />
-                }
-                label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
-              />
-            </FormGroup>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
                     // checked={values.theme === "Dark"}
                     checked={settings.view === "Graph"}
                     onChange={handleViewSwitch}
@@ -929,6 +898,39 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
                 label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
               />
             </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={!values.chooseUname}
+                    checked={!user.chooseUname}
+                    onChange={e => handlesChooseUnameSwitch(e, user)}
+                  />
+                }
+                label={`Display name: ${getDisplayNameValue(user)}`}
+              />
+            </FormGroup>
+            {/* {props.showHideClusters && (
+
+            )}
+            <FormGroup row>
+              <FormControl className="select RowSwitch">
+                <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />
+                <div className="RowSwitchItem">Clusters:</div>
+                <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
+              </FormControl>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={!values.chooseUname}
+                    checked={showClusters}
+                    // onChange={e => console.log("handlesChooseUnameSwitch(e, user)")}
+                    onChange={showHideClusters}
+                  />
+                }
+                label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
+              />
+            </FormGroup> */}
             <MemoizedInputSave
               identification="fNameInput"
               initialValue={user.fName || ""} //TODO: important fill empty user field
@@ -1236,14 +1238,41 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
           <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
           <div id="MiniUserPrifileTag">
             {/* <i className="material-icons grey-text">local_offer</i> */}
-            <LocalOfferIcon className="material-icons grey-text" style={{ marginRight: "12px" }} />
-            <span>{user.tag}</span>
+            <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
+              <div className="AccountSettingsButton">
+                <LocalOfferIcon
+                  sx={{ marginRight: "8px" }}
+                  id="tagChangeIcon"
+                  className="material-icons deep-orange-text"
+                />
+                {user.tag}
+
+                {isLoading && <LinearProgress />}
+              </div>
+            </MemoizedMetaButton>
+            {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
+            {nodeBookState?.choosingNode?.id === "tag" && (
+              <Suspense fallback={<div></div>}>
+                <div id="tagModal">
+                  <Modal style={{ top: "85px" }} onClick={closeTagSelector} returnLeft={true} noBackground={true}>
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
+                    <MemoizedTagsSearcher
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "235px", height: "235px" }}
+                    />
+                  </Modal>
+                </div>
+              </Suspense>
+            )}
           </div>
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px" }}
+              sx={{ width: "25px", height: "25px", fontSize: "16px", backgroundColor: "#ff9800", color: common.white }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}
@@ -1301,10 +1330,7 @@ const UserSettings = ({ user, userReputation, showClusters, setShowClusters, scr
         </div>
       </div>
       <div className="UserSettingsSidebarBody">
-        <MemoizedSidebarTabs
-          tabsTitle="User Mini-profile tabs"
-          tabsItems={tabsItems(user, nodeBookState?.choosingNode?.id)}
-        />
+        <MemoizedSidebarTabs tabsTitle="User Mini-profile tabs" tabsItems={tabsItems(user)} />
       </div>
     </>
   ) : (

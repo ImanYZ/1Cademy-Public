@@ -39,9 +39,6 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
-import lightModeLibraryImage from "../../public/lightModeLibraryBackground.jpg";
-import ClustersList from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
@@ -54,9 +51,9 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
-  addReference,
   changedNodes,
   citations,
+  COLUMN_GAP,
   compare2Nodes,
   compareAndUpdateNodeLinks,
   compareChoices,
@@ -167,7 +164,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   // object of cluster boundaries
-  const [clusterNodes, setClusterNodes] = useState({});
+  // const [clusterNodes, setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
   const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -201,7 +198,7 @@ const Dashboard = ({}: DashboardProps) => {
     setGraph,
     setMapWidth,
     setMapHeight,
-    setClusterNodes,
+    // setClusterNodes,
     // setMapChanged,
     mapWidth,
     mapHeight,
@@ -266,7 +263,8 @@ const Dashboard = ({}: DashboardProps) => {
   // const [nodeToImprove, setNodeToImprove] = useState<FullNodeData | null>(null);
 
   //
-  const [showClusters, setShowClusters] = useState(false);
+
+  // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
   // ---------------------------------------------------------------------
@@ -335,22 +333,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   //  bd => state (first render)
   useEffect(() => {
-    // setTimeout(() => {
-    console.log("iitial scroll");
-    if (user?.sNode === nodeBookState.selectedNode) return;
-    // if (queue.length) return;
-    console.log("iitial scroll 1");
-    if (!firstScrollToNode && queueFinished) {
-      if (!user?.sNode) return;
-      console.log("iitial scroll 2 (queueFinished)");
-      nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-      console.log("userNodesLoaded", userNodesLoaded);
-      scrollToNode(user.sNode);
-      setFirstScrollToNode(true);
-    }
-    // }, 1000);
+    setTimeout(() => {
+      console.log("--->> FStN", { firstScrollToNode, queueFinished });
+      if (user?.sNode === nodeBookState.selectedNode) return;
+
+      // if (queue.length) return;
+      // console.log("iitial scroll 1");
+      if (!firstScrollToNode && queueFinished) {
+        if (!user?.sNode) return;
+        const selectedNode = graph.nodes[user?.sNode];
+        if (!selectedNode) return;
+        if (selectedNode.top === 0) return;
+
+        console.log("--->> FStN:OK", { queueFinished, node: graph.nodes[user.sNode] });
+        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        // console.log("userNodesLoaded", userNodesLoaded);
+        scrollToNode(user.sNode);
+        setFirstScrollToNode(true);
+      }
+    }, 1000);
   }, [
     firstScrollToNode,
+    graph.nodes,
     isQueueWorking,
     nodeBookDispatch,
     nodeBookState.selectedNode,
@@ -432,7 +436,6 @@ const Dashboard = ({}: DashboardProps) => {
             let tmpEdges = {};
 
             if (cur.nodeChangeType === "added") {
-              // console.log("added");
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
               const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
@@ -440,7 +443,6 @@ const Dashboard = ({}: DashboardProps) => {
               tmpEdges = res.oldEdges;
             }
             if (cur.nodeChangeType === "modified" && cur.visible) {
-              // console.log("modified");
               const node = acu.newNodes[cur.node];
               if (!node) {
                 // <---  CHECK I change this from nodes
@@ -465,7 +467,6 @@ const Dashboard = ({}: DashboardProps) => {
             // I changed the reference from snapshot
             // so the NO visible nodes will come as modified and !visible
             if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-              // console.log("removed", cur.node, g.current);
               if (g.current.hasNode(cur.node)) {
                 // console.log("has Node");
                 g.current.nodes().forEach(function () {});
@@ -558,10 +559,11 @@ const Dashboard = ({}: DashboardProps) => {
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
 
-        nodesData.forEach(cur => {
-          if (!cur?.nData.nodeType || !cur.nData.references) return;
-          addReference(cur.nId, cur.nData);
-        });
+        // nodesData.forEach(cur => {
+        //   if (!cur?.nData.nodeType || !cur.nData.references) return;
+        //   addReference(cur.nId, cur.nData);
+        // });
+
         console.log("Nodes Data", { nodesData });
 
         const fullNodes = buildFullNodes(userNodeChanges, nodesData);
@@ -592,12 +594,20 @@ const Dashboard = ({}: DashboardProps) => {
             const tmpNode = nodes[cur.node];
 
             const hasParent = cur.parents.length;
+            // IMPROVE: we need to pass the parent which open the node
+            // to use his current position
+            // in this case we are checking first parent
+            // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
             const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-
-            const leftParent = nodeParent?.left ?? 0;
             const topParent = nodeParent?.top ?? 0;
 
-            return { ...cur, left: tmpNode?.left ?? leftParent, top: tmpNode?.top ?? topParent };
+            const leftParent = nodeParent?.left ?? 0;
+
+            return {
+              ...cur,
+              left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+              top: tmpNode?.top ?? topParent,
+            };
           });
 
           // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
@@ -605,7 +615,7 @@ const Dashboard = ({}: DashboardProps) => {
           // })
           // here we are filling dagger
           const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-          console.log({ newNodes, newEdges });
+
           return { nodes: newNodes, edges: newEdges };
         });
         // setEdges(edges => {
@@ -642,7 +652,7 @@ const Dashboard = ({}: DashboardProps) => {
         // IMPORTANT: I commented this to call all
         // visible: used to drag nodes in Notebook
         // visible and invisible to show bookmarks
-        // where("visible", "==", true),
+        where("visible", "==", true),
         where("deleted", "==", false)
       );
       const killSnapshot = snapshot(q);
@@ -3462,37 +3472,8 @@ const Dashboard = ({}: DashboardProps) => {
     [scrollToNodeInitialized]
   );
 
-  // console.log("dashboard render");
   return (
     <div className="MapContainer">
-      {settings.theme === "Dark" && (
-        <Box
-          data-testid="auth-layout"
-          sx={{
-            width: "100vw",
-            height: "100vh",
-            position: "fixed",
-            // filter: "brightness(0.25)",
-            zIndex: -2,
-          }}
-        >
-          <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
-        </Box>
-      )}
-      {settings.theme === "Light" && (
-        <Box
-          data-testid="auth-layout"
-          sx={{
-            width: "100vw",
-            height: "100vh",
-            position: "fixed",
-            // filter: "brightness(1.4)",
-            zIndex: -2,
-          }}
-        >
-          <Image alt="Library" src={lightModeLibraryImage} layout="fill" objectFit="cover" priority />
-        </Box>
-      )}
       <Box
         id="Map"
         sx={{
@@ -3504,61 +3485,63 @@ const Dashboard = ({}: DashboardProps) => {
         }}
       >
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
-        <Box sx={{ width: "100vw", height: "100vh", overflowX: "hidden" }}>
-          <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
-            {/* Data from map, don't REMOVE */}
-            <Box>
-              Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
-            </Box>
+        <Box sx={{ width: "100vw", height: "100vh" }}>
+          {process.env.NODE_ENV === "development" && (
+            <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
+              {/* Data from map, don't REMOVE */}
+              <Box>
+                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Typography>Global states:</Typography>
-            <Box>
-              <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-              <Button onClick={() => console.log(graph.edges)}>edges</Button>
-              <Button onClick={() => console.log(allTags)}>allTags</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-              <Button onClick={() => console.log(user)}>user</Button>
-              <Button onClick={() => console.log(settings)}>setting</Button>
-              <Button onClick={() => console.log(reputation)}>reputation</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-              {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
-              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-            </Box>
-            <Box>
-              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-              <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
-            </Box>
+              <Typography>Global states:</Typography>
+              <Box>
+                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+                <Button onClick={() => console.log(graph.edges)}>edges</Button>
+                <Button onClick={() => console.log(allTags)}>allTags</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
+                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.log(user)}>user</Button>
+                <Button onClick={() => console.log(settings)}>setting</Button>
+                <Button onClick={() => console.log(reputation)}>reputation</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
+                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+                <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+              </Box>
+              <Box>
+                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+                <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Box>
-              {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
-              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
-              <Button onClick={() => console.log(citations)}>citations</Button>
-            </Box>
+              <Box>
+                {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
+                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+                <Button onClick={() => console.log(citations)}>citations</Button>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Typography>Functions:</Typography>
-            <Box>
-              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                Toggle Open proposals
-              </Button>
-              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                Open Proposal
-              </Button>
-              <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
-            </Box>
-          </Drawer>
+              <Typography>Functions:</Typography>
+              <Box>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Toggle Open proposals
+                </Button>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Open Proposal
+                </Button>
+                <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+              </Box>
+            </Drawer>
+          )}
           <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -3572,12 +3555,13 @@ const Dashboard = ({}: DashboardProps) => {
             selectionType={nodeBookState.selectionType}
             selectedUser={selectedUser}
             reloadPermanentGrpah={reloadPermanentGraph}
-            showClusters={showClusters}
-            setShowClusters={setShowClusters}
+            // showClusters={showClusters}
+            // setShowClusters={setShowClusters}
             pendingProposalsLoaded={pendingProposalsLoaded}
             setPendingProposalsLoaded={setPendingProposalsLoaded}
             openProposal={openProposal}
             citations={citations}
+            selectedNode={nodeBookState.selectedNode}
             // ------------------- flags
             setOpenPendingProposals={setOpenPendingProposals}
             openPendingProposals={openPendingProposals}
@@ -3602,34 +3586,42 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode={scrollToNode}
           />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          <Box
-            sx={{
-              position: "fixed",
-              top: "10px",
-              right: "10px",
-              zIndex: "1300",
-              background: "#123",
-              color: "white",
-            }}
-          >
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-              {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+          {process.env.NODE_ENV === "development" && (
+            <Box
+              sx={{
+                position: "fixed",
+                top: "10px",
+                right: "10px",
+                zIndex: "1300",
+                background: "#123",
+                color: "white",
+              }}
+            >
+              <Box sx={{ border: "dashed 1px royalBlue" }}>
+                <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
+                {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+              </Box>
+              <Box sx={{ border: "dashed 1px royalBlue" }}>
+                <Typography>SN: {nodeBookState.selectedNode}</Typography>
+                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
+              </Box>
+              {/* <Box>
+                Edges:
+                {Object.keys(graph.edges).map(
+                  k => `${graph.edges[k].fromX},${graph.edges[k].fromY} -> ${graph.edges[k].toX},${graph.edges[k].toY}`
+                )}
+              </Box> */}
+              <Box sx={{ float: "right" }}>
+                <Tooltip title={"Watch geek data"}>
+                  <>
+                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                      <CodeIcon color="warning" />
+                    </IconButton>
+                  </>
+                </Tooltip>
+              </Box>
             </Box>
-            <Box sx={{ border: "dashed 1px royalBlue" }}>
-              <Typography>SN: {nodeBookState.selectedNode}</Typography>
-              <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
-            </Box>
-            <Box sx={{ float: "right" }}>
-              <Tooltip title={"Watch geek data"}>
-                <>
-                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon color="warning" />
-                  </IconButton>
-                </>
-              </Tooltip>
-            </Box>
-          </Box>
+          )}
 
           {/* end Data from map */}
           {settings.view === "Graph" && (
@@ -3644,7 +3636,7 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {showClusters && <ClustersList clusterNodes={clusterNodes} />}
+                {/* {showClusters && <ClustersList clusterNodes={clusterNodes} />} */}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
                   nodes={graph.nodes}

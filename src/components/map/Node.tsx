@@ -493,7 +493,7 @@ const Node = ({
       // }
     >
       {/* INFO: uncomment this only on develope */}
-      {identifier}
+      {process.env.NODE_ENV === "development" && identifier}
       {open ? (
         <>
           <div className="card-content">
@@ -572,6 +572,7 @@ const Node = ({
                 // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
                 // setValue={setContentCopy}
                 readOnly={!editable}
+                sxPreview={{ marginTop: "13px" }}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* CHECK: I commmented  this */}
