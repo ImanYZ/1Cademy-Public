@@ -13,13 +13,13 @@ import ShareIcon from "@mui/icons-material/Share";
 import { SvgIconProps } from "@mui/material/SvgIcon";
 import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import { FC } from "react";
-import { NodeType } from "src/types";
+import { NodeType as NodeTypes } from "src/types";
 
-// import { NodeType } from "../knowledgeTypes";
+import { NodeType } from "../knowledgeTypes";
 
 type Props = {
   tooltipPlacement?: TooltipProps["placement"];
-  nodeType?: NodeType;
+  nodeType?: NodeType | NodeTypes;
 } & SvgIconProps;
 
 const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "top", color = "primary", ...rest }) => {

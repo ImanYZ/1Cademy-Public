@@ -104,7 +104,7 @@ export const NodeItem = ({ node, userId, onHideNode, identifier }: NodeItemProps
     );
   };
   return (
-    <Card data-testid="node-item" sx={{ width: "100%", ":hover": { boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.2)" } }}>
+    <Card data-testid="node-item" sx={{ ":hover": { boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.2)" } }}>
       <NextLink passHref href={getNodePageUrl(node.title || "", node.id)}>
         <Link underline="none" color="inherit">
           <CardActionArea sx={{ pt: { xs: 4, lg: 6 }, px: { xs: 5, lg: 10 }, pb: 2 }}>
