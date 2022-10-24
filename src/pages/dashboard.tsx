@@ -2715,7 +2715,7 @@ const Dashboard = ({}: DashboardProps) => {
           editable: true,
           width: NODE_WIDTH,
           node: newNodeId,
-          left: thisNode.left,
+          left: thisNode.left + NODE_WIDTH + COLUMN_GAP,
           top: thisNode.top,
         };
         if (childNodeType === "Question") {
@@ -2743,7 +2743,7 @@ const Dashboard = ({}: DashboardProps) => {
         setTimeout(() => {
           console.log("call scroll", newNodeId);
           scrollToNode(newNodeId);
-        }, 1500);
+        }, 10000);
         return { nodes: newNodes, edges: newEdges };
       });
     },
