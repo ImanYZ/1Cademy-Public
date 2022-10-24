@@ -106,7 +106,7 @@ export const NodeItemDashboard = ({ node, userId, onHideNode, identifier }: Node
       data-testid="node-item"
       sx={{
         position: "relative",
-        background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "inherit"),
+        background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
         border: theme =>
           node.studied
             ? theme.palette.mode === "dark"
