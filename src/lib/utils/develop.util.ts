@@ -4,7 +4,7 @@
  * - this will print [FUNCTION_NAME]
  * - logInUpperCase must be writer to sho log like this: FUNCTION_NAME
  */
-const disableLogsTemporally = true;
+const disableLogsTemporally = false;
 export const devLog = (logInUpperCase: string, otherData: any = null) => {
   if (disableLogsTemporally) return;
   if (process.env.NODE_ENV !== "development") return;

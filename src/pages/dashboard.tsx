@@ -279,6 +279,7 @@ const Dashboard = ({}: DashboardProps) => {
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
       // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
+      devLog("scroll To Node", { nodeId, tries });
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized || queueFinished) {
@@ -515,87 +516,94 @@ const Dashboard = ({}: DashboardProps) => {
         );
       };
 
-      const userNodesSnapshot = onSnapshot(q, async snapshot => {
-        const docChanges = snapshot.docChanges();
-        console.log("first:docChanges", { docChanges });
-        if (!docChanges.length) return null;
-        // setIsSubmitting(true);
-        const userNodeChanges = getUserNodeChanges(docChanges);
-        const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-        const nodesData = await getNodes(db, nodeIds);
+      const userNodesSnapshot = onSnapshot(
+        q,
+        async snapshot => {
+          const docChanges = snapshot.docChanges();
 
-        // nodesData.forEach(cur => {
-        //   if (!cur?.nData.nodeType || !cur.nData.references) return;
-        //   addReference(cur.nId, cur.nData);
-        // });
+          console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
+          if (!docChanges.length) return null;
+          // setIsSubmitting(true);
+          const userNodeChanges = getUserNodeChanges(docChanges);
+          const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
+          const nodesData = await getNodes(db, nodeIds);
 
-        const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+          // nodesData.forEach(cur => {
+          //   if (!cur?.nData.nodeType || !cur.nData.references) return;
+          //   addReference(cur.nId, cur.nData);
+          // });
 
-        // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
-        // here set All Full Nodes to use in bookmarks
-        // here set visible Full Nodes to draw Nodes in notebook
-        const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-        // const mergedVisibleFullNodes = visibleFullNodes.map(cur=>{
-        //   const {lef} = nodes[cur.node]
-        //   {...cur,left:}
-        // })
-        // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
+          const fullNodes = buildFullNodes(userNodeChanges, nodesData);
 
-        setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-        // setNodes(newNodes);
-        // setEdges(newEdges);
-        // setNodes(nodes => {
-        //   const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edgesRef.current);
-        //   setEdges(newEdges);
-        //   return newNodes;
-        //   // setEdges(edges=>{
-        //   // })
-        // });
-        setGraph(({ nodes, edges }) => {
-          // Here we are merging with previous nodes left and top
-          const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-            const tmpNode = nodes[cur.node];
-
-            const hasParent = cur.parents.length;
-            // IMPROVE: we need to pass the parent which open the node
-            // to use his current position
-            // in this case we are checking first parent
-            // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-            const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-            const topParent = nodeParent?.top ?? 0;
-
-            const leftParent = nodeParent?.left ?? 0;
-
-            return {
-              ...cur,
-              left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-              top: tmpNode?.top ?? topParent,
-            };
-          });
-
-          // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
-          //   if(cur.nodeChangeType==='modified' &&)
+          // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
+          // here set All Full Nodes to use in bookmarks
+          // here set visible Full Nodes to draw Nodes in notebook
+          const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+          // const mergedVisibleFullNodes = visibleFullNodes.map(cur=>{
+          //   const {lef} = nodes[cur.node]
+          //   {...cur,left:}
           // })
-          // here we are filling dagger
-          const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-          console.log("visibleFullNodesMerged", visibleFullNodesMerged.length);
-          setTasksToWait(visibleFullNodesMerged.length);
-          return { nodes: newNodes, edges: newEdges };
-        });
-        // setEdges(edges => {
-        //   setNodes(newNodes);
-        //   return newEdges;
-        // });
-        // setIsSubmitting(false);
-        devLog("user Nodes Snapshot", {
-          userNodeChanges,
-          nodeIds,
-          nodesData,
-          fullNodes,
-          visibleFullNodes,
-        });
-        setUserNodesLoaded(true);
-      });
+          // const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodeRef.current, edgesRef.current);
+
+          setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+          // setNodes(newNodes);
+          // setEdges(newEdges);
+          // setNodes(nodes => {
+          //   const { newNodes, newEdges } = fillDagre(visibleFullNodes, nodes, edgesRef.current);
+          //   setEdges(newEdges);
+          //   return newNodes;
+          //   // setEdges(edges=>{
+          //   // })
+          // });
+          setGraph(({ nodes, edges }) => {
+            // Here we are merging with previous nodes left and top
+            const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+              const tmpNode = nodes[cur.node];
+
+              const hasParent = cur.parents.length;
+              // IMPROVE: we need to pass the parent which open the node
+              // to use his current position
+              // in this case we are checking first parent
+              // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+              const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+              const topParent = nodeParent?.top ?? 0;
+
+              const leftParent = nodeParent?.left ?? 0;
+
+              return {
+                ...cur,
+                left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+                top: tmpNode?.top ?? topParent,
+              };
+            });
+
+            // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
+            //   if(cur.nodeChangeType==='modified' &&)
+            // })
+            // here we are filling dagger
+            const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
+            console.log("visibleFullNodesMerged", visibleFullNodesMerged.length);
+            setTasksToWait(visibleFullNodesMerged.length);
+            return { nodes: newNodes, edges: newEdges };
+          });
+          // setEdges(edges => {
+          //   setNodes(newNodes);
+          //   return newEdges;
+          // });
+          // setIsSubmitting(false);
+          devLog("user Nodes Snapshot", {
+            userNodeChanges,
+            nodeIds,
+            nodesData,
+            fullNodes,
+            visibleFullNodes,
+          });
+          setUserNodesLoaded(true);
+        },
+        error => console.error(error),
+        () => console.log("snapsho is COMPLETE")
+      );
+
       return () => userNodesSnapshot();
     },
     [allTags, db]
@@ -2733,6 +2741,7 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log(4, { newNodes, newEdges });
         // setMapChanged(true);
         setTimeout(() => {
+          console.log("call scroll", newNodeId);
           scrollToNode(newNodeId);
         }, 1500);
         return { nodes: newNodes, edges: newEdges };
