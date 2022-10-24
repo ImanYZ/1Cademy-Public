@@ -86,6 +86,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
+type LastOperation = "OpenNode" | "CloseNode" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -195,6 +196,64 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
+  const lastOperation = useRef<LastOperation>(null);
+  const scrollToNode = useCallback(
+    (nodeId: string, tries = 0) => {
+      // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
+      devLog("scroll To Node", { nodeId, tries });
+      if (tries === 10) return;
+
+      if (!scrollToNodeInitialized) {
+        setTimeout(() => {
+          // const currentNode = graph.nodes[nodeId];
+          // if(currentNode.height===NODE_HEIGHT)
+          const originalNode = document.getElementById(nodeId);
+
+          if (
+            originalNode &&
+            "offsetLeft" in originalNode &&
+            originalNode.offsetLeft !== 0 &&
+            "offsetTop" in originalNode &&
+            originalNode.offsetTop !== 0
+            // currentNode?.height !== NODE_HEIGHT &&
+            // queueFinished
+          ) {
+            setScrollToNodeInitialized(true);
+            setTimeout(() => {
+              setScrollToNodeInitialized(false);
+            }, 1300);
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            setMapInteractionValue(() => {
+              return {
+                scale: 0.94,
+                translation: {
+                  x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
+                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
+                },
+              };
+            });
+          } else {
+            scrollToNode(nodeId, tries + 1);
+          }
+        }, 400);
+      }
+    },
+    [scrollToNodeInitialized]
+  );
+
+  const onCompleteWorker = useCallback(() => {
+    if (!nodeBookState.selectedNode) return;
+    if (!lastOperation.current) return;
+
+    if (lastOperation.current === "OpenNode") {
+      scrollToNode(nodeBookState.selectedNode);
+    }
+    if (lastOperation.current === "CloseNode") {
+      scrollToNode(nodeBookState.selectedNode);
+    }
+  }, [nodeBookState.selectedNode, scrollToNode]);
+
   const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait } = useWorkerQueue({
     g,
     graph,
@@ -206,6 +265,7 @@ const Dashboard = ({}: DashboardProps) => {
     mapWidth,
     mapHeight,
     allTags,
+    onComplete: onCompleteWorker,
   });
 
   // ---------------------------------------------------------------------
@@ -275,51 +335,6 @@ const Dashboard = ({}: DashboardProps) => {
   // FUNCTIONS
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
-
-  const scrollToNode = useCallback(
-    (nodeId: string, tries = 0) => {
-      // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
-      devLog("scroll To Node", { nodeId, tries });
-      if (tries === 10) return;
-
-      if (!scrollToNodeInitialized || queueFinished) {
-        setTimeout(() => {
-          // const currentNode = graph.nodes[nodeId];
-          // if(currentNode.height===NODE_HEIGHT)
-          const originalNode = document.getElementById(nodeId);
-
-          if (
-            originalNode &&
-            "offsetLeft" in originalNode &&
-            originalNode.offsetLeft !== 0 &&
-            "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0
-            // currentNode?.height !== NODE_HEIGHT &&
-            // queueFinished
-          ) {
-            setScrollToNodeInitialized(true);
-            setTimeout(() => {
-              setScrollToNodeInitialized(false);
-            }, 1300);
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            setMapInteractionValue(() => {
-              return {
-                scale: 0.94,
-                translation: {
-                  x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
-                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
-                },
-              };
-            });
-          } else {
-            scrollToNode(nodeId, tries + 1);
-          }
-        }, 400);
-      }
-    },
-    [queueFinished, scrollToNodeInitialized]
-  );
 
   //  bd => state (first render)
   useEffect(() => {
@@ -1126,10 +1141,12 @@ const Dashboard = ({}: DashboardProps) => {
           // setChosenNode(null);
           // setChosenNodeTitle(null);
           // setChoosingType(null);
-          setTimeout(() => {
-            scrollToNode(nodeId);
-          }, 1500);
+          // setTimeout(() => {
+          //   scrollToNode(nodeId);
+          // }, 1500);
           // setMapChanged(true);
+
+          lastOperation.current = "CloseNode";
 
           const newNodes = {
             ...oldNodes,
@@ -1216,13 +1233,15 @@ const Dashboard = ({}: DashboardProps) => {
           thisNode.tags.splice(linkIdx, 1);
           thisNode.tagIds.splice(linkIdx, 1);
         }
-        setTimeout(() => {
-          scrollToNode(nodeId);
-        }, 1500);
+        // setTimeout(() => {
+        //   scrollToNode(nodeId);
+        // }, 1500);
 
         oldNodes[nodeId] = thisNode;
         return { nodes: oldNodes, edges: newEdges };
       });
+      console.log("updating last operation");
+      lastOperation.current = "OpenNode";
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1332,9 +1351,10 @@ const Dashboard = ({}: DashboardProps) => {
         } catch (err) {
           console.error(err);
         }
-        setTimeout(() => {
-          scrollToNode(nodeId);
-        }, 1500);
+        // setTimeout(() => {
+        //   scrollToNode(nodeId);
+        // }, 1500);
+        lastOperation.current = "CloseNode";
         setIsSubmitting(false);
       }
     },
@@ -1604,9 +1624,10 @@ const Dashboard = ({}: DashboardProps) => {
           //  there are some places when calling scroll to node but we are not selecting that node
           setTimeout(() => {
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-            scrollToNode(nodeId);
+            // scrollToNode(nodeId);
+            lastOperation.current = "OpenNode";
             // setSelectedNode(nodeId);
-          }, 1500);
+          }, 0);
         } catch (err) {
           console.error(err);
         }
@@ -1750,10 +1771,10 @@ const Dashboard = ({}: DashboardProps) => {
         }
 
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
-        setTimeout(() => {
-          scrollToNode(parentNode);
-        }, 1500);
-
+        // setTimeout(() => {
+        //   scrollToNode(parentNode);
+        // }, 1500);
+        lastOperation.current = "CloseNode";
         // // setSelectedNode(parents[0]);
       }
     },
@@ -1899,11 +1920,13 @@ const Dashboard = ({}: DashboardProps) => {
             }
           }
           // await firebase.commitBatch();
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           await batch.commit();
           setIsSubmitting(false);
           setTimeout(() => {
-            scrollToNode(nodeId);
-          }, 1500);
+            // scrollToNode(nodeId);
+            lastOperation.current = "CloseNode";
+          }, 0);
         } catch (err) {
           console.error(err);
         }
@@ -2001,6 +2024,7 @@ const Dashboard = ({}: DashboardProps) => {
           //   // setOpenRecentNodes(true);
           // }
         }
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
     },
     // TODO: CHECK dependencies

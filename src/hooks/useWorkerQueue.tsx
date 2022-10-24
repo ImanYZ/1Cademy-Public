@@ -33,6 +33,7 @@ type UseWorkerQueueProps = {
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
+  onComplete: () => void;
 };
 export const useWorkerQueue = ({
   g,
@@ -45,6 +46,7 @@ export const useWorkerQueue = ({
   mapWidth,
   mapHeight,
   allTags,
+  onComplete,
 }: UseWorkerQueueProps) => {
   const [tasksToWait, setTasksToWait] = useState<number>(0);
   const [queue, setQueue] = useState<Task[]>([]);
@@ -145,23 +147,15 @@ export const useWorkerQueue = ({
         });
         // setMapChanged(mapChangedFlag); // CHECK: if is used
         setIsWorking(false);
+        onComplete();
       };
     },
-    [
-      allTags,
-      g,
-      mapHeight,
-      mapWidth,
-      // setClusterNodes,
-      setGraph,
-      setMapHeight,
-      setMapWidth,
-    ]
+    [allTags, g, mapHeight, mapWidth, onComplete, setGraph, setMapHeight, setMapWidth]
   );
 
   useEffect(() => {
-    console.log("[queue]: useEffect", { graph, tasksToWait, queueL: queue.length });
-    if (!didWork && tasksToWait >= queue.length) return; // if us first load, need to wait until get required tasks
+    console.log("[queue]: useEffect");
+    if (!didWork && tasksToWait > queue.length) return; // if us first load, need to wait until get required tasks
     if (isQueueWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
