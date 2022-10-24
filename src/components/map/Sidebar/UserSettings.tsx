@@ -108,11 +108,10 @@ const doNothing = () => {};
 type UserSettingProps = {
   user: User;
   userReputation: Reputation;
-  showClusters?: boolean;
-  setShowClusters?: (oClusters: boolean) => void;
+  scrollToNode: (nodeId: string) => void;
 };
 
-const UserSettings = ({ user, userReputation }: UserSettingProps) => {
+const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) => {
   const db = getFirestore();
   const [{ settings }, { dispatch }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -529,6 +528,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
           | "reason"
           | "foundFrom"
           | "birthDate"
+          | "view"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -590,7 +590,9 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
           case "birthDate":
             userLogCollection = "userBirthDayLog";
             break;
-
+          case "view":
+            userLogCollection = "userViewLog";
+            break;
           default:
           // code block
         }
@@ -621,6 +623,22 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
       dispatch({ type: "setTheme", payload: newTheme });
     },
     [changeAttr, dispatch, settings.theme]
+  );
+  const handleViewSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newView = settings.view === "Graph" ? "Masonry" : "Graph";
+      changeAttr("view")(newView);
+      // setTheme(newTheme);
+      dispatch({ type: "setView", payload: newView });
+
+      if (newView === "Graph") {
+        setTimeout(() => {
+          if (nodeBookState?.selectedNode) scrollToNode(nodeBookState.selectedNode);
+        }, 1500);
+      }
+    },
+    [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode, settings.view]
   );
 
   const handleBackgroundSwitch = useCallback(
@@ -800,7 +818,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
               <Suspense fallback={<div></div>}>
                 <div id="tagModal">
                   <Modal onClick={closeTagSelector} returnLeft={true} noBackground={true}>
-                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> 
+                    {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} />
                     <MemoizedTagsSearcher
                       setChosenTags={setChosenTags}
                       chosenTags={chosenTags}
@@ -866,6 +884,24 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
               <FormControlLabel
                 control={
                   <Switch
+                    // checked={values.theme === "Dark"}
+                    checked={settings.view === "Graph"}
+                    onChange={handleViewSwitch}
+                    // onChange={() => {
+                    //   // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
+                    //   // setThemeMode(settings.theme === "light" ? "dark" : "light");
+                    //   // dispatch({ type: "setTheme", payload: settings.theme === "Light" ? "Dark" : "Light" });
+                    //   handleThemeSwitch();
+                    // }}
+                  />
+                }
+                label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
                     // checked={!values.chooseUname}
                     checked={!user.chooseUname}
                     onChange={e => handlesChooseUnameSwitch(e, user)}
@@ -876,7 +912,7 @@ const UserSettings = ({ user, userReputation }: UserSettingProps) => {
             </FormGroup>
             {/* {props.showHideClusters && (
 
-            )} 
+            )}
             <FormGroup row>
               <FormControl className="select RowSwitch">
                 <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />

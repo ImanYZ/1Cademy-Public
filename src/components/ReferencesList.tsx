@@ -7,7 +7,7 @@ import React from "react";
 
 import { getNodePageUrl, isValidHttpUrl } from "@/lib/utils/utils";
 
-import { LinkedKnowledgeNode, NodeType } from "../knowledgeTypes";
+import { LinkedKnowledgeNode } from "../knowledgeTypes";
 import { LinkedReference } from "./LinkedReference";
 import NodeTypeIcon from "./NodeTypeIcon";
 
@@ -29,7 +29,7 @@ export const ReferencesList = ({ references, sx }: ReferencesListProps) => {
         <Typography variant="body2" color="text.secondary">
           References:
         </Typography>
-        <NodeTypeIcon nodeType={NodeType.Reference} sx={{ ml: "10px" }} />
+        <NodeTypeIcon nodeType={"Reference"} sx={{ ml: "10px" }} />
       </Box>
       <Divider />
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>

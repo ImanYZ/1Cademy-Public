@@ -341,6 +341,8 @@ export type ProposalInput = {
 
 export type UserTheme = "Dark" | "Light";
 
+export type UserView = "Graph" | "Masonry";
+
 export type UserBackground = "Color" | "Image";
 
 export type User = {
@@ -388,8 +390,9 @@ export type User = {
 };
 
 export type userSettings = {
-  background: "Image" | "Color";
+  background: UserBackground;
   theme: UserTheme;
+  view: UserView;
 };
 
 export type Reputation = {
@@ -461,7 +464,7 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
-  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground };
+  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground; view: UserView };
 };
 
 export type SetThemeAction = {
@@ -477,13 +480,17 @@ export type SetAuthUserAction = {
   type: "setAuthUser";
   payload: User;
 };
+export type SetViewAction = {
+  type: "setView";
+  payload: UserView;
+};
 export type DispatchAuthActions =
   | AuthLogoutSuccessAction
   | AuthLoginSuccessAction
   | SetThemeAction
   | SetBackgroundAction
-  | SetAuthUserAction;
-
+  | SetAuthUserAction
+  | SetViewAction;
 export type SignUpValidation = {
   uname?: string;
   email?: string;

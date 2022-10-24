@@ -7,6 +7,7 @@ import LinkNext from "next/link";
 import { FC } from "react";
 import { ReactNode } from "react-markdown/lib/react-markdown";
 
+// import { NodeType } from "src/types";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { NodeType } from "../knowledgeTypes";

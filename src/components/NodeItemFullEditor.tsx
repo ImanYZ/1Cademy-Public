@@ -27,6 +27,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { FieldArray, Formik, FormikErrors, FormikHelpers } from "formik";
 import { FC, ReactNode } from "react";
 
+// import { NodeType } from "src/types";
 import { NODE_TYPE_OPTIONS } from "@/lib/utils/constants";
 
 import { KnowledgeChoice, KnowledgeNode, NodeType } from "../knowledgeTypes";
@@ -58,7 +59,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
     title: node.title || "",
     content: node.content || "",
     reasons: "",
-    nodeType: node.nodeType || NodeType.Advertisement,
+    nodeType: node.nodeType || "Advertisement",
     questions: node.choices ? [...node.choices] : [],
   };
 
@@ -172,7 +173,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                       setFieldValue("nodeType", value);
                       setFieldValue(
                         "questions",
-                        value === NodeType.Question ? [{ choice: "", feedback: "", correct: false }] : []
+                        value === "Question" ? [{ choice: "", feedback: "", correct: false }] : []
                       );
                     }}
                   >
@@ -187,7 +188,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                   </Select>
                 </FormControl>
 
-                {values.nodeType === NodeType.Question && (
+                {values.nodeType === "Question" && (
                   <Box>
                     <>
                       <Box sx={{ display: "flex", color: grey[600], my: "32px" }}>

@@ -26,18 +26,7 @@ import RoundImage from "../RoundImage";
 import { MemoizedSidebarTabs } from "../SidebarTabs/SidebarTabs";
 import UseInfoTrends from "./UseInfoTrends";
 
-const NODE_TYPE_ARRAY: NodeType[] = [
-  "Concept",
-  "Code",
-  "Relation",
-  "Question",
-  "Profile",
-  "Sequel",
-  "Advertisement",
-  "Reference",
-  "News",
-  "Idea",
-];
+const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
 
 const UserInfo = (props: any) => {

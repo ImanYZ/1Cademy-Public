@@ -20,10 +20,10 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
 
   const loadUser = useCallback(async (userId: string) => {
     try {
-      const { user, reputation, theme, background } = await retrieveAuthenticatedUser(userId);
+      const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId);
 
       if (user && reputation) {
-        dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background } });
+        dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background, view } });
       } else {
         dispatch({ type: "logoutSuccess" });
       }

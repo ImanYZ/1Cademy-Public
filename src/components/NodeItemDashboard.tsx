@@ -1,5 +1,6 @@
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { Avatar, CardActionArea, Collapse, Grid, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Avatar, Collapse, Grid, IconButton } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -12,14 +13,11 @@ import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
-import NextLink from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { SimpleNode2 } from "src/types";
 
 import { getInstitutionsByName } from "@/lib/firestoreClient/institutions";
-import ROUTES from "@/lib/utils/routes";
-import { getNodePageUrl } from "@/lib/utils/utils";
 
-import { SimpleNode } from "../knowledgeTypes";
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
 import NodeVotes from "./NodeVotes";
@@ -35,13 +33,20 @@ type InstitutionData = {
 };
 
 type NodeItemProps = {
-  node: SimpleNode;
+  node: SimpleNode2;
+  userId?: string | null;
+  onHideNode?: any;
+  identifier?: string;
 };
 
-export const NodeItem = ({ node }: NodeItemProps) => {
+export const NodeItemDashboard = ({ node, userId, onHideNode, identifier }: NodeItemProps) => {
   const [expanded, setExpanded] = useState(false);
   const [institutionsData, setInstitutionsData] = useState<InstitutionData[]>([]);
   const [paddingTop, setPaddingTop] = useState("0");
+  const [
+    // isHiding,
+    setIsHiding,
+  ] = useState(false);
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
@@ -80,53 +85,88 @@ export const NodeItem = ({ node }: NodeItemProps) => {
       </IconButton>
     );
   };
+  const hideNodeHandler = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onHideNode(identifier, setIsHiding);
+    },
+    [onHideNode, identifier, setIsHiding]
+  );
+  const CloseCard = () => {
+    return (
+      <IconButton onClick={hideNodeHandler} sx={{ position: "absolute", top: "4px", right: "4px", zIndex: 10 }}>
+        <CloseIcon />
+      </IconButton>
+    );
+  };
 
   return (
-    <Card data-testid="node-item" sx={{ ":hover": { boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.2)" } }}>
-      <NextLink passHref href={getNodePageUrl(node.title || "", node.id)}>
-        <Link underline="none" color="inherit">
-          <CardActionArea sx={{ pt: { xs: 4, lg: 6 }, px: { xs: 5, lg: 10 }, pb: 2 }}>
-            <CardHeader
-              sx={{ p: 0, pb: 5 }}
-              title={
-                <Box>
-                  <MarkdownRender text={node.title || ""} />
-                </Box>
-              }
-            ></CardHeader>
+    <Card
+      data-testid="node-item"
+      sx={{
+        position: "relative",
+        background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "inherit"),
+        border: theme =>
+          node.studied
+            ? theme.palette.mode === "dark"
+              ? "solid 3px #fdc473"
+              : "solid 3px #fdc473"
+            : theme.palette.mode === "dark"
+            ? "solid 3px #fd7373"
+            : "solid 3px #ffa5a5",
+        borderRadius: "10px",
+        ":hover": { boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.2)" },
+      }}
+    >
+      {userId && <CloseCard />}
 
-            <CardContent sx={{ p: 0, height: "100%" }}>
-              <Typography variant="body1" fontSize="0.9rem" component="div">
-                <MarkdownRender text={node.content || ""} />
-              </Typography>
+      {/* <NextLink passHref href={getNodePageUrl(node.title || "", node.id)}> */}
+      <Link underline="none" color="inherit">
+        <Box sx={{ pt: { xs: 4, lg: 6 }, px: { xs: 5, lg: 10 }, pb: 2 }}>
+          {/* <CardActionArea sx={{ pt: { xs: 4, lg: 6 }, px: { xs: 5, lg: 10 }, pb: 2 }}> */}
+          <CardHeader
+            sx={{ p: 0, pb: 5 }}
+            title={
+              <Box>
+                <MarkdownRender text={node.title || ""} />
+              </Box>
+            }
+          ></CardHeader>
 
-              {node.nodeType === "Question" && <QuestionItem choices={node.choices} />}
+          <CardContent sx={{ p: 0, height: "100%" }}>
+            <Typography variant="body1" fontSize="0.9rem" component="div">
+              <MarkdownRender text={node.content || ""} />
+            </Typography>
 
-              {node.nodeImage && (
-                <Box
-                  style={{ paddingTop }}
-                  sx={{
-                    position: "relative",
+            {node.nodeType === "Question" && <QuestionItem choices={node.choices} />}
+
+            {node.nodeImage && (
+              <Box
+                style={{ paddingTop }}
+                sx={{
+                  position: "relative",
+                }}
+              >
+                <Image
+                  src={node.nodeImage}
+                  alt={node.title}
+                  layout="fill"
+                  objectFit="contain"
+                  priority
+                  onLoad={({ target }) => {
+                    const { naturalWidth, naturalHeight } = target as HTMLImageElement;
+                    setPaddingTop(`calc(100% / (${naturalWidth} / ${naturalHeight})`);
                   }}
-                >
-                  <Image
-                    src={node.nodeImage}
-                    alt={node.title}
-                    layout="fill"
-                    objectFit="contain"
-                    priority
-                    onLoad={({ target }) => {
-                      const { naturalWidth, naturalHeight } = target as HTMLImageElement;
-                      setPaddingTop(`calc(100% / (${naturalWidth} / ${naturalHeight})`);
-                    }}
-                    quality={50}
-                  />
-                </Box>
-              )}
-            </CardContent>
-          </CardActionArea>
-        </Link>
-      </NextLink>
+                  quality={50}
+                />
+              </Box>
+            )}
+          </CardContent>
+          {/* </CardActionArea> */}
+        </Box>
+      </Link>
+      {/* </NextLink> */}
 
       <CardActions sx={{ px: 10, pb: 5, pt: 4 }}>
         <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -166,30 +206,30 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                 <Box sx={{ display: "flex", flexWrap: "wrap", px: "10px" }}>
                   {node.contributors &&
                     node.contributors.map((contributor, idx) => (
-                      <NextLink key={idx} passHref href={`${ROUTES.home}?contributors=${contributor.username}`}>
-                        <Tooltip title={`${contributor.fullName} contributed to the evolution of this node.`}>
-                          <Avatar
-                            component={Link}
-                            sx={{
-                              marginLeft: "-10px",
-                              color: theme => theme.palette.common.gray,
-                              width: 50,
-                              height: 50,
-                              borderColor: "red",
-                              border: "solid 2px",
-                            }}
-                          >
-                            <Image
-                              alt={contributor.fullName}
-                              src={contributor.imageUrl}
-                              width={50}
-                              height={50}
-                              objectFit="cover"
-                              quality={40}
-                            />
-                          </Avatar>
-                        </Tooltip>
-                      </NextLink>
+                      // <NextLink key={idx} passHref href={`${ROUTES.home}?contributors=${contributor.username}`}>
+                      <Tooltip key={idx} title={`${contributor.fullName} contributed to the evolution of this node.`}>
+                        <Avatar
+                          component={Link}
+                          sx={{
+                            marginLeft: "-10px",
+                            color: theme => theme.palette.common.gray,
+                            width: 50,
+                            height: 50,
+                            borderColor: "red",
+                            border: "solid 2px",
+                          }}
+                        >
+                          <Image
+                            alt={contributor.fullName}
+                            src={contributor.imageUrl}
+                            width={50}
+                            height={50}
+                            objectFit="cover"
+                            quality={40}
+                          />
+                        </Avatar>
+                      </Tooltip>
+                      // </NextLink>
                     ))}
                 </Box>
               </Grid>
@@ -202,14 +242,10 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                       >
                         <Box sx={{ marginLeft: "-10px" }}>
                           {institution.id ? (
-                            <Link href={`${ROUTES.home}?institutions=${institution.id}`}>
-                              <OptimizedAvatar
-                                name={institution.name}
-                                imageUrl={institution?.logoURL}
-                                contained={true}
-                              />
-                            </Link>
+                            // <Link href={`${ROUTES.home}?institutions=${institution.id}`}>
+                            <OptimizedAvatar name={institution.name} imageUrl={institution?.logoURL} contained={true} />
                           ) : (
+                            // </Link>
                             <OptimizedAvatar name={institution.name} imageUrl={institution?.logoURL} contained={true} />
                           )}
                         </Box>

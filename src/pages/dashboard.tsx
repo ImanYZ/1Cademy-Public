@@ -1,6 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
-import { Button, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
+import { Masonry } from "@mui/lab";
+import { Button, Container, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 // import axios from "axios";
 import {
@@ -30,6 +31,8 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { MasonryNodes } from "@/components/MasonryNodes";
+import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -39,6 +42,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
+import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -78,7 +82,7 @@ import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodes
 import { imageLoaded } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
-import { NodeType } from "../types";
+import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
@@ -274,7 +278,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
-      if (tries === 50) return;
+      // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
+      if (tries === 10) return;
 
       if (!scrollToNodeInitialized || queueFinished) {
         setTimeout(() => {
@@ -3531,6 +3536,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenMedia={setOpenMedia}
             allNodes={allNodes}
             mapRendered={true}
+            scrollToNode={scrollToNode}
           />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
@@ -3571,118 +3577,173 @@ const Dashboard = ({}: DashboardProps) => {
           )}
 
           {/* end Data from map */}
-          <Box
-            id="MapContent"
-            className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
-            onMouseOver={mapContentMouseOver}
-          >
-            <MapInteractionCSS
-              textIsHovered={mapHovered}
-              /*identifier={'xdf'}*/
-              value={mapInteractionValue}
-              onChange={navigateWhenNotScrolling}
+          {settings.view === "Graph" && (
+            <Box
+              id="MapContent"
+              className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
+              onMouseOver={mapContentMouseOver}
             >
-              {/* {showClusters && <ClustersList clusterNodes={clusterNodes} />} */}
-              <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
-              <MemoizedNodeList
-                nodes={graph.nodes}
-                bookmark={bookmark}
-                markStudied={markStudied}
-                chosenNodeChanged={chosenNodeChanged}
-                referenceLabelChange={referenceLabelChange}
-                deleteLink={deleteLink}
-                openLinkedNode={openLinkedNode}
-                openAllChildren={openAllChildren}
-                hideNodeHandler={hideNodeHandler}
-                hideOffsprings={hideOffsprings}
-                toggleNode={toggleNode}
-                openNodePart={openNodePart}
-                selectNode={selectNode}
-                nodeClicked={nodeClicked} // CHECK when is used
-                correctNode={correctNode}
-                wrongNode={wrongNode}
-                uploadNodeImage={uploadNodeImage}
-                removeImage={removeImage}
-                setOpenMedia={(imgUrl: string | boolean) => {
-                  console.log("first", imgUrl);
-                  setOpenMedia(imgUrl);
-                }}
-                changeNodeHight={changeNodeHight}
-                changeChoice={changeChoice}
-                changeFeedback={changeFeedback}
-                switchChoice={switchChoice}
-                deleteChoice={deleteChoice}
-                addChoice={addChoice}
-                onNodeTitleBlur={onNodeTitleBlur}
-                saveProposedChildNode={saveProposedChildNode}
-                saveProposedImprovement={saveProposedImprovement}
-                closeSideBar={closeSideBar}
-                reloadPermanentGrpah={reloadPermanentGraph}
-                setNodeParts={setNodeParts}
-                citations={citations}
-              />
-            </MapInteractionCSS>
-            <Suspense fallback={<div></div>}>
-              <Modal
-                open={Boolean(openMedia)}
-                onClose={() => setOpenMedia(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
+              <MapInteractionCSS
+                textIsHovered={mapHovered}
+                /*identifier={'xdf'}*/
+                value={mapInteractionValue}
+                onChange={navigateWhenNotScrolling}
               >
-                <>
-                  <CloseIcon
-                    sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
-                    onClick={() => setOpenMedia(false)}
-                  />
-                  <MapInteractionCSS>
-                    {/* TODO: change open Media variable to string to not validate */}
-                    {typeof openMedia === "string" && (
-                      <Paper
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100vh",
-                          width: "100vw",
-                          background: "transparent",
-                        }}
-                      >
-                        {/* TODO: change to Next Image */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={openMedia} alt="Node image" className="responsive-img" />
-                      </Paper>
-                    )}
-                  </MapInteractionCSS>
-                </>
-              </Modal>
-              {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
-                <div className="CenterredLoadingImageContainer">
-                  <Image
-                    className="CenterredLoadingImage"
-                    loading="lazy"
-                    src={LoadingImg}
-                    alt="Loading"
-                    width={250}
-                    height={250}
-                  />
-                </div>
-              )}
-              {!Object.keys(graph.nodes).length && (
-                <>
-                  <div id="ChoosingNodeMessage">
-                    <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
-                    <p>Please open nodes using searching bar</p>
+                {/* {showClusters && <ClustersList clusterNodes={clusterNodes} />} */}
+                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
+                <MemoizedNodeList
+                  nodes={graph.nodes}
+                  bookmark={bookmark}
+                  markStudied={markStudied}
+                  chosenNodeChanged={chosenNodeChanged}
+                  referenceLabelChange={referenceLabelChange}
+                  deleteLink={deleteLink}
+                  openLinkedNode={openLinkedNode}
+                  openAllChildren={openAllChildren}
+                  hideNodeHandler={hideNodeHandler}
+                  hideOffsprings={hideOffsprings}
+                  toggleNode={toggleNode}
+                  openNodePart={openNodePart}
+                  selectNode={selectNode}
+                  nodeClicked={nodeClicked} // CHECK when is used
+                  correctNode={correctNode}
+                  wrongNode={wrongNode}
+                  uploadNodeImage={uploadNodeImage}
+                  removeImage={removeImage}
+                  setOpenMedia={(imgUrl: string | boolean) => {
+                    console.log("first", imgUrl);
+                    setOpenMedia(imgUrl);
+                  }}
+                  changeNodeHight={changeNodeHight}
+                  changeChoice={changeChoice}
+                  changeFeedback={changeFeedback}
+                  switchChoice={switchChoice}
+                  deleteChoice={deleteChoice}
+                  addChoice={addChoice}
+                  onNodeTitleBlur={onNodeTitleBlur}
+                  saveProposedChildNode={saveProposedChildNode}
+                  saveProposedImprovement={saveProposedImprovement}
+                  closeSideBar={closeSideBar}
+                  reloadPermanentGrpah={reloadPermanentGraph}
+                  setNodeParts={setNodeParts}
+                  citations={citations}
+                />
+              </MapInteractionCSS>
+              <Suspense fallback={<div></div>}>
+                <Modal
+                  open={Boolean(openMedia)}
+                  onClose={() => setOpenMedia(false)}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  <>
+                    <CloseIcon
+                      sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+                      onClick={() => setOpenMedia(false)}
+                    />
+                    <MapInteractionCSS>
+                      {/* TODO: change open Media variable to string to not validate */}
+                      {typeof openMedia === "string" && (
+                        <Paper
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "100vh",
+                            width: "100vw",
+                            background: "transparent",
+                          }}
+                        >
+                          {/* TODO: change to Next Image */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={openMedia} alt="Node image" className="responsive-img" />
+                        </Paper>
+                      )}
+                    </MapInteractionCSS>
+                  </>
+                </Modal>
+                {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
+                  <div className="CenterredLoadingImageContainer">
+                    <Image
+                      className="CenterredLoadingImage"
+                      loading="lazy"
+                      src={LoadingImg}
+                      alt="Loading"
+                      width={250}
+                      height={250}
+                    />
                   </div>
-                </>
-              )}
-            </Suspense>
+                )}
+                {!Object.keys(graph.nodes).length && (
+                  <>
+                    <div id="ChoosingNodeMessage">
+                      <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
+                      <p>Please open nodes using searching bar</p>
+                    </div>
+                  </>
+                )}
+              </Suspense>
 
-            {/* // <Modal onClick={closedSidebarClick("Media")}>
+              {/* // <Modal onClick={closedSidebarClick("Media")}>
               //   <MapInteractionCSS>
               //     <img src={openMedia} alt="Node image" className="responsive-img" />
               //   </MapInteractionCSS>
             </Modal> */}
-          </Box>
+            </Box>
+          )}
+
+          {settings.view === "Masonry" && (
+            <Box sx={{ height: "100vh", overflow: "auto" }}>
+              <Container>
+                <Masonry sx={{ my: 4, mx: { md: "0px" } }} columns={{ xm: 1, md: 2 }} spacing={4} defaultHeight={450}>
+                  {/* {isLoading && renderLoadingSkeletons()} */}
+
+                  {Object.keys(graph.nodes)
+                    .map(key => graph.nodes[key])
+                    .map(fullNode => {
+                      console.log("fullNode", fullNode);
+                      const simpleNode: SimpleNode2 = {
+                        id: fullNode.node,
+                        choices: fullNode.choices,
+                        contributors: Object.keys(fullNode.contributors).map(key => ({
+                          fullName: fullNode.contributors[key].fullname,
+                          imageUrl: fullNode.contributors[key].imageUrl,
+                          username: key,
+                        })),
+                        institutions: Object.keys(fullNode.institutions).map(key => ({ name: key })),
+                        nodeType: fullNode.nodeType,
+                        tags: fullNode.tags,
+                        versions: fullNode.versions ?? 0,
+                        changedAt: fullNode.changedAt.toString(),
+                        content: fullNode.content,
+                        corrects: fullNode.corrects,
+                        nodeImage: fullNode.nodeImage,
+                        studied: fullNode.isStudied,
+                        title: fullNode.title,
+                        wrongs: fullNode.wrongs,
+                      };
+                      return simpleNode;
+                    })
+                    .map((simpleNode: SimpleNode2) => (
+                      <NodeItemDashboard
+                        key={simpleNode.id}
+                        node={simpleNode}
+                        userId={user?.userId}
+                        identifier={simpleNode.id}
+                        onHideNode={hideNodeHandler}
+                      />
+                    ))}
+                </Masonry>
+              </Container>
+              <Suspense fallback={<div></div>}>
+                {isSubmitting && (
+                  <div className="CenterredLoadingImageContainer">
+                    <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                  </div>
+                )}
+              </Suspense>
+            </Box>
+          )}
         </Box>
       </Box>
     </div>
