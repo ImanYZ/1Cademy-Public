@@ -2764,10 +2764,12 @@ const Dashboard = ({}: DashboardProps) => {
         // });
         // console.log(4, { newNodes, newEdges });
         // setMapChanged(true);
-        setTimeout(() => {
-          console.log("call scroll", newNodeId);
-          scrollToNode(newNodeId);
-        }, 10000);
+        // setTimeout(() => {
+        //   console.log("call scroll", newNodeId);
+        //   scrollToNode(newNodeId);
+        // }, 10000);
+        nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
+        lastOperation.current = "OpenNode";
         return { nodes: newNodes, edges: newEdges };
       });
     },
