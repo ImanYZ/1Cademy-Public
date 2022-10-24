@@ -53,7 +53,7 @@ const UserInfo = (props: any) => {
     if (!db || !sUserObj) return;
 
     if ("deInstit" in sUserObj && !("instLogo" in sUserObj)) {
-      console.log("useEffect:", sUserObj);
+      // console.log("useEffect:", sUserObj);
       const fetchInstitution = async () => {
         const institutionsQuery = query(collection(db, "institutions"), where("name", "==", sUserObj.deInstit));
 
@@ -76,12 +76,12 @@ const UserInfo = (props: any) => {
   }, [db, sUserObj]);
 
   const loadOlderProposalsClick = useCallback(() => {
-    console.log("load");
+    // console.log("load");
     if (lastIndex >= proposals.length) return;
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
   }, [lastIndex, proposals.length]);
 
-  console.log({ lastIndex });
+  // console.log({ lastIndex });
 
   const tabsItems = useMemo(() => {
     return !user

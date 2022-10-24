@@ -192,7 +192,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
     async (page: number, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
       try {
         // async (page: number = 1) => {
-        console.log("[onSearch]");
+        // console.log("[onSearch]");
         setIsRetrieving(true);
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q: nodeBookState.searchQuery,
@@ -370,7 +370,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   const deleteChip = useCallback(
     (nodeId: string) => {
       setChosenTags(oldChosenTags => {
-        console.log({ status: "DeleteChip", oldChosenTags });
+        // console.log({ status: "DeleteChip", oldChosenTags });
         // Check: I commented this
         // if (oldChosenTags.length === 1) {
         //   setOnlyTags(false);
@@ -386,7 +386,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   );
 
   const setRecoverDefaultTags = useCallback(() => {
-    console.log("setRecoverDefaultTags");
+    // console.log("setRecoverDefaultTags");
     // setOnlyTags(true);
     // setAllTags(oldAllTags => {
     //   return { ...oldAllTags, [tag.node]: { ...oldAllTags[tag.node], checked: true } };
