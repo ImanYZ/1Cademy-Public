@@ -4,7 +4,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Box } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import Image from "next/image";
+// import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // import { User } from "src/knowledgeTypes";
@@ -13,7 +13,7 @@ import { loadReputationsData } from "@/lib/utils/Map.utils";
 
 // import React, { useCallback, useEffect, useMemo, useState } from "react";
 // import { useRecoilValue } from "recoil";
-import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
+// import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { MemoizedMetaButton } from "../MetaButton";
 import MultipleChoiceBtn from "../Sidebar/MultipleChoiceBtn";
 import { MemoizedComLeaderboardChip } from "./ComLeaderboardChip/ComLeaderboardChip";
@@ -258,7 +258,26 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           }}
         >
           {comLeaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={openComLeaderboardTypes} />}
-          {comPoints.length > 0 ? (
+          {!comPoints.length && <p>There are not points yet</p>}
+          {comPoints.map((comObj, idx) => {
+            return (
+              <MemoizedComLeaderboardChip
+                key={comObj.tagId}
+                idx={idx}
+                comTitle={comObj.tag}
+                // uname={comObj.admin}
+                totalPoints={comObj.totalPoints}
+                // imageUrl={comObj.aImgUrl}
+                // fullname={comObj.aFullname}
+                // chooseUname={comObj.aChooseUname}
+                // totalPoints={comObj.totalPoints}
+                totalPositives={comObj.positives}
+                totalNegatives={comObj.negatives}
+                // reloadPermanentGrpah={props.reloadPermanentGrpah}
+              />
+            );
+          })}
+          {/* {comPoints.length > 0 ? (
             comPoints.map((comObj, idx) => {
               return (
                 <MemoizedComLeaderboardChip
@@ -279,7 +298,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
             })
           ) : (
             <Image className="" src={LoadingImg} alt="Loading" />
-          )}
+          )} */}
         </Box>
       </div>
     </Box>
