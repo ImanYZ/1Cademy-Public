@@ -18,7 +18,7 @@ export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): 
 };
 
 export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesData[]> => {
-  console.log("[GET NODES]");
+  // console.log("[GET NODES]");
   const nodeDocsPromises = nodeIds.map(nodeId => {
     const nodeRef = doc(db, "nodes", nodeId);
     return getDoc(nodeRef);
@@ -48,7 +48,7 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
 };
 
 export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
-  console.log("[BUILD FULL NODES]");
+  // console.log("[BUILD FULL NODES]");
   const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
   const res = userNodesChanges
     .map(cur => {

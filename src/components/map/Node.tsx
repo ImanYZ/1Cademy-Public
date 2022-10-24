@@ -213,11 +213,8 @@ const Node = ({
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
-        // console.log("entries", identifier, entries[0].target?.style?.top);
-
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        // console.log("[observer]", { prevHight: previousRef.current, curHeight: blockSize, editable });
         const isSimilar = blockSize === previousHeightRef.current && topPosition === previousTopRef.current;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
