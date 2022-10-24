@@ -46,6 +46,7 @@ export const useWorkerQueue = ({
   mapHeight,
   allTags,
 }: UseWorkerQueueProps) => {
+  const [tasksToWait, setTasksToWait] = useState<number>(0);
   const [queue, setQueue] = useState<Task[]>([]);
   const [isQueueWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
@@ -105,7 +106,7 @@ export const useWorkerQueue = ({
         const gg = dagreUtils.mapObjectToGraph(gObject);
 
         worker.terminate();
-        // console.log("[queue]: ", { g: g.current, gg });
+        console.log("[queue]:FINISH ", { g: g.current, gg });
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
@@ -158,7 +159,8 @@ export const useWorkerQueue = ({
   );
 
   useEffect(() => {
-    // console.log("[queue]: useEffect", { graph });
+    console.log("[queue]: useEffect", { graph, tasksToWait, queueL: queue.length });
+    if (tasksToWait >= queue.length) return; // if we donat have required amount of task, we will wait
     if (isQueueWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
@@ -175,7 +177,7 @@ export const useWorkerQueue = ({
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, g, graph, isQueueWorking, queue, recalculateGraphWithWorker]);
+  }, [allTags, g, graph, isQueueWorking, queue, recalculateGraphWithWorker, tasksToWait]);
 
   const addTask = (newTask: Task) => {
     // console.log("addTask", newTask);
@@ -190,5 +192,5 @@ export const useWorkerQueue = ({
     return true;
   }, [didWork, isQueueWorking, queue.length]);
 
-  return { addTask, queue, isQueueWorking, queueFinished };
+  return { addTask, queue, isQueueWorking, queueFinished, setTasksToWait };
 };

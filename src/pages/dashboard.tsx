@@ -195,7 +195,7 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
-  const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait } = useWorkerQueue({
     g,
     graph,
     setGraph,
@@ -492,24 +492,6 @@ const Dashboard = ({}: DashboardProps) => {
         );
       };
 
-      // const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodeData[]) => {
-      //   return newAllNodes.reduce(
-      //     (acu, cur) => {
-      //       if (cur.nodeChangeType === "added") {
-      //         return [...acu, cur];
-      //       }
-      //       if (cur.nodeChangeType === "modified") {
-      //         return acu.map(c => (c.userNodeId === cur.userNodeId ? cur : c));
-      //       }
-      //       if (cur.nodeChangeType === "removed") {
-      //         return acu.filter(c => c.userNodeId !== cur.userNodeId);
-      //       }
-      //       return acu;
-      //     },
-      //     [...currentAllNodes]
-      //   );
-      // };
-
       const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
         return newAllNodes.reduce(
           (acu, cur) => {
@@ -535,6 +517,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const userNodesSnapshot = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
+        console.log("first:docChanges", { docChanges });
         if (!docChanges.length) return null;
         // setIsSubmitting(true);
         const userNodeChanges = getUserNodeChanges(docChanges);
@@ -595,7 +578,8 @@ const Dashboard = ({}: DashboardProps) => {
           // })
           // here we are filling dagger
           const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-
+          console.log("visibleFullNodesMerged", visibleFullNodesMerged.length);
+          setTasksToWait(visibleFullNodesMerged.length);
           return { nodes: newNodes, edges: newEdges };
         });
         // setEdges(edges => {
