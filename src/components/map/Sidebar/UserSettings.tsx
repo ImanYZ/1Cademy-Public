@@ -352,6 +352,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
         for (let institutionDoc of institutionsDocs.docs) {
           const institutionData = institutionDoc.data();
           setInstlogoURL(institutionData.logoURL);
+          // setInstlogoURL("");
         }
       };
       fetchInstitution();
@@ -1236,12 +1237,12 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
         <div id="MiniUserPrifileIdentity">
           {/* <div id="MiniUserPrifileName">{chooseUname ? username : fName + " " + lName}</div> */}
           <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
-          <div id="MiniUserPrifileTag">
+          <Box id="MiniUserPrifileTag" sx={{ display: "flex", gap: "10px", alignItems: "center" }}>
             {/* <i className="material-icons grey-text">local_offer</i> */}
             <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
               <div className="AccountSettingsButton">
                 <LocalOfferIcon
-                  sx={{ marginRight: "8px" }}
+                  sx={{ marginRight: "16px" }}
                   id="tagChangeIcon"
                   className="material-icons deep-orange-text"
                 />
@@ -1267,22 +1268,31 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
                 </div>
               </Suspense>
             )}
-          </div>
-          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
+          </Box>
+          <div
+            id="MiniUserPrifileInstitution"
+            style={{ display: "flex", gap: instlogoURL ? "14px" : "8px", alignItems: "center" }}
+          >
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px", fontSize: "16px", backgroundColor: "#ff9800", color: common.white }}
+              sx={{
+                width: "32px",
+                height: "32px",
+                fontSize: "16px",
+                backgroundColor: instlogoURL ? "transparent" : "#ff9800",
+                color: common.white,
+              }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}
             <span>{user.deInstit}</span>
           </div>
-          <div id="MiniUserPrifileTotalPoints">
+          <Box id="MiniUserPrifileTotalPoints" sx={{ display: "flex", alignItems: "center" }}>
             {/* <i className="material-icons DoneIcon green-text">done</i> */}
             <DoneIcon className="material-icons DoneIcon green-text" />
             <span>{shortenNumber(totalPoints, 2, false)}</span>
-          </div>
+          </Box>
         </div>
       </div>
       <div id="MiniUserPrifilePointsContainer">
