@@ -147,7 +147,9 @@ export const useWorkerQueue = ({
         });
         // setMapChanged(mapChangedFlag); // CHECK: if is used
         setIsWorking(false);
-        onComplete();
+        setTimeout(() => {
+          onComplete();
+        }, 1000);
       };
     },
     [allTags, g, mapHeight, mapWidth, onComplete, setGraph, setMapHeight, setMapWidth]

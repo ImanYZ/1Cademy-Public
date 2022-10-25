@@ -86,7 +86,6 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type LastOperation = "OpenNode" | "CloseNode" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -170,7 +169,8 @@ const Dashboard = ({}: DashboardProps) => {
   // const [clusterNodes, setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
-  const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
+  // const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
+  const scrollToNodeInitialized = useRef(false);
 
   // link that is currently selected
   const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
@@ -196,62 +196,55 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
-  const lastOperation = useRef<LastOperation>(null);
-  const scrollToNode = useCallback(
-    (nodeId: string, tries = 0) => {
-      // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
-      devLog("scroll To Node", { nodeId, tries });
-      if (tries === 10) return;
+  const scrollToNode = useCallback((nodeId: string, tries = 0) => {
+    // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
+    devLog("scroll To Node", { nodeId, tries });
+    if (tries === 10) return;
 
-      if (!scrollToNodeInitialized) {
-        setTimeout(() => {
-          // const currentNode = graph.nodes[nodeId];
-          // if(currentNode.height===NODE_HEIGHT)
-          const originalNode = document.getElementById(nodeId);
+    if (!scrollToNodeInitialized.current) {
+      setTimeout(() => {
+        // const currentNode = graph.nodes[nodeId];
+        // if(currentNode.height===NODE_HEIGHT)
+        const originalNode = document.getElementById(nodeId);
 
-          if (
-            originalNode &&
-            "offsetLeft" in originalNode &&
-            originalNode.offsetLeft !== 0 &&
-            "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0
-            // currentNode?.height !== NODE_HEIGHT &&
-            // queueFinished
-          ) {
-            setScrollToNodeInitialized(true);
-            setTimeout(() => {
-              setScrollToNodeInitialized(false);
-            }, 1300);
+        if (
+          originalNode &&
+          "offsetLeft" in originalNode &&
+          originalNode.offsetLeft !== 0 &&
+          "offsetTop" in originalNode &&
+          originalNode.offsetTop !== 0
+          // currentNode?.height !== NODE_HEIGHT &&
+          // queueFinished
+        ) {
+          // setScrollToNodeInitialized(true);
+          scrollToNodeInitialized.current = true;
+          setTimeout(() => {
+            scrollToNodeInitialized.current = false;
+            // setScrollToNodeInitialized(false);
+          }, 1300);
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            setMapInteractionValue(() => {
-              return {
-                scale: 0.94,
-                translation: {
-                  x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
-                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
-                },
-              };
-            });
-          } else {
-            scrollToNode(nodeId, tries + 1);
-          }
-        }, 400);
-      }
-    },
-    [scrollToNodeInitialized]
-  );
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          setMapInteractionValue(() => {
+            return {
+              scale: 0.94,
+              translation: {
+                x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
+                y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
+              },
+            };
+          });
+        } else {
+          scrollToNode(nodeId, tries + 1);
+        }
+      }, 400);
+    }
+  }, []);
 
   const onCompleteWorker = useCallback(() => {
+    console.log("onCompleteWorker", nodeBookState.selectedNode);
     if (!nodeBookState.selectedNode) return;
-    if (!lastOperation.current) return;
 
-    if (lastOperation.current === "OpenNode") {
-      scrollToNode(nodeBookState.selectedNode);
-    }
-    if (lastOperation.current === "CloseNode") {
-      scrollToNode(nodeBookState.selectedNode);
-    }
+    scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
   const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait } = useWorkerQueue({
@@ -1146,8 +1139,6 @@ const Dashboard = ({}: DashboardProps) => {
           // }, 1500);
           // setMapChanged(true);
 
-          lastOperation.current = "CloseNode";
-
           const newNodes = {
             ...oldNodes,
             [nodeId]: thisNode,
@@ -1240,8 +1231,6 @@ const Dashboard = ({}: DashboardProps) => {
         oldNodes[nodeId] = thisNode;
         return { nodes: oldNodes, edges: newEdges };
       });
-      console.log("updating last operation");
-      lastOperation.current = "OpenNode";
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1291,12 +1280,12 @@ const Dashboard = ({}: DashboardProps) => {
         // setIsHiding(true);
         setIsSubmitting(true);
         const offsprings = recursiveOffsprings(nodeId);
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
         const batch = writeBatch(db);
         try {
           for (let offspring of offsprings) {
             const thisNode = graph.nodes[offspring];
-            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             const { nodeRef, userNodeRef } = initNodeStatusChange(offspring, thisNode.userNodeId);
             const userNodeData = {
               changed: thisNode.changed,
@@ -1354,7 +1343,6 @@ const Dashboard = ({}: DashboardProps) => {
         // setTimeout(() => {
         //   scrollToNode(nodeId);
         // }, 1500);
-        lastOperation.current = "CloseNode";
         setIsSubmitting(false);
       }
     },
@@ -1538,6 +1526,7 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
+      devLog("open_Node_Handler", nodeId);
       // setFlag(!flag)
       let linkedNodeRef;
       let userNodeRef = null;
@@ -1622,12 +1611,13 @@ const Dashboard = ({}: DashboardProps) => {
 
           await batch.commit();
           //  there are some places when calling scroll to node but we are not selecting that node
-          setTimeout(() => {
-            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-            // scrollToNode(nodeId);
-            lastOperation.current = "OpenNode";
-            // setSelectedNode(nodeId);
-          }, 0);
+          console.log("will call openNode handler");
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+
+          // setTimeout(() => {
+          //   // scrollToNode(nodeId);
+          //   // setSelectedNode(nodeId);
+          // }, 0);
         } catch (err) {
           console.error(err);
         }
@@ -1639,14 +1629,17 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
+      devLog("open Linked Node", { linkedNodeID });
       if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID);
         if (linkedNode) {
+          console.log("link node exist");
+          nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           scrollToNode(linkedNodeID);
-          setTimeout(() => {
-            nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-            // setSelectedNode(linkedNodeID);
-          }, 400);
+
+          // setTimeout(() => {
+          //   // setSelectedNode(linkedNodeID);
+          // }, 400);
         } else {
           openNodeHandler(linkedNodeID);
         }
@@ -1774,7 +1767,6 @@ const Dashboard = ({}: DashboardProps) => {
         // setTimeout(() => {
         //   scrollToNode(parentNode);
         // }, 1500);
-        lastOperation.current = "CloseNode";
         // // setSelectedNode(parents[0]);
       }
     },
@@ -1923,10 +1915,6 @@ const Dashboard = ({}: DashboardProps) => {
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           await batch.commit();
           setIsSubmitting(false);
-          setTimeout(() => {
-            // scrollToNode(nodeId);
-            lastOperation.current = "CloseNode";
-          }, 0);
         } catch (err) {
           console.error(err);
         }
@@ -2769,7 +2757,7 @@ const Dashboard = ({}: DashboardProps) => {
         //   scrollToNode(newNodeId);
         // }, 10000);
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
-        lastOperation.current = "OpenNode";
+
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3435,14 +3423,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const edgeIds = Object.keys(graph.edges);
 
-  const navigateWhenNotScrolling = useCallback(
-    (newMapInteractionValue: any) => {
-      if (!scrollToNodeInitialized) {
-        return setMapInteractionValue(newMapInteractionValue);
-      }
-    },
-    [scrollToNodeInitialized]
-  );
+  const navigateWhenNotScrolling = (newMapInteractionValue: any) => {
+    if (!scrollToNodeInitialized.current) {
+      return setMapInteractionValue(newMapInteractionValue);
+    }
+  };
 
   return (
     <div className="MapContainer">
@@ -3575,7 +3560,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>SN: {nodeBookState.selectedNode}</Typography>
-                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized ? "T" : "F"}</Typography>
+                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized.current ? "T" : "F"}</Typography>
               </Box>
               {/* <Box>
                 Edges:
@@ -3599,7 +3584,7 @@ const Dashboard = ({}: DashboardProps) => {
           {settings.view === "Graph" && (
             <Box
               id="MapContent"
-              className={scrollToNodeInitialized ? "ScrollToNode" : undefined}
+              className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
             >
               <MapInteractionCSS
