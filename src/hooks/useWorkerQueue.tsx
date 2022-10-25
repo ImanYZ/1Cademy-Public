@@ -33,6 +33,7 @@ type UseWorkerQueueProps = {
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
+  onComplete: () => void;
 };
 export const useWorkerQueue = ({
   g,
@@ -45,7 +46,9 @@ export const useWorkerQueue = ({
   mapWidth,
   mapHeight,
   allTags,
+  onComplete,
 }: UseWorkerQueueProps) => {
+  const [tasksToWait, setTasksToWait] = useState<number>(0);
   const [queue, setQueue] = useState<Task[]>([]);
   const [isQueueWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
@@ -62,6 +65,7 @@ export const useWorkerQueue = ({
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
 
+      console.log("[queue]: ---------------> START ");
       worker.postMessage({
         // mapChangedFlag,
         // oldClusterNodes,
@@ -105,7 +109,7 @@ export const useWorkerQueue = ({
         const gg = dagreUtils.mapObjectToGraph(gObject);
 
         worker.terminate();
-        // console.log("[queue]: ", { g: g.current, gg });
+        console.log("[queue]: ---------------> FINISH ", { g: g.current, gg });
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
@@ -143,22 +147,17 @@ export const useWorkerQueue = ({
         });
         // setMapChanged(mapChangedFlag); // CHECK: if is used
         setIsWorking(false);
+        setTimeout(() => {
+          onComplete();
+        }, 1000);
       };
     },
-    [
-      allTags,
-      g,
-      mapHeight,
-      mapWidth,
-      // setClusterNodes,
-      setGraph,
-      setMapHeight,
-      setMapWidth,
-    ]
+    [allTags, g, mapHeight, mapWidth, onComplete, setGraph, setMapHeight, setMapWidth]
   );
 
   useEffect(() => {
-    // console.log("[queue]: useEffect", { graph });
+    console.log("[queue]: useEffect");
+    if (!didWork && tasksToWait > queue.length) return; // if us first load, need to wait until get required tasks
     if (isQueueWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
@@ -175,7 +174,7 @@ export const useWorkerQueue = ({
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, g, graph, isQueueWorking, queue, recalculateGraphWithWorker]);
+  }, [allTags, didWork, g, graph, isQueueWorking, queue, recalculateGraphWithWorker, tasksToWait]);
 
   const addTask = (newTask: Task) => {
     // console.log("addTask", newTask);
@@ -190,5 +189,5 @@ export const useWorkerQueue = ({
     return true;
   }, [didWork, isQueueWorking, queue.length]);
 
-  return { addTask, queue, isQueueWorking, queueFinished };
+  return { addTask, queue, isQueueWorking, queueFinished, setTasksToWait };
 };
