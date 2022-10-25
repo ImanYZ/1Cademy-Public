@@ -48,7 +48,7 @@ export const useWorkerQueue = ({
   allTags,
   onComplete,
 }: UseWorkerQueueProps) => {
-  const [tasksToWait, setTasksToWait] = useState<number>(0);
+  // const [tasksToWait, setTasksToWait] = useState<number>(0);
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
@@ -157,7 +157,7 @@ export const useWorkerQueue = ({
 
   useEffect(() => {
     console.log("[queue]: useEffect");
-    if (!didWork && tasksToWait > queue.length) return; // if us first load, need to wait until get required tasks
+    // if (!didWork && tasksToWait > queue.length) return; // if us first load, need to wait until get required tasks
     if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
@@ -174,7 +174,7 @@ export const useWorkerQueue = ({
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, didWork, g, graph, isWorking, queue, recalculateGraphWithWorker, tasksToWait]);
+  }, [allTags /* didWork */, , g, graph, isWorking, queue, recalculateGraphWithWorker /* tasksToWait */]);
 
   const addTask = (newTask: Task) => {
     // console.log("addTask", newTask);
@@ -190,5 +190,5 @@ export const useWorkerQueue = ({
     return true;
   }, [didWork, queue.length]);
 
-  return { addTask, queue, isQueueWorking: isWorking, queueFinished, setTasksToWait, didWork };
+  return { addTask, queue, isQueueWorking: isWorking, queueFinished /* , setTasksToWait,*/, didWork };
 };

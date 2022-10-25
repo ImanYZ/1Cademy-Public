@@ -245,7 +245,7 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
-  const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait, didWork } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking, queueFinished, /* setTasksToWait, */ didWork } = useWorkerQueue({
     g,
     graph,
     setGraph,
@@ -366,7 +366,9 @@ const Dashboard = ({}: DashboardProps) => {
 
     const intervalIdentifier = setTimeout(() => {
       setIsSubmitting(false);
-    }, 3000);
+      console.log("--->>> to false");
+      // TODO: add mesage to sat we dont found nodes
+    }, 20000);
     return () => clearInterval(intervalIdentifier);
   }, [didWork]);
 
@@ -540,7 +542,12 @@ const Dashboard = ({}: DashboardProps) => {
           // console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
           if (!docChanges.length) return null;
           // setIsSubmitting(true);
-          const userNodeChanges = getUserNodeChanges(docChanges);
+          const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
+          console.log("docChangesFromServer", docChangesFromServer);
+          if (!docChangesFromServer.length) return null;
+
+          const userNodeChanges = getUserNodeChanges(docChangesFromServer);
+
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
 
@@ -598,7 +605,7 @@ const Dashboard = ({}: DashboardProps) => {
             // })
             // here we are filling dagger
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-            setTasksToWait(visibleFullNodesMerged.length);
+            // setTasksToWait(visibleFullNodesMerged.length);
             return { nodes: newNodes, edges: newEdges };
           });
           // setEdges(edges => {
@@ -620,7 +627,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return () => userNodesSnapshot();
     },
-    [allTags, db, setTasksToWait]
+    [allTags, db /* setTasksToWait */]
   );
 
   useEffect(
@@ -3734,7 +3741,7 @@ const Dashboard = ({}: DashboardProps) => {
                 </Masonry>
               </Container>
               <Suspense fallback={<div></div>}>
-                {isSubmitting && (
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
                   </div>
