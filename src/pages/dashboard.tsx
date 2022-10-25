@@ -197,7 +197,6 @@ const Dashboard = ({}: DashboardProps) => {
   const g = useRef(dagreUtils.createGraph());
 
   const scrollToNode = useCallback((nodeId: string, tries = 0) => {
-    // console.log("scrollToNodeInitialized", { scrollToNodeInitialized, tries });
     devLog("scroll To Node", { nodeId, tries });
     if (tries === 10) return;
 
@@ -241,7 +240,6 @@ const Dashboard = ({}: DashboardProps) => {
   }, []);
 
   const onCompleteWorker = useCallback(() => {
-    console.log("onCompleteWorker", nodeBookState.selectedNode);
     if (!nodeBookState.selectedNode) return;
 
     scrollToNode(nodeBookState.selectedNode);
@@ -529,7 +527,7 @@ const Dashboard = ({}: DashboardProps) => {
         async snapshot => {
           const docChanges = snapshot.docChanges();
 
-          console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
+          // console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
           if (!docChanges.length) return null;
           // setIsSubmitting(true);
           const userNodeChanges = getUserNodeChanges(docChanges);
@@ -590,7 +588,6 @@ const Dashboard = ({}: DashboardProps) => {
             // })
             // here we are filling dagger
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-            console.log("visibleFullNodesMerged", visibleFullNodesMerged.length);
             setTasksToWait(visibleFullNodesMerged.length);
             return { nodes: newNodes, edges: newEdges };
           });
@@ -608,13 +605,12 @@ const Dashboard = ({}: DashboardProps) => {
           });
           setUserNodesLoaded(true);
         },
-        error => console.error(error),
-        () => console.log("snapsho is COMPLETE")
+        error => console.error(error)
       );
 
       return () => userNodesSnapshot();
     },
-    [allTags, db]
+    [allTags, db, setTasksToWait]
   );
 
   useEffect(
@@ -1608,16 +1604,9 @@ const Dashboard = ({}: DashboardProps) => {
 
           // const id = userNodeLogRef.id
           batch.set(doc(userNodeLogRef), userNodeLogData);
-
           await batch.commit();
-          //  there are some places when calling scroll to node but we are not selecting that node
-          console.log("will call openNode handler");
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
-          // setTimeout(() => {
-          //   // scrollToNode(nodeId);
-          //   // setSelectedNode(nodeId);
-          // }, 0);
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         } catch (err) {
           console.error(err);
         }
@@ -1633,13 +1622,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID);
         if (linkedNode) {
-          console.log("link node exist");
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           scrollToNode(linkedNodeID);
-
-          // setTimeout(() => {
-          //   // setSelectedNode(linkedNodeID);
-          // }, 400);
         } else {
           openNodeHandler(linkedNodeID);
         }
