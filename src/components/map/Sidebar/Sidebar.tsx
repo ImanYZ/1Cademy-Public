@@ -142,7 +142,7 @@ import UsersStatusList from "./UsersStatusList";
 // const CitationsList = React.lazy(() => import("./Citations/Citations"));
 // const UserInfo = React.lazy(() => import("./UsersStatus/UserInfo/UserInfo"));
 
-const lBTypes = ["Weekly", "Monthly", "All Time", "Others' Votes", "Others Monthly"];
+const lBTypes = ["Weekly", "Monthly", "All Time", "Others Votes", "Others Monthly"];
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 type SidebarType = {
