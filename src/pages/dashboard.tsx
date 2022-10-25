@@ -245,7 +245,7 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
-  const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait, didWork } = useWorkerQueue({
     g,
     graph,
     setGraph,
@@ -276,7 +276,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(true);
 
   // flag to open proposal sidebar
   // const [openProposals, setOpenProposals] = useState(false);
@@ -359,6 +359,16 @@ const Dashboard = ({}: DashboardProps) => {
     user?.sNode,
     userNodesLoaded,
   ]);
+
+  useEffect(() => {
+    // this will set is submiting to false when dont found nodes
+    if (didWork) return;
+
+    const intervalIdentifier = setTimeout(() => {
+      setIsSubmitting(false);
+    }, 3000);
+    return () => clearInterval(intervalIdentifier);
+  }, [didWork]);
 
   // called after first time map is rendered
   useEffect(() => {
@@ -1274,7 +1284,7 @@ const Dashboard = ({}: DashboardProps) => {
     async nodeId => {
       if (!nodeBookState.choosingNode && user) {
         // setIsHiding(true);
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         const offsprings = recursiveOffsprings(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -1339,7 +1349,7 @@ const Dashboard = ({}: DashboardProps) => {
         // setTimeout(() => {
         //   scrollToNode(nodeId);
         // }, 1500);
-        setIsSubmitting(false);
+        // setIsSubmitting(false);
       }
     },
     [nodeBookState.choosingNode, graph, recursiveOffsprings]
@@ -1761,7 +1771,7 @@ const Dashboard = ({}: DashboardProps) => {
   const openAllChildren = useMemoizedCallback(
     async (nodeId: string) => {
       if (!choosingNode && user) {
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         let linkedNode = null;
         let linkedNodeId = null;
         let linkedNodeRef = null;
@@ -1898,7 +1908,7 @@ const Dashboard = ({}: DashboardProps) => {
           // await firebase.commitBatch();
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           await batch.commit();
-          setIsSubmitting(false);
+          // setIsSubmitting(false);
         } catch (err) {
           console.error(err);
         }

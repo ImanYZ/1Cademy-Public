@@ -50,7 +50,7 @@ export const useWorkerQueue = ({
 }: UseWorkerQueueProps) => {
   const [tasksToWait, setTasksToWait] = useState<number>(0);
   const [queue, setQueue] = useState<Task[]>([]);
-  const [isQueueWorking, setIsWorking] = useState(false);
+  const [isWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
 
   const recalculateGraphWithWorker = useCallback(
@@ -158,7 +158,7 @@ export const useWorkerQueue = ({
   useEffect(() => {
     console.log("[queue]: useEffect");
     if (!didWork && tasksToWait > queue.length) return; // if us first load, need to wait until get required tasks
-    if (isQueueWorking) return;
+    if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
 
@@ -174,7 +174,7 @@ export const useWorkerQueue = ({
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, didWork, g, graph, isQueueWorking, queue, recalculateGraphWithWorker, tasksToWait]);
+  }, [allTags, didWork, g, graph, isWorking, queue, recalculateGraphWithWorker, tasksToWait]);
 
   const addTask = (newTask: Task) => {
     // console.log("addTask", newTask);
@@ -185,9 +185,10 @@ export const useWorkerQueue = ({
   const queueFinished = useMemo(() => {
     if (!didWork) return false; // it dident execute a task before
     if (queue.length) return false; // it has pendient tasks
-    if (isQueueWorking) return false; // is working now
-    return true;
-  }, [didWork, isQueueWorking, queue.length]);
 
-  return { addTask, queue, isQueueWorking, queueFinished, setTasksToWait };
+    // if (isQueueWorking) return false; // is working now
+    return true;
+  }, [didWork, queue.length]);
+
+  return { addTask, queue, isQueueWorking: isWorking, queueFinished, setTasksToWait, didWork };
 };
