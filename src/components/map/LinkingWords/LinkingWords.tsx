@@ -143,23 +143,31 @@ const LinkingWords = (props: LinkingWordsProps) => {
   );
 
   const proposalSubmit = useCallback(
-    () =>
-      props.isNew
-        ? props.saveProposedChildNode(
-            props.identifier,
-            // summary,
-            "",
-            props.reason
-          )
-        : props.saveProposedImprovement(
-            // summary,
-            "",
-            props.reason
-          ),
+    () => {
+      const firstParentId = props.parents[0];
+
+      if (props.isNew) {
+        props.saveProposedChildNode(props.identifier, "", props.reason);
+        if (!firstParentId) return;
+        nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
+        return;
+      }
+      props.saveProposedImprovement("", props.reason);
+      nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
+    },
+
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.isNew, props.identifier, props.reason, props.saveProposedChildNode, props.saveProposedImprovement]
   );
+
+  const onCancelProposal = () => {
+    props.closeSideBar();
+    const firstParentId = props.parents[0];
+    if (!firstParentId) return;
+
+    nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
+  };
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
     <div className="LinkingWordsContainer card-action">
@@ -308,7 +316,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 color="error"
                 variant="contained"
                 className="btn waves-effect waves-light hoverable red"
-                onClick={props.closeSideBar}
+                onClick={onCancelProposal}
               >
                 Cancel
               </Button>
