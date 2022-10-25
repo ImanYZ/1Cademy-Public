@@ -455,6 +455,7 @@ const Dashboard = ({}: DashboardProps) => {
                 tmpEdges = res.oldEdges;
               } else {
                 // console.log("  ---> current node", node);
+
                 const currentNode: FullNodeData = {
                   ...cur,
                   left: node.left,
@@ -560,10 +561,17 @@ const Dashboard = ({}: DashboardProps) => {
         const docChanges = snapshot.docChanges();
         if (!docChanges.length) return null;
         // setIsSubmitting(true);
-        const userNodeChanges = getUserNodeChanges(docChanges);
+
+        // setIsSubmitting(true);
+        const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
+        console.log("docChangesFromServer", docChangesFromServer);
+        if (!docChangesFromServer.length) return null;
+
+        const userNodeChanges = getUserNodeChanges(docChangesFromServer);
+
         const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
         const nodesData = await getNodes(db, nodeIds);
-
+        console.log("hasPendingWrites", { docChanges, hasPendingWrites: snapshot.metadata.hasPendingWrites });
         // nodesData.forEach(cur => {
         //   if (!cur?.nData.nodeType || !cur.nData.references) return;
         //   addReference(cur.nId, cur.nData);

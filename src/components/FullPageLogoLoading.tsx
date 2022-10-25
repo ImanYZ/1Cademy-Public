@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
+// import CircularProgress from "@mui/material/CircularProgress";
 import Image from "next/image";
 
-import LogoDarkMode from "../../public/DarkModeLogo.svg";
+import LogoDarkMode from "../../public/animated-icon-1cademy.gif";
 
 const FullPageLogoLoading = () => {
   return (
@@ -16,8 +16,8 @@ const FullPageLogoLoading = () => {
           alignItems: "center",
         }}
       >
-        <Image src={LogoDarkMode.src} alt="logo" width="200px" height="200px" />
-        <CircularProgress sx={{ mt: 5 }} />
+        <Image src={LogoDarkMode.src} alt="logo" width="250px" height="250px" />
+        {/* <CircularProgress sx={{ mt: 5 }} /> */}
       </Box>
     </Box>
   );
