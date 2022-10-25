@@ -1236,6 +1236,7 @@ const Dashboard = ({}: DashboardProps) => {
         // setTimeout(() => {
         //   scrollToNode(nodeId);
         // }, 1500);
+        scrollToNode(nodeId);
         oldNodes[nodeId] = thisNode;
         return { nodes: oldNodes, edges: newEdges };
       });

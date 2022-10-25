@@ -162,11 +162,11 @@ const LinkingWords = (props: LinkingWordsProps) => {
   );
 
   const onCancelProposal = () => {
-    props.closeSideBar();
     const firstParentId = props.parents[0];
     if (!firstParentId) return;
-
-    nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
+    const scrollTo = props.isNew ? firstParentId.node : props.identifier;
+    nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
+    props.closeSideBar();
   };
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
