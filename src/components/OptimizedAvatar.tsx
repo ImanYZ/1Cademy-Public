@@ -1,8 +1,7 @@
 import { Avatar, Box } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Image from "next/image";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 type Props = {
   name?: string;
   imageUrl?: string;
@@ -12,29 +11,29 @@ type Props = {
 };
 
 const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
-  const [checkIfFileExist, setCheckIfFileExist] = useState(false);
-  useEffect(() => {
-    if (imageUrl) {
-      const checkIfImageExists = async () => {
-        const storage = getStorage();
-        const storageRef = ref(storage, imageUrl);
+  const [checkIfFileExist /*setCheckIfFileExist*/] = useState(false);
+  // useEffect(() => {
+  //   if (imageUrl) {
+  //     const checkIfImageExists = async () => {
+  //       const storage = getStorage();
+  //       const storageRef = ref(storage, imageUrl);
 
-        getDownloadURL(storageRef)
-          .then(() => {
-            setCheckIfFileExist(true);
-          })
-          .catch(error => {
-            if (error.code === "storage/object-not-found") {
-              setCheckIfFileExist(false);
-            } else {
-              return Promise.reject(error);
-            }
-          });
-      };
+  //       getDownloadURL(storageRef)
+  //         .then(() => {
+  //           setCheckIfFileExist(true);
+  //         })
+  //         .catch(error => {
+  //           if (error.code === "storage/object-not-found") {
+  //             setCheckIfFileExist(false);
+  //           } else {
+  //             return Promise.reject(error);
+  //           }
+  //         });
+  //     };
 
-      checkIfImageExists();
-    }
-  }, [imageUrl]);
+  //     checkIfImageExists();
+  //   }
+  // }, [imageUrl]);
 
   const getInstitutions = (instName: string, index: number): string => {
     if (!instName?.split(" ")[index]) return "";
