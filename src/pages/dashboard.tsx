@@ -45,6 +45,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
+import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -89,7 +90,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | null;
+type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | "BOOKMARKS_SIDEBAR" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -337,19 +338,21 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
-
+      console.log("bd=>state", 1, { firstScrollToNode, queueFinished });
       if (!firstScrollToNode && queueFinished) {
+        console.log("bd=>state", 11);
         if (!user?.sNode) return;
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
 
+        console.log("bd=>state", 2);
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
 
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
-
+        console.log("bd=>state", 3);
         if (queueFinished) {
           setFirstLoading(false);
         }
@@ -3551,6 +3554,13 @@ const Dashboard = ({}: DashboardProps) => {
               theme={settings.theme}
               openLinkedNode={openLinkedNode}
               username={user.uname}
+              open={openSidebar === "BOOKMARKS_SIDEBAR"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && (
+            <SearcherSidebar
+              openLinkedNode={openLinkedNode}
               open={openSidebar === "SEARCHER_SIDEBAR"}
               onClose={() => setOpenSidebar(null)}
             />
@@ -3597,7 +3607,8 @@ const Dashboard = ({}: DashboardProps) => {
                     <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                       <CodeIcon color="warning" />
                     </IconButton>
-                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open</Button>
+                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
+                    <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                     <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
                     <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
                   </>
