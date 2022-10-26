@@ -33,6 +33,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { BookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { NotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
+import { PendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -88,7 +89,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | null;
+type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -3563,6 +3564,16 @@ const Dashboard = ({}: DashboardProps) => {
               onClose={() => setOpenSidebar(null)}
             />
           )}
+          {user?.uname && (
+            <PendingProposalSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              tagId={user.tagId}
+              open={openSidebar === "PENDING_LIST"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3588,6 +3599,7 @@ const Dashboard = ({}: DashboardProps) => {
                     </IconButton>
                     <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open</Button>
                     <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
+                    <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
                   </>
                 </Tooltip>
               </Box>
@@ -3680,7 +3692,7 @@ const Dashboard = ({}: DashboardProps) => {
                     </MapInteractionCSS>
                   </>
                 </Modal>
-                {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
+                {/* {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image
                       className="CenterredLoadingImage"
@@ -3691,7 +3703,7 @@ const Dashboard = ({}: DashboardProps) => {
                       height={250}
                     />
                   </div>
-                )}
+                )} */}
                 {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
                   <>
                     <div id="ChoosingNodeMessage">
