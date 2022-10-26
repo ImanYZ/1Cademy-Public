@@ -76,15 +76,7 @@ export const SidebarWrapper = ({
           </Typography>
         </Box>
       )}
-      <Box
-        sx={
-          {
-            /* border: "solid 2px red" */
-          }
-        }
-      >
-        {SidebarOptions}
-      </Box>
+      <Box>{SidebarOptions}</Box>
       <Box
         ref={sidebarContentRef}
         sx={{
