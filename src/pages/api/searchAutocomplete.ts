@@ -11,9 +11,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseAutocom
 
   try {
     const isSearchingAll = !q || q === "*";
-    const searchParameters: SearchParams = isSearchingAll
-      ? { q, query_by: "title", sort_by: "mostHelpful:desc" }
-      : { q, query_by: "title" };
+    let searchParameters: SearchParams = { q, query_by: "title", num_typos: "2" };
+    if (isSearchingAll) {
+      searchParameters = { ...searchParameters, sort_by: "mostHelpful:desc" };
+    }
     const searchResults = await clientTypesense
       .collections<TypesenseNodesSchema>("nodes")
       .documents()
