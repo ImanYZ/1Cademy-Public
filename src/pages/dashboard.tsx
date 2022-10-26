@@ -45,6 +45,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
+import { MainSidebar } from "../components/map/Sidebar/SidebarV2/MainSidebar";
 import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
@@ -90,7 +91,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | "BOOKMARKS_SIDEBAR" | null;
+export type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | "BOOKMARKS_SIDEBAR" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -3436,6 +3437,10 @@ const Dashboard = ({}: DashboardProps) => {
     }
   };
 
+  const onOpenSideBar = (sidebar: OpenSidebar) => {
+    setOpenSidebar(sidebar);
+  };
+
   return (
     <div className="MapContainer">
       <Box
@@ -3549,6 +3554,20 @@ const Dashboard = ({}: DashboardProps) => {
             mapRendered={true}
             scrollToNode={scrollToNode}
           />
+          {user && reputation && (
+            <MainSidebar
+              // theme={settings.theme}
+              // openLinkedNode={openLinkedNode}
+              // username={user.uname}
+              open={!openSidebar}
+              onClose={() => setOpenSidebar(null)}
+              reloadPermanentGrpah={reloadPermanentGraph}
+              user={user}
+              reputation={reputation}
+              theme={settings.theme}
+              onOpenSideBar={onOpenSideBar}
+            />
+          )}
           {user?.uname && (
             <BookmarksSidebar
               theme={settings.theme}
@@ -3607,6 +3626,7 @@ const Dashboard = ({}: DashboardProps) => {
                     <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                       <CodeIcon color="warning" />
                     </IconButton>
+                    <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
                     <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
                     <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                     <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>

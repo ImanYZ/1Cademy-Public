@@ -13,6 +13,8 @@ type SidebarWrapperProps = {
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
   width: number;
+  showCloseButton?: boolean;
+  showScrollUpButton?: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -26,6 +28,8 @@ export const SidebarWrapper = ({
   headerImage,
   SidebarOptions = null,
   SidebarContent,
+  showCloseButton = true,
+  showScrollUpButton = true,
 }: SidebarWrapperProps) => {
   // const contentHight=useMemo(() => {
   //   if(headerImage && sidbe)
@@ -93,42 +97,50 @@ export const SidebarWrapper = ({
       >
         {SidebarContent}
       </Box>
-      <Box sx={{ position: "absolute", top: "10px", right: "10px" }}>
-        <Tooltip title="Close the sidebar." placement="left">
-          <IconButton
-            onClick={onClose}
-            sx={{
-              background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
-              ":hover": {
-                background: theme => (theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)"),
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "10px",
-          right: "10px",
-        }}
-      >
-        <Tooltip title="Back to top.">
-          <IconButton
-            onClick={scrollToTop}
-            sx={{
-              background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
-              ":hover": {
-                background: theme => (theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)"),
-              },
-            }}
-          >
-            <ArrowUpwardIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+
+      {showCloseButton && (
+        <Box sx={{ position: "absolute", top: "10px", right: "10px" }}>
+          <Tooltip title="Close the sidebar." placement="left">
+            <IconButton
+              onClick={onClose}
+              sx={{
+                background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
+                ":hover": {
+                  background: theme =>
+                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
+
+      {showScrollUpButton && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "10px",
+            right: "10px",
+          }}
+        >
+          <Tooltip title="Back to top.">
+            <IconButton
+              onClick={scrollToTop}
+              sx={{
+                background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
+                ":hover": {
+                  background: theme =>
+                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
+                },
+              }}
+            >
+              <ArrowUpwardIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
     </Drawer>
   );
 };

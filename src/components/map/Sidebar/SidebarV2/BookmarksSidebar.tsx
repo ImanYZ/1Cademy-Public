@@ -10,6 +10,7 @@ import { FullNodeData, FullNodesData, UserNodeChanges, UserNodesData } from "../
 // import { MemoizedSidebarTabs } from "../../SidebarTabs/SidebarTabs";
 import { BookmarksList } from "../BookmarksList";
 import { SidebarWrapper } from "./SidebarWrapper";
+
 type SearcherSidebarProps = {
   open: boolean;
   onClose: () => void;
