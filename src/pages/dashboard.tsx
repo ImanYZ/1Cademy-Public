@@ -245,14 +245,12 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
-  const { addTask, queue, isQueueWorking, queueFinished, setTasksToWait } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
     g,
     graph,
     setGraph,
     setMapWidth,
     setMapHeight,
-    // setClusterNodes,
-    // setMapChanged,
     mapWidth,
     mapHeight,
     allTags,
@@ -276,7 +274,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(true);
 
   // flag to open proposal sidebar
   // const [openProposals, setOpenProposals] = useState(false);
@@ -321,6 +319,8 @@ const Dashboard = ({}: DashboardProps) => {
   // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
+  const [showNoNodesFoundMessage, setNoNodesFoundMessage] = useState(false);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -342,6 +342,8 @@ const Dashboard = ({}: DashboardProps) => {
 
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
+        setIsSubmitting(false);
+
         if (queueFinished) {
           setFirstLoading(false);
         }
@@ -527,10 +529,18 @@ const Dashboard = ({}: DashboardProps) => {
         async snapshot => {
           const docChanges = snapshot.docChanges();
 
-          // console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
-          if (!docChanges.length) return null;
+          if (!docChanges.length) {
+            setIsSubmitting(false);
+            setNoNodesFoundMessage(true);
+            return null;
+          }
+          setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
-          const userNodeChanges = getUserNodeChanges(docChanges);
+          const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
+          if (!docChangesFromServer.length) return null;
+
+          const userNodeChanges = getUserNodeChanges(docChangesFromServer);
+
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
 
@@ -588,7 +598,11 @@ const Dashboard = ({}: DashboardProps) => {
             // })
             // here we are filling dagger
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
-            setTasksToWait(visibleFullNodesMerged.length);
+
+            if (!Object.keys(newNodes).length) {
+              setNoNodesFoundMessage(true);
+            }
+            // setTasksToWait(visibleFullNodesMerged.length);
             return { nodes: newNodes, edges: newEdges };
           });
           // setEdges(edges => {
@@ -610,7 +624,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return () => userNodesSnapshot();
     },
-    [allTags, db, setTasksToWait]
+    [allTags, db /* setTasksToWait */]
   );
 
   useEffect(
@@ -1274,7 +1288,7 @@ const Dashboard = ({}: DashboardProps) => {
     async nodeId => {
       if (!nodeBookState.choosingNode && user) {
         // setIsHiding(true);
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         const offsprings = recursiveOffsprings(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -1339,7 +1353,7 @@ const Dashboard = ({}: DashboardProps) => {
         // setTimeout(() => {
         //   scrollToNode(nodeId);
         // }, 1500);
-        setIsSubmitting(false);
+        // setIsSubmitting(false);
       }
     },
     [nodeBookState.choosingNode, graph, recursiveOffsprings]
@@ -1761,7 +1775,7 @@ const Dashboard = ({}: DashboardProps) => {
   const openAllChildren = useMemoizedCallback(
     async (nodeId: string) => {
       if (!choosingNode && user) {
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         let linkedNode = null;
         let linkedNodeId = null;
         let linkedNodeRef = null;
@@ -1898,7 +1912,7 @@ const Dashboard = ({}: DashboardProps) => {
           // await firebase.commitBatch();
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           await batch.commit();
-          setIsSubmitting(false);
+          // setIsSubmitting(false);
         } catch (err) {
           console.error(err);
         }
@@ -3531,7 +3545,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Box
               sx={{
                 position: "fixed",
-                top: "10px",
+                bottom: "100px",
                 right: "10px",
                 zIndex: "1300",
                 background: "#123",
@@ -3540,18 +3554,9 @@ const Dashboard = ({}: DashboardProps) => {
             >
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-                {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+                {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
-              <Box sx={{ border: "dashed 1px royalBlue" }}>
-                <Typography>SN: {nodeBookState.selectedNode}</Typography>
-                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized.current ? "T" : "F"}</Typography>
-              </Box>
-              {/* <Box>
-                Edges:
-                {Object.keys(graph.edges).map(
-                  k => `${graph.edges[k].fromX},${graph.edges[k].fromY} -> ${graph.edges[k].toX},${graph.edges[k].toY}`
-                )}
-              </Box> */}
+              <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
               <Box sx={{ float: "right" }}>
                 <Tooltip title={"Watch geek data"}>
                   <>
@@ -3662,11 +3667,11 @@ const Dashboard = ({}: DashboardProps) => {
                     />
                   </div>
                 )}
-                {!Object.keys(graph.nodes).length && (
+                {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
-                      <p>Please open nodes using searching bar</p>
+                      <p>Please open nodes using searcher sidebar</p>
                     </div>
                   </>
                 )}
@@ -3689,7 +3694,6 @@ const Dashboard = ({}: DashboardProps) => {
                   {Object.keys(graph.nodes)
                     .map(key => graph.nodes[key])
                     .map(fullNode => {
-                      console.log("fullNode", fullNode);
                       const simpleNode: SimpleNode2 = {
                         id: fullNode.node,
                         choices: fullNode.choices,
@@ -3724,7 +3728,7 @@ const Dashboard = ({}: DashboardProps) => {
                 </Masonry>
               </Container>
               <Suspense fallback={<div></div>}>
-                {isSubmitting && (
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
                   </div>

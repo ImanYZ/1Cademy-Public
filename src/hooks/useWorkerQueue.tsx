@@ -4,13 +4,7 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils, GraphObject } from "../lib/utils/dagre.util";
 import { setDagNodes } from "../lib/utils/Map.utils";
-import {
-  // ClusterNodes,
-  EdgeData,
-  EdgesData,
-  FullNodeData,
-  FullNodesData,
-} from "../nodeBookTypes";
+import { EdgeData, EdgesData, FullNodeData, FullNodesData } from "../nodeBookTypes";
 
 export type Task = {
   id: string;
@@ -28,8 +22,6 @@ type UseWorkerQueueProps = {
   >;
   setMapWidth: any;
   setMapHeight: any;
-  // setClusterNodes: any;
-  // setMapChanged: any;
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
@@ -41,23 +33,17 @@ export const useWorkerQueue = ({
   setGraph,
   setMapWidth,
   setMapHeight,
-  // setClusterNodes,
-  // setMapChanged,
   mapWidth,
   mapHeight,
   allTags,
   onComplete,
 }: UseWorkerQueueProps) => {
-  const [tasksToWait, setTasksToWait] = useState<number>(0);
   const [queue, setQueue] = useState<Task[]>([]);
-  const [isQueueWorking, setIsWorking] = useState(false);
+  const [isWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
-      // console.log("[recalculateGraphWithWorker]", { nodesToRecalculate, edgesToRecalculate });
-      // let mapChangedFlag = true;
-      // const oldClusterNodes: ClusterNodes = {};
       let oldMapWidth = mapWidth;
       let oldMapHeight = mapHeight;
       let oldNodes = { ...nodesToRecalculate };
@@ -65,10 +51,7 @@ export const useWorkerQueue = ({
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
 
-      console.log("[queue]: ---------------> START ");
       worker.postMessage({
-        // mapChangedFlag,
-        // oldClusterNodes,
         oldMapWidth,
         oldMapHeight,
         oldNodes,
@@ -82,15 +65,7 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
-        const {
-          /*mapChangedFlag,*/
-          // oldClusterNodes,
-          oldMapWidth,
-          oldMapHeight,
-          oldNodes,
-          oldEdges,
-          graph,
-        } = e.data;
+        const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -109,7 +84,7 @@ export const useWorkerQueue = ({
         const gg = dagreUtils.mapObjectToGraph(gObject);
 
         worker.terminate();
-        console.log("[queue]: ---------------> FINISH ", { g: g.current, gg });
+
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
@@ -133,9 +108,7 @@ export const useWorkerQueue = ({
             };
             nodesCopy[nodeId] = overrideNode;
           });
-          // console.log("[queue]: ", { nodesCopy });
 
-          // console.log("override:edges:", { edges, oldEdges });
           const edgesCopy = { ...edges };
           Object.keys(edgesCopy).forEach(edgeId => {
             const resultEdge: EdgeData = oldEdges[edgeId];
@@ -145,7 +118,7 @@ export const useWorkerQueue = ({
           });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
-        // setMapChanged(mapChangedFlag); // CHECK: if is used
+
         setIsWorking(false);
         setTimeout(() => {
           onComplete();
@@ -156,9 +129,7 @@ export const useWorkerQueue = ({
   );
 
   useEffect(() => {
-    console.log("[queue]: useEffect");
-    if (!didWork && tasksToWait > queue.length) return; // if us first load, need to wait until get required tasks
-    if (isQueueWorking) return;
+    if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
 
@@ -174,20 +145,19 @@ export const useWorkerQueue = ({
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, didWork, g, graph, isQueueWorking, queue, recalculateGraphWithWorker, tasksToWait]);
+  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker /* tasksToWait */]);
 
   const addTask = (newTask: Task) => {
-    // console.log("addTask", newTask);
-    // console.log("[queue]: add task\n", queue);
     setQueue(queue => [...queue, newTask]);
   };
 
   const queueFinished = useMemo(() => {
     if (!didWork) return false; // it dident execute a task before
     if (queue.length) return false; // it has pendient tasks
-    if (isQueueWorking) return false; // is working now
-    return true;
-  }, [didWork, isQueueWorking, queue.length]);
 
-  return { addTask, queue, isQueueWorking, queueFinished, setTasksToWait };
+    // if (isQueueWorking) return false; // is working now
+    return true;
+  }, [didWork, queue.length]);
+
+  return { addTask, queue, isQueueWorking: isWorking, queueFinished };
 };
