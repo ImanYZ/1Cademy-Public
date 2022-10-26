@@ -24,7 +24,7 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { startTransition, useCallback, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useState } from "react";
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
