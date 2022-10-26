@@ -11,6 +11,7 @@ export const INITIAL_STATE: NodeBookState = {
   openToolbar: false,
   selectedUser: null,
   searchQuery: "",
+  searchByTitleOnly: false,
   nodeTitleBlured: false,
 };
 
@@ -38,6 +39,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, searchQuery: action.payload };
     case "setNodeTitleBlured":
       return { ...state, nodeTitleBlured: action.payload };
+    case "setSearchByTitleOnly":
+      return { ...state, searchByTitleOnly: action.payload };
     default:
       return { ...state };
   }

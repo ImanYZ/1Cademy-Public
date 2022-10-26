@@ -202,6 +202,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
           sortOption,
           sortDirection,
           page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
         });
         // const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
         //   q: nodeBookState.searchQuery,

@@ -13,7 +13,16 @@ import { IUserNode } from "src/types/IUserNode";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
-  const { q = "*", nodeTypes = [], tags = [], nodesUpdatedSince, sortOption, sortDirection, page } = req.body;
+  const {
+    q = "*",
+    nodeTypes = [],
+    tags = [],
+    nodesUpdatedSince,
+    sortOption,
+    sortDirection,
+    page,
+    onlyTitle,
+  } = req.body;
   const { uname } = req.body.data?.user?.userData;
 
   try {
@@ -21,11 +30,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
 
     const searchParameters: SearchParams = {
       q,
-      query_by: "title,content",
+      query_by: `title${!onlyTitle ? ",content" : ""}`,
       sort_by: buildSort(sortOption, sortDirection),
       filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
       page,
-      num_typos: "2,0",
+      num_typos: `2${!onlyTitle ? ",0" : ""}`,
     };
 
     const searchResults = await typesenseClient
