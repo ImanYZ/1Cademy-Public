@@ -245,14 +245,12 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
-  const { addTask, queue, isQueueWorking, queueFinished /* setTasksToWait, */ } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
     g,
     graph,
     setGraph,
     setMapWidth,
     setMapHeight,
-    // setClusterNodes,
-    // setMapChanged,
     mapWidth,
     mapHeight,
     allTags,
@@ -529,11 +527,8 @@ const Dashboard = ({}: DashboardProps) => {
       const userNodesSnapshot = onSnapshot(
         q,
         async snapshot => {
-          console.log("SNAPSCHOT CALLED");
           const docChanges = snapshot.docChanges();
 
-          console.log("SNAPSCHOT CALLED", docChanges.length);
-          // console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
           if (!docChanges.length) {
             setIsSubmitting(false);
             setNoNodesFoundMessage(true);
@@ -542,7 +537,6 @@ const Dashboard = ({}: DashboardProps) => {
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
-          console.log("docChangesFromServer", docChangesFromServer);
           if (!docChangesFromServer.length) return null;
 
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
@@ -3686,7 +3680,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
-                      <p>Please open nodes using searching bar</p>
+                      <p>Please open nodes using searcher sidebar</p>
                     </div>
                   </>
                 )}
@@ -3709,7 +3703,6 @@ const Dashboard = ({}: DashboardProps) => {
                   {Object.keys(graph.nodes)
                     .map(key => graph.nodes[key])
                     .map(fullNode => {
-                      console.log("fullNode", fullNode);
                       const simpleNode: SimpleNode2 = {
                         id: fullNode.node,
                         choices: fullNode.choices,
