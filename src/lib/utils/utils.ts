@@ -295,3 +295,11 @@ export const imageLoaded = async (imageUrl: any) => {
     });
   });
 };
+
+export const findDiff = (str1: String, str2: String) => {
+  let diff = "";
+  str2.split("").forEach(function (val: any, i: any) {
+    if (val != str1.charAt(i)) diff += val;
+  });
+  return diff;
+};

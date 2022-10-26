@@ -36,6 +36,7 @@ import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { getSearchNodes } from "@/lib/knowledgeApi";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
@@ -79,7 +80,7 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { imageLoaded } from "../lib/utils/utils";
+import { findDiff, imageLoaded } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
@@ -2758,7 +2759,19 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const onNodeTitleBlur = useCallback(
-    (newTitle: string) => {
+    async (newTitle: string) => {
+      let nodes: any = await getSearchNodes({ q: newTitle });
+      let exactMatchingNode = nodes.data.filter((node: any) => node.title === newTitle);
+      if (exactMatchingNode.length > 0) {
+        alert("You can't propose exact same name");
+        return;
+      }
+      let diff = findDiff(newTitle, nodes.data[0].title);
+      if (diff.length <= 3) {
+        alert(
+          "The node title that you just entered is very similar to another node’s title that you see in the search results on the left. Please do not propose duplicate nodes. If you find it necessary to create this node with the entered title, please explain why, in the reasoning section of your proposal."
+        );
+      }
       setOpenSearch(true);
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
