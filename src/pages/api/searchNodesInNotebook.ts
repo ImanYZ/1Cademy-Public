@@ -10,6 +10,7 @@ import { SortDirection, SortValues } from "../../nodeBookTypes";
 import { db } from "@/lib/firestoreServer/admin";
 import fbAuth from "src/middlewares/fbAuth";
 import { IUserNode } from "src/types/IUserNode";
+import { SearchParams } from "typesense/lib/Typesense/Documents";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const { q = "*", nodeTypes = [], tags = [], nodesUpdatedSince, sortOption, sortDirection, page } = req.body;
@@ -18,12 +19,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
   try {
     const typesenseClient = getTypesenseClient();
 
-    const searchParameters = {
+    const searchParameters: SearchParams = {
       q,
       query_by: "title,content",
       sort_by: buildSort(sortOption, sortDirection),
       filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
       page,
+      num_typos: "2,0",
     };
 
     const searchResults = await typesenseClient
