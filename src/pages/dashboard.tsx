@@ -245,7 +245,7 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
-  const { addTask, queue, isQueueWorking, queueFinished, /* setTasksToWait, */ didWork } = useWorkerQueue({
+  const { addTask, queue, isQueueWorking, queueFinished /* setTasksToWait, */ } = useWorkerQueue({
     g,
     graph,
     setGraph,
@@ -321,6 +321,8 @@ const Dashboard = ({}: DashboardProps) => {
   // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
+  const [showNoNodesFoundMessage, setNoNodesFoundMessage] = useState(false);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -342,6 +344,8 @@ const Dashboard = ({}: DashboardProps) => {
 
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
+        setIsSubmitting(false);
+
         if (queueFinished) {
           setFirstLoading(false);
         }
@@ -359,18 +363,6 @@ const Dashboard = ({}: DashboardProps) => {
     user?.sNode,
     userNodesLoaded,
   ]);
-
-  useEffect(() => {
-    // this will set is submiting to false when dont found nodes
-    if (didWork) return;
-
-    const intervalIdentifier = setTimeout(() => {
-      setIsSubmitting(false);
-      console.log("--->>> to false");
-      // TODO: add mesage to sat we dont found nodes
-    }, 20000);
-    return () => clearInterval(intervalIdentifier);
-  }, [didWork]);
 
   // called after first time map is rendered
   useEffect(() => {
@@ -537,10 +529,17 @@ const Dashboard = ({}: DashboardProps) => {
       const userNodesSnapshot = onSnapshot(
         q,
         async snapshot => {
+          console.log("SNAPSCHOT CALLED");
           const docChanges = snapshot.docChanges();
 
+          console.log("SNAPSCHOT CALLED", docChanges.length);
           // console.log("first:docChanges", { docChanges, pW: snapshot.metadata.hasPendingWrites });
-          if (!docChanges.length) return null;
+          if (!docChanges.length) {
+            setIsSubmitting(false);
+            setNoNodesFoundMessage(true);
+            return null;
+          }
+          setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
           console.log("docChangesFromServer", docChangesFromServer);
@@ -605,6 +604,10 @@ const Dashboard = ({}: DashboardProps) => {
             // })
             // here we are filling dagger
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
+
+            if (!Object.keys(newNodes).length) {
+              setNoNodesFoundMessage(true);
+            }
             // setTasksToWait(visibleFullNodesMerged.length);
             return { nodes: newNodes, edges: newEdges };
           });
@@ -3679,7 +3682,7 @@ const Dashboard = ({}: DashboardProps) => {
                     />
                   </div>
                 )}
-                {!Object.keys(graph.nodes).length && (
+                {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
