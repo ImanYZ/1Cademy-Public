@@ -31,6 +31,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { SearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -86,6 +87,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
+type OpenSidebar = "SEARCHER_SIDEBAR" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -164,6 +166,8 @@ const Dashboard = ({}: DashboardProps) => {
     scale: 1,
     translation: { x: 0, y: 0 },
   });
+
+  const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
 
   // object of cluster boundaries
   // const [clusterNodes, setClusterNodes] = useState({});
@@ -3526,6 +3530,7 @@ const Dashboard = ({}: DashboardProps) => {
             mapRendered={true}
             scrollToNode={scrollToNode}
           />
+          <SearcherSidebar open={openSidebar === "SEARCHER_SIDEBAR"} onClose={() => setOpenSidebar(null)} />
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3558,6 +3563,7 @@ const Dashboard = ({}: DashboardProps) => {
                     <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                       <CodeIcon color="warning" />
                     </IconButton>
+                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open</Button>
                   </>
                 </Tooltip>
               </Box>
