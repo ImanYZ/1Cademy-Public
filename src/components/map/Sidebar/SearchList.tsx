@@ -34,7 +34,7 @@ import {
 // import algoliasearch from "algoliasearch";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { startTransition, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useTransition } from "react";
 
 // import {
 //   ClearRefinements,
@@ -130,6 +130,10 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isPending, startTransition] = useTransition();
+
   // useEffect(() => {
   //   setFilteredNodes((oFilteredNodes) => {
   //     const oldFilteredNodes = [];
@@ -195,7 +199,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         // console.log("[onSearch]");
         setIsRetrieving(true);
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
-          q: nodeBookState.searchQuery,
+          q: search,
           nodeTypes,
           tags: getTagsSelected().map(cur => cur.title),
           nodesUpdatedSince,
@@ -229,7 +233,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         setIsRetrieving(false);
       }
     },
-    [getTagsSelected, nodeBookState.searchQuery, nodesUpdatedSince, searchResults.data]
+    [getTagsSelected, search, nodesUpdatedSince, searchResults.data]
   );
 
   useEffect(() => {
@@ -243,14 +247,15 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
 
   const handleChange = useCallback(
     (event: any) => {
-      event.persist();
-      setSearch(event.target.value);
+      // event.persist();
+      let val = event.target.value;
+      setSearch(val);
       startTransition(() => {
-        nodeBookDispatch({ type: "setSearchQuery", payload: event.target.value });
+        nodeBookDispatch({ type: "setSearchQuery", payload: val });
       });
       // setSearchQuery(event.target.value);
     },
-    [nodeBookDispatch]
+    [nodeBookDispatch, setSearch]
   );
 
   const onChangeSortOptions = (newSortOption: SortValues) => {
