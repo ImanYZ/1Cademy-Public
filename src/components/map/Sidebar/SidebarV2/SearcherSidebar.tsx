@@ -1,65 +1,120 @@
-import React from "react";
+import { Box, Tab, Tabs } from "@mui/material";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import bookmarksDarkTheme from "../../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../../public/bookmarks-light-theme.jpg";
+import { buildFullNodes, getNodes } from "../../../../lib/utils/nodesSyncronization.utils";
+import { FullNodeData, FullNodesData, UserNodeChanges, UserNodesData } from "../../../../nodeBookTypes";
+// import { MemoizedSidebarTabs } from "../../SidebarTabs/SidebarTabs";
+import { BookmarksList } from "../BookmarksList";
 import { SidebarWrapper } from "./SidebarWrapper";
 type SearcherSidebarProps = {
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
   openLinkedNode: any;
+  username: string;
 };
 
-export const SearcherSidebar = ({ open, onClose, theme }: SearcherSidebarProps) => {
+// type BookmarkTabOption = "Updated" | "Studied";
+
+export const SearcherSidebar = ({ open, onClose, theme, username, openLinkedNode }: SearcherSidebarProps) => {
+  const db = getFirestore();
+  const [bookmarks, setBookmarks] = useState<FullNodesData>({});
+  // const [optionSelected, setOptionSelected] = useState<BookmarkTabOption>("Updated");
+  const [value, setValue] = React.useState(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
+    return newAllNodes.reduce(
+      (acu, cur) => {
+        if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+          return { ...acu, [cur.node]: cur };
+        }
+        if (cur.nodeChangeType === "removed") {
+          const tmp = { ...acu };
+          delete tmp[cur.node];
+          return tmp;
+        }
+        return acu;
+      },
+      { ...currentAllNodes }
+    );
+  };
+
+  useEffect(() => {
+    const userNodesRef = collection(db, "userNodes");
+    const q = query(
+      userNodesRef,
+      where("user", "==", username),
+      where("bookmarked", "==", true),
+      where("deleted", "==", false)
+    );
+
+    const bookmarkSnapshot = onSnapshot(q, async snapshot => {
+      // console.log("on snapshot");
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) return null;
+
+      const bookmarksUserNodes: UserNodeChanges[] = docChanges.map((cur): UserNodeChanges => {
+        return {
+          cType: cur.type,
+          uNodeId: cur.doc.id,
+          uNodeData: cur.doc.data() as UserNodesData,
+        };
+      });
+
+      const bookmarksNodeIds = bookmarksUserNodes.map(cur => cur.uNodeData.node);
+      const bookmarksNodesData = await getNodes(db, bookmarksNodeIds);
+      const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData);
+      setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
+    });
+    return () => bookmarkSnapshot();
+  }, [db, username]);
+
+  const bookmarkedUserNodes = useMemo(() => {
+    // console.log("bookmarkedUserNodes");
+    return Object.keys(bookmarks).map(key => bookmarks[key]);
+  }, [bookmarks]);
+
+  const a11yProps = (index: number) => {
+    return {
+      id: `simple-tab-${index}`,
+      "aria-controls": `simple-tabpanel-${index}`,
+    };
+  };
+
   return (
-    // <SidebarWrapper
-    //   headerImage={image}
-    //   open={open}
-    //   onClose={onClose}
-    //   SidebarOptions={
-    //     <h2>
-    //       Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eum omnis incidunt numquam distinctio nemo aliquam
-    //       sunt rerum officiis dicta velit. Deleniti maiores, eos voluptas ratione natus perferendis libero vero ipsum.
-    //     </h2>
-    //   }
-    //   SidebarContent={
-    //     <h1>
-    //       Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatum provident, ad facere eos, quam dolores
-    //       doloribus sequi officiis velit assumenda nam accusantium commodi sint rerum, explicabo obcaecati vel est non!
-    //       Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dignissimos molestiae quaerat veritatis dicta
-    //       facilis numquam unde a. Neque ea exercitationem voluptate minima, ratione labore, quas blanditiis eveniet
-    //       maxime beatae dolorum. Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia debitis cupiditate
-    //       illo, nobis iste voluptates est voluptatibus delectus, tenetur minus maiores. Aspernatur, nulla earum veniam
-    //       exercitationem inventore fugiat provident placeat.
-    //     </h1>
-    //   }
-    //   width={300}
-    //   anchor="right"
-    // ></SidebarWrapper>
     <SidebarWrapper
+      title="Bookmarks"
       headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
       open={open}
       onClose={onClose}
+      width={430}
+      anchor="right"
       SidebarOptions={
-        <h2>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eum omnis incidunt numquam distinctio nemo aliquam
-          sunt rerum officiis dicta velit. Deleniti maiores, eos voluptas ratione natus perferendis libero vero ipsum.
-        </h2>
+        <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
+          <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
+            {[{ title: "Updated" }, { title: "Studied" }].map((tabItem: any, idx: number) => (
+              <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
+            ))}
+          </Tabs>
+        </Box>
       }
       SidebarContent={
-        <h1>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatum provident, ad facere eos, quam dolores
-          doloribus sequi officiis velit assumenda nam accusantium commodi sint rerum, explicabo obcaecati vel est non!
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dignissimos molestiae quaerat veritatis dicta
-          facilis numquam unde a. Neque ea exercitationem voluptate minima, ratione labore, quas blanditiis eveniet
-          maxime beatae dolorum. Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia debitis cupiditate
-          illo, nobis iste voluptates est voluptatibus delectus, tenetur minus maiores. Aspernatur, nulla earum veniam
-          exercitationem inventore fugiat provident placeat.
-        </h1>
+        <Box sx={{ p: "10px" }}>
+          {value === 0 && (
+            <BookmarksList openLinkedNode={openLinkedNode} updates={true} bookmarks={bookmarkedUserNodes} />
+          )}
+          {value === 1 && (
+            <BookmarksList openLinkedNode={openLinkedNode} updates={false} bookmarks={bookmarkedUserNodes} />
+          )}
+        </Box>
       }
-      width={300}
-      anchor="right"
     ></SidebarWrapper>
   );
 };

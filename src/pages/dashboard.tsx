@@ -3544,7 +3544,15 @@ const Dashboard = ({}: DashboardProps) => {
             mapRendered={true}
             scrollToNode={scrollToNode}
           />
-          <SearcherSidebar open={openSidebar === "SEARCHER_SIDEBAR"} onClose={() => setOpenSidebar(null)} />
+          {user?.uname && (
+            <SearcherSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "SEARCHER_SIDEBAR"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
