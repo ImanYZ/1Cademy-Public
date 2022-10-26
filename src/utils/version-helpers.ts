@@ -1,4 +1,4 @@
-import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import {
   convertToTGet,
   getNode,
@@ -11,6 +11,7 @@ import {
 import { NodeType } from "src/types";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
+import { detach } from "./helpers";
 
 export const comPointTypes = [
   "comPoints",
@@ -1372,15 +1373,19 @@ export const versionCreateUpdate = async ({
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
         }
-        [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-          batch: newBatch,
-          linkedId: nodeId,
-          nodeChanges: nodeUpdates,
-          major: false,
-          currentTimestamp,
-          writeCounts,
-          t,
-          tWriteOperations,
+        // TODO: move these to queue
+        await detach(async () => {
+          let batch = db.batch();
+          let writeCounts = 0;
+          await retrieveAndsignalAllUserNodesChanges({
+            batch,
+            linkedId: nodeId,
+            nodeChanges: nodeUpdates,
+            major: false,
+            currentTimestamp,
+            writeCounts,
+          });
+          await commitBatch(batch);
         });
         //  the version we are dealing with is just accepted (nodeDataDoc is not null)
         //  this was a pending proposal that was just accepted
@@ -1470,127 +1475,97 @@ export const versionCreateUpdate = async ({
             });
           }
           let linkedNode, linkedNodeChanges;
-          for (let addedParent of addedParents) {
-            linkedNode = await getNode({ nodeId: addedParent, t });
-            linkedNodeChanges = {
-              children: [...linkedNode.nodeData.children, { node: nodeId, title, label: "", type: nodeType }],
-              studied: 0,
-              changedAt: currentTimestamp,
-              updatedAt: currentTimestamp,
-            };
+          // TODO: move these to queue
+          await detach(async () => {
+            let batch = db.batch();
+            let newBatch = batch;
+            let writeCounts = 0;
+            for (let addedParent of addedParents) {
+              linkedNode = await getNode({ nodeId: addedParent });
+              linkedNodeChanges = {
+                children: [...linkedNode.nodeData.children, { node: nodeId, title, label: "", type: nodeType }],
+                studied: 0,
+                changedAt: currentTimestamp,
+                updatedAt: currentTimestamp,
+              };
 
-            if (t) {
-              tWriteOperations.push({
-                objRef: linkedNode.nodeRef,
-                data: linkedNodeChanges,
-                operationType: "update",
-              });
-            } else {
               newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
               [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-            }
 
-            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-              batch,
-              linkedId: addedParent,
-              nodeChanges: linkedNodeChanges,
-              major: true,
-              currentTimestamp,
-              writeCounts,
-              t,
-              tWriteOperations,
-            });
-          }
-          for (let addedChild of addedChildren) {
-            linkedNode = await getNode({ nodeId: addedChild, t });
-            linkedNodeChanges = {
-              parents: [...linkedNode.nodeData.parents, { node: nodeId, title, label: "", type: nodeType }],
-              studied: 0,
-              changedAt: currentTimestamp,
-              updatedAt: currentTimestamp,
-            };
-            if (t) {
-              tWriteOperations.push({
-                objRef: linkedNode.nodeRef,
-                data: linkedNodeChanges,
-                operationType: "update",
+              [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+                batch,
+                linkedId: addedParent,
+                nodeChanges: linkedNodeChanges,
+                major: true,
+                currentTimestamp,
+                writeCounts,
               });
-            } else {
+            }
+            for (let addedChild of addedChildren) {
+              linkedNode = await getNode({ nodeId: addedChild, t });
+              linkedNodeChanges = {
+                parents: [...linkedNode.nodeData.parents, { node: nodeId, title, label: "", type: nodeType }],
+                studied: 0,
+                changedAt: currentTimestamp,
+                updatedAt: currentTimestamp,
+              };
+
               newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
               [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-            }
-            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-              batch,
-              linkedId: addedChild,
-              nodeChanges: linkedNodeChanges,
-              major: true,
-              currentTimestamp,
-              writeCounts,
-              t,
-              tWriteOperations,
-            });
-          }
-          for (let removedParent of removedParents) {
-            linkedNode = await getNode({ nodeId: removedParent, t });
-            linkedNodeChanges = {
-              children: linkedNode.nodeData.children.filter((l: any) => l.node !== nodeId),
-              studied: 0,
-              changedAt: currentTimestamp,
-              updatedAt: currentTimestamp,
-            };
 
-            if (t) {
-              tWriteOperations.push({
-                objRef: linkedNode.nodeRef,
-                data: linkedNodeChanges,
-                operationType: "update",
+              [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+                batch,
+                linkedId: addedChild,
+                nodeChanges: linkedNodeChanges,
+                major: true,
+                currentTimestamp,
+                writeCounts,
               });
-            } else {
+            }
+            for (let removedParent of removedParents) {
+              linkedNode = await getNode({ nodeId: removedParent, t });
+              linkedNodeChanges = {
+                children: linkedNode.nodeData.children.filter((l: any) => l.node !== nodeId),
+                studied: 0,
+                changedAt: currentTimestamp,
+                updatedAt: currentTimestamp,
+              };
+
               newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
               [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-            }
 
-            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-              batch,
-              linkedId: removedParent,
-              nodeChanges: linkedNodeChanges,
-              major: true,
-              currentTimestamp,
-              writeCounts,
-              t,
-              tWriteOperations,
-            });
-          }
-          for (let removedChild of removedChildren) {
-            linkedNode = await getNode({ nodeId: removedChild, t });
-            linkedNodeChanges = {
-              parents: linkedNode.nodeData.parents.filter((l: any) => l.node !== nodeId),
-              studied: 0,
-              changedAt: currentTimestamp,
-              updatedAt: currentTimestamp,
-            };
-            if (t) {
-              tWriteOperations.push({
-                objRef: linkedNode.nodeRef,
-                data: linkedNodeChanges,
-                operationType: "update",
+              [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+                batch,
+                linkedId: removedParent,
+                nodeChanges: linkedNodeChanges,
+                major: true,
+                currentTimestamp,
+                writeCounts,
               });
-            } else {
+            }
+            for (let removedChild of removedChildren) {
+              linkedNode = await getNode({ nodeId: removedChild, t });
+              linkedNodeChanges = {
+                parents: linkedNode.nodeData.parents.filter((l: any) => l.node !== nodeId),
+                studied: 0,
+                changedAt: currentTimestamp,
+                updatedAt: currentTimestamp,
+              };
+
               newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
               [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-            }
 
-            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-              batch,
-              linkedId: removedChild,
-              nodeChanges: linkedNodeChanges,
-              major: true,
-              currentTimestamp,
-              writeCounts,
-              t,
-              tWriteOperations,
-            });
-          }
+              [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+                batch,
+                linkedId: removedChild,
+                nodeChanges: linkedNodeChanges,
+                major: true,
+                currentTimestamp,
+                writeCounts,
+              });
+            }
+            await commitBatch(batch);
+          });
           //  just accepted a proposal for a new child node (not an improvement)
         } else {
           const childNodeRef = db.collection("nodes").doc();
@@ -1814,17 +1789,22 @@ export const versionCreateUpdate = async ({
             });
           }
         }
-        // In both cases of accepting an improvement proposal and a child proposal,
-        // we need to signal all the users that it's changed.
-        [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-          batch: newBatch,
-          linkedId: nodeId,
-          nodeChanges: nodeUpdates,
-          major: true,
-          currentTimestamp,
-          writeCounts,
-          t,
-          tWriteOperations,
+
+        // TODO: move these to queue
+        await detach(async () => {
+          let batch = db.batch();
+          let writeCounts = 0;
+          // In both cases of accepting an improvement proposal and a child proposal,
+          // we need to signal all the users that it's changed.
+          await retrieveAndsignalAllUserNodesChanges({
+            batch,
+            linkedId: nodeId,
+            nodeChanges: nodeUpdates,
+            major: true,
+            currentTimestamp,
+            writeCounts,
+          });
+          await commitBatch(batch);
         });
       }
     }
