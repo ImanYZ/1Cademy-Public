@@ -32,6 +32,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { BookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { NotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -87,7 +88,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type OpenSidebar = "SEARCHER_SIDEBAR" | null;
+type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -3553,6 +3554,15 @@ const Dashboard = ({}: DashboardProps) => {
               onClose={() => setOpenSidebar(null)}
             />
           )}
+          {user?.uname && (
+            <NotificationSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "NOTIFICATION_SIDEBAR"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3577,6 +3587,7 @@ const Dashboard = ({}: DashboardProps) => {
                       <CodeIcon color="warning" />
                     </IconButton>
                     <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open</Button>
+                    <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
                   </>
                 </Tooltip>
               </Box>

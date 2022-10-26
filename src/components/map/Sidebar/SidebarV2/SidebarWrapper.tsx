@@ -48,7 +48,7 @@ export const SidebarWrapper = ({
       PaperProps={{
         sx: {
           width,
-          border: "solid 2px yellow",
+          border: "none",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         },
       }}
@@ -76,11 +76,10 @@ export const SidebarWrapper = ({
           </Typography>
         </Box>
       )}
-      <Box sx={{ border: "solid 2px red" }}>{SidebarOptions}</Box>
+      <Box>{SidebarOptions}</Box>
       <Box
         ref={sidebarContentRef}
         sx={{
-          border: "solid 2px blue",
           height: "100%",
           overflowY: "auto",
           scrollBehavior: "smooth",
