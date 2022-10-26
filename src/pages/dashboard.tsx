@@ -3545,7 +3545,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Box
               sx={{
                 position: "fixed",
-                top: "10px",
+                bottom: "100px",
                 right: "10px",
                 zIndex: "1300",
                 background: "#123",
@@ -3554,18 +3554,9 @@ const Dashboard = ({}: DashboardProps) => {
             >
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-                {queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
+                {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
-              <Box sx={{ border: "dashed 1px royalBlue" }}>
-                <Typography>SN: {nodeBookState.selectedNode}</Typography>
-                <Typography>scrollToNodeInitialized: {scrollToNodeInitialized.current ? "T" : "F"}</Typography>
-              </Box>
-              {/* <Box>
-                Edges:
-                {Object.keys(graph.edges).map(
-                  k => `${graph.edges[k].fromX},${graph.edges[k].fromY} -> ${graph.edges[k].toX},${graph.edges[k].toY}`
-                )}
-              </Box> */}
+              <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
               <Box sx={{ float: "right" }}>
                 <Tooltip title={"Watch geek data"}>
                   <>

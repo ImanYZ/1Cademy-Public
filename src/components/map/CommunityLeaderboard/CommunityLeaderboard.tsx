@@ -249,6 +249,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           className="ComLeaderbaordItems"
           sx={{
             width: "100%",
+            paddingRight: "80px",
             display: "flex",
             justifyContent: "flex-start",
             alignItems: "center",
