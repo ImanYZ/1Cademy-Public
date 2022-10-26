@@ -20,7 +20,7 @@ type SearcherSidebarProps = {
 
 // type BookmarkTabOption = "Updated" | "Studied";
 
-export const SearcherSidebar = ({ open, onClose, theme, username, openLinkedNode }: SearcherSidebarProps) => {
+export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNode }: SearcherSidebarProps) => {
   const db = getFirestore();
   const [bookmarks, setBookmarks] = useState<FullNodesData>({});
   // const [optionSelected, setOptionSelected] = useState<BookmarkTabOption>("Updated");

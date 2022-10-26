@@ -31,7 +31,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
-import { SearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
+import { BookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -3545,7 +3545,7 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode={scrollToNode}
           />
           {user?.uname && (
-            <SearcherSidebar
+            <BookmarksSidebar
               theme={settings.theme}
               openLinkedNode={openLinkedNode}
               username={user.uname}
