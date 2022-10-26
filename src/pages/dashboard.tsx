@@ -34,6 +34,7 @@ import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderbo
 import { BookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { NotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { PendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
+import { UserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -90,7 +91,13 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | "BOOKMARKS_SIDEBAR" | null;
+type OpenSidebar =
+  | "SEARCHER_SIDEBAR"
+  | "NOTIFICATION_SIDEBAR"
+  | "PENDING_LIST"
+  | "BOOKMARKS_SIDEBAR"
+  | "USER_INFO"
+  | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -3584,6 +3591,15 @@ const Dashboard = ({}: DashboardProps) => {
               onClose={() => setOpenSidebar(null)}
             />
           )}
+          {user?.uname && (
+            <UserInfoSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "USER_INFO"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3611,6 +3627,7 @@ const Dashboard = ({}: DashboardProps) => {
                     <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                     <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
                     <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
+                    <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
                   </>
                 </Tooltip>
               </Box>
