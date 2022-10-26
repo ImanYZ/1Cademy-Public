@@ -2624,3 +2624,11 @@ button.MuiTab-textColorInherit:focus {
   display: flex;
   align-items: center;
 }
+
+/* --- */
+#SearchQuery {
+  padding: 9.5px 14px;
+}
+#nodeSelect > div > div {
+  padding: 10px 10px 10px 13px;
+}

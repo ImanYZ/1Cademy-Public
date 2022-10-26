@@ -115,6 +115,6 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
           )}
         </Box>
       }
-    ></SidebarWrapper>
+    />
   );
 };
