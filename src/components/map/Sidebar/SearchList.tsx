@@ -237,6 +237,15 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   );
 
   useEffect(() => {
+    setSearch(prevSearch => {
+      if (prevSearch !== nodeBookState.searchQuery) {
+        return nodeBookState.searchQuery;
+      }
+      return prevSearch;
+    });
+  }, [nodeBookState.searchQuery, setSearch]);
+
+  useEffect(() => {
     if (nodeBookState.nodeTitleBlured /*&& filteredNodes.length !== 0*/) {
       // doSearch();
       onSearch(1, sortOption, sortDirection, nodeTypes);
