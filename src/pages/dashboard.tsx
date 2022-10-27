@@ -274,7 +274,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
-  const [isSubmitting, setIsSubmitting] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
   // const [openProposals, setOpenProposals] = useState(false);
