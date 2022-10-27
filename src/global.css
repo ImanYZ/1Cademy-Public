@@ -2653,6 +2653,7 @@ button.MuiTab-textColorInherit:focus {
 } */
 .toolbar:focus .toolbarButtonDescription,
 .toolbar:hover .toolbarButtonDescription {
+  width: 100px;
   display: flex;
   align-items: center;
   visibility: visible;

@@ -169,6 +169,9 @@ MainSidebarProps) => {
               height: "40px",
               textAlign: "left",
               alignSelf: "flex-start",
+              display: "flex",
+              justifyContent: "flex-end",
+              // border: "solid 2px blue",
               ":hover": {
                 backgroundColor: "rgba(255, 152, 0, 1)",
               },
@@ -185,6 +188,7 @@ MainSidebarProps) => {
                 overflow: "hidden",
                 visibility: "hidden",
                 transition: "visibility 0s, line-height 0s, height 0s",
+                width: "11px",
               }}
             >
               Search
@@ -197,7 +201,6 @@ MainSidebarProps) => {
               sx={{
                 display: "flex",
                 alignItems: "center",
-
                 justifyContent: "center",
                 gap: "5px",
                 height: "30px",
@@ -232,9 +235,7 @@ MainSidebarProps) => {
 
           {/* Bookmarks button */}
           <MemoizedMetaButton onClick={() => onOpenSideBar("BOOKMARKS_SIDEBAR")}>
-            <Box
-              sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}
-            >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
               <Badge
                 badgeContent={bookmarkUpdatesNum ?? 0}
                 color="error"
@@ -250,6 +251,7 @@ MainSidebarProps) => {
                   fontSize: "15px",
                   lineHeight: "0",
                   height: "0",
+                  width: "0",
                   overflow: "hidden",
                   visibility: "hidden",
                   transition: "visibility 0s, line-height 0s, height 0s",
@@ -262,9 +264,7 @@ MainSidebarProps) => {
 
           {/* Pending proposal sidebar */}
           <MemoizedMetaButton onClick={() => onOpenSideBar("PENDING_LIST")}>
-            <Box
-              sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}
-            >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
               <Badge
                 badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
                 color="error"
@@ -280,6 +280,7 @@ MainSidebarProps) => {
                   fontSize: "15px",
                   lineHeight: "0",
                   height: "0",
+                  width: "0",
                   overflow: "hidden",
                   visibility: "hidden",
                   transition: "visibility 0s, line-height 0s, height 0s",
@@ -307,7 +308,7 @@ MainSidebarProps) => {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "flex-start",
+                    justifyContent: "center",
                     gap: "5px",
                     height: "30px",
                   }}
@@ -347,6 +348,7 @@ MainSidebarProps) => {
                       fontSize: "15px",
                       lineHeight: "0",
                       height: "0",
+                      width: "0",
                       overflow: "hidden",
                       visibility: "hidden",
                       transition: "visibility 0s, line-height 0s, height 0s",
@@ -355,10 +357,27 @@ MainSidebarProps) => {
                       justifyContent: "center",
                     }}
                   >
-                    <div id="" style={{ textOverflow: "ellipsis", maxWidth: "90px" }}>
+                    <div
+                      id=""
+                      style={{
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        maxWidth: "90px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {user.tag}
                     </div>
-                    <div id="" style={{ fontSize: "12px" }}>
+                    <div
+                      id=""
+                      style={{
+                        fontSize: "12px",
+                        maxWidth: "90px",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {leaderboardType ? leaderboardType : "Leaderboard"}
                     </div>
                   </Box>
