@@ -9,10 +9,11 @@ type SidebarWrapperProps = {
   open: boolean;
   onClose: () => void;
   SidebarContent: ReactNode;
+  width: number;
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
-  width: number;
+  hoverWidth?: number;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
 };
@@ -30,6 +31,7 @@ export const SidebarWrapper = ({
   SidebarContent,
   showCloseButton = true,
   showScrollUpButton = true,
+  hoverWidth,
 }: SidebarWrapperProps) => {
   // const contentHight=useMemo(() => {
   //   if(headerImage && sidbe)
@@ -52,8 +54,16 @@ export const SidebarWrapper = ({
       PaperProps={{
         sx: {
           width,
+          ":hover": hoverWidth
+            ? {
+                width: hoverWidth,
+              }
+            : undefined,
           // border: "solid 2px yellow",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+          transitionProperty: "all",
+          transitionDuration: "1",
+          transitionTimingFunction: "ease",
         },
       }}
     >

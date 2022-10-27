@@ -2631,3 +2631,37 @@ button.MuiTab-textColorInherit:focus {
 #nodeSelect > div > div {
   padding: 10px 10px 10px 13px;
 }
+
+/* Toolbar styles */
+.toolbar:focus .toolbarDescription,
+.toolbar:hover .toolbarDescription {
+  width: 100px;
+  display: flex;
+  align-items: center;
+  visibility: visible;
+  line-height: 16px;
+  height: 24px;
+  /* height: auto; */
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}
+/* .toolbar:focus .toolbarButtonDescription{
+
+} */
+.toolbar:focus .toolbarButtonDescription,
+.toolbar:hover .toolbarButtonDescription {
+  display: flex;
+  align-items: center;
+  visibility: visible;
+  line-height: 16px;
+  height: 41px;
+  /* height: auto; */
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}

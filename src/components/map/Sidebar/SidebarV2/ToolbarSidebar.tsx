@@ -112,6 +112,7 @@ MainSidebarProps) => {
       open={open}
       onClose={onClose}
       width={80}
+      hoverWidth={150}
       // anchor="right"
       showCloseButton={false}
       showScrollUpButton={false}
@@ -125,8 +126,8 @@ MainSidebarProps) => {
       //     </Box>
       //   }
       SidebarContent={
-        <Box sx={{ p: "10px" }}>
-          <div className="Logo">
+        <Box className="toolbar" sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+          <Box sx={{ marginTop: "20px" }}>
             <MemoizedMetaButton
             // onClick={openSideBarClick("Trends")} // CHECK: I commented this, the sidebar trends was commented
             // tooltip="Click to open the trends in proposals."
@@ -137,7 +138,7 @@ MainSidebarProps) => {
                 <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
               </Box>
             </MemoizedMetaButton>
-          </div>
+          </Box>
 
           {/* User info button */}
           <MemoizedUserStatusIcon
@@ -157,15 +158,50 @@ MainSidebarProps) => {
           />
 
           {/* Searcher button */}
-          <Button id="SearchButton" onClick={() => onOpenSideBar("SEARCHER_SIDEBAR")}>
+          <Button
+            onClick={() => onOpenSideBar("SEARCHER_SIDEBAR")}
+            sx={{
+              width: "90%",
+              borderRadius: "0px 50px 50px 0px",
+              backgroundColor: "rgba(255, 152, 0, 1)",
+              color: "white",
+              lineHeight: "19px",
+              height: "40px",
+              textAlign: "left",
+              alignSelf: "flex-start",
+              ":hover": {
+                backgroundColor: "rgba(255, 152, 0, 1)",
+              },
+            }}
+          >
             <SearchIcon />
-            <span className="SidebarDescription">Search</span>
+            <Box
+              component="span"
+              className="toolbarDescription"
+              sx={{
+                fontSize: "15px",
+                lineHeight: "0",
+                height: "0",
+                overflow: "hidden",
+                visibility: "hidden",
+                transition: "visibility 0s, line-height 0s, height 0s",
+              }}
+            >
+              Search
+            </Box>
           </Button>
 
           {/* Notifications button */}
           <MemoizedMetaButton onClick={() => onOpenSideBar("NOTIFICATION_SIDEBAR")}>
             <Box
-              sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "5px", height: "30px" }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+
+                justifyContent: "center",
+                gap: "5px",
+                height: "30px",
+              }}
             >
               <Badge
                 badgeContent={uncheckedNotificationsNum ?? 0}
@@ -175,7 +211,22 @@ MainSidebarProps) => {
               >
                 {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
               </Badge>
-              <span className="SidebarDescription">Notifications</span>
+              <Box
+                component="span"
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  lineHeight: "0",
+                  height: "0",
+                  width: "0",
+
+                  overflow: "hidden",
+                  visibility: "hidden",
+                  transition: "visibility 0s, line-height 0s, height 0s",
+                }}
+              >
+                Notifications
+              </Box>
             </Box>
           </MemoizedMetaButton>
 
@@ -192,7 +243,20 @@ MainSidebarProps) => {
               >
                 <BookmarkBorderIcon className="material-icons" />
               </Badge>
-              <span className="SidebarDescription">Bookmarks</span>
+              <Box
+                component="span"
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  lineHeight: "0",
+                  height: "0",
+                  overflow: "hidden",
+                  visibility: "hidden",
+                  transition: "visibility 0s, line-height 0s, height 0s",
+                }}
+              >
+                Bookmarks
+              </Box>
             </Box>
           </MemoizedMetaButton>
 
@@ -209,7 +273,20 @@ MainSidebarProps) => {
               >
                 <FormatListBulletedIcon />
               </Badge>
-              <span className="SidebarDescription">Pending List</span>
+              <Box
+                component="span"
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  lineHeight: "0",
+                  height: "0",
+                  overflow: "hidden",
+                  visibility: "hidden",
+                  transition: "visibility 0s, line-height 0s, height 0s",
+                }}
+              >
+                Pending List
+              </Box>
             </Box>
           </MemoizedMetaButton>
 
@@ -253,14 +330,85 @@ MainSidebarProps) => {
                       </div>
                     )} */}
 
-                  <div id="LeaderboardChanger" className="SidebarDescription">
+                  {/* <div id="LeaderboardChanger" className="SidebarDescription">
                     <div id="LeaderboardTag" style={{ textOverflow: "ellipsis", width: "90px" }}>
                       {user.tag}
                     </div>
                     <div id="LeaderboardType" style={{ fontSize: "12px" }}>
                       {leaderboardType ? leaderboardType : "Leaderboard"}
                     </div>
-                  </div>
+                  </div> */}
+                  <Box
+                    component="span"
+                    className="toolbarButtonDescription"
+                    sx={{
+                      p: "0",
+                      m: "0",
+                      fontSize: "15px",
+                      lineHeight: "0",
+                      height: "0",
+                      overflow: "hidden",
+                      visibility: "hidden",
+                      transition: "visibility 0s, line-height 0s, height 0s",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div id="" style={{ textOverflow: "ellipsis", maxWidth: "90px" }}>
+                      {user.tag}
+                    </div>
+                    <div id="" style={{ fontSize: "12px" }}>
+                      {leaderboardType ? leaderboardType : "Leaderboard"}
+                    </div>
+                  </Box>
+                  {/* <Box>
+                    <Box
+                      component="span"
+                      className="toolbarButtonDescription"
+                      sx={{
+                        fontSize: "15px",
+                        lineHeight: "0",
+                        whiteSpace: "nowrap",
+                        height: "0",
+                        overflow: "hidden",
+                        visibility: "hidden",
+                        // transition: "visibility 0s, line-height 0s, height 0s",
+                        textOverflow: "ellipsis",
+                        width: "90px",
+                      }}
+                    >
+                      {user.tag}
+                    </Box>{" "}
+                    <Box
+                      component="span"
+                      className="toolbarButtonDescription"
+                      sx={{
+                        fontSize: "15px",
+                        lineHeight: "0",
+                        height: "0",
+                        overflow: "hidden",
+                        visibility: "hidden",
+                        // transition: "visibility 0s, line-height 0s, height 0s",
+                      }}
+                    >
+                      {leaderboardType ? leaderboardType : "Leaderboard"}
+                    </Box>
+                    <Box
+                      component="span"
+                      className="toolbarDescription"
+                      sx={{
+                        fontSize: "15px",
+                        lineHeight: "0",
+                        height: "0",
+                        overflow: "hidden",
+                        visibility: "hidden",
+                        transition: "visibility 0s, line-height 0s, height 0s",
+                      }}
+                    >
+                      Pending List
+                    </Box>
+                  </Box> */}
                 </Box>
               </MemoizedMetaButton>
               {leaderboardTypeOpen && (
