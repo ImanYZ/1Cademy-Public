@@ -41,7 +41,7 @@ type Notification = {
   uname: string;
 };
 
-export const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }: NotificationSidebarProps) => {
+const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }: NotificationSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
   const [uncheckedNotifications, setUncheckedNotifications] = useState<Notification[]>([]);
@@ -271,3 +271,6 @@ export const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, user
     ></SidebarWrapper>
   );
 };
+export const MemoizedNotificationSidebar = React.memo(NotificationSidebar, (prev, next) => {
+  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
+});

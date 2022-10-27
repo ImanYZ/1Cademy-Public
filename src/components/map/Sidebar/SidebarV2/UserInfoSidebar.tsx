@@ -35,7 +35,7 @@ type UserInfoSidebarProps = {
 };
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
-export const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: UserInfoSidebarProps) => {
+const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: UserInfoSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
@@ -406,3 +406,6 @@ export const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username
     />
   );
 };
+export const MemoizedUserInfoSidebar = React.memo(UserInfoSidebar, (prev, next) => {
+  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
+});

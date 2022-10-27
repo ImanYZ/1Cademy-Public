@@ -21,7 +21,7 @@ type PendingProposalSidebarProps = {
 };
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
-export const PendingProposalSidebar = ({
+const PendingProposalSidebar = ({
   open,
   onClose,
   theme,
@@ -147,3 +147,6 @@ export const PendingProposalSidebar = ({
     />
   );
 };
+export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar, (prev, next) => {
+  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
+});
