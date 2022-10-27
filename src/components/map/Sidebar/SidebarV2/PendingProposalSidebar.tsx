@@ -138,7 +138,7 @@ export const PendingProposalSidebar = ({
       open={open}
       onClose={onClose}
       width={430}
-      anchor="right"
+      // anchor="right"
       SidebarContent={
         <Box sx={{ paddingX: "10px", paddingTop: "10px" }}>
           <PendingProposalList proposals={proposals} openLinkedNode={openLinkedNode} />

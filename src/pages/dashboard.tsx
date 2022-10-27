@@ -45,8 +45,8 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
-import { MainSidebar } from "../components/map/Sidebar/SidebarV2/MainSidebar";
 import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
+import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -3555,7 +3555,7 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode={scrollToNode}
           />
           {user && reputation && (
-            <MainSidebar
+            <ToolbarSidebar
               // theme={settings.theme}
               // openLinkedNode={openLinkedNode}
               // username={user.uname}
@@ -3566,6 +3566,7 @@ const Dashboard = ({}: DashboardProps) => {
               reputation={reputation}
               theme={settings.theme}
               onOpenSideBar={onOpenSideBar}
+              mapRendered={true}
             />
           )}
           {user?.uname && (

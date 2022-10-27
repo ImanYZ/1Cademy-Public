@@ -877,7 +877,7 @@
 
 #SidebarButtonsContainer {
   position: fixed;
-  left: 0px;
+  right: 0px;
   top: 0px;
   height: 100vh;
   padding-top: 10px;

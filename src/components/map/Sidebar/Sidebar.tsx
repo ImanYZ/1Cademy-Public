@@ -734,7 +734,7 @@ const Sidebar = (props: SidebarType) => {
                   </div>
                 </Box>
               </MemoizedMetaButton>
-              {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
+              {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} onClose={leaderboardTypesToggle} />}
               {leaderboardType && (
                 <UsersStatusList
                   // reputationsLoaded={props.reputationsLoaded}

@@ -212,7 +212,7 @@ export const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSideb
       open={open}
       onClose={onClose}
       width={430}
-      anchor="right"
+      // anchor="right"
       SidebarOptions={
         <Box sx={{ p: "10px", borderBottom: 1, borderColor: "divider", width: "100%" }}>
           {showTagSelector && (

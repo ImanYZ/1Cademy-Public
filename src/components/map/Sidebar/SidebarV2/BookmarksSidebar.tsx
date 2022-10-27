@@ -96,7 +96,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       open={open}
       onClose={onClose}
       width={430}
-      anchor="right"
+      // anchor="right"
       SidebarOptions={
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>

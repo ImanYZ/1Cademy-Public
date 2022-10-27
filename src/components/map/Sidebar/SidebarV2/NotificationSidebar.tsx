@@ -218,7 +218,7 @@ export const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, user
       title="Notifications"
       headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
       width={430}
-      anchor="right"
+      // anchor="right"
       onClose={onClose}
       SidebarOptions={
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
