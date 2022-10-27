@@ -9,7 +9,6 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Autocomplete, Box, FormControlLabel, FormGroup, LinearProgress, Switch, TextField } from "@mui/material";
-import { common } from "@mui/material/colors";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
@@ -1272,7 +1271,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px", fontSize: "16px", backgroundColor: "#ff9800", color: common.white }}
+              sx={{ width: "25px", height: "25px", fontSize: "16px" }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}
