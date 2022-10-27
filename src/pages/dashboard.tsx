@@ -94,7 +94,7 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-type OpenSidebar =
+export type OpenSidebar =
   | "SEARCHER_SIDEBAR"
   | "NOTIFICATION_SIDEBAR"
   | "PENDING_LIST"
@@ -3674,7 +3674,7 @@ const Dashboard = ({}: DashboardProps) => {
                   </>
                 </Tooltip>
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                  <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
+                  <Button onClick={() => setOpenSidebar(null)}>Open Main Sidebar</Button>
                   <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
                   <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                   <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>

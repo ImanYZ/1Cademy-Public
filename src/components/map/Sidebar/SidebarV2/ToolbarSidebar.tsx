@@ -48,10 +48,11 @@ MainSidebarProps) => {
   const [bookmarkUpdatesNum /* , setBookmarkUpdatesNum */] = useState(0);
   const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(false);
   const [pendingProposalsNum /* setPendingProposalsNum */] = useState(0);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<any>(null);
 
   const onOpenLeaderboardOptions = (event: React.MouseEvent<any>) => {
     console.log("set target", event.target);
+
     setAnchorEl(event.target);
   };
   const onCloseLeaderBoardOptions = () => {
