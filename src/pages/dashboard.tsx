@@ -37,6 +37,7 @@ import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/Sidebar
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
+import { UserSettigsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -101,6 +102,7 @@ export type OpenSidebar =
   | "BOOKMARKS_SIDEBAR"
   | "USER_INFO"
   | "PROPOSALS"
+  | "USER_SETTINGS"
   | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
@@ -134,7 +136,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const [{ user, reputation, settings }] = useAuth();
+  const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   // node that user is currently selected (node will be highlighted)
@@ -3641,6 +3643,20 @@ const Dashboard = ({}: DashboardProps) => {
               openProposal={openProposal}
             />
           )}
+          {user && reputation && openSidebar === "USER_SETTINGS" && (
+            <UserSettigsSidebar
+              theme={settings.theme}
+              open={openSidebar === "USER_SETTINGS"}
+              onClose={() => setOpenSidebar(null)}
+              dispatch={dispatch}
+              nodeBookDispatch={nodeBookDispatch}
+              nodeBookState={nodeBookState}
+              userReputation={reputation}
+              user={user}
+              scrollToNode={scrollToNode}
+              settings={settings}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3681,6 +3697,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
                   <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
                   <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
+                  <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
                 </Box>
               </Box>
             </Box>

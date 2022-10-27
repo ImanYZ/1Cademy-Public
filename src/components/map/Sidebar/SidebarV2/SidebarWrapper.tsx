@@ -62,7 +62,7 @@ export const SidebarWrapper = ({
           // border: "solid 2px yellow",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transitionProperty: "all",
-          transitionDuration: "1",
+          transitionDuration: "1s",
           transitionTimingFunction: "ease",
         },
       }}

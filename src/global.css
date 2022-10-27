@@ -2485,10 +2485,6 @@ button.MuiTab-textColorInherit:focus {
   color: red;
 }
 
-#AccountSettings {
-  padding: 25px;
-  width: 430px;
-}
 .AccountSettingsButtons .Striked {
   text-decoration: line-through red;
 }
@@ -2521,10 +2517,6 @@ button.MuiTab-textColorInherit:focus {
 #LogoutButtonText {
   position: relative;
   top: -5.5px;
-}
-
-#PersonalSettings {
-  padding: 25px;
 }
 
 /* #PersonalSettings .MuiFormControl-root {
