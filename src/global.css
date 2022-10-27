@@ -1983,7 +1983,8 @@ button.MuiTab-textColorInherit:focus {
 
 #SearchIcon {
   color: white;
-  padding: 7px;
+  padding: 6px;
+  margin-right: -8px;
 }
 
 #SearchIcon:active {
@@ -1991,7 +1992,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #SearchIcon:hover {
-  box-shadow: 0px 2px 10px #bebebe;
+  box-shadow: 0px 0px 10px #bebebe;
   color: #ff9100 !important;
 }
 
