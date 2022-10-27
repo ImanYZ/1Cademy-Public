@@ -170,8 +170,10 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           label={`Display name: ${getDisplayNameValue()}`}
         />
       </FormGroup>
-
-      <FormGroup sx={{ mt: "8px" }}>
+      <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
+        You're going to be a member of: {values.tag}
+      </Typography>
+      <FormGroup sx={{ mt: "8px", mb: "8px" }}>
         <MemoizedTagsSearcher
           allTags={allTags}
           setAllTags={setAllTags}
@@ -179,9 +181,6 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           setChosenTags={setChosenTags}
           sx={{ maxHeight: "200px", height: "200px" }}
         />
-        <Typography sx={{ mt: "20px", color: theme => theme.palette.common.white }}>
-          You're going to be a member of: {values.tag}
-        </Typography>
       </FormGroup>
     </Box>
   );
