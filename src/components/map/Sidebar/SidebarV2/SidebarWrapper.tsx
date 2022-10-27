@@ -154,3 +154,4 @@ export const SidebarWrapper = ({
     </Drawer>
   );
 };
+// export default React.memo(SidebarWrapper);

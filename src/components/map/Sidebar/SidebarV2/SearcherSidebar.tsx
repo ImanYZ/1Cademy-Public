@@ -58,7 +58,7 @@ type Pagination = {
 
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
-export const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps) => {
+const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
 
@@ -487,3 +487,6 @@ export const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSideb
     />
   );
 };
+export const MemoizedSearcherSidebar = React.memo(SearcherSidebar, (prev, next) => {
+  return prev.open === next.open;
+});

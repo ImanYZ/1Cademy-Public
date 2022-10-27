@@ -31,9 +31,12 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
-import { BookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
-import { NotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
-import { PendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
+import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
+import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
+import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
+import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
+import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -45,7 +48,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
-import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
+// import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
@@ -91,7 +94,14 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
-export type OpenSidebar = "SEARCHER_SIDEBAR" | "NOTIFICATION_SIDEBAR" | "PENDING_LIST" | "BOOKMARKS_SIDEBAR" | null;
+type OpenSidebar =
+  | "SEARCHER_SIDEBAR"
+  | "NOTIFICATION_SIDEBAR"
+  | "PENDING_LIST"
+  | "BOOKMARKS_SIDEBAR"
+  | "USER_INFO"
+  | "PROPOSALS"
+  | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -2532,8 +2542,8 @@ const Dashboard = ({}: DashboardProps) => {
           resetAddedRemovedParentsChildren();
           event.currentTarget.blur();
         } else {
+          setOpenSidebar("PROPOSALS");
           setOpenSearch(false);
-
           setSelectedNodeType(nodeType);
           nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2854,11 +2864,15 @@ const Dashboard = ({}: DashboardProps) => {
     async (
       setIsAdmin: (value: boolean) => void,
       setIsRetrieving: (value: boolean) => void,
-      setProposals: (value: any) => void
+      setProposals: (value: any) => void,
+      who?: string
     ) => {
+      console.log(11);
+      console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
       if (!user) return;
+      console.log(22);
       if (!selectedNodeType) return;
-
+      console.log(33);
       setIsRetrieving(true);
       setGraph(({ nodes: oldNodes, edges }) => {
         // setNodes(oldNodes => {
@@ -3033,9 +3047,7 @@ const Dashboard = ({}: DashboardProps) => {
       setProposals(orderedProposals);
       setIsRetrieving(false);
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user?.uname, nodeBookState.selectedNode, selectedNodeType]
+    [user, selectedNodeType, db, nodeBookState.selectedNode]
   );
 
   /////////////////////////////////////////////////////
@@ -3571,7 +3583,7 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {user?.uname && (
-            <BookmarksSidebar
+            <MemoizedBookmarksSidebar
               theme={settings.theme}
               openLinkedNode={openLinkedNode}
               username={user.uname}
@@ -3580,14 +3592,14 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {user?.uname && (
-            <SearcherSidebar
+            <MemoizedSearcherSidebar
               openLinkedNode={openLinkedNode}
               open={openSidebar === "SEARCHER_SIDEBAR"}
               onClose={() => setOpenSidebar(null)}
             />
           )}
           {user?.uname && (
-            <NotificationSidebar
+            <MemoizedNotificationSidebar
               theme={settings.theme}
               openLinkedNode={openLinkedNode}
               username={user.uname}
@@ -3596,13 +3608,37 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {user?.uname && (
-            <PendingProposalSidebar
+            <MemoizedPendingProposalSidebar
               theme={settings.theme}
               openLinkedNode={openLinkedNode}
               username={user.uname}
               tagId={user.tagId}
               open={openSidebar === "PENDING_LIST"}
               onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && (
+            <MemoizedUserInfoSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "USER_INFO"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && openSidebar === "PROPOSALS" && (
+            <MemoizedProposalsSidebar
+              theme={settings.theme}
+              open={openSidebar === "PROPOSALS"}
+              onClose={() => setOpenSidebar(null)}
+              proposeNodeImprovement={proposeNodeImprovement}
+              fetchProposals={fetchProposals}
+              selectedNode={nodeBookState.selectedNode}
+              rateProposal={rateProposal}
+              selectProposal={selectProposal}
+              deleteProposal={deleteProposal}
+              proposeNewChild={proposeNewChild}
+              openProposal={openProposal}
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
@@ -3619,6 +3655,8 @@ const Dashboard = ({}: DashboardProps) => {
             >
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
+                <Typography>sNodetype {selectedNodeType}</Typography>
+
                 {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
               <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
@@ -3628,13 +3666,22 @@ const Dashboard = ({}: DashboardProps) => {
                     <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                       <CodeIcon color="warning" />
                     </IconButton>
-                    <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
+                    {/* <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
                     <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
                     <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                     <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                    <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
+                    <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button> */}
                   </>
                 </Tooltip>
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                  <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
+                  <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
+                  <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
+                  <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
+                  <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
+                  <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
+                  <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
+                </Box>
               </Box>
             </Box>
           )}

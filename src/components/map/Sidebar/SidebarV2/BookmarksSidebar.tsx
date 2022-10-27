@@ -74,7 +74,10 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData);
       setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
     });
-    return () => bookmarkSnapshot();
+    return () => {
+      console.log("UNMOUNT BOOKMARKS");
+      bookmarkSnapshot();
+    };
   }, [db, username]);
 
   const bookmarkedUserNodes = useMemo(() => {
@@ -119,3 +122,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
     />
   );
 };
+
+export const MemoizedBookmarksSidebar = React.memo(BookmarksSidebar, (prev, next) => {
+  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
+});
