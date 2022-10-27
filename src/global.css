@@ -2666,3 +2666,19 @@ button.MuiTab-textColorInherit:focus {
   -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
   -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
 }
+.toolbar:focus .customUserStatusTotalPoints,
+.toolbar:hover .customUserStatusTotalPoints {
+  display: flex;
+  align-items: center;
+}
+
+.scroll-styled::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 4px;
+  height: 4px;
+}
+
+.scroll-styled::-webkit-scrollbar-thumb {
+  background: rgba(113, 113, 113, 0.663);
+  border-radius: 4px;
+}

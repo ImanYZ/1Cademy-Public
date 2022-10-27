@@ -3442,10 +3442,11 @@ const Dashboard = ({}: DashboardProps) => {
   };
 
   return (
-    <div className="MapContainer">
+    <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
         id="Map"
         sx={{
+          overflow: "hidden",
           background:
             settings.background === "Color"
               ? theme =>

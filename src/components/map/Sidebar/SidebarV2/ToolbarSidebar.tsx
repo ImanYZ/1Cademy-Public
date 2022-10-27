@@ -43,7 +43,7 @@ export const ToolbarSidebar = ({
 MainSidebarProps) => {
   const db = getFirestore();
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
-  const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
+  // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
   const [uncheckedNotificationsNum /* , setUncheckedNotificationsNum */] = useState(0);
   const [bookmarkUpdatesNum /* , setBookmarkUpdatesNum */] = useState(0);
   const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(false);
@@ -75,7 +75,8 @@ MainSidebarProps) => {
     async (lBType: any, username: string) => {
       // console.log("==>> changeLeaderboard", lBType, username);
       setLeaderboardType(lBType);
-      setLeaderboardTypeOpen(false);
+      setAnchorEl(null);
+      // setLeaderboardTypeOpen(false);
 
       await addDoc(collection(db, "userLeaderboardLog"), {
         uname: username,
@@ -126,196 +127,200 @@ MainSidebarProps) => {
       //     </Box>
       //   }
       SidebarContent={
-        <Box className="toolbar" sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-          <Box sx={{ marginTop: "20px" }}>
-            <MemoizedMetaButton
-            // onClick={openSideBarClick("Trends")} // CHECK: I commented this, the sidebar trends was commented
-            // tooltip="Click to open the trends in proposals."
-            // tooltipPosition="Right"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <Box sx={{ display: "grid", placeItems: "center" }}>
-                <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
-              </Box>
-            </MemoizedMetaButton>
-          </Box>
-
-          {/* User info button */}
-          <MemoizedUserStatusIcon
-            uname={user.uname}
-            totalPoints={reputation?.totalPoints || 0}
-            totalPositives={reputation?.positives || 0}
-            totalNegatives={reputation?.negatives || 0}
-            imageUrl={user.imageUrl || ""}
-            fullname={user.fName + " " + user.lName}
-            chooseUname={user.chooseUname}
-            // online={isOnline}
-            online={true} // TODO: get online state from useUserState useEffect
-            inUserBar={true}
-            inNodeFooter={false}
-            reloadPermanentGrpah={reloadPermanentGrpah}
-            sx={{ justifyContent: "center" }}
-          />
-
-          {/* Searcher button */}
-          <Button
-            onClick={() => onOpenSideBar("SEARCHER_SIDEBAR")}
-            sx={{
-              width: "90%",
-              borderRadius: "0px 50px 50px 0px",
-              backgroundColor: "rgba(255, 152, 0, 1)",
-              color: "white",
-              lineHeight: "19px",
-              height: "40px",
-              textAlign: "left",
-              alignSelf: "flex-start",
-              display: "flex",
-              justifyContent: "flex-end",
-              // border: "solid 2px blue",
-              ":hover": {
-                backgroundColor: "rgba(255, 152, 0, 1)",
-              },
-            }}
+        <Box className="toolbar" sx={{ overflow: "hidden" }}>
+          <Box
+            // className="toolbar-options"
+            sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", height: "400px" }}
           >
-            <SearchIcon />
-            <Box
-              component="span"
-              className="toolbarDescription"
-              sx={{
-                fontSize: "15px",
-                lineHeight: "0",
-                height: "0",
-                overflow: "hidden",
-                visibility: "hidden",
-                transition: "visibility 0s, line-height 0s, height 0s",
-                width: "11px",
-              }}
-            >
-              Search
-            </Box>
-          </Button>
-
-          {/* Notifications button */}
-          <MemoizedMetaButton onClick={() => onOpenSideBar("NOTIFICATION_SIDEBAR")}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "5px",
-                height: "30px",
-              }}
-            >
-              <Badge
-                badgeContent={uncheckedNotificationsNum ?? 0}
-                color="error"
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{ wordBreak: "normal", padding: "1px" }}
-              >
-                {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
-              </Badge>
-              <Box
-                component="span"
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  lineHeight: "0",
-                  height: "0",
-                  width: "0",
-
-                  overflow: "hidden",
-                  visibility: "hidden",
-                  transition: "visibility 0s, line-height 0s, height 0s",
-                }}
-              >
-                Notifications
-              </Box>
-            </Box>
-          </MemoizedMetaButton>
-
-          {/* Bookmarks button */}
-          <MemoizedMetaButton onClick={() => onOpenSideBar("BOOKMARKS_SIDEBAR")}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
-              <Badge
-                badgeContent={bookmarkUpdatesNum ?? 0}
-                color="error"
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{ wordBreak: "normal", padding: "1px" }}
-              >
-                <BookmarkBorderIcon className="material-icons" />
-              </Badge>
-              <Box
-                component="span"
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  lineHeight: "0",
-                  height: "0",
-                  width: "0",
-                  overflow: "hidden",
-                  visibility: "hidden",
-                  transition: "visibility 0s, line-height 0s, height 0s",
-                }}
-              >
-                Bookmarks
-              </Box>
-            </Box>
-          </MemoizedMetaButton>
-
-          {/* Pending proposal sidebar */}
-          <MemoizedMetaButton onClick={() => onOpenSideBar("PENDING_LIST")}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
-              <Badge
-                badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
-                color="error"
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{ padding: "1px", wordBreak: "normal" }}
-              >
-                <FormatListBulletedIcon />
-              </Badge>
-              <Box
-                component="span"
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  lineHeight: "0",
-                  height: "0",
-                  width: "0",
-                  overflow: "hidden",
-                  visibility: "hidden",
-                  transition: "visibility 0s, line-height 0s, height 0s",
-                }}
-              >
-                Pending List
-              </Box>
-            </Box>
-          </MemoizedMetaButton>
-
-          {/* leaderboard options */}
-          {user?.tag && (
-            <>
+            <Box sx={{ marginTop: "20px" }}>
               <MemoizedMetaButton
-                // onClick={leaderboardTypesToggle}
-                onClick={(e: any) => onOpenLeaderboardOptions(e)}
-                // tooltip={
-                //   "Click to " +
-                //   (props.usersStatus ? "hide" : "show") +
-                //   " the user contribution trends."
-                // }
-                // tooltipPosition="Right"
+              // onClick={openSideBarClick("Trends")} // CHECK: I commented this, the sidebar trends was commented
+              // tooltip="Click to open the trends in proposals."
+              // tooltipPosition="Right"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <Box sx={{ display: "grid", placeItems: "center" }}>
+                  <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+                </Box>
+              </MemoizedMetaButton>
+            </Box>
+
+            {/* User info button */}
+            <MemoizedUserStatusIcon
+              uname={user.uname}
+              totalPoints={reputation?.totalPoints || 0}
+              totalPositives={reputation?.positives || 0}
+              totalNegatives={reputation?.negatives || 0}
+              imageUrl={user.imageUrl || ""}
+              fullname={user.fName + " " + user.lName}
+              chooseUname={user.chooseUname}
+              // online={isOnline}
+              online={true} // TODO: get online state from useUserState useEffect
+              inUserBar={true}
+              inNodeFooter={false}
+              reloadPermanentGrpah={reloadPermanentGrpah}
+              sx={{ justifyContent: "center" }}
+            />
+
+            {/* Searcher button */}
+            <Button
+              onClick={() => onOpenSideBar("SEARCHER_SIDEBAR")}
+              sx={{
+                width: "90%",
+                borderRadius: "0px 50px 50px 0px",
+                backgroundColor: "rgba(255, 152, 0, 1)",
+                color: "white",
+                lineHeight: "19px",
+                height: "40px",
+                textAlign: "left",
+                alignSelf: "flex-start",
+                display: "flex",
+                justifyContent: "flex-end",
+                // border: "solid 2px blue",
+                ":hover": {
+                  backgroundColor: "rgba(255, 152, 0, 1)",
+                },
+              }}
+            >
+              <SearchIcon />
+              <Box
+                component="span"
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  lineHeight: "0",
+                  height: "0",
+                  overflow: "hidden",
+                  visibility: "hidden",
+                  transition: "visibility 0s, line-height 0s, height 0s",
+                  width: "11px",
+                }}
+              >
+                Search
+              </Box>
+            </Button>
+
+            {/* Notifications button */}
+            <MemoizedMetaButton onClick={() => onOpenSideBar("NOTIFICATION_SIDEBAR")}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "5px",
+                  height: "30px",
+                }}
+              >
+                <Badge
+                  badgeContent={uncheckedNotificationsNum ?? 0}
+                  color="error"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  sx={{ wordBreak: "normal", padding: "1px" }}
+                >
+                  {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
+                </Badge>
                 <Box
+                  component="span"
+                  className="toolbarDescription"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "5px",
-                    height: "30px",
+                    fontSize: "15px",
+                    lineHeight: "0",
+                    height: "0",
+                    width: "0",
+
+                    overflow: "hidden",
+                    visibility: "hidden",
+                    transition: "visibility 0s, line-height 0s, height 0s",
                   }}
                 >
-                  <div className="LeaderbaordIcon">🏆</div>
-                  {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
-                  {/* {!props.reputationsLoaded && (
+                  Notifications
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+
+            {/* Bookmarks button */}
+            <MemoizedMetaButton onClick={() => onOpenSideBar("BOOKMARKS_SIDEBAR")}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
+                <Badge
+                  badgeContent={bookmarkUpdatesNum ?? 0}
+                  color="error"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  sx={{ wordBreak: "normal", padding: "1px" }}
+                >
+                  <BookmarkBorderIcon className="material-icons" />
+                </Badge>
+                <Box
+                  component="span"
+                  className="toolbarDescription"
+                  sx={{
+                    fontSize: "15px",
+                    lineHeight: "0",
+                    height: "0",
+                    width: "0",
+                    overflow: "hidden",
+                    visibility: "hidden",
+                    transition: "visibility 0s, line-height 0s, height 0s",
+                  }}
+                >
+                  Bookmarks
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+
+            {/* Pending proposal sidebar */}
+            <MemoizedMetaButton onClick={() => onOpenSideBar("PENDING_LIST")}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
+                <Badge
+                  badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
+                  color="error"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  sx={{ padding: "1px", wordBreak: "normal" }}
+                >
+                  <FormatListBulletedIcon />
+                </Badge>
+                <Box
+                  component="span"
+                  className="toolbarDescription"
+                  sx={{
+                    fontSize: "15px",
+                    lineHeight: "0",
+                    height: "0",
+                    width: "0",
+                    overflow: "hidden",
+                    visibility: "hidden",
+                    transition: "visibility 0s, line-height 0s, height 0s",
+                  }}
+                >
+                  Pending List
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+
+            {/* leaderboard options */}
+            {user?.tag && (
+              <>
+                <MemoizedMetaButton
+                  // onClick={leaderboardTypesToggle}
+                  onClick={(e: any) => onOpenLeaderboardOptions(e)}
+                  // tooltip={
+                  //   "Click to " +
+                  //   (props.usersStatus ? "hide" : "show") +
+                  //   " the user contribution trends."
+                  // }
+                  // tooltipPosition="Right"
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                      height: "30px",
+                    }}
+                  >
+                    <div className="LeaderbaordIcon">🏆</div>
+                    {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
+                    {/* {!props.reputationsLoaded && (
                       <div className="preloader-wrapper small active">
                         <div className="spinner-layer spinner-yellow-only">
                           <div className="circle-clipper left">
@@ -331,7 +336,7 @@ MainSidebarProps) => {
                       </div>
                     )} */}
 
-                  {/* <div id="LeaderboardChanger" className="SidebarDescription">
+                    {/* <div id="LeaderboardChanger" className="SidebarDescription">
                     <div id="LeaderboardTag" style={{ textOverflow: "ellipsis", width: "90px" }}>
                       {user.tag}
                     </div>
@@ -339,49 +344,49 @@ MainSidebarProps) => {
                       {leaderboardType ? leaderboardType : "Leaderboard"}
                     </div>
                   </div> */}
-                  <Box
-                    component="span"
-                    className="toolbarButtonDescription"
-                    sx={{
-                      p: "0",
-                      m: "0",
-                      fontSize: "15px",
-                      lineHeight: "0",
-                      height: "0",
-                      width: "0",
-                      overflow: "hidden",
-                      visibility: "hidden",
-                      transition: "visibility 0s, line-height 0s, height 0s",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <div
-                      id=""
-                      style={{
-                        textOverflow: "ellipsis",
+                    <Box
+                      component="span"
+                      className="toolbarButtonDescription"
+                      sx={{
+                        p: "0",
+                        m: "0",
+                        fontSize: "15px",
+                        lineHeight: "0",
+                        height: "0",
+                        width: "0",
                         overflow: "hidden",
-                        maxWidth: "90px",
-                        whiteSpace: "nowrap",
+                        visibility: "hidden",
+                        transition: "visibility 0s, line-height 0s, height 0s",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
                       }}
                     >
-                      {user.tag}
-                    </div>
-                    <div
-                      id=""
-                      style={{
-                        fontSize: "12px",
-                        maxWidth: "90px",
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {leaderboardType ? leaderboardType : "Leaderboard"}
-                    </div>
-                  </Box>
-                  {/* <Box>
+                      <div
+                        id=""
+                        style={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          maxWidth: "90px",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {user.tag}
+                      </div>
+                      <div
+                        id=""
+                        style={{
+                          fontSize: "12px",
+                          maxWidth: "90px",
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {leaderboardType ? leaderboardType : "Leaderboard"}
+                      </div>
+                    </Box>
+                    {/* <Box>
                     <Box
                       component="span"
                       className="toolbarButtonDescription"
@@ -428,49 +433,52 @@ MainSidebarProps) => {
                       Pending List
                     </Box>
                   </Box> */}
-                </Box>
-              </MemoizedMetaButton>
-              {leaderboardTypeOpen && (
-                <Menu
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={onCloseLeaderBoardOptions}
-                  MenuListProps={{
-                    "aria-labelledby": "basic-button",
-                  }}
-                  // anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                >
-                  {/* <MenuItem onClick={handleClose}>Profile</MenuItem>
+                  </Box>
+                </MemoizedMetaButton>
+                {
+                  <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={onCloseLeaderBoardOptions}
+                    MenuListProps={{
+                      "aria-labelledby": "basic-button",
+                    }}
+                    // anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  >
+                    {/* <MenuItem onClick={handleClose}>Profile</MenuItem>
                 <MenuItem onClick={handleClose}>My account</MenuItem>
                 <MenuItem onClick={handleClose}>Logout</MenuItem> */}
 
-                  {choices.map(choice => {
-                    return (
-                      <MenuItem key={choice.label} onClick={choice.choose}>
-                        {choice.label}
-                      </MenuItem>
-                    );
-                  })}
-                </Menu>
-                // <MultipleChoiceBtn
-                //   choices={choices}
-                //   onClose={onCloseLeaderBoardOptions}
-                //   anchorEl={anchorEl} /* onClose={leaderboardTypesToggle} */
-                // />
-              )}
-              {leaderboardType && (
-                <UsersStatusList
-                  // reputationsLoaded={props.reputationsLoaded}
-                  // reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
-                  // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
-                  // reloadPermanentGrpah={props.reloadPermanentGrpah}
-                  usersStatus={leaderboardType}
-                  reloadPermanentGraph={reloadPermanentGrpah}
-                />
-              )}
-            </>
-          )}
+                    {choices.map(choice => {
+                      return (
+                        <MenuItem key={choice.label} onClick={choice.choose}>
+                          {choice.label}
+                        </MenuItem>
+                      );
+                    })}
+                  </Menu>
+                  // <MultipleChoiceBtn
+                  //   choices={choices}
+                  //   onClose={onCloseLeaderBoardOptions}
+                  //   anchorEl={anchorEl} /* onClose={leaderboardTypesToggle} */
+                  // />
+                }
+              </>
+            )}
+          </Box>
+          <Box sx={{ height: "calc(100vh - 400px)", paddingBottom: "20px" }}>
+            {user?.tag && leaderboardType && (
+              <UsersStatusList
+                // reputationsLoaded={props.reputationsLoaded}
+                // reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
+                // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
+                // reloadPermanentGrpah={props.reloadPermanentGrpah}
+                usersStatus={leaderboardType}
+                reloadPermanentGraph={reloadPermanentGrpah}
+              />
+            )}
+          </Box>
         </Box>
       }
     />

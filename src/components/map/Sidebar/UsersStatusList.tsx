@@ -7,7 +7,7 @@ import { UsersStatus } from "../../../nodeBookTypes";
 // import { UsersStatus } from "../../../noteBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 
-const scale = 1;
+// const scale = 1;
 
 const usersListObjFromReputationObj = (user: any, userReputation: any, uname: string) => {
   return {
@@ -102,15 +102,15 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // flag for whether other' Monthly reputation data is downloaded from server
   const [reputationsOthersMonthlyLoaded, setReputationsOthersMonthlyLoaded] = useState(false);
 
-  const [scaledHeight, setScaledHeight] = useState((window.innerHeight - 430) / scale);
+  // const [scaledHeight, setScaledHeight] = useState((window.innerHeight - 430) / scale);
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [onlineUsersList, setOnlineUsersList] = useState<any[]>([]);
 
-  useEffect(() => {
-    window.onresize = () => setScaledHeight((window.innerHeight - 430) / scale);
-  }, [scale]);
+  // useEffect(() => {
+  //   window.onresize = () => setScaledHeight((window.innerHeight - 430) / scale);
+  // }, [scale]);
 
   // useEffect(() => {
   //   const interval = setInterval(() => setTimeNow(Date.now()), 60000);
@@ -333,8 +333,17 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
   return (
     <div
-      id="UsersStatusList"
-      style={{ height: scaledHeight, display: "flex", flexDirection: "column", alignItems: "center" }}
+      // id="UsersStatusList"
+      className="scroll-styled"
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        // border: "solid 2px royalBlue",
+        overflowY: "auto",
+        // width: "80px",
+      }}
     >
       {renderUsersList(onlineUsersList, true)}
       {renderUsersList(usersList, false)}
