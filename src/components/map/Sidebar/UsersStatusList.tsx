@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -332,22 +333,22 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   }, []);
 
   return (
-    <div
+    <Box
       // id="UsersStatusList"
       className="scroll-styled"
-      style={{
+      sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        // border: "solid 2px royalBlue",
         overflowY: "auto",
+        px: "10px",
         // width: "80px",
       }}
     >
       {renderUsersList(onlineUsersList, true)}
       {renderUsersList(usersList, false)}
-    </div>
+    </Box>
   );
 };
 

@@ -2682,3 +2682,10 @@ button.MuiTab-textColorInherit:focus {
   background: rgba(113, 113, 113, 0.663);
   border-radius: 4px;
 }
+/* scroll-styled */
+
+.toolbar:focus .scroll-styled,
+.toolbar:hover .scroll-styled {
+  display: flex;
+  align-items: flex-start;
+}
