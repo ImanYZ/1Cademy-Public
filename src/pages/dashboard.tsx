@@ -350,21 +350,18 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
-      console.log("bd=>state", 1, { firstScrollToNode, queueFinished });
+
       if (!firstScrollToNode && queueFinished) {
-        console.log("bd=>state", 11);
         if (!user?.sNode) return;
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
 
-        console.log("bd=>state", 2);
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
 
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
-        console.log("bd=>state", 3);
         if (queueFinished) {
           setFirstLoading(false);
         }
@@ -550,20 +547,25 @@ const Dashboard = ({}: DashboardProps) => {
         async snapshot => {
           const docChanges = snapshot.docChanges();
 
+          devLog("userNodesSnapshot:1", { docChanges });
           if (!docChanges.length) {
             setIsSubmitting(false);
             setNoNodesFoundMessage(true);
             return null;
           }
+
+          devLog("userNodesSnapshot:2", { docChanges });
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
           if (!docChangesFromServer.length) return null;
 
+          devLog("userNodesSnapshot:3", { docChangesFromServer });
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
+          devLog("userNodesSnapshot:4", { nodesData });
 
           // nodesData.forEach(cur => {
           //   if (!cur?.nData.nodeType || !cur.nData.references) return;
@@ -571,6 +573,7 @@ const Dashboard = ({}: DashboardProps) => {
           // });
 
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+          devLog("userNodesSnapshot:5", { fullNodes });
 
           // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
           // here set All Full Nodes to use in bookmarks
@@ -3471,8 +3474,12 @@ const Dashboard = ({}: DashboardProps) => {
       >
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
-          {process.env.NODE_ENV === "development" && (
-            <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
+          {
+            /* process.env.NODE_ENV === "development" && */ <Drawer
+              anchor={"right"}
+              open={openDeveloperMenu}
+              onClose={() => setOpenDeveloperMenu(false)}
+            >
               {/* Data from map, don't REMOVE */}
               <Box>
                 Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
@@ -3526,7 +3533,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
               </Box>
             </Drawer>
-          )}
+          }
           {/* <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -3658,8 +3665,8 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {process.env.NODE_ENV === "development" && (
-            <Box
+          {
+            /* process.env.NODE_ENV === "development" && */ <Box
               sx={{
                 position: "fixed",
                 bottom: "100px",
@@ -3701,7 +3708,7 @@ const Dashboard = ({}: DashboardProps) => {
                 </Box>
               </Box>
             </Box>
-          )}
+          }
 
           {/* end Data from map */}
           {settings.view === "Graph" && (
