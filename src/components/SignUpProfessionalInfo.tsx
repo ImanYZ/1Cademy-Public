@@ -14,7 +14,6 @@ import { FormikProps } from "formik";
 import { HTMLAttributes, lazy, Suspense, useEffect, useState } from "react";
 import { Institution, Major, SignUpFormValues } from "src/knowledgeTypes";
 
-import OptimizedAvatar from "../components/OptimizedAvatar";
 import { EDUCATION_VALUES } from "../lib/utils/constants";
 
 const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
@@ -129,7 +128,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         )}
         renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
           <li {...props}>
-            <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
+            {/* <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} /> */}
             <div style={{ paddingLeft: "7px" }}>{option.name}</div>
           </li>
         )}
