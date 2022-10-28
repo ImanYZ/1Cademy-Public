@@ -46,7 +46,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
         showSearch={showSearch}
         isSignedIn={isAuthenticated}
       />
-      {showMenu && <AppMenuMovil onSendFeedback={onSendFeedback} />}
+      {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />}
       <Box
         component="main"
         sx={{

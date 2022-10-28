@@ -1,13 +1,26 @@
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { Box, Button, Link, MenuItem, MenuList } from "@mui/material";
+import { getAuth } from "firebase/auth";
+import { useRouter } from "next/router";
 
 import SECTIONS from "@/lib/utils/navbarSections";
 
 interface AppMenuMovilProps {
   onSendFeedback: () => void;
+  isSignedIn: boolean;
 }
 
-const AppMenuMovil = ({ onSendFeedback }: AppMenuMovilProps) => {
+const AppMenuMovil = ({ onSendFeedback, isSignedIn }: AppMenuMovilProps) => {
+  const router = useRouter();
+  const handleSignout = async () => {
+    //TODO: Remove thhis button before deploying
+    await getAuth().signOut();
+    router.push("/signin");
+  };
+  const onRedirectToSignin = () => {
+    router.push("/signin");
+  };
+
   return (
     <Box
       sx={{
@@ -59,6 +72,46 @@ const AppMenuMovil = ({ onSendFeedback }: AppMenuMovilProps) => {
             APPLY!
           </Button>
         </MenuItem>
+        {isSignedIn ? (
+          <MenuItem title="Sign Out">
+            <Button
+              variant="outlined"
+              onClick={handleSignout}
+              sx={{
+                color: theme => theme.palette.common.white,
+                borderColor: theme => theme.palette.common.white,
+                minWidth: "116px",
+                fontSize: 16,
+                fontWeight: "700",
+                marginTop: "18px",
+                borderRadius: 40,
+                textAlign: "center",
+                width: "120px",
+              }}
+            >
+              SIGN OUT
+            </Button>
+          </MenuItem>
+        ) : (
+          <MenuItem title="Sign In/Out">
+            <Button
+              variant="outlined"
+              onClick={onRedirectToSignin}
+              sx={{
+                color: theme => theme.palette.common.white,
+                borderColor: theme => theme.palette.common.white,
+                minWidth: "120px",
+                fontSize: 16,
+                fontWeight: "700",
+                marginTop: "18px",
+                borderRadius: 40,
+                textAlign: "center",
+              }}
+            >
+              SIGN IN/UP
+            </Button>
+          </MenuItem>
+        )}
       </MenuList>
       <Button
         size="large"
