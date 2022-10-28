@@ -2,8 +2,6 @@ import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
-import { useNodeBook } from "@/context/NodeBookContext";
-
 import referencesDarkTheme from "../../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../../public/references-light-theme.jpg";
 import EditProposal from "../../EditProposal";
@@ -45,6 +43,7 @@ const ProposalsSidebar = ({
   deleteProposal,
   proposeNewChild,
   openProposal,
+  selectedNode,
 }: ProposalsSidebarProps) => {
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -52,8 +51,6 @@ const ProposalsSidebar = ({
   const [openProposalItem, setOpenProposalItem] = useState(false);
   const [value, setValue] = React.useState(0);
   const [selectionType] = useState();
-
-  const { nodeBookState } = useNodeBook();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -70,7 +67,7 @@ const ProposalsSidebar = ({
 
   useEffect(() => {
     setOpenProposalItem(false);
-    if (nodeBookState.selectedNode) {
+    if (selectedNode) {
       fetchProposals(setIsAdmin, setIsRetrieving, setProposals, "Segundo");
     }
     // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
@@ -78,7 +75,7 @@ const ProposalsSidebar = ({
     // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodeBookState.selectedNode]);
+  }, [selectedNode]);
 
   useEffect(() => {
     setOpenProposalItem(false);
@@ -156,7 +153,7 @@ const ProposalsSidebar = ({
       open={open}
       onClose={onClose}
       width={430}
-      anchor="right"
+      anchor="left"
       SidebarOptions={
         <Box>
           <Box>
@@ -166,7 +163,7 @@ const ProposalsSidebar = ({
               <EditProposal
                 openProposal={openProposalItem}
                 proposeNodeImprovement={proposeNodeImprovement}
-                selectedNode={nodeBookState.selectedNode}
+                selectedNode={selectedNode}
               />
               <div
                 id="ProposalButtonsRow"

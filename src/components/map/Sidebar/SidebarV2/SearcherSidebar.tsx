@@ -88,13 +88,13 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
   );
 
   const onSearch = useCallback(
-    async (page: number, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
+    async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
       try {
         // async (page: number = 1) => {
         // console.log("[onSearch]");
         setIsRetrieving(true);
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
-          q: search,
+          q,
           nodeTypes,
           tags: getTagsSelected().map(cur => cur.title),
           nodesUpdatedSince,
@@ -128,25 +128,42 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         setIsRetrieving(false);
       }
     },
-    [getTagsSelected, nodesUpdatedSince, search, searchResults.data]
+    [getTagsSelected, nodesUpdatedSince, searchResults.data]
   );
-  useEffect(() => {
-    setSearch(prevSearch => {
-      if (prevSearch !== nodeBookState.searchQuery) {
-        return nodeBookState.searchQuery;
-      }
-      return prevSearch;
-    });
-  }, [nodeBookState.searchQuery, setSearch]);
 
   useEffect(() => {
-    if (nodeBookState.nodeTitleBlured /*&& filteredNodes.length !== 0*/) {
-      // doSearch();
-      onSearch(1, sortOption, sortDirection, nodeTypes);
-      // setNodeTitleBlured(false);
+    if (nodeBookState.searchQuery && nodeBookState.nodeTitleBlured) {
+      setSearch(nodeBookState.searchQuery);
+      onSearch(1, nodeBookState.searchQuery, sortOption, sortDirection, nodeTypes);
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: false });
     }
-  }, [nodeBookDispatch, nodeBookState.nodeTitleBlured, nodeTypes, onSearch, sortDirection, sortOption]);
+  }, [
+    nodeBookDispatch,
+    nodeBookState.nodeTitleBlured,
+    nodeBookState.searchQuery,
+    nodeTypes,
+    onSearch,
+    sortDirection,
+    sortOption,
+  ]);
+  // useEffect(() => {
+  //   console.log("Sync Searcher ", nodeBookState.searchQuery);
+  //   setSearch(prevSearch => {
+  //     if (prevSearch !== nodeBookState.searchQuery) {
+  //       return nodeBookState.searchQuery;
+  //     }
+  //     return prevSearch;
+  //   });
+  // }, [nodeBookState.searchQuery, nodeTypes, setSearch, sortDirection, sortOption]);
+
+  // useEffect(() => {
+  //   if (nodeBookState.nodeTitleBlured /*&& filteredNodes.length !== 0*/) {
+  //     // doSearch();
+  //     onSearch(1, sortOption, sortDirection, nodeTypes);
+  //     // setNodeTitleBlured(false);
+  //     nodeBookDispatch({ type: "setNodeTitleBlured", payload: false });
+  //   }
+  // }, [nodeBookDispatch, nodeBookState.nodeTitleBlured, nodeTypes, onSearch, sortDirection, sortOption]);
 
   const handleChange = useCallback(
     (event: any) => {
@@ -163,21 +180,21 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
 
   const onChangeSortOptions = (newSortOption: SortValues) => {
     setSortOption(newSortOption);
-    onSearch(1, newSortOption, sortDirection, nodeTypes);
+    onSearch(1, search, newSortOption, sortDirection, nodeTypes);
   };
 
   const onChangeSortDirection = (newSortDirection: SortDirection) => {
     setSortDirection(newSortDirection);
-    onSearch(1, sortOption, newSortDirection, nodeTypes);
+    onSearch(1, search, sortOption, newSortDirection, nodeTypes);
   };
 
   const onSearchEnter = useCallback(
     (event: any) => {
       if (event.charCode === 13) {
-        onSearch(1, sortOption, sortDirection, nodeTypes);
+        onSearch(1, search, sortOption, sortDirection, nodeTypes);
       }
     },
-    [nodeTypes, onSearch, sortDirection, sortOption]
+    [nodeTypes, onSearch, search, sortDirection, sortOption]
   );
 
   const deleteChip = useCallback(
@@ -214,7 +231,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
   const onChangeNoteType = (event: SelectChangeEvent<string[]>) => {
     const newNodeTypes = event.target.value as NodeType[];
     setNodeTypes(newNodeTypes);
-    onSearch(1, sortOption, sortDirection, newNodeTypes);
+    onSearch(1, search, sortOption, sortDirection, newNodeTypes);
   };
 
   return (
@@ -307,7 +324,10 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton id="SearchIcon" onClick={() => onSearch(1, sortOption, sortDirection, nodeTypes)}>
+                    <IconButton
+                      id="SearchIcon"
+                      onClick={() => onSearch(1, search, sortOption, sortDirection, nodeTypes)}
+                    >
                       <SearchIcon />
                     </IconButton>
                   </InputAdornment>
@@ -482,7 +502,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
           {!isRetrieving && searchResults.lastPageLoaded < searchResults.totalPage && (
             <Box id="ContinueButton" sx={{ display: "flex", justifyContent: "center" }}>
               <MemoizedMetaButton
-                onClick={() => onSearch(searchResults.lastPageLoaded + 1, sortOption, sortDirection, nodeTypes)}
+                onClick={() => onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes)}
                 // tooltip="Load older search results"
                 // tooltipPosition="Right"
               >

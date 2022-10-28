@@ -48,7 +48,6 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
-import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
 // import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
@@ -211,7 +210,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
   const [firstLoading, setFirstLoading] = useState(true);
-  const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
+  const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
@@ -2529,6 +2528,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
+          console.log("selectNodeHandler 1");
           nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
@@ -2545,7 +2545,7 @@ const Dashboard = ({}: DashboardProps) => {
           event.currentTarget.blur();
         } else {
           setOpenSidebar("PROPOSALS");
-          setOpenSearch(false);
+          // setOpenSearch(false);
           setSelectedNodeType(nodeType);
           nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2786,7 +2786,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onNodeTitleBlur = useCallback(
     (newTitle: string) => {
-      setOpenSearch(true);
+      // setOpenSearch(true);
+      setOpenSidebar("SEARCHER_SIDEBAR");
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
@@ -3526,7 +3527,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
             </Drawer>
           )}
-          <MemoizedSidebar
+          {/* <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
             rateProposal={rateProposal}
@@ -3553,9 +3554,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenNotifications={setOpenNotifications}
             openNotifications={openNotifications}
             setOpenPresentations={setOpenPresentations}
-            setOpenToolbar={
-              /*setOpenToolbar*/ (newValue: boolean) => nodeBookDispatch({ type: "setOpenToolbar", payload: newValue })
-            }
+            setOpenToolbar={(newValue: boolean) => nodeBookDispatch({ type: "setOpenToolbar", payload: newValue })}
             openToolbar={nodeBookState.openToolbar}
             setOpenSearch={setOpenSearch}
             openSearch={openSearch}
@@ -3568,7 +3567,7 @@ const Dashboard = ({}: DashboardProps) => {
             allNodes={allNodes}
             mapRendered={true}
             scrollToNode={scrollToNode}
-          />
+          /> */}
           {user && reputation && (
             <ToolbarSidebar
               // theme={settings.theme}
