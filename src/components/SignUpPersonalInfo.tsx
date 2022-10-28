@@ -66,9 +66,9 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         const { country_name, state_prov, city } = res.data;
         setCSCByGeolocation({ country: country_name, state: state_prov, city });
         if (!countries.filter(cur => cur.name === country_name)) return;
-
+        await updateStatesByCountry(country_name);
         setFieldValue("country", country_name);
-        // await updateStatesByCountry(country_name)
+
         setFieldValue("state", state_prov);
         // await updateCitiesByState(state_prov)
         setFieldValue("city", city);
@@ -79,6 +79,14 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
 
     getCSCByGeolocation();
   }, [CSCByGeolocation, countries, setFieldValue, touched.country, values.country]);
+
+  useEffect(() => {
+    if (values.state) {
+      updateCitiesByState(values.state);
+    } else {
+      setCities([]);
+    }
+  }, [states]);
 
   const updateStatesByCountry = async (currentCountry: string | null) => {
     if (!currentCountry) return [];
