@@ -450,7 +450,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                       >
                         <>
                           {/* <i className="material-icons grey-text">event_available</i> */}
-                          <EventAvailableIcon className="material-icons grey-text" />
+                          <EventAvailableIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
                           <span>{dayjs(resNode.changedAt).fromNow()}</span>
                         </>
                       </MemoizedMetaButton>
@@ -460,7 +460,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                       >
                         <>
                           {/* <i className="material-icons grey-text">create</i> */}
-                          <CreateIcon className="material-icons grey-text" />
+                          <CreateIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
                           <span>{shortenNumber(resNode.versions, 2, false)}</span>
                         </>
                       </MemoizedMetaButton>
@@ -470,7 +470,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                       >
                         <>
                           {/* <i className="material-icons grey-text">close</i> */}
-                          <CloseIcon className="material-icons grey-text" />
+                          <CloseIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
                           <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
                         </>
                       </MemoizedMetaButton>
@@ -480,7 +480,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                       >
                         <>
                           {/* <i className="material-icons DoneIcon grey-text">done</i> */}
-                          <DoneIcon className="material-icons DoneIcon grey-text" />
+                          <DoneIcon className="material-icons DoneIcon grey-text" sx={{ fontSize: "inherit" }} />
                           <span>{shortenNumber(resNode.corrects, 2, false)}</span>
                         </>
                       </MemoizedMetaButton>
