@@ -2,6 +2,8 @@ import { Box } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { OpenSidebar } from "@/pages/dashboard";
+
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
 import { UsersStatus } from "../../../nodeBookTypes";
@@ -79,6 +81,7 @@ const usersListObjFromReputationObj = (user: any, userReputation: any, uname: st
 type UsersStatusListProps = {
   usersStatus: UsersStatus;
   reloadPermanentGraph: any;
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 
 const UsersStatusList = (props: UsersStatusListProps) => {
@@ -312,25 +315,29 @@ const UsersStatusList = (props: UsersStatusListProps) => {
     }
   }, [usersOnlineStatusLoaded, reputationsOthersMonthlyDict, props.usersStatus, loadReputationPoints]);
 
-  const renderUsersList = useCallback((uList: any[], online: boolean) => {
-    return uList.map((user: any) => (
-      <MemoizedUserStatusIcon
-        key={"User" + user.uname}
-        uname={user.uname}
-        totalPoints={user.totalPoints}
-        totalPositives={user.totalPositives}
-        totalNegatives={user.totalNegatives}
-        imageUrl={user.imageUrl}
-        fullname={user.fullname}
-        chooseUname={user.chooseUname}
-        online={online}
-        inUserBar={false}
-        inNodeFooter={false}
-        reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
-        tagTitle={user.tag}
-      />
-    ));
-  }, []);
+  const renderUsersList = useCallback(
+    (uList: any[], online: boolean) => {
+      return uList.map((user: any) => (
+        <MemoizedUserStatusIcon
+          key={"User" + user.uname}
+          uname={user.uname}
+          totalPoints={user.totalPoints}
+          totalPositives={user.totalPositives}
+          totalNegatives={user.totalNegatives}
+          imageUrl={user.imageUrl}
+          fullname={user.fullname}
+          chooseUname={user.chooseUname}
+          online={online}
+          inUserBar={false}
+          inNodeFooter={false}
+          reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
+          tagTitle={user.tag}
+          setOpenSideBar={props.setOpenSideBar}
+        />
+      ));
+    },
+    [props.setOpenSideBar]
+  );
 
   return (
     <Box

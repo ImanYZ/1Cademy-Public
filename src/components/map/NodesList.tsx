@@ -3,6 +3,7 @@ import { FullNodeData } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
+import { OpenSidebar } from "@/pages/dashboard";
 
 // import { FullNodeData } from "../../noteBookTypes";
 import { MemoizedNode } from "./Node";
@@ -42,6 +43,7 @@ type NodeListProps = {
   setOpenMedia: (imagUrl: string) => void;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 
 const NodesList = ({
@@ -77,6 +79,7 @@ const NodesList = ({
   setOpenMedia,
   setNodeParts,
   citations,
+  setOpenSideBar,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -199,6 +202,7 @@ const NodesList = ({
             setOpenMedia={setOpenMedia}
             setNodeParts={setNodeParts}
             citations={citations}
+            setOpenSideBar={setOpenSideBar}
           />
         );
       })}

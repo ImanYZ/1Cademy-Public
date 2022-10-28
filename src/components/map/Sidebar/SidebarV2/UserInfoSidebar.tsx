@@ -287,7 +287,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       open={open}
       onClose={onClose}
       width={430}
-      anchor="right"
+      anchor="left"
       SidebarOptions={
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", marginTop: "40px" }}>
           <Box>

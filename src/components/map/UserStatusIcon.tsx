@@ -4,6 +4,8 @@ import { Box, SxProps, Theme, Tooltip } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { OpenSidebar } from "@/pages/dashboard";
+
 import { useAuth } from "../../context/AuthContext";
 import { useNodeBook } from "../../context/NodeBookContext";
 import usePrevious from "../../hooks/usePrevious";
@@ -25,6 +27,7 @@ type UserStatusIconProps = {
   totalNegatives?: any;
   totalPoints?: any;
   tagTitle?: string;
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
   sx?: SxProps<Theme>;
 };
 
@@ -110,6 +113,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         payload: "UserInfo",
       });
       // setSelectionType("UserInfo");
+      props.setOpenSideBar("USER_INFO");
       props.reloadPermanentGrpah();
       addDoc(userUserInfoCollection, {
         uname: user.uname,

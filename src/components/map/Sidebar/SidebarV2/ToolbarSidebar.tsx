@@ -44,6 +44,7 @@ export const ToolbarSidebar = ({
 }: //   mapRendered = true,
 MainSidebarProps) => {
   const db = getFirestore();
+
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
   // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
   const [uncheckedNotificationsNum /* , setUncheckedNotificationsNum */] = useState(0);
@@ -134,7 +135,35 @@ MainSidebarProps) => {
     });
     // onOpenSidebarLog("Search");
   }, [db, setOpenSideBar, user.uname]);
-
+  // const onOpenUserInfoSidebar = useCallback(() => {
+  //   const userUserInfoCollection = collection(db, "userUserInfoLog");
+  //   nodeBookDispatch({
+  //     type: "setSelectedUser",
+  //     payload: {
+  //       username: user.uname,
+  //       imageUrl: user.imageUrl,
+  //       fullName: user.fName,
+  //       chooseUname: user.chooseUname,
+  //     },
+  //   });
+  //   setOpenSideBar("USER_SETTINGS");
+  //   reloadPermanentGrpah();
+  //   addDoc(userUserInfoCollection, {
+  //     uname: user.uname,
+  //     uInfo: user.uname,
+  //     createdAt: Timestamp.fromDate(new Date()),
+  //   });
+  //   // onOpenSidebarLog("Search");
+  // }, [
+  //   db,
+  //   nodeBookDispatch,
+  //   reloadPermanentGrpah,
+  //   setOpenSideBar,
+  //   user.chooseUname,
+  //   user.fName,
+  //   user.imageUrl,
+  //   user.uname,
+  // ]);
   // const onOpenSearcherSidebar = useCallback(() => {
   //   onOpenSideBar("SEARCHER_SIDEBAR");
   //   onOpenSidebarLog("Search");
@@ -529,6 +558,7 @@ MainSidebarProps) => {
                 // reloadPermanentGrpah={props.reloadPermanentGrpah}
                 usersStatus={leaderboardType}
                 reloadPermanentGraph={reloadPermanentGrpah}
+                setOpenSideBar={setOpenSideBar}
               />
             )}
           </Box>

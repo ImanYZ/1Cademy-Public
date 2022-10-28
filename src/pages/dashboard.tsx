@@ -3754,6 +3754,7 @@ const Dashboard = ({}: DashboardProps) => {
                   reloadPermanentGrpah={reloadPermanentGraph}
                   setNodeParts={setNodeParts}
                   citations={citations}
+                  setOpenSideBar={setOpenSidebar}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
