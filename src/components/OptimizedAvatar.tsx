@@ -1,4 +1,5 @@
 import { Avatar, Box } from "@mui/material";
+import { common } from "@mui/material/colors";
 import { SxProps, Theme } from "@mui/system";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Image from "next/image";
@@ -12,7 +13,7 @@ type Props = {
 };
 
 const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
-  const [checkIfFileExist, setCheckIfFileExist] = useState(false);
+  const [checkIfFileExist, setCheckIfFileExist] = useState(true);
   useEffect(() => {
     if (imageUrl) {
       const checkIfImageExists = async () => {
@@ -51,9 +52,11 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
     return (
       <Avatar
         sx={{
-          width: "40px",
-          height: "40px",
-          ...sx,
+          width: "32.5px",
+          height: "32.5px",
+          backgroundColor: "#ff9800",
+          color: common.white,
+          fontSize: "16px",
         }}
       >
         {name.charAt(0)}

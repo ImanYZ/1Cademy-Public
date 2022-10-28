@@ -8,7 +8,7 @@ import { MemoizedMetaButton } from "../MetaButton";
 
 type MultipleChoiceBtnProps = {
   choices: { label: string; choose: any }[];
-  close: any;
+  onClose: any;
 };
 
 const MultipleChoiceBtn = (props: MultipleChoiceBtnProps) => {

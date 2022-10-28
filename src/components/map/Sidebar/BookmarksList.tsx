@@ -25,6 +25,7 @@ type BookmarksListProps = {
 const ELEMENTS_PER_PAGE = 13;
 
 export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksListProps) => {
+  console.log("bookmarks", bookmarks);
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
 
   // useEffect(() => {
@@ -72,7 +73,7 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             // CHECK: I changed: node.id to node.userNodeId
             key={`node${node.userNodeId}`}
             onClick={() => openLinkedNode(node.node)}
-            sx={{ listStyle: "none", padding: "10px", mx: "10px" }}
+            sx={{ listStyle: "none", padding: "10px" /*  mx: "10px" */ }}
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
               <NodeTypeIcon nodeType={node.nodeType} sx={{ fontSize: "16px" }} />

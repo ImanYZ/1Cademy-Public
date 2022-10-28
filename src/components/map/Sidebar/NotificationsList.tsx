@@ -130,7 +130,6 @@ const NotificationsList = (props: NotificationsListProps) => {
               listStyle: "none",
               px: "10px",
               fontSize: "16px",
-              mx: "10px",
             }}
           >
             <div className="NotificationBody">

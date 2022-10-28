@@ -1,40 +1,27 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, SxProps, Theme, Tooltip } from "@mui/material";
-import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { User } from "src/knowledgeTypes";
 
-import { OpenSidebar } from "@/pages/dashboard";
-
-import { useAuth } from "../../context/AuthContext";
-import { useNodeBook } from "../../context/NodeBookContext";
 import usePrevious from "../../hooks/usePrevious";
 // import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
 // import RoundImage from "./RoundImage";
 
-type UserStatusIconProps = {
-  uname: string;
+type UserStatusSettingsProps = {
   imageUrl: string;
-  fullname: string;
-  chooseUname: any;
   online: boolean;
-  inUserBar: boolean;
-  inNodeFooter: boolean;
-  reloadPermanentGrpah: any;
   totalPositives?: any;
   totalNegatives?: any;
   totalPoints?: any;
-  tagTitle?: string;
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  onClick: () => void;
+  user: User;
   sx?: SxProps<Theme>;
 };
 
-const UserStatusIcon = (props: UserStatusIconProps) => {
-  const db = getFirestore();
-  const [{ user }] = useAuth();
-  const { nodeBookDispatch } = useNodeBook();
+const UserStatusSettings = (props: UserStatusSettingsProps) => {
   const [pointsGained, setPointsGained] = useState(false);
   const [pointsLost, setPointsLost] = useState(false);
 
@@ -76,59 +63,10 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.totalPoints, props.totalPositives, props.totalNegatives]);
 
-  const openUserInfo = useCallback(() => {
-    if (!user) return;
-
-    const userUserInfoCollection = collection(db, "userUserInfoLog");
-
-    // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
-    if (props.inUserBar) {
-      // Open Toollbar (user setting sidebar)
-      nodeBookDispatch({ type: "setOpenToolbar", payload: true });
-      // setOpenToolbar(true);
-
-      addDoc(userUserInfoCollection, {
-        uname: user.uname,
-        uInfo: user.uname,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
-    } else {
-      // Open user info sidebar
-      nodeBookDispatch({
-        type: "setSelectedUser",
-        payload: {
-          username: props.uname,
-          imageUrl: props.imageUrl,
-          fullName: props.fullname,
-          chooseUname: props.chooseUname,
-        },
-      });
-
-      // setSelectedUser(props.uname);
-      // setSelectedUserImageURL(props.imageUrl);
-      // setSelectedUserFullname(props.fullname);
-      // setSelectedUserChooseUname(props.chooseUname);
-      nodeBookDispatch({
-        type: "setSelectionType",
-        payload: "UserInfo",
-      });
-      // setSelectionType("UserInfo");
-      props.setOpenSideBar("USER_INFO");
-      props.reloadPermanentGrpah();
-      addDoc(userUserInfoCollection, {
-        uname: user.uname,
-        uInfo: props.uname,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
-    }
-    // console.log("openUserInfo");
-  }, [db, nodeBookDispatch, props, user]);
-
   const getTooltipTitle = (): JSX.Element => {
-    let title: string = "";
-    title += props.inUserBar ? "Your profile settings" : props.chooseUname ? props.uname : props.fullname;
+    let title: string = "Your profile settings";
 
-    if (!("inNodeFooter" in props && props.inNodeFooter) && "totalPositives" in props && "totalNegatives" in props) {
+    if ("totalPositives" in props && "totalNegatives" in props) {
       return (
         <>
           <span>{title}</span>
@@ -155,7 +93,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
       <Box
         // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
         className="SidebarButton"
-        onClick={openUserInfo}
+        onClick={props.onClick}
         sx={{
           // border: "dashed 2px pink",
           display: "flex",
@@ -173,21 +111,19 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
             contained={false}
             sx={{ border: "none", width: "28px", height: "28px", position: "static", cursor: "pointer" }}
           />
-          {!props.inNodeFooter && (
-            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-          )}
+          <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
         </div>
-        {!props.inNodeFooter && (
+        {
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
           <div className={"customUserStatusTotalPoints"}>
             <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
             <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
-            {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
+            {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
           </div>
-        )}
+        }
       </Box>
     </Tooltip>
   );
 };
 
-export const MemoizedUserStatusIcon = React.memo(UserStatusIcon);
+export const MemoizedUserStatusSettings = React.memo(UserStatusSettings);
