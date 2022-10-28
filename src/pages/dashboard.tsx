@@ -554,9 +554,10 @@ const Dashboard = ({}: DashboardProps) => {
         q,
         async snapshot => {
           const docChanges = snapshot.docChanges();
-
+          console.log("docChanges", docChanges);
           if (!docChanges.length) {
             setIsSubmitting(false);
+            setFirstLoading(false);
             setNoNodesFoundMessage(true);
             return null;
           }
@@ -3813,7 +3814,7 @@ const Dashboard = ({}: DashboardProps) => {
                     </MapInteractionCSS>
                   </>
                 </Modal>
-                {/* {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image
                       className="CenterredLoadingImage"
@@ -3824,7 +3825,7 @@ const Dashboard = ({}: DashboardProps) => {
                       height={250}
                     />
                   </div>
-                )} */}
+                )}
                 {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
                   <>
                     <div id="ChoosingNodeMessage">
