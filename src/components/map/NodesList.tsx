@@ -35,6 +35,7 @@ type NodeListProps = {
   deleteChoice: any;
   addChoice: any;
   onNodeTitleBlur: (newTitle: string) => void;
+  setOpenSearch: any;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
@@ -70,6 +71,7 @@ const NodesList = ({
   deleteChoice,
   addChoice,
   onNodeTitleBlur,
+  setOpenSearch,
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
@@ -192,6 +194,7 @@ const NodesList = ({
             deleteChoice={deleteChoice}
             addChoice={addChoice}
             onNodeTitleBLur={onNodeTitleBlur}
+            setOpenSearch={setOpenSearch}
             saveProposedChildNode={saveProposedChildNode}
             saveProposedImprovement={saveProposedImprovement}
             closeSideBar={closeSideBar}

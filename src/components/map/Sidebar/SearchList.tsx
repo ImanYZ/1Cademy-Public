@@ -182,6 +182,9 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   //   //   return newAllTags;
   //   // });
   // }, [tag]);
+  useEffect(() => {
+    setSearch(nodeBookState.searchQuery);
+  }, [nodeBookState.searchQuery]);
 
   const getTagsSelected = useCallback<() => TagTreeView[]>(
     () => Object.values(allTags).filter(tag => tag.checked),

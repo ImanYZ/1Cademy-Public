@@ -3634,6 +3634,7 @@ const Dashboard = ({}: DashboardProps) => {
                   deleteChoice={deleteChoice}
                   addChoice={addChoice}
                   onNodeTitleBlur={onNodeTitleBlur}
+                  setOpenSearch={setOpenSearch}
                   saveProposedChildNode={saveProposedChildNode}
                   saveProposedImprovement={saveProposedImprovement}
                   closeSideBar={closeSideBar}
