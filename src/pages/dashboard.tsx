@@ -32,6 +32,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
@@ -102,6 +103,7 @@ export type OpenSidebar =
   | "USER_INFO"
   | "PROPOSALS"
   | "USER_SETTINGS"
+  | "CITATIONS"
   | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
@@ -2008,7 +2010,7 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const openNodePart = useCallback(
-    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags?: any) => {
+    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
       if (!choosingNode) {
         if (openPart === partType) {
           setOpenPart(null);
@@ -2029,7 +2031,7 @@ const Dashboard = ({}: DashboardProps) => {
             nodeBookState.selectionType !== "AcceptedProposals" &&
             nodeBookState.selectionType !== "Proposals"
           ) {
-            tags;
+            // tags;
             setOpenRecentNodes(true);
           }
         }
@@ -2521,16 +2523,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
 
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
         }
+        if (chosenType === "Citations") {
+          if (openSidebar === "CITATIONS") {
+            console.log("NULLLL");
+            setOpenSidebar(null);
+            return;
+          }
+          setOpenSidebar("CITATIONS");
+          setSelectedNodeType(nodeType);
+          nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+
+          return;
+        }
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
-          console.log("selectNodeHandler 1");
           nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
@@ -2557,15 +2571,13 @@ const Dashboard = ({}: DashboardProps) => {
       }
     },
     // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      choosingNode,
+      nodeBookState.choosingNode,
       nodeBookState.selectionType,
       nodeBookState.selectedNode,
-      // selectedNode,
-      // selectionType,
       reloadPermanentGraph,
-      // proposeNodeImprovement,
+      openSidebar,
+      nodeBookDispatch,
       resetAddedRemovedParentsChildren,
     ]
   );
@@ -3659,6 +3671,14 @@ const Dashboard = ({}: DashboardProps) => {
               settings={settings}
             />
           )}
+          {user && nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
+            <CitationsSidebar
+              open={openSidebar === "CITATIONS"}
+              onClose={() => setOpenSidebar(null)}
+              openLinkedNode={openLinkedNode}
+              identifier={nodeBookState.selectedNode}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3674,7 +3694,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
                 <Typography>sNodetype {selectedNodeType}</Typography>
-
+                <Typography>openSidebar {openSidebar}</Typography>
                 {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
               <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
@@ -3700,6 +3720,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
                   <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
                   <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
+                  <Button onClick={() => setOpenSidebar("CITATIONS")}>Citation</Button>
                 </Box>
               </Box>
             </Box>

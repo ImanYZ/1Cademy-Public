@@ -301,7 +301,7 @@ const NodeFooter = ({
                       (acceptedProposalsSelected ? "orange-text" : "grey-text")
                     }
                   >
-                    event_available
+                    event_Citing Nodesavailable
                   </i>
                   <span>{dayjs(changedAt).fromNow()}</span>
                 </MemoizedMetaButton> */}
