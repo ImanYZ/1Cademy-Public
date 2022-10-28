@@ -1277,7 +1277,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px", fontSize: "16px" }}
+              sx={{ width: "37px", height: "37px" }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}
