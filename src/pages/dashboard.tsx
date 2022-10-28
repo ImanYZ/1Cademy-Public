@@ -31,6 +31,13 @@ import { MapInteractionCSS } from "react-map-interaction";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
+import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
+import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
+import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
+import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
+import { UserSettigsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { MasonryNodes } from "@/components/MasonryNodes";
 import { NodeItem } from "@/components/NodeItem";
 /* eslint-enable */
@@ -41,7 +48,8 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
-import { MemoizedSidebar } from "../components/map/Sidebar/Sidebar";
+// import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
+import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -86,6 +94,15 @@ import { NodeType, SimpleNode2 } from "../types";
 
 type DashboardProps = {};
 
+export type OpenSidebar =
+  | "SEARCHER_SIDEBAR"
+  | "NOTIFICATION_SIDEBAR"
+  | "PENDING_PROPOSALS"
+  | "BOOKMARKS_SIDEBAR"
+  | "USER_INFO"
+  | "PROPOSALS"
+  | "USER_SETTINGS"
+  | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -118,7 +135,7 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
 
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const [{ user, reputation, settings }] = useAuth();
+  const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   // node that user is currently selected (node will be highlighted)
@@ -165,6 +182,8 @@ const Dashboard = ({}: DashboardProps) => {
     translation: { x: 0, y: 0 },
   });
 
+  const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
+
   // object of cluster boundaries
   // const [clusterNodes, setClusterNodes] = useState({});
 
@@ -191,7 +210,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
   const [firstLoading, setFirstLoading] = useState(true);
-  const [pendingProposalsLoaded, setPendingProposalsLoaded] = useState(true);
+  const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
@@ -331,19 +350,21 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
-
+      console.log("bd=>state", 1, { firstScrollToNode, queueFinished });
       if (!firstScrollToNode && queueFinished) {
+        console.log("bd=>state", 11);
         if (!user?.sNode) return;
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
 
+        console.log("bd=>state", 2);
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
 
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
-
+        console.log("bd=>state", 3);
         if (queueFinished) {
           setFirstLoading(false);
         }
@@ -2507,6 +2528,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
+          console.log("selectNodeHandler 1");
           nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
@@ -2522,8 +2544,8 @@ const Dashboard = ({}: DashboardProps) => {
           resetAddedRemovedParentsChildren();
           event.currentTarget.blur();
         } else {
-          setOpenSearch(false);
-
+          setOpenSidebar("PROPOSALS");
+          // setOpenSearch(false);
           setSelectedNodeType(nodeType);
           nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2764,7 +2786,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onNodeTitleBlur = useCallback(
     (newTitle: string) => {
-      setOpenSearch(true);
+      // setOpenSearch(true);
+      setOpenSidebar("SEARCHER_SIDEBAR");
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
@@ -2844,11 +2867,15 @@ const Dashboard = ({}: DashboardProps) => {
     async (
       setIsAdmin: (value: boolean) => void,
       setIsRetrieving: (value: boolean) => void,
-      setProposals: (value: any) => void
+      setProposals: (value: any) => void,
+      who?: string
     ) => {
+      console.log(11);
+      console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
       if (!user) return;
+      console.log(22);
       if (!selectedNodeType) return;
-
+      console.log(33);
       setIsRetrieving(true);
       setGraph(({ nodes: oldNodes, edges }) => {
         // setNodes(oldNodes => {
@@ -3023,9 +3050,7 @@ const Dashboard = ({}: DashboardProps) => {
       setProposals(orderedProposals);
       setIsRetrieving(false);
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user?.uname, nodeBookState.selectedNode, selectedNodeType]
+    [user, selectedNodeType, db, nodeBookState.selectedNode]
   );
 
   /////////////////////////////////////////////////////
@@ -3427,11 +3452,16 @@ const Dashboard = ({}: DashboardProps) => {
     }
   };
 
+  const onOpenSideBar = (sidebar: OpenSidebar) => {
+    setOpenSidebar(sidebar);
+  };
+
   return (
-    <div className="MapContainer">
+    <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
         id="Map"
         sx={{
+          overflow: "hidden",
           background:
             settings.background === "Color"
               ? theme =>
@@ -3497,7 +3527,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
             </Drawer>
           )}
-          <MemoizedSidebar
+          {/* <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
             rateProposal={rateProposal}
@@ -3524,9 +3554,7 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenNotifications={setOpenNotifications}
             openNotifications={openNotifications}
             setOpenPresentations={setOpenPresentations}
-            setOpenToolbar={
-              /*setOpenToolbar*/ (newValue: boolean) => nodeBookDispatch({ type: "setOpenToolbar", payload: newValue })
-            }
+            setOpenToolbar={(newValue: boolean) => nodeBookDispatch({ type: "setOpenToolbar", payload: newValue })}
             openToolbar={nodeBookState.openToolbar}
             setOpenSearch={setOpenSearch}
             openSearch={openSearch}
@@ -3539,7 +3567,96 @@ const Dashboard = ({}: DashboardProps) => {
             allNodes={allNodes}
             mapRendered={true}
             scrollToNode={scrollToNode}
-          />
+          /> */}
+          {user && reputation && (
+            <ToolbarSidebar
+              // theme={settings.theme}
+              // openLinkedNode={openLinkedNode}
+              // username={user.uname}
+              open={!openSidebar}
+              onClose={() => setOpenSidebar(null)}
+              reloadPermanentGrpah={reloadPermanentGraph}
+              user={user}
+              reputation={reputation}
+              theme={settings.theme}
+              setOpenSideBar={onOpenSideBar}
+              mapRendered={true}
+              selectedUser={selectedUser}
+            />
+          )}
+          {user?.uname && (
+            <MemoizedBookmarksSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "BOOKMARKS_SIDEBAR"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && (
+            <MemoizedSearcherSidebar
+              openLinkedNode={openLinkedNode}
+              open={openSidebar === "SEARCHER_SIDEBAR"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && (
+            <MemoizedNotificationSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "NOTIFICATION_SIDEBAR"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && (
+            <MemoizedPendingProposalSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              tagId={user.tagId}
+              open={openSidebar === "PENDING_PROPOSALS"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && (
+            <MemoizedUserInfoSidebar
+              theme={settings.theme}
+              openLinkedNode={openLinkedNode}
+              username={user.uname}
+              open={openSidebar === "USER_INFO"}
+              onClose={() => setOpenSidebar(null)}
+            />
+          )}
+          {user?.uname && openSidebar === "PROPOSALS" && (
+            <MemoizedProposalsSidebar
+              theme={settings.theme}
+              open={openSidebar === "PROPOSALS"}
+              onClose={() => setOpenSidebar(null)}
+              proposeNodeImprovement={proposeNodeImprovement}
+              fetchProposals={fetchProposals}
+              selectedNode={nodeBookState.selectedNode}
+              rateProposal={rateProposal}
+              selectProposal={selectProposal}
+              deleteProposal={deleteProposal}
+              proposeNewChild={proposeNewChild}
+              openProposal={openProposal}
+            />
+          )}
+          {user && reputation && openSidebar === "USER_SETTINGS" && (
+            <UserSettigsSidebar
+              theme={settings.theme}
+              open={openSidebar === "USER_SETTINGS"}
+              onClose={() => setOpenSidebar(null)}
+              dispatch={dispatch}
+              nodeBookDispatch={nodeBookDispatch}
+              nodeBookState={nodeBookState}
+              userReputation={reputation}
+              user={user}
+              scrollToNode={scrollToNode}
+              settings={settings}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {process.env.NODE_ENV === "development" && (
             <Box
@@ -3554,6 +3671,8 @@ const Dashboard = ({}: DashboardProps) => {
             >
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
+                <Typography>sNodetype {selectedNodeType}</Typography>
+
                 {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
               <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
@@ -3563,8 +3682,23 @@ const Dashboard = ({}: DashboardProps) => {
                     <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                       <CodeIcon color="warning" />
                     </IconButton>
+                    {/* <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
+                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
+                    <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
+                    <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
+                    <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button> */}
                   </>
                 </Tooltip>
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                  <Button onClick={() => setOpenSidebar(null)}>Open Main Sidebar</Button>
+                  <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
+                  <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
+                  <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
+                  <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button>
+                  <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
+                  <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
+                  <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
+                </Box>
               </Box>
             </Box>
           )}
@@ -3620,6 +3754,7 @@ const Dashboard = ({}: DashboardProps) => {
                   reloadPermanentGrpah={reloadPermanentGraph}
                   setNodeParts={setNodeParts}
                   citations={citations}
+                  setOpenSideBar={setOpenSidebar}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
@@ -3655,7 +3790,7 @@ const Dashboard = ({}: DashboardProps) => {
                     </MapInteractionCSS>
                   </>
                 </Modal>
-                {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
+                {/* {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image
                       className="CenterredLoadingImage"
@@ -3666,7 +3801,7 @@ const Dashboard = ({}: DashboardProps) => {
                       height={250}
                     />
                   </div>
-                )}
+                )} */}
                 {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
                   <>
                     <div id="ChoosingNodeMessage">

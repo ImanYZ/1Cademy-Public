@@ -150,14 +150,14 @@ const PendingProposalList = (props: PendingProposalListProps) => {
             justifyContent: "center",
           }}
         >
-          <h3>You don't have notifications</h3>
+          <h3>You don't have Pending Proposals</h3>
         </Box>
       )}
 
       {!!props.proposals.length && (
         <ul
           className="collection Proposals"
-          style={{ display: "flex", flexDirection: "column", padding: "10px", overflow: "hidden", gap: "4px" }}
+          style={{ display: "flex", padding: "0px", margin: "0px", flexDirection: "column", gap: "4px" }}
         >
           {props.proposals.slice(0, lastIndex).map((proposal, idx) => {
             return (

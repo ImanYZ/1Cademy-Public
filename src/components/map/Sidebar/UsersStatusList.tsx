@@ -1,5 +1,8 @@
+import { Box } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+
+import { OpenSidebar } from "@/pages/dashboard";
 
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
@@ -7,7 +10,7 @@ import { UsersStatus } from "../../../nodeBookTypes";
 // import { UsersStatus } from "../../../noteBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 
-const scale = 1;
+// const scale = 1;
 
 const usersListObjFromReputationObj = (user: any, userReputation: any, uname: string) => {
   return {
@@ -78,6 +81,7 @@ const usersListObjFromReputationObj = (user: any, userReputation: any, uname: st
 type UsersStatusListProps = {
   usersStatus: UsersStatus;
   reloadPermanentGraph: any;
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 
 const UsersStatusList = (props: UsersStatusListProps) => {
@@ -102,15 +106,15 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // flag for whether other' Monthly reputation data is downloaded from server
   const [reputationsOthersMonthlyLoaded, setReputationsOthersMonthlyLoaded] = useState(false);
 
-  const [scaledHeight, setScaledHeight] = useState((window.innerHeight - 430) / scale);
+  // const [scaledHeight, setScaledHeight] = useState((window.innerHeight - 430) / scale);
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [onlineUsersList, setOnlineUsersList] = useState<any[]>([]);
 
-  useEffect(() => {
-    window.onresize = () => setScaledHeight((window.innerHeight - 430) / scale);
-  }, [scale]);
+  // useEffect(() => {
+  //   window.onresize = () => setScaledHeight((window.innerHeight - 430) / scale);
+  // }, [scale]);
 
   // useEffect(() => {
   //   const interval = setInterval(() => setTimeNow(Date.now()), 60000);
@@ -311,34 +315,47 @@ const UsersStatusList = (props: UsersStatusListProps) => {
     }
   }, [usersOnlineStatusLoaded, reputationsOthersMonthlyDict, props.usersStatus, loadReputationPoints]);
 
-  const renderUsersList = useCallback((uList: any[], online: boolean) => {
-    return uList.map((user: any) => (
-      <MemoizedUserStatusIcon
-        key={"User" + user.uname}
-        uname={user.uname}
-        totalPoints={user.totalPoints}
-        totalPositives={user.totalPositives}
-        totalNegatives={user.totalNegatives}
-        imageUrl={user.imageUrl}
-        fullname={user.fullname}
-        chooseUname={user.chooseUname}
-        online={online}
-        inUserBar={false}
-        inNodeFooter={false}
-        reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
-        tagTitle={user.tag}
-      />
-    ));
-  }, []);
+  const renderUsersList = useCallback(
+    (uList: any[], online: boolean) => {
+      return uList.map((user: any) => (
+        <MemoizedUserStatusIcon
+          key={"User" + user.uname}
+          uname={user.uname}
+          totalPoints={user.totalPoints}
+          totalPositives={user.totalPositives}
+          totalNegatives={user.totalNegatives}
+          imageUrl={user.imageUrl}
+          fullname={user.fullname}
+          chooseUname={user.chooseUname}
+          online={online}
+          inUserBar={false}
+          inNodeFooter={false}
+          reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
+          tagTitle={user.tag}
+          setOpenSideBar={props.setOpenSideBar}
+        />
+      ));
+    },
+    [props.setOpenSideBar]
+  );
 
   return (
-    <div
-      id="UsersStatusList"
-      style={{ height: scaledHeight, display: "flex", flexDirection: "column", alignItems: "center" }}
+    <Box
+      // id="UsersStatusList"
+      className="scroll-styled"
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        overflowY: "auto",
+        px: "10px",
+        // width: "80px",
+      }}
     >
       {renderUsersList(onlineUsersList, true)}
       {renderUsersList(usersList, false)}
-    </div>
+    </Box>
   );
 };
 

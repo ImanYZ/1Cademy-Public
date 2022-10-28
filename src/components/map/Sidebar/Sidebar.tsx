@@ -16,6 +16,8 @@ import {
 } from "firebase/firestore";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { OpenSidebar } from "@/pages/dashboard";
+
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";
 import citation from "../../../../public/citations.jpg";
@@ -194,6 +196,7 @@ type SidebarType = {
   selectedNode: string | null;
   // allNodes: any;
   scrollToNode: (nodeId: string) => void;
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 
 const Sidebar = (props: SidebarType) => {
@@ -662,6 +665,7 @@ const Sidebar = (props: SidebarType) => {
             inNodeFooter={false}
             reloadPermanentGrpah={props.reloadPermanentGrpah}
             sx={{ justifyContent: "center" }}
+            setOpenSideBar={props.setOpenSideBar}
           />
 
           <Button id="SearchButton" onClick={openSideBarClick("Search")}>
@@ -734,7 +738,7 @@ const Sidebar = (props: SidebarType) => {
                   </div>
                 </Box>
               </MemoizedMetaButton>
-              {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={leaderboardTypesToggle} />}
+              {leaderboardTypeOpen && <MultipleChoiceBtn choices={choices} onClose={leaderboardTypesToggle} />}
               {leaderboardType && (
                 <UsersStatusList
                   // reputationsLoaded={props.reputationsLoaded}
@@ -743,6 +747,7 @@ const Sidebar = (props: SidebarType) => {
                   // reloadPermanentGrpah={props.reloadPermanentGrpah}
                   usersStatus={leaderboardType}
                   reloadPermanentGraph={props.reloadPermanentGrpah}
+                  setOpenSideBar={props.setOpenSideBar}
                 />
               )}
             </>

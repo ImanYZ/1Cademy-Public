@@ -8,6 +8,7 @@ import React, { startTransition, useCallback, useEffect, useRef, useState } from
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
+import { OpenSidebar } from "@/pages/dashboard";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -107,6 +108,7 @@ type NodeProps = {
   setOpenMedia: (imagUrl: string) => void;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 const Node = ({
   identifier,
@@ -181,6 +183,7 @@ const Node = ({
   setOpenMedia,
   setNodeParts,
   citations,
+  setOpenSideBar,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -498,9 +501,8 @@ const Node = ({
               {editable && isNew && (
                 <>
                   {/* New Node with inputs */}
-                  <p className="NewChildProposalWarning">Before proposing,</p>
                   <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                    <span>- Search </span>
+                    <span> Before proposing, search </span>
                     <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
                     <span> to ensure the node does not exist.</span>
                   </p>
@@ -699,6 +701,7 @@ const Node = ({
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
                 citations={citations}
+                setOpenSideBar={setOpenSideBar}
               />
               {/* <NodeFooter
                 open={true}
@@ -866,6 +869,7 @@ const Node = ({
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
                 citations={citations}
+                setOpenSideBar={setOpenSideBar}
               />
               {/* <NodeFooter
                 open={false}

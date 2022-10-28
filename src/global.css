@@ -877,7 +877,7 @@
 
 #SidebarButtonsContainer {
   position: fixed;
-  left: 0px;
+  right: 0px;
   top: 0px;
   height: 100vh;
   padding-top: 10px;
@@ -2334,7 +2334,6 @@ button.MuiTab-textColorInherit:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 10px;
 }
 
 /* #MarkAllReadButton {
@@ -2487,10 +2486,6 @@ button.MuiTab-textColorInherit:focus {
   color: red;
 }
 
-#AccountSettings {
-  padding: 25px;
-  width: 430px;
-}
 .AccountSettingsButtons .Striked {
   text-decoration: line-through red;
 }
@@ -2523,10 +2518,6 @@ button.MuiTab-textColorInherit:focus {
 #LogoutButtonText {
   position: relative;
   top: -5.5px;
-}
-
-#PersonalSettings {
-  padding: 25px;
 }
 
 /* #PersonalSettings .MuiFormControl-root {
@@ -2624,4 +2615,70 @@ button.MuiTab-textColorInherit:focus {
 #SidebarButtonsContainer:hover .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
+}
+
+/* --- */
+#SearchQuery {
+  padding: 9.5px 14px;
+}
+#nodeSelect > div > div {
+  padding: 10px 10px 10px 13px;
+}
+
+/* Toolbar styles */
+.toolbar:focus .toolbarDescription,
+.toolbar:hover .toolbarDescription {
+  width: 100px;
+  display: flex;
+  align-items: center;
+  visibility: visible;
+  line-height: 16px;
+  height: 24px;
+  /* height: auto; */
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}
+/* .toolbar:focus .toolbarButtonDescription{
+
+} */
+.toolbar:focus .toolbarButtonDescription,
+.toolbar:hover .toolbarButtonDescription {
+  width: 100px;
+  display: flex;
+  align-items: center;
+  visibility: visible;
+  line-height: 16px;
+  height: 41px;
+  /* height: auto; */
+  transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
+  -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
+  -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
+  -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
+  -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
+}
+.toolbar:focus .customUserStatusTotalPoints,
+.toolbar:hover .customUserStatusTotalPoints {
+  display: flex;
+  align-items: center;
+}
+
+.scroll-styled::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 4px;
+  height: 4px;
+}
+
+.scroll-styled::-webkit-scrollbar-thumb {
+  background: rgba(113, 113, 113, 0.663);
+  border-radius: 4px;
+}
+/* scroll-styled */
+
+.toolbar:focus .scroll-styled,
+.toolbar:hover .scroll-styled {
+  display: flex;
+  align-items: flex-start;
 }
