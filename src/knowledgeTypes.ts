@@ -484,13 +484,19 @@ export type SetViewAction = {
   type: "setView";
   payload: UserView;
 };
+
+export type SetReputationAction = {
+  type: "setReputation";
+  payload: Reputation;
+};
 export type DispatchAuthActions =
   | AuthLogoutSuccessAction
   | AuthLoginSuccessAction
   | SetThemeAction
   | SetBackgroundAction
   | SetAuthUserAction
-  | SetViewAction;
+  | SetViewAction
+  | SetReputationAction;
 export type SignUpValidation = {
   uname?: string;
   email?: string;
