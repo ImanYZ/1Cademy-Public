@@ -215,6 +215,11 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
+  //Notificatios
+  const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
+  const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
+  const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
+
   const scrollToNode = useCallback((nodeId: string, tries = 0) => {
     devLog("scroll To Node", { nodeId, tries });
     if (tries === 10) return;
@@ -674,6 +679,164 @@ const Dashboard = ({}: DashboardProps) => {
       };
     },
     [allTagsLoaded, db, snapshot, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (!allTagsLoaded) return;
+
+      const userNodesRef = collection(db, "userNodes");
+      const q = query(
+        userNodesRef,
+        where("user", "==", user.uname),
+        where("bookmarked", "==", true),
+        where("isStudied", "==", false),
+        where("deleted", "==", false)
+      );
+      const bookmarkSnapshot = onSnapshot(q, async snapshot => {
+        // console.log("on snapshot");
+        const docChanges = snapshot.docChanges();
+
+        if (!docChanges.length) {
+          setBookmarkUpdatesNum(0);
+        } else {
+          for (let change of docChanges) {
+            if (change.type === "added") {
+              setBookmarkUpdatesNum(oldbookmarkNum => oldbookmarkNum + 1);
+            } else if (change.type === "removed") {
+              setBookmarkUpdatesNum(oldbookmarkNum => oldbookmarkNum - 1);
+            }
+          }
+        }
+      });
+      return () => {
+        bookmarkSnapshot();
+      };
+    },
+    [allTagsLoaded, db, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (!allTagsLoaded) return;
+
+      const versionsSnapshots: any[] = [];
+      const versions: { [key: string]: any } = {};
+      const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+      for (let nodeType of NODE_TYPES_ARRAY) {
+        const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
+        if (!versionsColl || !userVersionsColl) continue;
+
+        const versionsQuery = query(
+          versionsColl,
+          where("accepted", "==", false),
+          where("tagIds", "array-contains", user.tagId),
+          where("deleted", "==", false)
+        );
+
+        const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
+          const docChanges = snapshot.docChanges();
+          if (docChanges.length > 0) {
+            // const temporalProposals:any[] = []
+            for (let change of docChanges) {
+              const versionId = change.doc.id;
+              const versionData = change.doc.data();
+              if (change.type === "removed") {
+                delete versions[versionId];
+              }
+              if (change.type === "added" || change.type === "modified") {
+                versions[versionId] = {
+                  ...versionData,
+                  id: versionId,
+                  createdAt: versionData.createdAt.toDate(),
+                  award: false,
+                  correct: false,
+                  wrong: false,
+                };
+                delete versions[versionId].deleted;
+                delete versions[versionId].updatedAt;
+
+                const q = query(
+                  userVersionsColl,
+                  where("version", "==", versionId),
+                  where("user", "==", user?.uname),
+                  limit(1)
+                );
+
+                const userVersionsDocs = await getDocs(q);
+
+                // const userVersionsDocs = await userVersionsColl
+                //   .where("version", "==", versionId)
+                //   .where("user", "==", user.uname)
+                //   .limit(1)
+                //   .get();
+
+                for (let userVersionsDoc of userVersionsDocs.docs) {
+                  const userVersion = userVersionsDoc.data();
+                  delete userVersion.version;
+                  delete userVersion.updatedAt;
+                  delete userVersion.createdAt;
+                  delete userVersion.user;
+                  versions[versionId] = {
+                    ...versions[versionId],
+                    ...userVersion,
+                  };
+                }
+              }
+            }
+
+            const pendingProposals = { ...versions };
+            const proposalsTemp = Object.values(pendingProposals);
+            setPendingProposalsNum(proposalsTemp.length);
+          }
+        });
+        versionsSnapshots.push(versionsSnapshot);
+      }
+      ``;
+      return () => {
+        for (let vSnapshot of versionsSnapshots) {
+          vSnapshot();
+        }
+      };
+    },
+    [allTagsLoaded, db, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      const userNodesRef = collection(db, "notifications");
+      const q = query(userNodesRef, where("proposer", "==", user.uname));
+
+      const notificationsSnapshot = onSnapshot(q, async snapshot => {
+        // console.log("on snapshot");
+
+        const docChanges = snapshot.docChanges();
+        for (let change of docChanges) {
+          const { checked } = change.doc.data();
+          if (change.type === "removed") {
+            setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
+          }
+          if (change.type === "added" || change.type === "modified") {
+            if (checked) {
+              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
+            } else {
+              // will add in uncheckedNotificationsDict
+              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum + 1);
+            }
+          }
+        }
+      });
+      return () => {
+        notificationsSnapshot();
+      };
+    },
+    [db, user?.uname]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
 
@@ -3589,6 +3752,9 @@ const Dashboard = ({}: DashboardProps) => {
               setOpenSideBar={onOpenSideBar}
               mapRendered={true}
               selectedUser={selectedUser}
+              uncheckedNotificationsNum={uncheckedNotificationsNum}
+              bookmarkUpdatesNum={bookmarkUpdatesNum}
+              pendingProposalsNum={pendingProposalsNum}
             />
           )}
           {user?.uname && (
