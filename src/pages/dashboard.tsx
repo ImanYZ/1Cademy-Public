@@ -98,7 +98,7 @@ type DashboardProps = {};
 export type OpenSidebar =
   | "SEARCHER_SIDEBAR"
   | "NOTIFICATION_SIDEBAR"
-  | "PENDING_LIST"
+  | "PENDING_PROPOSALS"
   | "BOOKMARKS_SIDEBAR"
   | "USER_INFO"
   | "PROPOSALS"
@@ -3580,8 +3580,9 @@ const Dashboard = ({}: DashboardProps) => {
               user={user}
               reputation={reputation}
               theme={settings.theme}
-              onOpenSideBar={onOpenSideBar}
+              setOpenSideBar={onOpenSideBar}
               mapRendered={true}
+              selectedUser={selectedUser}
             />
           )}
           {user?.uname && (
@@ -3615,7 +3616,7 @@ const Dashboard = ({}: DashboardProps) => {
               openLinkedNode={openLinkedNode}
               username={user.uname}
               tagId={user.tagId}
-              open={openSidebar === "PENDING_LIST"}
+              open={openSidebar === "PENDING_PROPOSALS"}
               onClose={() => setOpenSidebar(null)}
             />
           )}
@@ -3686,7 +3687,7 @@ const Dashboard = ({}: DashboardProps) => {
                     <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
                     <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                     <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                    <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button> */}
+                    <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button> */}
                   </>
                 </Tooltip>
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
@@ -3694,7 +3695,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
                   <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
                   <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                  <Button onClick={() => setOpenSidebar("PENDING_LIST")}>Pending List</Button>
+                  <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button>
                   <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
                   <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
                   <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>

@@ -4,7 +4,7 @@ import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import SearchIcon from "@mui/icons-material/Search";
 import { Badge, Box, Button, Menu, MenuItem } from "@mui/material";
-import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import React, { useCallback, useMemo, useState } from "react";
 
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
@@ -13,7 +13,7 @@ import { Reputation, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/dashboard";
 import { MemoizedMetaButton } from "../../MetaButton";
-import { MemoizedUserStatusIcon } from "../../UserStatusIcon";
+import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
 // import MultipleChoiceBtn from "../MultipleChoiceBtn";
 import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
@@ -27,8 +27,9 @@ type MainSidebarProps = {
   user: User;
   theme: UserTheme;
   reputation: Reputation;
-  onOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
   mapRendered: boolean;
+  selectedUser: string | null;
 };
 
 export const ToolbarSidebar = ({
@@ -38,7 +39,8 @@ export const ToolbarSidebar = ({
   user,
   reputation,
   theme,
-  onOpenSideBar,
+  setOpenSideBar,
+  selectedUser,
 }: //   mapRendered = true,
 MainSidebarProps) => {
   const db = getFirestore();
@@ -106,6 +108,60 @@ MainSidebarProps) => {
   // const leaderboardTypesToggle = useCallback(() => {
   //   setLeaderboardTypeOpen(oldCLT => !oldCLT);
   // }, []);
+  const onOpenSidebarLog = useCallback(
+    async (sidebarType: string) => {
+      const userOpenSidebarLogObj: any = {
+        uname: user.uname,
+        sidebarType,
+        createdAt: Timestamp.fromDate(new Date()),
+      };
+      if (selectedUser) {
+        userOpenSidebarLogObj.selectedUser = selectedUser;
+      }
+      const userOpenSidebarLogRef = doc(collection(db, "userOpenSidebarLog"));
+      await setDoc(userOpenSidebarLogRef, userOpenSidebarLogObj);
+    },
+    [db, selectedUser, user.uname]
+  );
+
+  const onOpenUserSettingsSidebar = useCallback(() => {
+    const userUserInfoCollection = collection(db, "userUserInfoLog");
+    setOpenSideBar("USER_SETTINGS");
+    addDoc(userUserInfoCollection, {
+      uname: user.uname,
+      uInfo: user.uname,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+    // onOpenSidebarLog("Search");
+  }, [db, setOpenSideBar, user.uname]);
+
+  // const onOpenSearcherSidebar = useCallback(() => {
+  //   onOpenSideBar("SEARCHER_SIDEBAR");
+  //   onOpenSidebarLog("Search");
+  // }, [onOpenSideBar, onOpenSidebarLog]);
+
+  // const onOpenNotificationSidebar = useCallback(() => {
+  //   onOpenSideBar("NOTIFICATION_SIDEBAR");
+  //   onOpenSidebarLog("Notifications");
+  // }, [onOpenSideBar, onOpenSidebarLog]);
+
+  // const onOpenBookmarksSidebar = useCallback(() => {
+  //   onOpenSideBar("NOTIFICATION_SIDEBAR");
+  //   onOpenSidebarLog("Bookmarks");
+  // }, [onOpenSideBar, onOpenSidebarLog]);
+
+  // const onOpenPendingProposalsSidebar = useCallback(() => {
+  //   onOpenSideBar("PENDING_PROPOSALS");
+  //   onOpenSidebarLog("PendingProposals");
+  // }, [onOpenSideBar, onOpenSidebarLog]);
+
+  const onOpenSidebar = useCallback(
+    (SidebarType: OpenSidebar, logName: string) => {
+      setOpenSideBar(SidebarType);
+      onOpenSidebarLog(logName);
+    },
+    [setOpenSideBar, onOpenSidebarLog]
+  );
 
   return (
     <SidebarWrapper
@@ -147,25 +203,20 @@ MainSidebarProps) => {
             </Box>
 
             {/* User info button */}
-            <MemoizedUserStatusIcon
-              uname={user.uname}
+            <MemoizedUserStatusSettings
+              user={user}
               totalPoints={reputation?.totalPoints || 0}
               totalPositives={reputation?.positives || 0}
               totalNegatives={reputation?.negatives || 0}
               imageUrl={user.imageUrl || ""}
-              fullname={user.fName + " " + user.lName}
-              chooseUname={user.chooseUname}
-              // online={isOnline}
               online={true} // TODO: get online state from useUserState useEffect
-              inUserBar={true}
-              inNodeFooter={false}
-              reloadPermanentGrpah={reloadPermanentGrpah}
               sx={{ justifyContent: "center" }}
+              onClick={onOpenUserSettingsSidebar}
             />
 
             {/* Searcher button */}
             <Button
-              onClick={() => onOpenSideBar("SEARCHER_SIDEBAR")}
+              onClick={() => onOpenSidebar("SEARCHER_SIDEBAR", "Search")}
               sx={{
                 width: "100%",
                 borderRadius: "0px 50px 50px 0px",
@@ -203,7 +254,7 @@ MainSidebarProps) => {
             </Button>
 
             {/* Notifications button */}
-            <MemoizedMetaButton onClick={() => onOpenSideBar("NOTIFICATION_SIDEBAR")}>
+            <MemoizedMetaButton onClick={() => onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications")}>
               <Box
                 sx={{
                   display: "flex",
@@ -241,7 +292,7 @@ MainSidebarProps) => {
             </MemoizedMetaButton>
 
             {/* Bookmarks button */}
-            <MemoizedMetaButton onClick={() => onOpenSideBar("BOOKMARKS_SIDEBAR")}>
+            <MemoizedMetaButton onClick={() => onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks")}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
                 <Badge
                   badgeContent={bookmarkUpdatesNum ?? 0}
@@ -270,7 +321,7 @@ MainSidebarProps) => {
             </MemoizedMetaButton>
 
             {/* Pending proposal sidebar */}
-            <MemoizedMetaButton onClick={() => onOpenSideBar("PENDING_LIST")}>
+            <MemoizedMetaButton onClick={() => onOpenSidebar("PENDING_PROPOSALS", "PendingProposals")}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
                 <Badge
                   badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
