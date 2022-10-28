@@ -52,11 +52,11 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
     return (
       <Avatar
         sx={{
-          width: "40px",
-          height: "40px",
+          width: "32px",
+          height: "32px",
           backgroundColor: "#ff9800",
           color: common.white,
-          ...sx,
+          fontSize: "16px",
         }}
       >
         {name.charAt(0)}
