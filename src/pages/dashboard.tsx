@@ -328,6 +328,9 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
 
+  // list of tags used for searching
+  // const [selectedTagsState, setSelectedTagsState] = useState([]);
+
   // temporal state with value from node to improve
   // when click in improve Node the copy of original Node is here
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
@@ -2005,7 +2008,7 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const openNodePart = useCallback(
-    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
+    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any, tags?: any) => {
       if (!choosingNode) {
         if (openPart === partType) {
           setOpenPart(null);
@@ -2021,15 +2024,14 @@ const Dashboard = ({}: DashboardProps) => {
               createdAt: Timestamp.fromDate(new Date()),
             });
           }
-          // if (
-          //   partType === "Tags" &&
-          //   //i commented this two line until we define the right states
-          //   // selectionType !== "AcceptedProposals" &&
-          //   // selectionType !== "Proposals"
-          // ) {
-          //   // setSelectedTags(tags);
-          //   // setOpenRecentNodes(true);
-          // }
+          if (
+            partType === "Tags" &&
+            nodeBookState.selectionType !== "AcceptedProposals" &&
+            nodeBookState.selectionType !== "Proposals"
+          ) {
+            tags;
+            setOpenRecentNodes(true);
+          }
         }
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
