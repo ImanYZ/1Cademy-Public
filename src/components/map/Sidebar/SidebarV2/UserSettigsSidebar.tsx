@@ -9,7 +9,6 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Autocomplete, FormControlLabel, FormGroup, LinearProgress, Switch, Tab, Tabs, TextField } from "@mui/material";
-import { common } from "@mui/material/colors";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
@@ -1084,8 +1083,6 @@ export const UserSettigsSidebar = ({
                     width: "25px",
                     height: "25px",
                     fontSize: "16px",
-                    backgroundColor: "#ff9800",
-                    color: common.white,
                   }}
                   renderAsAvatar={false}
                 />

@@ -24,7 +24,7 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { startTransition, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useTransition } from "react";
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
@@ -72,6 +72,9 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isPending, startTransition] = useTransition();
+
   const [searchResults, setSearchResults] = useState<Pagination>({
     data: [],
     lastPageLoaded: 0,
@@ -91,7 +94,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         // console.log("[onSearch]");
         setIsRetrieving(true);
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
-          q: nodeBookState.searchQuery,
+          q: search,
           nodeTypes,
           tags: getTagsSelected().map(cur => cur.title),
           nodesUpdatedSince,
@@ -125,8 +128,16 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         setIsRetrieving(false);
       }
     },
-    [getTagsSelected, nodeBookState.searchQuery, nodesUpdatedSince, searchResults.data]
+    [getTagsSelected, nodesUpdatedSince, search, searchResults.data]
   );
+  useEffect(() => {
+    setSearch(prevSearch => {
+      if (prevSearch !== nodeBookState.searchQuery) {
+        return nodeBookState.searchQuery;
+      }
+      return prevSearch;
+    });
+  }, [nodeBookState.searchQuery, setSearch]);
 
   useEffect(() => {
     if (nodeBookState.nodeTitleBlured /*&& filteredNodes.length !== 0*/) {
@@ -139,14 +150,15 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
 
   const handleChange = useCallback(
     (event: any) => {
-      event.persist();
-      setSearch(event.target.value);
+      // event.persist();
+      let val = event.target.value;
+      setSearch(val);
       startTransition(() => {
-        nodeBookDispatch({ type: "setSearchQuery", payload: event.target.value });
+        nodeBookDispatch({ type: "setSearchQuery", payload: val });
       });
       // setSearchQuery(event.target.value);
     },
-    [nodeBookDispatch]
+    [nodeBookDispatch, setSearch]
   );
 
   const onChangeSortOptions = (newSortOption: SortValues) => {

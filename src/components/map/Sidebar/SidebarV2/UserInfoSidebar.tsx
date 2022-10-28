@@ -8,7 +8,6 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
-import { common } from "@mui/material/colors";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
@@ -317,8 +316,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                           width: "25px",
                           height: "25px",
                           fontSize: "15px",
-                          backgroundColor: "#ff9800",
-                          color: common.white,
                         }}
                         renderAsAvatar={false}
                       />
