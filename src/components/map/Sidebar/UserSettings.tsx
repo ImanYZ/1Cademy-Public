@@ -17,6 +17,7 @@ import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updat
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 import { useAuth } from "../../../context/AuthContext";
@@ -413,6 +414,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
           // console.log("CALLING API", nodeBookState.chosenNode.id);
           setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          let { reputation } = await retrieveAuthenticatedUser(user.userId);
           setIsLoading(false);
           // await axios.post(`/changeDefaultTag/${chosenNode}`);
           // setTag({ node: chosenNode, title: chosenNodeTitle });
@@ -420,6 +422,10 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
             type: "setAuthUser",
             payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
           });
+
+          if (reputation) {
+            dispatch({ type: "setReputation", payload: reputation });
+          }
         } catch (err) {
           setIsLoading(false);
           console.error(err);

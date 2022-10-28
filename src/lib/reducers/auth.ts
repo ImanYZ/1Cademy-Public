@@ -34,6 +34,8 @@ function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
       return { ...state, settings: { ...state.settings, background: action.payload } };
     case "setAuthUser":
       return { ...state, user: action.payload };
+    case "setReputation":
+      return { ...state, reputation: action.payload };
     case "setView":
       return { ...state, settings: { ...state.settings, view: action.payload } };
   }
