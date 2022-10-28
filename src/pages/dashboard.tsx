@@ -3292,8 +3292,8 @@ const Dashboard = ({}: DashboardProps) => {
             //   });
             // }
 
-            // const rootURL = "https://storage.googleapis.com/onecademy-dev.appspot.com/"
-            const picturesFolder = "UploadedImages/";
+            const rootURL = "https://storage.googleapis.com/onecademy-dev.appspot.com/";
+            const picturesFolder = rootURL + "UploadedImages/";
             const imageNameSplit = image.name.split(".");
             const imageExtension = imageNameSplit[imageNameSplit.length - 1];
             let imageFileName = user.userId + "/" + new Date().toUTCString() + "." + imageExtension;
