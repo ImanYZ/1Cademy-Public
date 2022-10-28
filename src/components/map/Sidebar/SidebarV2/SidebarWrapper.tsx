@@ -37,11 +37,12 @@ export const SidebarWrapper = ({
   //   if(headerImage && sidbe)
   // }, [second])
 
-  const sidebarContentRef = useRef(null);
+  const sidebarContentRef = useRef<any>(null);
 
   const scrollToTop = useCallback(() => {
     // console.log(sidebarRef.current);
     if (!sidebarContentRef.current) return;
+
     sidebarContentRef.current.scrollTop = 0;
   }, [sidebarContentRef]);
 
