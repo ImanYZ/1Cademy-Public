@@ -23,6 +23,7 @@ import { NodeType } from "src/types";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Post } from "@/lib/mapApi";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "@/lib/utils/constants";
 import shortenNumber from "@/lib/utils/shortenNumber";
@@ -331,6 +332,8 @@ export const UserSettigsSidebar = ({
           // console.log("CALLING API", nodeBookState.chosenNode.id);
           setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          let { reputation } = await retrieveAuthenticatedUser(user.userId);
+
           setIsLoading(false);
           // await axios.post(`/changeDefaultTag/${chosenNode}`);
           // setTag({ node: chosenNode, title: chosenNodeTitle });
@@ -338,6 +341,10 @@ export const UserSettigsSidebar = ({
             type: "setAuthUser",
             payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
           });
+
+          if (reputation) {
+            dispatch({ type: "setReputation", payload: reputation });
+          }
         } catch (err) {
           setIsLoading(false);
           console.error(err);
