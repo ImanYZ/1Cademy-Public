@@ -167,7 +167,7 @@ MainSidebarProps) => {
             <Button
               onClick={() => onOpenSideBar("SEARCHER_SIDEBAR")}
               sx={{
-                width: "90%",
+                width: "100%",
                 borderRadius: "0px 50px 50px 0px",
                 backgroundColor: "rgba(255, 152, 0, 1)",
                 color: "white",
@@ -176,7 +176,8 @@ MainSidebarProps) => {
                 textAlign: "left",
                 alignSelf: "flex-start",
                 display: "flex",
-                justifyContent: "flex-end",
+                justifyContent: "center",
+                gap: "5px",
                 // border: "solid 2px blue",
                 ":hover": {
                   backgroundColor: "rgba(255, 152, 0, 1)",
@@ -194,7 +195,7 @@ MainSidebarProps) => {
                   overflow: "hidden",
                   visibility: "hidden",
                   transition: "visibility 0s, line-height 0s, height 0s",
-                  width: "11px",
+                  width: "0",
                 }}
               >
                 Search

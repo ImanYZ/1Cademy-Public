@@ -12,6 +12,7 @@ import { Autocomplete, FormControlLabel, FormGroup, LinearProgress, Switch, Tab,
 import { common } from "@mui/material/colors";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
@@ -73,7 +74,6 @@ export const UserSettigsSidebar = ({
   scrollToNode,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
-  const [isLoading, setIsLoading] = useState(false);
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -82,13 +82,146 @@ export const UserSettigsSidebar = ({
 
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [value, setValue] = React.useState(0);
 
+  const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
+  const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
+    if (!userValue) return "";
+    if (userValue === defaultValue || !userValues.includes(userValue)) return userValue;
+    return "";
+  };
+  const getOtherEthnicityValue = (user: User): string => {
+    if (!user?.ethnicity) return "";
+    const otherEthnicity = user.ethnicity.find(ethnicityItem => !isInEthnicityValues(ethnicityItem));
+    return otherEthnicity ? otherEthnicity : "";
+    // if(user.ethnicity.some(ethnicityItem=>!isInEthnicityValues(ethnicityItem))) return user.ethnicity.filter(cur=>cur!==ETHNICITY_VALUES[6])
+    //     if (user.ethnicity.includes("") === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
+    //     return "";
+  };
+  const [genderOtherValue, setGenderOtherValue] = useState(
+    getOtherValue(GENDER_VALUES, GENDER_VALUES[2], user?.gender)
+  );
+  const [ethnicityOtherValue, setEthnicityOtherValue] = useState(getOtherEthnicityValue(user));
+  const [foundFromOtherValue, setFoundFromOtherValue] = useState(
+    getOtherValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[2], user?.foundFrom)
+  );
+  const [reason, setReason] = useState(user?.reason || ""); // TODO: improve this
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  const updateStatesByCountry = useCallback(
+    async (currentCountry: string | null) => {
+      // console.log("updateStatesByCountry", 1, currentCountry);
+      if (!currentCountry) return setStates([]);
+      // console.log("updateStatesByCountry", 2, countries);
+      const countryObject = countries.find(cur => cur.name === currentCountry);
+      if (!countryObject) return setStates([]);
+      // console.log("updateStatesByCountry", 3);
+      // console.log("countryObject", countryObject);
+      const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
+      const { State } = await import("country-state-city");
+      setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
+    },
+    [countries]
+  );
+  const updateCitiesByState = useCallback(
+    async (currentState: string | null) => {
+      // console.log("updateCitiesByState", 2);
+      // if (!user?.country) return [];
+      if (!currentState) return setCities([]);
+
+      // console.log("updateCitiesByState", 3);
+      const currentCountry = countries.find(cur => cur.name === user.country);
+      if (!currentCountry) {
+        setStates([]);
+        setCities([]);
+        return;
+      }
+
+      // console.log("updateCitiesByState", 4);
+      const stateObject = states.find(cur => cur.name === currentState);
+      if (!stateObject) return setCities([]);
+
+      const defaultCountry: ICity = { name: "Prefer not to say", countryCode: "", stateCode: "" };
+      const { City } = await import("country-state-city");
+      setCities([...City.getCitiesOfState(currentCountry.isoCode, stateObject.isoCode), defaultCountry]);
+    },
+    [countries, states, user?.country]
+  );
+
+  useEffect(() => {
+    setReason(user.reason ?? "");
+    setFoundFromOtherValue(user.foundFrom ?? "");
+    setGenderOtherValue(user.gender ?? "");
+  }, [user]);
+
+  useEffect(() => {
+    const getLanguages = async () => {
+      const ISO6391Obj = await import("iso-639-1");
+      const allLanguages = [
+        ...ISO6391Obj.default.getAllNames().sort((l1, l2) => (l1 < l2 ? -1 : 1)),
+        "Prefer not to say",
+      ];
+      setLanguages(allLanguages);
+    };
+    getLanguages();
+  }, []);
+
+  useEffect(() => {
+    const getCountries = async () => {
+      const defaultCountry: ICountry = {
+        name: "Prefer not to say",
+        isoCode: "",
+        phonecode: "",
+        flag: "",
+        currency: "",
+        latitude: "",
+        longitude: "",
+      };
+      const { Country } = await import("country-state-city");
+      setCountries([...Country.getAllCountries(), defaultCountry]);
+    };
+    getCountries();
+  }, []);
+
+  useEffect(() => {
+    updateStatesByCountry(user.country || null);
+  }, [updateStatesByCountry, user.country]);
+
+  useEffect(() => {
+    updateCitiesByState(user.state || null);
+  }, [updateCitiesByState, user.state]);
+
+  useEffect(() => {
+    if (!countries.length) return;
+
+    const getCSCByGeolocation = async () => {
+      try {
+        if (user.country || user.state || user.city) return;
+
+        const res = await axios.get("https://api.ipgeolocation.io/ipgeo?apiKey=b1a57107845644e2b5e8688727eacb0e");
+        if (!res.data) return;
+
+        const { country_name, state_prov, city } = res.data;
+        const isValidCountry = countries.filter(cur => cur.name === country_name);
+        if (!isValidCountry) return;
+
+        const userRef = doc(db, "users", user.uname);
+        await updateDoc(userRef, { country: country_name, state: state_prov, city: city });
+
+        // console.log("wiil call set Timeout");
+
+        dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
+      } catch (err) {
+        // console.log("cant autocomplete country state city");
+      }
+    };
+    getCSCByGeolocation();
+  }, [countries, db, dispatch, user]);
 
   useEffect(() => {
     const total =
@@ -181,131 +314,57 @@ export const UserSettigsSidebar = ({
     }
   }, [db, user]);
 
-  //130
-  const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
-  //132
-  const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
-    if (!userValue) return "";
-    if (userValue === defaultValue || !userValues.includes(userValue)) return userValue;
-    return "";
-  };
-  //138
-  const getOtherEthnicityValue = (user: User): string => {
-    if (!user?.ethnicity) return "";
-    const otherEthnicity = user.ethnicity.find(ethnicityItem => !isInEthnicityValues(ethnicityItem));
-    return otherEthnicity ? otherEthnicity : "";
-    // if(user.ethnicity.some(ethnicityItem=>!isInEthnicityValues(ethnicityItem))) return user.ethnicity.filter(cur=>cur!==ETHNICITY_VALUES[6])
-    //     if (user.ethnicity.includes("") === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
-    //     return "";
-  };
+  useEffect(() => {
+    if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
+      nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
+      // setChosenNodeTitle(allTags[chosenTags[0]].title);
+      // setChosenNode(chosenTags[0]);
+    }
+  }, [allTags, chosenTags, nodeBookDispatch]);
 
-  //146
-  const [genderOtherValue, setGenderOtherValue] = useState(
-    getOtherValue(GENDER_VALUES, GENDER_VALUES[2], user?.gender)
-  );
-  //149
-  const [ethnicityOtherValue, setEthnicityOtherValue] = useState(getOtherEthnicityValue(user));
-  //150
-  const [foundFromOtherValue, setFoundFromOtherValue] = useState(
-    getOtherValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[2], user?.foundFrom)
-  );
-  //156
-  const [reason, setReason] = useState(user?.reason || ""); // TODO: improve this
-
-  //159
-  const updateStatesByCountry = useCallback(
-    async (currentCountry: string | null) => {
-      // console.log("updateStatesByCountry", 1, currentCountry);
-      if (!currentCountry) return setStates([]);
-      // console.log("updateStatesByCountry", 2, countries);
-      const countryObject = countries.find(cur => cur.name === currentCountry);
-      if (!countryObject) return setStates([]);
-      // console.log("updateStatesByCountry", 3);
-      // console.log("countryObject", countryObject);
-      const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
-      const { State } = await import("country-state-city");
-      setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
-    },
-    [countries]
-  );
-  //175
-  const updateCitiesByState = useCallback(
-    async (currentState: string | null) => {
-      // console.log("updateCitiesByState", 2);
-      // if (!user?.country) return [];
-      if (!currentState) return setCities([]);
-
-      // console.log("updateCitiesByState", 3);
-      const currentCountry = countries.find(cur => cur.name === user.country);
-      if (!currentCountry) {
-        setStates([]);
-        setCities([]);
-        return;
+  useEffect(() => {
+    const setDefaultTag = async () => {
+      // if (choosingNode && chosenNode && choosingNode === "tag") {
+      if (nodeBookState.choosingNode?.id === "tag" && nodeBookState.chosenNode) {
+        // setIsSubmitting(true); // TODO: enable submitting global state
+        try {
+          // await firebase.idToken();
+          // console.log("CALLING API", nodeBookState.chosenNode.id);
+          setIsLoading(true);
+          await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          setIsLoading(false);
+          // await axios.post(`/changeDefaultTag/${chosenNode}`);
+          // setTag({ node: chosenNode, title: chosenNodeTitle });
+          dispatch({
+            type: "setAuthUser",
+            payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
+          });
+        } catch (err) {
+          setIsLoading(false);
+          console.error(err);
+          // window.location.reload();
+        }
+        // setChoosingNode(false);
+        // setChosenNode(null);
+        // setChosenNodeTitle(null);
+        // setIsSubmitting(false);
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
       }
+    };
+    setDefaultTag();
+  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
-      // console.log("updateCitiesByState", 4);
-      const stateObject = states.find(cur => cur.name === currentState);
-      if (!stateObject) return setCities([]);
-
-      const defaultCountry: ICity = { name: "Prefer not to say", countryCode: "", stateCode: "" };
-      const { City } = await import("country-state-city");
-      setCities([...City.getCitiesOfState(currentCountry.isoCode, stateObject.isoCode), defaultCountry]);
-    },
-    [countries, states, user?.country]
+  const choosingNodeClick = useCallback(
+    (choosingNodeTag: string) =>
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } }),
+    [nodeBookDispatch]
   );
-  //200
 
-  useEffect(() => {
-    setReason(user.reason ?? "");
-    setFoundFromOtherValue(user.foundFrom ?? "");
-    setGenderOtherValue(user.gender ?? "");
-  }, [user]);
-  //206
-  useEffect(() => {
-    const getLanguages = async () => {
-      const ISO6391Obj = await import("iso-639-1");
-      const allLanguages = [
-        ...ISO6391Obj.default.getAllNames().sort((l1, l2) => (l1 < l2 ? -1 : 1)),
-        "Prefer not to say",
-      ];
-      setLanguages(allLanguages);
-    };
-    getLanguages();
-  }, []);
-  //218
-
-  useEffect(() => {
-    const getCountries = async () => {
-      const defaultCountry: ICountry = {
-        name: "Prefer not to say",
-        isoCode: "",
-        phonecode: "",
-        flag: "",
-        currency: "",
-        latitude: "",
-        longitude: "",
-      };
-      const { Country } = await import("country-state-city");
-      setCountries([...Country.getAllCountries(), defaultCountry]);
-    };
-    getCountries();
-  }, []);
-  //236
-  useEffect(() => {
-    updateStatesByCountry(user.country || null);
-  }, [updateStatesByCountry, user.country]);
-  //239
-  useEffect(() => {
-    updateCitiesByState(user.state || null);
-  }, [updateCitiesByState, user.state]);
-
-  //480
   const logoutClick = useCallback((event: any) => {
     event.preventDefault();
     getAuth().signOut();
   }, []);
-
-  //510
 
   /**
    * Update user attribute in DB
@@ -413,7 +472,7 @@ export const UserSettigsSidebar = ({
       },
     [db, user]
   );
-  //671
+
   const handleThemeSwitch = useCallback(
     (event: any) => {
       event.preventDefault();
@@ -424,6 +483,7 @@ export const UserSettigsSidebar = ({
     },
     [changeAttr, dispatch, settings.theme]
   );
+
   const handleViewSwitch = useCallback(
     (event: any) => {
       event.preventDefault();
@@ -440,7 +500,7 @@ export const UserSettigsSidebar = ({
     },
     [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode, settings.view]
   );
-  //644
+
   const handleBackgroundSwitch = useCallback(
     (event: any) => {
       event.preventDefault();
@@ -462,7 +522,16 @@ export const UserSettigsSidebar = ({
     },
     [changeAttr, dispatch]
   );
-  // 677
+  const closeTagSelector = useCallback(() => {
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
+    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    // setChoosingNode(false);
+    // setChosenNode(null);
+    // setChosenNodeTitle(null);
+    // setChosenTags([]);
+    // setAllTags({});
+    // setIsSubmitting(false); //Check i comented this
+  }, [nodeBookDispatch]);
 
   const handleChange = useCallback(
     (event: any) => {
@@ -536,12 +605,17 @@ export const UserSettigsSidebar = ({
     [changeAttr, dispatch, genderOtherValue, user]
   );
 
-  //753
   const getDisplayNameValue = (user: User) => {
     if (user.chooseUname) return user.uname || "Your Username";
     return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
   };
-  //769
+
+  const canShowOtherEthnicityInput = (ethnicity: string[]) => {
+    if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
+    if (ethnicity.some((ethnicityItem: string) => !isInEthnicityValues(ethnicityItem))) return true;
+    return false;
+  };
+
   const mergeEthnicityOtherValueWithUserEthnicity = (user: User, otherEthnicity: string) => {
     const toRemoveOtherValues = !user.ethnicity.includes(ETHNICITY_VALUES[6]);
     const processedUserEthnicity = toRemoveOtherValues
@@ -552,75 +626,17 @@ export const UserSettigsSidebar = ({
     return [...filteredEthnicities, otherEthnicity];
   };
 
-  //778
   const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return null;
     userOptions.includes(userValue) ? userValue : defaultValue;
     // console.log("RES -->", res);
     return userOptions.includes(userValue) ? userValue : defaultValue;
   };
-  //784
   const getSelectedOptionsByValue = (userValues: string[], isInValues: any, defaultValue: string) => {
     const existOtherValue = userValues.some(item => !isInValues(item));
     const filteredValues = userValues.filter(item => isInValues(item));
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
-  //763
-  const canShowOtherEthnicityInput = (ethnicity: string[]) => {
-    if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
-    if (ethnicity.some((ethnicityItem: string) => !isInEthnicityValues(ethnicityItem))) return true;
-    return false;
-  };
-
-  useEffect(() => {
-    const setDefaultTag = async () => {
-      // if (choosingNode && chosenNode && choosingNode === "tag") {
-      if (nodeBookState.choosingNode?.id === "tag" && nodeBookState.chosenNode) {
-        // setIsSubmitting(true); // TODO: enable submitting global state
-        try {
-          // await firebase.idToken();
-          // console.log("CALLING API", nodeBookState.chosenNode.id);
-          setIsLoading(true);
-          await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
-          setIsLoading(false);
-          // await axios.post(`/changeDefaultTag/${chosenNode}`);
-          // setTag({ node: chosenNode, title: chosenNodeTitle });
-          dispatch({
-            type: "setAuthUser",
-            payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
-          });
-        } catch (err) {
-          setIsLoading(false);
-          console.error(err);
-          // window.location.reload();
-        }
-        // setChoosingNode(false);
-        // setChosenNode(null);
-        // setChosenNodeTitle(null);
-        // setIsSubmitting(false);
-        nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        nodeBookDispatch({ type: "setChosenNode", payload: null });
-      }
-    };
-    setDefaultTag();
-  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
-
-  const choosingNodeClick = useCallback(
-    (choosingNodeTag: string) =>
-      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } }),
-    [nodeBookDispatch]
-  );
-  const closeTagSelector = useCallback(() => {
-    nodeBookDispatch({ type: "setChosenNode", payload: null });
-    nodeBookDispatch({ type: "setChoosingNode", payload: null });
-    // setChoosingNode(false);
-    // setChosenNode(null);
-    // setChosenNodeTitle(null);
-    // setChosenTags([]);
-    // setAllTags({});
-    // setIsSubmitting(false); //Check i comented this
-  }, [nodeBookDispatch]);
-
   const tabsItems = [
     {
       title: "Account",
