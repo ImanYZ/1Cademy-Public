@@ -403,7 +403,7 @@ const NodeFooter = ({
                   tooltipPosition="top"
                 >
                   <>
-                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "green" : "inherit" }} />
+                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
                     <span>{shortenNumber(correctNum, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
@@ -549,7 +549,7 @@ const NodeFooter = ({
                   <span>{shortenNumber(wrongNum, 2, false)}</span>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "green" : "inherit" }} />
+                  <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
                   <span>{shortenNumber(correctNum, 2, false)}</span>
                 </Box>
               </Box>
