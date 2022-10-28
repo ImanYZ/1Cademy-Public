@@ -564,7 +564,7 @@ const Dashboard = ({}: DashboardProps) => {
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
-          if (!docChangesFromServer.length) return null;
+          // if (!docChangesFromServer.length) return null;
 
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
 
