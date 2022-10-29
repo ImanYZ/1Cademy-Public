@@ -3292,7 +3292,7 @@ const Dashboard = ({}: DashboardProps) => {
             //   });
             // }
 
-            const rootURL = "https://storage.googleapis.com/onecademy-dev.appspot.com/";
+            const rootURL = "https://storage.googleapis.com/" + process.env.NEXT_PUBLIC_STORAGE_BUCKET + "/";
             const picturesFolder = rootURL + "UploadedImages/";
             const imageNameSplit = image.name.split(".");
             const imageExtension = imageNameSplit[imageNameSplit.length - 1];
