@@ -87,7 +87,7 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { imageLoaded } from "../lib/utils/utils";
+import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
@@ -3291,8 +3291,12 @@ const Dashboard = ({}: DashboardProps) => {
             //     return { ...thisNode };
             //   });
             // }
-
-            const rootURL = "https://storage.googleapis.com/" + process.env.NEXT_PUBLIC_STORAGE_BUCKET + "/";
+            let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+            if (isValidHttpUrl(bucket)) {
+              const { hostname } = new URL(bucket);
+              bucket = hostname;
+            }
+            const rootURL = "https://storage.googleapis.com/" + bucket + "/";
             const picturesFolder = rootURL + "UploadedImages/";
             const imageNameSplit = image.name.split(".");
             const imageExtension = imageNameSplit[imageNameSplit.length - 1];
