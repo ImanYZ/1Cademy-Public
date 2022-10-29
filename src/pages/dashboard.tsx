@@ -2791,6 +2791,7 @@ const Dashboard = ({}: DashboardProps) => {
     async (newTitle: string) => {
       // setOpenSearch(true);
       setOpenSidebar("SEARCHER_SIDEBAR");
+
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
