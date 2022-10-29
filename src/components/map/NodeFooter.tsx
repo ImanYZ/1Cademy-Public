@@ -134,7 +134,13 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-
+  const selectTags = useCallback(
+    (event: any) => {
+      console.log("Click tags");
+      openNodePart(event, "Tags");
+    },
+    [openNodePart]
+  );
   const selectPendingProposals = useCallback(
     (event: any) => {
       selectNode(event, "Proposals"); // Pass correct data
@@ -295,7 +301,7 @@ const NodeFooter = ({
                       (acceptedProposalsSelected ? "orange-text" : "grey-text")
                     }
                   >
-                    event_available
+                    event_Citing Nodesavailable
                   </i>
                   <span>{dayjs(changedAt).fromNow()}</span>
                 </MemoizedMetaButton> */}
@@ -351,7 +357,7 @@ const NodeFooter = ({
                 </MemoizedMetaButton>
 
                 <MemoizedMetaButton
-                  onClick={() => console.log("selectTags")}
+                  onClick={selectTags}
                   tooltip="View tags assigned to this node."
                   tooltipPosition="top"
                 >

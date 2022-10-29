@@ -30,6 +30,9 @@ type MainSidebarProps = {
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   mapRendered: boolean;
   selectedUser: string | null;
+  uncheckedNotificationsNum: number;
+  bookmarkUpdatesNum: number;
+  pendingProposalsNum: number;
 };
 
 export const ToolbarSidebar = ({
@@ -41,16 +44,18 @@ export const ToolbarSidebar = ({
   theme,
   setOpenSideBar,
   selectedUser,
+  uncheckedNotificationsNum,
+  bookmarkUpdatesNum,
+  pendingProposalsNum,
 }: //   mapRendered = true,
 MainSidebarProps) => {
   const db = getFirestore();
 
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
   // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
-  const [uncheckedNotificationsNum /* , setUncheckedNotificationsNum */] = useState(0);
-  const [bookmarkUpdatesNum /* , setBookmarkUpdatesNum */] = useState(0);
-  const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(false);
-  const [pendingProposalsNum /* setPendingProposalsNum */] = useState(0);
+
+  const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(true);
+
   const [anchorEl, setAnchorEl] = useState<any>(null);
 
   const onOpenLeaderboardOptions = (event: React.MouseEvent<any>) => {

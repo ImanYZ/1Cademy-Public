@@ -76,7 +76,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
               borderRadius: 1,
               height: { xs: "40px", md: "55px" },
               // px: { xs: "12px", md: "25px" },
-              p: { xs: "0px 10p x 0px 12px", md: "0px 12px 0px 25px" },
+              p: { xs: "0px 10px 0px 12px", md: "0px 12px 0px 25px" },
               background: theme => theme.palette.common.white,
             }}
             ref={params.InputProps.ref}

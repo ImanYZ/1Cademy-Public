@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import { postWithToken } from "../../../lib/mapApi";
-import { imageLoaded } from "../../../lib/utils/utils";
+import { imageLoaded, isValidHttpUrl } from "../../../lib/utils/utils";
 // import { newId } from "../../../lib/utils/newid";
 // import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
@@ -82,13 +82,17 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           //await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
 
           //Showing profile picture on frontend
-
-          const picturesFolder = "ProfilePictures/";
+          let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+          if (isValidHttpUrl(bucket)) {
+            const { hostname } = new URL(bucket);
+            bucket = hostname;
+          }
+          const rootURL = "https://storage.googleapis.com/" + bucket + "/";
+          const picturesFolder = rootURL + "ProfilePictures/";
           const imageNameSplit = image.name.split(".");
           const imageExtension = imageNameSplit[imageNameSplit.length - 1];
           let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
           const storageRef = ref(storage, picturesFolder + imageFileName);
-          console.log("imageFileName", imageFileName);
           const task = uploadBytesResumable(storageRef, image);
           task.on(
             "state_changed",

@@ -211,6 +211,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
             })}
           </div>
         )}
+
         {props.openPart === "References" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
             <strong>References</strong>
@@ -382,6 +383,38 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 </Box>
               </MemoizedMetaButton>
             )}
+          </Box>
+        )}
+
+        {props.openPart === "Tags" && (
+          <Box sx={{ fontSize: "16px" }}>
+            <strong>Tags</strong>
+            {props.tags.map((tag: any, idx: number) => {
+              return (
+                <div key={props.identifier + "LinkTo" + tag.node + "DIV"}>
+                  <LinkingButton
+                    key={props.identifier + "LinkTo" + tag.node}
+                    onClick={props.openLinkedNode}
+                    // nodeID={props.identifier}
+                    linkedNodeID={tag.node}
+                    linkedNodeTitle={tag.title}
+                    linkedNodeType="tag"
+                    iClassName="local_offer"
+                  />
+                  {props.editable && (
+                    <div className="LinkDeleteButton">
+                      <MemoizedMetaButton
+                        onClick={deleteLink(idx, "Tag")}
+                        tooltip="Click to delete the link to this tag."
+                        tooltipPosition="right"
+                      >
+                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                      </MemoizedMetaButton>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </Box>
         )}
         {props.openPart === "LinkingWords" && (

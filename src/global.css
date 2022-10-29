@@ -19,6 +19,12 @@
   font-size: 21px;
 }
 
+@media screen and (max-width: 600px) and (min-width: 10px) {
+  .home-search-input::placeholder {
+    font-size: 16px;
+  }
+}
+
 /* --------------------------------------------- */
 /* map styles */
 
@@ -60,6 +66,7 @@
   line-height: 28px;
   color: #e5e5e5;
   z-index: 4;
+  text-align: center;
 }
 
 .spinner-white,
