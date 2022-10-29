@@ -17,6 +17,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useRef, useState } from "react";
 
+import { OpenSidebar } from "@/pages/dashboard";
+
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { OpenPart } from "../../nodeBookTypes";
@@ -72,6 +74,7 @@ type NodeFooterProps = {
   uploadNodeImage: any;
   user: User;
   citations: { [key: string]: Set<string> };
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 
 const NodeFooter = ({
@@ -118,6 +121,7 @@ const NodeFooter = ({
   wrongNode,
   uploadNodeImage,
   user,
+  setOpenSideBar,
 }: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -207,6 +211,7 @@ const NodeFooter = ({
               inUserBar={false}
               inNodeFooter={true}
               reloadPermanentGrpah={reloadPermanentGrpah}
+              setOpenSideBar={setOpenSideBar}
             />
           ) : (
             <MemoizedUserStatusIcon
@@ -218,6 +223,7 @@ const NodeFooter = ({
               inUserBar={false}
               inNodeFooter={true}
               reloadPermanentGrpah={reloadPermanentGrpah}
+              setOpenSideBar={setOpenSideBar}
             />
           ))}
         <div
@@ -397,7 +403,7 @@ const NodeFooter = ({
                   tooltipPosition="top"
                 >
                   <>
-                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "green" : "inherit" }} />
+                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
                     <span>{shortenNumber(correctNum, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
@@ -543,7 +549,7 @@ const NodeFooter = ({
                   <span>{shortenNumber(wrongNum, 2, false)}</span>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "green" : "inherit" }} />
+                  <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
                   <span>{shortenNumber(correctNum, 2, false)}</span>
                 </Box>
               </Box>

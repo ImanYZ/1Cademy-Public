@@ -249,6 +249,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           className="ComLeaderbaordItems"
           sx={{
             width: "100%",
+            paddingRight: "80px",
             display: "flex",
             justifyContent: "flex-start",
             alignItems: "center",
@@ -257,7 +258,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
             height: "inherit",
           }}
         >
-          {comLeaderboardTypeOpen && <MultipleChoiceBtn choices={choices} close={openComLeaderboardTypes} />}
+          {comLeaderboardTypeOpen && <MultipleChoiceBtn choices={choices} onClose={openComLeaderboardTypes} />}
           {!comPoints.length && <p>There are not points yet</p>}
           {comPoints.map((comObj, idx) => {
             return (

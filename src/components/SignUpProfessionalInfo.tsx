@@ -14,8 +14,8 @@ import { FormikProps } from "formik";
 import { HTMLAttributes, lazy, Suspense, useEffect, useState } from "react";
 import { Institution, Major, SignUpFormValues } from "src/knowledgeTypes";
 
-import OptimizedAvatar from "../components/OptimizedAvatar";
 import { EDUCATION_VALUES } from "../lib/utils/constants";
+import OptimizedAvatar from "./OptimizedAvatar";
 
 const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
 const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
@@ -32,6 +32,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
   const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
   const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
@@ -67,8 +68,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       const institutionSorted = institutions
         .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
         .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+      setAllInstitutions(institutionSorted);
 
-      setInstitutions(institutionSorted);
+      setInstitutions(institutionSorted.slice(0, 10));
     };
     retrieveInstitutions();
   }, []);
@@ -78,6 +80,19 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
     const foundInstitution = institutions.find(cur => cur.name === values.institution);
     if (!foundInstitution) return null;
     return foundInstitution;
+  };
+  const onChangeInstitution = (value: string) => {
+    const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
+      if (acu.length < 10) {
+        if (cur.name.includes(value)) {
+          return [...acu, cur];
+        } else {
+          return acu;
+        }
+      }
+      return acu;
+    }, []);
+    setInstitutions(foundInstitution);
   };
 
   return (
@@ -116,6 +131,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         id="institution"
         value={getNameFromInstitutionSelected()}
         onChange={(_, value) => setFieldValue("institution", value?.name || null)}
+        onInputChange={(_, value) => {
+          onChangeInstitution(value);
+        }}
         onBlur={() => setTouched({ ...touched, institution: true })}
         options={institutions}
         getOptionLabel={option => option.name}

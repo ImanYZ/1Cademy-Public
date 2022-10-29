@@ -10,6 +10,7 @@ import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff } from "@/lib/utils/utils";
+import { OpenSidebar } from "@/pages/dashboard";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -110,6 +111,7 @@ type NodeProps = {
   setOpenSearch: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
+  setOpenSideBar: (sidebar: OpenSidebar) => void;
 };
 const Node = ({
   identifier,
@@ -185,6 +187,7 @@ const Node = ({
   setOpenSearch,
   setNodeParts,
   citations,
+  setOpenSideBar,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -224,7 +227,7 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        const isSimilar = blockSize === previousHeightRef.current && topPosition === previousTopRef.current;
+        const isSimilar = blockSize === previousHeightRef.current; /* && topPosition === previousTopRef.current */
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
         if (isSimilar) return;
@@ -490,7 +493,7 @@ const Node = ({
         }
         setTitleUpdated(false);
       }
-      setOpenSearch(true);
+      setOpenSideBar("SEARCHER_SIDEBAR");
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
@@ -581,9 +584,8 @@ const Node = ({
               {editable && isNew && (
                 <>
                   {/* New Node with inputs */}
-                  <p className="NewChildProposalWarning">Before proposing,</p>
                   <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                    <span>- Search </span>
+                    <span> Before proposing, search </span>
                     <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
                     <span> to ensure the node does not exist.</span>
                   </p>
@@ -785,6 +787,7 @@ const Node = ({
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
                 citations={citations}
+                setOpenSideBar={setOpenSideBar}
               />
               {/* <NodeFooter
                 open={true}
@@ -953,6 +956,7 @@ const Node = ({
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
                 citations={citations}
+                setOpenSideBar={setOpenSideBar}
               />
               {/* <NodeFooter
                 open={false}

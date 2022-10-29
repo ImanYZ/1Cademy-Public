@@ -9,7 +9,6 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Autocomplete, Box, FormControlLabel, FormGroup, LinearProgress, Switch, TextField } from "@mui/material";
-import { common } from "@mui/material/colors";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
@@ -18,6 +17,7 @@ import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updat
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 import { useAuth } from "../../../context/AuthContext";
@@ -414,6 +414,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
           // console.log("CALLING API", nodeBookState.chosenNode.id);
           setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          let { reputation } = await retrieveAuthenticatedUser(user.userId);
           setIsLoading(false);
           // await axios.post(`/changeDefaultTag/${chosenNode}`);
           // setTag({ node: chosenNode, title: chosenNodeTitle });
@@ -421,6 +422,10 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
             type: "setAuthUser",
             payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
           });
+
+          if (reputation) {
+            dispatch({ type: "setReputation", payload: reputation });
+          }
         } catch (err) {
           setIsLoading(false);
           console.error(err);
@@ -1272,7 +1277,7 @@ const UserSettings = ({ user, userReputation, scrollToNode }: UserSettingProps) 
             <OptimizedAvatar
               imageUrl={instlogoURL}
               name={user.deInstit + " logo"}
-              sx={{ width: "25px", height: "25px", fontSize: "16px", backgroundColor: "#ff9800", color: common.white }}
+              sx={{ width: "37px", height: "37px" }}
               renderAsAvatar={false}
             />
             {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}

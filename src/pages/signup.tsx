@@ -142,7 +142,7 @@ const SignUpPage: NextPageWithLayout = () => {
     education: yup.string().required("Please enter your educational status").nullable(true),
     institution: yup.string().required("Please enter your institution").nullable(),
     major: yup.string().required("Please enter your major").nullable(),
-    fieldOfInterest: yup.string().required("Please enter your field of interest"),
+    // fieldOfInterest: yup.string().required("Please enter your field of interest"),
     signUpAgreement: yup.boolean().isTrue("Please accept the Informed Consent to continue"),
   });
 
@@ -240,7 +240,8 @@ const SignUpPage: NextPageWithLayout = () => {
       Boolean(formik.errors.email) ||
       Boolean(formik.errors.username) ||
       Boolean(formik.errors.password) ||
-      Boolean(formik.errors.passwordConfirmation)
+      Boolean(formik.errors.passwordConfirmation) ||
+      !Boolean(formik.values.firstName)
     );
   };
 
@@ -314,7 +315,7 @@ const SignUpPage: NextPageWithLayout = () => {
           {activeStep === 1 && (
             <>
               <div></div>
-              <Button disabled={formik.isSubmitting} variant="contained" onClick={onNextStep}>
+              <Button disabled={isInvalidFirstStep() || formik.isSubmitting} variant="contained" onClick={onNextStep}>
                 Next
               </Button>
             </>
