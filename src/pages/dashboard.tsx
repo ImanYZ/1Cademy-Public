@@ -810,6 +810,7 @@ const Dashboard = ({}: DashboardProps) => {
     () => {
       if (!db) return;
       if (!user?.uname) return;
+      if (!allTagsLoaded) return;
       const userNodesRef = collection(db, "notifications");
       const q = query(userNodesRef, where("proposer", "==", user.uname));
 
