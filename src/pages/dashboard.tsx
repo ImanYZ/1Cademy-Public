@@ -728,6 +728,7 @@ const Dashboard = ({}: DashboardProps) => {
     () => {
       if (!db) return;
       if (!user?.uname) return;
+      if (user?.tagId) return;
       if (!allTagsLoaded) return;
 
       const versionsSnapshots: any[] = [];
@@ -809,7 +810,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       };
     },
-    [allTagsLoaded, db, user?.uname]
+    [allTagsLoaded, db, user?.tagId, user?.uname]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
   useEffect(
@@ -843,7 +844,7 @@ const Dashboard = ({}: DashboardProps) => {
         notificationsSnapshot();
       };
     },
-    [db, user?.uname]
+    [db, user?.uname, allTagsLoaded]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
 
