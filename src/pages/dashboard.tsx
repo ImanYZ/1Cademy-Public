@@ -3826,7 +3826,7 @@ const Dashboard = ({}: DashboardProps) => {
                     />
                   </div>
                 )}
-                {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
+                {showNoNodesFoundMessage && !firstLoading && (
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
