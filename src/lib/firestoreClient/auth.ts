@@ -68,6 +68,7 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
 
     user = {
       userId,
+      birthDate: userData.birthDate.toDate(),
       deCourse: userData.deCourse,
       deInstit: userData.deInstit,
       deMajor: userData.deMajor,

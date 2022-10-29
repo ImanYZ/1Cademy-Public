@@ -13,6 +13,8 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
 import { ICity, ICountry, IState } from "country-state-city";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
@@ -35,6 +37,9 @@ import Modal from "../../Modal/Modal";
 import ProfileAvatar from "../ProfileAvatar";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
+
+dayjs.extend(relativeTime);
+
 type UserSettingsSidebarProps = {
   open: boolean;
   onClose: () => void;
