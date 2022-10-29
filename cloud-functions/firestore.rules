@@ -1,0 +1,472 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /messages/{messageId} {
+      allow read;
+      allow create, update: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && (request.resource.data.content is string
+                      || (request.resource.data.nodeLink is string
+                      && request.resource.data.nodeLink.size() > 4)
+                      || (request.resource.data.uploadedUrl is string
+                      && request.resource.data.uploadedUrl.matches('https?://.*')));
+      allow delete: if request.auth != null
+                    && resource.data.uid == request.auth.uid;
+    }
+    match /tags/{tagId} {
+      allow read;
+      allow write: if false;
+    }
+    match /nodes/{nodeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                  && resource.data.admin == request.resource.data.admin
+                  && resource.data.changedAt == request.resource.data.changedAt
+                  && resource.data.children == request.resource.data.children
+                  && resource.data.comments == request.resource.data.comments
+                  && resource.data.content == request.resource.data.content
+                  && resource.data.corrects == request.resource.data.corrects
+                  && resource.data.createdAt == request.resource.data.createdAt
+                  && resource.data.deleted == request.resource.data.deleted
+                  && resource.data.maxVersionRating == request.resource.data.maxVersionRating
+                  && resource.data.nodeImage == request.resource.data.nodeImage
+                  && resource.data.nodeType == request.resource.data.nodeType
+                  && resource.data.parents == request.resource.data.parents
+                  && resource.data.references == request.resource.data.references
+                  && resource.data.tags == request.resource.data.tags
+                  && resource.data.title == request.resource.data.title
+                  && resource.data.versions == request.resource.data.versions
+                  && (resource.data.studied + 1 == request.resource.data.studied
+                      || resource.data.studied - 1 == request.resource.data.studied
+                      || resource.data.studied == request.resource.data.studied)
+                  && (resource.data.viewers + 1 == request.resource.data.viewers
+                      || resource.data.viewers - 1 == request.resource.data.viewers
+                      || resource.data.viewers == request.resource.data.viewers)
+                  && resource.data.wrongs == request.resource.data.wrongs;
+    }
+    match /userNodes/{userNodeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.user == request.auth.token.name;
+      allow update: if request.auth != null
+                    && resource.data.user == request.auth.token.name
+                    && resource.data.node == request.resource.data.node
+                    && resource.data.user == request.resource.data.user;
+      allow delete: if request.auth != null
+                    && resource.data.user == request.auth.token.name;
+    }
+    match /userNodesLog/{userNodeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.user == request.auth.token.name;
+    }
+    match /userVersionsLog/{userVersionId} {
+      allow read: if false;
+      allow write: if false;
+    }
+    match /stats/{statId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /presentations/{presentationId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /presNodes/{presNodeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /conceptVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /codeVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /relationVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /questionVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /referenceVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /ideaVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /profileVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /sequelVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /advertisementVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /newsVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userConceptVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userCodeVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userRelationVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userQuestionVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userReferenceVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userIdeaVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userProfileVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userSequelVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userAdvertisementVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userNewsVersions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /conceptVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /codeVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /relationVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /questionVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /referenceVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /ideaVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /profileVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /sequelVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /advertisementVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /newsVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userConceptVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userCodeVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userRelationVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userQuestionVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userReferenceVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userIdeaVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userProfileVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userSequelVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userAdvertisementVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /userNewsVersionComments/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /users/{uname} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /status/{uname} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /leaders/{uname} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /institutions/{instId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /reputations/{reputationId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /monthlyReputations/{reputationId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /weeklyReputations/{reputationId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /othersReputations/{reputationId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /othMonReputations/{reputationId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /comPoints/{comPointId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /comMonthlyPoints/{comPointId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /comWeeklyPoints/{comPointId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /comOthersPoints/{comPointId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /comOthMonPoints/{comPointId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /notifications/{reputationId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && resource.data.proposer == request.auth.token.name;
+    }
+    match /userNodePartsLog/{userNodePartId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userNodeSelectLog/{userNodeSelectId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userClosedSidebarLog/{userClosedSidebarId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userOpenSidebarLog/{userOpenSidebarId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userClustersLog/{userClustersId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userUsersStatusLog/{userUsersStatusId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userUserInfoLog/{userUserInfoId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userSearchLog/{userSearchId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userFNameLog/{userFNameId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userLNameLog/{userLNameId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userThemeLog/{userThemeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userBackgroundLog/{userBackgroundId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userChooseUnameLog/{userChooseUnameId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /changeUnameLog/{changeUnameId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userLangLog/{userLangLogId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userLeaderboardLog/{userLeaderboardId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    // CHECK: i added this --->
+    match /userReasonLog/{userReasonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userGenderLog/{userGenderId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+     match /userEthnicityLog/{userEthnicityId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+     match /userFoundFromLog/{userFoundFromId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userBirthDayLog/{userBirthDayId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userCountryLog/{userCountryDayId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userStateLog/{userStateDayId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userCityLog/{userCityDayId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userDeInstitLog/{userDeInstitId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userDeMajorLog/{userDeMajorId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userOccupationLog/{userOccupationId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userFieldOfInterestLog/{userFieldOfInterestId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    match /userViewLog/{userViewId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                    && request.resource.data.uname == request.auth.token.name;
+    }
+    // <-------
+    // ----> I added
+    match /notificationNums/{uname} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    // <----
+    match /JoiningExp/{JoiningExpId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    // FCM Tokens:
+    //   - Anyone can write their token.
+    //   - Reading list of tokens is not allowed.
+    match /fcmTokens/{token} {
+      allow read: if false;
+      allow write;
+    }
+    match /{documents=**} {
+      allow read, write: if false;
+    }
+  }
+}

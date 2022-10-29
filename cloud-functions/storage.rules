@@ -1,0 +1,33 @@
+// Returns true if the uploaded file is an image and its size is below the given number of MB.
+function isImageBelowMaxSize(maxSizeMB) {
+  return request.resource.size < maxSizeMB * 1024 * 1024
+      && request.resource.contentType.matches('image/.*');
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /Messages/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId && isImageBelowMaxSize(5);
+      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow read;
+    }
+    match /Audio/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow read;
+    }
+    match /Logos/{fileName} {
+      allow write: if request.auth != null && isImageBelowMaxSize(5);
+      allow read;
+    }
+    match /uploads/images/{userId}/{fileName=**} {
+      allow write: if request.resource.metadata.uid != null && request.resource.metadata.uid == userId;
+      allow delete: if request.resource.metadata.uid != null && request.resource.metadata.uid == userId;
+      allow read;
+    }
+    match /{allPaths=**} {
+      allow write: if request.auth != null && isImageBelowMaxSize(5);
+      allow read;
+    }
+  }
+}
