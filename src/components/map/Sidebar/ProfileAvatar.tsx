@@ -82,13 +82,12 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           //await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
 
           //Showing profile picture on frontend
-
-          const picturesFolder = "ProfilePictures/";
+          const rootURL = "https://storage.googleapis.com/" + process.env.NEXT_PUBLIC_STORAGE_BUCKET + "/";
+          const picturesFolder = rootURL + "ProfilePictures/";
           const imageNameSplit = image.name.split(".");
           const imageExtension = imageNameSplit[imageNameSplit.length - 1];
           let imageFileName = userId + "/" + new Date().toUTCString() + "." + imageExtension;
           const storageRef = ref(storage, picturesFolder + imageFileName);
-          console.log("imageFileName", imageFileName);
           const task = uploadBytesResumable(storageRef, image);
           task.on(
             "state_changed",
