@@ -343,7 +343,7 @@ const Dashboard = ({}: DashboardProps) => {
   // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
-  const [showNoNodesFoundMessage, setNoNodesFoundMessage] = useState(false);
+  const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -3826,14 +3826,14 @@ const Dashboard = ({}: DashboardProps) => {
                     />
                   </div>
                 )}
-                {showNoNodesFoundMessage && !firstLoading && (
+                {/* {showNoNodesFoundMessage && !firstLoading && (
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
                       <p>Please open nodes using searcher sidebar</p>
                     </div>
                   </>
-                )}
+                )} */}
               </Suspense>
 
               {/* // <Modal onClick={closedSidebarClick("Media")}>
