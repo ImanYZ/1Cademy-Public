@@ -211,7 +211,6 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-
   return (
     <SidebarWrapper
       open={open}
