@@ -10,13 +10,13 @@ import { deepmerge } from "@mui/utils";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { SnackbarProvider } from "notistack";
 import { useMemo, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
 import { getDesignTokens, getThemedComponents } from "../src/brandingTheme";
 import { createEmotionCache } from "../src/createEmotionCache";
-import { SnackbarProvider } from "notistack";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -29,6 +29,7 @@ type ExtendedAppProps = AppProps & {
 
 // ** Configure JSS & ClassName
 const App = (props: ExtendedAppProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const [queryClient] = useState(
     () =>
@@ -65,7 +66,27 @@ const App = (props: ExtendedAppProps) => {
           <ThemeProvider theme={theme}>
             <SnackbarProvider maxSnack={3}>
               <CssBaseline />
-              <Component {...pageProps} />
+              {/* <Component {...pageProps} /> */}
+              <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css" />
+              <div
+                style={{
+                  margin: "0px auto",
+                  width: "400px"
+                }}
+                id="maintenance-page"
+              >
+                <h1 className="nl_open-sans">Planned Upgrade Today</h1>
+                <img src="/asset/maintenance.png" />
+                <p>
+                  This tool is temporarily unavailable due to a planned upgrade.
+                  <br />
+                  <br />
+                  We expect to be finished with maintenance by midnight (Pacific time), Saturday night.
+                  <br />
+                  <br />
+                  We apologize for any inconvenience.
+                </p>
+              </div>
             </SnackbarProvider>
           </ThemeProvider>
         </CacheProvider>
