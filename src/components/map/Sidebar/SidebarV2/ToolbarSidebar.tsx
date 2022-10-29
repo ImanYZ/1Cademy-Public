@@ -221,7 +221,7 @@ MainSidebarProps) => {
         <Box className="toolbar" sx={{ overflow: "hidden" }}>
           <Box
             // className="toolbar-options"
-            sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", height: "400px" }}
+            sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", height: "376px" }}
           >
             <Box sx={{ marginTop: "20px" }}>
               <MemoizedMetaButton
