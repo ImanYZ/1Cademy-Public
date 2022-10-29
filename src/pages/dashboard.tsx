@@ -32,6 +32,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
@@ -102,6 +103,7 @@ export type OpenSidebar =
   | "USER_INFO"
   | "PROPOSALS"
   | "USER_SETTINGS"
+  | "CITATIONS"
   | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
@@ -333,6 +335,9 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
 
+  // list of tags used for searching
+  // const [selectedTagsState, setSelectedTagsState] = useState([]);
+
   // temporal state with value from node to improve
   // when click in improve Node the copy of original Node is here
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
@@ -343,7 +348,7 @@ const Dashboard = ({}: DashboardProps) => {
   // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
-  const [showNoNodesFoundMessage, setNoNodesFoundMessage] = useState(false);
+  const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -555,6 +560,7 @@ const Dashboard = ({}: DashboardProps) => {
           devLog("userNodesSnapshot:1", { docChanges });
           if (!docChanges.length) {
             setIsSubmitting(false);
+            setFirstLoading(false);
             setNoNodesFoundMessage(true);
             return null;
           }
@@ -563,7 +569,7 @@ const Dashboard = ({}: DashboardProps) => {
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
-          if (!docChangesFromServer.length) return null;
+          // if (!docChangesFromServer.length) return null;
 
           devLog("userNodesSnapshot:3", { docChangesFromServer });
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
@@ -2188,15 +2194,14 @@ const Dashboard = ({}: DashboardProps) => {
               createdAt: Timestamp.fromDate(new Date()),
             });
           }
-          // if (
-          //   partType === "Tags" &&
-          //   //i commented this two line until we define the right states
-          //   // selectionType !== "AcceptedProposals" &&
-          //   // selectionType !== "Proposals"
-          // ) {
-          //   // setSelectedTags(tags);
-          //   // setOpenRecentNodes(true);
-          // }
+          if (
+            partType === "Tags" &&
+            nodeBookState.selectionType !== "AcceptedProposals" &&
+            nodeBookState.selectionType !== "Proposals"
+          ) {
+            // tags;
+            setOpenRecentNodes(true);
+          }
         }
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
@@ -2686,16 +2691,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
 
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
         }
+        if (chosenType === "Citations") {
+          if (openSidebar === "CITATIONS") {
+            console.log("NULLLL");
+            setOpenSidebar(null);
+            return;
+          }
+          setOpenSidebar("CITATIONS");
+          setSelectedNodeType(nodeType);
+          nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+
+          return;
+        }
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
-          console.log("selectNodeHandler 1");
           nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
@@ -2722,15 +2739,13 @@ const Dashboard = ({}: DashboardProps) => {
       }
     },
     // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      choosingNode,
+      nodeBookState.choosingNode,
       nodeBookState.selectionType,
       nodeBookState.selectedNode,
-      // selectedNode,
-      // selectionType,
       reloadPermanentGraph,
-      // proposeNodeImprovement,
+      openSidebar,
+      nodeBookDispatch,
       resetAddedRemovedParentsChildren,
     ]
   );
@@ -3831,6 +3846,14 @@ const Dashboard = ({}: DashboardProps) => {
               settings={settings}
             />
           )}
+          {user && nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
+            <CitationsSidebar
+              open={openSidebar === "CITATIONS"}
+              onClose={() => setOpenSidebar(null)}
+              openLinkedNode={openLinkedNode}
+              identifier={nodeBookState.selectedNode}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {
             /* process.env.NODE_ENV === "development" && */ <Box
@@ -3846,7 +3869,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
                 <Typography>sNodetype {selectedNodeType}</Typography>
-
+                <Typography>openSidebar {openSidebar}</Typography>
                 {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
               <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
@@ -3872,6 +3895,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
                   <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
                   <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
+                  <Button onClick={() => setOpenSidebar("CITATIONS")}>Citation</Button>
                 </Box>
               </Box>
             </Box>
@@ -3964,7 +3988,7 @@ const Dashboard = ({}: DashboardProps) => {
                     </MapInteractionCSS>
                   </>
                 </Modal>
-                {/* {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image
                       className="CenterredLoadingImage"
@@ -3975,15 +3999,15 @@ const Dashboard = ({}: DashboardProps) => {
                       height={250}
                     />
                   </div>
-                )} */}
-                {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
+                )}
+                {/* {showNoNodesFoundMessage && !firstLoading && (
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
                       <p>Please open nodes using searcher sidebar</p>
                     </div>
                   </>
-                )}
+                )} */}
               </Suspense>
 
               {/* // <Modal onClick={closedSidebarClick("Media")}>
