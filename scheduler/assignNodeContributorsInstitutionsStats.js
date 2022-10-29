@@ -18,7 +18,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
       nodes: 0,
       links: 0,
       proposals: 0,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     const userDocs = await db.collection("users").get();
     for (let userDoc of userDocs.docs) {
@@ -98,7 +98,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
             // and add the nodeRef to be able to update the node at the end.
             if (!(versionData.node in nodesUpdates)) {
               nodesUpdates[versionData.node] = {
-                nodeRef
+                nodeRef,
               };
             }
             // In institutions and contributors, each key represents an
@@ -132,7 +132,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
                 fullname: userFullnames[versionData.proposer],
                 imageUrl: versionData.imageUrl,
                 chooseUname: versionData.chooseUname ? versionData.chooseUname : false,
-                reputation: 0
+                reputation: 0,
               };
               if (
                 versionData.proposer in userInstitutions &&
@@ -140,7 +140,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
               ) {
                 nodesUpdates[versionData.node].institNames.push(userInstitutions[versionData.proposer]);
                 nodesUpdates[versionData.node].institutions[userInstitutions[versionData.proposer]] = {
-                  reputation: 0
+                  reputation: 0,
                 };
               }
             }
@@ -161,7 +161,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
               if (userInstitutions[versionData.proposer]) {
                 contributors[versionData.proposer] = {
                   docRef: db.collection("users").doc(versionData.proposer),
-                  reputation: versionData.corrects - versionData.wrongs
+                  reputation: versionData.corrects - versionData.wrongs,
                 };
               }
             }
@@ -179,7 +179,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
               if (institutionDocs.docs.length > 0) {
                 institutions[userInstitutions[versionData.proposer]] = {
                   docRef: db.collection("institutions").doc(institutionDocs.docs[0].id),
-                  reputation: versionData.corrects - versionData.wrongs
+                  reputation: versionData.corrects - versionData.wrongs,
                 };
               }
             }
@@ -191,17 +191,17 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
           contributors: nodesUpdates[nodeId].contributors,
           institutions: nodesUpdates[nodeId].institutions,
           contribNames: nodesUpdates[nodeId].contribNames,
-          institNames: nodesUpdates[nodeId].institNames
+          institNames: nodesUpdates[nodeId].institNames,
         });
       }
       for (let contributorId in contributors) {
         await batchUpdate(contributors[contributorId].docRef, {
-          totalPoints: roundNum(contributors[contributorId].reputation)
+          totalPoints: roundNum(contributors[contributorId].reputation),
         });
       }
       for (let institutionName in institutions) {
         await batchUpdate(institutions[institutionName].docRef, {
-          totalPoints: roundNum(institutions[institutionName].reputation)
+          totalPoints: roundNum(institutions[institutionName].reputation),
         });
       }
     }

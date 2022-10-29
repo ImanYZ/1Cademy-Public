@@ -3,8 +3,8 @@ const zlib = require("zlib");
 
 var dirs = ["../public/sitemap"];
 
-dirs.forEach((dir) => {
-  fs.readdirSync(dir).forEach((file) => {
+dirs.forEach(dir => {
+  fs.readdirSync(dir).forEach(file => {
     if (file.endsWith(".xml")) {
       // gzip
       const fileContents = fs.createReadStream(dir + "/" + file);
@@ -13,9 +13,9 @@ dirs.forEach((dir) => {
 
       fileContents
         .pipe(zip)
-        .on("error", (err) => console.error(err))
+        .on("error", err => console.error(err))
         .pipe(writeStream)
-        .on("error", (err) => console.error(err));
+        .on("error", err => console.error(err));
     }
   });
 });

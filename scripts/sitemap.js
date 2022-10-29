@@ -4,9 +4,9 @@ const prettier = require("prettier");
 
 const getDate = new Date().toISOString();
 
-const BASE_URL = 'https://node.1cademy.us';
+const BASE_URL = "https://node.1cademy.us";
 
-const formatted = (sitemap) => prettier.format(sitemap, { parser: "html" });
+const formatted = sitemap => prettier.format(sitemap, { parser: "html" });
 
 (async () => {
   const pages = await globby(["../public/sitemap/*.gz"]);

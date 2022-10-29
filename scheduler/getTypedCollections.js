@@ -60,6 +60,6 @@ exports.getTypedCollections = (db, nodeType) => {
     versionsColl,
     userVersionsColl,
     versionsCommentsColl,
-    userVersionsCommentsColl
+    userVersionsCommentsColl,
   };
 };

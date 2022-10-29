@@ -21,7 +21,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
   return {
     redirect: {
       permanent: true,
-      destination: nodeAlias ? `/node/${nodeAlias}/${nodeId}` : `/404`
-    }
+      destination: nodeAlias ? `/node/${nodeAlias}/${nodeId}` : `/404`,
+    },
   } as GetServerSidePropsResult<any>;
 };

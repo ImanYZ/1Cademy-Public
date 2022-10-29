@@ -14,7 +14,7 @@ const formatted = sitemap => prettier.format(sitemap, { parser: "html" });
     "../pages/**/*.tsx",
     "../pages/*.tsx",
     // exclude
-    "!../pages/_*.tsx"
+    "!../pages/_*.tsx",
   ]);
 
   const pagesSitemap = `

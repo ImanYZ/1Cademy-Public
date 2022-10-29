@@ -4,15 +4,19 @@ const prettier = require("prettier");
 const getDate = new Date().toISOString();
 import { db } from "../lib/admin.ts";
 
-const BASE_URL = 'https://node.1cademy.us';
+const BASE_URL = "https://node.1cademy.us";
 
-const formatted = (sitemap) => prettier.format(sitemap, { parser: "html" });
+const formatted = sitemap => prettier.format(sitemap, { parser: "html" });
 
-const escapeBreaksQuotes = (text) => {
-  return text.replace(/(?:\r\n|\r|\n)/g, "<br>").replace(/['"]/g, "").trim().toLowerCase();
+const escapeBreaksQuotes = text => {
+  return text
+    .replace(/(?:\r\n|\r|\n)/g, "<br>")
+    .replace(/['"]/g, "")
+    .trim()
+    .toLowerCase();
 };
 
-const encodeTitle = (title) => {
+const encodeTitle = title => {
   return encodeURI(escapeBreaksQuotes(title)).replace(/[&\/\?\\]/g, "");
 };
 
@@ -31,7 +35,7 @@ const encodeTitle = (title) => {
       if (nodeValue > ObjValues.value) {
         nodes[nodeTitle] = {
           id: nodeId,
-          value: (nodeValue + 1),
+          value: nodeValue + 1,
           updatedAt: nodeUpdatedAt,
         };
       }
@@ -49,18 +53,20 @@ const encodeTitle = (title) => {
       return;
     }
     const nodeTitle = encodeTitle(title);
-    return `${BASE_URL}/node/${nodeTitle}/${node.id}`
+    return `${BASE_URL}/node/${nodeTitle}/${node.id}`;
   });
 
   const allPaths = await [...dynamicPaths];
 
   const nodesSitemap = `
     ${allPaths
-      .map(url => (
-        `<url>
+      .map(
+        url =>
+          `<url>
             <loc>${url}</loc>
             <lastmod>${getDate}</lastmod>
-          </url>`))
+          </url>`
+      )
       .join("")}
   `;
 

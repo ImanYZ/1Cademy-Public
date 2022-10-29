@@ -1,0 +1,632 @@
+body {
+  background-image: none;
+  background-color: #121212;
+}
+body.Image {
+  background-image: url(../../public/darkModeLibraryBackground.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: none;
+}
+body.LightMode {
+  background-image: none;
+  background-color: #dfdfdf;
+}
+body.Image.LightMode {
+  background-image: url(../../public/lightModeLibraryBackground.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: none;
+}
+
+#AppContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.UserAvatar {
+  position: relative;
+  white-space: nowrap;
+  margin: 4px 4px 4px 4px;
+  height: 85px;
+  line-height: 85px;
+  width: 85px;
+  border-radius: 50%;
+  font-family: Roboto, Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  text-align: center;
+  background-color: transparent;
+  color: white;
+  overflow: hidden;
+}
+.UserAvatar img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: auto;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+#SignOutButton button:hover,
+.SidebarButton button:hover {
+  -webkit-box-shadow: 1px 1px 13px 4px rgba(190, 190, 190, 1);
+  -moz-box-shadow: 1px 1px 13px 4px rgba(190, 190, 190, 1);
+  box-shadow: 1px 1px 13px 4px rgba(190, 190, 190, 1);
+}
+
+.select__input input {
+  height: 22px !important;
+  margin: 0px !important;
+}
+
+.input-field.inline {
+  width: 400px;
+}
+
+.CenterredLoadingImageContainer {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  height: 100vh;
+  width: 100vw;
+  padding: 0px;
+  /* margin: 0 0 0 5.2%; */
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border: "solid 2px red";
+  background: rgba(0, 0, 0, 0.452);
+}
+
+.CenterredLoadingImage {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 150px;
+  border: "solid 2px yellow";
+
+  /* margin-bottom: 10px; */
+}
+
+.FileUploadPercentage {
+  margin-left: 10px;
+}
+
+.errorMessage {
+  display: block;
+  color: red;
+}
+
+.Tooltip .TooltipText {
+  cursor: default;
+  width: 220px;
+  background-color: #333;
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 1s, visibility 1s; /* vendorless fallback */
+  -o-transition: opacity 1s, visibility 1s; /* opera */
+  -ms-transition: opacity 1s, visibility 1s; /* IE 10 */
+  -moz-transition: opacity 1s, visibility 1s; /* Firefox */
+  -webkit-transition: opacity 1s, visibility 1s; /*safari and chrome */
+}
+.LightMode .Tooltip .TooltipText {
+  background-color: #fff;
+  color: #000;
+}
+
+.Tooltip:hover {
+  z-index: 100;
+}
+.Tooltip:hover .TooltipText {
+  visibility: visible;
+  opacity: 1;
+}
+.Tooltip .TooltipText.Right {
+  top: -10px;
+  left: 112%;
+}
+.Tooltip .TooltipText.Left {
+  top: -10px;
+  right: 112%;
+}
+.Tooltip .TooltipText.Top {
+  bottom: 130%;
+  left: 50%;
+  margin-left: -110px; /* Use half of the width (250/2 = 125)!, to center the Tooltip */
+}
+.Tooltip .TooltipText.Bottom {
+  top: 130%;
+  left: 50%;
+  margin-left: -110px; /* Use half of the width (250/2 = 125)!, to center the Tooltip */
+}
+.Tooltip .TooltipText.BottomLeft {
+  top: 130%;
+  right: 0px;
+}
+.Tooltip .TooltipText.Top::after {
+  content: " ";
+  position: absolute;
+  top: 100%; /* At the bottom of the Tooltip */
+  left: 50%;
+  margin-left: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.LightMode .Tooltip .TooltipText.Top::after {
+  border-color: #fff transparent transparent transparent;
+}
+
+.Tooltip .TooltipText.Bottom::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%; /* At the top of the Tooltip */
+  left: 50%;
+  margin-left: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+}
+
+.LightMode .Tooltip .TooltipText.Bottom::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%; /* At the top of the Tooltip */
+  left: 50%;
+  margin-left: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent #fff transparent;
+}
+
+.Tooltip .TooltipText.Right::after {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  right: 100%; /* To the left of the Tooltip */
+  margin-top: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent #333 transparent transparent;
+}
+
+.LightMode .Tooltip .TooltipText.Right::after {
+  border-color: transparent #fff transparent transparent;
+}
+
+.Tooltip .TooltipText.Left::after {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  left: 100%; /* To the right of the Tooltip */
+  margin-top: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent transparent #333;
+}
+
+.LightMode .Tooltip .TooltipText.Left::after {
+  border-color: transparent transparent transparent #fff;
+}
+
+.Tooltip .TooltipText.BottomLeft::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%; /* At the top of the Tooltip */
+  left: 85%;
+  margin-left: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+}
+
+.LightMode .Tooltip .TooltipText.BottomLeft::after {
+  border-color: transparent transparent #fff transparent;
+}
+
+.material-icons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.material-icons-outlined,
+.material-icons.material-icons--outlined,
+.material-icons-two-tone,
+.material-icons.material-icons--two-tone,
+.material-icons-round,
+.material-icons.material-icons--round,
+.material-icons-sharp,
+.material-icons.material-icons--sharp {
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-icons-outlined,
+.material-icons.material-icons--outlined {
+  font-family: "Material Icons Outlined";
+}
+
+.material-icons-two-tone,
+.material-icons.material-icons--two-tone {
+  font-family: "Material Icons Two Tone";
+}
+
+.material-icons-round,
+.material-icons.material-icons--round {
+  font-family: "Material Icons Round";
+}
+
+.material-icons-sharp,
+.material-icons.material-icons--sharp {
+  font-family: "Material Icons Sharp";
+}
+
+.icon-flipped {
+  transform: scaleX(-1);
+  -moz-transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+  -ms-transform: scaleX(-1);
+}
+
+input {
+  /* border-color: #ee5e00; */
+  border: none;
+  box-shadow: none;
+}
+
+label {
+  color: #a7a7a7;
+}
+
+.input-field {
+  width: 100%;
+  margin: 0px;
+}
+
+.LightMode .collection .input,
+.LightMode #SearchQueryContainer .MuiInputAdornment-positionEnd,
+.LightMode #nodeSelect svg,
+.LightMode .tagText,
+.LightMode .input.validatedInput label,
+.LightMode label,
+.LightMode #FilterTagsSelector label,
+.LightMode #autocompleteList label {
+  color: #454545;
+}
+
+#FilterTagsSelector .Mui-focused .input label,
+#FilterTagsSelector .Mui-checked svg,
+#FilterTagsSelector .MuiCheckbox-colorSecondary.Mui-checked,
+#recentNodesList .Mui-focused .MuiSelect-root,
+#recentNodesList .Mui-focused svg,
+#autocompleteList .Mui-checked svg,
+#autocompleteList .MuiCheckbox-colorSecondary.Mui-checked {
+  color: #ff9100 !important;
+}
+.LightMode #FilterTagsSelector .Mui-focused .input label,
+.LightMode #FilterTagsSelector .Mui-checked svg,
+.LightMode #FilterTagsSelector .MuiCheckbox-colorSecondary.Mui-checked,
+.LightMode #recentNodesList .Mui-focused .MuiSelect-root,
+.LightMode #recentNodesList .Mui-focused svg,
+.LightMode #autocompleteList .Mui-checked svg,
+.LightMode #autocompleteList .MuiCheckbox-colorSecondary.Mui-checked {
+  color: unset !important;
+}
+
+.LightMode #tagModal #ModalBody,
+.LightMode #nodeSelect .MuiInputBase-root,
+.LightMode .searchSelect,
+.LightMode #autocompleteList,
+.LightMode #nodeSelectMenu .MuiPaper-root,
+.LightMode #sortFilterMenu .MuiPaper-root {
+  color: #454545;
+  background-color: #f0f0f0;
+}
+
+/* Light Mode */
+
+.LightMode .MuiChip-outlined.chip,
+.LightMode .MuiChip-outlined.chip svg,
+.LightMode #SearchQueryContainer .MuiOutlinedInput-notchedOutline,
+.LightMode #nodesUpdatedSinceContainer .MuiFormControl-root .MuiOutlinedInput-notchedOutline {
+  border-color: #454545;
+  color: #454545;
+}
+
+.MuiInputLabel-root.MuiInputLabel-root,
+.MuiInputBase-input {
+  /* color: #f6f6f6; */
+}
+.LightMode .MuiInputLabel-root.MuiInputLabel-root,
+.LightMode .MuiInputBase-input {
+  color: #454545;
+}
+
+.MuiInput-underline:hover:not(.Mui-disabled):before {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.88);
+}
+.LightMode .MuiInput-underline:hover:not(.Mui-disabled):before {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.88);
+}
+
+.FormButton {
+  display: block;
+  margin: 25px auto 25px auto;
+  width: 241px;
+}
+
+.FormButton.MuiButtonBase-root {
+  background-color: #ee5e00;
+  height: 50px;
+  margin: 0px 10px;
+}
+.FormButton.MuiButtonBase-root.Green {
+  background-color: #00bb19;
+}
+
+.FormButton.MuiButtonBase-root:hover {
+  background-color: #ff7f2a;
+}
+
+.FormButton.MuiButtonBase-root.Green:hover {
+  background-color: #01d36a;
+}
+
+.FormButton.MuiButtonBase-root.disabled {
+  background-color: #424242;
+}
+.LightMode .FormButton.MuiButtonBase-root.disabled {
+  background-color: #dcdcdc;
+}
+
+.FormButton.MuiButtonBase-root span {
+  color: #f0f0f0;
+}
+.LightMode .FormButton.MuiButtonBase-root span {
+  color: #454545;
+}
+
+.FormButton .FormButtonText {
+  margin: 10px;
+}
+
+.FormButton .preloader-wrapper {
+  margin: 10px -10px 10px 19px;
+}
+
+.DoubleInputRow {
+  display: grid;
+  grid-template-columns: auto 34px auto;
+}
+
+.FormInputs .MuiFormControl-root {
+  width: 100%;
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+
+.FormInputs .input.PleaseSpecify {
+  margin-top: 16px;
+  margin-bottom: -10px;
+}
+
+.ButtonLoading {
+  position: absolute;
+  top: 4px;
+  left: 100px;
+  z-index: 1;
+}
+
+.green-text,
+.LightMode i.green-text {
+  color: rgb(0, 211, 105);
+}
+
+.grey-text,
+.LightMode i.grey-text {
+  color: grey;
+}
+
+.red-text,
+.LightMode i.red-text {
+  color: rgb(255, 29, 29);
+}
+
+.amber-text,
+.LightMode i.amber-text {
+  color: rgb(255, 166, 0);
+}
+
+.yellow-text,
+.LightMode i.yellow-text {
+  color: yellow;
+}
+
+.deep-orange-text,
+.LightMode i.deep-orange-text {
+  color: orange;
+}
+
+.orange-text,
+.LightMode i.orange-text {
+  color: #ff8a33;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+i {
+  color: #f0f0f0;
+}
+/* .LightMode p,
+.LightMode h1,
+.LightMode h2,
+.LightMode h3,
+.LightMode h4,
+.LightMode i {
+  color: #454545;
+} */
+
+/* check: I commented this, this is spoiling the h2 in markdown render  */
+
+/* h2 {
+  color: #a7a7a7;
+  text-align: center;
+} */
+
+.FormInputs .MuiOutlinedInput-notchedOutline {
+  border-color: #424242;
+}
+
+.FormInputs .Mui-focused .MuiOutlinedInput-notchedOutline,
+.FormInputs label.Mui-focused,
+.FormInputs .MuiInput-underline:after,
+.FormInputs .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #ee5e00;
+  color: #ee5e00;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #a7a7a7;
+}
+
+.FormInputs .MuiAutocomplete-input {
+  height: 1rem;
+  padding: 7.5px 4px;
+  margin: 5px 10px;
+  font-size: 15px;
+}
+
+.FormInputs .MuiAutocomplete-inputRoot {
+  padding: 7px 0px;
+}
+
+.FormInputs svg,
+.FormInputs .MuiSelect-root,
+.EthnicityMenu .Mui-checked svg {
+  color: #ffffff;
+}
+.LightMode .FormInputs svg,
+.LightMode .FormInputs .MuiSelect-root,
+.LightMode .EthnicityMenu .Mui-checked svg {
+  color: unset;
+}
+
+.EthnicityMenu .MuiCheckbox-colorSecondary.Mui-checked,
+.FormInputs .MuiCheckbox-colorSecondary.Mui-checked {
+  color: #ee5e00;
+}
+
+#tagModal #ModalBody {
+  position: fixed;
+  width: 364px;
+  height: 350px;
+  left: 430px;
+  top: 139px;
+
+  background: #1b1b1b;
+  box-shadow: 0px 0px 10px #ffffff;
+  border-radius: 5px;
+  padding: 5px;
+}
+.LightMode #tagModal #ModalBody {
+  box-shadow: 0px 0px 10px rgb(0, 204, 255, 0.7);
+}
+
+#tagModal #ModalCloseButton .CloseButton {
+  margin: 8px 0px;
+}
+
+/* Change autocomplete styles in WebKit */
+/* from https://stackoverflow.com/questions/2781549/removing-input-background-colour-for-chrome-autocomplete */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ff9100;
+  -webkit-box-shadow: 0px 0px 0px 100px #1f1f1f inset !important;
+  box-shadow: 0px 0px 0px 100px #1f1f1f inset !important;
+  -webkit-text-fill-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+.LightMode input:-webkit-autofill,
+.LightMode input:-webkit-autofill:hover,
+.LightMode input:-webkit-autofill:focus,
+.LightMode input:-webkit-autofill:active,
+.LightMode textarea:-webkit-autofill,
+.LightMode textarea:-webkit-autofill:hover,
+.LightMode textarea:-webkit-autofill:focus,
+.LightMode select:-webkit-autofill,
+.LightMode select:-webkit-autofill:hover,
+.LightMode select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0px 0px 0px 100px #f0f0f0 inset !important;
+  box-shadow: 0px 0px 0px 100px #f0f0f0 inset !important;
+  -webkit-text-fill-color: #454545;
+}
+
+.MuiListItem-root .MuiSvgIcon-root,
+.MuiAutocomplete-option .MuiSvgIcon-root,
+.MuiTreeItem-root .MuiSvgIcon-root {
+  /* fill: #f0f0f0; */
+}
+
+.LightMode .MuiListItem-root .MuiSvgIcon-root,
+.LightMode .MuiAutocomplete-option .MuiSvgIcon-root,
+.LightMode .MuiTreeItem-root .MuiSvgIcon-root {
+  fill: currentColor;
+}
+
+.ChartTitle {
+  margin: 13px 25px 0px 25px;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 19px;
+  color: white;
+}
+
+.LightMode .ChartTitle {
+  color: #000;
+}
+
+.Striked {
+  text-decoration: line-through grey;
+}
+
+.modelInSearchTags {
+  margin-top: 5px !important;
+  height: 235px;
+}

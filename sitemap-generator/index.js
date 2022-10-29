@@ -17,8 +17,8 @@ const admin = firebaseAdmin.initializeApp({
     token_uri: process.env.ONECADEMYCRED_TOKEN_URI,
     auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
     client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
-    databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL
-  })
+    databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
+  }),
 });
 
 // bucket storage initialization, in our case storage was in different project otherwise we can use single service to connect both of services
@@ -33,8 +33,8 @@ const storage = new Storage({
     auth_uri: process.env.GCSTORAGE_AUTH_URI,
     token_uri: process.env.GCSTORAGE_TOKEN_URI,
     auth_provider_x509_cert_url: process.env.GCSTORAGE_AUTH_PROVIDER_X509_CERT_URL,
-    client_x509_cert_url: process.env.GCSTORAGE_CLIENT_X509_CERT_URL
-  }
+    client_x509_cert_url: process.env.GCSTORAGE_CLIENT_X509_CERT_URL,
+  },
 });
 const bucket = storage.bucket(process.env.STATIC_STORAGE_BUCKET);
 
@@ -99,7 +99,7 @@ async function main() {
     const nodeData = node.data();
     communityIds.push({
       id: node.id,
-      title: nodeData.title
+      title: nodeData.title,
     });
     console.log(
       `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
@@ -109,7 +109,7 @@ async function main() {
     );
     pages[node.id] = {
       url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
-      updated_at: nodeData.updatedAt.toDate().toISOString()
+      updated_at: nodeData.updatedAt.toDate().toISOString(),
     };
   }
 
@@ -120,7 +120,7 @@ async function main() {
       .where("deleted", "==", false)
       .where("tags", "array-contains", {
         node: community.id,
-        title: community.title
+        title: community.title,
       })
       .get();
 
@@ -136,7 +136,7 @@ async function main() {
       );
       pages[contentNode.id] = {
         url: `${process.env.APP_URL}/node/${generateAlias(contentNodeData.title)}/${contentNode.id}`,
-        updated_at: contentNodeData.updatedAt.toDate().toISOString()
+        updated_at: contentNodeData.updatedAt.toDate().toISOString(),
       };
     }
   }
@@ -163,7 +163,7 @@ async function main() {
       const communitySubSmUrl = await uploadToBucket(communitySubSmFilename, _sitemapContent);
       sitemaps.push({
         url: communitySubSmUrl,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       });
       c++;
     }

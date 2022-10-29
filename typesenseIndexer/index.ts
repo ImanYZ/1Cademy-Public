@@ -25,11 +25,11 @@ const firebaseApp: App = initializeApp({
     auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
     client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
     storageBucket: process.env.ONECADEMYCRED_STORAGE_BUCKET,
-    databaseURL: process.env.ONECADEMYCRED_DATABASE_URL
-  } as any)
+    databaseURL: process.env.ONECADEMYCRED_DATABASE_URL,
+  } as any),
 });
 
-const db = getFirestore(firebaseApp);
+export const db = getFirestore(firebaseApp);
 
 const getUsersFromFirestore = async () => {
   let users: { name: string; username: string; imageUrl: string }[] = [];
@@ -96,18 +96,18 @@ const getNodesData = (
     return Object.entries(nodeData.contributors || {})
       .map(
         cur =>
-        ({ ...cur[1], username: cur[0] } as {
-          fullname: string;
-          imageUrl: string;
-          reputation: number;
-          username: string;
-        })
+          ({ ...cur[1], username: cur[0] } as {
+            fullname: string;
+            imageUrl: string;
+            reputation: number;
+            username: string;
+          })
       )
       .sort((a, b) => (b.reputation = a.reputation))
       .map(contributor => ({
         fullName: contributor.fullname,
         imageUrl: contributor.imageUrl,
-        username: contributor.username
+        username: contributor.username,
       }));
   };
 
@@ -152,7 +152,9 @@ const getNodesData = (
       title: nodeData.title || "",
       titlesReferences,
       updatedAt: nodeData.updatedAt?.toMillis() || 0,
-      wrongs: nodeData.wrongs || 0
+      wrongs: nodeData.wrongs || 0,
+      netVotes: (nodeData.corrects || 0) - (nodeData.wrongs || 0),
+      versions: nodeData.versions ?? 0,
     };
   });
 };
@@ -182,7 +184,7 @@ const getReferencesData = async (nodeDocs: FirebaseFirestore.QuerySnapshot<Fireb
       return {
         node: reference.node,
         title: nodeReference?.title || "",
-        label: reference.label
+        label: reference.label,
       };
     })
   );
@@ -192,7 +194,7 @@ const getReferencesData = async (nodeDocs: FirebaseFirestore.QuerySnapshot<Fireb
       const indexReference = referencesSet.findIndex(cur => cur.title === currentReference.title);
       const processedReference: TypesenseProcessedReferences = {
         title: currentReference.title,
-        data: [{ label: currentReference.label, node: currentReference.node }]
+        data: [{ label: currentReference.label, node: currentReference.node }],
       };
       if (indexReference < 0) return [...referencesSet, processedReference];
       referencesSet[indexReference].data = [...referencesSet[indexReference].data, ...processedReference.data];
@@ -208,7 +210,7 @@ const fillInstitutionsIndex = async (forceReIndex?: boolean) => {
   const data = await getInstitutionsFirestore();
   const fields: CollectionFieldSchema[] = [
     { name: "id", type: "string" },
-    { name: "name", type: "string" }
+    { name: "name", type: "string" },
   ];
 
   await indexCollection("institutions", fields, data, forceReIndex);
@@ -219,7 +221,7 @@ const fillUsersIndex = async (forceReIndex?: boolean) => {
   const fields: CollectionFieldSchema[] = [
     { name: "username", type: "string" },
     { name: "name", type: "string" },
-    { name: "imageUrl", type: "string" }
+    { name: "imageUrl", type: "string" },
   ];
   await indexCollection("users", fields, data, forceReIndex);
 };
@@ -230,11 +232,14 @@ const fillNodesIndex = async (
 ) => {
   const data = getNodesData(nodeDocs);
   const fields: CollectionFieldSchema[] = [
-    { name: "changedAtMillis", type: "int64" },
+    { name: "changedAtMillis", type: "int64" }, // DATE_MODIFIED x
+    { name: "updatedAt", type: "int64" }, //LAST_VIEWED from updatedAt X
     { name: "content", type: "string" },
     { name: "contributorsNames", type: "string[]" },
     { name: "mostHelpful", type: "int32" },
     { name: "corrects", type: "int32" },
+    { name: "wrongs", type: "int32" }, //wrongs X
+    { name: "netVotes", type: "int32" }, //NET_NOTES x
     { name: "labelsReferences", type: "string[]" },
     { name: "institutionsNames", type: "string[]" },
     { name: "nodeType", type: "string" },
@@ -242,7 +247,8 @@ const fillNodesIndex = async (
     { name: "title", type: "string" },
     { name: "titlesReferences", type: "string[]" },
     { name: "isTag", type: "bool" },
-    { name: "institNames", type: "string[]" }
+    { name: "institNames", type: "string[]" },
+    { name: "versions", type: "int64" }, // PROPOSALS X
   ];
 
   await indexCollection("nodes", fields, data, forceReIndex);
@@ -264,21 +270,20 @@ const fillReferencesIndex = async (
 const main = async () => {
   console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
   console.log(`Begin indexing at ${new Date().toISOString()}`);
-  if (CLOUD_RUN_TASK_INDEX === 0) {
-    console.log("Index users tasks");
-    await fillUsersIndex(true);
-  }
-  if (CLOUD_RUN_TASK_INDEX === 1) {
-    console.log("Index Institutions task");
-    await fillInstitutionsIndex(true);
-  }
-  if (CLOUD_RUN_TASK_INDEX === 2) {
-    console.log("Index Nodes and References task");
-    const nodeDocs = await db.collection("nodes").get();
-    await fillNodesIndex(nodeDocs, true);
-    await fillReferencesIndex(nodeDocs, true);
-
-  }
+  // if (CLOUD_RUN_TASK_INDEX === 0) {
+  console.log("Index users tasks");
+  await fillUsersIndex(true);
+  // }
+  // if (CLOUD_RUN_TASK_INDEX === 1) {
+  console.log("Index Institutions task");
+  await fillInstitutionsIndex(true);
+  // }
+  // if (CLOUD_RUN_TASK_INDEX === 2) {
+  console.log("Index Nodes and References task");
+  const nodeDocs = await db.collection("nodes").get();
+  await fillNodesIndex(nodeDocs, true);
+  await fillReferencesIndex(nodeDocs, true);
+  // }
   console.log(`End indexing at ${new Date().toISOString()}`);
   console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);
 };

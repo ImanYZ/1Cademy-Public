@@ -36,20 +36,24 @@ defaults:
 
 jobs:
   tests:
-    name: Unit tests - jest
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [16.x]
     steps:
       - uses: actions/checkout@v2
+      - uses: isbang/compose-action@v1.3.2
+        with:
+          compose-file: "./docker-compose.dev.yml"
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: npm install and build
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run build
       - name: Unit tests
-        run: npm run test:ci
+        run:
+          npm run test:ci

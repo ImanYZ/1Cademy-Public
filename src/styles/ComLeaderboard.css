@@ -1,0 +1,121 @@
+#ComLeaderboardMain {
+  display: flex;
+  /* grid-template-columns: 145px auto; */
+  align-items: center;
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
+  height: 85px;
+  z-index: 1;
+  transition: width 1s ease-in-out; /* vendorless fallback */
+  -o-transition: width 1s; /* opera */
+  -ms-transition: width 1s; /* IE 10 */
+  -moz-transition: width 1s; /* Firefox */
+  -webkit-transition: width 1s; /*safari and chrome */
+}
+
+#ComLeaderboardMain.Minimized {
+  width: 31px;
+}
+
+#ComLeaderboardContainer {
+  height: 100%;
+  width: 100%;
+  /* padding-left: 70px; */
+  background-color: rgb(31, 31, 31);
+}
+.LightMode #ComLeaderboardContainer {
+  background-color: #f0f0f0;
+}
+
+/* #ComLeaderboardContainer.ComLeaderboardContainerSelfVotes {
+  padding-left: 88px;
+}
+#ComLeaderboardContainer.ComLeaderboardContainerOthersVotes {
+  padding-left: 100px;
+}
+#ComLeaderboardContainer.ComLeaderboardContainerOthersMonthly {
+  padding-left: 109px;
+} */
+
+#ComLeaderboardMinimizer {
+  position: relative;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 90px;
+  padding-right: 10px;
+  border-radius: 10px 0px 0px 10px;
+  background-color: rgb(31, 31, 31);
+}
+.LightMode #ComLeaderboardMinimizer {
+  background-color: #f0f0f0;
+}
+
+#ComLeaderboardMinimizer .MetaButton {
+  height: 100%;
+  width: 100%;
+}
+
+#ComLeaderbaordChanger {
+  /* position: absolute; */
+  /* top: 4px; */
+  /* left: 157px; */
+  font-size: 25px;
+  /* text-align: center; */
+}
+
+#ComLeaderbaordChangerText {
+  color: #dcdcdc;
+  font-size: 16px;
+  width: 63px;
+  text-align: center;
+  font-weight: bold;
+  /* margin-bottom: 4px; */
+}
+.LightMode #ComLeaderbaordChangerText {
+  color: #454545;
+}
+
+#ComLeaderbaordChangerIcon {
+  text-align: center;
+  font-size: 32px;
+}
+
+#ComLeaderboardContainer #MultipleChoiceBtnContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  left: 25px;
+  bottom: 80px;
+  width: 108.1px;
+  font-size: 13px;
+  border-radius: 5px;
+}
+
+#CenterredLoadingImageComLeaderboard {
+  display: flex;
+  width: 610px;
+  padding: 0px;
+  /* margin: 0 auto; */
+  /* margin-top: -34px; */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.ComLeaderbaordItems {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-left: 5px;
+}
+.ComLeaderbaordItems::-webkit-scrollbar {
+  width: 8px; /* Tamaño del scroll en vertical */
+  height: 8px; /* Tamaño del scroll en horizontal */
+}
+.ComLeaderbaordItems::-webkit-scrollbar-thumb {
+  background: rgba(105, 105, 105, 0.61);
+  border-radius: 4px;
+}

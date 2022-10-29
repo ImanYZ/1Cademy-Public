@@ -32,7 +32,7 @@ exports.updateInstitutions = async () => {
               t.update(instRef, {
                 users: [...institData.users, userDoc.id],
                 usersNum: institData.usersNum + 1,
-                domains: instDomains
+                domains: instDomains,
               });
             }
           } else {
@@ -43,7 +43,7 @@ exports.updateInstitutions = async () => {
             t.update(instRef, {
               users: [userDoc.id],
               usersNum: 1,
-              domains: instDomains
+              domains: instDomains,
             });
           }
         } else {
@@ -81,11 +81,11 @@ exports.updateInstitutions = async () => {
             } else {
               geoLoc = {
                 lng: "",
-                lat: ""
+                lat: "",
               };
               console.log({
                 institution: userData.deInstit,
-                geocodeResponse: response.data
+                geocodeResponse: response.data,
               });
             }
           }
@@ -99,7 +99,7 @@ exports.updateInstitutions = async () => {
             domains: [domainName],
             name: userData.deInstit,
             users: [userDoc.id],
-            usersNum: 1
+            usersNum: 1,
           });
         }
         const userRef = db.collection("users").doc(userDoc.id);

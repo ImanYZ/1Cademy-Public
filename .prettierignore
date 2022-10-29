@@ -3,3 +3,7 @@
 data
 .next
 coverage
+.yarn
+.next
+dist
+node_modules

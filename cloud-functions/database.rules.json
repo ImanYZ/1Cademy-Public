@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "status": {
+      "$uid": {
+		    ".read": true,
+        ".write": true
+      }
+    }
+  }
+}

@@ -73,9 +73,11 @@ export type TypesenseNodesSchema = {
   title: string; // typesense
   titlesReferences: string[]; // typesense
   updatedAt: number;
-  wrongs: number;
+  wrongs: number; //typesense
   mostHelpful: number; // typesense
   isTag: boolean; // typesense
+  versions: number; // typesense
+  netVotes: number; // typesense
 };
 
 export type TypesenseProcessedReferences = {
@@ -95,7 +97,7 @@ export enum NodeType {
   "Advertisement" = "Advertisement",
   "News" = "News",
   "Private" = "Private",
-  "Tag" = "Tag"
+  "Tag" = "Tag",
 }
 
 export type LinkedKnowledgeNode = {

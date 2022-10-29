@@ -16,8 +16,8 @@ admin = admin.initializeApp(
       auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
       client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
       storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
-      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL
-    })
+      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
+    }),
   },
   "onecademy"
 );
@@ -149,5 +149,5 @@ module.exports = {
   isFirestoreDeadlineError,
   batchSet,
   batchUpdate,
-  batchDelete
+  batchDelete,
 };

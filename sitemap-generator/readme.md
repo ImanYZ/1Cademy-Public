@@ -1,10 +1,12 @@
 ### Local Setup
- - execute `npm install`
- - copy `.env.example` as `.env`
- - update env variables
- - execute `npm run start`
+
+- execute `npm install`
+- copy `.env.example` as `.env`
+- update env variables
+- execute `npm run start`
 
 ### Build
+
 ```
 source .env
 docker build -t gcr.io/visualexp-a7d2c/sitemap-scheduler \
@@ -35,6 +37,7 @@ docker build -t gcr.io/visualexp-a7d2c/sitemap-scheduler \
 ```
 
 ### Push
+
 ```
 # optional command to authorize your push requests
 gcloud auth login
@@ -45,11 +48,13 @@ docker push gcr.io/visualexp-a7d2c/sitemap-scheduler:latest
 ```
 
 ### Deploy
+
 ```
 gcloud beta run jobs create sitemap-generator --image=gcr.io/visualexp-a7d2c/sitemap-scheduler --set-env-vars=ONECADEMYCRED_TYPE="${ONECADEMYCRED_TYPE}",ONECADEMYCRED_PROJECT_ID="${ONECADEMYCRED_PROJECT_ID}",ONECADEMYCRED_PRIVATE_KEY_ID="${ONECADEMYCRED_PRIVATE_KEY_ID}",ONECADEMYCRED_PRIVATE_KEY="${ONECADEMYCRED_PRIVATE_KEY}",ONECADEMYCRED_CLIENT_EMAIL="${ONECADEMYCRED_CLIENT_EMAIL}",ONECADEMYCRED_CLIENT_ID="${ONECADEMYCRED_CLIENT_ID}",ONECADEMYCRED_AUTH_URI="${ONECADEMYCRED_AUTH_URI}",ONECADEMYCRED_TOKEN_URI="${ONECADEMYCRED_TOKEN_URI}",ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL="${ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL}",ONECADEMYCRED_CLIENT_X509_CERT_URL="${ONECADEMYCRED_CLIENT_X509_CERT_URL}",GCSTORAGE_TYPE="${GCSTORAGE_TYPE}",GCSTORAGE_PROJECT_ID="${GCSTORAGE_PROJECT_ID}",GCSTORAGE_PRIVATE_KEY_ID="${GCSTORAGE_PRIVATE_KEY_ID}",GCSTORAGE_PRIVATE_KEY="${GCSTORAGE_PRIVATE_KEY}",GCSTORAGE_CLIENT_EMAIL="${GCSTORAGE_CLIENT_EMAIL}",GCSTORAGE_CLIENT_ID="${GCSTORAGE_CLIENT_ID}",GCSTORAGE_AUTH_URI="${GCSTORAGE_AUTH_URI}",GCSTORAGE_TOKEN_URI="${GCSTORAGE_TOKEN_URI}",GCSTORAGE_AUTH_PROVIDER_X509_CERT_URL="${GCSTORAGE_AUTH_PROVIDER_X509_CERT_URL}",GCSTORAGE_CLIENT_X509_CERT_URL="${GCSTORAGE_CLIENT_X509_CERT_URL}",STATIC_STORAGE_BUCKET="${STATIC_STORAGE_BUCKET}",NEXT_PUBLIC_DATA_BASE_URL="${NEXT_PUBLIC_DATA_BASE_URL}",NEXT_PUBLIC_PROJECT_ID="${NEXT_PUBLIC_PROJECT_ID}",APP_URL="${APP_URL}"
 ```
 
 ### To execute manually
+
 ```
 gcloud beta run jobs execute sitemap-generator
 ```
