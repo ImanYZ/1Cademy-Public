@@ -32,6 +32,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
@@ -102,6 +103,7 @@ export type OpenSidebar =
   | "USER_INFO"
   | "PROPOSALS"
   | "USER_SETTINGS"
+  | "CITATIONS"
   | null;
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
@@ -214,6 +216,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const previousLengthNodes = useRef(0);
   const g = useRef(dagreUtils.createGraph());
+
+  //Notificatios
+  const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
+  const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
+  const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
   const scrollToNode = useCallback((nodeId: string, tries = 0) => {
     devLog("scroll To Node", { nodeId, tries });
@@ -328,6 +335,9 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
 
+  // list of tags used for searching
+  // const [selectedTagsState, setSelectedTagsState] = useState([]);
+
   // temporal state with value from node to improve
   // when click in improve Node the copy of original Node is here
   // when you cancel you need to restore the node (copy nodeToImprove in the node modified)
@@ -338,7 +348,7 @@ const Dashboard = ({}: DashboardProps) => {
   // const [showClusters, setShowClusters] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
-  const [showNoNodesFoundMessage, setNoNodesFoundMessage] = useState(false);
+  const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -550,6 +560,7 @@ const Dashboard = ({}: DashboardProps) => {
           devLog("userNodesSnapshot:1", { docChanges });
           if (!docChanges.length) {
             setIsSubmitting(false);
+            setFirstLoading(false);
             setNoNodesFoundMessage(true);
             return null;
           }
@@ -558,7 +569,7 @@ const Dashboard = ({}: DashboardProps) => {
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
-          if (!docChangesFromServer.length) return null;
+          // if (!docChangesFromServer.length) return null;
 
           devLog("userNodesSnapshot:3", { docChangesFromServer });
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
@@ -674,6 +685,166 @@ const Dashboard = ({}: DashboardProps) => {
       };
     },
     [allTagsLoaded, db, snapshot, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (!allTagsLoaded) return;
+
+      const userNodesRef = collection(db, "userNodes");
+      const q = query(
+        userNodesRef,
+        where("user", "==", user.uname),
+        where("bookmarked", "==", true),
+        where("isStudied", "==", false),
+        where("deleted", "==", false)
+      );
+      const bookmarkSnapshot = onSnapshot(q, async snapshot => {
+        // console.log("on snapshot");
+        const docChanges = snapshot.docChanges();
+
+        if (!docChanges.length) {
+          setBookmarkUpdatesNum(0);
+        } else {
+          for (let change of docChanges) {
+            if (change.type === "added") {
+              setBookmarkUpdatesNum(oldbookmarkNum => oldbookmarkNum + 1);
+            } else if (change.type === "removed") {
+              setBookmarkUpdatesNum(oldbookmarkNum => oldbookmarkNum - 1);
+            }
+          }
+        }
+      });
+      return () => {
+        bookmarkSnapshot();
+      };
+    },
+    [allTagsLoaded, db, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (user?.tagId) return;
+      if (!allTagsLoaded) return;
+
+      const versionsSnapshots: any[] = [];
+      const versions: { [key: string]: any } = {};
+      const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+      for (let nodeType of NODE_TYPES_ARRAY) {
+        const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
+        if (!versionsColl || !userVersionsColl) continue;
+
+        const versionsQuery = query(
+          versionsColl,
+          where("accepted", "==", false),
+          where("tagIds", "array-contains", user.tagId),
+          where("deleted", "==", false)
+        );
+
+        const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
+          const docChanges = snapshot.docChanges();
+          if (docChanges.length > 0) {
+            // const temporalProposals:any[] = []
+            for (let change of docChanges) {
+              const versionId = change.doc.id;
+              const versionData = change.doc.data();
+              if (change.type === "removed") {
+                delete versions[versionId];
+              }
+              if (change.type === "added" || change.type === "modified") {
+                versions[versionId] = {
+                  ...versionData,
+                  id: versionId,
+                  createdAt: versionData.createdAt.toDate(),
+                  award: false,
+                  correct: false,
+                  wrong: false,
+                };
+                delete versions[versionId].deleted;
+                delete versions[versionId].updatedAt;
+
+                const q = query(
+                  userVersionsColl,
+                  where("version", "==", versionId),
+                  where("user", "==", user?.uname),
+                  limit(1)
+                );
+
+                const userVersionsDocs = await getDocs(q);
+
+                // const userVersionsDocs = await userVersionsColl
+                //   .where("version", "==", versionId)
+                //   .where("user", "==", user.uname)
+                //   .limit(1)
+                //   .get();
+
+                for (let userVersionsDoc of userVersionsDocs.docs) {
+                  const userVersion = userVersionsDoc.data();
+                  delete userVersion.version;
+                  delete userVersion.updatedAt;
+                  delete userVersion.createdAt;
+                  delete userVersion.user;
+                  versions[versionId] = {
+                    ...versions[versionId],
+                    ...userVersion,
+                  };
+                }
+              }
+            }
+
+            const pendingProposals = { ...versions };
+            const proposalsTemp = Object.values(pendingProposals);
+            setPendingProposalsNum(proposalsTemp.length);
+          }
+        });
+        versionsSnapshots.push(versionsSnapshot);
+      }
+      ``;
+      return () => {
+        for (let vSnapshot of versionsSnapshots) {
+          vSnapshot();
+        }
+      };
+    },
+    [allTagsLoaded, db, user?.tagId, user?.uname]
+    // [allTags, allTagsLoaded, db, user?.uname]
+  );
+  useEffect(
+    () => {
+      if (!db) return;
+      if (!user?.uname) return;
+      if (!allTagsLoaded) return;
+      const userNodesRef = collection(db, "notifications");
+      const q = query(userNodesRef, where("proposer", "==", user.uname));
+
+      const notificationsSnapshot = onSnapshot(q, async snapshot => {
+        // console.log("on snapshot");
+
+        const docChanges = snapshot.docChanges();
+        for (let change of docChanges) {
+          const { checked } = change.doc.data();
+          if (change.type === "removed") {
+            setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
+          }
+          if (change.type === "added" || change.type === "modified") {
+            if (checked) {
+              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
+            } else {
+              // will add in uncheckedNotificationsDict
+              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum + 1);
+            }
+          }
+        }
+      });
+      return () => {
+        notificationsSnapshot();
+      };
+    },
+    [db, user?.uname, allTagsLoaded]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
 
@@ -2024,15 +2195,14 @@ const Dashboard = ({}: DashboardProps) => {
               createdAt: Timestamp.fromDate(new Date()),
             });
           }
-          // if (
-          //   partType === "Tags" &&
-          //   //i commented this two line until we define the right states
-          //   // selectionType !== "AcceptedProposals" &&
-          //   // selectionType !== "Proposals"
-          // ) {
-          //   // setSelectedTags(tags);
-          //   // setOpenRecentNodes(true);
-          // }
+          if (
+            partType === "Tags" &&
+            nodeBookState.selectionType !== "AcceptedProposals" &&
+            nodeBookState.selectionType !== "Proposals"
+          ) {
+            // tags;
+            setOpenRecentNodes(true);
+          }
         }
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
@@ -2522,16 +2692,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
 
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
         }
+        if (chosenType === "Citations") {
+          if (openSidebar === "CITATIONS") {
+            console.log("NULLLL");
+            setOpenSidebar(null);
+            return;
+          }
+          setOpenSidebar("CITATIONS");
+          setSelectedNodeType(nodeType);
+          nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+
+          return;
+        }
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
-          console.log("selectNodeHandler 1");
           nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
@@ -2558,15 +2740,13 @@ const Dashboard = ({}: DashboardProps) => {
       }
     },
     // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      choosingNode,
+      nodeBookState.choosingNode,
       nodeBookState.selectionType,
       nodeBookState.selectedNode,
-      // selectedNode,
-      // selectionType,
       reloadPermanentGraph,
-      // proposeNodeImprovement,
+      openSidebar,
+      nodeBookDispatch,
       resetAddedRemovedParentsChildren,
     ]
   );
@@ -3589,6 +3769,9 @@ const Dashboard = ({}: DashboardProps) => {
               setOpenSideBar={onOpenSideBar}
               mapRendered={true}
               selectedUser={selectedUser}
+              uncheckedNotificationsNum={uncheckedNotificationsNum}
+              bookmarkUpdatesNum={bookmarkUpdatesNum}
+              pendingProposalsNum={pendingProposalsNum}
             />
           )}
           {user?.uname && (
@@ -3664,6 +3847,14 @@ const Dashboard = ({}: DashboardProps) => {
               settings={settings}
             />
           )}
+          {user && nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
+            <CitationsSidebar
+              open={openSidebar === "CITATIONS"}
+              onClose={() => setOpenSidebar(null)}
+              openLinkedNode={openLinkedNode}
+              identifier={nodeBookState.selectedNode}
+            />
+          )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {
             /* process.env.NODE_ENV === "development" && */ <Box
@@ -3679,7 +3870,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Box sx={{ border: "dashed 1px royalBlue" }}>
                 <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
                 <Typography>sNodetype {selectedNodeType}</Typography>
-
+                <Typography>openSidebar {openSidebar}</Typography>
                 {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
               </Box>
               <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
@@ -3705,6 +3896,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
                   <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
                   <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
+                  <Button onClick={() => setOpenSidebar("CITATIONS")}>Citation</Button>
                 </Box>
               </Box>
             </Box>
@@ -3797,7 +3989,7 @@ const Dashboard = ({}: DashboardProps) => {
                     </MapInteractionCSS>
                   </>
                 </Modal>
-                {/* {(isSubmitting || (!queueFinished && firstLoading && Object.keys(graph.nodes).length)) && (
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenterredLoadingImageContainer">
                     <Image
                       className="CenterredLoadingImage"
@@ -3808,15 +4000,15 @@ const Dashboard = ({}: DashboardProps) => {
                       height={250}
                     />
                   </div>
-                )} */}
-                {showNoNodesFoundMessage && !Object.keys(graph.nodes).length && (
+                )}
+                {/* {showNoNodesFoundMessage && !firstLoading && (
                   <>
                     <div id="ChoosingNodeMessage">
                       <p style={{ color: "orange", textAlign: "center" }}>You don't have visible nodes yet</p>
                       <p>Please open nodes using searcher sidebar</p>
                     </div>
                   </>
-                )}
+                )} */}
               </Suspense>
 
               {/* // <Modal onClick={closedSidebarClick("Media")}>
