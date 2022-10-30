@@ -728,7 +728,7 @@ const Dashboard = ({}: DashboardProps) => {
     () => {
       if (!db) return;
       if (!user?.uname) return;
-      if (user?.tagId) return;
+      if (!user?.tagId) return;
       if (!allTagsLoaded) return;
 
       const versionsSnapshots: any[] = [];
@@ -3860,8 +3860,8 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {
-            /* process.env.NODE_ENV === "development" && */ <Box
+          {process.env.NODE_ENV === "development" && (
+            <Box
               sx={{
                 position: "fixed",
                 bottom: "100px",
@@ -3904,7 +3904,7 @@ const Dashboard = ({}: DashboardProps) => {
                 </Box>
               </Box>
             </Box>
-          }
+          )}
 
           {/* end Data from map */}
           {settings.view === "Graph" && (
