@@ -3643,6 +3643,14 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenSidebar(sidebar);
   };
 
+  // this method was required to cleanup editor added, removed child and parent list
+  const cleanEditorLink = useCallback(() => {
+    setAddedParents([]);
+    setAddedChildren([]);
+    setRemovedParents([]);
+    setRemovedChildren([]);
+  }, [setAddedParents, setAddedChildren, setRemovedParents, setRemovedChildren]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3928,6 +3936,7 @@ const Dashboard = ({}: DashboardProps) => {
                   chosenNodeChanged={chosenNodeChanged}
                   referenceLabelChange={referenceLabelChange}
                   deleteLink={deleteLink}
+                  cleanEditorLink={cleanEditorLink}
                   openLinkedNode={openLinkedNode}
                   openAllChildren={openAllChildren}
                   hideNodeHandler={hideNodeHandler}
