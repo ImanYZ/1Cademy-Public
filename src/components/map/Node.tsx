@@ -100,6 +100,7 @@ type NodeProps = {
   switchChoice: any; //
   deleteChoice: any; //
   addChoice: any; //
+  cleanEditorLink: () => void;
   onNodeTitleBLur: (newTitle: string) => void; //
   saveProposedChildNode: any; //
   saveProposedImprovement: any; //
@@ -184,6 +185,7 @@ const Node = ({
   setNodeParts,
   citations,
   setOpenSideBar,
+  cleanEditorLink,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -432,6 +434,7 @@ const Node = ({
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
+      cleanEditorLink();
     }
   }, [editable]);
 
