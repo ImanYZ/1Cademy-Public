@@ -14,8 +14,10 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
+import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
+import NewChildProposal from "./NewChildProposal";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 import QuestionChoices from "./QuestionChoices";
@@ -35,6 +37,8 @@ import QuestionChoices from "./QuestionChoices";
 // CHECK: Improve this passing Full Node Data
 // this Node need to become testeable
 // also split the in (Node and FormNode) to reduce the complexity
+
+type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
   activeNode: any; //organize this i a better forme
@@ -110,7 +114,19 @@ type NodeProps = {
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  proposeNodeImprovement: any;
+  proposeNewChild: any;
 };
+
+const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
+  Concept: "local_library",
+  Relation: "share",
+  Question: "help_outline",
+  Code: "code",
+  Reference: "menu_book",
+  Idea: "emoji_objects",
+};
+
 const Node = ({
   identifier,
   activeNode,
@@ -185,6 +201,8 @@ const Node = ({
   setNodeParts,
   citations,
   setOpenSideBar,
+  proposeNodeImprovement,
+  proposeNewChild,
   cleanEditorLink,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
@@ -209,6 +227,7 @@ const Node = ({
   const previousTopRef = useRef<string>("0px");
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
+  const [openProposal, setOpenProposal] = useState(false);
 
   const [contentCopy, setContentCopy] = useState(content);
   useEffect(() => {
@@ -918,6 +937,38 @@ const Node = ({
           </div>
         </div>
       )}
+      {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
+        <Box>
+          <hr />
+          <div className="edit-improve-area">
+            <EditProposal
+              identifier={identifier}
+              openProposal={openProposal}
+              proposeNodeImprovement={proposeNodeImprovement}
+              selectedNode={nodeBookState.selectedNode}
+            />
+            <div
+              id="ProposalButtonsRow"
+              style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+            >
+              {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                (childNodeType: ProposedChildTypesIcons) => {
+                  return (
+                    <NewChildProposal
+                      key={childNodeType}
+                      childNodeType={childNodeType}
+                      icon={proposedChildTypesIcons[childNodeType]}
+                      openProposal={openProposal}
+                      setOpenProposal={setOpenProposal}
+                      proposeNewChild={proposeNewChild}
+                    />
+                  );
+                }
+              )}
+            </div>
+          </div>
+        </Box>
+      ) : null}
     </div>
   );
 };

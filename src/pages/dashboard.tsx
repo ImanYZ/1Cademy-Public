@@ -2688,7 +2688,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       scrollToNode(nodeBookState.selectedNode);
     },
-    [nodeBookState, reloadPermanentGraph, scrollToNode]
+    [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
   );
 
   const selectNode = useCallback(
@@ -2728,6 +2728,7 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenTrends(false);
           setOpenMedia(false);
           resetAddedRemovedParentsChildren();
+          setOpenSidebar(null);
           event.currentTarget.blur();
         } else {
           setOpenSidebar("PROPOSALS");
@@ -3961,6 +3962,8 @@ const Dashboard = ({}: DashboardProps) => {
                   setNodeParts={setNodeParts}
                   citations={citations}
                   setOpenSideBar={setOpenSidebar}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  proposeNewChild={proposeNewChild}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
