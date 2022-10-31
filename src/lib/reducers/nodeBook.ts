@@ -13,6 +13,8 @@ export const INITIAL_STATE: NodeBookState = {
   searchQuery: "",
   searchByTitleOnly: false,
   nodeTitleBlured: false,
+  openEditButton: false,
+  nodeId: null,
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {
@@ -41,6 +43,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, nodeTitleBlured: action.payload };
     case "setSearchByTitleOnly":
       return { ...state, searchByTitleOnly: action.payload };
+    case "setOpenEditButton":
+      return { ...state, openEditButton: action.payload.status, nodeId: action.payload.nodeId };
     default:
       return { ...state };
   }

@@ -1,0 +1,30 @@
+steps:
+  # Build the indexer container image for Scheduler
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args: ["-c", "docker build -t gcr.io/visualexp-a7d2c/twenty-five-hour-scheduler -f ./scheduler/Dockerfile ."]
+  # Push the Scheduler container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/visualexp-a7d2c/twenty-five-hour-scheduler"]
+  # Deploy Scheduler container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "beta",
+        "run",
+        "jobs",
+        "update",
+        "twenty-five-hour-scheduler",
+        "--image",
+        "gcr.io/visualexp-a7d2c/twenty-five-hour-scheduler",
+        "--tasks",
+        "1",
+        "--region",
+        "us-central1",
+        "--project",
+        "visualexp-a7d2c"
+      ]
+images:
+  - gcr.io/visualexp-a7d2c/twenty-five-hour-scheduler
+timeout: 2000s

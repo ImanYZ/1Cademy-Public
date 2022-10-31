@@ -6,7 +6,7 @@ import { Box, CircularProgress } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { useNodeBook } from "../../context/NodeBookContext";
-import EditProposal from "./EditProposal";
+//import EditProposal from "./EditProposal";
 // import { useRecoilState, useRecoilValue } from "recoil";
 // import {
 //   openProposalState,
@@ -17,20 +17,20 @@ import EditProposal from "./EditProposal";
 // import EditProposal from "../EditProposal/EditProposal";
 // import NewChildProposal from "../NewChildProposal/NewChildProposal";
 // import ProposalsList from "../ProposalsList/ProposalsList";
-import NewChildProposal from "./NewChildProposal";
+//import NewChildProposal from "./NewChildProposal";
 import ProposalsList from "./ProposalsList/ProposalsList";
 import { MemoizedSidebarTabs } from "./SidebarTabs/SidebarTabs";
 
-type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
+//type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 
-const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
-  Concept: "local_library",
-  Relation: "share",
-  Question: "help_outline",
-  Code: "code",
-  Reference: "menu_book",
-  Idea: "emoji_objects",
-};
+// const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
+//   Concept: "local_library",
+//   Relation: "share",
+//   Question: "help_outline",
+//   Code: "code",
+//   Reference: "menu_book",
+//   Idea: "emoji_objects",
+// };
 
 type ProposalsProps = {
   proposeNodeImprovement: any;
@@ -45,8 +45,8 @@ type ProposalsProps = {
 const Proposals = (props: ProposalsProps) => {
   const { nodeBookState } = useNodeBook();
   // const [selectedNode] = useState();
-  const [selectionType] = useState();
-  const [openProposal, setOpenProposal] = useState(false);
+  // const [selectionType] = useState();
+  // const [openProposal, setOpenProposal] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(false);
@@ -62,7 +62,7 @@ const Proposals = (props: ProposalsProps) => {
   }, []);
 
   useEffect(() => {
-    setOpenProposal(false);
+    //setOpenProposal(false);
     if (nodeBookState.selectedNode) {
       props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     }
@@ -73,9 +73,9 @@ const Proposals = (props: ProposalsProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.selectedNode]);
 
-  useEffect(() => {
-    setOpenProposal(false);
-  }, [selectionType]);
+  // useEffect(() => {
+  //   setOpenProposal(false);
+  // }, [selectionType]);
 
   const tabsItems = [
     {
@@ -145,7 +145,7 @@ const Proposals = (props: ProposalsProps) => {
       <div id="ProposalButtonsCollection">
         {/* <h6 style={{ margin: '0px' }}>Here Edit proposal component</h6> */}
         {/* CHECK: I commented this */}
-        <EditProposal
+        {/* <EditProposal
           openProposal={openProposal}
           proposeNodeImprovement={props.proposeNodeImprovement}
           selectedNode={nodeBookState.selectedNode}
@@ -168,7 +168,7 @@ const Proposals = (props: ProposalsProps) => {
               );
             }
           )}
-        </div>
+        </div> */}
       </div>
       <MemoizedSidebarTabs tabsTitle="Proposals tabs" tabsItems={tabsItems} />
     </div>
