@@ -114,6 +114,8 @@ export type SetNodeTitleBluredAction = {
 export type SetSearchByTitleOnly = {
   type: "setSearchByTitleOnly";
   payload: boolean;
+};
+
 export type SetOpenEditButtonAction = {
   type: "setOpenEditButton";
   payload: any;
@@ -131,9 +133,8 @@ export type DispatchNodeBookActions =
   | SetSelectedUserAction
   | SetSearchQueryAction
   | SetNodeTitleBluredAction
-  | SetSearchByTitleOnly;
+  | SetSearchByTitleOnly
   | SetOpenEditButtonAction;
-
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
