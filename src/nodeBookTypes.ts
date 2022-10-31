@@ -52,6 +52,8 @@ export interface NodeBookState {
   readonly searchByTitleOnly: boolean;
   readonly searchQuery: string;
   readonly nodeTitleBlured: boolean;
+  readonly openEditButton: boolean;
+  readonly nodeId: any;
 }
 
 export type SetSNodeAction = {
@@ -112,6 +114,9 @@ export type SetNodeTitleBluredAction = {
 export type SetSearchByTitleOnly = {
   type: "setSearchByTitleOnly";
   payload: boolean;
+export type SetOpenEditButtonAction = {
+  type: "setOpenEditButton";
+  payload: any;
 };
 
 export type DispatchNodeBookActions =
@@ -127,6 +132,8 @@ export type DispatchNodeBookActions =
   | SetSearchQueryAction
   | SetNodeTitleBluredAction
   | SetSearchByTitleOnly;
+  | SetOpenEditButtonAction;
+
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;

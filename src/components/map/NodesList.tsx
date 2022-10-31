@@ -35,6 +35,7 @@ type NodeListProps = {
   switchChoice: any;
   deleteChoice: any;
   addChoice: any;
+  cleanEditorLink: () => void;
   onNodeTitleBlur: (newTitle: string) => void;
   setOpenSearch: any;
   saveProposedChildNode: any;
@@ -45,6 +46,8 @@ type NodeListProps = {
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  proposeNodeImprovement: any;
+  proposeNewChild: any;
 };
 
 const NodesList = ({
@@ -80,8 +83,11 @@ const NodesList = ({
   reloadPermanentGrpah,
   setOpenMedia,
   setNodeParts,
+  cleanEditorLink,
   citations,
   setOpenSideBar,
+  proposeNodeImprovement,
+  proposeNewChild,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -136,6 +142,7 @@ const NodesList = ({
             top={nodes[nId].top}
             width={NODE_WIDTH}
             editable={nodes[nId].editable}
+            cleanEditorLink={cleanEditorLink}
             unaccepted={unaccepted}
             nodeType={nodes[nId].nodeType}
             isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
@@ -206,6 +213,8 @@ const NodesList = ({
             setNodeParts={setNodeParts}
             citations={citations}
             setOpenSideBar={setOpenSideBar}
+            proposeNodeImprovement={proposeNodeImprovement}
+            proposeNewChild={proposeNewChild}
           />
         );
       })}

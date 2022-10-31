@@ -23,6 +23,7 @@ import { INotification } from "src/types/INotification";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IReputation } from "src/types/IReputationPoint";
 import { ITag } from "src/types/ITag";
+import { firstWeekMonthDays } from "src/utils";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { createUserNode } from "testUtils/fakers/userNode";
@@ -86,15 +87,23 @@ describe("POST /api/proposeNodeImprovement", () => {
     })
   );
 
-  nodes.push(
-    createNode({
-      admin: users[0],
-      isTag: false,
-      corrects: 1,
-      parents: [nodes[1]],
-      tags: [],
-    })
-  );
+  const node3 = createNode({
+    admin: users[0],
+    isTag: false,
+    corrects: 1,
+    parents: [nodes[1]],
+    tags: [],
+  });
+
+  nodes.push(node3);
+
+  // node to be a tag and we need this to check if its getting reputation and 1Cademy node (default node) also getting reputation
+  const node4 = createNode({
+    admin: users[0],
+    isTag: true,
+    corrects: 1,
+  });
+  nodes.push(node4);
 
   // setting default community to default user
   users[0].tag = nodes[0].title;
@@ -121,7 +130,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
-      tags: [nodes[0]],
+      tags: [],
       parents: [nodes[0]],
       children: [nodes[2]],
     }),
@@ -130,7 +139,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       accepted: false,
       proposer: users[0],
       corrects: 1,
-      tags: [nodes[0]],
+      tags: [],
       parents: [nodes[0]],
       children: [nodes[1]],
     }),
@@ -239,8 +248,8 @@ describe("POST /api/proposeNodeImprovement", () => {
           data: {
             ...nodes[2],
             title: "RANDOM TITLE",
-            tagIds: [nodes[0].documentId],
-            tags: [nodes[0].title],
+            tagIds: [nodes[0].documentId, node4.documentId],
+            tags: [nodes[0].title, node4.title],
             id: nodes[2].documentId,
             addedParents: [String(nodes[0].documentId)],
             addedChildren: [String(nodes[1].documentId)],
@@ -283,6 +292,7 @@ describe("POST /api/proposeNodeImprovement", () => {
         .where("proposer", "==", users[0].uname)
         .get();
       let versionData = versions.docs[0].data();
+      console.log(versions.docs.length, "versions.docs.length");
       expect(versionData?.addedTags).toBe(true);
     });
 
@@ -297,22 +307,100 @@ describe("POST /api/proposeNodeImprovement", () => {
       expect(versionData?.changedTitle).toBe(true);
     });
 
-    it("increase reputation of proposer", async () => {
-      const reputationResult = await db
-        .collection("weeklyReputations")
-        .where("uname", "==", users[0].uname)
-        .where("tagId", "==", users[0].tagId)
-        .get();
-      const reputationDocData = reputationResult.docs[0].data() as IReputation;
+    it("increase reputation of proposer all time", async () => {
       const oldReputation = positiveFields.reduce(
         (carry: number, positiveField: string) => carry + Number(reputations[0][positiveField as keyof IReputation]),
         0
       );
+      const reputationResult = await db
+        .collection("monthlyReputations")
+        .where("uname", "==", users[0].uname)
+        .where("tagId", "==", node4.documentId)
+        .get();
+      const reputationDocData = reputationResult.docs[0].data() as IReputation;
       const newReputation = positiveFields.reduce(
         (carry: number, positiveField: string) => carry + Number(reputationDocData[positiveField as keyof IReputation]),
         0
       );
       expect(newReputation).toEqual(oldReputation + 1);
+    });
+
+    it("increase reputation of proposer monthly", async () => {
+      const { firstMonthDay } = firstWeekMonthDays();
+      const reputationResult = await db
+        .collection("monthlyReputations")
+        .where("uname", "==", users[0].uname)
+        .where("tagId", "==", node4.documentId)
+        .where("firstMonthDay", "==", firstMonthDay)
+        .get();
+      const reputationDocData = reputationResult.docs[0].data() as IReputation;
+      const newReputation = positiveFields.reduce(
+        (carry: number, positiveField: string) => carry + Number(reputationDocData[positiveField as keyof IReputation]),
+        0
+      );
+      expect(newReputation).toEqual(1);
+    });
+
+    it("increase reputation of proposer weekly", async () => {
+      const { firstWeekDay } = firstWeekMonthDays();
+      const reputationResult = await db
+        .collection("weeklyReputations")
+        .where("uname", "==", users[0].uname)
+        .where("tagId", "==", node4.documentId)
+        .where("firstWeekDay", "==", firstWeekDay)
+        .get();
+      const reputationDocData = reputationResult.docs[0].data() as IReputation;
+      const newReputation = positiveFields.reduce(
+        (carry: number, positiveField: string) => carry + Number(reputationDocData[positiveField as keyof IReputation]),
+        0
+      );
+      expect(newReputation).toEqual(1);
+    });
+
+    it("increase reputation of proposer all time (1Cademy)", async () => {
+      const reputationResult = await db
+        .collection("monthlyReputations")
+        .where("uname", "==", users[0].uname)
+        .where("tagId", "==", nodes[0].documentId)
+        .get();
+      const reputationDocData = reputationResult.docs[0].data() as IReputation;
+      const newReputation = positiveFields.reduce(
+        (carry: number, positiveField: string) => carry + Number(reputationDocData[positiveField as keyof IReputation]),
+        0
+      );
+      expect(newReputation).toEqual(1);
+    });
+
+    it("increase reputation of proposer monthly (1Cademy)", async () => {
+      const { firstMonthDay } = firstWeekMonthDays();
+      const reputationResult = await db
+        .collection("monthlyReputations")
+        .where("uname", "==", users[0].uname)
+        .where("tagId", "==", nodes[0].documentId)
+        .where("firstMonthDay", "==", firstMonthDay)
+        .get();
+      const reputationDocData = reputationResult.docs[0].data() as IReputation;
+      const newReputation = positiveFields.reduce(
+        (carry: number, positiveField: string) => carry + Number(reputationDocData[positiveField as keyof IReputation]),
+        0
+      );
+      expect(newReputation).toEqual(1);
+    });
+
+    it("increase reputation of proposer weekly (1Cademy)", async () => {
+      const { firstWeekDay } = firstWeekMonthDays();
+      const reputationResult = await db
+        .collection("weeklyReputations")
+        .where("uname", "==", users[0].uname)
+        .where("tagId", "==", nodes[0].documentId)
+        .where("firstWeekDay", "==", firstWeekDay)
+        .get();
+      const reputationDocData = reputationResult.docs[0].data() as IReputation;
+      const newReputation = positiveFields.reduce(
+        (carry: number, positiveField: string) => carry + Number(reputationDocData[positiveField as keyof IReputation]),
+        0
+      );
+      expect(newReputation).toEqual(1);
     });
 
     it("increment notification count (pendingPropsNums) for each community member beside who is proposing version", async () => {

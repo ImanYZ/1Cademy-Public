@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import { Button, Container, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
@@ -728,7 +729,7 @@ const Dashboard = ({}: DashboardProps) => {
     () => {
       if (!db) return;
       if (!user?.uname) return;
-      if (user?.tagId) return;
+      if (!user?.tagId) return;
       if (!allTagsLoaded) return;
 
       const versionsSnapshots: any[] = [];
@@ -2687,7 +2688,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       scrollToNode(nodeBookState.selectedNode);
     },
-    [nodeBookState, reloadPermanentGraph, scrollToNode]
+    [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
   );
 
   const selectNode = useCallback(
@@ -2727,6 +2728,7 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenTrends(false);
           setOpenMedia(false);
           resetAddedRemovedParentsChildren();
+          setOpenSidebar(null);
           event.currentTarget.blur();
         } else {
           setOpenSidebar("PROPOSALS");
@@ -2813,10 +2815,10 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
         // isTheSame = compareLinks(oldNode.tags, newNode.tags, isTheSame, false)
         // isTheSame = compareLinks(oldNode.references, newNode.references, isTheSame, false)
-        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
-        isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+        isTheSame = isTheSame && compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = isTheSame && compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = isTheSame && compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
+        isTheSame = isTheSame && compareLinks(oldNode.children, newNode.children, isTheSame, false);
 
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
@@ -3644,6 +3646,19 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenSidebar(sidebar);
   };
 
+  // this method was required to cleanup editor added, removed child and parent list
+  const cleanEditorLink = useCallback(() => {
+    setAddedParents([]);
+    setAddedChildren([]);
+    setRemovedParents([]);
+    setRemovedChildren([]);
+  }, [setAddedParents, setAddedChildren, setRemovedParents, setRemovedChildren]);
+
+  const onScrollToLastNode = () => {
+    if (!nodeBookState.selectedNode) return;
+    scrollToNode(nodeBookState.selectedNode);
+  };
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3861,51 +3876,39 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {
-            /* process.env.NODE_ENV === "development" && */ <Box
+          {nodeBookState.selectedNode && (
+            <Tooltip title="Scroll to last Selected Node" placement="left">
+              <IconButton
+                color="secondary"
+                sx={{
+                  position: "fixed",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+                onClick={onScrollToLastNode}
+              >
+                <MyLocationIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {process.env.NODE_ENV === "development" && (
+            <Tooltip
+              title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                bottom: "100px",
+                top: "60px",
                 right: "10px",
                 zIndex: "1300",
-                background: "#123",
-                color: "white",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
               }}
             >
-              <Box sx={{ border: "dashed 1px royalBlue" }}>
-                <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-                <Typography>sNodetype {selectedNodeType}</Typography>
-                <Typography>openSidebar {openSidebar}</Typography>
-                {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
-              </Box>
-              <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
-              <Box sx={{ float: "right" }}>
-                <Tooltip title={"Watch geek data"}>
-                  <>
-                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                      <CodeIcon color="warning" />
-                    </IconButton>
-                    {/* <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
-                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
-                    <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
-                    <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                    <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button> */}
-                  </>
-                </Tooltip>
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                  <Button onClick={() => setOpenSidebar(null)}>Open Main Sidebar</Button>
-                  <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
-                  <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
-                  <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                  <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button>
-                  <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
-                  <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
-                  <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
-                  <Button onClick={() => setOpenSidebar("CITATIONS")}>Citation</Button>
-                </Box>
-              </Box>
-            </Box>
-          }
+              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
           {/* end Data from map */}
           {settings.view === "Graph" && (
@@ -3929,6 +3932,7 @@ const Dashboard = ({}: DashboardProps) => {
                   chosenNodeChanged={chosenNodeChanged}
                   referenceLabelChange={referenceLabelChange}
                   deleteLink={deleteLink}
+                  cleanEditorLink={cleanEditorLink}
                   openLinkedNode={openLinkedNode}
                   openAllChildren={openAllChildren}
                   hideNodeHandler={hideNodeHandler}
@@ -3960,6 +3964,8 @@ const Dashboard = ({}: DashboardProps) => {
                   setNodeParts={setNodeParts}
                   citations={citations}
                   setOpenSideBar={setOpenSidebar}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  proposeNewChild={proposeNewChild}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

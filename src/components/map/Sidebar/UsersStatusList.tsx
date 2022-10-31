@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { OpenSidebar } from "@/pages/dashboard";
@@ -124,6 +124,32 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   //   };
   // }, [scale]);
 
+  const loadUserData = useCallback(
+    (userId: string) => {
+      let singleUserQuery = query(collection(db, "users"), where(documentId(), "==", userId));
+      getDocs(singleUserQuery).then(snapshot => {
+        if (snapshot.docs.length) {
+          let userDoc = snapshot.docs[0];
+          let userData = userDoc.data();
+          const { fName, lName, createdAt, imageUrl, chooseUname } = userData;
+          setUsersDict(prevUserDict => {
+            return {
+              ...prevUserDict,
+              [userId]: {
+                createdAt,
+                imageUrl,
+                fullname: fName + " " + lName,
+                chooseUname,
+                userId,
+              },
+            };
+          });
+        }
+      });
+    },
+    [setUsersDict]
+  );
+
   // Get user data by tag selected
   useEffect(() => {
     if (!user) return;
@@ -147,7 +173,9 @@ const UsersStatusList = (props: UsersStatusListProps) => {
           };
         }
       }
-      setUsersDict({ ...usersDictTemp });
+      setUsersDict(prevUserDict => {
+        return { ...prevUserDict, ...usersDictTemp };
+      });
       setUsersDictLoaded(true);
     });
     return () => usersSnapshot();
@@ -227,15 +255,20 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   }, [db, reputationsOthersMonthlyLoaded]);
 
   const loadReputationPoints = useCallback(
-    (reputationsDict: any) => {
+    (reputationsDict: any, usersStatus: string) => {
       const usersListTmp = [];
+      for (let uname in reputationsDict) {
+        if (!usersDict.hasOwnProperty(uname)) {
+          loadUserData(uname);
+        }
+      }
       const onlineUsersListTmp = [];
       for (let uname of Object.keys(usersDict)) {
         if (uname in reputationsDict) {
           const user = usersDict[uname];
           const userReputation = reputationsDict[uname];
-          if (
-            ("totalPoints" in userReputation && userReputation.totalPoints >= 13) ||
+          const totalPoints =
+            userReputation.totalPoints ||
             userReputation.cnCorrects +
               userReputation.cnInst -
               userReputation.cnWrongs +
@@ -266,9 +299,9 @@ const UsersStatusList = (props: UsersStatusListProps) => {
               userReputation.iCorrects +
               userReputation.iInst -
               userReputation.iWrongs +
-              userReputation.lterm >=
-              13
-          ) {
+              userReputation.lterm;
+          // only skip small amounts if user status is for all time filter and other filter
+          if (((usersStatus !== "All Time" && usersStatus !== "Others Votes") || totalPoints >= 13) && totalPoints) {
             if (onlineUsers.includes(uname)) {
               onlineUsersListTmp.push(usersListObjFromReputationObj(user, userReputation, uname));
             } else {
@@ -287,31 +320,31 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "All Time") {
-      loadReputationPoints(reputationsDict);
+      loadReputationPoints(reputationsDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Monthly") {
-      loadReputationPoints(reputationsMonthlyDict);
+      loadReputationPoints(reputationsMonthlyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsMonthlyDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Weekly") {
-      loadReputationPoints(reputationsWeeklyDict);
+      loadReputationPoints(reputationsWeeklyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsWeeklyDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Others Votes") {
-      loadReputationPoints(reputationsOthersDict);
+      loadReputationPoints(reputationsOthersDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsOthersDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Others Monthly") {
-      loadReputationPoints(reputationsOthersMonthlyDict);
+      loadReputationPoints(reputationsOthersMonthlyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsOthersMonthlyDict, props.usersStatus, loadReputationPoints]);
 
