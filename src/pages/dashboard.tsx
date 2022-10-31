@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import { Button, Container, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
@@ -3868,6 +3869,19 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
+          <IconButton
+            color="secondary"
+            sx={{
+              position: "fixed",
+              top: "100px",
+              right: "10px",
+              zIndex: "1300",
+              background: "#123",
+              // color: theme=>theme.palette.mode ==="dark" ? theme.palette.common.,
+            }}
+          >
+            <MyLocationIcon />
+          </IconButton>
           {process.env.NODE_ENV === "development" && (
             <Box
               sx={{
