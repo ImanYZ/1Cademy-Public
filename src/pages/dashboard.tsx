@@ -2688,7 +2688,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       scrollToNode(nodeBookState.selectedNode);
     },
-    [nodeBookState, reloadPermanentGraph, scrollToNode]
+    [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
   );
 
   const selectNode = useCallback(
@@ -2728,6 +2728,7 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenTrends(false);
           setOpenMedia(false);
           resetAddedRemovedParentsChildren();
+          setOpenSidebar(null);
           event.currentTarget.blur();
         } else {
           setOpenSidebar("PROPOSALS");
@@ -2813,10 +2814,10 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
         // isTheSame = compareLinks(oldNode.tags, newNode.tags, isTheSame, false)
         // isTheSame = compareLinks(oldNode.references, newNode.references, isTheSame, false)
-        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
-        isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+        isTheSame = isTheSame && compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = isTheSame && compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = isTheSame && compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
+        isTheSame = isTheSame && compareLinks(oldNode.children, newNode.children, isTheSame, false);
 
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
@@ -3960,6 +3961,8 @@ const Dashboard = ({}: DashboardProps) => {
                   setNodeParts={setNodeParts}
                   citations={citations}
                   setOpenSideBar={setOpenSidebar}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  proposeNewChild={proposeNewChild}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

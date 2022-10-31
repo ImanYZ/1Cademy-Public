@@ -43,7 +43,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeVideo,
       nodeAudio,
       parents,
-      references,
       tagIds,
       tags,
       subType,
@@ -60,9 +59,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let batch = db.batch();
     let writeCounts = 0;
 
-    const _references = references.map((_reference: INodeLink) => _reference.title);
-    const referenceIds = references.map((_reference: INodeLink) => _reference.node);
-    const referenceLabels = references.map((_reference: INodeLink) => _reference.label);
+    let { referenceIds, references, referenceLabels } = data || {};
+    if (references.length && typeof references[0] === "object") {
+      referenceIds = references.map((_reference: INodeLink) => _reference.node);
+      referenceLabels = references.map((_reference: INodeLink) => _reference.label);
+      references = references.map((_reference: INodeLink) => _reference.title);
+    }
+    if (!Array.isArray(referenceIds)) {
+      referenceIds = [];
+    }
+    if (!Array.isArray(references)) {
+      references = [];
+    }
+    if (!Array.isArray(referenceLabels)) {
+      referenceLabels = [];
+    }
 
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     const { nodeData, nodeRef } = await getNode({ nodeId: id });
@@ -79,7 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       parents,
       referenceIds,
       referenceLabels,
-      references: _references,
+      references: references,
       tagIds,
       tags,
       proposer: userData.uname,

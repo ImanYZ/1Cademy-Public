@@ -310,7 +310,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
           }
         }
       }
-      console.log(usersListTmp, onlineUsersListTmp, reputationsDict, "usersListTmp, onlineUsersListTmp");
       usersListTmp.sort((u1, u2) => u2.totalPoints - u1.totalPoints);
       onlineUsersListTmp.sort((u1, u2) => u2.totalPoints - u1.totalPoints);
       setUsersList(usersListTmp);
@@ -333,7 +332,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Weekly") {
-      console.log(reputationsWeeklyDict, "reputationsWeeklyDict");
       loadReputationPoints(reputationsWeeklyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsWeeklyDict, props.usersStatus, loadReputationPoints]);

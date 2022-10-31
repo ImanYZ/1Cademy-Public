@@ -256,6 +256,9 @@ export const proposalNotification = async ({
 };
 
 export const compareFlatLinks = ({ links1, links2 }: any) => {
+  if (typeof links2 === "undefined" && typeof links1 !== "undefined") {
+    return false;
+  }
   if (links1.length !== links2.length) {
     return false;
   }
