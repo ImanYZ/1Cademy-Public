@@ -298,8 +298,14 @@ export const imageLoaded = async (imageUrl: any) => {
 
 export const findDiff = (str1: String, str2: String) => {
   let diff = "";
-  str2.split("").forEach(function (val: any, i: any) {
-    if (val != str1.charAt(i)) diff += val;
+  let stringForSplit = str2;
+  let stringForDiff = str1;
+  if (str1.length > str2.length) {
+    stringForSplit = str1;
+    stringForDiff = str2;
+  }
+  stringForSplit.split("").forEach(function (val: any, i: any) {
+    if (val != stringForDiff.charAt(i)) diff += val;
   });
   return diff;
 };
