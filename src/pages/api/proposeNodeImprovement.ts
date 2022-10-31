@@ -12,6 +12,7 @@ import {
   proposalNotification,
   versionCreateUpdate,
 } from "../../utils";
+import { INodeLink } from "src/types/INodeLink";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -42,8 +43,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeVideo,
       nodeAudio,
       parents,
-      referenceIds,
-      referenceLabels,
       references,
       tagIds,
       tags,
@@ -61,6 +60,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let batch = db.batch();
     let writeCounts = 0;
 
+    const _references = references.map((_reference: INodeLink) => _reference.title);
+    const referenceIds = references.map((_reference: INodeLink) => _reference.node);
+    const referenceLabels = references.map((_reference: INodeLink) => _reference.label);
+
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     const { nodeData, nodeRef } = await getNode({ nodeId: id });
     const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
@@ -76,7 +79,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       parents,
       referenceIds,
       referenceLabels,
-      references,
+      references: _references,
       tagIds,
       tags,
       proposer: userData.uname,
