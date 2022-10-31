@@ -54,10 +54,13 @@ export const SidebarWrapper = ({
       onClose={onClose}
       PaperProps={{
         sx: {
+          minWidth: { xs: "25vw", sm: width },
           width,
+          maxWidth: { xs: "85vw", sm: "50vw" },
           ":hover": hoverWidth
             ? {
                 width: hoverWidth,
+                // width: { xs: "20vw", sm: hoverWidth },
               }
             : undefined,
           // border: "solid 2px yellow",
