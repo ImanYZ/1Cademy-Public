@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box } from "@mui/material";
-import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -239,6 +239,9 @@ const Node = ({
 
   const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
+
+  const [isLoading, startTransition] = useTransition();
+
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -882,6 +885,7 @@ const Node = ({
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}
               ableToPropose={ableToPropose}
+              isLoading={isLoading}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component
