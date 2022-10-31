@@ -27,7 +27,7 @@ export const ReferencesList = ({ references, sx }: ReferencesListProps) => {
     <Box sx={{ ...sx }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: "15px", mt: "20px" }}>
         <Typography variant="body2" color="text.secondary">
-          References:
+          References
         </Typography>
         <NodeTypeIcon nodeType={"Reference"} sx={{ ml: "10px" }} />
       </Box>

@@ -5,6 +5,7 @@ import { getNodePageUrl, getReferenceTitle } from "@/lib/utils/utils";
 
 import { LinkedKnowledgeNode } from "../knowledgeTypes";
 import { LinkedTag } from "./LinkedTag";
+import NodeTypeIcon from "./NodeTypeIcon";
 
 type TagsListProps = {
   tags: LinkedKnowledgeNode[];
@@ -16,9 +17,12 @@ export const TagsList = ({ tags, sx }: TagsListProps) => {
 
   return (
     <Box sx={{ ...sx }}>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
-        Tags:
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", mb: "15px", mt: "20px" }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
+          Tags
+        </Typography>
+        <NodeTypeIcon nodeType={"Tag"} sx={{ ml: "10px" }} />
+      </Box>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {tags.map((node, idx) => (
           <LinkedTag
