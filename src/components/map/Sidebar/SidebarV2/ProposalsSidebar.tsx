@@ -4,8 +4,8 @@ import { UserTheme } from "src/knowledgeTypes";
 
 import referencesDarkTheme from "../../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../../public/references-light-theme.jpg";
-import EditProposal from "../../EditProposal";
-import NewChildProposal from "../../NewChildProposal";
+// import EditProposal from "../../EditProposal";
+// import NewChildProposal from "../../NewChildProposal";
 import ProposalsList from "../../ProposalsList/ProposalsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -22,16 +22,16 @@ type ProposalsSidebarProps = {
   openProposal: any;
   selectedNode: string | null;
 };
-type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
+// type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 
-const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
-  Concept: "local_library",
-  Relation: "share",
-  Question: "help_outline",
-  Code: "code",
-  Reference: "menu_book",
-  Idea: "emoji_objects",
-};
+// const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
+//   Concept: "local_library",
+//   Relation: "share",
+//   Question: "help_outline",
+//   Code: "code",
+//   Reference: "menu_book",
+//   Idea: "emoji_objects",
+// };
 const ProposalsSidebar = ({
   open,
   onClose,
@@ -48,9 +48,9 @@ const ProposalsSidebar = ({
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
-  const [openProposalItem, setOpenProposalItem] = useState(false);
+  // const [openProposalItem, setOpenProposalItem] = useState(false);
   const [value, setValue] = React.useState(0);
-  const [selectionType] = useState();
+  // const [selectionType] = useState();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -66,7 +66,7 @@ const ProposalsSidebar = ({
   }, []);
 
   useEffect(() => {
-    setOpenProposalItem(false);
+    //setOpenProposalItem(false);
     if (selectedNode) {
       fetchProposals(setIsAdmin, setIsRetrieving, setProposals, "Segundo");
     }
@@ -77,9 +77,9 @@ const ProposalsSidebar = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNode]);
 
-  useEffect(() => {
-    setOpenProposalItem(false);
-  }, [selectionType]);
+  // useEffect(() => {
+  //   setOpenProposalItem(false);
+  // }, [selectionType]);
 
   const tabsItems = [
     {
@@ -160,7 +160,7 @@ const ProposalsSidebar = ({
             <div id="ProposalButtonsCollection">
               {/* <h6 style={{ margin: '0px' }}>Here Edit proposal component</h6> */}
               {/* CHECK: I commented this */}
-              <EditProposal
+              {/* <EditProposal
                 openProposal={openProposalItem}
                 proposeNodeImprovement={proposeNodeImprovement}
                 selectedNode={selectedNode}
@@ -183,7 +183,7 @@ const ProposalsSidebar = ({
                     );
                   }
                 )}
-              </div>
+              </div> */}
             </div>
           </Box>
           <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>

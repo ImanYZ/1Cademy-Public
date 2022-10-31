@@ -44,6 +44,8 @@ type NodeListProps = {
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  proposeNodeImprovement: any;
+  proposeNewChild: any;
 };
 
 const NodesList = ({
@@ -80,6 +82,8 @@ const NodesList = ({
   setNodeParts,
   citations,
   setOpenSideBar,
+  proposeNodeImprovement,
+  proposeNewChild,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -203,6 +207,8 @@ const NodesList = ({
             setNodeParts={setNodeParts}
             citations={citations}
             setOpenSideBar={setOpenSideBar}
+            proposeNodeImprovement={proposeNodeImprovement}
+            proposeNewChild={proposeNewChild}
           />
         );
       })}
