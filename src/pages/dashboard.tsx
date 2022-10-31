@@ -3652,6 +3652,11 @@ const Dashboard = ({}: DashboardProps) => {
     setRemovedChildren([]);
   }, [setAddedParents, setAddedChildren, setRemovedParents, setRemovedChildren]);
 
+  const onScrollToLastNode = () => {
+    if (!nodeBookState.selectedNode) return;
+    scrollToNode(nodeBookState.selectedNode);
+  };
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3869,63 +3874,38 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          <IconButton
-            color="secondary"
-            sx={{
-              position: "fixed",
-              top: "100px",
-              right: "10px",
-              zIndex: "1300",
-              background: "#123",
-              // color: theme=>theme.palette.mode ==="dark" ? theme.palette.common.,
-            }}
-          >
-            <MyLocationIcon />
-          </IconButton>
+          {nodeBookState.selectedNode && (
+            <Tooltip title="Scroll to last Selected Node" placement="left">
+              <IconButton
+                color="secondary"
+                sx={{
+                  position: "fixed",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+                onClick={onScrollToLastNode}
+              >
+                <MyLocationIcon />
+              </IconButton>
+            </Tooltip>
+          )}
           {process.env.NODE_ENV === "development" && (
-            <Box
-              sx={{
-                position: "fixed",
-                bottom: "100px",
-                right: "10px",
-                zIndex: "1300",
-                background: "#123",
-                color: "white",
-              }}
-            >
-              <Box sx={{ border: "dashed 1px royalBlue" }}>
-                <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-                <Typography>sNodetype {selectedNodeType}</Typography>
-                <Typography>openSidebar {openSidebar}</Typography>
-                {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
-              </Box>
-              <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
-              <Box sx={{ float: "right" }}>
-                <Tooltip title={"Watch geek data"}>
-                  <>
-                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                      <CodeIcon color="warning" />
-                    </IconButton>
-                    {/* <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
-                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
-                    <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
-                    <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                    <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button> */}
-                  </>
-                </Tooltip>
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                  <Button onClick={() => setOpenSidebar(null)}>Open Main Sidebar</Button>
-                  <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
-                  <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
-                  <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                  <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button>
-                  <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
-                  <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
-                  <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
-                  <Button onClick={() => setOpenSidebar("CITATIONS")}>Citation</Button>
-                </Box>
-              </Box>
-            </Box>
+            <Tooltip title={"Watch geek data"}>
+              <IconButton
+                onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
           )}
 
           {/* end Data from map */}
