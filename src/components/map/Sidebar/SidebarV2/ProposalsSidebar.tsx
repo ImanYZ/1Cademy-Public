@@ -202,7 +202,10 @@ const ProposalsSidebar = ({
 
 export const MemoizedProposalsSidebar = React.memo(ProposalsSidebar, (prev, next) => {
   return (
-    prev.theme === next.theme && prev.open === next.open && prev.fetchProposals === next.fetchProposals
+    prev.theme === next.theme &&
+    prev.open === next.open &&
+    prev.fetchProposals === next.fetchProposals &&
+    prev.openProposal === next.openProposal
     // prev.selectProposal === next.selectProposal &&
     // prev.proposeNodeImprovement === next.proposeNodeImprovement &&
     // prev.rateProposal === next.rateProposal &&
