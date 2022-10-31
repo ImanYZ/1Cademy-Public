@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import { Button, Container, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
@@ -88,7 +89,7 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { imageLoaded } from "../lib/utils/utils";
+import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
@@ -728,7 +729,7 @@ const Dashboard = ({}: DashboardProps) => {
     () => {
       if (!db) return;
       if (!user?.uname) return;
-      if (user?.tagId) return;
+      if (!user?.tagId) return;
       if (!allTagsLoaded) return;
 
       const versionsSnapshots: any[] = [];
@@ -3471,8 +3472,12 @@ const Dashboard = ({}: DashboardProps) => {
             //     return { ...thisNode };
             //   });
             // }
-
-            const rootURL = "https://storage.googleapis.com/" + process.env.NEXT_PUBLIC_STORAGE_BUCKET + "/";
+            let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+            if (isValidHttpUrl(bucket)) {
+              const { hostname } = new URL(bucket);
+              bucket = hostname;
+            }
+            const rootURL = "https://storage.googleapis.com/" + bucket + "/";
             const picturesFolder = rootURL + "UploadedImages/";
             const imageNameSplit = image.name.split(".");
             const imageExtension = imageNameSplit[imageNameSplit.length - 1];
@@ -3637,6 +3642,19 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onOpenSideBar = (sidebar: OpenSidebar) => {
     setOpenSidebar(sidebar);
+  };
+
+  // this method was required to cleanup editor added, removed child and parent list
+  const cleanEditorLink = useCallback(() => {
+    setAddedParents([]);
+    setAddedChildren([]);
+    setRemovedParents([]);
+    setRemovedChildren([]);
+  }, [setAddedParents, setAddedChildren, setRemovedParents, setRemovedChildren]);
+
+  const onScrollToLastNode = () => {
+    if (!nodeBookState.selectedNode) return;
+    scrollToNode(nodeBookState.selectedNode);
   };
 
   return (
@@ -3856,51 +3874,39 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {
-            /* process.env.NODE_ENV === "development" && */ <Box
+          {nodeBookState.selectedNode && (
+            <Tooltip title="Scroll to last Selected Node" placement="left">
+              <IconButton
+                color="secondary"
+                sx={{
+                  position: "fixed",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+                onClick={onScrollToLastNode}
+              >
+                <MyLocationIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {process.env.NODE_ENV === "development" && (
+            <Tooltip
+              title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                bottom: "100px",
+                top: "60px",
                 right: "10px",
                 zIndex: "1300",
-                background: "#123",
-                color: "white",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
               }}
             >
-              <Box sx={{ border: "dashed 1px royalBlue" }}>
-                <Typography>Queue Workers {isQueueWorking ? "⌛" : ""}</Typography>
-                <Typography>sNodetype {selectedNodeType}</Typography>
-                <Typography>openSidebar {openSidebar}</Typography>
-                {queue.length > 10 ? `👷‍♂️ +10 ` : queue.map(cur => (cur ? ` 👷‍♂️ ${cur.height} ` : ` 🚜 `))}
-              </Box>
-              <Box sx={{ border: "dashed 1px royalBlue" }}></Box>
-              <Box sx={{ float: "right" }}>
-                <Tooltip title={"Watch geek data"}>
-                  <>
-                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                      <CodeIcon color="warning" />
-                    </IconButton>
-                    {/* <Button onClick={() => setOpenSidebar("MAIN_SIDEBAR")}>Open Main Sidebar</Button>
-                    <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
-                    <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
-                    <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                    <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button> */}
-                  </>
-                </Tooltip>
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                  <Button onClick={() => setOpenSidebar(null)}>Open Main Sidebar</Button>
-                  <Button onClick={() => setOpenSidebar("SEARCHER_SIDEBAR")}>Open searcher</Button>
-                  <Button onClick={() => setOpenSidebar("BOOKMARKS_SIDEBAR")}>Open bookmarks</Button>
-                  <Button onClick={() => setOpenSidebar("NOTIFICATION_SIDEBAR")}>Notification</Button>
-                  <Button onClick={() => setOpenSidebar("PENDING_PROPOSALS")}>Pending List</Button>
-                  <Button onClick={() => setOpenSidebar("USER_INFO")}>UserInfo</Button>
-                  <Button onClick={() => setOpenSidebar("PROPOSALS")}>Proposals</Button>
-                  <Button onClick={() => setOpenSidebar("USER_SETTINGS")}>User settings</Button>
-                  <Button onClick={() => setOpenSidebar("CITATIONS")}>Citation</Button>
-                </Box>
-              </Box>
-            </Box>
-          }
+              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
           {/* end Data from map */}
           {settings.view === "Graph" && (
@@ -3924,6 +3930,7 @@ const Dashboard = ({}: DashboardProps) => {
                   chosenNodeChanged={chosenNodeChanged}
                   referenceLabelChange={referenceLabelChange}
                   deleteLink={deleteLink}
+                  cleanEditorLink={cleanEditorLink}
                   openLinkedNode={openLinkedNode}
                   openAllChildren={openAllChildren}
                   hideNodeHandler={hideNodeHandler}

@@ -35,6 +35,7 @@ type NodeListProps = {
   switchChoice: any;
   deleteChoice: any;
   addChoice: any;
+  cleanEditorLink: () => void;
   onNodeTitleBlur: (newTitle: string) => void;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
@@ -80,6 +81,7 @@ const NodesList = ({
   reloadPermanentGrpah,
   setOpenMedia,
   setNodeParts,
+  cleanEditorLink,
   citations,
   setOpenSideBar,
   proposeNodeImprovement,
@@ -138,6 +140,7 @@ const NodesList = ({
             top={nodes[nId].top}
             width={NODE_WIDTH}
             editable={nodes[nId].editable}
+            cleanEditorLink={cleanEditorLink}
             unaccepted={unaccepted}
             nodeType={nodes[nId].nodeType}
             isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}

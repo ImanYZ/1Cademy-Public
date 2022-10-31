@@ -25,16 +25,9 @@ steps:
         "ONECADEMYCRED_PRIVATE_KEY",
         "ONECADEMYCRED_PRIVATE_KEY_ID"
       ]
-  # Build the indexer container image for Typesense indexer
-  - name: "gcr.io/cloud-builders/docker"
-    entrypoint: "bash"
-    args: ["-c", "docker build -t gcr.io/visualexp-a7d2c/typesense-indexer -f typesenseIndexer.Dockerfile ."]
   # Push the NextJS container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/visualexp-a7d2c/knowledge"]
-  # Push the Typesense Indexer container image to Container Registry
-  - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/visualexp-a7d2c/typesense-indexer"]
   # Deploy the NextJS container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
@@ -50,28 +43,8 @@ steps:
         "--project",
         "visualexp-a7d2c"
       ]
-  # Deploy Typesense indexer container image to Cloud Run
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: gcloud
-    args:
-      [
-        "beta",
-        "run",
-        "jobs",
-        "update",
-        "typesense-indexer",
-        "--image",
-        "gcr.io/visualexp-a7d2c/typesense-indexer",
-        "--tasks",
-        "3",
-        "--region",
-        "us-central1",
-        "--project",
-        "visualexp-a7d2c"
-      ]
 images:
   - gcr.io/visualexp-a7d2c/knowledge
-  - gcr.io/visualexp-a7d2c/typesense-indexer
 availableSecrets:
   secretManager:
     - versionName: projects/141114383555/secrets/ONECADEMYCRED_CLIENT_EMAIL/versions/1
