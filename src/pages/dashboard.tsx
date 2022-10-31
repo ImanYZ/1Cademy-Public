@@ -2805,7 +2805,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (!keyFound) return;
         const oldNode = allNodes[keyFound];
         // const oldNode = { ...nodeToImprove };
-
         let isTheSame =
           newNode.title === oldNode.title &&
           newNode.content === oldNode.content &&
