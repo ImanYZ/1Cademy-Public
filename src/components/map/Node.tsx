@@ -478,7 +478,7 @@ const Node = ({
         nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
         let nodes: any = await getSearchAutocomplete(newTitle);
         let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
-        let diff = findDiff(newTitle, nodes.results.length > 0 ? nodes.results[0] : "");
+        let diff = findDiff(nodes.results[0] ?? "", newTitle);
         if (!explainationDesc) {
           if (exactMatchingNode.length > 0 || diff.length <= 3) {
             setError(
