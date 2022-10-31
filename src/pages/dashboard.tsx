@@ -3892,17 +3892,17 @@ const Dashboard = ({}: DashboardProps) => {
             </Tooltip>
           )}
           {process.env.NODE_ENV === "development" && (
-            <Tooltip title={"Watch geek data"}>
-              <IconButton
-                onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}
-                sx={{
-                  position: "fixed",
-                  top: "60px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
+            <Tooltip
+              title={"Watch geek data"}
+              sx={{
+                position: "fixed",
+                top: "60px",
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+              }}
+            >
+              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
                 <CodeIcon />
               </IconButton>
             </Tooltip>
