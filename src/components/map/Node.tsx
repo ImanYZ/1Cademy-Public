@@ -8,6 +8,8 @@ import React, { useCallback, useEffect, useRef, useState, useTransition } from "
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
+import { getSearchAutocomplete } from "@/lib/knowledgeApi";
+import { findDiff } from "@/lib/utils/utils";
 import { OpenSidebar } from "@/pages/dashboard";
 
 import { useAuth } from "../../context/AuthContext";
@@ -111,6 +113,7 @@ type NodeProps = {
   closeSideBar: any; //
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
+  setOpenSearch: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
@@ -198,6 +201,7 @@ const Node = ({
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
+  setOpenSearch,
   setNodeParts,
   citations,
   setOpenSideBar,
@@ -227,8 +231,13 @@ const Node = ({
   const previousTopRef = useRef<string>("0px");
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
+  const [titleUpdated, setTitleUpdated] = useState(false);
+  const [ableToPropose, setAbleToPropose] = useState(false);
+  const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
+  const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
   const [openProposal, setOpenProposal] = useState(false);
 
+  const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
 
   const [isLoading, startTransition] = useTransition();
@@ -293,6 +302,12 @@ const Node = ({
 
   const onSetTitle = (newTitle: string) => {
     setTitleCopy(newTitle);
+    if (newTitle.trim().length > 0) {
+      if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
+    } else {
+      setAbleToPropose(false);
+    }
+    setTitleUpdated(true);
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
       setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
@@ -300,6 +315,13 @@ const Node = ({
   };
   const onSetContent = (newContent: string) => {
     setContentCopy(newContent);
+    if (newContent.trim().length > 0) {
+      setAbleToPropose(true);
+    } else {
+      if (!imageLoaded) {
+        setAbleToPropose(false);
+      }
+    }
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
       setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
@@ -315,10 +337,19 @@ const Node = ({
     [toggleNode, identifier, open]
   );
   const removeImageHandler = useCallback(() => {
+    if (contentCopy.trim().length == 0) {
+      setAbleToPropose(false);
+    }
+    setImageLoaded(false);
     removeImage(nodeRef, identifier);
-  }, [nodeRef, removeImage, identifier]);
+  }, [nodeRef, removeImage, identifier, contentCopy]);
 
-  const onImageLoad = useCallback(() => setImageLoaded(true), []);
+  const onImageLoad = useCallback(() => {
+    if (titleCopy.trim().length > 0) {
+      setAbleToPropose(true);
+    }
+    setImageLoaded(true);
+  }, []);
 
   const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
@@ -466,6 +497,58 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
+  const onBlurNodeTitle = useCallback(
+    async (newTitle: string) => {
+      if (titleUpdated && newTitle.trim().length > 0) {
+        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
+        let nodes: any = await getSearchAutocomplete(newTitle);
+        let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
+        let diff = findDiff(nodes.results[0] ?? "", newTitle);
+        if (!explainationDesc) {
+          if (exactMatchingNode.length > 0 || diff.length <= 3) {
+            setError(
+              "This title is too close to another node's title shown in the search results on the left. Please differentiate this from other node titles by making it more specific, or in the reasoning section below carefully explain why the title should be as you entered."
+            );
+            setNodeTitleHasIssue(true);
+            setAbleToPropose(false);
+          } else {
+            setError(null);
+            if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
+          }
+        }
+        setTitleUpdated(false);
+      }
+      setOpenSideBar("SEARCHER_SIDEBAR");
+      // setNodeTitleBlured(true); // this is not used in searcher
+      // setSearchQuery(newTitle);
+      // setSelectionType(null);
+      nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+      // nodeBookDispatch({ type: "setSelectionType", payload: null });
+    },
+    [nodeBookDispatch, titleUpdated]
+  );
+
+  const onBlurExplainDesc = useCallback(
+    async (text: string) => {
+      setExplainationDesc(true);
+      if (nodeTitleHasIssue) {
+        if (text.trim().length > 0) {
+          if (!ableToPropose && (imageLoaded || contentCopy.trim().length > 0)) {
+            setAbleToPropose(true);
+          }
+          setError(null);
+        } else {
+          setAbleToPropose(false);
+          setError(
+            "This title is too close to another node's title shown in the search results on the left. Please differentiate this from other node titles by making it more specific, or in the reasoning section below carefully explain why the title should be as you entered."
+          );
+        }
+      }
+    },
+    [ableToPropose]
+  );
+
   if (!user) {
     return null;
   }
@@ -551,12 +634,14 @@ const Node = ({
                 // value={titleCopy}
                 // onChangeContent={setReason}
                 setValue={onSetTitle}
-                onBlurCallback={onNodeTitleBLur}
+                onBlurCallback={onBlurNodeTitle}
                 // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
                 focus
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+                error={error ? true : false}
+                helperText={error ? error : ""}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* <HyperEditor
@@ -677,6 +762,7 @@ const Node = ({
                     value={reason}
                     setValue={setReason}
                     readOnly={false}
+                    onBlurCallback={onBlurExplainDesc}
                   />
                 </>
               )}
@@ -798,6 +884,7 @@ const Node = ({
               saveProposedChildNode={saveProposedChildNode}
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}
+              ableToPropose={ableToPropose}
               isLoading={isLoading}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>

@@ -37,6 +37,7 @@ export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "C
  * - selectedTags: list of tags used for searching
  * - openToolbar: to open user setting sidebar
  * - selectedUser: to open user info sidebar
+ * - searchByTitleOnly: to use only title to search, in other searches it uses content as well
  */
 export interface NodeBookState {
   readonly sNode: string | null;
@@ -48,6 +49,7 @@ export interface NodeBookState {
   readonly selectedTags: string[];
   readonly openToolbar: boolean;
   readonly selectedUser: SelectedUser | null;
+  readonly searchByTitleOnly: boolean;
   readonly searchQuery: string;
   readonly nodeTitleBlured: boolean;
   readonly openEditButton: boolean;
@@ -109,6 +111,11 @@ export type SetNodeTitleBluredAction = {
   payload: boolean;
 };
 
+export type SetSearchByTitleOnly = {
+  type: "setSearchByTitleOnly";
+  payload: boolean;
+};
+
 export type SetOpenEditButtonAction = {
   type: "setOpenEditButton";
   payload: any;
@@ -126,6 +133,7 @@ export type DispatchNodeBookActions =
   | SetSelectedUserAction
   | SetSearchQueryAction
   | SetNodeTitleBluredAction
+  | SetSearchByTitleOnly
   | SetOpenEditButtonAction;
 
 export type NodeBookActions = {

@@ -2969,9 +2969,10 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const onNodeTitleBlur = useCallback(
-    (newTitle: string) => {
+    async (newTitle: string) => {
       // setOpenSearch(true);
       setOpenSidebar("SEARCHER_SIDEBAR");
+
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
@@ -3954,6 +3955,7 @@ const Dashboard = ({}: DashboardProps) => {
                   deleteChoice={deleteChoice}
                   addChoice={addChoice}
                   onNodeTitleBlur={onNodeTitleBlur}
+                  setOpenSearch={setOpenSearch}
                   saveProposedChildNode={saveProposedChildNode}
                   saveProposedImprovement={saveProposedImprovement}
                   closeSideBar={closeSideBar}

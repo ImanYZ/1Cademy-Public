@@ -62,6 +62,7 @@ type LinkingWordsProps = {
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
+  ableToPropose?: boolean;
   isLoading: boolean;
 };
 
@@ -327,7 +328,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 variant="contained"
                 className="btn waves-effect waves-light hoverable green"
                 onClick={proposalSubmit}
-                disabled={props.isLoading}
+                disabled={!props?.ableToPropose ?? false}
               >
                 Propose
               </Button>

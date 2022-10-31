@@ -1,4 +1,4 @@
-import { Input, InputLabel, Switch, Typography } from "@mui/material";
+import { InputLabel, Switch, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
 import React, { useCallback, useMemo, useState } from "react";
@@ -13,11 +13,23 @@ type EditorProps = {
   setValue: (value: string) => void;
   sxPreview?: SxProps<Theme>;
   onBlurCallback?: (value: string) => void;
+  error?: boolean;
+  helperText?: String;
 };
 
 type EditorOptions = "EDIT" | "PREVIEW";
 
-export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCallback, focus = false }: EditorProps) => {
+export const Editor = ({
+  label,
+  value,
+  setValue,
+  readOnly,
+  sxPreview,
+  onBlurCallback,
+  focus = false,
+  error = false,
+  helperText,
+}: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
   // const inputRef = useRef<HTMLElement>(null);
@@ -87,7 +99,8 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCall
       <Box sx={{ display: "flex", flexDirection: "column-reverse" }}>
         <Box>
           {option === "EDIT" && !readOnly ? (
-            <Input
+            <TextField
+              variant="standard"
               id={inputId}
               inputRef={titleFocus}
               fullWidth
@@ -97,6 +110,8 @@ export const Editor = ({ label, value, setValue, readOnly, sxPreview, onBlurCall
               onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
               onFocus={moveToEnd}
               sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+              error={error}
+              helperText={helperText}
             />
           ) : (
             <Box>
