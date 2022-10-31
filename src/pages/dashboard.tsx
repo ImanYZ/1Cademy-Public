@@ -2727,6 +2727,7 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenTrends(false);
           setOpenMedia(false);
           resetAddedRemovedParentsChildren();
+          setOpenSidebar(null);
           event.currentTarget.blur();
         } else {
           setOpenSidebar("PROPOSALS");
