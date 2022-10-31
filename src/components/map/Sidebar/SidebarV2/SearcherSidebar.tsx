@@ -101,6 +101,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
           sortOption,
           sortDirection,
           page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
         });
         // const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
         //   q: nodeBookState.searchQuery,
