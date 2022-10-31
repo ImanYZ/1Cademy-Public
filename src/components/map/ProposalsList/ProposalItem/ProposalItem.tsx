@@ -1,5 +1,6 @@
 // import "./ProposalItem.css";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
 import { Paper } from "@mui/material";
@@ -41,7 +42,13 @@ const ProposalItem = (props: any) => {
   } else {
     proposalSummaries = proposalSummariesGenerator(props.proposal);
   }
-
+  const deleteProposalClick = useCallback(
+    (proposal: any, proposalIdx: any) => (event: any) =>
+      props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.deleteProposal, props.proposals]
+  );
   return (
     <Paper
       elevation={3}
@@ -82,6 +89,15 @@ const ProposalItem = (props: any) => {
               <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
             </div>
           </MemoizedMetaButton>
+          {!props.accepted && props.proposal.proposer === props.username && (
+            <MemoizedMetaButton
+              onClick={deleteProposalClick(props.proposal, props.proposalIdx)}
+              tooltip="Delete your proposal."
+              tooltipPosition="bottom-start"
+            >
+              <DeleteForeverIcon className="grey-text" fontSize="inherit"></DeleteForeverIcon>
+            </MemoizedMetaButton>
+          )}
         </div>
       </div>
       <div>

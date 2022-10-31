@@ -207,6 +207,12 @@ const ProposalsList = (props: ProposalsListProps) => {
               proposalSummaries={proposalSummaries}
               shouldSelectProposal={true}
               showTitle={true}
+              proposalIdx={proposalIdx}
+              proposals={props.proposals}
+              setProposals={props.setProposals}
+              deleteProposal={props.deleteProposal}
+              accepted={proposal.accepted}
+              username={username}
               // rateProposal={rateProposalClick(proposal, proposalIdx, true, false, false)}
             />
           </Box>
