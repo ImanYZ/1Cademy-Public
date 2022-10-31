@@ -255,7 +255,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   }, [db, reputationsOthersMonthlyLoaded]);
 
   const loadReputationPoints = useCallback(
-    (reputationsDict: any) => {
+    (reputationsDict: any, usersStatus: string) => {
       const usersListTmp = [];
       for (let uname in reputationsDict) {
         if (!usersDict.hasOwnProperty(uname)) {
@@ -267,8 +267,8 @@ const UsersStatusList = (props: UsersStatusListProps) => {
         if (uname in reputationsDict) {
           const user = usersDict[uname];
           const userReputation = reputationsDict[uname];
-          if (
-            ("totalPoints" in userReputation && userReputation.totalPoints >= 13) ||
+          const totalPoints =
+            userReputation.totalPoints ||
             userReputation.cnCorrects +
               userReputation.cnInst -
               userReputation.cnWrongs +
@@ -299,9 +299,9 @@ const UsersStatusList = (props: UsersStatusListProps) => {
               userReputation.iCorrects +
               userReputation.iInst -
               userReputation.iWrongs +
-              userReputation.lterm >=
-              13
-          ) {
+              userReputation.lterm;
+          // only skip small amounts if user status is for all time filter and other filter
+          if (((usersStatus !== "All Time" && usersStatus !== "Others Votes") || totalPoints >= 13) && totalPoints) {
             if (onlineUsers.includes(uname)) {
               onlineUsersListTmp.push(usersListObjFromReputationObj(user, userReputation, uname));
             } else {
@@ -310,6 +310,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
           }
         }
       }
+      console.log(usersListTmp, onlineUsersListTmp, reputationsDict, "usersListTmp, onlineUsersListTmp");
       usersListTmp.sort((u1, u2) => u2.totalPoints - u1.totalPoints);
       onlineUsersListTmp.sort((u1, u2) => u2.totalPoints - u1.totalPoints);
       setUsersList(usersListTmp);
@@ -320,31 +321,32 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "All Time") {
-      loadReputationPoints(reputationsDict);
+      loadReputationPoints(reputationsDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Monthly") {
-      loadReputationPoints(reputationsMonthlyDict);
+      loadReputationPoints(reputationsMonthlyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsMonthlyDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Weekly") {
-      loadReputationPoints(reputationsWeeklyDict);
+      console.log(reputationsWeeklyDict, "reputationsWeeklyDict");
+      loadReputationPoints(reputationsWeeklyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsWeeklyDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Others Votes") {
-      loadReputationPoints(reputationsOthersDict);
+      loadReputationPoints(reputationsOthersDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsOthersDict, props.usersStatus, loadReputationPoints]);
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "Others Monthly") {
-      loadReputationPoints(reputationsOthersMonthlyDict);
+      loadReputationPoints(reputationsOthersMonthlyDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsOthersMonthlyDict, props.usersStatus, loadReputationPoints]);
 
