@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { OpenSidebar } from "@/pages/dashboard";
@@ -124,6 +124,32 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   //   };
   // }, [scale]);
 
+  const loadUserData = useCallback(
+    (userId: string) => {
+      let singleUserQuery = query(collection(db, "users"), where(documentId(), "==", userId));
+      getDocs(singleUserQuery).then(snapshot => {
+        if (snapshot.docs.length) {
+          let userDoc = snapshot.docs[0];
+          let userData = userDoc.data();
+          const { fName, lName, createdAt, imageUrl, chooseUname } = userData;
+          setUsersDict(prevUserDict => {
+            return {
+              ...prevUserDict,
+              [userId]: {
+                createdAt,
+                imageUrl,
+                fullname: fName + " " + lName,
+                chooseUname,
+                userId,
+              },
+            };
+          });
+        }
+      });
+    },
+    [setUsersDict]
+  );
+
   // Get user data by tag selected
   useEffect(() => {
     if (!user) return;
@@ -147,7 +173,9 @@ const UsersStatusList = (props: UsersStatusListProps) => {
           };
         }
       }
-      setUsersDict({ ...usersDictTemp });
+      setUsersDict(prevUserDict => {
+        return { ...prevUserDict, ...usersDictTemp };
+      });
       setUsersDictLoaded(true);
     });
     return () => usersSnapshot();
@@ -229,6 +257,11 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   const loadReputationPoints = useCallback(
     (reputationsDict: any) => {
       const usersListTmp = [];
+      for (let uname in reputationsDict) {
+        if (!usersDict.hasOwnProperty(uname)) {
+          loadUserData(uname);
+        }
+      }
       const onlineUsersListTmp = [];
       for (let uname of Object.keys(usersDict)) {
         if (uname in reputationsDict) {

@@ -17,7 +17,7 @@ const Head: FC<Props> = props => {
     children,
   } = props;
   const router = useRouter();
-  const preview = `${APP_DOMAIN}DarkmodeLogo.png`;
+  const preview = `${APP_DOMAIN}DarkmodeLogoTwobyOne.png`;
 
   return (
     <NextHead>

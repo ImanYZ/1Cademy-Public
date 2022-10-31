@@ -7,7 +7,7 @@ admin.initializeApp();
 // detects authentication from the environment.
 const firestore = admin.firestore();
 
-exports.onUserStatusChanged = functions.database.ref("/status/{uid}").onUpdate(async (change, context) => {
+exports.onUserStatusChanged = functions.database.ref("/status/{uname}").onUpdate(async (change, context) => {
   // Get the data written to Realtime Database
   const eventStatus = change.after.val();
 
