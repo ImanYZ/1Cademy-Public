@@ -634,5 +634,5 @@ select:-webkit-autofill:focus {
 .edit-improve-area {
   display: flex;
   align-items: center;
-  margin: 10px 0px !important;
+  /* margin: 10px 0px !important; */
 }

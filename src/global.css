@@ -285,11 +285,11 @@
   padding: 10px 13px;
 }
 .card .card-action .LearnBefore {
-  border-right: 1px solid #ececec;
+  /* border-right: 1px solid #ececec; */
   margin-right: -1px;
 }
 .card .card-action .LearnAfter {
-  border-left: 1px solid #ececec;
+  /* border-left: 1px solid #ececec; */
   padding-left: 11px; /*CHECK I add this to fix separation in vertical line*/
 }
 .card .card-action .row {
