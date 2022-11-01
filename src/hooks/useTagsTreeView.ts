@@ -60,15 +60,14 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     const unsubscribe = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
-      const newTagsTreeView = applyTagsTreeViewChanges(tagsTreeView, docChanges);
-      setTagsTreeView(newTagsTreeView);
+      setTagsTreeView(prevTagTreeView => {
+        return applyTagsTreeViewChanges(prevTagTreeView, docChanges);
+      });
       setAllTagsLoaded(true);
     });
 
     return () => unsubscribe();
-    // Disable this line, if add tagsTreeView as dependencies will get in a loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setTagsTreeView]);
 
   return { allTags: tagsTreeView, setAllTags: setTagsTreeView, allTagsLoaded };
 };
