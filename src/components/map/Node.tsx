@@ -119,6 +119,7 @@ type NodeProps = {
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
+  scrollToNode: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -208,6 +209,7 @@ const Node = ({
   proposeNodeImprovement,
   proposeNewChild,
   cleanEditorLink,
+  scrollToNode,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -280,12 +282,16 @@ const Node = ({
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
+        scrollToNode(nodeBookState.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
+      }
+      if (event.target.type === "textarea") {
+        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
     },
     [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
