@@ -1,3 +1,4 @@
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Box, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 
@@ -16,9 +17,12 @@ export const TagsList = ({ tags, sx }: TagsListProps) => {
 
   return (
     <Box sx={{ ...sx }}>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
-        Tags:
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", mb: "15px", mt: "20px" }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
+          Tags
+        </Typography>
+        <LocalOfferIcon sx={{ fontSize: "1.5rem", ml: "10px", color: "#ff8a33" }} />
+      </Box>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {tags.map((node, idx) => (
           <LinkedTag

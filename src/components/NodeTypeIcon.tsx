@@ -4,7 +4,7 @@ import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 // import EventIcon from "@mui/icons-material/Event";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-// import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 // import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -47,8 +47,8 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "top", color = "
         return <ArticleIcon color={color} {...rest} />;
       // case "Private":
       //   return <LockIcon color={color} {...rest} />;
-      // case "Tag":
-      //   return <LocalOfferIcon color={color} {...rest} />;
+      case "Tag":
+        return <LocalOfferIcon color={color} {...rest} />;
       default:
         return <LockIcon color={color} {...rest} />;
     }
