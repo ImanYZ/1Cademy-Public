@@ -3926,6 +3926,7 @@ const Dashboard = ({}: DashboardProps) => {
               id="MapContent"
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
+              onTouchStart={mapContentMouseOver}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}
