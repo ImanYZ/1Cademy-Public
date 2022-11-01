@@ -268,7 +268,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-
+    if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -2891,12 +2891,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
+          console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
-
+        console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
         const newChildNode: any = {
@@ -2947,7 +2948,7 @@ const Dashboard = ({}: DashboardProps) => {
             },
           ];
         }
-
+        console.log("newChildNode", newChildNode);
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
@@ -2965,7 +2966,9 @@ const Dashboard = ({}: DashboardProps) => {
         //   scrollToNode(newNodeId);
         // }, 10000);
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
-
+        setTimeout(() => {
+          scrollToNode(newNodeId);
+        }, 3500);
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3969,6 +3972,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOpenSideBar={setOpenSidebar}
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
+                  scrollToNode={scrollToNode}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
