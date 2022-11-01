@@ -48,6 +48,7 @@ type NodeListProps = {
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
+  scrollToNode: any;
 };
 
 const NodesList = ({
@@ -88,6 +89,7 @@ const NodesList = ({
   setOpenSideBar,
   proposeNodeImprovement,
   proposeNewChild,
+  scrollToNode,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -215,6 +217,7 @@ const NodesList = ({
             setOpenSideBar={setOpenSideBar}
             proposeNodeImprovement={proposeNodeImprovement}
             proposeNewChild={proposeNewChild}
+            scrollToNode={scrollToNode}
           />
         );
       })}
