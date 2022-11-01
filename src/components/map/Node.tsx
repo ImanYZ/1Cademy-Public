@@ -1029,36 +1029,44 @@ const Node = ({
         </div>
       )}
       {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
-        <Box>
-          <hr />
-          <div className="edit-improve-area">
-            <EditProposal
-              identifier={identifier}
-              openProposal={openProposal}
-              proposeNodeImprovement={proposeNodeImprovement}
-              selectedNode={nodeBookState.selectedNode}
-            />
-            <div
-              id="ProposalButtonsRow"
-              style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+        <>
+          <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
+          <Box sx={{ p: "13px 10px" }}>
+            {/* <hr /> */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+              }}
             >
-              {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                (childNodeType: ProposedChildTypesIcons) => {
-                  return (
-                    <NewChildProposal
-                      key={childNodeType}
-                      childNodeType={childNodeType}
-                      icon={proposedChildTypesIcons[childNodeType]}
-                      openProposal={openProposal}
-                      setOpenProposal={setOpenProposal}
-                      proposeNewChild={proposeNewChild}
-                    />
-                  );
-                }
-              )}
-            </div>
-          </div>
-        </Box>
+              <EditProposal
+                identifier={identifier}
+                openProposal={openProposal}
+                proposeNodeImprovement={proposeNodeImprovement}
+                selectedNode={nodeBookState.selectedNode}
+              />
+              <div
+                id="ProposalButtonsRow"
+                style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+              >
+                {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                  (childNodeType: ProposedChildTypesIcons) => {
+                    return (
+                      <NewChildProposal
+                        key={childNodeType}
+                        childNodeType={childNodeType}
+                        icon={proposedChildTypesIcons[childNodeType]}
+                        openProposal={openProposal}
+                        setOpenProposal={setOpenProposal}
+                        proposeNewChild={proposeNewChild}
+                      />
+                    );
+                  }
+                )}
+              </div>
+            </Box>
+          </Box>
+        </>
       ) : null}
     </div>
   );
