@@ -122,7 +122,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     }
     comPs.sort((a, b) => b.totalPoints - a.totalPoints);
     // console.log("COM POINTS, ", comPs);
-    setComPoints(comPs.slice(0, 9));
+    setComPoints(comPs.slice(0, 25));
   }, []);
 
   useEffect(() => {
@@ -259,7 +259,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           }}
         >
           {comLeaderboardTypeOpen && <MultipleChoiceBtn choices={choices} onClose={openComLeaderboardTypes} />}
-          {!comPoints.length && <p>There are not points yet</p>}
+          {!comPoints.length && <p>There are no points yet</p>}
           {comPoints.map((comObj, idx) => {
             return (
               <MemoizedComLeaderboardChip

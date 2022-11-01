@@ -57,7 +57,7 @@ import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
-import { idToken } from "../lib/firestoreClient/auth";
+import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
@@ -998,6 +998,10 @@ const Dashboard = ({}: DashboardProps) => {
           console.error(err);
           // window.location.reload();
         }
+      }
+      let { reputation } = await retrieveAuthenticatedUser(user!.userId);
+      if (reputation) {
+        dispatch({ type: "setReputation", payload: reputation });
       }
       setSelectedRelation(null);
       // setSelectedNode(null);
@@ -2715,7 +2719,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
-          nodeBookDispatch({ type: "setSelectedNode", payload: null });
+          // nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
           setOpenPendingProposals(false);
