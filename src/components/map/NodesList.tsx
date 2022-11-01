@@ -37,6 +37,7 @@ type NodeListProps = {
   addChoice: any;
   cleanEditorLink: () => void;
   onNodeTitleBlur: (newTitle: string) => void;
+  setOpenSearch: any;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
@@ -45,6 +46,9 @@ type NodeListProps = {
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  proposeNodeImprovement: any;
+  proposeNewChild: any;
+  scrollToNode: any;
 };
 
 const NodesList = ({
@@ -73,6 +77,7 @@ const NodesList = ({
   deleteChoice,
   addChoice,
   onNodeTitleBlur,
+  setOpenSearch,
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
@@ -82,6 +87,9 @@ const NodesList = ({
   cleanEditorLink,
   citations,
   setOpenSideBar,
+  proposeNodeImprovement,
+  proposeNewChild,
+  scrollToNode,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -198,6 +206,7 @@ const NodesList = ({
             deleteChoice={deleteChoice}
             addChoice={addChoice}
             onNodeTitleBLur={onNodeTitleBlur}
+            setOpenSearch={setOpenSearch}
             saveProposedChildNode={saveProposedChildNode}
             saveProposedImprovement={saveProposedImprovement}
             closeSideBar={closeSideBar}
@@ -206,6 +215,9 @@ const NodesList = ({
             setNodeParts={setNodeParts}
             citations={citations}
             setOpenSideBar={setOpenSideBar}
+            proposeNodeImprovement={proposeNodeImprovement}
+            proposeNewChild={proposeNewChild}
+            scrollToNode={scrollToNode}
           />
         );
       })}

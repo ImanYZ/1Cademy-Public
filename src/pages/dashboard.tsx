@@ -57,7 +57,7 @@ import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
-import { idToken } from "../lib/firestoreClient/auth";
+import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
@@ -268,7 +268,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-
+    if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -998,6 +998,10 @@ const Dashboard = ({}: DashboardProps) => {
           console.error(err);
           // window.location.reload();
         }
+      }
+      let { reputation } = await retrieveAuthenticatedUser(user!.userId);
+      if (reputation) {
+        dispatch({ type: "setReputation", payload: reputation });
       }
       setSelectedRelation(null);
       // setSelectedNode(null);
@@ -2688,7 +2692,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       scrollToNode(nodeBookState.selectedNode);
     },
-    [nodeBookState, reloadPermanentGraph, scrollToNode]
+    [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
   );
 
   const selectNode = useCallback(
@@ -2715,7 +2719,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (nodeBookState.selectedNode === nodeId && nodeBookState.selectionType === chosenType) {
           // setSelectedNode(null);
           // setSelectionType(null);
-          nodeBookDispatch({ type: "setSelectedNode", payload: null });
+          // nodeBookDispatch({ type: "setSelectedNode", payload: null });
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedNodeType(null);
           setOpenPendingProposals(false);
@@ -2728,6 +2732,7 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenTrends(false);
           setOpenMedia(false);
           resetAddedRemovedParentsChildren();
+          setOpenSidebar(null);
           event.currentTarget.blur();
         } else {
           setOpenSidebar("PROPOSALS");
@@ -2805,7 +2810,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (!keyFound) return;
         const oldNode = allNodes[keyFound];
         // const oldNode = { ...nodeToImprove };
-
         let isTheSame =
           newNode.title === oldNode.title &&
           newNode.content === oldNode.content &&
@@ -2887,12 +2891,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
+          console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
-
+        console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
         const newChildNode: any = {
@@ -2943,7 +2948,7 @@ const Dashboard = ({}: DashboardProps) => {
             },
           ];
         }
-
+        console.log("newChildNode", newChildNode);
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
@@ -2961,7 +2966,9 @@ const Dashboard = ({}: DashboardProps) => {
         //   scrollToNode(newNodeId);
         // }, 10000);
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
-
+        setTimeout(() => {
+          scrollToNode(newNodeId);
+        }, 3500);
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -2969,9 +2976,10 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const onNodeTitleBlur = useCallback(
-    (newTitle: string) => {
+    async (newTitle: string) => {
       // setOpenSearch(true);
       setOpenSidebar("SEARCHER_SIDEBAR");
+
       // setNodeTitleBlured(true); // this is not used in searcher
       // setSearchQuery(newTitle);
       // setSelectionType(null);
@@ -3954,6 +3962,7 @@ const Dashboard = ({}: DashboardProps) => {
                   deleteChoice={deleteChoice}
                   addChoice={addChoice}
                   onNodeTitleBlur={onNodeTitleBlur}
+                  setOpenSearch={setOpenSearch}
                   saveProposedChildNode={saveProposedChildNode}
                   saveProposedImprovement={saveProposedImprovement}
                   closeSideBar={closeSideBar}
@@ -3961,6 +3970,9 @@ const Dashboard = ({}: DashboardProps) => {
                   setNodeParts={setNodeParts}
                   citations={citations}
                   setOpenSideBar={setOpenSidebar}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  proposeNewChild={proposeNewChild}
+                  scrollToNode={scrollToNode}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

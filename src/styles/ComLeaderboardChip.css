@@ -1,4 +1,7 @@
 .ComLeaderboardChip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   line-height: 40.9px;
   direction: ltr;
   transition: all 2.2s; /* vendorless fallback */
@@ -6,7 +9,7 @@
   -ms-transition: all 2.2s; /* IE 10 */
   -moz-transition: all 2.2s; /* Firefox */
   -webkit-transition: all 2.2s; /*safari and chrome */
-  display: inline-block;
+  /* display: inline-block; */
   position: relative;
   background-color: #333;
   border-radius: 10px;

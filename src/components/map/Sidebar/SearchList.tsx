@@ -186,6 +186,9 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
   //   //   return newAllTags;
   //   // });
   // }, [tag]);
+  useEffect(() => {
+    setSearch(nodeBookState.searchQuery);
+  }, [nodeBookState.searchQuery]);
 
   const getTagsSelected = useCallback<() => TagTreeView[]>(
     () => Object.values(allTags).filter(tag => tag.checked),
@@ -206,6 +209,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
           sortOption,
           sortDirection,
           page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
         });
         // const data = await axios.post<SearchResult>("api/searchNodesInNotebook/", {
         //   q: nodeBookState.searchQuery,

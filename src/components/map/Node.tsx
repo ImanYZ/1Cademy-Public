@@ -4,18 +4,22 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box } from "@mui/material";
-import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
+import { getSearchAutocomplete } from "@/lib/knowledgeApi";
+import { findDiff } from "@/lib/utils/utils";
 import { OpenSidebar } from "@/pages/dashboard";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
+import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
+import NewChildProposal from "./NewChildProposal";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 import QuestionChoices from "./QuestionChoices";
@@ -35,6 +39,8 @@ import QuestionChoices from "./QuestionChoices";
 // CHECK: Improve this passing Full Node Data
 // this Node need to become testeable
 // also split the in (Node and FormNode) to reduce the complexity
+
+type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
   activeNode: any; //organize this i a better forme
@@ -107,10 +113,24 @@ type NodeProps = {
   closeSideBar: any; //
   reloadPermanentGrpah: any; //
   setOpenMedia: (imagUrl: string) => void;
+  setOpenSearch: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  proposeNodeImprovement: any;
+  proposeNewChild: any;
+  scrollToNode: any;
 };
+
+const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
+  Concept: "local_library",
+  Relation: "share",
+  Question: "help_outline",
+  Code: "code",
+  Reference: "menu_book",
+  Idea: "emoji_objects",
+};
+
 const Node = ({
   identifier,
   activeNode,
@@ -182,10 +202,14 @@ const Node = ({
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
+  setOpenSearch,
   setNodeParts,
   citations,
   setOpenSideBar,
+  proposeNodeImprovement,
+  proposeNewChild,
   cleanEditorLink,
+  scrollToNode,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -209,8 +233,17 @@ const Node = ({
   const previousTopRef = useRef<string>("0px");
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
+  const [titleUpdated, setTitleUpdated] = useState(false);
+  const [ableToPropose, setAbleToPropose] = useState(false);
+  const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
+  const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
+  const [openProposal, setOpenProposal] = useState(false);
 
+  const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
+
+  const [isLoading, startTransition] = useTransition();
+
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -249,12 +282,16 @@ const Node = ({
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
+        scrollToNode(nodeBookState.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
+      }
+      if (event.target.type === "textarea") {
+        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
     },
     [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
@@ -271,6 +308,12 @@ const Node = ({
 
   const onSetTitle = (newTitle: string) => {
     setTitleCopy(newTitle);
+    if (newTitle.trim().length > 0) {
+      if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
+    } else {
+      setAbleToPropose(false);
+    }
+    setTitleUpdated(true);
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
       setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
@@ -278,6 +321,13 @@ const Node = ({
   };
   const onSetContent = (newContent: string) => {
     setContentCopy(newContent);
+    if (newContent.trim().length > 0) {
+      setAbleToPropose(true);
+    } else {
+      if (!imageLoaded) {
+        setAbleToPropose(false);
+      }
+    }
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
       setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
@@ -293,10 +343,19 @@ const Node = ({
     [toggleNode, identifier, open]
   );
   const removeImageHandler = useCallback(() => {
+    if (contentCopy.trim().length == 0) {
+      setAbleToPropose(false);
+    }
+    setImageLoaded(false);
     removeImage(nodeRef, identifier);
-  }, [nodeRef, removeImage, identifier]);
+  }, [nodeRef, removeImage, identifier, contentCopy]);
 
-  const onImageLoad = useCallback(() => setImageLoaded(true), []);
+  const onImageLoad = useCallback(() => {
+    if (titleCopy.trim().length > 0) {
+      setAbleToPropose(true);
+    }
+    setImageLoaded(true);
+  }, []);
 
   const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
@@ -444,6 +503,58 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
+  const onBlurNodeTitle = useCallback(
+    async (newTitle: string) => {
+      if (titleUpdated && newTitle.trim().length > 0) {
+        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
+        let nodes: any = await getSearchAutocomplete(newTitle);
+        let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
+        let diff = findDiff(nodes.results[0] ?? "", newTitle);
+        if (!explainationDesc) {
+          if (exactMatchingNode.length > 0 || diff.length <= 3) {
+            setError(
+              "This title is too close to another node's title shown in the search results on the left. Please differentiate this from other node titles by making it more specific, or in the reasoning section below carefully explain why the title should be as you entered."
+            );
+            setNodeTitleHasIssue(true);
+            setAbleToPropose(false);
+          } else {
+            setError(null);
+            if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
+          }
+        }
+        setTitleUpdated(false);
+      }
+      setOpenSideBar("SEARCHER_SIDEBAR");
+      // setNodeTitleBlured(true); // this is not used in searcher
+      // setSearchQuery(newTitle);
+      // setSelectionType(null);
+      nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+      // nodeBookDispatch({ type: "setSelectionType", payload: null });
+    },
+    [nodeBookDispatch, titleUpdated]
+  );
+
+  const onBlurExplainDesc = useCallback(
+    async (text: string) => {
+      setExplainationDesc(true);
+      if (nodeTitleHasIssue) {
+        if (text.trim().length > 0) {
+          if (!ableToPropose && (imageLoaded || contentCopy.trim().length > 0)) {
+            setAbleToPropose(true);
+          }
+          setError(null);
+        } else {
+          setAbleToPropose(false);
+          setError(
+            "This title is too close to another node's title shown in the search results on the left. Please differentiate this from other node titles by making it more specific, or in the reasoning section below carefully explain why the title should be as you entered."
+          );
+        }
+      }
+    },
+    [ableToPropose]
+  );
+
   if (!user) {
     return null;
   }
@@ -529,12 +640,14 @@ const Node = ({
                 // value={titleCopy}
                 // onChangeContent={setReason}
                 setValue={onSetTitle}
-                onBlurCallback={onNodeTitleBLur}
+                onBlurCallback={onBlurNodeTitle}
                 // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))}
                 // setValue={setTitleCopy}
                 focus
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+                error={error ? true : false}
+                helperText={error ? error : ""}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* <HyperEditor
@@ -655,6 +768,7 @@ const Node = ({
                     value={reason}
                     setValue={setReason}
                     readOnly={false}
+                    onBlurCallback={onBlurExplainDesc}
                   />
                 </>
               )}
@@ -776,6 +890,8 @@ const Node = ({
               saveProposedChildNode={saveProposedChildNode}
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}
+              ableToPropose={ableToPropose}
+              isLoading={isLoading}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component
@@ -918,6 +1034,46 @@ const Node = ({
           </div>
         </div>
       )}
+      {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
+        <>
+          <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
+          <Box sx={{ p: "13px 10px" }}>
+            {/* <hr /> */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <EditProposal
+                identifier={identifier}
+                openProposal={openProposal}
+                proposeNodeImprovement={proposeNodeImprovement}
+                selectedNode={nodeBookState.selectedNode}
+              />
+              <div
+                id="ProposalButtonsRow"
+                style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+              >
+                {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                  (childNodeType: ProposedChildTypesIcons) => {
+                    return (
+                      <NewChildProposal
+                        key={childNodeType}
+                        childNodeType={childNodeType}
+                        icon={proposedChildTypesIcons[childNodeType]}
+                        openProposal={openProposal}
+                        setOpenProposal={setOpenProposal}
+                        proposeNewChild={proposeNewChild}
+                      />
+                    );
+                  }
+                )}
+              </div>
+            </Box>
+          </Box>
+        </>
+      ) : null}
     </div>
   );
 };
