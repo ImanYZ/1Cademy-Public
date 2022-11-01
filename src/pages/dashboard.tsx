@@ -167,6 +167,10 @@ const Dashboard = ({}: DashboardProps) => {
   // edges: dictionary of all edges visible on map for specific user
   const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
   // const [nodeTypeVisibilityChanges, setNodeTypeVisibilityChanges] = useState([]);
+  const [originalNodes, setOriginalNodes] = useState<{ nodes: FullNodesData; edges: EdgesData }>({
+    nodes: {},
+    edges: {},
+  });
 
   const [allNodes, setAllNodes] = useState<FullNodesData>({});
 
@@ -2698,7 +2702,7 @@ const Dashboard = ({}: DashboardProps) => {
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
-
+      setOriginalNodes({ nodes: graph.nodes, edges: graph.edges });
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
@@ -3662,6 +3666,11 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   };
 
+  const onCloseSidebar = () => {
+    setGraph({ nodes: originalNodes.nodes, edges: originalNodes.edges });
+    if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+    setOpenSidebar(null);
+  };
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3829,7 +3838,7 @@ const Dashboard = ({}: DashboardProps) => {
               username={user.uname}
               tagId={user.tagId}
               open={openSidebar === "PENDING_PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
             />
           )}
           {user?.uname && (
@@ -3845,7 +3854,7 @@ const Dashboard = ({}: DashboardProps) => {
             <MemoizedProposalsSidebar
               theme={settings.theme}
               open={openSidebar === "PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
               proposeNodeImprovement={proposeNodeImprovement}
               fetchProposals={fetchProposals}
               selectedNode={nodeBookState.selectedNode}
