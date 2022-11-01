@@ -359,6 +359,16 @@ const Dashboard = ({}: DashboardProps) => {
 
   //  bd => state (first render)
   useEffect(() => {
+    // retrieve ID from params if it is being
+    // navigated by the Dashboard through router params
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const selectedNode = urlParams.get("nodeId");
+    const hasNodeIdFromDashboard = selectedNode && selectedNode !== null && selectedNode !== "";
+
+    if (hasNodeIdFromDashboard) {
+      console.log("NODEID COMING FROM DASHBOARD:::", selectedNode);
+    }
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
 
@@ -368,7 +378,9 @@ const Dashboard = ({}: DashboardProps) => {
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
 
-        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        const sNode: any = hasNodeIdFromDashboard ? selectedNode : user?.sNode;
+
+        nodeBookDispatch({ type: "setSelectedNode", payload: sNode });
 
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
@@ -453,6 +465,13 @@ const Dashboard = ({}: DashboardProps) => {
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
+      // retrieve ID from params if it is being
+      // navigated by the Dashboard through router params
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const selectedNode = urlParams.get("nodeId");
+      const hasNodeIdFromDashboard = selectedNode && selectedNode !== null && selectedNode !== "";
+
       const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
         return fullNodes.reduce(
           (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
@@ -575,8 +594,9 @@ const Dashboard = ({}: DashboardProps) => {
           devLog("userNodesSnapshot:3", { docChangesFromServer });
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
 
-          const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
+          const nodeIds = hasNodeIdFromDashboard ? [selectedNode] : userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
+          console.log("asdadadnkjas", { nodeIds });
           devLog("userNodesSnapshot:4", { nodesData });
 
           // nodesData.forEach(cur => {
@@ -665,9 +685,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(
     () => {
-      if (!db) return;
-      if (!user?.uname) return;
-      if (!allTagsLoaded) return;
+      if (!db || !user?.uname || !allTagsLoaded) return;
 
       const userNodesRef = collection(db, "userNodes");
       const q = query(
@@ -688,11 +706,10 @@ const Dashboard = ({}: DashboardProps) => {
     [allTagsLoaded, db, snapshot, user?.uname]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
+
   useEffect(
     () => {
-      if (!db) return;
-      if (!user?.uname) return;
-      if (!allTagsLoaded) return;
+      if (!db || !user?.uname || !allTagsLoaded) return;
 
       const userNodesRef = collection(db, "userNodes");
       const q = query(
@@ -725,12 +742,10 @@ const Dashboard = ({}: DashboardProps) => {
     [allTagsLoaded, db, user?.uname]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
+
   useEffect(
     () => {
-      if (!db) return;
-      if (!user?.uname) return;
-      if (!user?.tagId) return;
-      if (!allTagsLoaded) return;
+      if (!db || !user?.uname || !user?.tagId || !allTagsLoaded) return;
 
       const versionsSnapshots: any[] = [];
       const versions: { [key: string]: any } = {};
@@ -816,9 +831,8 @@ const Dashboard = ({}: DashboardProps) => {
   );
   useEffect(
     () => {
-      if (!db) return;
-      if (!user?.uname) return;
-      if (!allTagsLoaded) return;
+      if (!db || !user?.uname || !allTagsLoaded) return;
+
       const userNodesRef = collection(db, "notifications");
       const q = query(userNodesRef, where("proposer", "==", user.uname));
 
@@ -871,33 +885,47 @@ const Dashboard = ({}: DashboardProps) => {
 
   // state => bd
   useEffect(() => {
-    const changeSelectedNode = async () => {
-      if (!user?.uname) return;
-      if (!nodeBookState.selectedNode) return;
-      if (user?.sNode === nodeBookState.selectedNode) return;
+    // retrieve ID from params if it is being
+    // navigated by the Dashboard through router params
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const selectedNode = urlParams.get("nodeId");
+    const hasNodeIdFromDashboard = selectedNode && selectedNode !== null && selectedNode !== "";
 
+    if (hasNodeIdFromDashboard) {
+      console.log("NODEID COMING FROM DASHBOARD:::", selectedNode);
+    }
+
+    const updateUser = async () => {
       // if (user?.uname) {
       // const userRef = db.collection("users").doc(username);
       const usersRef = collection(db, "users");
-      const userRef = doc(usersRef, user.uname);
+      const userRef = doc(usersRef, user?.uname);
 
-      await updateDoc(userRef, { sNode: nodeBookState.selectedNode });
+      const sNode = hasNodeIdFromDashboard ? selectedNode : nodeBookState.selectedNode;
+      await updateDoc(userRef, { sNode });
       // setSNode(nodeBookState.selectedNode);
 
       const userNodeSelectLogRef = collection(db, "userNodeSelectLog");
       setDoc(doc(userNodeSelectLogRef), {
-        nodeId: nodeBookState.selectedNode,
-        uname: user.uname,
+        nodeId: sNode,
+        uname: user?.uname,
         createdAt: Timestamp.fromDate(new Date()),
       });
-      // await userRef.update({ sNode: selectedNode });
-      // const userNodeSelectLogRef = firebase.db.collection("userNodeSelectLog").doc();
-      // userNodeSelectLogRef.set({
-      //   nodeId: selectedNode,
-      //   uname: username,
-      //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      // });
-      // }
+    };
+
+    // console.log('nodeBookState.selectedNode', nodeBookState.selectedNode === user?.sNode, user?.sNode !== selectedNode);
+    const changeSelectedNode = async () => {
+      // console.log('sNodesNode', user?.uname, (user?.sNode === nodeBookState.selectedNode || user?.sNode !== selectedNode));
+      if (!user?.uname || !nodeBookState.selectedNode) return;
+
+      if (hasNodeIdFromDashboard && user?.sNode !== selectedNode) {
+        updateUser();
+      } else if (user?.sNode === nodeBookState.selectedNode) {
+        return;
+      } else {
+        updateUser();
+      }
     };
     changeSelectedNode();
   }, [db, nodeBookState.selectedNode, user?.sNode, user?.uname]);
@@ -3399,6 +3427,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
   );
+
   const mapContentMouseOver = useCallback((event: any) => {
     if (
       // event.target.tagName.toLowerCase() === "input" || // CHECK <-- this was commented
@@ -3622,6 +3651,7 @@ const Dashboard = ({}: DashboardProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, choosingNode, selectedNodeType, reloadPermanentGraph]
   );
+
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
       // console.log("In removeImage");
@@ -3673,66 +3703,62 @@ const Dashboard = ({}: DashboardProps) => {
       >
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
-          {
-            /* process.env.NODE_ENV === "development" && */ <Drawer
-              anchor={"right"}
-              open={openDeveloperMenu}
-              onClose={() => setOpenDeveloperMenu(false)}
-            >
-              {/* Data from map, don't REMOVE */}
-              <Box>
-                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
-              </Box>
+          {/* { process.env.NODE_ENV === "development" && */}
+          <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
+            {/* Data from map, don't REMOVE */}
+            <Box>
+              Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
+            </Box>
 
-              <Divider />
+            <Divider />
 
-              <Typography>Global states:</Typography>
-              <Box>
-                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-                <Button onClick={() => console.log(graph.edges)}>edges</Button>
-                <Button onClick={() => console.log(allTags)}>allTags</Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-                <Button onClick={() => console.log(user)}>user</Button>
-                <Button onClick={() => console.log(settings)}>setting</Button>
-                <Button onClick={() => console.log(reputation)}>reputation</Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
-                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-                <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-                <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
-              </Box>
+            <Typography>Global states:</Typography>
+            <Box>
+              <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+              <Button onClick={() => console.log(graph.edges)}>edges</Button>
+              <Button onClick={() => console.log(allTags)}>allTags</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
+              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+              <Button onClick={() => console.log(user)}>user</Button>
+              <Button onClick={() => console.log(settings)}>setting</Button>
+              <Button onClick={() => console.log(reputation)}>reputation</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+              {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
+              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+              <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+            </Box>
 
-              <Divider />
+            <Divider />
 
-              <Box>
-                {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
-                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
-                <Button onClick={() => console.log(citations)}>citations</Button>
-              </Box>
+            <Box>
+              {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
+              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+              <Button onClick={() => console.log(citations)}>citations</Button>
+            </Box>
 
-              <Divider />
+            <Divider />
 
-              <Typography>Functions:</Typography>
-              <Box>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Toggle Open proposals
-                </Button>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Open Proposal
-                </Button>
-                <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
-              </Box>
-            </Drawer>
-          }
+            <Typography>Functions:</Typography>
+            <Box>
+              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                Toggle Open proposals
+              </Button>
+              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                Open Proposal
+              </Button>
+              <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+            </Box>
+          </Drawer>
+          {/* } */}
           {/* <MemoizedSidebar
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
