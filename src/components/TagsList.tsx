@@ -1,3 +1,4 @@
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Box, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 
@@ -5,7 +6,6 @@ import { getNodePageUrl, getReferenceTitle } from "@/lib/utils/utils";
 
 import { LinkedKnowledgeNode } from "../knowledgeTypes";
 import { LinkedTag } from "./LinkedTag";
-import NodeTypeIcon from "./NodeTypeIcon";
 
 type TagsListProps = {
   tags: LinkedKnowledgeNode[];
@@ -21,7 +21,7 @@ export const TagsList = ({ tags, sx }: TagsListProps) => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
           Tags
         </Typography>
-        <NodeTypeIcon nodeType={"Tag"} sx={{ ml: "10px" }} />
+        <LocalOfferIcon sx={{ fontSize: "1.5rem", ml: "10px", color: "#ff8a33" }} />
       </Box>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {tags.map((node, idx) => (
