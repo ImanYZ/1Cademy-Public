@@ -268,7 +268,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-
+    if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -2726,7 +2726,6 @@ const Dashboard = ({}: DashboardProps) => {
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
-
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
@@ -2919,12 +2918,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
+          console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
-
+        console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
         const newChildNode: any = {
@@ -2975,7 +2975,7 @@ const Dashboard = ({}: DashboardProps) => {
             },
           ];
         }
-
+        console.log("newChildNode", newChildNode);
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
@@ -2993,7 +2993,9 @@ const Dashboard = ({}: DashboardProps) => {
         //   scrollToNode(newNodeId);
         // }, 10000);
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
-
+        setTimeout(() => {
+          scrollToNode(newNodeId);
+        }, 3500);
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3692,6 +3694,11 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   };
 
+  const onCloseSidebar = () => {
+    reloadPermanentGraph();
+    if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+    setOpenSidebar(null);
+  };
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3855,7 +3862,7 @@ const Dashboard = ({}: DashboardProps) => {
               username={user.uname}
               tagId={user.tagId}
               open={openSidebar === "PENDING_PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
             />
           )}
           {user?.uname && (
@@ -3871,7 +3878,7 @@ const Dashboard = ({}: DashboardProps) => {
             <MemoizedProposalsSidebar
               theme={settings.theme}
               open={openSidebar === "PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
               proposeNodeImprovement={proposeNodeImprovement}
               fetchProposals={fetchProposals}
               selectedNode={nodeBookState.selectedNode}
@@ -3995,6 +4002,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOpenSideBar={setOpenSidebar}
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
+                  scrollToNode={scrollToNode}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

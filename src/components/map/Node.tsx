@@ -119,6 +119,7 @@ type NodeProps = {
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
+  scrollToNode: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -208,6 +209,7 @@ const Node = ({
   proposeNodeImprovement,
   proposeNewChild,
   cleanEditorLink,
+  scrollToNode,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -280,12 +282,16 @@ const Node = ({
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         // setChosenNode(identifier);
         // setChosenNodeTitle(title);
+        scrollToNode(nodeBookState.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
         event.currentTarget.activeElement.nodeName !== "INPUT"
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
+      }
+      if (event.target.type === "textarea") {
+        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
     },
     [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
@@ -1029,36 +1035,44 @@ const Node = ({
         </div>
       )}
       {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
-        <Box>
-          <hr />
-          <div className="edit-improve-area">
-            <EditProposal
-              identifier={identifier}
-              openProposal={openProposal}
-              proposeNodeImprovement={proposeNodeImprovement}
-              selectedNode={nodeBookState.selectedNode}
-            />
-            <div
-              id="ProposalButtonsRow"
-              style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+        <>
+          <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
+          <Box sx={{ p: "13px 10px" }}>
+            {/* <hr /> */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+              }}
             >
-              {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                (childNodeType: ProposedChildTypesIcons) => {
-                  return (
-                    <NewChildProposal
-                      key={childNodeType}
-                      childNodeType={childNodeType}
-                      icon={proposedChildTypesIcons[childNodeType]}
-                      openProposal={openProposal}
-                      setOpenProposal={setOpenProposal}
-                      proposeNewChild={proposeNewChild}
-                    />
-                  );
-                }
-              )}
-            </div>
-          </div>
-        </Box>
+              <EditProposal
+                identifier={identifier}
+                openProposal={openProposal}
+                proposeNodeImprovement={proposeNodeImprovement}
+                selectedNode={nodeBookState.selectedNode}
+              />
+              <div
+                id="ProposalButtonsRow"
+                style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+              >
+                {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                  (childNodeType: ProposedChildTypesIcons) => {
+                    return (
+                      <NewChildProposal
+                        key={childNodeType}
+                        childNodeType={childNodeType}
+                        icon={proposedChildTypesIcons[childNodeType]}
+                        openProposal={openProposal}
+                        setOpenProposal={setOpenProposal}
+                        proposeNewChild={proposeNewChild}
+                      />
+                    );
+                  }
+                )}
+              </div>
+            </Box>
+          </Box>
+        </>
       ) : null}
     </div>
   );
