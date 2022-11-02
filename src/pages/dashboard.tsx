@@ -359,18 +359,33 @@ const Dashboard = ({}: DashboardProps) => {
 
   //  bd => state (first render)
   useEffect(() => {
+    const queryString = window.location.search;
+    if (user?.sNode === nodeBookState.selectedNode) return;
+    const urlParams = new URLSearchParams(queryString);
+    let noodeIdFromDashboard = urlParams.get("nodeId");
+    if (noodeIdFromDashboard && !firstScrollToNode) {
+      const selectedNodeGraph = graph.nodes[noodeIdFromDashboard];
+      if (!selectedNodeGraph) openNodeHandler(noodeIdFromDashboard);
+    }
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
-
       if (!firstScrollToNode && queueFinished) {
         if (!user?.sNode) return;
         const selectedNode = graph.nodes[user?.sNode];
+        if (noodeIdFromDashboard) {
+          const selectedNodeDash = graph.nodes[noodeIdFromDashboard];
+          if (selectedNode.top === 0 && selectedNodeDash.top === 0) return;
+          if (selectedNodeDash) return;
+        }
         if (!selectedNode) return;
-        if (selectedNode.top === 0) return;
+        if (!noodeIdFromDashboard) {
+          nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+          scrollToNode(user.sNode);
+        } else {
+          nodeBookDispatch({ type: "setSelectedNode", payload: noodeIdFromDashboard });
+          scrollToNode(noodeIdFromDashboard);
+        }
 
-        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-
-        scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
         if (queueFinished) {
@@ -378,6 +393,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     firstScrollToNode,
     graph.nodes,
@@ -1917,7 +1933,7 @@ const Dashboard = ({}: DashboardProps) => {
             isStudied: thisNode.isStudied,
             bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
             node: nodeId,
-            open: false,
+            open: thisNode.open,
             user: username,
             visible: false,
             wrong: thisNode.wrong,
