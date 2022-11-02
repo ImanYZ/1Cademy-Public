@@ -3884,10 +3884,11 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {nodeBookState.selectedNode && !openSidebar && (
-            <Tooltip title="Scroll to last Selected Node" placement="left">
-              <IconButton
-                color="secondary"
+          {nodeBookState.selectedNode && (
+            <div className="trackNcodeBtn">
+              <Tooltip
+                title="Scroll to last Selected Node"
+                placement="left"
                 sx={{
                   position: "fixed",
                   top: "10px",
@@ -3895,27 +3896,30 @@ const Dashboard = ({}: DashboardProps) => {
                   zIndex: "1300",
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 }}
-                onClick={onScrollToLastNode}
               >
-                <MyLocationIcon />
-              </IconButton>
-            </Tooltip>
+                <IconButton color="secondary" onClick={onScrollToLastNode}>
+                  <MyLocationIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
-          {process.env.NODE_ENV === "development" && !openSidebar && (
-            <Tooltip
-              title={"Watch geek data"}
-              sx={{
-                position: "fixed",
-                top: "60px",
-                right: "10px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              }}
-            >
-              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                <CodeIcon />
-              </IconButton>
-            </Tooltip>
+          {process.env.NODE_ENV === "development" && (
+            <div className="trackNcodeBtn">
+              <Tooltip
+                title={"Watch geek data"}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                  <CodeIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
 
           {/* end Data from map */}

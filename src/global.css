@@ -19,6 +19,12 @@
   font-size: 21px;
 }
 
+@media screen and (max-width: 490px) and (min-width: 10px) {
+  .trackNcodeBtn {
+    display: none;
+  }
+}
+
 @media screen and (max-width: 600px) and (min-width: 10px) {
   .home-search-input::placeholder {
     font-size: 16px;
@@ -2689,7 +2695,8 @@ button.MuiTab-textColorInherit:focus {
 .toolbar:hover .toolbarButtonDescription {
   width: 100px;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
+  align-items: flex-start;
   visibility: visible;
   line-height: 16px;
   height: 41px;
@@ -2722,4 +2729,5 @@ button.MuiTab-textColorInherit:focus {
 .toolbar:hover .scroll-styled {
   display: flex;
   align-items: flex-start;
+  margin-left: 10px;
 }

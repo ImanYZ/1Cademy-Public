@@ -215,7 +215,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
           <Box sx={{ paddingRight: "5px" }}>{comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}</Box>
         </MemoizedMetaButton>
       </Box>
-      <div
+      <Box
         id="ComLeaderboardContainer"
         className={
           comLeaderboardType === "Self-votes"
@@ -226,7 +226,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
             ? "ComLeaderboardContainerOthersMonthly"
             : ""
         }
-        style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "16px" }}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: { xs: "5px", md: "16px" } }}
       >
         <div id="ComLeaderbaordChanger">
           <MemoizedMetaButton onClick={openComLeaderboardTypes}>
@@ -301,7 +301,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
             <Image className="" src={LoadingImg} alt="Loading" />
           )} */}
         </Box>
-      </div>
+      </Box>
     </Box>
   );
 };
