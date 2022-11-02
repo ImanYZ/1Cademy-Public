@@ -2531,6 +2531,7 @@ const Dashboard = ({}: DashboardProps) => {
   const closeSideBar = useMemoizedCallback(() => {
     devLog("In closeSideBar");
 
+    // TODO: call closeSidebar every close sidebar action
     if (!user) return;
 
     // setNodeToImprove(null); // CHECK: I added this to compare then
