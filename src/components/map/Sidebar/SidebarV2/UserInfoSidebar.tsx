@@ -255,7 +255,13 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 {proposals.slice(0, lastIndex).map((proposal, idx) => {
                   return (
                     proposal.title && (
-                      <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                      <ProposalItem
+                        key={idx}
+                        proposal={proposal}
+                        openLinkedNode={openLinkedNode}
+                        selectProposal={() => {}}
+                        showTitle={true}
+                      />
                     )
                   );
                 })}

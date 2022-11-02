@@ -21,13 +21,30 @@ const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
-const ProposalItem = (props: any) => {
+type ProposalItemProps = {
+  shouldSelectProposal?: boolean;
+  selectProposal: any;
+  openLinkedNode: any;
+  proposalSummaries?: any;
+  proposal: any;
+  showTitle: boolean;
+  openProposalSidebar?: any;
+};
+
+const ProposalItem = (props: ProposalItemProps) => {
+  console.log({ props });
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
         props.selectProposal(event, proposal);
+        console.log(1);
       } else {
+        console.log(2, props.openProposalSidebar);
         props.openLinkedNode(proposal.node);
+        if (props.openProposalSidebar) {
+          console.log(22);
+          props.openProposalSidebar();
+        }
       }
     },
     // TODO: check dependencies to remove eslint-disable-next-line

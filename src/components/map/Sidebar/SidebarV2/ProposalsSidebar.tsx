@@ -146,6 +146,7 @@ const ProposalsSidebar = ({
     };
   };
 
+  console.log("Proposal sidebar:proposals", proposals);
   return (
     <SidebarWrapper
       title="Proposals"

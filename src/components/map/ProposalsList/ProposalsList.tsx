@@ -204,6 +204,7 @@ const ProposalsList = (props: ProposalsListProps) => {
               key={proposal.id}
               proposal={proposal}
               selectProposal={props.selectProposal}
+              openLinkedNode={() => {}}
               proposalSummaries={proposalSummaries}
               shouldSelectProposal={true}
               showTitle={true}

@@ -18,6 +18,7 @@ type PendingProposalSidebarProps = {
   openLinkedNode: any;
   username: string;
   tagId: string | undefined;
+  onOpenProposalSidebar: (nodeId: string) => void;
 };
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
@@ -28,6 +29,7 @@ const PendingProposalSidebar = ({
   openLinkedNode,
   username,
   tagId,
+  onOpenProposalSidebar,
 }: PendingProposalSidebarProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
   const db = getFirestore();
@@ -141,7 +143,11 @@ const PendingProposalSidebar = ({
       // anchor="right"
       SidebarContent={
         <Box sx={{ paddingX: "10px", paddingTop: "10px" }}>
-          <PendingProposalList proposals={proposals} openLinkedNode={openLinkedNode} />
+          <PendingProposalList
+            proposals={proposals}
+            openLinkedNode={openLinkedNode}
+            onOpenProposalSidebar={onOpenProposalSidebar}
+          />
         </Box>
       }
     />

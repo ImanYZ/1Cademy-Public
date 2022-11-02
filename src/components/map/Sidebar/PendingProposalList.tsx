@@ -16,9 +16,11 @@ type PendingProposalListProps = {
   // setPendingProposalsNum: any;
   proposals: any[];
   openLinkedNode: any;
+  onOpenProposalSidebar?: any;
 };
 
 const PendingProposalList = (props: PendingProposalListProps) => {
+  console.log("pendingproposalList", props);
   // const [{ user }] = useAuth();
   // const db = getFirestore();
 
@@ -161,7 +163,14 @@ const PendingProposalList = (props: PendingProposalListProps) => {
         >
           {props.proposals.slice(0, lastIndex).map((proposal, idx) => {
             return (
-              <ProposalItem key={idx} proposal={proposal} openLinkedNode={props.openLinkedNode} showTitle={true} />
+              <ProposalItem
+                key={idx}
+                proposal={proposal}
+                openLinkedNode={props.openLinkedNode}
+                showTitle={true}
+                selectProposal={() => {}}
+                openProposalSidebar={props.onOpenProposalSidebar}
+              />
             );
           })}
           {/* CHECK, I changes pendingProposals to proposal */}

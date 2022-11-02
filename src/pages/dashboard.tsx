@@ -3061,12 +3061,12 @@ const Dashboard = ({}: DashboardProps) => {
       setProposals: (value: any) => void,
       who?: string
     ) => {
-      console.log(11);
+      // console.log(11);
       console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
       if (!user) return;
-      console.log(22);
+      // console.log(22);
       if (!selectedNodeType) return;
-      console.log(33);
+      // console.log(33);
       setIsRetrieving(true);
       setGraph(({ nodes: oldNodes, edges }) => {
         // setNodes(oldNodes => {
@@ -3249,6 +3249,7 @@ const Dashboard = ({}: DashboardProps) => {
   const selectProposal = useMemoizedCallback(
     (event, proposal) => {
       if (!user?.uname) return;
+      devLog("SELECT PROPOSAL", proposal);
       // const selectedNode = nodeBookState.selectedNode;
       event.preventDefault();
       setOpenProposal(proposal.id);
@@ -3837,6 +3838,7 @@ const Dashboard = ({}: DashboardProps) => {
               tagId={user.tagId}
               open={openSidebar === "PENDING_PROPOSALS"}
               onClose={() => onCloseSidebar()}
+              onOpenProposalSidebar={() => setOpenSidebar("PROPOSALS")}
             />
           )}
           {user?.uname && (

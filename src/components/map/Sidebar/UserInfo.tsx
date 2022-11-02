@@ -107,6 +107,7 @@ const UserInfo = (props: any) => {
                         key={idx}
                         proposal={proposal}
                         openLinkedNode={props.openLinkedNode}
+                        selectProposal={() => {}}
                         showTitle={true}
                       />
                     )
