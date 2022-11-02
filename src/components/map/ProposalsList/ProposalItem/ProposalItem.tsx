@@ -43,7 +43,9 @@ const ProposalItem = (props: ProposalItemProps) => {
         props.openLinkedNode(proposal.node);
         if (props.openProposalSidebar) {
           console.log(22);
-          props.openProposalSidebar();
+          setTimeout(() => {
+            props.openProposalSidebar();
+          }, 500);
         }
       }
     },
