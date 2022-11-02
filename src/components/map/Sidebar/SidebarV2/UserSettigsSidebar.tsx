@@ -1047,12 +1047,12 @@ export const UserSettigsSidebar = ({
       // anchor="right"gggggg
       SidebarOptions={
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", paddingTop: "40px" }}>
-          <div id="MiniUserPrifileHeader">
+          <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
             {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
         <div id="MiniUserPrifileFullProfileLink"></div> */}
             <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
 
-            <div id="MiniUserPrifileIdentity">
+            <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
               {/* <div id="MiniUserPrifileName">{chooseUname ? username : fName + " " + lName}</div> */}
               <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
               <div id="MiniUserPrifileTag">
@@ -1108,8 +1108,8 @@ export const UserSettigsSidebar = ({
               </div>
             </div>
           </div>
-          <div id="MiniUserPrifilePointsContainer">
-            <div className="MiniUserProfilePoints LeftPoints">
+          <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
+            <div className="MiniUserProfilePoints">
               {/* <i className="material-icons amber-text">local_library</i> */}
               <LocalLibraryIcon className="material-icons amber-text" />
               <span className="ToolbarValue">
@@ -1130,7 +1130,7 @@ export const UserSettigsSidebar = ({
                 {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
               </span>
             </div>
-            <div className="MiniUserProfilePoints LeftPoints">
+            <div className="MiniUserProfilePoints">
               {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
               <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
               <span className="ToolbarValue">
