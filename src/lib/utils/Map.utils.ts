@@ -981,6 +981,7 @@ export const compareChoices = (node1: any, node2: any, isTheSame: boolean) => {
 };
 
 export const compare2Nodes = (node1: any, node2: any) => {
+  if (!node1 || !node2) return;
   if (Object.keys(node1).length !== Object.keys(node2).length) {
     return false;
   }
