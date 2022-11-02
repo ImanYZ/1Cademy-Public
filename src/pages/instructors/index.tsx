@@ -1,3 +1,4 @@
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 
 import HeaderNavbar from "../../components/instructors/HeaderNavbar";
@@ -13,19 +14,21 @@ const Instructors = ({}: InstructorsProps) => {
   return (
     <Box>
       <HeaderNavbar />
-      {/* <Box sx={{ pt: "75px" }}> */}
-      <SemesterFilter
-        semesters={semesters}
-        selectedSemester={selectedSemester}
-        setSelectedSemester={setSelectedSemester}
-        courses={courses}
-        selectedCourse={selectedCourse}
-        setSelectedCourse={setSelectedCourse}
-      />
-      <h1>instructor page</h1>
-      <p>
-        semester {selectedCourse} selected has {courses.length} and course {selectedCourse} is selected
-      </p>
+      <Paper sx={{ p: "10px" }}>
+        {/* <Box sx={{ pt: "75px" }}> */}
+        <SemesterFilter
+          semesters={semesters}
+          selectedSemester={selectedSemester}
+          setSelectedSemester={setSelectedSemester}
+          courses={courses}
+          selectedCourse={selectedCourse}
+          setSelectedCourse={setSelectedCourse}
+        />
+        <h1>instructor page</h1>
+        <p>
+          semester {selectedCourse} selected has {courses.length} and course {selectedCourse} is selected
+        </p>
+      </Paper>
     </Box>
   );
 };
