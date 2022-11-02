@@ -360,7 +360,6 @@ const Dashboard = ({}: DashboardProps) => {
   //  bd => state (first render)
   useEffect(() => {
     const queryString = window.location.search;
-    if (user?.sNode === nodeBookState.selectedNode) return;
     const urlParams = new URLSearchParams(queryString);
     let noodeIdFromDashboard = urlParams.get("nodeId");
     if (noodeIdFromDashboard && !firstScrollToNode) {
