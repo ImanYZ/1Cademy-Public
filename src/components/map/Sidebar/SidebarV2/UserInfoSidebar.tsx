@@ -290,94 +290,94 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       anchor="left"
       SidebarOptions={
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", marginTop: "40px" }}>
-          <Box>
-            <div id="MiniUserPrifileHeader">
-              {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
+          <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
+            {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
         <div id="MiniUserPrifileFullProfileLink"></div> */}
-              <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
-              <div id="MiniUserPrifileIdentity">
-                <div id="MiniUserPrifileName">
-                  {nodeBookState.selectedUser.chooseUname
-                    ? nodeBookState.selectedUser.username
-                    : nodeBookState.selectedUser.fullName}
-                </div>
-                {sUserObj && (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <Box sx={{ display: "flex", gap: "8px" }}>
-                      <LocalOfferIcon className="material-icons grey-text" />
-                      <span>{sUserObj.tag}</span>
-                    </Box>
-                    <Box sx={{ display: "flex", gap: "8px" }}>
-                      {/* <img src={sUserObj.instLogo} alt={sUserObj.deInstit + " logo"} width="25px" /> */}
-                      <OptimizedAvatar
-                        imageUrl={sUserObj.instLogo}
-                        name={sUserObj.deInstit + " logo"}
-                        sx={{
-                          width: "25px",
-                          height: "25px",
-                          fontSize: "15px",
-                        }}
-                        renderAsAvatar={false}
-                      />
-                      <span>{sUserObj.deInstit}</span>
-                    </Box>
-                    <Box sx={{ display: "flex", gap: "8px" }}>
-                      <DoneIcon className="material-icons DoneIcon green-text" />
-                      <span>{shortenNumber(sUserObj.totalPoints, 2, false)}</span>
-                    </Box>
-                  </Box>
-                )}
+            <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
+
+            <div id="MiniUserPrifileIdentityUSettingSidebar" className="MiniUserPrifileIdentityMobile">
+              <div id="MiniUserPrifileName">
+                {nodeBookState.selectedUser.chooseUname
+                  ? nodeBookState.selectedUser.username
+                  : nodeBookState.selectedUser.fullName}
               </div>
-            </div>
-            <div id="MiniUserPrifilePointsContainer">
               {sUserObj && (
-                <>
-                  <div className="MiniUserProfilePoints LeftPoints">
-                    {/* <i className="material-icons amber-text">local_library</i> */}
-                    <LocalLibraryIcon className="material-icons amber-text" />
-                    <span className="ToolbarValue">
-                      {shortenNumber(sUserObj.cnCorrects || 0 - sUserObj.cnWrongs || 0, 2, false)}
-                    </span>
-                  </div>
-                  <div className="MiniUserProfilePoints">
-                    {/* <i className="material-icons amber-text">share</i> */}
-                    <ShareIcon className="material-icons amber-text" />
-                    <span className="ToolbarValue">
-                      {shortenNumber(sUserObj.mCorrects || 0 - sUserObj.mWrongs || 0, 2, false)}
-                    </span>
-                  </div>
-                  <div className="MiniUserProfilePoints">
-                    {/* <i className="material-icons amber-text">help_outline</i> */}
-                    <HelpOutlineIcon className="material-icons amber-text" />
-                    <span className="ToolbarValue">
-                      {shortenNumber(sUserObj.qCorrects || 0 - sUserObj.qWrongs || 0, 2, false)}
-                    </span>
-                  </div>
-                  <div className="MiniUserProfilePoints LeftPoints">
-                    {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
-                    <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
-                    <span className="ToolbarValue">
-                      {shortenNumber(sUserObj.iCorrects || 0 - sUserObj.iWrongs || 0, 2, false)}
-                    </span>
-                  </div>
-                  <div className="MiniUserProfilePoints">
-                    {/* <i className="material-icons amber-text">code</i> */}
-                    <CodeIcon className="material-icons amber-text" />
-                    <span className="ToolbarValue">
-                      {shortenNumber(sUserObj.cdCorrects || 0 - sUserObj.cdWrongs || 0, 2, false)}
-                    </span>
-                  </div>
-                  <div className="MiniUserProfilePoints">
-                    {/* <i className="material-icons amber-text">menu_book</i> */}
-                    <MenuBookIcon className="material-icons amber-text" />
-                    <span className="ToolbarValue">
-                      {shortenNumber(sUserObj.rfCorrects || 0 - sUserObj.rfWrongs || 0, 2, false)}
-                    </span>
-                  </div>
-                </>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <Box sx={{ display: "flex", gap: "8px" }}>
+                    <LocalOfferIcon className="material-icons grey-text" />
+                    <span>{sUserObj.tag}</span>
+                  </Box>
+                  <Box sx={{ display: "flex", gap: "8px" }}>
+                    {/* <img src={sUserObj.instLogo} alt={sUserObj.deInstit + " logo"} width="25px" /> */}
+                    <OptimizedAvatar
+                      imageUrl={sUserObj.instLogo}
+                      name={sUserObj.deInstit + " logo"}
+                      sx={{
+                        width: "25px",
+                        height: "25px",
+                        fontSize: "15px",
+                      }}
+                      renderAsAvatar={false}
+                    />
+                    <span>{sUserObj.deInstit}</span>
+                  </Box>
+                  <Box sx={{ display: "flex", gap: "8px" }}>
+                    <DoneIcon className="material-icons DoneIcon green-text" />
+                    <span>{shortenNumber(sUserObj.totalPoints, 2, false)}</span>
+                  </Box>
+                </Box>
               )}
             </div>
-          </Box>
+          </div>
+          <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
+            {sUserObj && (
+              <>
+                <div className="MiniUserProfilePoints">
+                  {/* <i className="material-icons amber-text">local_library</i> */}
+                  <LocalLibraryIcon className="material-icons amber-text" />
+                  <span className="ToolbarValue">
+                    {shortenNumber(sUserObj.cnCorrects || 0 - sUserObj.cnWrongs || 0, 2, false)}
+                  </span>
+                </div>
+                <div className="MiniUserProfilePoints">
+                  {/* <i className="material-icons amber-text">share</i> */}
+                  <ShareIcon className="material-icons amber-text" />
+                  <span className="ToolbarValue">
+                    {shortenNumber(sUserObj.mCorrects || 0 - sUserObj.mWrongs || 0, 2, false)}
+                  </span>
+                </div>
+                <div className="MiniUserProfilePoints">
+                  {/* <i className="material-icons amber-text">help_outline</i> */}
+                  <HelpOutlineIcon className="material-icons amber-text" />
+                  <span className="ToolbarValue">
+                    {shortenNumber(sUserObj.qCorrects || 0 - sUserObj.qWrongs || 0, 2, false)}
+                  </span>
+                </div>
+                <div className="MiniUserProfilePoints">
+                  {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
+                  <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
+                  <span className="ToolbarValue">
+                    {shortenNumber(sUserObj.iCorrects || 0 - sUserObj.iWrongs || 0, 2, false)}
+                  </span>
+                </div>
+                <div className="MiniUserProfilePoints">
+                  {/* <i className="material-icons amber-text">code</i> */}
+                  <CodeIcon className="material-icons amber-text" />
+                  <span className="ToolbarValue">
+                    {shortenNumber(sUserObj.cdCorrects || 0 - sUserObj.cdWrongs || 0, 2, false)}
+                  </span>
+                </div>
+                <div className="MiniUserProfilePoints">
+                  {/* <i className="material-icons amber-text">menu_book</i> */}
+                  <MenuBookIcon className="material-icons amber-text" />
+                  <span className="ToolbarValue">
+                    {shortenNumber(sUserObj.rfCorrects || 0 - sUserObj.rfWrongs || 0, 2, false)}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+
           {!isRetrieving && (
             <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
               {tabsItems.map((tabItem: any, idx: number) => (

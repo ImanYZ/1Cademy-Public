@@ -263,13 +263,16 @@ MainSidebarProps) => {
                 display: "flex",
                 justifyContent: "center",
                 gap: "5px",
+                padding: "6px 0px",
                 // border: "solid 2px blue",
                 ":hover": {
                   backgroundColor: "rgba(255, 152, 0, 1)",
                 },
               }}
             >
-              <SearchIcon />
+              <div className="toolbarBadge" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <SearchIcon />
+              </div>
               <Box
                 component="span"
                 className="toolbarDescription"
@@ -299,6 +302,7 @@ MainSidebarProps) => {
                 }}
               >
                 <Badge
+                  className="toolbarBadge"
                   badgeContent={uncheckedNotificationsNum ?? 0}
                   color="error"
                   anchorOrigin={{ vertical: "top", horizontal: "left" }}
@@ -329,6 +333,7 @@ MainSidebarProps) => {
             <MemoizedMetaButton onClick={() => onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks")}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
                 <Badge
+                  className="toolbarBadge"
                   badgeContent={bookmarkUpdatesNum ?? 0}
                   color="error"
                   anchorOrigin={{ vertical: "top", horizontal: "left" }}
@@ -358,6 +363,7 @@ MainSidebarProps) => {
             <MemoizedMetaButton onClick={() => onOpenSidebar("PENDING_PROPOSALS", "PendingProposals")}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
                 <Badge
+                  className="toolbarBadge"
                   badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
                   color="error"
                   anchorOrigin={{ vertical: "top", horizontal: "left" }}

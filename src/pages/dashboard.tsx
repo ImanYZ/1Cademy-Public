@@ -2531,6 +2531,7 @@ const Dashboard = ({}: DashboardProps) => {
   const closeSideBar = useMemoizedCallback(() => {
     devLog("In closeSideBar");
 
+    // TODO: call closeSidebar every close sidebar action
     if (!user) return;
 
     // setNodeToImprove(null); // CHECK: I added this to compare then
@@ -2552,14 +2553,11 @@ const Dashboard = ({}: DashboardProps) => {
     //   nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
     // );
 
-    if (
-      nodeBookState.selectionType === "AcceptedProposals" ||
-      nodeBookState.selectionType === "Proposals" ||
-      (nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable)
-    ) {
+    //only reload permanent graph if therese is temporal nodes on the map
+    //it means only for proposals (child/improvements)
+    if (tempNodes.size || nodeChanges) {
       reloadPermanentGraph();
     }
-
     let sidebarType: any = nodeBookState.selectionType;
     if (openPendingProposals) {
       sidebarType = "PendingProposals";
@@ -2698,7 +2696,6 @@ const Dashboard = ({}: DashboardProps) => {
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
-
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
@@ -3665,6 +3662,11 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   };
 
+  const onCloseSidebar = () => {
+    reloadPermanentGraph();
+    if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+    setOpenSidebar(null);
+  };
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3832,7 +3834,7 @@ const Dashboard = ({}: DashboardProps) => {
               username={user.uname}
               tagId={user.tagId}
               open={openSidebar === "PENDING_PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
             />
           )}
           {user?.uname && (
@@ -3848,7 +3850,7 @@ const Dashboard = ({}: DashboardProps) => {
             <MemoizedProposalsSidebar
               theme={settings.theme}
               open={openSidebar === "PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
               proposeNodeImprovement={proposeNodeImprovement}
               fetchProposals={fetchProposals}
               selectedNode={nodeBookState.selectedNode}
@@ -3882,7 +3884,7 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {nodeBookState.selectedNode && (
+          {nodeBookState.selectedNode && !openSidebar && (
             <Tooltip title="Scroll to last Selected Node" placement="left">
               <IconButton
                 color="secondary"
@@ -3899,7 +3901,7 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
-          {process.env.NODE_ENV === "development" && (
+          {process.env.NODE_ENV === "development" && !openSidebar && (
             <Tooltip
               title={"Watch geek data"}
               sx={{
@@ -3922,6 +3924,7 @@ const Dashboard = ({}: DashboardProps) => {
               id="MapContent"
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
+              onTouchStart={mapContentMouseOver}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}
