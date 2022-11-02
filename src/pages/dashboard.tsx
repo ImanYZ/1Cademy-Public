@@ -3886,7 +3886,7 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {nodeBookState.selectedNode && (
+          {nodeBookState.selectedNode && !openSidebar && (
             <Tooltip title="Scroll to last Selected Node" placement="left">
               <IconButton
                 color="secondary"
@@ -3903,7 +3903,7 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
-          {process.env.NODE_ENV === "development" && (
+          {process.env.NODE_ENV === "development" && !openSidebar && (
             <Tooltip
               title={"Watch geek data"}
               sx={{
