@@ -268,7 +268,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-
+    if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -2531,6 +2531,7 @@ const Dashboard = ({}: DashboardProps) => {
   const closeSideBar = useMemoizedCallback(() => {
     devLog("In closeSideBar");
 
+    // TODO: call closeSidebar every close sidebar action
     if (!user) return;
 
     // setNodeToImprove(null); // CHECK: I added this to compare then
@@ -2552,14 +2553,11 @@ const Dashboard = ({}: DashboardProps) => {
     //   nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
     // );
 
-    if (
-      nodeBookState.selectionType === "AcceptedProposals" ||
-      nodeBookState.selectionType === "Proposals" ||
-      (nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable)
-    ) {
+    //only reload permanent graph if therese is temporal nodes on the map
+    //it means only for proposals (child/improvements)
+    if (tempNodes.size || nodeChanges) {
       reloadPermanentGraph();
     }
-
     let sidebarType: any = nodeBookState.selectionType;
     if (openPendingProposals) {
       sidebarType = "PendingProposals";
@@ -2698,7 +2696,6 @@ const Dashboard = ({}: DashboardProps) => {
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
       devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
-
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
@@ -2891,12 +2888,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
+          console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
-
+        console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
         const newChildNode: any = {
@@ -2947,7 +2945,7 @@ const Dashboard = ({}: DashboardProps) => {
             },
           ];
         }
-
+        console.log("newChildNode", newChildNode);
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
@@ -2965,7 +2963,9 @@ const Dashboard = ({}: DashboardProps) => {
         //   scrollToNode(newNodeId);
         // }, 10000);
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
-
+        setTimeout(() => {
+          scrollToNode(newNodeId);
+        }, 3500);
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3662,6 +3662,11 @@ const Dashboard = ({}: DashboardProps) => {
     scrollToNode(nodeBookState.selectedNode);
   };
 
+  const onCloseSidebar = () => {
+    reloadPermanentGraph();
+    if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+    setOpenSidebar(null);
+  };
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3829,7 +3834,7 @@ const Dashboard = ({}: DashboardProps) => {
               username={user.uname}
               tagId={user.tagId}
               open={openSidebar === "PENDING_PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
             />
           )}
           {user?.uname && (
@@ -3845,7 +3850,7 @@ const Dashboard = ({}: DashboardProps) => {
             <MemoizedProposalsSidebar
               theme={settings.theme}
               open={openSidebar === "PROPOSALS"}
-              onClose={() => setOpenSidebar(null)}
+              onClose={() => onCloseSidebar()}
               proposeNodeImprovement={proposeNodeImprovement}
               fetchProposals={fetchProposals}
               selectedNode={nodeBookState.selectedNode}
@@ -3880,9 +3885,10 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {nodeBookState.selectedNode && (
-            <Tooltip title="Scroll to last Selected Node" placement="left">
-              <IconButton
-                color="secondary"
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
+              <Tooltip
+                title="Scroll to last Selected Node"
+                placement="left"
                 sx={{
                   position: "fixed",
                   top: "10px",
@@ -3890,27 +3896,30 @@ const Dashboard = ({}: DashboardProps) => {
                   zIndex: "1300",
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 }}
-                onClick={onScrollToLastNode}
               >
-                <MyLocationIcon />
-              </IconButton>
-            </Tooltip>
+                <IconButton color="secondary" onClick={onScrollToLastNode}>
+                  <MyLocationIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
           {process.env.NODE_ENV === "development" && (
-            <Tooltip
-              title={"Watch geek data"}
-              sx={{
-                position: "fixed",
-                top: "60px",
-                right: "10px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              }}
-            >
-              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                <CodeIcon />
-              </IconButton>
-            </Tooltip>
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
+              <Tooltip
+                title={"Watch geek data"}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                  <CodeIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
 
           {/* end Data from map */}
@@ -3919,6 +3928,7 @@ const Dashboard = ({}: DashboardProps) => {
               id="MapContent"
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
+              onTouchStart={mapContentMouseOver}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}
@@ -3969,6 +3979,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOpenSideBar={setOpenSidebar}
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
+                  scrollToNode={scrollToNode}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

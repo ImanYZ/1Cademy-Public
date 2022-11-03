@@ -54,20 +54,17 @@ export const SidebarWrapper = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          minWidth: { xs: "25vw", sm: width },
+          minWidth: { xs: "15vw", sm: width },
           width,
-          maxWidth: { xs: "85vw", sm: "50vw" },
+          maxWidth: { xs: "100%", sm: "50vw" },
           ":hover": hoverWidth
             ? {
-                width: hoverWidth,
-                // width: { xs: "20vw", sm: hoverWidth },
+                width: { xs: hoverWidth },
               }
             : undefined,
           // border: "solid 2px yellow",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
-          transitionProperty: "all",
-          transitionDuration: "1s",
-          transitionTimingFunction: "ease",
+          transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
         },
       }}
     >
@@ -82,7 +79,7 @@ export const SidebarWrapper = ({
               bottom: 0,
               paddingLeft: "13px",
               // left: 13,
-              fontSize: "40px",
+              fontSize: { xs: "32px", sm: "40px" },
               // backgroundColor: "red",
               background: theme =>
                 theme.palette.mode === "dark"

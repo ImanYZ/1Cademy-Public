@@ -263,13 +263,16 @@ MainSidebarProps) => {
                 display: "flex",
                 justifyContent: "center",
                 gap: "5px",
+                padding: "6px 0px",
                 // border: "solid 2px blue",
                 ":hover": {
                   backgroundColor: "rgba(255, 152, 0, 1)",
                 },
               }}
             >
-              <SearchIcon />
+              <div className="toolbarBadge" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <SearchIcon />
+              </div>
               <Box
                 component="span"
                 className="toolbarDescription"
@@ -299,6 +302,7 @@ MainSidebarProps) => {
                 }}
               >
                 <Badge
+                  className="toolbarBadge"
                   badgeContent={uncheckedNotificationsNum ?? 0}
                   color="error"
                   anchorOrigin={{ vertical: "top", horizontal: "left" }}
@@ -329,6 +333,7 @@ MainSidebarProps) => {
             <MemoizedMetaButton onClick={() => onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks")}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
                 <Badge
+                  className="toolbarBadge"
                   badgeContent={bookmarkUpdatesNum ?? 0}
                   color="error"
                   anchorOrigin={{ vertical: "top", horizontal: "left" }}
@@ -358,6 +363,7 @@ MainSidebarProps) => {
             <MemoizedMetaButton onClick={() => onOpenSidebar("PENDING_PROPOSALS", "PendingProposals")}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
                 <Badge
+                  className="toolbarBadge"
                   badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
                   color="error"
                   anchorOrigin={{ vertical: "top", horizontal: "left" }}
@@ -405,7 +411,12 @@ MainSidebarProps) => {
                       height: "30px",
                     }}
                   >
-                    <div className="LeaderbaordIcon">🏆</div>
+                    <Box
+                      className="LeaderbaordIcon toolbarBadge"
+                      sx={{ fontSize: "20px", padding: "1px", wordBreak: "normal" }}
+                    >
+                      🏆
+                    </Box>
                     {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
                     {/* {!props.reputationsLoaded && (
                       <div className="preloader-wrapper small active">
@@ -435,8 +446,6 @@ MainSidebarProps) => {
                       component="span"
                       className="toolbarButtonDescription"
                       sx={{
-                        p: "0",
-                        m: "0",
                         fontSize: "15px",
                         lineHeight: "0",
                         height: "0",
@@ -446,7 +455,6 @@ MainSidebarProps) => {
                         transition: "visibility 0s, line-height 0s, height 0s",
                         display: "flex",
                         flexDirection: "column",
-                        justifyContent: "center",
                       }}
                     >
                       <div

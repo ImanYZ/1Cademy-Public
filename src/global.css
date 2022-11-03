@@ -19,6 +19,12 @@
   font-size: 21px;
 }
 
+@media screen and (max-width: 480px) and (min-width: 10px) {
+  .trackNcodeBtn {
+    display: none;
+  }
+}
+
 @media screen and (max-width: 600px) and (min-width: 10px) {
   .home-search-input::placeholder {
     font-size: 16px;
@@ -52,7 +58,7 @@
 
 #ChoosingNodeMessage {
   position: absolute;
-  width: 469px;
+  width: auto;
   left: 490px;
   top: 25px;
   padding: 13px;
@@ -67,6 +73,22 @@
   color: #e5e5e5;
   z-index: 4;
   text-align: center;
+  overflow: hidden;
+}
+
+@media screen and (max-width: 800px) and (min-width: 601px) {
+  #ChoosingNodeMessage {
+    width: auto;
+    left: 430px;
+    font-size: 12px;
+    padding: 5px;
+  }
+}
+
+@media screen and (max-width: 600px) and (min-width: 10px) {
+  #ChoosingNodeMessage {
+    display: none;
+  }
 }
 
 .spinner-white,
@@ -285,11 +307,11 @@
   padding: 10px 13px;
 }
 .card .card-action .LearnBefore {
-  border-right: 1px solid #ececec;
+  /* border-right: 1px solid #ececec; */
   margin-right: -1px;
 }
 .card .card-action .LearnAfter {
-  border-left: 1px solid #ececec;
+  /* border-left: 1px solid #ececec; */
   padding-left: 11px; /*CHECK I add this to fix separation in vertical line*/
 }
 .card .card-action .row {
@@ -1280,6 +1302,29 @@ button.MuiTab-textColorInherit:focus {
   /* height: 100%; */
 }
 
+.MiniUserProfileHeaderMobile {
+  width: 100% !important;
+}
+
+@media screen and (max-width: 600px) and (min-width: 10px) {
+  .MiniUserProfileHeaderMobile {
+    grid-template-columns: 100% !important;
+    padding-left: 0 !important;
+    justify-items: center !important;
+    gap: 16px;
+  }
+  .MiniUserPrifileIdentityMobile {
+    padding: 0px 20px;
+    gap: 16px;
+  }
+  .LeftPoints {
+    margin-left: 0px !important;
+  }
+  .AccountSettingsButton {
+    width: 100% !important;
+  }
+}
+
 #MiniUserPrifileHeader #UserProfilePicture {
   margin: 0px 2.5px 0px 10px;
 }
@@ -1329,6 +1374,11 @@ button.MuiTab-textColorInherit:focus {
 #MiniUserPrifileIdentity {
   display: grid;
   grid-template-rows: auto auto auto auto;
+}
+
+#MiniUserPrifileIdentityUSettingSidebar {
+  display: grid;
+  grid-template-rows: auto auto auto;
 }
 
 #MiniUserPrifileName {
@@ -2367,7 +2417,8 @@ button.MuiTab-textColorInherit:focus {
 }
 
 .NotificationBody .NotificationNodeLink {
-  width: 340px;
+  /* width: 340px; */
+  width: fit-content;
   margin-top: -10px;
   margin-bottom: -10px;
 }
@@ -2648,6 +2699,11 @@ button.MuiTab-textColorInherit:focus {
   -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
   -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
 }
+
+.toolbar:focus .toolbarBadge,
+.toolbar:hover .toolbarBadge {
+  margin-left: 20px;
+}
 /* .toolbar:focus .toolbarButtonDescription{
 
 } */
@@ -2655,7 +2711,9 @@ button.MuiTab-textColorInherit:focus {
 .toolbar:hover .toolbarButtonDescription {
   width: 100px;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
+  justify-content: center;
+  align-items: flex-start;
   visibility: visible;
   line-height: 16px;
   height: 41px;
@@ -2688,4 +2746,5 @@ button.MuiTab-textColorInherit:focus {
 .toolbar:hover .scroll-styled {
   display: flex;
   align-items: flex-start;
+  margin-left: 10px;
 }
