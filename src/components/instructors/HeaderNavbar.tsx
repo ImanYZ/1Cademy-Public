@@ -8,9 +8,10 @@ import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 
 const OPTIONS: { id: string; title: string; label: string; route: string }[] = [
   { id: "01", label: "HOME", title: "HOME", route: "/instructors" },
-  { id: "02", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
-  { id: "03", label: "QUESTIONS", title: "QUESTIONS", route: "/instructors/questions" },
-  { id: "04", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
+  { id: "02", label: "DASHBOARD", title: "DASHBOARD", route: "/instructors/dashboard" },
+  { id: "03", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
+  { id: "04", label: "QUESTIONS", title: "QUESTIONS", route: "/instructors/questions" },
+  { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
 ];
 
 type HeaderNavbarProps = {};
@@ -84,7 +85,7 @@ const HeaderNavbar = ({}: HeaderNavbarProps) => {
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
           <Button color="secondary" sx={{ wordBreak: "normal", width: "233px", p: "12px 24px 12px 37px" }}>
             <ArrowForwardIosIcon fontSize="small" sx={{ mr: "20px" }} />
-            GO TO DASHBOARD
+            GO TO NOTEBOOK
           </Button>
           <Box
             sx={{

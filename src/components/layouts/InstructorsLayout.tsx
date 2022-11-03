@@ -1,4 +1,3 @@
-import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import { NextPage } from "next";
 import React, { FC, ReactNode } from "react";
@@ -17,10 +16,10 @@ type InstructorsLayoutPageProps = {
 type Props = {
   children: (props: InstructorsLayoutPageProps) => ReactNode;
 };
-export type NextPageWithLayout<P = InstructorsLayoutPageProps, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: NextPageWithLayout) => ReactNode;
+export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: InstructorLayoutPage) => ReactNode;
 };
-export const PublicLayout: FC<Props> = ({ children }) => {
+export const InstructorsLayout: FC<Props> = ({ children }) => {
   // const [{ isAuthenticated }] = useAuth();
   // const router = useRouter();
   // useEffect(() => {
@@ -31,9 +30,15 @@ export const PublicLayout: FC<Props> = ({ children }) => {
   const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
     useSemesterFilter();
   return (
-    <Box>
+    <Box
+      sx={{
+        // width: "100vw",
+        background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
+        border: "solid 2px royalBlue",
+      }}
+    >
       <HeaderNavbar />
-      <Paper sx={{ p: "10px" }}>
+      <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
         <SemesterFilter
           semesters={semesters}
           selectedSemester={selectedSemester}
@@ -42,7 +47,8 @@ export const PublicLayout: FC<Props> = ({ children }) => {
           selectedCourse={selectedCourse}
           setSelectedCourse={setSelectedCourse}
         />
-      </Paper>
+      </Box>
+
       {children({ selectedSemester, selectedCourse })}
     </Box>
   );

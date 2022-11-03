@@ -1,5 +1,5 @@
-import { NextPageWithLayout, PublicLayout } from "@/components/layouts/InstructorsLayout";
-const Page: NextPageWithLayout = ({ selectedSemester, selectedCourse }) => {
+import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
+const Page: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
   return (
     <p>
       hello world {selectedSemester} + {selectedCourse}
@@ -9,6 +9,6 @@ const Page: NextPageWithLayout = ({ selectedSemester, selectedCourse }) => {
 
 // This wrapper expose the shared variables from filters
 const PageWrapper = () => {
-  return <PublicLayout>{props => <Page {...props} />}</PublicLayout>;
+  return <InstructorsLayout>{props => <Page {...props} />}</InstructorsLayout>;
 };
 export default PageWrapper;

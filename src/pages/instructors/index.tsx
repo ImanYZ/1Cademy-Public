@@ -1,39 +1,100 @@
-import { Paper } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
-import HeaderNavbar from "../../components/instructors/HeaderNavbar";
-import { SemesterFilter } from "../../components/instructors/SemesterFilter";
-import { useSemesterFilter } from "../../components/instructors/useSemesterFilter";
+import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
-type InstructorsProps = {};
-
-const Instructors = ({}: InstructorsProps) => {
-  const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
-    useSemesterFilter();
-
+const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
   return (
-    <Box>
-      <HeaderNavbar />
-      <Paper sx={{ p: "10px" }}>
-        {/* <Box sx={{ pt: "75px" }}> */}
-        <SemesterFilter
-          semesters={semesters}
-          selectedSemester={selectedSemester}
-          setSelectedSemester={setSelectedSemester}
-          courses={courses}
-          selectedCourse={selectedCourse}
-          setSelectedCourse={setSelectedCourse}
-        />
-        <h1>instructor page</h1>
-        <p>
-          semester {selectedCourse} selected has {courses.length} and course {selectedCourse} is selected
-        </p>
-      </Paper>
+    <Box
+      sx={{
+        pb: "10px",
+        maxWidth: "1384px",
+        m: "auto",
+        px: { xs: "10px", xl: "0px" },
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "minmax(auto, 421px) auto minmax(auto, 629px)" },
+          gap: "16px",
+        }}
+      >
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "16px",
+        }}
+      >
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            1 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            2 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            3 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            4 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            5 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            6 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+
+        <Paper sx={{ p: "40px" }}>
+          <Typography>
+            7 hello world {selectedSemester} + {selectedCourse}
+          </Typography>
+        </Paper>
+      </Box>
     </Box>
   );
 };
 
-export default Instructors;
+// This wrapper expose the shared variables from filters
+const PageWrapper = () => {
+  return <InstructorsLayout>{props => <Instructors {...props} />}</InstructorsLayout>;
+};
+export default PageWrapper;
 
 // const NodeBook = () => (
 //   <NodeBookProvider>
