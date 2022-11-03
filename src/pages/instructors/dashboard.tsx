@@ -1,9 +1,11 @@
 import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
+import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
 const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
+  // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
   return (
     <Box
       sx={{
@@ -28,10 +30,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             hello world {selectedSemester} + {selectedCourse}
           </Typography>
         </Paper>
-        <Paper sx={{ p: "40px" }}>
-          <Typography>
-            hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+        <Paper sx={{ p: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <PointsBarChart />
         </Paper>
         <Paper sx={{ p: "40px" }}>
           <Typography>
