@@ -64,7 +64,7 @@ export const SidebarWrapper = ({
             : undefined,
           // border: "solid 2px yellow",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
-          transition: "all 1s ease",
+          transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
         },
       }}
     >

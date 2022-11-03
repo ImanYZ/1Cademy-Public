@@ -3885,7 +3885,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {nodeBookState.selectedNode && (
-            <div className="trackNcodeBtn">
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
               <Tooltip
                 title="Scroll to last Selected Node"
                 placement="left"
@@ -3904,7 +3904,7 @@ const Dashboard = ({}: DashboardProps) => {
             </div>
           )}
           {process.env.NODE_ENV === "development" && (
-            <div className="trackNcodeBtn">
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
               <Tooltip
                 title={"Watch geek data"}
                 sx={{
