@@ -49,6 +49,7 @@ export const useSemesterFilter = () => {
 
     const newCourses = getCourseBySemester(selectedSemester, MOCK_COURSES);
     setCourses(newCourses);
+    setSelectedCourse(newCourses[0]);
   }, [selectedSemester]);
 
   return {
