@@ -8,19 +8,20 @@ import { Button } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
+import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
   DataGrid,
-  GridCallbackDetails,
+  // GridCallbackDetails,
   // GridCellEditCommitParams,
   GridColumns,
   // GridRenderEditCellParams,
   GridRowsProp,
   // GridValueSetterParams,
-  MuiBaseEvent,
-  MuiEvent,
+  // MuiBaseEvent,
+  // MuiEvent,
 } from "@mui/x-data-grid";
 import { randomTraderName, randomUpdatedDate } from "@mui/x-data-grid-generator";
 import React, { useState } from "react";
@@ -290,11 +291,22 @@ const rows: GridRowsProp = [
 ];
 
 export const Students = () => {
-  const [tableRows, setTableRows] = useState<GridRowsProp | null>(rows);
+  const [tableRows, setTableRows] = useState<GridRowsProp>(rows);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [tableColumns, setTableColumns] = useState(dataGridColumns({ editMode: true }));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updatedTableData, setUpdatedTableData] = useState(rows);
   const [openFilter, setOpenFilter] = useState(false);
-  const [filters, setFilters] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [dataGridLoading, setDataGridLoading] = useState<boolean>(false);
+  const [filters, setFilters] = useState<
+    {
+      title: string;
+      operation: string;
+      value: number;
+    }[]
+  >([]);
   const lessGreatThan: GridColumns = [
     { field: "<", headerName: "Less" },
     { field: ">", headerName: "Great" },
@@ -313,20 +325,21 @@ export const Students = () => {
   const changeFilter = (value: string) => {
     const newFilter = {
       title: value,
-      opertaion: "<",
+      operation: "<",
       value: 10,
     };
-    setFilters(oldFilter => [...oldFilter, newFilter]);
-    console.log(value);
+    const updateFilters = [...filters, newFilter];
+    setFilters(updateFilters);
   };
 
   const addFilter = () => {
     const newFilter = {
       title: "",
-      opertaion: "<",
+      operation: "<",
       value: 10,
     };
-    setFilters(oldFilter => [...oldFilter, newFilter]);
+    const updateFilters = [...filters, newFilter];
+    setFilters(updateFilters);
   };
 
   const deleteFilter = (index: any) => {
@@ -375,17 +388,15 @@ export const Students = () => {
                       //   onChangeInstitution(value);
                       // }}
                       // onBlur={() => setTouched({ ...touched, institution: true })}
-                      options={columns({
-                        editMode,
-                      })}
-                      getOptionLabel={option => option.field}
+                      options={tableColumns}
+                      getOptionLabel={(option: any) => option.field}
                       renderInput={params => <TextField {...params} placeholder="Feild" />}
-                      renderOption={(props, option) => (
+                      renderOption={(props, option: any) => (
                         <li {...props}>
                           <div style={{ paddingLeft: "7px" }}>{option.field}</div>
                         </li>
                       )}
-                      isOptionEqualToValue={(option, value) => option.field === value.field}
+                      isOptionEqualToValue={(option: any, value: any) => option.field === value.field}
                       fullWidth
                       sx={{ mb: "16px", width: "96%", ml: "10px", textAlign: "center" }}
                     />
@@ -399,14 +410,14 @@ export const Students = () => {
                         // }}
                         // onBlur={() => setTouched({ ...touched, institution: true })}
                         options={lessGreatThan}
-                        getOptionLabel={option => option.field}
+                        getOptionLabel={(option: any) => option.field}
                         renderInput={params => <TextField {...params} placeholder="" />}
-                        renderOption={(props, option) => (
+                        renderOption={(props, option: any) => (
                           <li {...props}>
                             <div style={{ paddingLeft: "7px" }}>{option.field}</div>
                           </li>
                         )}
-                        isOptionEqualToValue={(option, value) => option.field === value.field}
+                        isOptionEqualToValue={(option: any, value: any) => option.field === value.field}
                         fullWidth
                         sx={{ mb: "16px", width: "20%", ml: "10px", textAlign: "center" }}
                       />
@@ -431,14 +442,12 @@ export const Students = () => {
             <Autocomplete
               id="field"
               // value={getNameFromInstitutionSelected()}
-              onChange={(_, value) => changeFilter(value?.field)}
+              onChange={(_, value: any) => changeFilter(value?.field)}
               // onInputChange={(_, value) => {
               //   onChangeInstitution(value);
               // }}
               // onBlur={() => setTouched({ ...touched, institution: true })}
-              options={columns({
-                editMode,
-              })}
+              options={tableColumns}
               getOptionLabel={option => option.field}
               renderInput={params => <TextField {...params} placeholder="Feild" />}
               renderOption={(props, option) => (
@@ -477,20 +486,21 @@ export const Students = () => {
   );
 
   const saveTableChanges = () => {
-    setTableRows([]);
-    setEditMode(false);
-    setTimeout(() => {
-      setTableRows([...updatedTableData]);
-    }, 1000);
+    // console.log(apiRef?.current?.getRowModels());
+    // setTableRows([]);
+    // setDataGridLoading(true);
+    // setTimeout(() => {
+    //   setTableRows([...updatedTableData]);
+    //   setDataGridLoading(false);
+    // }, 1000);
   };
 
   const discardTableChanges = () => {
-    setEditMode(false);
     setTableRows([...tableRows]);
     setUpdatedTableData([]);
   };
 
-  console.log({ filters, editMode });
+  // console.log({ filters, editMode });
   return (
     <>
       <PageWrapper />
@@ -588,28 +598,31 @@ export const Students = () => {
               x.id = index;
               return x;
             })}
-            columns={columns({
-              editMode,
-            })}
-            autoPageSize={true}
-            onCellEditCommit={(params: any, event: MuiEvent<MuiBaseEvent>, details: GridCallbackDetails) => {
-              console.log({
-                params,
-                event,
-                details,
-              });
-              // const updatedValue = params.value;
-              const tableData = [...tableRows];
-              const rowData = params?.row;
-              const { id } = rowData;
-              const findStudentIndex = tableData.findIndex(row => row.id === id);
-              tableData[findStudentIndex] = rowData;
-              setUpdatedTableData(tableData);
+            columns={tableColumns}
+            autoPageSize
+            components={{
+              LoadingOverlay: LinearProgress,
             }}
+            hideFooter
+            loading={dataGridLoading}
+            // onCellEditCommit={(params: any, event: MuiEvent<MuiBaseEvent>, details: GridCallbackDetails) => {
+            //   console.log({
+            //     params,
+            //     event,
+            //     details,
+            //   });
+            //   // const updatedValue = params.value;
+            //   const tableData = [...tableRows];
+            //   const rowData = params?.row;
+            //   const { id } = rowData;
+            //   const findStudentIndex = tableData.findIndex(row => row.id === id);
+            //   tableData[findStudentIndex] = rowData;
+            //   setUpdatedTableData(tableData);
+            // }}
             /* 
-          we shouldn't use this as this is for experimental purpose,
-          only use if it is marked stable by MUI 
-        */
+        we shouldn't use this as this is for experimental purpose,
+        only use if it is marked stable by MUI 
+      */
             // experimentalFeatures={{ newEditingApi: true }}
           />
           {editMode && (
@@ -684,20 +697,14 @@ export const Students = () => {
 
 export default Students;
 
-const columns = ({ editMode }: any) => [
+const dataGridColumns = ({ editMode }: any) => [
   {
     field: "firstName",
     headerName: "First Name",
     description: "First Name",
-    // valueSetter: (params: any) => setUpdatedValue(params, "firstName"),
+    // valueSetter: (params: GridValueSetterParams) => ({ ...params.row, firstName: params.value }),
     cellClassName: () => `${editMode ? "editable-cell" : "not-editable-cell"}`,
-    // renderEditCell: (params: GridRenderEditCellParams) => {
-    //   console.log({ params });
-    //   return (
-    //     <TextField className="edit-text" value={params.value} style={{ width: "100%" }} />
-    //   );
-    // },
-    width: 150,
+    width: 250,
     editable: true,
   },
   {
@@ -705,10 +712,7 @@ const columns = ({ editMode }: any) => [
     headerName: "Last Name",
     description: "Last Name",
     cellClassName: () => `${editMode ? "editable-cell" : "not-editable-cell"}`,
-    // renderEditCell: (params: GridRenderEditCellParams) => (
-    //   <TextField className="edit-text" value={params.value} style={{ width: "100%" }} />
-    // ),
-    width: 150,
+    width: 200,
     editable: true,
   },
   {
