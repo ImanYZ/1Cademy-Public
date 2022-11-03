@@ -411,7 +411,12 @@ MainSidebarProps) => {
                       height: "30px",
                     }}
                   >
-                    <div className="LeaderbaordIcon">🏆</div>
+                    <Box
+                      className="LeaderbaordIcon toolbarBadge"
+                      sx={{ fontSize: "20px", padding: "1px", wordBreak: "normal" }}
+                    >
+                      🏆
+                    </Box>
                     {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
                     {/* {!props.reputationsLoaded && (
                       <div className="preloader-wrapper small active">
@@ -441,8 +446,6 @@ MainSidebarProps) => {
                       component="span"
                       className="toolbarButtonDescription"
                       sx={{
-                        p: "0",
-                        m: "0",
                         fontSize: "15px",
                         lineHeight: "0",
                         height: "0",
@@ -452,7 +455,6 @@ MainSidebarProps) => {
                         transition: "visibility 0s, line-height 0s, height 0s",
                         display: "flex",
                         flexDirection: "column",
-                        justifyContent: "center",
                       }}
                     >
                       <div
