@@ -636,3 +636,13 @@ select:-webkit-autofill:focus {
   align-items: center;
   margin: 10px 0px !important;
 }
+
+.MuiCollapse-container {
+  transition-duration: 0s !important;
+}
+/* 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+} */
