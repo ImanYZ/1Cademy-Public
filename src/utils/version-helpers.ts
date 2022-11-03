@@ -440,7 +440,6 @@ export const changeNodeTitle = async ({
     const newParents = linkedData.parents.filter((parent: any) => parent.node !== nodeId);
     newParents.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
     linkedDataChanges = {
-      ...linkedDataChanges,
       parents: newParents,
       updatedAt: currentTimestamp,
     };
@@ -1477,9 +1476,9 @@ export const versionCreateUpdate = async ({
               tWriteOperations,
             });
           }
-          let linkedNode, linkedNodeChanges;
           // TODO: move these to queue
           await detach(async () => {
+            let linkedNode, linkedNodeChanges;
             let batch = db.batch();
             let newBatch = batch;
             let writeCounts = 0;
