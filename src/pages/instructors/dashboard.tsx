@@ -1,6 +1,8 @@
 import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
+import { BubbleChart } from "@/components/chats/BubbleChart";
+
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
@@ -30,13 +32,28 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             hello world {selectedSemester} + {selectedCourse}
           </Typography>
         </Paper>
-        <Paper sx={{ p: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Paper
+          sx={{ p: "40px", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: "4px" }}>
+            <Box>
+              <Typography>Points</Typography>
+              <Typography># of Students</Typography>
+            </Box>
+            <Box>
+              <Typography>Points</Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                <span>{`>100%`}</span>
+                <span>{`>10%`}</span>
+                <span>{`>50%`}</span>
+                <span>{`<=100%`}</span>
+              </Box>
+            </Box>
+          </Box>
           <PointsBarChart />
         </Paper>
         <Paper sx={{ p: "40px" }}>
-          <Typography>
-            hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+          <BubbleChart />
         </Paper>
       </Box>
       <Box
