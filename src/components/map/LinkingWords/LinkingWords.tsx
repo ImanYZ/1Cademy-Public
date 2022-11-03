@@ -165,8 +165,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   const onCancelProposal = () => {
     const firstParentId = props.parents[0];
-    if (!firstParentId) return;
-    const scrollTo = props.isNew ? firstParentId.node : props.identifier;
+    const scrollTo = props.isNew ? firstParentId.node ?? undefined : props.identifier;
+    if (!scrollTo) return;
+
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     props.closeSideBar();
   };
