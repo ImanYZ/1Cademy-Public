@@ -1,7 +1,5 @@
 import { Timestamp } from "firebase/firestore";
 
-import { IReputation } from "./IReputationPoint";
-
 export type ICourseSyllabusItem = {
   title: string;
   node: string;
@@ -35,12 +33,18 @@ export type ICourseStudent = {
   votePoints: number;
 };
 
-export type ICourse = {
+// document id should be semester id as well
+export type ISemester = {
   instructors: string[]; // list of uid/uname
   title: string;
-  tagIds: string[];
-  tags: string[]; // (CourseName, UniversityName, BatchName)
-  // students: number;
+  tagId: string; // semester tag id
+  tag: string; // semester tag name
+  uTagId: string; // university tag id
+  utag: string; // university tag name
+  cTagId: string; // course tag id
+  ctag: string; // course tag
+  // tagIds: string[];
+  // tags: string[]; // (CourseName, UniversityName, BatchName)
   syllabus: ICourseSyllabusItem[];
   days: number;
   nodeProposals: ICourseNodeProposalSettings;
@@ -61,25 +65,34 @@ export type IInstructor = {
   courses: string[];
 };
 
-// we can use this for  weekly, monthly
-// tagId is course tag id
-export type ICoursePoint = IReputation & {
-  uTagId: string; // University tag id
-  bTagId: string; // Batch tag id
-};
-
 export type ICourseTag = {
-  tagId: string; // tagId of course
+  ctagId: string; // tagId of course
   uTagId: string; // University Tag Id
-  bTagId: string; // Batch Tag Id
+  tagId: string; // Semester Tag Id
 };
 
-export type ICourseStudentStat = {
-  tagId: string; // tagId of course
-  uTagId: string; // University Tag Id
-  bTagId: string; // Batch Tag Id
-  uname: string;
+export type ICourseStudentStatDay = {
   day: string; // 11-1-2022
   proposals: number;
   questions: number;
+};
+
+export type ICourseStudentStat = {
+  tagId: string; // tagId of semester
+  uname: string;
+  days: ICourseStudentStatDay[];
+};
+
+export type ICourseStudentVoteStatDay = {
+  upVotes: number;
+  downVotes: number;
+  instVotes: number;
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
+};
+
+export type ICourseStudentVoteStat = {
+  tagId: string; // tagId of semester
+  uname: string;
+  days: ICourseStudentVoteStatDay[];
 };
