@@ -2531,6 +2531,7 @@ const Dashboard = ({}: DashboardProps) => {
   const closeSideBar = useMemoizedCallback(() => {
     devLog("In closeSideBar");
 
+    // TODO: call closeSidebar every close sidebar action
     if (!user) return;
 
     // setNodeToImprove(null); // CHECK: I added this to compare then
@@ -2552,14 +2553,11 @@ const Dashboard = ({}: DashboardProps) => {
     //   nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
     // );
 
-    if (
-      nodeBookState.selectionType === "AcceptedProposals" ||
-      nodeBookState.selectionType === "Proposals" ||
-      (nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable)
-    ) {
+    //only reload permanent graph if therese is temporal nodes on the map
+    //it means only for proposals (child/improvements)
+    if (tempNodes.size || nodeChanges) {
       reloadPermanentGraph();
     }
-
     let sidebarType: any = nodeBookState.selectionType;
     if (openPendingProposals) {
       sidebarType = "PendingProposals";
@@ -3926,6 +3924,7 @@ const Dashboard = ({}: DashboardProps) => {
               id="MapContent"
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
+              onTouchStart={mapContentMouseOver}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}
