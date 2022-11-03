@@ -1,6 +1,8 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+// import { createStyles, makeStyles } from '@mui/styles';
+import EditIcon from "@mui/icons-material/Edit";
 import { Box } from "@mui/material";
 import { Button } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -9,7 +11,6 @@ import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-// import { createStyles, makeStyles } from '@mui/styles';
 import {
   DataGrid,
   GridCallbackDetails,
@@ -24,6 +25,7 @@ import {
 import { randomTraderName, randomUpdatedDate } from "@mui/x-data-grid-generator";
 import React, { useState } from "react";
 
+import PageWrapper from "./tmp";
 // const useStyles = makeStyles(() => ({
 //   editableMode: {
 
@@ -287,18 +289,18 @@ const rows: GridRowsProp = [
   },
 ];
 
-export const StudentDashboard = () => {
+export const Students = () => {
+  const [tableRows, setTableRows] = useState<GridRowsProp | null>(rows);
+  const [updatedTableData, setUpdatedTableData] = useState(rows);
+  const [openFilter, setOpenFilter] = useState(false);
+  const [filters, setFilters] = useState([]);
+  const [editMode, setEditMode] = useState(false);
   const lessGreatThan: GridColumns = [
     { field: "<", headerName: "Less" },
     { field: ">", headerName: "Great" },
   ];
 
   // const classes = useStyles();
-  const [tableRows, setTableRows] = useState(rows);
-  const [updatedTableData, setUpdatedTableData] = useState(rows);
-  const [openFilter, setOpenFilter] = useState(false);
-  const [filters, setFilters] = useState([]);
-  const [editMode, setEditMode] = useState(false);
 
   // const setUpdatedValue = (params: GridValueSetterParams, fieldName: string) => {
   //   return { ...params.row, [fieldName]: updatedValue };
@@ -353,7 +355,7 @@ export const StudentDashboard = () => {
         }}
       >
         <Box sx={{ ml: "50px", width: "400px" }}>
-          <Typography>Filter By</Typography>
+          <Typography sx={{ mb: "10px" }}>Filter By</Typography>
 
           {filters.length > 0 ? (
             <>
@@ -373,7 +375,9 @@ export const StudentDashboard = () => {
                       //   onChangeInstitution(value);
                       // }}
                       // onBlur={() => setTouched({ ...touched, institution: true })}
-                      options={columns}
+                      options={columns({
+                        editMode,
+                      })}
                       getOptionLabel={option => option.field}
                       renderInput={params => <TextField {...params} placeholder="Feild" />}
                       renderOption={(props, option) => (
@@ -432,7 +436,9 @@ export const StudentDashboard = () => {
               //   onChangeInstitution(value);
               // }}
               // onBlur={() => setTouched({ ...touched, institution: true })}
-              options={columns}
+              options={columns({
+                editMode,
+              })}
               getOptionLabel={option => option.field}
               renderInput={params => <TextField {...params} placeholder="Feild" />}
               renderOption={(props, option) => (
@@ -472,141 +478,211 @@ export const StudentDashboard = () => {
 
   const saveTableChanges = () => {
     setTableRows([]);
+    setEditMode(false);
     setTimeout(() => {
       setTableRows([...updatedTableData]);
     }, 1000);
   };
 
   const discardTableChanges = () => {
+    setEditMode(false);
     setTableRows([...tableRows]);
     setUpdatedTableData([]);
   };
 
   console.log({ filters, editMode });
   return (
-    <Box className="student-dashboard" sx={{ padding: "20px" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          m: "25px 30px",
-        }}
-      >
+    <>
+      <PageWrapper />
+      <Box className="student-dashboard" sx={{ padding: "20px" }}>
         <Box
-          style={{
+          sx={{
             display: "flex",
-            alignItems: "center",
-            width: "30%",
-            justifyContent: "space-evenly",
-            flexWrap: "wrap",
+            justifyContent: "space-between",
+            m: "25px 30px",
           }}
         >
-          <Typography variant="h1" component="h2">
-            Sl 106
-          </Typography>
-          <Typography sx={{ mr: "40px" }} variant="h5" component="h2">
-            SFall: 22
-          </Typography>
-          <Typography variant="h5" component="h2">
-            Students: 50
-          </Typography>
-        </Box>
-        <Box>
-          <Button
-            variant="contained"
-            onClick={handleOpenCloseFilter}
-            sx={{
-              color: theme => theme.palette.common.white,
-              background: theme => theme.palette.common.orange,
-              height: { xs: "40px", md: "55px" },
-              width: { xs: "50%", md: "auto" },
-              fontSize: 16,
-              fontWeight: "700",
-              my: { xs: "0px", md: "auto" },
-              mt: { xs: "15px", md: "auto" },
-              marginLeft: { xs: "0px", md: "32px" },
-              marginRight: "40px",
-              paddingX: "30px",
-              borderRadius: 1,
-              textAlign: "center",
-              alignSelf: "center",
+          <Box
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "30%",
+              justifyContent: "space-evenly",
+              flexWrap: "wrap",
             }}
           >
-            Filter By
-          </Button>
-          <TextField
-            sx={{ height: "5px", width: "500px" }}
-            id="outlined-basic"
-            placeholder="search name or email"
-            variant="outlined"
-          />
-          <Button
-            variant="contained"
-            onClick={() => setEditMode(!editMode)}
-            sx={{
-              color: theme => theme.palette.common.white,
-              background: theme => theme.palette.common.orange,
-              height: { xs: "40px", md: "55px" },
-              width: { xs: "50%", md: "auto" },
-              fontSize: 16,
-              fontWeight: "700",
-              my: { xs: "0px", md: "auto" },
-              mt: { xs: "15px", md: "auto" },
-              marginLeft: { xs: "0px", md: "32px" },
-              marginRight: "40px",
-              paddingX: "30px",
-              borderRadius: 1,
-              textAlign: "center",
-              alignSelf: "center",
-            }}
-          >
-            Add/Edit
-          </Button>
+            <Box sx={{ display: "flex", flexDirection: "row" }}>
+              <Typography variant="h1" component="h2">
+                Sl 106
+              </Typography>
+              <Typography sx={{ ml: "5px", mt: "20px", fontSize: "14.5px" }} variant="h5" component="h2">
+                Fall 22
+              </Typography>
+            </Box>
 
-          <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
-            {list()}
-          </Drawer>
+            <Typography sx={{ fontSize: "14.5px" }} variant="h5" component="h2">
+              Students: 50
+            </Typography>
+          </Box>
+          <Box>
+            <Button
+              variant="contained"
+              onClick={handleOpenCloseFilter}
+              sx={{
+                color: theme => theme.palette.common.white,
+                background: theme => theme.palette.common.orange,
+                height: { xs: "40px", md: "55px" },
+                width: { xs: "50%", md: "auto" },
+                fontSize: 16,
+                fontWeight: "700",
+                my: { xs: "0px", md: "auto" },
+                mt: { xs: "15px", md: "auto" },
+                marginLeft: { xs: "0px", md: "32px" },
+                marginRight: "40px",
+                paddingX: "30px",
+                borderRadius: 1,
+                textAlign: "center",
+                alignSelf: "center",
+              }}
+            >
+              Filter By
+            </Button>
+            <TextField
+              sx={{ height: "5px", width: "500px" }}
+              id="outlined-basic"
+              placeholder="search name or email"
+              variant="outlined"
+            />
+            <Button
+              variant="contained"
+              onClick={() => setEditMode(!editMode)}
+              sx={{
+                color: theme => theme.palette.common.white,
+                background: theme => theme.palette.common.black,
+                height: { xs: "40px", md: "55px" },
+                width: { xs: "50%", md: "auto" },
+                fontSize: 16,
+                fontWeight: "700",
+                my: { xs: "0px", md: "auto" },
+                mt: { xs: "15px", md: "auto" },
+                marginLeft: { xs: "0px", md: "32px" },
+                marginRight: "40px",
+                paddingX: "30px",
+                borderRadius: 1,
+                textAlign: "center",
+                alignSelf: "center",
+              }}
+            >
+              <EditIcon /> Edit/Add
+            </Button>
+
+            <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
+              {list()}
+            </Drawer>
+          </Box>
         </Box>
-      </Box>
-      <hr />
-      <Box className="student-dashboard-table" sx={{ height: "500px", mt: "40px", mr: "70px", ml: "40px" }}>
-        <DataGrid
-          rows={tableRows.map((x, index) => {
-            x.id = index;
-            return x;
-          })}
-          columns={columns({
-            editMode,
-          })}
-          autoPageSize={true}
-          onCellEditCommit={(params: any, event: MuiEvent<MuiBaseEvent>, details: GridCallbackDetails) => {
-            console.log({
-              params,
-              event,
-              details,
-            });
-            // const updatedValue = params.value;
-            const tableData = [...tableRows];
-            const rowData = params?.row;
-            const { id } = rowData;
-            const findStudentIndex = tableData.findIndex(row => row.id === id);
-            tableData[findStudentIndex] = rowData;
-            setUpdatedTableData(tableData);
-          }}
-          /* 
+        <hr />
+        <Box className="student-dashboard-table" sx={{ height: "500px", mt: "40px", mr: "70px", ml: "40px" }}>
+          <DataGrid
+            rows={tableRows.map((x, index) => {
+              x.id = index;
+              return x;
+            })}
+            columns={columns({
+              editMode,
+            })}
+            autoPageSize={true}
+            onCellEditCommit={(params: any, event: MuiEvent<MuiBaseEvent>, details: GridCallbackDetails) => {
+              console.log({
+                params,
+                event,
+                details,
+              });
+              // const updatedValue = params.value;
+              const tableData = [...tableRows];
+              const rowData = params?.row;
+              const { id } = rowData;
+              const findStudentIndex = tableData.findIndex(row => row.id === id);
+              tableData[findStudentIndex] = rowData;
+              setUpdatedTableData(tableData);
+            }}
+            /* 
           we shouldn't use this as this is for experimental purpose,
           only use if it is marked stable by MUI 
         */
-          // experimentalFeatures={{ newEditingApi: true }}
-        />
-        <Button onClick={() => saveTableChanges()}>Save Changes</Button>
-        <Button onClick={() => discardTableChanges()}>Discard Changes</Button>
+            // experimentalFeatures={{ newEditingApi: true }}
+          />
+          {editMode && (
+            <Box sx={{ mt: "50px" }}>
+              <Button
+                variant="text"
+                sx={{
+                  color: theme => theme.palette.common.black,
+                  backgroundColor: "#EDEDED",
+                  fontSize: 16,
+                  fontWeight: "700",
+                  my: { xs: "0px", md: "auto" },
+                  mt: { xs: "15px", md: "auto" },
+                  marginLeft: { xs: "0px", md: "32px" },
+                  marginRight: "40px",
+                  paddingX: "30px",
+                  borderRadius: 1,
+                  textAlign: "center",
+                  alignSelf: "center",
+                }}
+                onClick={() => discardTableChanges()}
+              >
+                Add students from a csv file
+              </Button>
+
+              <Box sx={{ textAlign: "right" }}>
+                <Button
+                  variant="text"
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                  onClick={() => discardTableChanges()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.orange,
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                  onClick={() => saveTableChanges()}
+                >
+                  Save Changes
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 
-export default StudentDashboard;
+export default Students;
 
 const columns = ({ editMode }: any) => [
   {
@@ -621,7 +697,7 @@ const columns = ({ editMode }: any) => [
     //     <TextField className="edit-text" value={params.value} style={{ width: "100%" }} />
     //   );
     // },
-    width: 200,
+    width: 150,
     editable: true,
   },
   {
@@ -632,7 +708,7 @@ const columns = ({ editMode }: any) => [
     // renderEditCell: (params: GridRenderEditCellParams) => (
     //   <TextField className="edit-text" value={params.value} style={{ width: "100%" }} />
     // ),
-    width: 200,
+    width: 150,
     editable: true,
   },
   {
