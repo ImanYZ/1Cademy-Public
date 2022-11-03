@@ -1073,7 +1073,12 @@ export const UserSettigsSidebar = ({
                 {nodeBookState?.choosingNode?.id === "tag" && (
                   <Suspense fallback={<div></div>}>
                     <div id="tagModal">
-                      <Modal style={{ top: "85px" }} onClick={closeTagSelector} returnLeft={true} noBackground={true}>
+                      <Modal
+                        className="tagSelectorModalUserSetting"
+                        onClick={closeTagSelector}
+                        returnLeft={true}
+                        noBackground={true}
+                      >
                         {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
                         <MemoizedTagsSearcher
                           setChosenTags={setChosenTags}
