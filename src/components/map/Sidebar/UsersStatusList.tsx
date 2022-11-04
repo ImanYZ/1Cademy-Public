@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, SxProps, Theme } from "@mui/material";
 import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -82,6 +82,7 @@ type UsersStatusListProps = {
   usersStatus: UsersStatus;
   reloadPermanentGraph: any;
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  sx?: SxProps<Theme>;
 };
 
 const UsersStatusList = (props: UsersStatusListProps) => {
@@ -366,6 +367,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
           reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
           tagTitle={user.tag}
           setOpenSideBar={props.setOpenSideBar}
+          sx={{ ...props.sx }}
         />
       ));
     },
