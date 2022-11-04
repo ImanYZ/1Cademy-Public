@@ -365,19 +365,145 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const [urlNodeProcess, setUrlNodeProcess] = useState(false);
+
+  /**
+   * get Node data
+   * iterate over children and update updatedAt field
+   * iterate over parents and update updatedAt field
+   * get userNode data
+   *  - if exist: update visible and updatedAt field
+   *  - else: create
+   * build fullNode then call makeNodeVisibleInItsLinks and createOrUpdateNode
+   * scroll
+   * update selectedNode
+   */
+  const openNodeHandler = useMemoizedCallback(
+    async (nodeId: string) => {
+      devLog("open_Node_Handler", nodeId);
+      // setFlag(!flag)
+      let linkedNodeRef;
+      let userNodeRef = null;
+      let userNodeData: UserNodesData | null = null;
+
+      const nodeRef = doc(db, "nodes", nodeId);
+      const nodeDoc = await getDoc(nodeRef);
+
+      const batch = writeBatch(db);
+      // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
+      // const nodeDoc = await nodeRef.get();
+      if (nodeDoc.exists() && user) {
+        //CHECK: added user
+        const thisNode: any = { ...nodeDoc.data(), id: nodeId };
+        try {
+          for (let child of thisNode.children) {
+            linkedNodeRef = doc(db, "nodes", child.node);
+
+            // linkedNodeRef = db.collection("nodes").doc(child.node);
+
+            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
+          }
+          for (let parent of thisNode.parents) {
+            // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+            linkedNodeRef = doc(db, "nodes", parent.node);
+            // do a batch r
+            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            // await firebase.batchUpdate(linkedNodeRef, {
+            //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            // });
+          }
+          const userNodesRef = collection(db, "userNodes");
+          const q = query(userNodesRef, where("node", "==", nodeId), where("user", "==", user.uname), limit(1));
+          const userNodeDoc = await getDocs(q);
+          let userNodeId = null;
+          if (userNodeDoc.docs.length > 0) {
+            // if exist documents update the first
+            userNodeId = userNodeDoc.docs[0].id;
+            // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
+            const userNodeRef = doc(db, "userNodes", userNodeId);
+            userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
+            userNodeData.visible = true;
+            userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            batch.update(userNodeRef, userNodeData);
+          } else {
+            // if NOT exist documents create a document
+            userNodeRef = collection(db, "userNodes");
+            // userNodeId = userNodeRef.id;
+
+            userNodeData = {
+              changed: true,
+              correct: false,
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: false,
+              bookmarked: false,
+              node: nodeId,
+              open: true,
+              user: user.uname,
+              visible: true,
+              wrong: false,
+            };
+            batch.set(doc(userNodeRef), userNodeData); // CHECK: changed with batch
+            // const docRef = await addDoc(userNodeRef, userNodeData);
+            // userNodeId = docRef.id; // CHECK: commented this
+          }
+          batch.update(nodeRef, {
+            viewers: thisNode.viewers + 1,
+            updatedAt: Timestamp.fromDate(new Date()),
+          });
+          const userNodeLogRef = collection(db, "userNodesLog");
+
+          const userNodeLogData = {
+            ...userNodeData,
+            createdAt: Timestamp.fromDate(new Date()),
+          };
+
+          // const id = userNodeLogRef.id
+          batch.set(doc(userNodeLogRef), userNodeLogData);
+          await batch.commit();
+
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    },
+    // CHECK: I commented allNode, I did'nt found where is defined
+    [user /*allNodes*/, , allTags /*allUserNodes*/]
+  );
+  //Getting the node from the Url to open and scroll to that node in the first render
+  useEffect(() => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let noodeIdFromDashboard = urlParams.get("nodeId");
+    if (!noodeIdFromDashboard) return setUrlNodeProcess(true);
+    if (!firstScrollToNode) {
+      const selectedNodeGraph = graph.nodes[noodeIdFromDashboard];
+      if (!selectedNodeGraph) openNodeHandler(noodeIdFromDashboard);
+    }
+    setTimeout(() => {
+      if (!noodeIdFromDashboard) return;
+      const selectedNodeDash = graph.nodes[noodeIdFromDashboard];
+      console.log("selectedNodeDash", selectedNodeDash);
+      if (selectedNodeDash?.top === 0) return;
+      if (selectedNodeDash) return;
+      nodeBookDispatch({ type: "setSelectedNode", payload: noodeIdFromDashboard });
+      scrollToNode(noodeIdFromDashboard);
+    }, 1000);
+  }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
+
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
-
-      if (!firstScrollToNode && queueFinished) {
+      if (!firstScrollToNode && queueFinished && urlNodeProcess) {
         if (!user?.sNode) return;
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
-
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
@@ -395,6 +521,7 @@ const Dashboard = ({}: DashboardProps) => {
     queue.length,
     queueFinished,
     scrollToNode,
+    urlNodeProcess,
     user?.sNode,
     userNodesLoaded,
   ]);
@@ -1731,113 +1858,6 @@ const Dashboard = ({}: DashboardProps) => {
   //   [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   // );
 
-  /**
-   * get Node data
-   * iterate over children and update updatedAt field
-   * iterate over parents and update updatedAt field
-   * get userNode data
-   *  - if exist: update visible and updatedAt field
-   *  - else: create
-   * build fullNode then call makeNodeVisibleInItsLinks and createOrUpdateNode
-   * scroll
-   * update selectedNode
-   */
-  const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string) => {
-      devLog("open_Node_Handler", nodeId);
-      // setFlag(!flag)
-      let linkedNodeRef;
-      let userNodeRef = null;
-      let userNodeData: UserNodesData | null = null;
-
-      const nodeRef = doc(db, "nodes", nodeId);
-      const nodeDoc = await getDoc(nodeRef);
-
-      const batch = writeBatch(db);
-      // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
-      // const nodeDoc = await nodeRef.get();
-      if (nodeDoc.exists() && user) {
-        //CHECK: added user
-        const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        try {
-          for (let child of thisNode.children) {
-            linkedNodeRef = doc(db, "nodes", child.node);
-
-            // linkedNodeRef = db.collection("nodes").doc(child.node);
-
-            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-            // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
-          }
-          for (let parent of thisNode.parents) {
-            // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
-            linkedNodeRef = doc(db, "nodes", parent.node);
-            // do a batch r
-            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-            // await firebase.batchUpdate(linkedNodeRef, {
-            //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-            // });
-          }
-          const userNodesRef = collection(db, "userNodes");
-          const q = query(userNodesRef, where("node", "==", nodeId), where("user", "==", user.uname), limit(1));
-          const userNodeDoc = await getDocs(q);
-          let userNodeId = null;
-          if (userNodeDoc.docs.length > 0) {
-            // if exist documents update the first
-            userNodeId = userNodeDoc.docs[0].id;
-            // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
-            const userNodeRef = doc(db, "userNodes", userNodeId);
-            userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
-            userNodeData.visible = true;
-            userNodeData.updatedAt = Timestamp.fromDate(new Date());
-            batch.update(userNodeRef, userNodeData);
-          } else {
-            // if NOT exist documents create a document
-            userNodeRef = collection(db, "userNodes");
-            // userNodeId = userNodeRef.id;
-
-            userNodeData = {
-              changed: true,
-              correct: false,
-              createdAt: Timestamp.fromDate(new Date()),
-              updatedAt: Timestamp.fromDate(new Date()),
-              deleted: false,
-              isStudied: false,
-              bookmarked: false,
-              node: nodeId,
-              open: true,
-              user: user.uname,
-              visible: true,
-              wrong: false,
-            };
-            batch.set(doc(userNodeRef), userNodeData); // CHECK: changed with batch
-            // const docRef = await addDoc(userNodeRef, userNodeData);
-            // userNodeId = docRef.id; // CHECK: commented this
-          }
-          batch.update(nodeRef, {
-            viewers: thisNode.viewers + 1,
-            updatedAt: Timestamp.fromDate(new Date()),
-          });
-          const userNodeLogRef = collection(db, "userNodesLog");
-
-          const userNodeLogData = {
-            ...userNodeData,
-            createdAt: Timestamp.fromDate(new Date()),
-          };
-
-          // const id = userNodeLogRef.id
-          batch.set(doc(userNodeLogRef), userNodeLogData);
-          await batch.commit();
-
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    },
-    // CHECK: I commented allNode, I did'nt found where is defined
-    [user /*allNodes*/, , allTags /*allUserNodes*/]
-  );
-
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
       devLog("open Linked Node", { linkedNodeID });
@@ -1925,7 +1945,7 @@ const Dashboard = ({}: DashboardProps) => {
             isStudied: thisNode.isStudied,
             bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
             node: nodeId,
-            open: false,
+            open: thisNode.open,
             user: username,
             visible: false,
             wrong: thisNode.wrong,
