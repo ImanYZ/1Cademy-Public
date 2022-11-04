@@ -475,6 +475,7 @@ export const Students = () => {
       console.log(row);
     }
     setTableRows(newTable);
+    handleOpenCloseFilter();
   };
 
   const handleChangeFilter = (event: any) => {
@@ -770,7 +771,11 @@ export const Students = () => {
             {filters?.map((filter, index) => {
               return (
                 <>
-                  <Chip key={index} label={filter.title} onDelete={() => deleteFilter(index)} />
+                  <Chip
+                    key={index}
+                    label={filter.title + " " + filter.operation + " " + filter.value}
+                    onDelete={() => deleteFilter(index)}
+                  />
                   {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
                 </>
               );
