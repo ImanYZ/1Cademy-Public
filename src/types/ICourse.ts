@@ -6,22 +6,6 @@ export type ISemesterSyllabusItem = {
   children?: ISemesterSyllabusItem[];
 };
 
-export type ISemesterNodeProposalSettings = {
-  startDate: Timestamp;
-  endDate: Timestamp;
-  numPoints: number;
-  numProposalPerDay: number;
-  totalDaysOfCourse: number;
-};
-
-export type ISemesterQuestionProposalSettings = {
-  startDate: Timestamp;
-  endDate: Timestamp;
-  numPoints: number;
-  numQuestionsPerDay: number;
-  totalDaysOfCourse: number;
-};
-
 export type ISemesterStudent = {
   uname: string;
   totalPoints: number;
@@ -47,8 +31,20 @@ export type ISemester = {
   // tags: string[]; // (CourseName, UniversityName, BatchName)
   syllabus: ISemesterSyllabusItem[];
   days: number;
-  nodeProposals: ISemesterNodeProposalSettings;
-  questionProposals: ISemesterQuestionProposalSettings;
+  nodeProposals: {
+    startDate: Timestamp;
+    endDate: Timestamp;
+    numPoints: number;
+    numProposalPerDay: number;
+    totalDaysOfCourse: number;
+  };
+  questionProposals: {
+    startDate: Timestamp;
+    endDate: Timestamp;
+    numPoints: number;
+    numQuestionsPerDay: number;
+    totalDaysOfCourse: number;
+  };
   votes: {
     pointIncrementOnAgreement: number;
     pointDecrementOnAgreement: number;
