@@ -11,6 +11,8 @@ import { db } from "@/lib/firestoreServer/admin";
 import fbAuth from "src/middlewares/fbAuth";
 import { IUserNode } from "src/types/IUserNode";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
+import { arrayToChunks } from "src/utils";
+import { QueryDocumentSnapshot } from "firebase-admin/firestore";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const {
@@ -62,10 +64,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
 
     const nodeIds = allPostsData.map(post => post.id);
     let userStudiedNodes: { [key: string]: boolean } = {};
-    const userNodes = nodeIds?.length
-      ? await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get()
-      : { docs: [] };
-    for (const userNode of userNodes.docs) {
+
+    const nodeIdChunks = arrayToChunks(nodeIds, 10);
+    const userNodeDocs: QueryDocumentSnapshot<any>[] = [];
+
+    for (const nodeIdChunk of nodeIdChunks) {
+      if (!nodeIdChunk.length) {
+        continue;
+      }
+      const snapshot = await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get();
+      for (let i = 0; i < snapshot.docs.length; i++) {
+        userNodeDocs.push(snapshot.docs[i]);
+      }
+    }
+
+    for (const userNode of userNodeDocs) {
       const userNodeData = userNode.data() as IUserNode;
       userStudiedNodes[userNodeData.node] = !!userNodeData?.isStudied;
     }
