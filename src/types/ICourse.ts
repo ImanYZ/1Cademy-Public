@@ -1,12 +1,12 @@
 import { Timestamp } from "firebase/firestore";
 
-export type ICourseSyllabusItem = {
+export type ISemesterSyllabusItem = {
   title: string;
   node: string;
-  children?: ICourseSyllabusItem[];
+  children?: ISemesterSyllabusItem[];
 };
 
-export type ICourseNodeProposalSettings = {
+export type ISemesterNodeProposalSettings = {
   startDate: Timestamp;
   endDate: Timestamp;
   numPoints: number;
@@ -14,7 +14,7 @@ export type ICourseNodeProposalSettings = {
   totalDaysOfCourse: number;
 };
 
-export type ICourseQuestionProposalSettings = {
+export type ISemesterQuestionProposalSettings = {
   startDate: Timestamp;
   endDate: Timestamp;
   numPoints: number;
@@ -22,7 +22,7 @@ export type ICourseQuestionProposalSettings = {
   totalDaysOfCourse: number;
 };
 
-export type ICourseStudent = {
+export type ISemesterStudent = {
   uname: string;
   totalPoints: number;
   newNodes: number;
@@ -40,15 +40,15 @@ export type ISemester = {
   tagId: string; // semester tag id
   tag: string; // semester tag name
   uTagId: string; // university tag id
-  utag: string; // university tag name
+  uTag: string; // university tag name
   cTagId: string; // course tag id
-  ctag: string; // course tag
+  cTag: string; // course tag
   // tagIds: string[];
   // tags: string[]; // (CourseName, UniversityName, BatchName)
-  syllabus: ICourseSyllabusItem[];
+  syllabus: ISemesterSyllabusItem[];
   days: number;
-  nodeProposals: ICourseNodeProposalSettings;
-  questionProposals: ICourseQuestionProposalSettings;
+  nodeProposals: ISemesterNodeProposalSettings;
+  questionProposals: ISemesterQuestionProposalSettings;
   votes: {
     pointIncrementOnAgreement: number;
     pointDecrementOnAgreement: number;
@@ -57,42 +57,50 @@ export type ISemester = {
     onReceiveStar: number;
   };
   deleted: boolean;
-  students: ICourseStudent[];
-};
-
-export type IInstructor = {
-  uname: string;
-  courses: string[];
+  students: ISemesterStudent[];
 };
 
 export type ICourseTag = {
   ctagId: string; // tagId of course
+  cTag: string;
   uTagId: string; // University Tag Id
+  uTag: string;
   tagId: string; // Semester Tag Id
+  tag: string;
 };
 
-export type ICourseStudentStatDay = {
+export type IInstructor = {
+  uname: string;
+  courses: ICourseTag[];
+};
+
+export type ICourse = {
+  title: string;
+  node: string;
+  uTagIds: string[];
+  uTags: string[];
+  sTagIds: string[];
+  sTags: string[];
+};
+
+export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022
   proposals: number;
   questions: number;
 };
 
-export type ICourseStudentStat = {
+export type ISemesterStudentStat = {
   tagId: string; // tagId of semester
   uname: string;
-  days: ICourseStudentStatDay[];
+  days: ISemesterStudentStatDay[];
 };
 
-export type ICourseStudentVoteStatDay = {
+export type ISemesterStudentVoteStat = {
+  tagId: string; // tagId of semester
+  uname: string;
   upVotes: number;
   downVotes: number;
   instVotes: number;
   agreementsWithInst: number;
   disagreementsWithInst: number;
-};
-
-export type ICourseStudentVoteStat = {
-  tagId: string; // tagId of semester
-  uname: string;
-  days: ICourseStudentVoteStatDay[];
 };
