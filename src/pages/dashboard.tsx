@@ -271,12 +271,12 @@ const Dashboard = ({}: DashboardProps) => {
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
     if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
-    console.log("onCompleteWorker", 1);
+    // console.log("onCompleteWorker", 1);
     if (["LinkingWords", "References", "Tags", "PendingProposals"].includes(lastNodeOperation.current)) {
       // when open options from node is not required to scrollToNode
       return (lastNodeOperation.current = "");
     }
-    console.log("onCompleteWorker", 2);
+    // console.log("onCompleteWorker", 2);
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -486,7 +486,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTimeout(() => {
       if (!noodeIdFromDashboard) return;
       const selectedNodeDash = graph.nodes[noodeIdFromDashboard];
-      console.log("selectedNodeDash", selectedNodeDash);
+      // console.log("selectedNodeDash", selectedNodeDash);
       if (selectedNodeDash?.top === 0) return;
       if (selectedNodeDash) return;
       nodeBookDispatch({ type: "setSelectedNode", payload: noodeIdFromDashboard });
@@ -2213,7 +2213,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
-      console.log({ partType, openPart });
+      // console.log({ partType, openPart });
       lastNodeOperation.current = partType;
       if (!choosingNode) {
         if (partType === "PendingProposals") {
@@ -2737,7 +2737,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
         if (chosenType === "Citations") {
           if (openSidebar === "CITATIONS") {
-            console.log("NULLLL");
+            // console.log("NULLLL");
             setOpenSidebar(null);
             return;
           }
@@ -2923,13 +2923,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
-          console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
+          // console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
-        console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
+        // console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
         const newChildNode: any = {
@@ -2980,7 +2980,7 @@ const Dashboard = ({}: DashboardProps) => {
             },
           ];
         }
-        console.log("newChildNode", newChildNode);
+        // console.log("newChildNode", newChildNode);
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
@@ -3091,15 +3091,14 @@ const Dashboard = ({}: DashboardProps) => {
     async (
       setIsAdmin: (value: boolean) => void,
       setIsRetrieving: (value: boolean) => void,
-      setProposals: (value: any) => void,
-      who?: string
+      setProposals: (value: any) => void
     ) => {
-      console.log(11);
-      console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
+      // console.log(11);
+      // console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
       if (!user) return;
-      console.log(22);
+      // console.log(22);
       if (!selectedNodeType) return;
-      console.log(33);
+      // console.log(33);
       setIsRetrieving(true);
       setGraph(({ nodes: oldNodes, edges }) => {
         // setNodes(oldNodes => {
