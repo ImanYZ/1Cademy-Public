@@ -357,7 +357,6 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
-  //  bd => state (first render)
   const [urlNodeProcess, setUrlNodeProcess] = useState(false);
 
   /**
@@ -466,7 +465,7 @@ const Dashboard = ({}: DashboardProps) => {
     // CHECK: I commented allNode, I did'nt found where is defined
     [user /*allNodes*/, , allTags /*allUserNodes*/]
   );
-
+  //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -487,6 +486,7 @@ const Dashboard = ({}: DashboardProps) => {
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
+  //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
