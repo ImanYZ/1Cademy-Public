@@ -2,6 +2,8 @@ import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { Chapter } from "../../pages/instructors/dashboard";
+
 // const columns = ["fruit", "vegetable"];
 
 // // const data = [
@@ -15,85 +17,100 @@ import { UserTheme } from "src/knowledgeTypes";
 
 // const chartWidth = 100;
 // const chartHeight = 100;
-type Chapter = {
-  [key: string]: number[];
-};
-type BoxData = {
-  "Proposal Points": Chapter;
-  "Question Points": Chapter;
-  "Vote Points": Chapter;
-};
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: Chapter, theme: UserTheme) {
+function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: Chapter, theme: UserTheme, drawYAxis: boolean) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
   const svg = d3.select(svgRef);
 
   // set the dimensions and margins of the graph
-  const margin = { top: 10, right: 30, bottom: 20, left: 40 };
-  const width = 400 - margin.left - margin.right;
-  const height = 200 - margin.top - margin.bottom;
-  const boxHeight = 25;
-  const boxCenter = (idx: number) => 10 + idx * (boxHeight + margin.bottom / 2);
+  const MARGIN = { top: 10, right: 30, bottom: 20, left: 40 };
+  const INITIAL_WIDTH = 400;
+  const INITIAL_HEIGHT = 60 * Object.keys(data).length; // Height with padding and margin
+  const BOX_HEIGHT = 25;
+  const OFFSET_X = 120;
+  const width = INITIAL_WIDTH - MARGIN.left - MARGIN.right;
+  const height = INITIAL_HEIGHT - MARGIN.top - MARGIN.bottom;
 
   svg
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", INITIAL_WIDTH)
+    .attr("height", INITIAL_HEIGHT)
     .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
+  // drawGrid(svg, width, height, OFFSET_X);
   // create dummy data
-  const x = d3.scaleLinear().domain([0, 60]).range([0, width]);
-  svg.append("g").attr("transform", `translate(20,${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
+  const x = d3
+    .scaleLinear()
+    .domain([0, 80])
+    .range([0, width - OFFSET_X]);
+  svg.append("g").attr("transform", `translate(${OFFSET_X},${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
 
-  const y = d3.scaleBand().domain(["A", "B", "C"]).range([height, 0]).padding(0.2);
-  svg.append("g").attr("transform", `translate(20,0)`).call(d3.axisLeft(y));
+  const y = d3.scaleBand().domain(Object.keys(data)).range([height, 0]).padding(0.2);
+  if (drawYAxis) {
+    svg.append("g").attr("transform", `translate(${OFFSET_X},0)`).call(d3.axisLeft(y));
+  }
 
-  Object.keys(data)
-    .map((key: string) => data[key])
-    .map((d: number[], idx: number) => {
-      drawBox(svg, boxHeight, boxCenter(idx), d, theme, x);
-    });
+  Object.keys(data).forEach((key: string) => {
+    const boxCenter = y(key);
+    if (boxCenter) {
+      drawBox(svg, BOX_HEIGHT, boxCenter, data[key], theme, x, OFFSET_X, key);
+    }
+  });
 }
 
 const drawBox = (
   svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
   boxHeight: number,
-  Boxcenter: number,
+  boxCenter: number,
   data: number[],
   theme: UserTheme,
-  x: d3.ScaleLinear<number, number, never>
+  x: d3.ScaleLinear<number, number, never>,
+  offsetX: number,
+  key: string
 ) => {
-  const data_sorted = data.sort(d3.ascending);
-  const q1 = d3.quantile(data_sorted, 0.25);
-  const median = d3.quantile(data_sorted, 0.5);
-  const q3 = d3.quantile(data_sorted, 0.75);
+  // const data_sorted = data.sort(d3.ascending);
+  const dataSortedAscending = [...data].sort(d3.ascending);
+  const dataSortedDescending = [...data].sort(d3.descending);
+  const q1 = d3.quantile(dataSortedAscending, 0.25);
+  const median = d3.quantile(dataSortedAscending, 0.5);
+  const q3 = d3.quantile(dataSortedAscending, 0.75);
   if (!q1 || !q3 || !median) return;
 
   const interQuantileRange = q3 - q1;
-  const min = q1 - 1.5 * interQuantileRange;
-  const max = q1 + 1.5 * interQuantileRange;
-  console.log("stadistic", { q1, median, q3, min, max, xmin: x(min), xmax: x(max) });
+  const inferiorLimit = q1 - 1.5 * interQuantileRange;
+  const superiorLimit = q3 + 1.5 * interQuantileRange;
+
+  const min = dataSortedAscending.find(c => c >= inferiorLimit);
+  const max = dataSortedDescending.find(c => c <= superiorLimit);
+
+  if (!min || !max) return;
+
+  // const min = q1 - 1.5 * interQuantileRange;
+  // const max = q3 + 1.5 * interQuantileRange;
+  console.log("stadistic:", key, { interQuantileRange, q1, median, q3, min, max, xmin: x(min), xmax: x(max) });
 
   svg
     .append("line")
     .attr("x1", x(min))
     .attr("x2", x(max))
-    .attr("y1", Boxcenter)
-    .attr("y2", Boxcenter)
+    .attr("y1", boxCenter)
+    .attr("y2", boxCenter)
     .attr("stroke", theme === "Dark" ? "white" : "black")
-    .attr("transform", `translate(20,0)`);
+    .attr("transform", `translate(${offsetX},${boxHeight / 2 + 9})`);
+
   // Show the box
-  console.log("box", { x: x(q3), y: Boxcenter - boxHeight / 2, height: boxHeight, width: x(q1) - x(q3) });
+  // console.log("box", { x: x(q3), y: Boxcenter - boxHeight / 2, height: boxHeight, width: x(q1) - x(q3) });
   svg
     .append("rect")
     .attr("x", x(q1))
-    .attr("y", Boxcenter - boxHeight / 2)
+    .attr("y", boxCenter - boxHeight / 2)
     .attr("height", boxHeight)
     .attr("width", x(q3) - x(q1))
     .style("fill", "rgb(255, 196, 152)")
-    .attr("transform", `translate(20,0)`);
+    .attr("transform", `translate(${offsetX},${boxHeight / 2 + 9})`);
+
   // // show median, min and max horizontal lines
   svg
     .selectAll("toto")
@@ -102,10 +119,11 @@ const drawBox = (
     .append("line")
     .attr("x1", d => x(d))
     .attr("x2", d => x(d))
-    .attr("y1", Boxcenter - boxHeight / 2)
-    .attr("y2", Boxcenter + boxHeight / 2)
+    .attr("y1", boxCenter - boxHeight / 2)
+    .attr("y2", boxCenter + boxHeight / 2)
     .attr("stroke", theme === "Dark" ? "white" : "black")
-    .attr("transform", `translate(20,0)`);
+    .attr("transform", `translate(${offsetX},${boxHeight / 2 + 9})`);
+
   svg
     .selectAll("toto")
     .data([median])
@@ -113,23 +131,25 @@ const drawBox = (
     .append("line")
     .attr("x1", d => x(d))
     .attr("x2", d => x(d))
-    .attr("y1", Boxcenter - boxHeight / 2)
-    .attr("y2", Boxcenter + boxHeight / 2)
+    .attr("y1", boxCenter - boxHeight / 2)
+    .attr("y2", boxCenter + boxHeight / 2)
     .attr("stroke", "orange")
-    .attr("transform", `translate(20,0)`);
+    .attr("transform", `translate(${offsetX},${boxHeight / 2 + 9})`);
 };
 
 type BoxChartProps = {
   theme: UserTheme;
+  data: Chapter;
+  drawYAxis?: boolean;
 };
 
-export const BoxChart = ({ theme }: BoxChartProps) => {
+export const BoxChart = ({ data, theme, drawYAxis = true }: BoxChartProps) => {
   const svg = useCallback(
     (svgRef: any) => {
       console.log("svg callbak");
-      drawChart(svgRef, data["Proposal Points"], theme);
+      drawChart(svgRef, data, theme, drawYAxis);
     },
-    [theme]
+    [data, theme, drawYAxis]
   );
 
   return <svg ref={svg} />;
@@ -151,21 +171,3 @@ export const BoxChart = ({ theme }: BoxChartProps) => {
 //     "Vote Points": [11, 29, 11, 3, 12, 22, 13, 4, 15, 16, 1, 19, 2, 2, 11, 9],
 //   },
 // };
-
-const data: BoxData = {
-  "Proposal Points": {
-    "The way of the program": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-  },
-  "Question Points": {
-    "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-  },
-  "Vote Points": {
-    "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-  },
-};

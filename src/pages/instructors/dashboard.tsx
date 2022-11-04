@@ -1,4 +1,6 @@
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography /* useTheme */ } from "@mui/material";
+// import { useTheme } from "@mui/material/styles";
+// import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 
 import { BoxChart } from "@/components/chats/BoxChart";
@@ -7,8 +9,59 @@ import { BubbleChart } from "@/components/chats/BubbleChart";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
+export type Chapter = {
+  [key: string]: number[];
+};
+export type BoxData = {
+  "Proposal Points": Chapter;
+  "Question Points": Chapter;
+  "Vote Points": Chapter;
+};
+
+const data: BoxData = {
+  "Proposal Points": {
+    "The way of the program": [20, 23, 24, 24, 24, 25, 30],
+    "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    // "Fruitfuwwel functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    // "1Fruiwwtful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    // "1Fruwitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    // "1Frwuitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    // "1wFruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    // "1Fwruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+  },
+  "Question Points": {
+    // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+    // "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+    // Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+    "The way of the program": [20, 23, 24, 24, 24, 25, 30],
+    "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+  },
+  "Vote Points": {
+    // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+    // "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+    // Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+    "The way of the program": [20, 23, 24, 24, 24, 25, 30],
+    "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+    "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+  },
+};
+
 const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
+
+  // const theme = useTheme();
+  // const matches = useMediaQuery(theme.breakpoints.up("sm"));
   return (
     <Box
       sx={{
@@ -73,7 +126,9 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
         }}
       >
         <Paper sx={{ p: "40px" }}>
-          <BoxChart theme={"Dark"} />
+          <BoxChart theme={"Dark"} data={data["Proposal Points"]} />
+          <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={false} />
+          <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={false} />
         </Paper>
         <Paper sx={{ p: "40px" }}>
           <Typography>
