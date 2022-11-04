@@ -6,18 +6,21 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import { Box } from "@mui/material";
 import { Button } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
+import Chip from "@mui/material/Chip";
 import Drawer from "@mui/material/Drawer";
+import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
+import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
+import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
   DataGrid,
   // GridCallbackDetails,
   // GridCellEditCommitParams,
-  GridColumns,
   // GridRenderEditCellParams,
   GridRowsProp,
   // GridValueSetterParams,
@@ -435,7 +438,7 @@ export const Students = () => {
   const [updatedTableData, setUpdatedTableData] = useState(rows);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [tableColumns /* , setTableColumns */] = useState(dataGridColumns({ editMode: false }));
+  // const [tableColumns /* , setTableColumns */] = useState(dataGridColumns({ editMode: false }));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dataGridLoading, setDataGridLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<
@@ -445,24 +448,38 @@ export const Students = () => {
       value: number;
     }[]
   >([]);
-  const lessGreatThan: GridColumns = [
-    { field: "<", headerName: "Less" },
-    { field: ">", headerName: "Great" },
-  ];
-
-  // const classes = useStyles();
-
-  // const setUpdatedValue = (params: GridValueSetterParams, fieldName: string) => {
-  //   return { ...params.row, [fieldName]: updatedValue };
-  // };
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
 
-  const handleFilterBy = () => {};
+  const handleFilterBy = () => {
+    const _tableRows = [...tableRows];
+    const newTable = [];
+    for (let row of _tableRows) {
+      let canShow = true;
+      for (let filter of filters) {
+        if (filter.operation === "<") {
+          if (row[filter.title] > filter.value) {
+            canShow = false;
+            break;
+          }
+        } else if (filter.operation === ">") {
+          if (row[filter.title] < filter.value) {
+            canShow = false;
+            break;
+          }
+        }
+      }
+      if (canShow) {
+        newTable.push(row);
+      }
+      console.log(row);
+    }
+    setTableRows(newTable);
+  };
 
-  const changeFilter = (value: string) => {
+  const handleChangeFilter = (event: any) => {
     const newFilter = {
-      title: value,
+      title: event.target.value,
       operation: "<",
       value: 10,
     };
@@ -486,6 +503,45 @@ export const Students = () => {
     _oldFilters.splice(index, 1);
     setFilters(_oldFilters);
   };
+  const handleChangeOperation = () => {
+    console.log("handleChangeOperation");
+  };
+
+  const filterChoices = [
+    "totalPoints",
+    "wrongs",
+    "corrects",
+    "awards",
+    "newPorposals",
+    "editNodeProposals",
+    "proposalsPoints",
+    "questions",
+    "questionPoints",
+    "vote",
+    "votePoints",
+    "lastActivity",
+  ];
+
+  const handleChangeChoice = (index: number, event: any) => {
+    console.log(index);
+    const _filters = [...filters];
+    _filters[index] = {
+      ..._filters[index],
+      title: event.target.value,
+    };
+    setFilters(_filters);
+  };
+
+  const editFilterValue = (index: number, event: any) => {
+    console.log(event.target.value);
+    const _filters = [...filters];
+    _filters[index] = {
+      ..._filters[index],
+      value: event.target.value,
+    };
+    setFilters(_filters);
+  };
+  console.log("filters", filters);
   const list = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
@@ -512,62 +568,47 @@ export const Students = () => {
               {filters.map((filter, index) => {
                 console.log(filter.operation);
                 return (
-                  <Paper key={index} elevation={6} sx={{ mb: "13px" }}>
-                    <Box sx={{ textAlign: "right" }}>
-                      <IconButton onClick={() => deleteFilter(index)}>
-                        <DeleteForeverIcon />
-                      </IconButton>
-                    </Box>
-                    <Autocomplete
-                      id="field"
-                      // value={getValueFilter(filter)}
-                      // onChange={(_, value) => changeFilter(value?.field)}
-                      // onInputChange={(_, value) => {
-                      //   onChangeInstitution(value);
-                      // }}
-                      // onBlur={() => setTouched({ ...touched, institution: true })}
-                      options={tableColumns}
-                      getOptionLabel={(option: any) => option.field}
-                      renderInput={params => <TextField {...params} placeholder="Feild" />}
-                      renderOption={(props, option: any) => (
-                        <li {...props}>
-                          <div style={{ paddingLeft: "7px" }}>{option.field}</div>
-                        </li>
-                      )}
-                      isOptionEqualToValue={(option: any, value: any) => option.field === value.field}
-                      fullWidth
-                      sx={{ mb: "16px", width: "96%", ml: "10px", textAlign: "center" }}
-                    />
-                    <Box sx={{ display: "flex", flexDirection: "row" }}>
-                      <Autocomplete
-                        id="field"
-                        // value={getValueFilter(filter)}
-                        // onChange={(_, value) => changeFilter(value?.field)}
-                        // onInputChange={(_, value) => {
-                        //   onChangeInstitution(value);
-                        // }}
-                        // onBlur={() => setTouched({ ...touched, institution: true })}
-                        options={lessGreatThan}
-                        getOptionLabel={(option: any) => option.field}
-                        renderInput={params => <TextField {...params} placeholder="" />}
-                        renderOption={(props, option: any) => (
-                          <li {...props}>
-                            <div style={{ paddingLeft: "7px" }}>{option.field}</div>
-                          </li>
-                        )}
-                        isOptionEqualToValue={(option: any, value: any) => option.field === value.field}
-                        fullWidth
-                        sx={{ mb: "16px", width: "20%", ml: "10px", textAlign: "center" }}
-                      />
-                      <TextField
-                        sx={{ height: "5px", width: "70%" }}
-                        id="outlined-basic"
-                        placeholder="Enter a value"
-                        variant="outlined"
-                        value={filter.value}
-                      />
-                    </Box>
-                  </Paper>
+                  <>
+                    <Paper key={index} elevation={6} sx={{ mb: "13px" }}>
+                      <Box sx={{ textAlign: "right" }}>
+                        <IconButton onClick={() => deleteFilter(index)}>
+                          <DeleteForeverIcon />
+                        </IconButton>
+                      </Box>
+                      <Box sx={{ width: "367px", ml: "5px", mr: "10px", paddingBottom: "10px" }}>
+                        <FormControl fullWidth>
+                          <Select value={filter.title} onChange={event => handleChangeChoice(index, event)}>
+                            {filterChoices.map((choice, index) => {
+                              return (
+                                <MenuItem key={index} value={choice}>
+                                  {choice}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Box>
+                      <Box sx={{ display: "flex", flexDirection: "row", paddingBottom: "25px" }}>
+                        <Box sx={{ minWidth: 80, ml: "5px", mr: "10px" }}>
+                          <FormControl fullWidth>
+                            <Select value={filter.operation} onChange={handleChangeOperation}>
+                              <MenuItem value={"<"}>{"<"}</MenuItem>
+                              <MenuItem value={">"}>{">"}</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                        <TextField
+                          sx={{ height: "5px", width: "70%" }}
+                          id="outlined-basic"
+                          placeholder="Enter a value"
+                          variant="outlined"
+                          onChange={event => editFilterValue(index, event)}
+                          value={filter.value}
+                        />
+                      </Box>
+                    </Paper>
+                    <>{filters.length - 1 !== index && <>AND</>}</>
+                  </>
                 );
               })}
               <Box sx={{ mt: "10px" }}>
@@ -578,26 +619,19 @@ export const Students = () => {
               </Box>
             </>
           ) : (
-            <Autocomplete
-              id="field"
-              // value={getNameFromInstitutionSelected()}
-              onChange={(_, value: any) => changeFilter(value?.field)}
-              // onInputChange={(_, value) => {
-              //   onChangeInstitution(value);
-              // }}
-              // onBlur={() => setTouched({ ...touched, institution: true })}
-              options={tableColumns}
-              getOptionLabel={option => option.field}
-              renderInput={params => <TextField {...params} placeholder="Feild" />}
-              renderOption={(props, option) => (
-                <li {...props}>
-                  <div style={{ paddingLeft: "7px" }}>{option.field}</div>
-                </li>
-              )}
-              isOptionEqualToValue={(option, value) => option.field === value.field}
-              fullWidth
-              sx={{ mb: "16px" }}
-            />
+            <Box sx={{ width: "367px", ml: "5px", mr: "10px", paddingBottom: "10px" }}>
+              <FormControl fullWidth>
+                <Select displayEmpty name="Enter a value" onChange={handleChangeFilter}>
+                  {filterChoices.map((choice, index) => {
+                    return (
+                      <MenuItem key={index} value={choice}>
+                        {choice}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Box>
           )}
         </Box>
         <Box sx={{ textAlign: "center" }}>
@@ -731,6 +765,19 @@ export const Students = () => {
             </Drawer>
           </Box>
         </Box>
+        {filters.length > 0 && !openFilter && (
+          <Stack direction="row" spacing={1}>
+            {filters?.map((filter, index) => {
+              return (
+                <>
+                  <Chip key={index} label={filter.title} onDelete={() => deleteFilter(index)} />
+                  {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
+                </>
+              );
+            })}{" "}
+          </Stack>
+        )}
+
         <hr />
         <Box className="student-dashboard-table" sx={{ height: "500px", mt: "40px", mr: "70px", ml: "40px" }}>
           <DataGrid
@@ -759,9 +806,9 @@ export const Students = () => {
             //   tableData[findStudentIndex] = rowData;
             //   setUpdatedTableData(tableData);
             // }}
-            /* 
+            /*
         we shouldn't use this as this is for experimental purpose,
-        only use if it is marked stable by MUI 
+        only use if it is marked stable by MUI
       */
             // experimentalFeatures={{ newEditingApi: true }}
           />
