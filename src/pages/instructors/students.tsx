@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 // import { createStyles, makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,8 +25,10 @@ import {
   // MuiEvent,
 } from "@mui/x-data-grid";
 import { randomTraderName, randomUpdatedDate } from "@mui/x-data-grid-generator";
+import { GridActionsCellItem } from "@mui/x-data-grid-pro";
 import React, { useState } from "react";
 
+import OptimizedAvatar from "../../components/OptimizedAvatar";
 import PageWrapper from "./tmp";
 // const useStyles = makeStyles(() => ({
 //   editableMode: {
@@ -35,10 +38,18 @@ import PageWrapper from "./tmp";
 const rows: GridRowsProp = [
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
-    totalPoints: 10,
+    totalPoints: 20,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -50,10 +61,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -65,10 +84,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -80,10 +107,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -95,10 +130,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -110,10 +153,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -125,10 +176,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -140,10 +199,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -155,10 +222,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -170,10 +245,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -185,10 +268,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -200,10 +291,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -215,10 +314,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -230,10 +337,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -245,10 +360,18 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar:
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2F5Xmi9d1H1yeRQ8giDkfjm00Fd0f2%2FWed%2C%2012%20Oct%202022%2019%3A09%3A26%20GMT_430x1300.jpeg?alt=media&token=93036b13-d3d8-45fd-86d4-2807287dc5f0",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -260,10 +383,17 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "username",
+      avatar: "https://assets.materialup.com/uploads/bebad102-7f40-4941-99cd-54366113003e/avatar-08.png",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -275,10 +405,17 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
+    user: {
+      username: "Harry Potter",
+      avatar: "https://assets.materialup.com/uploads/bebad102-7f40-4941-99cd-54366113003e/avatar-08.png",
+    },
     firstName: randomTraderName(),
     lastName: randomTraderName(),
     email: "samirbes@umich.edu",
     totalPoints: 10,
+    corrects: 10,
+    wrongs: 10,
+    awards: 10,
     newPorposals: 10,
     editNodeProposals: 10,
     proposalsPoints: 10,
@@ -293,11 +430,12 @@ const rows: GridRowsProp = [
 export const Students = () => {
   const [tableRows, setTableRows] = useState<GridRowsProp>(rows);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tableColumns, setTableColumns] = useState(dataGridColumns({ editMode: true }));
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updatedTableData, setUpdatedTableData] = useState(rows);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [tableColumns /* , setTableColumns */] = useState(dataGridColumns({ editMode: false }));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dataGridLoading, setDataGridLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<
@@ -348,7 +486,6 @@ export const Students = () => {
     _oldFilters.splice(index, 1);
     setFilters(_oldFilters);
   };
-
   const list = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
@@ -373,6 +510,7 @@ export const Students = () => {
           {filters.length > 0 ? (
             <>
               {filters.map((filter, index) => {
+                console.log(filter.operation);
                 return (
                   <Paper key={index} elevation={6} sx={{ mb: "13px" }}>
                     <Box sx={{ textAlign: "right" }}>
@@ -382,7 +520,7 @@ export const Students = () => {
                     </Box>
                     <Autocomplete
                       id="field"
-                      // value={getNameFromInstitutionSelected()}
+                      // value={getValueFilter(filter)}
                       // onChange={(_, value) => changeFilter(value?.field)}
                       // onInputChange={(_, value) => {
                       //   onChangeInstitution(value);
@@ -403,7 +541,7 @@ export const Students = () => {
                     <Box sx={{ display: "flex", flexDirection: "row" }}>
                       <Autocomplete
                         id="field"
-                        // value={getNameFromInstitutionSelected()}
+                        // value={getValueFilter(filter)}
                         // onChange={(_, value) => changeFilter(value?.field)}
                         // onInputChange={(_, value) => {
                         //   onChangeInstitution(value);
@@ -426,6 +564,7 @@ export const Students = () => {
                         id="outlined-basic"
                         placeholder="Enter a value"
                         variant="outlined"
+                        value={filter.value}
                       />
                     </Box>
                   </Paper>
@@ -496,6 +635,7 @@ export const Students = () => {
   };
 
   const discardTableChanges = () => {
+    setEditMode(!editMode);
     setTableRows([...tableRows]);
     setUpdatedTableData([]);
   };
@@ -598,7 +738,7 @@ export const Students = () => {
               x.id = index;
               return x;
             })}
-            columns={tableColumns}
+            columns={dataGridColumns({ editMode })}
             autoPageSize
             components={{
               LoadingOverlay: LinearProgress,
@@ -699,6 +839,26 @@ export default Students;
 
 const dataGridColumns = ({ editMode }: any) => [
   {
+    field: "user",
+    headerName: "",
+    description: "",
+    renderCell: params => {
+      return (
+        <>
+          <OptimizedAvatar
+            name={params.row.user.username}
+            imageUrl={params.row.user.avatar}
+            contained
+            renderAsAvatar={false}
+          />
+        </>
+      );
+    },
+    // valueSetter: (params: GridValueSetterParams) => ({ ...params.row, firstName: params.value }),
+    width: 50,
+    editable: true,
+  },
+  {
     field: "firstName",
     headerName: "First Name",
     description: "First Name",
@@ -730,6 +890,27 @@ const dataGridColumns = ({ editMode }: any) => [
     field: "totalPoints",
     headerName: "Total Poitns",
     description: "Total Points",
+    width: 100,
+    editable: false,
+  },
+  {
+    field: "wrongs",
+    headerName: "Wrongs",
+    description: "Wrongs",
+    width: 100,
+    editable: false,
+  },
+  {
+    field: "corrects",
+    headerName: "Corrects",
+    description: "Corrects",
+    width: 100,
+    editable: false,
+  },
+  {
+    field: "awards",
+    headerName: "Awards",
+    description: "Awards",
     width: 100,
     editable: false,
   },
@@ -789,5 +970,19 @@ const dataGridColumns = ({ editMode }: any) => [
     type: "dateTime",
     width: 220,
     editable: false,
+  },
+  {
+    field: "actions",
+    type: "actions",
+    width: editMode ? 100 : 0,
+    getActions: () => [
+      editMode ? (
+        <>
+          <GridActionsCellItem icon={<DeleteIcon sx={{ color: "red" }} />} label="Delete" />
+        </>
+      ) : (
+        <></>
+      ),
+    ],
   },
 ];
