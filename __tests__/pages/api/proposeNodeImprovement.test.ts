@@ -105,6 +105,20 @@ describe("POST /api/proposeNodeImprovement", () => {
   });
   nodes.push(node4);
 
+  const node5 = createNode({
+    admin: users[0],
+    isTag: true,
+    corrects: 1,
+    parents: [node3],
+  });
+  nodes.push(node5);
+  node3.children.push({
+    node: String(node5.documentId),
+    title: node5.title,
+    label: "",
+    type: "Concept",
+  });
+
   // setting default community to default user
   users[0].tag = nodes[0].title;
   users[0].tagId = String(nodes[0].documentId);
@@ -292,7 +306,6 @@ describe("POST /api/proposeNodeImprovement", () => {
         .where("proposer", "==", users[0].uname)
         .get();
       let versionData = versions.docs[0].data();
-      console.log(versions.docs.length, "versions.docs.length");
       expect(versionData?.addedTags).toBe(true);
     });
 
@@ -305,6 +318,13 @@ describe("POST /api/proposeNodeImprovement", () => {
         .get();
       let versionData = versions.docs[0].data();
       expect(versionData?.changedTitle).toBe(true);
+    });
+
+    it("edge case to check if api is not messup sub childrens", async () => {
+      const _node5 = await db.collection("nodes").doc(String(node5.documentId)).get();
+      const node5Data = _node5.data() as INode;
+      const subChildren = node5Data?.children || [];
+      expect(subChildren.length).toEqual(0);
     });
 
     it("increase reputation of proposer all time", async () => {

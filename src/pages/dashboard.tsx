@@ -2551,6 +2551,7 @@ const Dashboard = ({}: DashboardProps) => {
   const closeSideBar = useMemoizedCallback(() => {
     devLog("In closeSideBar");
 
+    // TODO: call closeSidebar every close sidebar action
     if (!user) return;
 
     // setNodeToImprove(null); // CHECK: I added this to compare then
@@ -2572,14 +2573,11 @@ const Dashboard = ({}: DashboardProps) => {
     //   nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable
     // );
 
-    if (
-      nodeBookState.selectionType === "AcceptedProposals" ||
-      nodeBookState.selectionType === "Proposals" ||
-      (nodeBookState.selectedNode && "selectedNode" in graph.nodes && graph.nodes[nodeBookState.selectedNode].editable)
-    ) {
+    //only reload permanent graph if therese is temporal nodes on the map
+    //it means only for proposals (child/improvements)
+    if (tempNodes.size || nodeChanges) {
       reloadPermanentGraph();
     }
-
     let sidebarType: any = nodeBookState.selectionType;
     if (openPendingProposals) {
       sidebarType = "PendingProposals";
@@ -3906,10 +3904,11 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {nodeBookState.selectedNode && !openSidebar && (
-            <Tooltip title="Scroll to last Selected Node" placement="left">
-              <IconButton
-                color="secondary"
+          {nodeBookState.selectedNode && (
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
+              <Tooltip
+                title="Scroll to last Selected Node"
+                placement="left"
                 sx={{
                   position: "fixed",
                   top: "10px",
@@ -3917,27 +3916,30 @@ const Dashboard = ({}: DashboardProps) => {
                   zIndex: "1300",
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 }}
-                onClick={onScrollToLastNode}
               >
-                <MyLocationIcon />
-              </IconButton>
-            </Tooltip>
+                <IconButton color="secondary" onClick={onScrollToLastNode}>
+                  <MyLocationIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
-          {process.env.NODE_ENV === "development" && !openSidebar && (
-            <Tooltip
-              title={"Watch geek data"}
-              sx={{
-                position: "fixed",
-                top: "60px",
-                right: "10px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              }}
-            >
-              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                <CodeIcon />
-              </IconButton>
-            </Tooltip>
+          {process.env.NODE_ENV === "development" && (
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
+              <Tooltip
+                title={"Watch geek data"}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                  <CodeIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
 
           {/* end Data from map */}
@@ -3946,6 +3948,7 @@ const Dashboard = ({}: DashboardProps) => {
               id="MapContent"
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
+              onTouchStart={mapContentMouseOver}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}
