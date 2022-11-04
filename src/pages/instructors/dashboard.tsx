@@ -1,6 +1,7 @@
 import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
+import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
 
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
@@ -27,17 +28,24 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           gap: "16px",
         }}
       >
-        <Paper sx={{ p: "40px" }}>
+        <Paper sx={{ p: "16px" }}>
           <Typography>
             hello world {selectedSemester} + {selectedCourse}
           </Typography>
         </Paper>
         <Paper
-          sx={{ p: "40px", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}
+          sx={{
+            px: "32px",
+            py: "40px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: "4px" }}>
             <Box>
-              <Typography>Points</Typography>
+              <Typography sx={{ fontSize: "19px" }}>Points</Typography>
               <Typography># of Students</Typography>
             </Box>
             <Box>
@@ -52,7 +60,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           </Box>
           <PointsBarChart />
         </Paper>
-        <Paper sx={{ p: "40px" }}>
+        <Paper sx={{ px: "32px", py: "40px" }}>
+          <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
           <BubbleChart />
         </Paper>
       </Box>
@@ -64,9 +73,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
         }}
       >
         <Paper sx={{ p: "40px" }}>
-          <Typography>
-            1 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+          <BoxChart theme={"Dark"} />
         </Paper>
         <Paper sx={{ p: "40px" }}>
           <Typography>

@@ -3,14 +3,26 @@ import React, { useCallback } from "react";
 
 // const columns = ["fruit", "vegetable"];
 
+const GREEN = "rgb(56, 142, 60)";
+const GREEN_ALPHA = "rgba(129, 199, 132, 0.8)";
+const RED = "rgb(239, 83, 80)";
+const RED_ALPHA = "rgba(239, 83, 80, 0.8)";
+const GRAY = "rgb(117, 117, 117)";
+const GRAY_ALPHA = "rgba(237, 237, 237, 0.8)";
+const ORANGE = "rgb(255, 138, 51)";
+const ORANGE_ALPHA = "rgba(251, 204, 169, 0.8)";
+
 const BUBBLE_MOCK = [
-  { label: "Proposasl", radio: 100, x: 100, y: 100 },
-  { label: "Proposasl", radio: 70, x: 200, y: 150 },
-  { label: "Proposasl", radio: 20, x: 40, y: 300 },
-  { label: "Proposasl", radio: 35, x: 200, y: 350 },
-  { label: "Proposasl", radio: 15, x: 10, y: 75 },
-  { label: "Proposasl", radio: 80, x: 300, y: 300 },
-  { label: "Proposasl", radio: 35, x: 300, y: 75 },
+  { students: 30, votes: 170, points: 40 },
+  { students: 70, votes: 150, points: 19 },
+  { students: 70, votes: 350, points: 79 },
+  { students: 30, votes: 270, points: 18 },
+  { students: 25, votes: 330, points: 20 },
+  { students: 35, votes: 120, points: 60 },
+  { students: 20, votes: 340, points: -10 },
+  { students: 10, votes: 140, points: 80 },
+  { students: 30, votes: 110, points: 0 },
+  { students: 15, votes: 370, points: -2 },
 ];
 // // const data = [
 // //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
@@ -32,7 +44,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
 
   // set the dimensions and margins of the graph
   const margin = { top: 10, right: 0, bottom: 20, left: 50 },
-    width = 400 - margin.left - margin.right,
+    width = 500 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
@@ -57,20 +69,22 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   // console.log({ groups });
 
   // Add X axis
-  // const x = d3.scaleBand().domain(groups).range([0, width]).padding(0.2);
-  // svg.append("g").attr("transform", `translate(20, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
+  const x = d3.scaleLinear().domain([0, 500]).range([0, width]);
+  svg.append("g").attr("transform", `translate(30, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  // const y = d3.scaleLinear().domain([0, 60]).range([height, 0]);
-  // svg.append("g").attr("transform", `translate(20, 0)`).call(d3.axisLeft(y));
+  const y = d3.scaleLinear().domain([-10, 100]).range([height, 0]);
+  svg.append("g").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
 
+  console.log({ x, y });
   // color palette = one color per subgroup
-  // const color = d3.scaleOrdinal().domain(subgroups).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
+  // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
+  const color = d3
+    .scaleThreshold()
+    .domain([-50, 0, 20, 100])
+    .range(["white", RED_ALPHA, ORANGE_ALPHA, GREEN_ALPHA, "white"]);
+  const borderColor = d3.scaleThreshold().domain([-10, 0, 20, 100]).range(["white", RED, ORANGE, GREEN, "white"]);
 
-  //stack the data? --> stack per subgroup
-  // const stackedData = d3.stack().keys(subgroups)(data);
-  // console.log(stackedData);
-  // Show the bars
   svg
     .append("g")
     .selectAll("circle")
@@ -78,19 +92,19 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .data(BUBBLE_MOCK)
     // .join("g")
     .join("circle")
-    .attr("fill", "rgba(129, 199, 132, 0.6)")
+    .attr("fill", d => (d.points !== 0 ? color(d.points) : GRAY_ALPHA))
     // .selectAll("rect")
     // enter a second time = loop subgroup per subgroup to add all rectangles
     // .data(d => d)
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y)
+    .attr("cx", d => x(d.votes))
+    .attr("cy", d => y(d.points))
     // .attr("height", d => y(d[0]) - y(d[1]))
-    .attr("r", d => d.radio)
-    .attr("stroke-width", 3)
-    .attr("stroke", "rgb(129, 199, 132)")
+    .attr("r", d => d.students)
+    .attr("stroke-width", 2)
+    .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
     .attr("text", "Hello World")
-    .attr("transform", `translate(20, 0)`);
+    .attr("transform", `translate(30, 0)`);
   svg
     .append("g")
     .selectAll("text")
@@ -98,16 +112,16 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .data(BUBBLE_MOCK)
     // .join("g")
     .join("text")
-    .attr("fill", "rgb(129, 199, 132)")
+    .attr("fill", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     // .selectAll("rect")
     // enter a second time = loop subgroup per subgroup to add all rectangles
     // .data(d => d)
-    .attr("x", d => d.x)
-    .attr("y", d => d.y)
+    .attr("x", d => x(d.votes))
+    .attr("y", d => y(d.points))
     .attr("dominant-baseline", "middle")
     .attr("text-anchor", "middle")
     .text("9")
-    .style("font-size", "34px");
+    .style("font-size", "24px");
 
   // .append("text")            // append text
   // .style("fill", "black")      // make the text black
