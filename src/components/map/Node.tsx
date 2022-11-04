@@ -253,11 +253,18 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        const isSimilar = blockSize === previousHeightRef.current; /* && topPosition === previousTopRef.current */
+        console.log("->", { blockSize, previousHeight: previousHeightRef.current });
+        const isSimilar = blockSize === previousHeightRef.current;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
         if (isSimilar) return;
 
+        console.log({
+          entries: entries[0],
+          currentHeight: new Number(blockSize.toString()),
+          previousHeight: new Number(previousHeightRef.current.toString()),
+          isSimilar,
+        });
         changeNodeHight(identifier, blockSize);
       } catch (err) {
         console.warn("invalid entry", err);
