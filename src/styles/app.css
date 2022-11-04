@@ -671,9 +671,16 @@ select:-webkit-autofill:focus {
 .MuiCollapse-container {
   transition-duration: 0s !important;
 }
-/* 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+
+.remove-arrow-buttons input[type="number"]::-webkit-inner-spin-button,
+.remove-arrow-buttons input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* .instructor-settings-main h2,
+h3,
+h4,
+p {
+  color: black !important;
 } */
