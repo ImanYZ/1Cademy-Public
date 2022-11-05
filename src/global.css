@@ -2748,3 +2748,13 @@ button.MuiTab-textColorInherit:focus {
   align-items: flex-start;
   margin-left: 10px;
 }
+@media (max-width: 600px) {
+  .scroll-styled {
+    display: flex;
+    align-items: flex-start !important;
+    margin-left: 10px;
+  }
+  .fromSideBar {
+    display: flex !important;
+  }
+}

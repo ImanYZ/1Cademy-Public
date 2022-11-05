@@ -101,7 +101,6 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
           justifyContent: "flex-start",
           gap: "5px",
           padding: "5px 0px",
-          ...props.sx,
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
@@ -115,11 +114,11 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
         </div>
         {
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
-          <div className={"customUserStatusTotalPoints"}>
+          <Box className={"customUserStatusTotalPoints"} sx={{ ...props.sx }}>
             <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
             <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
             {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
-          </div>
+          </Box>
         }
       </Box>
     </Tooltip>

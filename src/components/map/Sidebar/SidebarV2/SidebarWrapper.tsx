@@ -16,6 +16,7 @@ type SidebarWrapperProps = {
   hoverWidth?: number;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
+  isMenuOpen?: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -32,6 +33,7 @@ export const SidebarWrapper = ({
   showCloseButton = true,
   showScrollUpButton = true,
   hoverWidth,
+  isMenuOpen,
 }: SidebarWrapperProps) => {
   // const contentHight=useMemo(() => {
   //   if(headerImage && sidbe)
@@ -54,12 +56,12 @@ export const SidebarWrapper = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          minWidth: { xs: "15vw", sm: width },
-          width,
+          minWidth: { xs: "0px", sm: width },
+          width: { xs: isMenuOpen ? width : "auto", sm: width },
           maxWidth: { xs: "100%", sm: "50vw" },
           ":hover": hoverWidth
             ? {
-                width: { xs: hoverWidth },
+                width: { sm: hoverWidth },
               }
             : undefined,
           // border: "solid 2px yellow",
