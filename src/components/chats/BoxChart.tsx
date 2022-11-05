@@ -4,81 +4,64 @@ import { UserTheme } from "src/knowledgeTypes";
 
 import { Chapter } from "../../pages/instructors/dashboard";
 
-// const columns = ["fruit", "vegetable"];
-
-// // const data = [
-// //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
-// //   { category: "vegetable", yes: 5, no: 4, maybe: 9 },
-// // ];
-// // const data = [
-// //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
-// //   { category: "vegetable", yes: 5, no: 4, maybe: 9 },
-// // ];
-
-// const chartWidth = 100;
-// const chartHeight = 100;
+type boxPlotMarginType = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
 
 function drawChart(
   svgRef: React.RefObject<SVGSVGElement>,
-  data: Chapter,
   identifier: string,
-  theme: UserTheme,
-  drawYAxis: boolean
+  data: Chapter,
+  width: number,
+  boxHeight: number,
+  margin: boxPlotMarginType,
+  offsetX: number,
+  offsetY: number,
+  drawYAxis: boolean,
+  theme: UserTheme
 ) {
-  //   const data = [12, 5, 6, 6, 9, 10];
-  //   const height = 120;
-  //   const width = 250;
   const svg = d3.select(svgRef);
-  // d3.selectAll("*").remove();
 
   // set the dimensions and margins of the graph
-  const MARGIN = { top: 10, right: 0, bottom: 20, left: 40 };
-  const OFFSET_X = drawYAxis ? 180 : 0;
-  const OFFSET_Y = 16;
-  const INITIAL_WIDTH = 350 + OFFSET_X;
-  const INITIAL_HEIGHT = 50 * Object.keys(data).length; // Height with padding and margin
-  const BOX_HEIGHT = 25;
-  const width = INITIAL_WIDTH - MARGIN.left - MARGIN.right;
-  const height = INITIAL_HEIGHT - MARGIN.top - MARGIN.bottom;
+  // const margin = { top: 10, right: 0, bottom: 20, left: 40 };
+  console.log({ offsetX });
+  // const offsetY = 18;
+  // width = width + OFFSET_X;
+  const height = 50 * Object.keys(data).length; // Height with padding and margin
+  const widthProcessed = width - margin.left - margin.right;
+  const heightProcessed = height - margin.top - margin.bottom;
 
   // configure SVG's size and position
   svg
-    .attr("width", INITIAL_WIDTH)
-    .attr("height", INITIAL_HEIGHT)
+    .attr("width", width)
+    .attr("height", height)
     .append("g")
-    .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // create group graphic types
-  svg.append("g").attr("id", "totos");
-  svg.append("g").attr("id", "lines");
-  svg.append("g").attr("id", "boxes");
-  svg.append("g").attr("id", "median");
-  svg.append("g").attr("id", "locations");
-  svg.append("g").attr("id", "mesh");
 
   // remove old axis
   // svg.select(`#${identifier}-lines`).remove();
-  svg.select(`#${identifier}-axis-y`).remove();
-  svg.select(`#${identifier}-axis-x`).remove();
+  svg.select(`#axis-y`).remove();
+  svg.select(`#axis-x`).remove();
 
   // redraw svg
   const x = d3
     .scaleLinear()
     .domain([0, 80])
-    .range([0, width - OFFSET_X]);
+    .range([0, widthProcessed - offsetX]);
   svg
     .append("g")
-    .attr("id", `${identifier}-axis-x`)
-    .attr("transform", `translate(${OFFSET_X},${height})`)
+    .attr("id", `axis-x`)
+    .attr("transform", `translate(${offsetX},${heightProcessed})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
-  const y = d3.scaleBand().domain(Object.keys(data)).range([height, 0]).padding(0.2);
+  const y = d3.scaleBand().domain(Object.keys(data)).range([heightProcessed, 0]).padding(0.2);
   if (drawYAxis) {
-    svg
-      .append("g")
-      .attr("id", `${identifier}-axis-y`)
-      .attr("transform", `translate(${OFFSET_X},0)`)
-      .call(d3.axisLeft(y));
+    svg.append("g").attr("id", `axis-y`).attr("transform", `translate(${offsetX},0)`).call(d3.axisLeft(y));
   }
 
   const keys = Object.keys(data); /* .map(cur=>data[cur]) */
@@ -136,16 +119,15 @@ function drawChart(
     .data(statistics)
     .join("rect")
     .attr("x", d => d.q1)
-    .attr("y", d => d.boxCenter - BOX_HEIGHT / 2)
-    .attr("height", BOX_HEIGHT)
+    .attr("y", d => d.boxCenter - boxHeight / 2)
+    .attr("height", boxHeight)
     .attr("width", d => d.q3 - d.q1)
     .style("fill", "rgba(255, 196, 152, 1)")
-    .attr("transform", `translate(${OFFSET_X},${OFFSET_Y})`);
+    .attr("transform", `translate(${offsetX},${offsetY})`);
 
   // Lines plot drawing
   svg
     .select("#lines")
-    .attr("id", `${identifier}-lines`)
     .selectAll("line")
     .data(statistics)
     .join("line")
@@ -154,7 +136,7 @@ function drawChart(
     .attr("y1", d => d.boxCenter)
     .attr("y2", d => d.boxCenter)
     .attr("stroke", theme === "Dark" ? "white" : "black")
-    .attr("transform", `translate(${OFFSET_X},${OFFSET_Y})`);
+    .attr("transform", `translate(${offsetX},${offsetY})`);
 
   // (toto) min and max lines
   // data for toto lines
@@ -173,10 +155,10 @@ function drawChart(
     .join("line")
     .attr("x1", d => x(d.x))
     .attr("x2", d => x(d.x))
-    .attr("y1", d => d.boxCenter - BOX_HEIGHT / 2)
-    .attr("y2", d => d.boxCenter + BOX_HEIGHT / 2)
+    .attr("y1", d => d.boxCenter - boxHeight / 2)
+    .attr("y2", d => d.boxCenter + boxHeight / 2)
     .attr("stroke", theme === "Dark" ? "white" : "black")
-    .attr("transform", `translate(${OFFSET_X},${OFFSET_Y})`);
+    .attr("transform", `translate(${offsetX},${offsetY})`);
 
   // Median drawing
   svg
@@ -186,11 +168,11 @@ function drawChart(
     .join("line")
     .attr("x1", d => x(d.median))
     .attr("x2", d => x(d.median))
-    .attr("y1", d => d.boxCenter - BOX_HEIGHT / 2)
-    .attr("y2", d => d.boxCenter + BOX_HEIGHT / 2)
+    .attr("y1", d => d.boxCenter - boxHeight / 2)
+    .attr("y2", d => d.boxCenter + boxHeight / 2)
     .attr("stroke", "#EC7115")
     .attr("stroke-width", "2px")
-    .attr("transform", `translate(${OFFSET_X},${OFFSET_Y})`);
+    .attr("transform", `translate(${offsetX},${offsetY})`);
 
   // Location Icons Path
   const locationIconPath =
@@ -203,30 +185,64 @@ function drawChart(
     .data(statistics)
     .join("path")
     .attr("d", locationIconPath)
-    .attr("transform", d => `translate(${OFFSET_X + Math.random() * (x(d.max) - x(d.min)) + x(d.min)},${d.boxCenter})`)
+    .attr("transform", d => `translate(${offsetX + Math.random() * (x(d.max) - x(d.min)) + x(d.min)},${d.boxCenter})`)
     .attr("fill", "#EF5350");
 
   //mesh
-  // const;
+  svg
+    .select("#mesh")
+    .selectAll("line")
+    .data(statistics)
+    .join("line")
+    .attr("x1", 0)
+    .attr("x2", widthProcessed - offsetX)
+    .attr("y1", d => d.boxCenter)
+    .attr("y2", d => d.boxCenter)
+    .attr("stroke", "rgba(224, 224, 224, .1)")
+    .attr("stroke-width", "1px")
+    .attr("transform", `translate(${offsetX},${offsetY})`);
 }
 
 type BoxChartProps = {
   identifier: string;
-  theme: UserTheme;
   data: Chapter;
+  width: number;
+  boxHeight: number;
+  margin: boxPlotMarginType;
+  offsetX: number;
+  offsetY: number;
   drawYAxis?: boolean;
+  theme: UserTheme;
 };
 
-export const BoxChart = ({ identifier, data, theme, drawYAxis = true }: BoxChartProps) => {
+export const BoxChart = ({
+  identifier,
+  data,
+  width,
+  boxHeight,
+  margin,
+  offsetX,
+  offsetY,
+  drawYAxis = true,
+  theme,
+}: BoxChartProps) => {
   const svg = useCallback(
     (svgRef: any) => {
-      console.log("svg callbak");
-      drawChart(svgRef, data, identifier, theme, drawYAxis);
+      drawChart(svgRef, identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme);
     },
-    [data, identifier, theme, drawYAxis]
+    [identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme]
   );
 
-  return <svg ref={svg} />;
+  return (
+    <svg ref={svg}>
+      <g id="mesh"></g>
+      <g id="totos"></g>
+      <g id="lines"></g>
+      <g id="boxes"></g>
+      <g id="median"></g>
+      <g id="locations"></g>
+    </svg>
+  );
 };
 // const data: BoxData = {
 //   "The way of the program": {

@@ -118,9 +118,9 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     // .data(d => d)
     .attr("x", d => x(d.votes))
     .attr("y", d => y(d.points))
-    .attr("dominant-baseline", "middle")
     .attr("text-anchor", "middle")
-    .text("9")
+    .attr("alignment-baseline", "central")
+    .text("2")
     .style("font-size", "24px");
 
   // .append("text")            // append text

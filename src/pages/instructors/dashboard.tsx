@@ -1,4 +1,6 @@
-import { Paper, Typography /* useTheme */ } from "@mui/material";
+import PlaceIcon from "@mui/icons-material/Place";
+import SquareIcon from "@mui/icons-material/Square";
+import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
@@ -8,7 +10,6 @@ import { BubbleChart } from "@/components/chats/BubbleChart";
 
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
-
 export type Chapter = {
   [key: string]: number[];
 };
@@ -57,11 +58,27 @@ const data: BoxData = {
   },
 };
 
+const BoxLegend = () => {
+  return (
+    <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
+      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+        <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
+      </Box>
+      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
+        <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+      </Box>
+    </Box>
+  );
+};
+
 const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
 
-  // const theme = useTheme();
-  // const matches = useMediaQuery(theme.breakpoints.up("sm"));
+  const theme = useTheme();
+  const isMovil = useMediaQuery(theme.breakpoints.down("md"));
+  console.log({ isMovil });
   return (
     <Box
       sx={{
@@ -120,15 +137,86 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
       </Box>
       <Box
         sx={{
+          width: "100%",
           display: "grid",
           gridTemplateColumns: "1fr",
           gap: "16px",
         }}
       >
-        <Paper sx={{ p: "40px" }}>
-          <BoxChart theme={"Dark"} data={data["Proposal Points"]} />
-          <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={true} />
-          <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={true} />
+        <Paper
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: { sm: "40px 20px", md: "40px 20px" },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { sm: "column", md: "row" },
+              justifyContent: "center",
+              alignItems: "center",
+              gap: isMovil ? "24px" : "0px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>
+                <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+              </Box>
+              <BoxChart
+                theme={"Dark"}
+                data={data["Proposal Points"]}
+                width={450}
+                boxHeight={25}
+                margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
+                offsetX={150}
+                offsetY={18}
+                identifier="boxplot1"
+              />
+              {isMovil && <BoxLegend />}
+            </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
+                <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+              </Box>
+              <BoxChart
+                theme={"Dark"}
+                data={data["Question Points"]}
+                drawYAxis={isMovil}
+                width={isMovil ? 450 : 300}
+                boxHeight={25}
+                margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                offsetX={isMovil ? 150 : 2}
+                offsetY={18}
+                identifier="boxplot1"
+              />
+              {isMovil && <BoxLegend />}
+            </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
+                <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+              </Box>
+              <BoxChart
+                theme={"Dark"}
+                data={data["Vote Points"]}
+                drawYAxis={isMovil}
+                width={isMovil ? 450 : 300}
+                boxHeight={25}
+                margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                offsetX={isMovil ? 150 : 2}
+                offsetY={18}
+                identifier="boxplot1"
+              />
+              {isMovil && <BoxLegend />}
+            </Box>
+          </Box>
+          {!isMovil && <BoxLegend />}
         </Paper>
         <Paper sx={{ p: "40px" }}>
           <Typography>
