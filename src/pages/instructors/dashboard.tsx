@@ -127,8 +127,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
       >
         <Paper sx={{ p: "40px" }}>
           <BoxChart theme={"Dark"} data={data["Proposal Points"]} />
-          <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={false} />
-          <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={false} />
+          <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={true} />
+          <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={true} />
         </Paper>
         <Paper sx={{ p: "40px" }}>
           <Typography>
