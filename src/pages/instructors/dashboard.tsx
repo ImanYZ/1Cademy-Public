@@ -1,4 +1,4 @@
-import { Paper, Typography /* useTheme */ } from "@mui/material";
+import { Paper, Typography, useMediaQuery /* useTheme */, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
@@ -7,6 +7,7 @@ import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
 
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
+import { TrendPlot } from "../../components/chats/TrendPlot";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
 export type Chapter = {
@@ -60,8 +61,35 @@ const data: BoxData = {
 const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
 
-  // const theme = useTheme();
-  // const matches = useMediaQuery(theme.breakpoints.up("sm"));
+  const theme = useTheme();
+  // const [screenSize, setScreenSize] = useState(null);
+
+  const isMovil = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.only("md"));
+
+  // useEffect(()=>{
+
+  // })
+  console.log("first", theme.breakpoints);
+  // const isMovil = useMediaQuery(theme.breakpoints.values());
+
+  // const [width, setWith] = useState(0);
+  // const getWith = useCallback(ref => {
+  //   if (!ref) return 0;
+
+  //   // console.log({ ref: ref.clientWidth });
+  //   setWith(ref.clientWidth);
+  // }, []);
+
+  // const getWith = useCallback(ref => {
+  //   if (!ref) return 0;
+
+  //   // console.log({ ref: ref.clientWidth });
+  //   setWith(ref.clientWidth);
+  // }, []);
+
+  // useEffect(() => {}, [isSmall, isMedium]);
+
   return (
     <Box
       sx={{
@@ -130,40 +158,116 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={false} />
           <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={false} />
         </Paper>
-        <Paper sx={{ p: "40px" }}>
-          <Typography>
-            2 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+        <Paper
+          /* ref={getWith} */ sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <TrendPlot
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={[]}
+          />
         </Paper>
-        <Paper sx={{ p: "40px" }}>
-          <Typography>
-            3 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+        {/* <Paper sx={{ p: "40px" }}>
+          <TrendPlot
+            title={"Edit Proposals"}
+            heightTop={354}
+            heightBottom={160}
+            width={1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={[]}
+          />
         </Paper>
 
         <Paper sx={{ p: "40px" }}>
-          <Typography>
-            4 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+          <TrendPlot
+            title={"Links"}
+            heightTop={354}
+            heightBottom={160}
+            width={1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={[]}
+          />
         </Paper>
 
         <Paper sx={{ p: "40px" }}>
-          <Typography>
-            5 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+          <TrendPlot
+            title={"Nodes"}
+            heightTop={354}
+            heightBottom={160}
+            width={1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={[]}
+          />
         </Paper>
 
         <Paper sx={{ p: "40px" }}>
-          <Typography>
-            6 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
+          <TrendPlot
+            title={"Votes"}
+            heightTop={354}
+            heightBottom={160}
+            width={1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={[]}
+          />
         </Paper>
 
         <Paper sx={{ p: "40px" }}>
-          <Typography>
-            7 hello world {selectedSemester} + {selectedCourse}
-          </Typography>
-        </Paper>
+          <TrendPlot
+            title={"Questions"}
+            heightTop={354}
+            heightBottom={160}
+            width={1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={[]}
+          />
+        </Paper> */}
       </Box>
     </Box>
   );
