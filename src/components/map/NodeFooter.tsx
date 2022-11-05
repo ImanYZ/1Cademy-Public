@@ -146,6 +146,7 @@ const NodeFooter = ({
   );
   const selectPendingProposals = useCallback(
     (event: any) => {
+      openNodePart(event, "PendingProposals");
       if (nodeBookState.nodeId != identifier) {
         nodeBookDispatch({
           type: "setOpenEditButton",

@@ -45,12 +45,12 @@ export const TrendPlot = ({
   const [zoomDomain, setZoomDomain] = useState({});
   console.log({ heightBottom, heightTop });
   return (
-    <Box sx={{ width, border: "solid 2px pink" }}>
+    <Box sx={{ width /* border: "solid 2px pink" */ }}>
       <div>
         {title}:{width}
       </div>
 
-      <Box sx={{ width, height: heightTop, border: "solid 2px royalblue" }}>
+      <Box sx={{ width, height: heightTop /* border: "solid 2px royalblue" */ }}>
         <VictoryChart
           padding={{ top: 22, left: 36, right: 0, bottom: 70 }}
           width={width}
@@ -100,7 +100,7 @@ export const TrendPlot = ({
         </VictoryChart>
       </Box>
 
-      <Box sx={{ width, height: heightBottom, border: "solid 2px royalblue" }}>
+      <Box sx={{ width, height: heightBottom /* border: "solid 2px royalblue" */ }}>
         <VictoryChart
           padding={{ top: 10, left: 40, right: 22, bottom: 40 }}
           width={width}

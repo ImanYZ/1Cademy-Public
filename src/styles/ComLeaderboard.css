@@ -73,6 +73,19 @@
   font-weight: bold;
   /* margin-bottom: 4px; */
 }
+@media screen and (max-width: 600px) and (min-width: 10px) {
+  #ComLeaderbaordChangerText {
+    color: #dcdcdc;
+    font-size: 12px;
+    width: fit-content;
+    text-align: center;
+    font-weight: normal;
+    word-break: keep-all;
+  }
+  #ComLeaderbaordChangerIcon {
+    font-size: 22px !important;
+  }
+}
 .LightMode #ComLeaderbaordChangerText {
   color: #454545;
 }
