@@ -897,6 +897,7 @@ const Node = ({
               saveProposedChildNode={saveProposedChildNode}
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}
+              setAbleToPropose={setAbleToPropose}
               ableToPropose={ableToPropose}
               isLoading={isLoading}
             />
