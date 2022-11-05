@@ -1,6 +1,6 @@
-import { Paper, Typography, useTheme } from "@mui/material";
+import { Paper, Typography /* useTheme */ } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
+// import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 
 import { BoxChart } from "@/components/chats/BoxChart";
@@ -60,8 +60,8 @@ const data: BoxData = {
 const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
 
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  // const theme = useTheme();
+  // const matches = useMediaQuery(theme.breakpoints.up("sm"));
   return (
     <Box
       sx={{
@@ -127,8 +127,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
       >
         <Paper sx={{ p: "40px" }}>
           <BoxChart theme={"Dark"} data={data["Proposal Points"]} />
-          <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={isSmall} />
-          <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={isSmall} />
+          <BoxChart theme={"Dark"} data={data["Question Points"]} drawYAxis={false} />
+          <BoxChart theme={"Dark"} data={data["Vote Points"]} drawYAxis={false} />
         </Paper>
         <Paper sx={{ p: "40px" }}>
           <Typography>

@@ -33,10 +33,10 @@ function drawChart(
 
   // set the dimensions and margins of the graph
   const MARGIN = { top: 10, right: 30, bottom: 20, left: 40 };
-  const INITIAL_WIDTH = 400;
+  const OFFSET_X = drawYAxis ? 120 : 0;
+  const INITIAL_WIDTH = 400 + OFFSET_X;
   const INITIAL_HEIGHT = 60 * Object.keys(data).length; // Height with padding and margin
   const BOX_HEIGHT = 25;
-  const OFFSET_X = drawYAxis ? 120 : 0;
   const width = INITIAL_WIDTH - MARGIN.left - MARGIN.right;
   const height = INITIAL_HEIGHT - MARGIN.top - MARGIN.bottom;
 
@@ -47,6 +47,9 @@ function drawChart(
     .append("g")
     .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
+  svg.append("g").attr("id", "totos");
+  svg.append("g").attr("id", "boxes");
+  svg.append("g").attr("id", "main");
   // remove old draw
   // svg.select(`#${identifier}-lines`).remove();
   svg.select(`#${identifier}-axis-y`).remove();
@@ -90,6 +93,7 @@ function drawChart(
     const max = dataSortedDescending.find(c => c <= superiorLimit);
 
     if (!min || !max) return null;
+    console.log("", { min, max, q1, q3 });
     return { min, max, q1, q3 };
   };
 
@@ -104,14 +108,22 @@ function drawChart(
       const yy = y(key);
       if (!yy) return null;
 
-      return { x1: x(res.min), x2: x(res.max), q1: x(res.q1), q3: x(res.q3), boxCenter: yy };
+      return {
+        min: res.min,
+        max: res.max,
+        x1: x(res.min),
+        x2: x(res.max),
+        q1: x(res.q1),
+        q3: x(res.q3),
+        boxCenter: yy,
+      };
     })
     .flatMap(c => c || []);
-
+  console.log("G", G);
   svg
     // .join("g")
-    .select("g")
-    // .attr("id", `${identifier}-lines`)
+    .select("#main")
+    .attr("id", `${identifier}-lines`)
     .selectAll("line")
     .data(G)
     .join("line")
@@ -124,7 +136,7 @@ function drawChart(
     .attr("transform", `translate(${OFFSET_X},${BOX_HEIGHT / 2 + 9})`);
 
   svg
-    .select("g")
+    .select("#boxes")
     .selectAll("rect")
     .data(G)
     .join("rect")
@@ -135,6 +147,49 @@ function drawChart(
     .attr("width", d => d.q3 - d.q1)
     .style("fill", "rgb(255, 196, 152)")
     .attr("transform", `translate(${OFFSET_X},${BOX_HEIGHT / 2 + 9})`);
+
+  G.forEach(g => {
+    svg
+      .select("#totos")
+      .selectAll("line")
+      .data([g.min, g.max])
+      .join("line")
+      .attr("x1", d => x(d))
+      .attr("x2", d => x(d))
+      .attr("y1", g.boxCenter - BOX_HEIGHT / 2)
+      .attr("y2", g.boxCenter + BOX_HEIGHT / 2)
+      .attr("stroke", theme === "Dark" ? "white" : "black")
+      .attr("transform", `translate(${OFFSET_X},${BOX_HEIGHT / 2 + 9})`);
+  });
+
+  // svg
+  //   .select("g")
+  //   .selectAll("toto")
+  //   .data(G)
+  //   .join("toto")
+  //   .selectAll("line")
+
+  // .data(d => [d.min, d.max])
+  // .data(d => d)
+  // .join("line")
+  // .attr("x1", (d,s,ss) => x(d.))
+  // .attr("x2", d => x(d))
+  // .attr("y1",  - boxHeight / 2)
+  // .attr("y2", boxCenter + boxHeight / 2)
+  // .attr("stroke", theme === "Dark" ? "white" : "black")
+  // .attr("transform", `translate(${offsetX},${boxHeight / 2 + 9})`);
+
+  //   // svg
+  //   //   .selectAll("toto")
+  //   //   .data([min, max])
+  //   //   .enter()
+  //   //   .append("line")
+  //   //   .attr("x1", d => x(d))
+  //   //   .attr("x2", d => x(d))
+  //   //   .attr("y1", boxCenter - boxHeight / 2)
+  //   //   .attr("y2", boxCenter + boxHeight / 2)
+  //   //   .attr("stroke", theme === "Dark" ? "white" : "black")
+  //   //   .attr("transform", `translate(${offsetX},${boxHeight / 2 + 9})`);
 
   // Object.keys(data).forEach((key: string) => {
   //   const boxCenter = y(key);
