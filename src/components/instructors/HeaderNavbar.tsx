@@ -7,9 +7,9 @@ import React from "react";
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 
 const OPTIONS: { id: string; title: string; label: string; route: string }[] = [
-  { id: "01", label: "HOME", title: "HOME", route: "/dashboard" },
+  // { id: "01", label: "HOME", title: "HOME", route: "/dashboard" },
   { id: "02", label: "DASHBOARD", title: "DASHBOARD", route: "/instructors/dashboard" },
-  { id: "03", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
+  // { id: "03", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
   { id: "04", label: "QUESTIONS", title: "QUESTIONS", route: "/instructors/questions" },
   { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
 ];
