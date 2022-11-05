@@ -26,8 +26,9 @@ export const CSVBtn = ({ getCSVRowData }: any) => {
       }, {});
       return obj;
     });
+    const headerKeys = Object.keys(Object.assign({}, ...array));
 
-    getCSVRowData(array);
+    getCSVRowData({ columns: headerKeys, rows: array });
   };
 
   return (
