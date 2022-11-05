@@ -83,6 +83,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
+    props.setAbleToPropose(true);
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeBookState.chosenNode]);
@@ -131,7 +132,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
-      props.setAbleToPropose(true);
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
       // setChoosingNode(props.identifier);
@@ -139,7 +139,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
     },
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.identifier, props.setAbleToPropose]
+    [props.identifier]
   );
 
   const deleteLink = useCallback(
