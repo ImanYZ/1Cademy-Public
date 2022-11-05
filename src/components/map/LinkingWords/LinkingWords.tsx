@@ -63,6 +63,7 @@ type LinkingWordsProps = {
   saveProposedImprovement: any;
   closeSideBar: any;
   ableToPropose?: boolean;
+  setAbleToPropose: (value: boolean) => void;
   isLoading: boolean;
 };
 
@@ -98,8 +99,11 @@ const LinkingWords = (props: LinkingWordsProps) => {
   //   [props.referenceLabelChange]
   // );
   const referenceLabelChangeHandler = useCallback(
-    (newLabel: string, idx: number) => props.referenceLabelChange(newLabel, props.identifier, idx),
-    [props.referenceLabelChange]
+    (newLabel: string, idx: number) => {
+      props.referenceLabelChange(newLabel, props.identifier, idx);
+      props.setAbleToPropose(true);
+    },
+    [props.referenceLabelChange, props.setAbleToPropose]
   );
 
   const choosingNewLinkedNode = useCallback(
@@ -127,6 +131,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
+      props.setAbleToPropose(true);
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
       // setChoosingNode(props.identifier);
@@ -134,14 +139,17 @@ const LinkingWords = (props: LinkingWordsProps) => {
     },
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.identifier]
+    [props.identifier, props.setAbleToPropose]
   );
 
   const deleteLink = useCallback(
-    (idx: any, linkType: any) => (/*event: any*/) => props.deleteLink(idx, linkType),
+    (idx: any, linkType: any) => (/*event: any*/) => {
+      props.deleteLink(idx, linkType);
+      props.setAbleToPropose(true);
+    },
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.deleteLink]
+    [props.deleteLink, props.setAbleToPropose]
   );
 
   const proposalSubmit = useCallback(
@@ -167,7 +175,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
     const firstParentId = props.parents[0];
     const scrollTo = props.isNew ? firstParentId.node ?? undefined : props.identifier;
     if (!scrollTo) return;
-
+    props.setAbleToPropose(false);
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     props.closeSideBar();
   };
