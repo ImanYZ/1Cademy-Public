@@ -41,6 +41,8 @@ import {
 } from "@mui/x-data-grid";
 import React, { useState } from "react";
 
+import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
+
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 import CSVBtn from "./CSVBtn";
 // const useStyles = makeStyles(() => ({
@@ -513,7 +515,7 @@ const keysColumns: any = {
   "Vote Points": "votePoints",
   "Last Activity": "lastActivity",
 };
-export const Students = () => {
+export const Students: InstructorLayoutPage = () => {
   // const classes = useStyles();
   const [tableRows, setTableRows] = useState(rows.slice());
   const [CSVRowData, getCSVRowData] = useState<GridRowsProp>([]);
@@ -1206,4 +1208,8 @@ export const Students = () => {
   );
 };
 
-export default Students;
+// This wrapper expose the shared variables from filters
+const PageWrapper = () => {
+  return <InstructorsLayout>{props => <Students {...props} />}</InstructorsLayout>;
+};
+export default PageWrapper;
