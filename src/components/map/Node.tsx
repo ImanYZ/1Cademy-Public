@@ -500,6 +500,7 @@ const Node = ({
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
+      setReason("");
       cleanEditorLink();
     }
   }, [editable]);
