@@ -81,7 +81,8 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .attr("y", d => y(d[1]))
     .attr("height", d => y(d[0]) - y(d[1]))
     .attr("width", x.bandwidth())
-    .attr("transform", `translate(20, 0)`);
+    .attr("transform", `translate(20, 0)`)
+    .on("mouseover", (e, d) => console.log(e, d));
 }
 
 export const PointsBarChart = () => {

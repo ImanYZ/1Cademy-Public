@@ -147,7 +147,13 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             <Box>
               <Typography sx={{ fontSize: "12px" }}>Completion rate</Typography>
               <Box
-                sx={{ display: "grid", gridTemplateColumns: "15px 1fr 15px 1fr", columnGap: "2px", fontSize: "12px" }}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "15px 1fr 15px 1fr",
+                  alignItems: "center",
+                  columnGap: "2px",
+                  fontSize: "12px",
+                }}
               >
                 <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
                 <span>{`>100%`}</span>
@@ -216,7 +222,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                 {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
-                <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
               </Box>
               <BoxChart
                 theme={"Dark"}
@@ -234,7 +240,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                 {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
-                <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
               </Box>
               <BoxChart
                 theme={"Dark"}

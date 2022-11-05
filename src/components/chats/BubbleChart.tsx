@@ -120,7 +120,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .attr("y", d => y(d.points))
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "central")
-    .text("2")
+    // .text("2")
     .style("font-size", "24px");
 
   // .append("text")            // append text
