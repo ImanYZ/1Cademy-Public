@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScaleName,
   VictoryAxis,
@@ -43,6 +43,27 @@ export const TrendPlot = ({
   trendData,
 }: TrendPlotProps) => {
   const [zoomDomain, setZoomDomain] = useState({});
+
+  useEffect(() => {
+    if (trendData.length !== 0) {
+      console.log({ trendData });
+      let oneThirdIndex = Math.floor(trendData.length / 3);
+      console.log(trendData[oneThirdIndex], trendData[oneThirdIndex][x]);
+      let oneThirdValue = trendData[oneThirdIndex][x];
+      let twoThirdIndex = Math.floor((trendData.length * 2) / 3);
+      let twoThirdValue = trendData[twoThirdIndex][x];
+      if (x === "date") {
+        // console.log({ oneThirdValue, twoThirdValue });
+        oneThirdValue = new Date(oneThirdValue);
+        twoThirdValue = new Date(twoThirdValue);
+        console.log(1, { oneThirdValue, twoThirdValue });
+      }
+      setZoomDomain({
+        x: [twoThirdValue, oneThirdValue],
+      });
+    }
+  }, [trendData, x]);
+
   console.log({ heightBottom, heightTop });
   return (
     <Box sx={{ width /* border: "solid 2px pink" */ }}>
