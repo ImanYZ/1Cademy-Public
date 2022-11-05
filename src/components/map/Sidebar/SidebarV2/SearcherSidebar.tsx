@@ -336,7 +336,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
               }}
             />
           </div>
-          <div id="SearchTagsContainer">
+          <Box sx={{ marginTop: { xs: "13px", sm: "8px" } }}>
             <label className="Tooltip">
               {/* <input
               name="OnlyTagsNodes"
@@ -370,7 +370,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                 Recover Default Tag(s)
               </span>
             )}
-          </div>
+          </Box>
           <div
             id="nodesUpdatedSinceContainer"
             style={{

@@ -5,23 +5,16 @@ import { useRouter } from "next/router";
 import React from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
+import { Option } from "../layouts/InstructorsLayout";
 
-const OPTIONS: { id: string; title: string; label: string; route: string }[] = [
-  // { id: "01", label: "HOME", title: "HOME", route: "/dashboard" },
-  { id: "02", label: "DASHBOARD", title: "DASHBOARD", route: "/instructors/dashboard" },
-  // { id: "03", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
-  { id: "04", label: "QUESTIONS", title: "QUESTIONS", route: "/instructors/questions" },
-  { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
-];
-
-type HeaderNavbarProps = {};
-const HeaderNavbar = ({}: HeaderNavbarProps) => {
+type HeaderNavbarProps = { options: Option[] };
+const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
   const router = useRouter();
 
   console.log("router.route", router.route);
 
   const getTabSelected = () => {
-    const tabSelected = OPTIONS.findIndex(cur => cur.route === router.route);
+    const tabSelected = options.findIndex(cur => cur.route === router.route);
     return tabSelected >= 0 ? tabSelected : false;
   };
   return (
@@ -45,7 +38,6 @@ const HeaderNavbar = ({}: HeaderNavbarProps) => {
           value={getTabSelected()}
           variant="scrollable"
           scrollButtons="auto"
-          // allowScrollButtonsMobile
           aria-label="scrollable auto tabs navigation bar"
           sx={{
             px: "25px",
@@ -63,7 +55,7 @@ const HeaderNavbar = ({}: HeaderNavbarProps) => {
             },
           }}
         >
-          {OPTIONS.map((page, idx) => (
+          {options.map((page, idx) => (
             <LightTooltip key={idx} title={page.title}>
               <Tab
                 onClick={event => {
@@ -92,9 +84,6 @@ const HeaderNavbar = ({}: HeaderNavbarProps) => {
               width: "55px",
               height: "55px",
               position: "relative",
-              // borderRadius: "50%",
-              // border: "solid 2px",
-              // borderColor: theme => theme.palette.common.gray,
               color: theme => theme.palette.common.gray,
             }}
           >
@@ -110,55 +99,6 @@ const HeaderNavbar = ({}: HeaderNavbarProps) => {
               }}
             />
           </Box>
-          {/* <Box
-            sx={{
-              width: "55px",
-              height: "55px",
-              border: "solid 2px",
-              borderColor: theme => theme.palette.common.gray,
-              color: theme => theme.palette.common.gray,
-              borderRadius: "30px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: theme => theme.palette.common.white,
-            }}
-          >
-            <Image src={"/lightModeLibraryBackground.jpg"} alt={name} width="33px" height="24px" quality={40} />
-          </Box> */}
-
-          {/* 
-        {showMenu && (
-          <LightTooltip title="Account">
-            <IconButton
-              size="large"
-              edge="end"
-              onClick={onCloseMenu}
-              color="inherit"
-              sx={{
-                display: { xs: "flex", md: "none" },
-              }}
-            >
-              <CloseIcon sx={{ color: theme => theme.palette.common.white, m: "auto" }} fontSize="large" />
-            </IconButton>
-          </LightTooltip>
-        )}
-
-        {!showMenu && (
-          <LightTooltip title="Account">
-            <IconButton
-              size="large"
-              edge="end"
-              onClick={onShowMenu}
-              color="inherit"
-              sx={{
-                display: { xs: "flex", md: "none" },
-              }}
-            >
-              <MenuIcon sx={{ color: theme => theme.palette.common.white }} fontSize="large" />
-            </IconButton>
-          </LightTooltip>
-        )} */}
         </Box>
       </Toolbar>
     </AppBar>

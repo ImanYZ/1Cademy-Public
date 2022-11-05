@@ -223,6 +223,8 @@ const Dashboard = ({}: DashboardProps) => {
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
   const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
+  const lastNodeOperation = useRef<string>("");
+
   const scrollToNode = useCallback((nodeId: string, tries = 0) => {
     devLog("scroll To Node", { nodeId, tries });
     if (tries === 10) return;
@@ -269,6 +271,12 @@ const Dashboard = ({}: DashboardProps) => {
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
     if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
+    // console.log("onCompleteWorker", 1);
+    if (["LinkingWords", "References", "Tags", "PendingProposals"].includes(lastNodeOperation.current)) {
+      // when open options from node is not required to scrollToNode
+      return (lastNodeOperation.current = "");
+    }
+    // console.log("onCompleteWorker", 2);
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -357,19 +365,145 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const [urlNodeProcess, setUrlNodeProcess] = useState(false);
+
+  /**
+   * get Node data
+   * iterate over children and update updatedAt field
+   * iterate over parents and update updatedAt field
+   * get userNode data
+   *  - if exist: update visible and updatedAt field
+   *  - else: create
+   * build fullNode then call makeNodeVisibleInItsLinks and createOrUpdateNode
+   * scroll
+   * update selectedNode
+   */
+  const openNodeHandler = useMemoizedCallback(
+    async (nodeId: string) => {
+      devLog("open_Node_Handler", nodeId);
+      // setFlag(!flag)
+      let linkedNodeRef;
+      let userNodeRef = null;
+      let userNodeData: UserNodesData | null = null;
+
+      const nodeRef = doc(db, "nodes", nodeId);
+      const nodeDoc = await getDoc(nodeRef);
+
+      const batch = writeBatch(db);
+      // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
+      // const nodeDoc = await nodeRef.get();
+      if (nodeDoc.exists() && user) {
+        //CHECK: added user
+        const thisNode: any = { ...nodeDoc.data(), id: nodeId };
+        try {
+          for (let child of thisNode.children) {
+            linkedNodeRef = doc(db, "nodes", child.node);
+
+            // linkedNodeRef = db.collection("nodes").doc(child.node);
+
+            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
+          }
+          for (let parent of thisNode.parents) {
+            // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
+            linkedNodeRef = doc(db, "nodes", parent.node);
+            // do a batch r
+            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            // await firebase.batchUpdate(linkedNodeRef, {
+            //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            // });
+          }
+          const userNodesRef = collection(db, "userNodes");
+          const q = query(userNodesRef, where("node", "==", nodeId), where("user", "==", user.uname), limit(1));
+          const userNodeDoc = await getDocs(q);
+          let userNodeId = null;
+          if (userNodeDoc.docs.length > 0) {
+            // if exist documents update the first
+            userNodeId = userNodeDoc.docs[0].id;
+            // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
+            const userNodeRef = doc(db, "userNodes", userNodeId);
+            userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
+            userNodeData.visible = true;
+            userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            batch.update(userNodeRef, userNodeData);
+          } else {
+            // if NOT exist documents create a document
+            userNodeRef = collection(db, "userNodes");
+            // userNodeId = userNodeRef.id;
+
+            userNodeData = {
+              changed: true,
+              correct: false,
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: false,
+              bookmarked: false,
+              node: nodeId,
+              open: true,
+              user: user.uname,
+              visible: true,
+              wrong: false,
+            };
+            batch.set(doc(userNodeRef), userNodeData); // CHECK: changed with batch
+            // const docRef = await addDoc(userNodeRef, userNodeData);
+            // userNodeId = docRef.id; // CHECK: commented this
+          }
+          batch.update(nodeRef, {
+            viewers: thisNode.viewers + 1,
+            updatedAt: Timestamp.fromDate(new Date()),
+          });
+          const userNodeLogRef = collection(db, "userNodesLog");
+
+          const userNodeLogData = {
+            ...userNodeData,
+            createdAt: Timestamp.fromDate(new Date()),
+          };
+
+          // const id = userNodeLogRef.id
+          batch.set(doc(userNodeLogRef), userNodeLogData);
+          await batch.commit();
+
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    },
+    // CHECK: I commented allNode, I did'nt found where is defined
+    [user /*allNodes*/, , allTags /*allUserNodes*/]
+  );
+  //Getting the node from the Url to open and scroll to that node in the first render
+  useEffect(() => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let noodeIdFromDashboard = urlParams.get("nodeId");
+    if (!noodeIdFromDashboard) return setUrlNodeProcess(true);
+    if (!firstScrollToNode) {
+      const selectedNodeGraph = graph.nodes[noodeIdFromDashboard];
+      if (!selectedNodeGraph) openNodeHandler(noodeIdFromDashboard);
+    }
+    setTimeout(() => {
+      if (!noodeIdFromDashboard) return;
+      const selectedNodeDash = graph.nodes[noodeIdFromDashboard];
+      // console.log("selectedNodeDash", selectedNodeDash);
+      if (selectedNodeDash?.top === 0) return;
+      if (selectedNodeDash) return;
+      nodeBookDispatch({ type: "setSelectedNode", payload: noodeIdFromDashboard });
+      scrollToNode(noodeIdFromDashboard);
+    }, 1000);
+  }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
+
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
       if (user?.sNode === nodeBookState.selectedNode) return;
-
-      if (!firstScrollToNode && queueFinished) {
+      if (!firstScrollToNode && queueFinished && urlNodeProcess) {
         if (!user?.sNode) return;
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
-
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
@@ -387,6 +521,7 @@ const Dashboard = ({}: DashboardProps) => {
     queue.length,
     queueFinished,
     scrollToNode,
+    urlNodeProcess,
     user?.sNode,
     userNodesLoaded,
   ]);
@@ -1723,113 +1858,6 @@ const Dashboard = ({}: DashboardProps) => {
   //   [user, nodes, edges /*allNodes*/, , allTags /*allUserNodes*/]
   // );
 
-  /**
-   * get Node data
-   * iterate over children and update updatedAt field
-   * iterate over parents and update updatedAt field
-   * get userNode data
-   *  - if exist: update visible and updatedAt field
-   *  - else: create
-   * build fullNode then call makeNodeVisibleInItsLinks and createOrUpdateNode
-   * scroll
-   * update selectedNode
-   */
-  const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string) => {
-      devLog("open_Node_Handler", nodeId);
-      // setFlag(!flag)
-      let linkedNodeRef;
-      let userNodeRef = null;
-      let userNodeData: UserNodesData | null = null;
-
-      const nodeRef = doc(db, "nodes", nodeId);
-      const nodeDoc = await getDoc(nodeRef);
-
-      const batch = writeBatch(db);
-      // const nodeRef = firebase.db.collection("nodes").doc(nodeId);
-      // const nodeDoc = await nodeRef.get();
-      if (nodeDoc.exists() && user) {
-        //CHECK: added user
-        const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        try {
-          for (let child of thisNode.children) {
-            linkedNodeRef = doc(db, "nodes", child.node);
-
-            // linkedNodeRef = db.collection("nodes").doc(child.node);
-
-            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-            // await firebase.batchUpdate(linkedNodeRef, { updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) });
-          }
-          for (let parent of thisNode.parents) {
-            // linkedNodeRef = firebase.db.collection("nodes").doc(parent.node);
-            linkedNodeRef = doc(db, "nodes", parent.node);
-            // do a batch r
-            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-            // await firebase.batchUpdate(linkedNodeRef, {
-            //   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-            // });
-          }
-          const userNodesRef = collection(db, "userNodes");
-          const q = query(userNodesRef, where("node", "==", nodeId), where("user", "==", user.uname), limit(1));
-          const userNodeDoc = await getDocs(q);
-          let userNodeId = null;
-          if (userNodeDoc.docs.length > 0) {
-            // if exist documents update the first
-            userNodeId = userNodeDoc.docs[0].id;
-            // userNodeRef = firebase.db.collection("userNodes").doc(userNodeId);
-            const userNodeRef = doc(db, "userNodes", userNodeId);
-            userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
-            userNodeData.visible = true;
-            userNodeData.updatedAt = Timestamp.fromDate(new Date());
-            batch.update(userNodeRef, userNodeData);
-          } else {
-            // if NOT exist documents create a document
-            userNodeRef = collection(db, "userNodes");
-            // userNodeId = userNodeRef.id;
-
-            userNodeData = {
-              changed: true,
-              correct: false,
-              createdAt: Timestamp.fromDate(new Date()),
-              updatedAt: Timestamp.fromDate(new Date()),
-              deleted: false,
-              isStudied: false,
-              bookmarked: false,
-              node: nodeId,
-              open: true,
-              user: user.uname,
-              visible: true,
-              wrong: false,
-            };
-            batch.set(doc(userNodeRef), userNodeData); // CHECK: changed with batch
-            // const docRef = await addDoc(userNodeRef, userNodeData);
-            // userNodeId = docRef.id; // CHECK: commented this
-          }
-          batch.update(nodeRef, {
-            viewers: thisNode.viewers + 1,
-            updatedAt: Timestamp.fromDate(new Date()),
-          });
-          const userNodeLogRef = collection(db, "userNodesLog");
-
-          const userNodeLogData = {
-            ...userNodeData,
-            createdAt: Timestamp.fromDate(new Date()),
-          };
-
-          // const id = userNodeLogRef.id
-          batch.set(doc(userNodeLogRef), userNodeLogData);
-          await batch.commit();
-
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    },
-    // CHECK: I commented allNode, I did'nt found where is defined
-    [user /*allNodes*/, , allTags /*allUserNodes*/]
-  );
-
   const openLinkedNode = useCallback(
     (linkedNodeID: string) => {
       devLog("open Linked Node", { linkedNodeID });
@@ -1917,7 +1945,7 @@ const Dashboard = ({}: DashboardProps) => {
             isStudied: thisNode.isStudied,
             bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
             node: nodeId,
-            open: false,
+            open: thisNode.open,
             user: username,
             visible: false,
             wrong: thisNode.wrong,
@@ -2185,8 +2213,15 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
+      // console.log({ partType, openPart });
+      lastNodeOperation.current = partType;
       if (!choosingNode) {
+        if (partType === "PendingProposals") {
+          // TODO: refactor to use only one state to open node options
+          return; // HERE we are breakin the code, for now this part is manage by setOpenEditButton, change after refactor
+        }
         if (openPart === partType) {
+          // is opened, so will close
           setOpenPart(null);
           event.currentTarget.blur();
         } else {
@@ -2428,7 +2463,7 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      devLog("CHANGE NH 🚀", `H:${height}, nId:${nodeId}`);
+      devLog("CHANGE 🚀", `H:${height.toFixed(1)}, nId:${nodeId}`);
 
       // // if (value === nodes[nodeId].title) return;
       // const nodeChanged: FullNodeData = { ...nodes[nodeId], height };
@@ -2702,7 +2737,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
         if (chosenType === "Citations") {
           if (openSidebar === "CITATIONS") {
-            console.log("NULLLL");
+            // console.log("NULLLL");
             setOpenSidebar(null);
             return;
           }
@@ -2815,10 +2850,10 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
         // isTheSame = compareLinks(oldNode.tags, newNode.tags, isTheSame, false)
         // isTheSame = compareLinks(oldNode.references, newNode.references, isTheSame, false)
-        isTheSame = isTheSame && compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = isTheSame && compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = isTheSame && compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
-        isTheSame = isTheSame && compareLinks(oldNode.children, newNode.children, isTheSame, false);
+        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
+        isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
+        isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
 
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
@@ -2888,13 +2923,13 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges }; // CHECK: I added this to validate
 
         if (!(nodeBookState.selectedNode in changedNodes)) {
-          console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
+          // console.log("COPY : ", oldNodes[nodeBookState.selectedNode]);
           changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
         }
         if (!tempNodes.has(newNodeId)) {
           tempNodes.add(newNodeId);
         }
-        console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
+        // console.log("COPY 2: ", oldNodes[nodeBookState.selectedNode]);
         const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
 
         const newChildNode: any = {
@@ -2945,7 +2980,7 @@ const Dashboard = ({}: DashboardProps) => {
             },
           ];
         }
-        console.log("newChildNode", newChildNode);
+        // console.log("newChildNode", newChildNode);
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
@@ -3056,15 +3091,14 @@ const Dashboard = ({}: DashboardProps) => {
     async (
       setIsAdmin: (value: boolean) => void,
       setIsRetrieving: (value: boolean) => void,
-      setProposals: (value: any) => void,
-      who?: string
+      setProposals: (value: any) => void
     ) => {
-      console.log(11);
-      console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
+      // console.log(11);
+      // console.log("who", who, "users: ", user, " sNodE: ", selectedNodeType);
       if (!user) return;
-      console.log(22);
+      // console.log(22);
       if (!selectedNodeType) return;
-      console.log(33);
+      // console.log(33);
       setIsRetrieving(true);
       setGraph(({ nodes: oldNodes, edges }) => {
         // setNodes(oldNodes => {
@@ -3884,10 +3918,11 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
-          {nodeBookState.selectedNode && !openSidebar && (
-            <Tooltip title="Scroll to last Selected Node" placement="left">
-              <IconButton
-                color="secondary"
+          {nodeBookState.selectedNode && (
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
+              <Tooltip
+                title="Scroll to last Selected Node"
+                placement="left"
                 sx={{
                   position: "fixed",
                   top: "10px",
@@ -3895,27 +3930,32 @@ const Dashboard = ({}: DashboardProps) => {
                   zIndex: "1300",
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 }}
-                onClick={onScrollToLastNode}
               >
-                <MyLocationIcon />
-              </IconButton>
-            </Tooltip>
+                <IconButton color="secondary" onClick={onScrollToLastNode}>
+                  <MyLocationIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           )}
-          {process.env.NODE_ENV === "development" && !openSidebar && (
-            <Tooltip
-              title={"Watch geek data"}
-              sx={{
-                position: "fixed",
-                top: "60px",
-                right: "10px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              }}
-            >
-              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                <CodeIcon />
-              </IconButton>
-            </Tooltip>
+          {process.env.NODE_ENV === "development" && (
+            <div className={openSidebar ? "trackNcodeBtn" : ""}>
+              <Tooltip
+                title={"Watch geek data"}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                {/* DEVTOOLS */}
+                <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                  <CodeIcon />
+                </IconButton>
+              </Tooltip>
+              partType: {lastNodeOperation.current}
+            </div>
           )}
 
           {/* end Data from map */}

@@ -421,16 +421,20 @@ export const changeNodeTitle = async ({
       newBatch.update(linkedRef, linkedDataChanges);
       [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
-
-    [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-      batch: newBatch,
-      linkedId: parent.node,
-      nodeChanges: linkedDataChanges,
-      major: false,
-      currentTimestamp,
-      writeCounts,
-      t,
-      tWriteOperations,
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+        batch,
+        linkedId: parent.node,
+        nodeChanges: linkedDataChanges,
+        major: false,
+        currentTimestamp,
+        writeCounts,
+        t,
+        tWriteOperations,
+      });
+      await commitBatch(batch);
     });
   }
   for (let child of nodeData.children) {
@@ -440,7 +444,6 @@ export const changeNodeTitle = async ({
     const newParents = linkedData.parents.filter((parent: any) => parent.node !== nodeId);
     newParents.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
     linkedDataChanges = {
-      ...linkedDataChanges,
       parents: newParents,
       updatedAt: currentTimestamp,
     };
@@ -455,16 +458,20 @@ export const changeNodeTitle = async ({
       newBatch.update(linkedRef, linkedDataChanges);
       [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
-
-    [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-      batch: newBatch,
-      linkedId: child.node,
-      nodeChanges: linkedDataChanges,
-      major: false,
-      currentTimestamp,
-      writeCounts,
-      t,
-      tWriteOperations,
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+        batch,
+        linkedId: child.node,
+        nodeChanges: linkedDataChanges,
+        major: false,
+        currentTimestamp,
+        writeCounts,
+        t,
+        tWriteOperations,
+      });
+      await commitBatch(batch);
     });
   }
   if (nodeData.isTag) {
@@ -1477,9 +1484,9 @@ export const versionCreateUpdate = async ({
               tWriteOperations,
             });
           }
-          let linkedNode, linkedNodeChanges;
           // TODO: move these to queue
           await detach(async () => {
+            let linkedNode, linkedNodeChanges;
             let batch = db.batch();
             let newBatch = batch;
             let writeCounts = 0;
