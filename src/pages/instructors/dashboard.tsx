@@ -118,7 +118,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
               <Typography># of Students</Typography>
             </Box>
             <Box>
-              <Typography>Points</Typography>
+              <Typography sx={{ fontSize: "12px" }}>Completion rate</Typography>
               <Box
                 sx={{ display: "grid", gridTemplateColumns: "15px 1fr 15px 1fr", columnGap: "2px", fontSize: "12px" }}
               >
