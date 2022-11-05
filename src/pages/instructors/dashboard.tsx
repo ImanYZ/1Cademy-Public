@@ -110,25 +110,32 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            alignItems: "center",
           }}
         >
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: "4px" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "4px" }}>
             <Box>
               <Typography sx={{ fontSize: "19px" }}>Points</Typography>
               <Typography># of Students</Typography>
             </Box>
             <Box>
               <Typography>Points</Typography>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: "15px 1fr 15px 1fr", columnGap: "2px", fontSize: "12px" }}
+              >
+                <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
                 <span>{`>100%`}</span>
+                <SquareIcon fontSize="inherit" sx={{ fill: "#F9E2D0" }} />
                 <span>{`>10%`}</span>
+                <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
                 <span>{`>50%`}</span>
+                <SquareIcon fontSize="inherit" sx={{ fill: "#FF8A33" }} />
                 <span>{`<=100%`}</span>
               </Box>
             </Box>
           </Box>
-          <PointsBarChart />
+          <Box sx={{ alignSelf: "center" }}>
+            <PointsBarChart />
+          </Box>
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>
           <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
