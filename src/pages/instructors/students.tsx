@@ -1,10 +1,14 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 // import { createStyles, makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
-import { Box } from "@mui/material";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import SearchIcon from "@mui/icons-material/Search";
+import SortIcon from "@mui/icons-material/Sort";
+import { Box, Modal, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import Drawer from "@mui/material/Drawer";
@@ -13,6 +17,7 @@ import IconButton from "@mui/material/IconButton";
 // import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
+import Popover from "@mui/material/Popover";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
@@ -38,7 +43,6 @@ import React, { useState } from "react";
 
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 import CSVBtn from "./CSVBtn";
-import PageWrapper from "./tmp";
 // const useStyles = makeStyles(() => ({
 //   editableMode: {
 
@@ -50,12 +54,12 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
       online: true,
     },
     firstName: "Derrick ",
     lastName: "Schultz",
-    email: "samirbes@umich.edu",
+    email: "ouhrac@gmail.com",
     totalPoints: 74,
     corrects: 40,
     wrongs: 51,
@@ -74,7 +78,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
     },
     firstName: "Edna ",
     lastName: " Roberts",
@@ -168,7 +172,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
       online: true,
     },
     firstName: "Johanna",
@@ -192,7 +196,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
       online: true,
     },
     firstName: "Effie",
@@ -285,7 +289,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
     },
     firstName: "Isaac",
     lastName: "Thompson",
@@ -308,7 +312,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
     },
     firstName: "Rosetta",
     lastName: "Lucas",
@@ -354,7 +358,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
     },
     firstName: "Alan",
     lastName: "Medina",
@@ -377,7 +381,7 @@ const rows: GridRowsProp = [
     user: {
       username: "username",
       avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
     },
     firstName: "Ray",
     lastName: "Phelps",
@@ -473,7 +477,6 @@ const columns: string[] = [
   "vote",
   "votePoints",
   "lastActivity",
-  "actions",
 ];
 
 const keys = [
@@ -493,9 +496,26 @@ const keys = [
   "Vote Points",
   "Last Activity",
 ];
+const keysColumns: any = {
+  "First Name": "firstName",
+  "Last Name": "lastName",
+  Email: "email",
+  "Total Poitns": "totalPoints",
+  Wrongs: "wrongs",
+  Corrects: "corrects",
+  Awards: "awards",
+  "New Proposals": "newPorposals",
+  "Edit Node Proposals": "editNodeProposals",
+  "Proposals Points": "proposalsPoints",
+  Questions: "questions",
+  "Question Points": "questionPoints",
+  Vote: "vote",
+  "Vote Points": "votePoints",
+  "Last Activity": "lastActivity",
+};
 export const Students = () => {
   // const classes = useStyles();
-  const [tableRows, setTableRows] = useState<GridRowsProp>(rows);
+  const [tableRows, setTableRows] = useState(rows.slice());
   const [CSVRowData, getCSVRowData] = useState<GridRowsProp>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
@@ -503,6 +523,7 @@ export const Students = () => {
   const [updatedTableData, setUpdatedTableData] = useState(rows);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [openUploadModal, setOpenUploadModal] = useState(false);
   // const [tableColumns /* , setTableColumns */] = useState(dataGridColumns({ editMode: false }));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dataGridLoading, setDataGridLoading] = useState<boolean>(false);
@@ -513,14 +534,15 @@ export const Students = () => {
       value: number;
     }[]
   >([]);
-
+  const [searchValue, setSearchValue] = useState("");
+  const theme = useTheme();
+  const isMovil = useMediaQuery(theme.breakpoints.down("md"));
+  console.log(isMovil);
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
-  console.log("tableRows", tableRows);
-
-  const handleFilterBy = (filters: any) => {
+  const [selectedColumn, setSelectedColumn] = useState("");
+  const handleFilterBy = (filters: any, fromDash: boolean) => {
     let _tableRows = rows.slice();
     for (let filter of filters) {
-      console.log(filterChoices[filter.title]);
       if (filter.operation === "<") {
         _tableRows = _tableRows.filter(row => row[filterChoices[filter.title]] <= filter.value);
       } else if (filter.operation === ">") {
@@ -528,7 +550,7 @@ export const Students = () => {
       }
     }
     setTableRows(_tableRows);
-    if (openFilter) {
+    if (openFilter && !fromDash) {
       handleOpenCloseFilter();
     }
   };
@@ -545,7 +567,7 @@ export const Students = () => {
 
   const addFilter = () => {
     const newFilter = {
-      title: "",
+      title: "Total Poitns",
       operation: "<",
       value: 10,
     };
@@ -553,26 +575,22 @@ export const Students = () => {
     setFilters(updateFilters);
   };
 
-  const deleteFilter = (index: any) => {
-    console.log(index);
+  const deleteFilter = (index: any, fromDash: boolean) => {
     const _oldFilters = [...filters];
     _oldFilters.splice(index, 1);
     setFilters(_oldFilters);
-    handleFilterBy(_oldFilters);
+    handleFilterBy(_oldFilters, fromDash);
   };
   const handleChangeOperation = (index: number, event: any) => {
-    console.log(event.target.value);
     const _filters = [...filters];
     _filters[index] = {
       ..._filters[index],
       operation: event.target.value,
     };
     setFilters(_filters);
-    console.log("handleChangeOperation");
   };
 
   const handleChangeChoice = (index: number, event: any) => {
-    console.log(index);
     const _filters = [...filters];
     _filters[index] = {
       ..._filters[index],
@@ -582,7 +600,6 @@ export const Students = () => {
   };
 
   const editFilterValue = (index: number, event: any) => {
-    console.log(event.target.value);
     const _filters = [...filters];
     _filters[index] = {
       ..._filters[index],
@@ -617,12 +634,11 @@ export const Students = () => {
           {filters.length > 0 ? (
             <>
               {filters.map((filter, index) => {
-                console.log(filter.operation);
                 return (
                   <>
                     <Paper key={index} elevation={6} sx={{ mb: "13px" }}>
                       <Box sx={{ textAlign: "right" }}>
-                        <IconButton onClick={() => deleteFilter(index)}>
+                        <IconButton onClick={() => deleteFilter(index, true)}>
                           <DeleteForeverIcon />
                         </IconButton>
                       </Box>
@@ -688,7 +704,7 @@ export const Students = () => {
         <Box sx={{ textAlign: "center" }}>
           <Button
             variant="contained"
-            onClick={() => handleFilterBy(filters)}
+            onClick={() => handleFilterBy(filters, false)}
             sx={{
               color: theme => theme.palette.common.white,
               background: theme => theme.palette.common.orange,
@@ -710,7 +726,7 @@ export const Students = () => {
   );
 
   const saveTableChanges = () => {
-    // console.log(apiRef?.current?.getRowModels());
+    setEditMode(false);
     // setTableRows([]);
     // setDataGridLoading(true);
     // setTimeout(() => {
@@ -724,16 +740,99 @@ export const Students = () => {
     setTableRows([...tableRows]);
     setUpdatedTableData([]);
   };
+  const editValues = (column: any, index: any, event: any) => {
+    debugger;
+    let _tableRows = tableRows.slice();
+    _tableRows[index][column] = event.target.value;
+    setTableRows(_tableRows);
+  };
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (colmn: any, event: any) => {
+    setSelectedColumn(keysColumns[colmn]);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
+  const id = open ? "simple-popover" : undefined;
+
+  const sortLowHigh = () => {
+    const _tableRows = tableRows.slice();
+    if (["firstName", "lastName", "email"].includes(selectedColumn)) {
+      _tableRows.sort((a, b) => {
+        const nameA = a[selectedColumn].toUpperCase();
+        const nameB = b[selectedColumn].toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      _tableRows.sort((a, b) => a[selectedColumn] - b[selectedColumn]);
+    }
+    setTableRows(_tableRows);
+    handleClose();
+  };
+  const sortHighLow = () => {
+    const _tableRows = tableRows.slice();
+    if (["firstName", "lastName", "email"].includes(selectedColumn)) {
+      _tableRows.sort((a, b) => {
+        const nameA = a[selectedColumn].toUpperCase();
+        const nameB = b[selectedColumn].toUpperCase();
+        if (nameA > nameB) {
+          return -1;
+        }
+        if (nameA < nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      _tableRows.sort((a, b) => b[selectedColumn] - a[selectedColumn]);
+    }
+    setTableRows(_tableRows);
+    handleClose();
+  };
+  const deleteRow = (index: number) => {
+    const _tableRows = tableRows.slice();
+    _tableRows.splice(index, 1);
+    setTableRows(_tableRows);
+  };
+  const searchByNameEmail = (newValue: string) => {
+    const _tableRows = tableRows.slice();
+
+    const newTable = _tableRows.filter(row => {
+      return (
+        row.firstName.toLowerCase().includes(newValue) ||
+        row.lastName.toLowerCase().includes(newValue) ||
+        row.email.toLowerCase().includes(newValue)
+      );
+    });
+    setTableRows(newTable);
+  };
+  const handleNewSearh = (event: any) => {
+    setSearchValue(event.target.value);
+    if (!event.target.value) return setTableRows(rows.slice());
+    searchByNameEmail(event.target.value.toLowerCase());
+  };
 
   return (
     <>
-      <PageWrapper />
-      <Box className="student-dashboard" sx={{ padding: "20px" }}>
+      <Box className="student-dashboard" sx={{ width: "100%" }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            m: "25px 30px",
+            flexDirection: isMovil ? "column" : "row",
           }}
         >
           <Box
@@ -742,74 +841,133 @@ export const Students = () => {
               alignItems: "center",
               width: "30%",
               justifyContent: "space-evenly",
-              flexWrap: "wrap",
+              flexDirection: "row",
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "row" }}>
-              <Typography variant="h1" component="h2">
-                Sl 106
-              </Typography>
-              <Typography sx={{ ml: "5px", mt: "20px", fontSize: "14.5px" }} variant="h5" component="h2">
-                Fall 22
-              </Typography>
-            </Box>
+            <Typography variant="h1" component="h2">
+              Sl
+            </Typography>
+            <Typography variant="h1" component="h5">
+              106
+            </Typography>
 
             <Typography sx={{ fontSize: "14.5px" }} variant="h5" component="h2">
-              Students: 50
+              Students:
+            </Typography>
+            <Typography sx={{ fontSize: "14.5px" }} variant="h5" component="h2">
+              50
             </Typography>
           </Box>
-          <Box>
-            <Button
-              variant="contained"
-              onClick={handleOpenCloseFilter}
-              sx={{
-                color: theme => theme.palette.common.white,
-                background: theme => theme.palette.common.orange,
-                height: { xs: "40px", md: "55px" },
-                width: { xs: "50%", md: "auto" },
-                fontSize: 16,
-                fontWeight: "700",
-                my: { xs: "0px", md: "auto" },
-                mt: { xs: "15px", md: "auto" },
-                marginLeft: { xs: "0px", md: "32px" },
-                marginRight: "40px",
-                paddingX: "30px",
-                borderRadius: 1,
-                textAlign: "center",
-                alignSelf: "center",
-              }}
-            >
-              Filter By
-            </Button>
+          <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
             <TextField
-              sx={{ height: "5px", width: "500px" }}
+              sx={{ width: !isMovil ? "500px" : "50%" }}
               id="outlined-basic"
+              value={searchValue}
+              onChange={handleNewSearh}
               placeholder="search name or email"
               variant="outlined"
-            />
-            <Button
-              variant="contained"
-              onClick={() => setEditMode(!editMode)}
-              sx={{
-                color: theme => theme.palette.common.white,
-                background: theme => theme.palette.common.black,
-                height: { xs: "40px", md: "55px" },
-                width: { xs: "50%", md: "auto" },
-                fontSize: 16,
-                fontWeight: "700",
-                my: { xs: "0px", md: "auto" },
-                mt: { xs: "15px", md: "auto" },
-                marginLeft: { xs: "0px", md: "32px" },
-                marginRight: "40px",
-                paddingX: "30px",
-                borderRadius: 1,
-                textAlign: "center",
-                alignSelf: "center",
+              InputProps={{
+                endAdornment: (
+                  <IconButton
+                    onClick={() => {
+                      searchByNameEmail(searchValue.toLowerCase());
+                    }}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                ),
               }}
-            >
-              <EditIcon /> Edit/Add
-            </Button>
+            />
+            {!isMovil ? (
+              <>
+                <Button
+                  variant="contained"
+                  onClick={handleOpenCloseFilter}
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.orange,
+                    height: { xs: "40px", md: "55px" },
+                    width: { xs: "50%", md: "auto" },
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    mt: { xs: "15px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                >
+                  Sort By
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => setEditMode(!editMode)}
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.black,
+                    height: { xs: "40px", md: "55px" },
+                    width: { xs: "50%", md: "auto" },
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    mt: { xs: "15px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                >
+                  <EditIcon /> Edit/Add
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="contained"
+                  onClick={handleOpenCloseFilter}
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.black,
+                    height: { xs: "40px", md: "55px" },
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    mt: { xs: "15px", md: "auto" },
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                >
+                  <SortIcon /> Sort
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleOpenCloseFilter}
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.black,
+                    height: { xs: "40px", md: "55px" },
 
+                    my: { xs: "0px", md: "auto" },
+                    mt: { xs: "15px", md: "auto" },
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                >
+                  <FilterAltIcon /> Filter
+                </Button>
+              </>
+            )}
             <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
               {list()}
             </Drawer>
@@ -823,7 +981,7 @@ export const Students = () => {
                   <Chip
                     key={index}
                     label={filter.title + " " + filter.operation + " " + filter.value}
-                    onDelete={() => deleteFilter(index)}
+                    onDelete={() => deleteFilter(index, false)}
                     sx={{ fontSize: "20px" }}
                   />
                   {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
@@ -835,48 +993,116 @@ export const Students = () => {
 
         <hr />
         <Box
-          className="student-dashboard-table"
-          sx={{ height: "500px", mt: "40px", mr: "70px", ml: "30px", mb: "90px" }}
+          sx={{
+            height: "500px",
+            mt: "40px",
+            mr: !isMovil ? "70px" : "0px",
+            ml: !isMovil ? "30px" : "0px",
+            mb: !isMovil ? "90px" : "0px",
+          }}
         >
           <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell align="right"> {""}</TableCell>
+                  {!isMovil && <TableCell align="right"> {""}</TableCell>}
                   {keys.map(colmn => {
                     return (
-                      <TableCell align="left" key={colmn}>
+                      <TableCell
+                        style={
+                          ["First Name", "Last Name"].includes(colmn) && isMovil
+                            ? { position: "sticky", left: colmn === "Last Name" ? 120 : 0, backgroundColor: "gray" }
+                            : {}
+                        }
+                        align="left"
+                        key={colmn}
+                      >
                         <div style={{ display: "flex", flexDirection: "row" }}>
                           <div> {colmn}</div>
-                          <IconButton style={{ paddingTop: "10px" }}>
+                          <IconButton
+                            id={id}
+                            onClick={event => handleClick(colmn, event)}
+                            style={{ paddingTop: "10px" }}
+                          >
                             {" "}
                             <ArrowDropDownIcon viewBox="1 9 24 24" />
                           </IconButton>
                         </div>
+                        <Popover
+                          id={id}
+                          open={open}
+                          anchorEl={anchorEl}
+                          onClose={handleClose}
+                          anchorOrigin={{
+                            vertical: "top",
+                            horizontal: "left",
+                          }}
+                        >
+                          <Box sx={{ width: "250px", display: "flex", flexDirection: "column" }}>
+                            <Button sx={{ p: 2, fontSize: "20px" }} onClick={sortLowHigh}>
+                              Sort Low to High
+                            </Button>
+                            <Button sx={{ p: 2, fontSize: "20px" }} onClick={sortHighLow}>
+                              Sort High to Low
+                            </Button>
+                          </Box>
+                        </Popover>
                       </TableCell>
                     );
                   })}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tableRows.map(row => (
+                {tableRows.map((row, index) => (
                   <TableRow key={row.firstName} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    <TableCell align="left">
-                      <OptimizedAvatar
-                        name={row.user.username}
-                        imageUrl={row.user.avatar}
-                        renderAsAvatar={true}
-                        contained={false}
-                      />
-                      <div className={row.user.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-                    </TableCell>
-                    {columns.map(colm => {
+                    {!isMovil && (
+                      <TableCell align="left">
+                        <OptimizedAvatar
+                          name={row.user.username}
+                          imageUrl={row.user.avatar}
+                          renderAsAvatar={true}
+                          contained={false}
+                        />
+                        <div className={row.user.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+                      </TableCell>
+                    )}
+                    {columns.map(colmn => {
                       return (
-                        <TableCell key={colm} align="left">
-                          {row[colm]}
+                        <TableCell
+                          key={colmn}
+                          style={
+                            ["firstName", "lastName"].includes(colmn) && isMovil
+                              ? { position: "sticky", left: colmn === "lastName" ? 120 : 0, backgroundColor: "gray" }
+                              : {}
+                          }
+                          align="left"
+                        >
+                          {editMode && ["firstName", "lastName", "email"].includes(colmn) ? (
+                            <TextField
+                              style={{ width: colmn === "email" ? "200px" : "150px" }}
+                              value={row[colmn]}
+                              onChange={event => editValues(colmn, index, event)}
+                              id="outlined-basic"
+                              variant="outlined"
+                            />
+                          ) : (
+                            <>{row[colmn]}</>
+                          )}
                         </TableCell>
                       );
                     })}
+                    {editMode && (
+                      <TableCell align="right">
+                        <IconButton onClick={() => deleteRow(index)}>
+                          <DeleteIcon
+                            sx={{
+                              color: "red",
+                              borderRadius: "50%",
+                            }}
+                          />
+                        </IconButton>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -884,7 +1110,7 @@ export const Students = () => {
           </TableContainer>
           {editMode && (
             <Box sx={{ mt: "50px" }}>
-              {/* <Button
+              <Button
                 variant="text"
                 sx={{
                   color: theme => theme.palette.common.black,
@@ -900,11 +1126,38 @@ export const Students = () => {
                   textAlign: "center",
                   alignSelf: "center",
                 }}
-                onClick={() => discardTableChanges()}
+                onClick={() => setOpenUploadModal(true)}
               >
                 Add students from a csv file
-              </Button> */}
-              <CSVBtn getCSVRowData={getCSVRowData} />
+              </Button>
+              <Modal
+                keepMounted
+                open={openUploadModal}
+                aria-labelledby="keep-mounted-modal-title"
+                aria-describedby="keep-mounted-modal-description"
+              >
+                <Box
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 400,
+                    backgroundColor: "grey",
+                    border: "2px solid #000",
+                  }}
+                >
+                  <Typography sx={{ color: "balck" }} id="keep-mounted-modal-title" variant="h6" component="h2">
+                    Add students from a csv file
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "row" }}>
+                    <CSVBtn getCSVRowData={getCSVRowData} />
+                    <Button variant="contained" onClick={() => setOpenUploadModal(false)}>
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              </Modal>
 
               <Box sx={{ textAlign: "right" }}>
                 <Button
