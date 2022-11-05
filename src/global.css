@@ -2773,6 +2773,13 @@ button.MuiTab-textColorInherit:focus {
   opacity: 0.6;
 }
 
-.student-dashboard-table .not-editable-cell {
-  pointer-events: none;
+@media (max-width: 600px) {
+  .scroll-styled {
+    display: flex;
+    align-items: flex-start !important;
+    margin-left: 10px;
+  }
+  .fromSideBar {
+    display: flex !important;
+  }
 }
