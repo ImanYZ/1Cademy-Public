@@ -26,6 +26,8 @@ import Typography from "@mui/material/Typography";
 import {
   // GridCallbackDetails,
   // GridCellEditCommitParams,
+  // GridColumns,
+  // GridRenderCellParams,
   // GridRenderEditCellParams,
   GridRowsProp,
   // GridValueSetterParams,
@@ -35,6 +37,7 @@ import {
 import React, { useState } from "react";
 
 import OptimizedAvatar from "../../components/OptimizedAvatar";
+import CSVBtn from "./CSVBtn";
 import PageWrapper from "./tmp";
 // const useStyles = makeStyles(() => ({
 //   editableMode: {
@@ -491,7 +494,9 @@ const keys = [
   "Last Activity",
 ];
 export const Students = () => {
-  const [tableRows, setTableRows] = useState<GridRowsProp>(rows.slice());
+  // const classes = useStyles();
+  const [tableRows, setTableRows] = useState<GridRowsProp>(rows);
+  const [CSVRowData, getCSVRowData] = useState<GridRowsProp>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -585,7 +590,9 @@ export const Students = () => {
     };
     setFilters(_filters);
   };
-  console.log("filters", filters);
+
+  console.log("filters", { filters, CSVRowData });
+
   const list = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
@@ -718,7 +725,6 @@ export const Students = () => {
     setUpdatedTableData([]);
   };
 
-  console.log("tableRows :::: :::: ", tableRows);
   return (
     <>
       <PageWrapper />
@@ -878,7 +884,7 @@ export const Students = () => {
           </TableContainer>
           {editMode && (
             <Box sx={{ mt: "50px" }}>
-              <Button
+              {/* <Button
                 variant="text"
                 sx={{
                   color: theme => theme.palette.common.black,
@@ -897,7 +903,8 @@ export const Students = () => {
                 onClick={() => discardTableChanges()}
               >
                 Add students from a csv file
-              </Button>
+              </Button> */}
+              <CSVBtn getCSVRowData={getCSVRowData} />
 
               <Box sx={{ textAlign: "right" }}>
                 <Button
