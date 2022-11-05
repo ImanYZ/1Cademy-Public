@@ -253,7 +253,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           {!isMovil && <BoxLegend />}
         </Paper>
         <Paper
-          /* ref={getWith} */ sx={{
+          sx={{
             p: isMovil ? "10px" : isTablet ? "20px" : "40px",
             display: "flex",
             alignItems: "center",
@@ -278,12 +278,22 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             trendData={[]}
           />
         </Paper>
-        {/* <Paper sx={{ p: "40px" }}>
+        <Paper
+          sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TrendPlot
-            title={"Edit Proposals"}
-            heightTop={354}
-            heightBottom={160}
-            width={1045}
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
             scaleX={"time"}
             labelX={"Day"}
             scaleY={"linear"}
@@ -295,12 +305,22 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           />
         </Paper>
 
-        <Paper sx={{ p: "40px" }}>
+        <Paper
+          sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TrendPlot
-            title={"Links"}
-            heightTop={354}
-            heightBottom={160}
-            width={1045}
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
             scaleX={"time"}
             labelX={"Day"}
             scaleY={"linear"}
@@ -312,12 +332,22 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           />
         </Paper>
 
-        <Paper sx={{ p: "40px" }}>
+        <Paper
+          sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TrendPlot
-            title={"Nodes"}
-            heightTop={354}
-            heightBottom={160}
-            width={1045}
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
             scaleX={"time"}
             labelX={"Day"}
             scaleY={"linear"}
@@ -329,12 +359,22 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           />
         </Paper>
 
-        <Paper sx={{ p: "40px" }}>
+        <Paper
+          sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TrendPlot
-            title={"Votes"}
-            heightTop={354}
-            heightBottom={160}
-            width={1045}
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
             scaleX={"time"}
             labelX={"Day"}
             scaleY={"linear"}
@@ -346,12 +386,22 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           />
         </Paper>
 
-        <Paper sx={{ p: "40px" }}>
+        <Paper
+          sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TrendPlot
-            title={"Questions"}
-            heightTop={354}
-            heightBottom={160}
-            width={1045}
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
             scaleX={"time"}
             labelX={"Day"}
             scaleY={"linear"}
@@ -361,7 +411,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             y="num"
             trendData={[]}
           />
-        </Paper> */}
+        </Paper>
       </Box>
     </Box>
   );
