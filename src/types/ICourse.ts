@@ -11,6 +11,7 @@ export type ISemesterStudent = {
   chooseUname: string;
   imageUrl: string;
   fullname: string;
+  email: string;
 };
 
 // document id should be semester id as well
@@ -22,6 +23,8 @@ export type ISemester = {
   uTitle: string; // university tag name
   cTagId: string; // course tag id
   cTitle: string; // course tag
+  pTitle: string; // program tile
+  pTagId: string; // program tag id
   // tagIds: string[];
   // tags: string[]; // (CourseName, UniversityName, BatchName)
   syllabus: ISemesterSyllabusItem[];
@@ -54,6 +57,8 @@ export type ISemester = {
 };
 
 export type ICourseTag = {
+  pTagId: string; // program tag id
+  pTitle: string;
   cTagId: string; // tagId of course
   cTitle: string;
   uTagId: string; // University Tag Id
@@ -72,6 +77,8 @@ export type IInstructor = {
 export type ICourse = {
   title: string;
   node: string;
+  pTagIds: string[];
+  pTags: string[];
   uTagIds: string[];
   uTitles: string[];
   sTagIds: string[];
@@ -94,6 +101,7 @@ export type ISemesterStudentStat = {
   updatedAt: Timestamp;
 };
 
+// semesterStudentVoteStats
 export type ISemesterStudentVoteStat = {
   tagId: string; // tagId of semester
   uname: string;
