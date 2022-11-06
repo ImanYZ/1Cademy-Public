@@ -272,7 +272,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!nodeBookState.selectedNode) return;
     if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     // console.log("onCompleteWorker", 1);
-    if (["LinkingWords", "References", "Tags", "PendingProposals"].includes(lastNodeOperation.current)) {
+    if (["LinkingWords", "References", "Tags", "PendingProposals", "ToggleNode"].includes(lastNodeOperation.current)) {
       // when open options from node is not required to scrollToNode
       return (lastNodeOperation.current = "");
     }
@@ -2151,6 +2151,7 @@ const Dashboard = ({}: DashboardProps) => {
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
+        lastNodeOperation.current = "ToggleNode";
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
 
