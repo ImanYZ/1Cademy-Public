@@ -120,6 +120,7 @@ type NodeProps = {
   proposeNodeImprovement: any;
   proposeNewChild: any;
   scrollToNode: any;
+  openSidebar: OpenSidebar;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -210,6 +211,7 @@ const Node = ({
   proposeNewChild,
   cleanEditorLink,
   scrollToNode,
+  openSidebar,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -1036,7 +1038,7 @@ const Node = ({
           </div>
         </div>
       )}
-      {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
+      {openSidebar === "PROPOSALS" && nodeBookState.selectedNode == identifier ? (
         <>
           <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
           <Box sx={{ p: "13px 10px" }}>

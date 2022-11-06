@@ -2731,10 +2731,22 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType, openSidebar });
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
+        }
+
+        if (chosenType === "Proposals") {
+          if (openSidebar === "PROPOSALS" && nodeId === nodeBookState.selectedNode) {
+            setOpenSidebar(null);
+          } else {
+            setOpenSidebar("PROPOSALS");
+            setSelectedNodeType(nodeType);
+            nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          }
+          return;
         }
         if (chosenType === "Citations") {
           if (openSidebar === "CITATIONS") {
@@ -2778,7 +2790,6 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    // TODO: CHECK dependencies
     [
       nodeBookState.choosingNode,
       nodeBookState.selectionType,
@@ -4017,6 +4028,7 @@ const Dashboard = ({}: DashboardProps) => {
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
                   scrollToNode={scrollToNode}
+                  openSidebar={openSidebar}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
