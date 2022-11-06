@@ -7,6 +7,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import DraftsIcon from "@mui/icons-material/Drafts";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import ImageIcon from "@mui/icons-material/Image";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
@@ -25,7 +26,7 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect,useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { OpenSidebar } from "@/pages/dashboard";
@@ -874,6 +875,7 @@ const NodeFooter = ({
                 <Box component="span" sx={{ marginLeft: "10px" }}>
                   Share Node
                 </Box>
+                <KeyboardArrowRightIcon sx={{ marginLeft: "20px" }} />
               </Box>
             </MemoizedMetaButton>
           </MenuItem>
