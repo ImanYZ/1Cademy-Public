@@ -289,7 +289,14 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       width={430}
       anchor="left"
       SidebarOptions={
-        <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", marginTop: "40px" }}>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+            marginTop: "40px",
+          }}
+        >
           <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
             {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
         <div id="MiniUserPrifileFullProfileLink"></div> */}

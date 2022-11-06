@@ -255,6 +255,7 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
+        // console.log("->", { blockSize, previousHeight: previousHeightRef.current });
         const isSimilar = blockSize === previousHeightRef.current;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
@@ -1159,6 +1160,7 @@ export const MemoizedNode = React.memo(Node);
 //     prevProps.studied === nextProps.studied &&
 //     prevProps.isStudied === nextProps.isStudied &&
 //     prevProps.changed === nextProps.changed &&
+
 //     prevProps.changedAt === nextProps.changedAt &&
 //     prevProps.lastVisit.getTime() === nextProps.lastVisit.getTime() &&
 //     prevProps.bookmarked === nextProps.bookmarked &&

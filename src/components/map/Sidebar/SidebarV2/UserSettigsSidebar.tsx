@@ -1046,7 +1046,14 @@ export const UserSettigsSidebar = ({
       width={430}
       // anchor="right"gggggg
       SidebarOptions={
-        <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", paddingTop: "40px" }}>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+            paddingTop: "40px",
+          }}
+        >
           <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
             {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
         <div id="MiniUserPrifileFullProfileLink"></div> */}

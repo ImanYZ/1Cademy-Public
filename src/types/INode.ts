@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 import type { INodeContributor } from "./INodeContributor";
 import { INodeLink } from "./INodeLink";
 import { INodeType } from "./INodeType";
@@ -45,9 +47,10 @@ export type INode = {
       reputation: number;
     };
   };
-  changedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  locked?: boolean;
+  changedAt: Date | Timestamp;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
   children: INodeLink[];
   maxVersionRating: number;
 };
