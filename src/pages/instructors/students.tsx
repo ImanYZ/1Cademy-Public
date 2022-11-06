@@ -56,7 +56,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
-const rows = [
+const rows: any = [
   {
     id: 0,
     username: "username",
@@ -736,7 +736,7 @@ export const Students: InstructorLayoutPage = () => {
   const searchByNameEmail = (newValue: string) => {
     const _tableRows = tableRows.slice();
 
-    const newTable = _tableRows.filter(row => {
+    const newTable = _tableRows.filter((row: any) => {
       return (
         row.firstName.toLowerCase().includes(newValue) ||
         row.lastName.toLowerCase().includes(newValue) ||
@@ -773,14 +773,14 @@ export const Students: InstructorLayoutPage = () => {
     } else {
       updateTableRows();
     }
-    _tableRow.push({
-      id: Math.floor(Math.random() * 100),
-      username: "Harry Potter",
-      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-      firstName: "",
-      lastName: "",
-      email: "",
-    });
+    // _tableRow.push({
+    //   id: Math.floor(Math.random() * 100),
+    //   username: "Harry Potter",
+    //   avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+    //   firstName: "",
+    //   lastName: "",
+    //   email: "",
+    // });
     setTableRows(_tableRow);
     setEditMode(!editMode);
   };
@@ -1130,7 +1130,7 @@ export const Students: InstructorLayoutPage = () => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  {keys.map((colmn: any, index) => {
+                  {keys.map((colmn, index) => {
                     return (
                       <TableCell
                         key={index}
@@ -1207,7 +1207,7 @@ export const Students: InstructorLayoutPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tableRows.map((row: any, index) => (
+                {tableRows.map((row: any, index: number) => (
                   <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                     {!isMovil && (
                       <TableCell align="left">
