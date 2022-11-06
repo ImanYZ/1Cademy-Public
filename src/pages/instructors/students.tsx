@@ -7,7 +7,6 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import SortIcon from "@mui/icons-material/Sort";
 import { Box, Modal, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
@@ -28,37 +27,20 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import {
-  // GridCallbackDetails,
-  // GridCellEditCommitParams,
-  // GridColumns,
-  // GridRenderCellParams,
-  // GridRenderEditCellParams,
-  GridRowsProp,
-  // GridValueSetterParams,
-  // MuiBaseEvent,
-  // MuiEvent,
-} from "@mui/x-data-grid";
+import { GridRowsProp } from "@mui/x-data-grid";
 import React, { useState } from "react";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 import CSVBtn from "./CSVBtn";
-// const useStyles = makeStyles(() => ({
-//   editableMode: {
-
-//   },
-// }));
 const rows: GridRowsProp = [
   {
     id: 0,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
-      online: true,
-    },
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
+    online: true,
     firstName: "Derrick ",
     lastName: "Schultz",
     email: "ouhrac@gmail.com",
@@ -77,11 +59,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 1,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
+
     firstName: "Edna ",
     lastName: " Roberts",
     email: "samirbes@umich.edu",
@@ -100,11 +82,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 2,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Belle ",
     lastName: " Douglas",
     email: "samirbes@umich.edu",
@@ -123,12 +105,12 @@ const rows: GridRowsProp = [
   },
   {
     id: 3,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-      online: true,
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+    online: true,
+
     firstName: "Jay",
     lastName: "Tyler",
     email: "samirbes@umich.edu",
@@ -147,12 +129,12 @@ const rows: GridRowsProp = [
   },
   {
     id: 4,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-      online: true,
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+    online: true,
+
     firstName: "Darrell",
     lastName: "Harrington",
     email: "samirbes@umich.edu",
@@ -171,12 +153,12 @@ const rows: GridRowsProp = [
   },
   {
     id: 5,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
-      online: true,
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
+    online: true,
+
     firstName: "Johanna",
     lastName: "Bailey",
     email: "samirbes@umich.edu",
@@ -195,12 +177,12 @@ const rows: GridRowsProp = [
   },
   {
     id: 6,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
-      online: true,
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
+    online: true,
+
     firstName: "Effie",
     lastName: "Vega",
     email: "samirbes@umich.edu",
@@ -219,11 +201,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 7,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Lida",
     lastName: "Jordan",
     email: "samirbes@umich.edu",
@@ -242,11 +224,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 8,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Genevieve",
     lastName: "Todd",
     email: "samirbes@umich.edu",
@@ -265,11 +247,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 9,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Wayne",
     lastName: "Edwards",
     email: "samirbes@umich.edu",
@@ -288,11 +270,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 10,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
+
     firstName: "Isaac",
     lastName: "Thompson",
     email: "samirbes@umich.edu",
@@ -311,11 +293,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 11,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
+
     firstName: "Rosetta",
     lastName: "Lucas",
     email: "samirbes@umich.edu",
@@ -334,11 +316,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 12,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Harold ",
     lastName: "Robbins",
     email: "samirbes@umich.edu",
@@ -357,11 +339,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 13,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
+
     firstName: "Alan",
     lastName: "Medina",
     email: "samirbes@umich.edu",
@@ -380,11 +362,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 14,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
+
     firstName: "Ray",
     lastName: "Phelps",
     email: "samirbes@umich.edu",
@@ -403,11 +385,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 15,
-    user: {
-      username: "username",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "username",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Lilly",
     lastName: "McKinney",
     email: "samirbes@umich.edu",
@@ -426,11 +408,11 @@ const rows: GridRowsProp = [
   },
   {
     id: 16,
-    user: {
-      username: "Harry Potter",
-      avatar:
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    },
+
+    username: "Harry Potter",
+    avatar:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
+
     firstName: "Bertie",
     lastName: "Collins",
     email: "samirbes@umich.edu",
@@ -518,17 +500,10 @@ const keysColumns: any = {
 export const Students: InstructorLayoutPage = () => {
   // const classes = useStyles();
   const [tableRows, setTableRows] = useState(rows.slice());
-  const [CSVRowData, getCSVRowData] = useState<GridRowsProp>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [updatedTableData, setUpdatedTableData] = useState(rows);
+  const [CSVRowData, getCSVRowData] = useState([]);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [openUploadModal, setOpenUploadModal] = useState(false);
-  // const [tableColumns /* , setTableColumns */] = useState(dataGridColumns({ editMode: false }));
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dataGridLoading, setDataGridLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<
     {
       title: string;
@@ -539,9 +514,11 @@ export const Students: InstructorLayoutPage = () => {
   const [searchValue, setSearchValue] = useState("");
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
-  console.log(isMovil);
+  const [openProfile, setOpenProfile] = useState(false);
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
+  const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
   const [selectedColumn, setSelectedColumn] = useState("");
+  const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
   const handleFilterBy = (filters: any, fromDash: boolean) => {
     let _tableRows = rows.slice();
     for (let filter of filters) {
@@ -609,9 +586,63 @@ export const Students: InstructorLayoutPage = () => {
     };
     setFilters(_filters);
   };
+  const studentsProfile = () => (
+    <Box sx={{ borderRadius: "16px", m: 0, border: 1 }}>
+      {"  "}
+      <Box sx={{ textAlign: "right" }}>
+        <IconButton onClick={handleOpenCloseProfile}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Box sx={{ textAlign: "center", height: "200px" }}>
+        <Box sx={{ display: "flex", ml: "33%", mb: "5%", mt: "10%", flexDirection: "row" }}>
+          <Box>
+            <OptimizedAvatar
+              name={openedProfile.username}
+              imageUrl={openedProfile.avatar}
+              renderAsAvatar={true}
+              contained={false}
+              sx={{ mr: "15px" }}
+            />
+            <div
+              className={openedProfile.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+              style={{ fontSize: "1px", marginLeft: "35px" }}
+            ></div>
+          </Box>
+          <a href="#">{openedProfile.firstName + openedProfile.lastName}</a>
+        </Box>
 
-  console.log("filters", { filters, CSVRowData });
-
+        <Box sx={{ mr: "30px" }}>{openedProfile.email}</Box>
+        <Button
+          variant="contained"
+          onClick={() => {
+            console.log("takemetothe profile");
+          }}
+          sx={{
+            color: theme => theme.palette.common.white,
+            background: theme => theme.palette.common.orange,
+            fontSize: 13,
+            fontWeight: "700",
+            my: { xs: "0px", md: "auto" },
+            mt: { xs: "15px", md: "auto" },
+            marginLeft: { xs: "0px", md: "32px" },
+            marginRight: "40px",
+            paddingX: "30px",
+            borderRadius: 1,
+            textAlign: "center",
+            alignSelf: "center",
+          }}
+        >
+          See Profile
+        </Button>
+      </Box>
+    </Box>
+  );
+  const openThisProfile = (row: any) => {
+    if (!isMovil) return;
+    setOpenedProfile(row);
+    handleOpenCloseProfile();
+  };
   const list = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
@@ -623,7 +654,7 @@ export const Students: InstructorLayoutPage = () => {
       <Box
         role="presentation"
         sx={{
-          width: "489px",
+          width: "300px",
           display: "flex",
           flexDirection: "column",
           height: "90%",
@@ -728,22 +759,33 @@ export const Students: InstructorLayoutPage = () => {
   );
 
   const saveTableChanges = () => {
-    setEditMode(false);
-    // setTableRows([]);
-    // setDataGridLoading(true);
-    // setTimeout(() => {
-    //   setTableRows([...updatedTableData]);
-    //   setDataGridLoading(false);
-    // }, 1000);
-  };
+    const _tableRow = tableRows.slice();
+    let students = [];
 
+    if (editMode) {
+      for (let row of _tableRow) {
+        if (!row.firstName || !row.lastName || !row.email) {
+          _tableRow.splice(_tableRow.indexOf(row), 1);
+        }
+      }
+      setTableRows(_tableRow);
+      for (let row of _tableRow) {
+        students.push({
+          email: row.email,
+          fName: row.firstName,
+          lName: row.lastName,
+        });
+      }
+      const payloadAPI = { students };
+      console.log(payloadAPI);
+      return setEditMode(!editMode);
+    }
+    setEditMode(false);
+  };
   const discardTableChanges = () => {
     setEditMode(!editMode);
-    setTableRows([...tableRows]);
-    setUpdatedTableData([]);
   };
   const editValues = (column: any, index: any, event: any) => {
-    debugger;
     let _tableRows = tableRows.slice();
     _tableRows[index][column] = event.target.value;
     setTableRows(_tableRows);
@@ -826,6 +868,39 @@ export const Students: InstructorLayoutPage = () => {
     if (!event.target.value) return setTableRows(rows.slice());
     searchByNameEmail(event.target.value.toLowerCase());
   };
+  const editAndAdd = () => {
+    const _tableRow = tableRows.slice();
+    if (editMode) {
+      saveTableChanges();
+      return setEditMode(!editMode);
+    }
+    _tableRow.push({
+      id: 16,
+      username: "Harry Potter",
+      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+      firstName: "",
+      lastName: "",
+      email: "",
+    });
+    setTableRows(_tableRow);
+    setEditMode(!editMode);
+  };
+
+  const addNewData = () => {
+    const _tableRow = tableRows.slice();
+    for (let row of CSVRowData.rows) {
+      const newObject = {
+        username: "username",
+        avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+        firstName: row["First Name"],
+        lastName: row["Last Name"],
+        email: row["Email"],
+      };
+      _tableRow.push(newObject);
+    }
+    setTableRows(_tableRow);
+    setOpenUploadModal(false);
+  };
 
   return (
     <>
@@ -862,12 +937,20 @@ export const Students: InstructorLayoutPage = () => {
           </Box>
           <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
             <TextField
-              sx={{ width: !isMovil ? "500px" : "50%" }}
+              sx={{
+                width: { sm: 200, md: 300 },
+                "& .MuiInputBase-root": {
+                  height: 40,
+                },
+                alignSelf: "center",
+                mt: 2.5,
+                ml: 3,
+                backgroundColor: theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#F5F5F5",
+              }}
               id="outlined-basic"
               value={searchValue}
               onChange={handleNewSearh}
-              placeholder="search name or email"
-              variant="outlined"
+              placeholder={!isMovil ? "search name or email" : "search"}
               InputProps={{
                 endAdornment: (
                   <IconButton
@@ -895,18 +978,17 @@ export const Students: InstructorLayoutPage = () => {
                     my: { xs: "0px", md: "auto" },
                     mt: { xs: "15px", md: "auto" },
                     marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
                     paddingX: "30px",
                     borderRadius: 1,
                     textAlign: "center",
                     alignSelf: "center",
                   }}
                 >
-                  Sort By
+                  Filter By
                 </Button>
                 <Button
                   variant="contained"
-                  onClick={() => setEditMode(!editMode)}
+                  onClick={editAndAdd}
                   sx={{
                     color: theme => theme.palette.common.white,
                     background: theme => theme.palette.common.black,
@@ -936,34 +1018,9 @@ export const Students: InstructorLayoutPage = () => {
                     color: theme => theme.palette.common.white,
                     background: theme => theme.palette.common.black,
                     height: { xs: "40px", md: "55px" },
-                    fontSize: 16,
-                    fontWeight: "700",
                     my: { xs: "0px", md: "auto" },
                     mt: { xs: "15px", md: "auto" },
-                    marginLeft: "10px",
-                    marginRight: "5px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                >
-                  <SortIcon /> Sort
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={handleOpenCloseFilter}
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.black,
-                    height: { xs: "40px", md: "55px" },
-
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
+                    ml: "15px",
                   }}
                 >
                   <FilterAltIcon /> Filter
@@ -996,7 +1053,6 @@ export const Students: InstructorLayoutPage = () => {
         <hr />
         <Box
           sx={{
-            height: "500px",
             mt: "40px",
             mr: !isMovil ? "70px" : "0px",
             ml: !isMovil ? "30px" : "0px",
@@ -1011,9 +1067,14 @@ export const Students: InstructorLayoutPage = () => {
                   {keys.map(colmn => {
                     return (
                       <TableCell
-                        style={
+                        sx={
                           ["First Name", "Last Name"].includes(colmn) && isMovil
-                            ? { position: "sticky", left: colmn === "Last Name" ? 120 : 0, backgroundColor: "gray" }
+                            ? {
+                                position: "sticky",
+                                left: colmn === "Last Name" ? 120 : 0,
+                                backgroundColor: theme =>
+                                  theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                              }
                             : {}
                         }
                         align="left"
@@ -1060,21 +1121,26 @@ export const Students: InstructorLayoutPage = () => {
                     {!isMovil && (
                       <TableCell align="left">
                         <OptimizedAvatar
-                          name={row.user.username}
-                          imageUrl={row.user.avatar}
+                          name={row.username}
+                          imageUrl={row.avatar}
                           renderAsAvatar={true}
                           contained={false}
                         />
-                        <div className={row.user.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+                        <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
                       </TableCell>
                     )}
                     {columns.map(colmn => {
                       return (
                         <TableCell
                           key={colmn}
-                          style={
+                          sx={
                             ["firstName", "lastName"].includes(colmn) && isMovil
-                              ? { position: "sticky", left: colmn === "lastName" ? 120 : 0, backgroundColor: "gray" }
+                              ? {
+                                  position: "sticky",
+                                  left: colmn === "lastName" ? 120 : 0,
+                                  backgroundColor: theme =>
+                                    theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                                }
                               : {}
                           }
                           align="left"
@@ -1088,7 +1154,16 @@ export const Students: InstructorLayoutPage = () => {
                               variant="outlined"
                             />
                           ) : (
-                            <>{row[colmn]}</>
+                            <>
+                              {["firstName", "lastName"].includes(colmn) ? (
+                                <a href="#" onClick={() => openThisProfile(row)}>
+                                  {" "}
+                                  <>{row[colmn]}</>
+                                </a>
+                              ) : (
+                                <>{row[colmn]}</>
+                              )}
+                            </>
                           )}
                         </TableCell>
                       );
@@ -1144,16 +1219,26 @@ export const Students: InstructorLayoutPage = () => {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    width: 400,
+                    width: 500,
+                    height: 200,
                     backgroundColor: "grey",
                     border: "2px solid #000",
+                    mt: "50px",
                   }}
                 >
-                  <Typography sx={{ color: "balck" }} id="keep-mounted-modal-title" variant="h6" component="h2">
-                    Add students from a csv file
-                  </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "row" }}>
-                    <CSVBtn getCSVRowData={getCSVRowData} />
+                  <Box sx={{ textAlign: "center" }}>
+                    <Typography sx={{ color: "balck" }} id="keep-mounted-modal-title" variant="h6" component="h2">
+                      Add students from a csv file
+                    </Typography>
+                    <Box sx={{ textAlign: "center" }}>
+                      <CSVBtn getCSVRowData={getCSVRowData} />
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: "flex", mr: "50px", ml: "50px", justifyContent: "space-between" }}>
+                    <Button variant="contained" onClick={addNewData}>
+                      Add to the table
+                    </Button>
                     <Button variant="contained" onClick={() => setOpenUploadModal(false)}>
                       Cancel
                     </Button>
@@ -1203,6 +1288,14 @@ export const Students: InstructorLayoutPage = () => {
             </Box>
           )}
         </Box>
+        <Drawer
+          sx={{ backgroundColor: "transparent" }}
+          anchor={"bottom"}
+          open={openProfile}
+          onClose={handleOpenCloseProfile}
+        >
+          {studentsProfile()}
+        </Drawer>
       </Box>
     </>
   );
