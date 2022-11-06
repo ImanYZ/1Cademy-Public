@@ -37,6 +37,12 @@ type MainSidebarProps = {
   pendingProposalsNum: number;
 };
 
+// TODO:
+// create a utils function to detect OS and Browser
+// for using cross browser functionality issues
+const isSafari =
+  typeof window === "undefined" ? false : /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+
 export const ToolbarSidebar = ({
   open,
   onClose,
@@ -646,7 +652,7 @@ MainSidebarProps) => {
                 </>
               )}
             </Box>
-            <Box sx={{ height: "calc(100vh - 400px)", paddingBottom: "20px" }}>
+            <Box sx={{ height: "calc(100vh - 400px)", paddingBottom: "20px", marginTop: isSafari ? "20px" : "" }}>
               {user?.tag && leaderboardType && (
                 <UsersStatusList
                   // reputationsLoaded={props.reputationsLoaded}
