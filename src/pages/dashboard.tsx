@@ -693,7 +693,7 @@ const Dashboard = ({}: DashboardProps) => {
         async snapshot => {
           const docChanges = snapshot.docChanges();
 
-          devLog("userNodesSnapshot:1", { docChanges });
+          devLog("1:userNodes Snapshot:changes", docChanges);
           if (!docChanges.length) {
             setIsSubmitting(false);
             setFirstLoading(false);
@@ -701,18 +701,18 @@ const Dashboard = ({}: DashboardProps) => {
             return null;
           }
 
-          devLog("userNodesSnapshot:2", { docChanges });
+          // devLog("user Nodes Snapshot", docChanges);
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
           const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
           // if (!docChangesFromServer.length) return null;
 
-          devLog("userNodesSnapshot:3", { docChangesFromServer });
+          devLog("2:userNodes Snapshot:From_server", docChangesFromServer);
           const userNodeChanges = getUserNodeChanges(docChangesFromServer);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
-          devLog("userNodesSnapshot:4", { nodesData });
+          devLog("3:user Nodes Snapshot:Nodes Data", nodesData);
 
           // nodesData.forEach(cur => {
           //   if (!cur?.nData.nodeType || !cur.nData.references) return;
@@ -720,7 +720,7 @@ const Dashboard = ({}: DashboardProps) => {
           // });
 
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-          devLog("userNodesSnapshot:5", { fullNodes });
+          devLog("4:user Nodes Snapshot:Full nodes", fullNodes);
 
           // const newFullNodes = fullNodes.reduce((acu, cur) => ({ ...acu, [cur.node]: cur }), {});
           // here set All Full Nodes to use in bookmarks
@@ -3032,8 +3032,8 @@ const Dashboard = ({}: DashboardProps) => {
       // setChosenNodeTitle(null);
       const newNode = graph.nodes[newNodeId];
 
-      if (!newNode.title) return console.log("title required");
-      if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) return console.log("choices required");
+      if (!newNode.title) return console.error("title required");
+      if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) return console.error("choices required");
 
       if (/*newNode.nodeType !== "" &&*/ newNodeId) {
         let referencesOK = true;

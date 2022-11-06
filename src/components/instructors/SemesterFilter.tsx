@@ -17,6 +17,7 @@ type SemesterFilterProps = {
   courses: string[];
   selectedCourse: string | undefined;
   setSelectedCourse: any;
+  isMovil: boolean;
 };
 
 export const SemesterFilter = ({
@@ -26,9 +27,14 @@ export const SemesterFilter = ({
   courses,
   selectedCourse,
   setSelectedCourse,
+  isMovil,
 }: SemesterFilterProps) => {
   const onChangeSemester = (event: SelectChangeEvent) => {
     setSelectedSemester(event.target.value as string);
+  };
+
+  const onChangeCourse2 = (event: SelectChangeEvent) => {
+    setSelectedCourse(event.target.value as string);
   };
 
   const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
@@ -55,13 +61,34 @@ export const SemesterFilter = ({
         </Select>
       </FormControl>
 
-      <ToggleButtonGroup value={selectedCourse} exclusive onChange={onChangeCourse} aria-label="text alignment">
-        {courses.map((cur, idx) => (
-          <ToggleButton key={idx} value={cur} aria-label="left aligned">
-            {cur}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+      {!isMovil && (
+        <ToggleButtonGroup value={selectedCourse} exclusive onChange={onChangeCourse} aria-label="text alignment">
+          {courses.map((cur, idx) => (
+            <ToggleButton key={idx} value={cur} aria-label="left aligned">
+              {cur}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      )}
+      {isMovil && (
+        <FormControl>
+          <InputLabel id="course-filter-label">Courses</InputLabel>
+          <Select
+            labelId="course-filter-label"
+            id="course-filter"
+            value={selectedCourse}
+            label="Course"
+            onChange={onChangeCourse2}
+            sx={{ width: "140px" }}
+          >
+            {courses.map((cur, idx) => (
+              <MenuItem key={idx} value={cur}>
+                {cur}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
     </Box>
   );
 };
