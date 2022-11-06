@@ -168,6 +168,12 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
         <Paper sx={{ p: "16px" }}>
           <Typography>
             hello world {selectedSemester} + {selectedCourse}
+            {/* // NewNodeProposal = newNodes
+// editProposals = improvements
+// links
+// nodes
+// votes
+// question */}
           </Typography>
         </Paper>
         <Paper
