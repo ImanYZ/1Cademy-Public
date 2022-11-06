@@ -1,16 +1,17 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
+import { UserTheme } from "src/knowledgeTypes";
 
 // const columns = ["fruit", "vegetable"];
 
 const GREEN = "rgb(56, 142, 60)";
-const GREEN_ALPHA = "rgba(129, 199, 132, 0.8)";
+const GREEN_ALPHA = "rgba(129, 199, 132, 0.5)";
 const RED = "rgb(239, 83, 80)";
-const RED_ALPHA = "rgba(239, 83, 80, 0.8)";
+const RED_ALPHA = "rgba(239, 83, 80, 0.5)";
 const GRAY = "rgb(117, 117, 117)";
-const GRAY_ALPHA = "rgba(237, 237, 237, 0.8)";
+const GRAY_ALPHA = "rgba(237, 237, 237, 0.5)";
 const ORANGE = "rgb(255, 138, 51)";
-const ORANGE_ALPHA = "rgba(251, 204, 169, 0.8)";
+const ORANGE_ALPHA = "rgba(251, 204, 169, 0.5)";
 
 const BUBBLE_MOCK = [
   { students: 30, votes: 170, points: 40 },
@@ -35,17 +36,23 @@ const BUBBLE_MOCK = [
 
 // const chartWidth = 100;
 // const chartHeight = 100;
+type BubbleMargin = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
+function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin: BubbleMargin, theme: UserTheme) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
   const svg = d3.select(svgRef);
 
   // set the dimensions and margins of the graph
-  const margin = { top: 10, right: 0, bottom: 20, left: 50 },
-    width = 500 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+  // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
+  //   width = 500 - margin.left - margin.right,
+  const height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   //   const svg = d3
@@ -70,11 +77,11 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
 
   // Add X axis
   const x = d3.scaleLinear().domain([0, 500]).range([0, width]);
-  svg.append("g").attr("transform", `translate(30, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
+  svg.select("#axis-x").attr("transform", `translate(30, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
   const y = d3.scaleLinear().domain([-10, 100]).range([height, 0]);
-  svg.append("g").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
+  svg.select("#axis-y").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
   // color palette = one color per subgroup
@@ -86,7 +93,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   const borderColor = d3.scaleThreshold().domain([-10, 0, 20, 100]).range(["white", RED, ORANGE, GREEN, "white"]);
 
   svg
-    .append("g")
+    .select("#bubbles")
     .selectAll("circle")
     // Enter in the stack data = loop key per key = group per group
     .data(BUBBLE_MOCK)
@@ -103,26 +110,24 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
-    .attr("text", "Hello World")
+    .append("text")
     .attr("transform", `translate(30, 0)`);
   svg
-    .append("g")
+    .select("#nums")
     .selectAll("text")
     // Enter in the stack data = loop key per key = group per group
     .data(BUBBLE_MOCK)
-    // .join("g")
     .join("text")
     .attr("fill", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    // .selectAll("rect")
-    // enter a second time = loop subgroup per subgroup to add all rectangles
-    // .data(d => d)
+    .attr("stroke", theme === "Dark" ? "white" : "black")
     .attr("x", d => x(d.votes))
     .attr("y", d => y(d.points))
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "central")
-    // .text("2")
+    .text("2")
     .style("font-size", "24px");
 
+  // d => (d.points !== 0 ? borderColor(d.points) : GRAY)
   // .append("text")            // append text
   // .style("fill", "black")      // make the text black
   // .style("writing-mode", "tb") // set the writing mode
@@ -131,7 +136,12 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   // .text("Hello World");   // define the text to display
 }
 
-export const BubbleChart = () => {
+type BubblePlotProps = {
+  width: number;
+  margin: BubbleMargin;
+  theme: UserTheme;
+};
+export const BubbleChart = ({ width, margin, theme }: BubblePlotProps) => {
   console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
 
@@ -140,10 +150,20 @@ export const BubbleChart = () => {
   //     drawChart(svg);
   //   }, [svg]);
 
-  const svg = useCallback((svgRef: any) => {
-    console.log("svg callbak");
-    drawChart(svgRef);
-  }, []);
+  const svg = useCallback(
+    (svgRef: any) => {
+      console.log("svg callbak");
+      drawChart(svgRef, width, margin, theme);
+    },
+    [margin, width]
+  );
 
-  return <svg ref={svg} />;
+  return (
+    <svg ref={svg}>
+      <g id="axis-x"></g>
+      <g id="axis-y"></g>
+      <g id="bubbles"></g>
+      <g id="nums"></g>
+    </svg>
+  );
 };

@@ -4,7 +4,7 @@ import { UserTheme } from "src/knowledgeTypes";
 
 import { Chapter } from "../../pages/instructors/dashboard";
 
-type boxPlotMarginType = {
+type boxPlotMargin = {
   top: number;
   right: number;
   bottom: number;
@@ -17,7 +17,7 @@ function drawChart(
   data: Chapter,
   width: number,
   boxHeight: number,
-  margin: boxPlotMarginType,
+  margin: boxPlotMargin,
   offsetX: number,
   offsetY: number,
   drawYAxis: boolean,

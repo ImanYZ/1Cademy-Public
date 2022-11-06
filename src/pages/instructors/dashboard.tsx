@@ -212,7 +212,11 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>
           <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
-          <BubbleChart />
+          <BubbleChart
+            width={isMovil ? 220 : 500}
+            margin={{ top: 10, right: 0, bottom: 20, left: 50 }}
+            theme={"Dark"}
+          />
         </Paper>
       </Box>
       <Box
@@ -229,7 +233,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            p: { sm: "40px 20px", md: "40px 20px" },
+            p: isMovil ? "10px 10px" : "40px 20px",
           }}
         >
           <Box
@@ -250,7 +254,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
               <BoxChart
                 theme={"Dark"}
                 data={data["Proposal Points"]}
-                width={450}
+                width={isMovil ? 300 : 450}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
                 offsetX={150}
@@ -268,7 +272,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
                 theme={"Dark"}
                 data={data["Question Points"]}
                 drawYAxis={isMovil}
-                width={isMovil ? 450 : 300}
+                width={isMovil ? 300 : 300}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
                 offsetX={isMovil ? 150 : 2}
@@ -286,7 +290,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
                 theme={"Dark"}
                 data={data["Vote Points"]}
                 drawYAxis={isMovil}
-                width={isMovil ? 450 : 300}
+                width={isMovil ? 300 : 300}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
                 offsetX={isMovil ? 150 : 2}
