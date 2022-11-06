@@ -272,7 +272,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!nodeBookState.selectedNode) return;
     if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     // console.log("onCompleteWorker", 1);
-    if (["LinkingWords", "References", "Tags", "PendingProposals"].includes(lastNodeOperation.current)) {
+    if (["LinkingWords", "References", "Tags", "PendingProposals", "ToggleNode"].includes(lastNodeOperation.current)) {
       // when open options from node is not required to scrollToNode
       return (lastNodeOperation.current = "");
     }
@@ -1415,12 +1415,11 @@ const Dashboard = ({}: DashboardProps) => {
                 type: chosenNodeObj.nodeType,
               },
             ];
+            const chosenNodeId = nodeBookState.chosenNode.id;
             if (removedParents.includes(nodeBookState.chosenNode.id)) {
-              const chosenNodeId = nodeBookState.chosenNode.id;
               setRemovedParents(removedParents.filter((nId: string) => nId !== chosenNodeId));
             } else {
-              const choosingNodeId = nodeBookState.choosingNode.id;
-              setAddedParents(oldAddedParents => [...oldAddedParents, choosingNodeId]);
+              setAddedParents(oldAddedParents => [...oldAddedParents, chosenNodeId]);
             }
 
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
@@ -2151,6 +2150,7 @@ const Dashboard = ({}: DashboardProps) => {
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
+        lastNodeOperation.current = "ToggleNode";
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
 
@@ -2730,10 +2730,22 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType, openSidebar });
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
+        }
+
+        if (chosenType === "Proposals") {
+          if (openSidebar === "PROPOSALS" && nodeId === nodeBookState.selectedNode) {
+            setOpenSidebar(null);
+          } else {
+            setOpenSidebar("PROPOSALS");
+            setSelectedNodeType(nodeType);
+            nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          }
+          return;
         }
         if (chosenType === "Citations") {
           if (openSidebar === "CITATIONS") {
@@ -2777,7 +2789,6 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    // TODO: CHECK dependencies
     [
       nodeBookState.choosingNode,
       nodeBookState.selectionType,
@@ -4016,6 +4027,7 @@ const Dashboard = ({}: DashboardProps) => {
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
                   scrollToNode={scrollToNode}
+                  openSidebar={openSidebar}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

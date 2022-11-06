@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { Timestamp } from "firebase-admin/firestore";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { IUserNodeVersionLog } from "src/types/IUserNodeVersionLog";
@@ -72,10 +73,8 @@ export function createNode(params: IFakeNodeOptions): INode {
       }
     }
   }
-  
-  const {
-    choices
-  } = params;
+
+  const { choices } = params;
 
   return {
     documentId: params.documentId ? params.documentId : faker.datatype.uuid(),
@@ -144,10 +143,11 @@ export function createNode(params: IFakeNodeOptions): INode {
 
 export function convertNodeToTypeSchema(node: INode, params: any = {}) {
   const netVote = node.corrects - node.wrongs;
+  const updatedAt = node.updatedAt instanceof Timestamp ? node.updatedAt.toDate() : node.updatedAt;
   return {
     id: node.documentId,
-    changedAtMillis: node.updatedAt.getUTCMilliseconds(),
-    updatedAt: Math.floor(node.updatedAt.getTime() / 1000),
+    changedAtMillis: updatedAt.getUTCMilliseconds(),
+    updatedAt: Math.floor(updatedAt.getTime() / 1000),
     content: node.content,
     contributorsNames: node.contribNames,
     mostHelpful: params.mostHelpful ? params.mostHelpful : 0,
@@ -240,7 +240,7 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     tags,
     corrects,
     wrongs,
-    choices
+    choices,
   } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
