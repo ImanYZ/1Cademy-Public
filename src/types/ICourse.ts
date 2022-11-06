@@ -2,7 +2,7 @@ import { Timestamp } from "firebase-admin/firestore";
 
 export type ISemesterSyllabusItem = {
   title: string;
-  node: string;
+  node?: string;
   children?: ISemesterSyllabusItem[];
 };
 

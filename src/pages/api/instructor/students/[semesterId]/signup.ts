@@ -25,6 +25,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   initFirebaseClientSDK();
   const frontAuth = frontGetAuth();
   try {
+    if (!req.body?.data?.user?.instructor) {
+      throw new Error("your are not instructor");
+    }
+    const instructorUname = req.body.data.user.userData.uname;
+
     let batch = db.batch();
     let writeCounts = 0;
 
@@ -33,6 +38,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const semesterRef = db.collection("semesters").doc(String(semesterId));
     const semesterData = (await semesterRef.get()).data() as ISemester;
+
+    // check if current user is a instructor and access to this course
+    if (semesterData.instructors.indexOf(instructorUname) === -1) {
+      throw new Error("access denied");
+    }
 
     const semesterNodeData = (await db.collection("nodes").doc(semesterData.tagId).get()).data() as INode;
 
