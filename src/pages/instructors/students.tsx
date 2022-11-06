@@ -30,7 +30,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { GridRowsProp } from "@mui/x-data-grid";
 import {
   /* addDoc, */
   collection,
@@ -57,7 +56,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
-const rows: GridRowsProp = [
+const rows = [
   {
     id: 0,
     username: "username",
@@ -453,6 +452,7 @@ const rows: GridRowsProp = [
     lastActivity: "02/22/22",
   },
 ];
+
 const filterChoices: any = {
   "Total Poitns": "totalPoints",
   Wrongs: "wrongs",
@@ -1026,26 +1026,6 @@ export const Students: InstructorLayoutPage = () => {
               flexDirection: "row",
             }}
           >
-            <Button
-              variant="text"
-              sx={{
-                color: theme => theme.palette.common.black,
-                backgroundColor: "#EDEDED",
-                fontSize: 16,
-                fontWeight: "700",
-                my: { xs: "0px", md: "auto" },
-                mt: { xs: "15px", md: "auto" },
-                marginLeft: { xs: "0px", md: "32px" },
-                marginRight: "40px",
-                paddingX: "30px",
-                borderRadius: 1,
-                textAlign: "center",
-                alignSelf: "center",
-              }}
-              onClick={() => setOpenUploadModal(true)}
-            >
-              Add students from a csv file
-            </Button>
             <Typography variant="h1" component="h2">
               Sl
             </Typography>
@@ -1334,7 +1314,7 @@ export const Students: InstructorLayoutPage = () => {
           </TableContainer>
           {editMode && (
             <Box sx={{ mt: "50px" }}>
-              {/* <Button
+              <Button
                 variant="text"
                 sx={{
                   color: theme => theme.palette.common.black,
@@ -1353,7 +1333,7 @@ export const Students: InstructorLayoutPage = () => {
                 onClick={() => setOpenUploadModal(true)}
               >
                 Add students from a csv file
-              </Button> */}
+              </Button>
               <Button
                 variant="text"
                 sx={{
