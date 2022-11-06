@@ -64,7 +64,7 @@ export const SidebarWrapper = ({
                 width: { sm: hoverWidth },
               }
             : undefined,
-          // border: "solid 2px yellow",
+          borderRight: theme => (theme.palette.mode === "dark" ? "1px solid #000000" : "1px solid #eeeeee)"),
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
         },
