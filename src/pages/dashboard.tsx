@@ -3032,8 +3032,8 @@ const Dashboard = ({}: DashboardProps) => {
       // setChosenNodeTitle(null);
       const newNode = graph.nodes[newNodeId];
 
-      if (!newNode.title) return console.log("title required");
-      if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) return console.log("choices required");
+      if (!newNode.title) return console.error("title required");
+      if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) return console.error("choices required");
 
       if (/*newNode.nodeType !== "" &&*/ newNodeId) {
         let referencesOK = true;
