@@ -49,6 +49,7 @@ type NodeListProps = {
   proposeNodeImprovement: any;
   proposeNewChild: any;
   scrollToNode: any;
+  openSidebar: OpenSidebar;
 };
 
 const NodesList = ({
@@ -90,6 +91,7 @@ const NodesList = ({
   proposeNodeImprovement,
   proposeNewChild,
   scrollToNode,
+  openSidebar,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -218,6 +220,7 @@ const NodesList = ({
             proposeNodeImprovement={proposeNodeImprovement}
             proposeNewChild={proposeNewChild}
             scrollToNode={scrollToNode}
+            openSidebar={openSidebar}
           />
         );
       })}
@@ -257,7 +260,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.saveProposedChildNode === next.saveProposedChildNode &&
     prev.saveProposedImprovement === next.saveProposedImprovement &&
     prev.closeSideBar === next.closeSideBar &&
-    prev.reloadPermanentGrpah === next.reloadPermanentGrpah
+    prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
+    prev.openSidebar === prev.openSidebar
   );
 });
 
