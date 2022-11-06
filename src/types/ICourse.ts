@@ -8,7 +8,7 @@ export type ISemesterSyllabusItem = {
 
 export type ISemesterStudent = {
   uname: string;
-  chooseUname: string;
+  chooseUname: boolean;
   imageUrl: string;
   fullname: string;
   email: string;
@@ -97,6 +97,7 @@ export type ISemesterStudentStat = {
   tagId: string; // tagId of semester
   uname: string;
   days: ISemesterStudentStatDay[];
+  deleted: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

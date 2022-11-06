@@ -45,6 +45,7 @@ export type INode = {
       reputation: number;
     };
   };
+  locked?: boolean;
   changedAt: Date;
   createdAt: Date;
   updatedAt: Date;
