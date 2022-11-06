@@ -56,7 +56,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
-const rows = [
+const rows: any = [
   {
     id: 0,
     username: "username",
@@ -802,14 +802,14 @@ export const Students: InstructorLayoutPage = () => {
     } else {
       updateTableRows();
     }
-    _tableRow.push({
-      id: Math.floor(Math.random() * 100),
-      username: "Harry Potter",
-      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-      firstName: "",
-      lastName: "",
-      email: "",
-    });
+    // _tableRow.push({
+    //   id: Math.floor(Math.random() * 100),
+    //   username: "Harry Potter",
+    //   avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+    //   firstName: "",
+    //   lastName: "",
+    //   email: "",
+    // });
     setTableRows(_tableRow);
     setEditMode(!editMode);
   };
@@ -1161,6 +1161,7 @@ export const Students: InstructorLayoutPage = () => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
+                  {!isMovil && <TableCell align="right"> {""}</TableCell>}
                   {keys.map((colmn, index) => {
                     return (
                       <TableCell
