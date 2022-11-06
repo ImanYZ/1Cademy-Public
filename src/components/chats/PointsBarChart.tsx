@@ -12,8 +12,8 @@ const GREATER_THAN_100_COLOR = "rgb(56, 142, 60)";
 const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 
 var data = [
-  { month: "Proposasl", apples: 2, bananas: 3, cherries: 15, dates: 30 },
-  { month: "Questions", apples: 13, bananas: 17, cherries: 7, dates: 13 },
+  { month: 0, apples: 2, bananas: 3, cherries: 15, dates: 30 },
+  { month: 1, apples: 13, bananas: 17, cherries: 7, dates: 13 },
 ];
 // // const data = [
 // //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
@@ -59,8 +59,9 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   const groups = data.map(d => d.month).flatMap(c => c);
   console.log({ groups });
 
+  const columns = ["Proposals", "Questions"];
   // Add X axis
-  const x = d3.scaleBand().domain(groups).range([0, width]).padding(0.2);
+  const x = d3.scaleBand().domain(columns).range([0, width]).padding(0.2);
   svg.append("g").attr("transform", `translate(20, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
@@ -84,8 +85,6 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .range([LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
   //stack the data? --> stack per subgroup
   const stackedData = d3.stack().keys(subgroups)(data);
-  console.log({ stackedData });
-  // Show the bars
 
   svg
     .select("#bars-proposal")
@@ -93,38 +92,43 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     // Enter in the stack data = loop key per key = group per group
     .data(stackedData)
     .join("g")
-    .attr("fill", d => {
-      console.log("dddd", d);
-      return colorApha(d.key);
-    })
-
+    .attr("fill", d => colorApha(d.key) as string)
     .selectAll("rect")
     // enter a second time = loop subgroup per subgroup to add all rectangles
-    .data(d => {
-      console.log("PASSED", d);
-
-      return d;
-    })
+    .data(d => d)
     .join("rect")
     .on("mouseover", function (e, d) {
       console.log(e);
       console.log(d);
-      // const parenNode = d3.select(this.parentNode);
-      const subgroupName = d3.select(this.parentNode).datum().key;
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
 
-      console.log({ _this: this });
-      d3.select(this).style("fill", color(subgroupName));
+      const parentNode = _this.parentNode as any;
+      const selectedNode = d3.select(parentNode) as any;
+      const subgroupName = selectedNode.datum().key;
+      d3.select(this)
+        .transition()
+        .style("fill", color(subgroupName) as string);
     })
     .on("mouseout", function (e, d) {
       console.log(e);
       console.log(d);
-      // const parenNode = d3.select(this.parentNode);
-      const subgroupName = d3.select(this.parentNode).datum().key;
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
 
-      console.log({ _this: this });
-      d3.select(this).style("fill", colorApha(subgroupName));
+      const parentNode = _this.parentNode as any;
+      const selectedNode = d3.select(parentNode) as any;
+      const subgroupName = selectedNode.datum().key;
+      d3.select(this)
+        .transition()
+        .style("fill", colorApha(subgroupName) as string);
     })
-    .attr("x", d => x(d.data.month))
+    .attr("x", d => {
+      console.log("DD", d);
+      const x1: number = d.data["month"];
+      console.log({ x1 });
+      return x(columns[x1]) ?? 0;
+    })
     .attr("y", d => y(d[1]))
     .attr("height", d => y(d[0]) - y(d[1]))
     .attr("width", x.bandwidth())
