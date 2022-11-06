@@ -155,6 +155,7 @@ const layoutHandler = (
       const newToX = toNode.left;
       const newToY = toNode.top + Math.floor(toNode.height / 2);
       const thisEdge = oldEdges[e.v + "-" + e.w];
+      // console.log(JSON.stringify({thisEdge, v: e.v, w: e.w, fromNode, toNode}), "thisEdge, e.v, e.w")
 
       if (
         !("fromX" in thisEdge) ||

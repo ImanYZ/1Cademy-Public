@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 export type ITheme = "Dark" | "Light";
 
 export type IUser = {
@@ -41,8 +43,8 @@ export type IUser = {
   occupation: string;
   foundFrom: string; // pre-specified values with free text possibility
   fieldOfInterest: string; // free text
-  birthDate: Date;
+  birthDate?: Date | Timestamp | null;
   reason: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
 };
