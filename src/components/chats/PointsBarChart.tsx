@@ -86,8 +86,18 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   //stack the data? --> stack per subgroup
   const stackedData = d3.stack().keys(subgroups)(data);
 
+  //tooltip
+  const tooltip = d3.select("#tool-tip");
+  // .append("div");
+  // .style("position", "absolute")
+  // .style("opacity", 0)
+  // .attr("class", "tooltip")
+  // .style("background-color", "#303134")
+  // .style("border-radius", "5px")
+  // .style("padding", "10px");
   svg
-    .select("#bars-proposal")
+
+    .select("#bars")
     .selectAll("g")
     // Enter in the stack data = loop key per key = group per group
     .data(stackedData)
@@ -99,16 +109,24 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .join("rect")
     .on("mouseover", function (e, d) {
       console.log(e);
-      console.log(d);
+      console.log({ enter: d });
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
-
       const parentNode = _this.parentNode as any;
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key;
+      console.log({ parentNode: selectedNode.datum() });
+      const subGroupValue = d.data[subgroupName];
+      const middle = y((d[0] + d[1]) / 2);
+      console.log({ middle });
       d3.select(this)
         .transition()
         .style("fill", color(subgroupName) as string);
+      tooltip
+        .html("subgroup: " + subgroupName + "<br>" + "Value" + subGroupValue)
+        .style("opacity", 0)
+        .style("top", `${middle}px`)
+        .style("left", `${1.6 * x.bandwidth()}px`);
     })
     .on("mouseout", function (e, d) {
       console.log(e);
@@ -122,9 +140,9 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
       d3.select(this)
         .transition()
         .style("fill", colorApha(subgroupName) as string);
+      tooltip.style("opacity", 0).style("pointer-events", "none");
     })
     .attr("x", d => {
-      console.log("DD", d);
       const x1: number = d.data["month"];
       console.log({ x1 });
       return x(columns[x1]) ?? 0;
@@ -150,9 +168,21 @@ export const PointsBarChart = () => {
   }, []);
 
   return (
-    <svg ref={svg}>
-      <g id="bars-proposal"></g>
-      <g id="bars-questions"></g>
-    </svg>
+    <div id="box-plot-container" style={{ position: "relative" }}>
+      <svg ref={svg}>
+        <g id="bars"></g>
+      </svg>
+      <div
+        id="tool-tip"
+        style={{
+          position: "absolute",
+          background: "#303134",
+          boxShadow: "0 1px 1px 1px black",
+          borderRadius: "2px",
+          opacity: "0",
+          padding: "2px 4px",
+        }}
+      ></div>
+    </div>
   );
 };

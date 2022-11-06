@@ -208,7 +208,7 @@ type BoxChartProps = {
   data: Chapter;
   width: number;
   boxHeight: number;
-  margin: boxPlotMarginType;
+  margin: boxPlotMargin;
   offsetX: number;
   offsetY: number;
   drawYAxis?: boolean;
