@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+import { Timestamp } from "firebase-admin/firestore";
 
 export type ISemesterSyllabusItem = {
   title: string;
@@ -8,13 +8,9 @@ export type ISemesterSyllabusItem = {
 
 export type ISemesterStudent = {
   uname: string;
-  totalPoints: number;
-  newNodes: number;
-  improvements: number;
-  questions: number;
-  questionPoints: number;
-  votes: number;
-  votePoints: number;
+  chooseUname: string;
+  imageUrl: string;
+  fullname: string;
 };
 
 // document id should be semester id as well
@@ -22,11 +18,10 @@ export type ISemester = {
   instructors: string[]; // list of uid/uname
   title: string;
   tagId: string; // semester tag id
-  tag: string; // semester tag name
   uTagId: string; // university tag id
-  uTag: string; // university tag name
+  uTitle: string; // university tag name
   cTagId: string; // course tag id
-  cTag: string; // course tag
+  cTitle: string; // course tag
   // tagIds: string[];
   // tags: string[]; // (CourseName, UniversityName, BatchName)
   syllabus: ISemesterSyllabusItem[];
@@ -54,29 +49,35 @@ export type ISemester = {
   };
   deleted: boolean;
   students: ISemesterStudent[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export type ICourseTag = {
-  ctagId: string; // tagId of course
-  cTag: string;
+  cTagId: string; // tagId of course
+  cTitle: string;
   uTagId: string; // University Tag Id
-  uTag: string;
+  uTitle: string;
   tagId: string; // Semester Tag Id
-  tag: string;
+  title: string;
 };
 
 export type IInstructor = {
   uname: string;
   courses: ICourseTag[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export type ICourse = {
   title: string;
   node: string;
   uTagIds: string[];
-  uTags: string[];
+  uTitles: string[];
   sTagIds: string[];
-  sTags: string[];
+  sTitles: string[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export type ISemesterStudentStatDay = {
@@ -89,6 +90,8 @@ export type ISemesterStudentStat = {
   tagId: string; // tagId of semester
   uname: string;
   days: ISemesterStudentStatDay[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export type ISemesterStudentVoteStat = {
@@ -99,4 +102,17 @@ export type ISemesterStudentVoteStat = {
   instVotes: number;
   agreementsWithInst: number;
   disagreementsWithInst: number;
+  lastActivity: Timestamp;
+
+  totalPoints: number;
+  newNodes: number;
+  improvements: number;
+  questions: number;
+  questionPoints: number;
+  votes: number;
+  votePoints: number;
+
+  deleted: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
