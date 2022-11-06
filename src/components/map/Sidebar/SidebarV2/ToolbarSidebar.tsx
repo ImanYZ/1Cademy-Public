@@ -61,8 +61,6 @@ MainSidebarProps) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
 
   const onOpenLeaderboardOptions = (event: React.MouseEvent<any>) => {
-    console.log("set target", event.target);
-
     setAnchorEl(event.target);
   };
   const onCloseLeaderBoardOptions = () => {

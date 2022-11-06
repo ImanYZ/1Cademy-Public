@@ -51,7 +51,6 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
   const snapshot = useCallback((q: Query<DocumentData>) => {
     const notificationsSnapshot = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
-      console.log("docChanges ", docChanges);
       if (!docChanges.length) return null;
 
       // const checkedNotificationsDict: any = checkedNotifications.reduce((acu, cur) => {
