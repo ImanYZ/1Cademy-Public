@@ -91,6 +91,12 @@ export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022
   proposals: number;
   questions: number;
+
+  newNodes: number;
+  links: number; // improvements on children and parent links
+
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
 };
 
 export type ISemesterStudentStat = {
@@ -116,6 +122,7 @@ export type ISemesterStudentVoteStat = {
   totalPoints: number;
   newNodes: number;
   improvements: number;
+  links: number;
   questions: number;
   questionPoints: number;
   votes: number;

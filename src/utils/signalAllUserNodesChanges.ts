@@ -32,6 +32,7 @@ export const signalAllUserNodesChanges = async ({
       changedUserNode.nodeChanges = deleteField();
     }
     if (major) {
+      // console.log(changedUserNode.nodeChanges, "nodeChanges");
       changedUserNode.isStudied = false;
     }
     if (deleted) {

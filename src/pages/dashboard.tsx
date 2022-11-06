@@ -1415,12 +1415,11 @@ const Dashboard = ({}: DashboardProps) => {
                 type: chosenNodeObj.nodeType,
               },
             ];
+            const chosenNodeId = nodeBookState.chosenNode.id;
             if (removedParents.includes(nodeBookState.chosenNode.id)) {
-              const chosenNodeId = nodeBookState.chosenNode.id;
               setRemovedParents(removedParents.filter((nId: string) => nId !== chosenNodeId));
             } else {
-              const choosingNodeId = nodeBookState.choosingNode.id;
-              setAddedParents(oldAddedParents => [...oldAddedParents, choosingNodeId]);
+              setAddedParents(oldAddedParents => [...oldAddedParents, chosenNodeId]);
             }
 
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {

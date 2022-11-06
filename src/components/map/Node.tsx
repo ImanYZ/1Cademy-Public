@@ -253,7 +253,7 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        console.log("->", { blockSize, previousHeight: previousHeightRef.current });
+        // console.log("->", { blockSize, previousHeight: previousHeightRef.current });
         const isSimilar = blockSize === previousHeightRef.current;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
