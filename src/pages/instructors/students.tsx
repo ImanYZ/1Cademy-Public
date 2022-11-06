@@ -28,6 +28,24 @@ import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { GridRowsProp } from "@mui/x-data-grid";
+import {
+  /* addDoc, */
+  collection,
+  /*   doc,
+  DocumentData,
+  getDoc,
+  getDocs, */
+  getFirestore,
+  /*   limit, */
+  onSnapshot,
+  /*  Query,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+  writeBatch, */
+} from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -519,6 +537,37 @@ export const Students: InstructorLayoutPage = () => {
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const id = open ? "simple-popover" : undefined;
+
+  useEffect(() => {
+    if (isMovil) setEditMode(false);
+  }, [isMovil]);
+  const db = getFirestore();
+  useEffect(() => {
+    if (!db) return;
+
+    const semestersRef = collection(db, "semesters");
+    const q = query(semestersRef);
+    const semestersSnapshot = onSnapshot(q, async snapshot => {
+      // console.log("on snapshot");
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) return;
+      for (let change of docChanges) {
+        if (change.type === "added" || change.type === "modified") {
+          setTableRows(change.doc.data().students.splice());
+          console.log(":::: :::: ::: :data from Database ::: ::::: ", change.doc.data().students.splice());
+        }
+      }
+    });
+    return () => {
+      semestersSnapshot();
+    };
+  }, [db]);
+
+  //this to filter the results
   const handleFilterBy = (filters: any, fromDash: boolean) => {
     let _tableRows = rows.slice();
     for (let filter of filters) {
@@ -533,7 +582,6 @@ export const Students: InstructorLayoutPage = () => {
       handleOpenCloseFilter();
     }
   };
-
   const handleChangeFilter = (event: any) => {
     const newFilter = {
       title: event.target.value,
@@ -544,16 +592,27 @@ export const Students: InstructorLayoutPage = () => {
     setFilters(updateFilters);
   };
 
-  const addFilter = () => {
-    const newFilter = {
-      title: "Total Poitns",
-      operation: "<",
-      value: 10,
-    };
-    const updateFilters = [...filters, newFilter];
-    setFilters(updateFilters);
+  //TO-DO
+  const updateTableRows = () => {
+    let addNewRow = true;
+    let _tableRows = tableRows.slice();
+    for (let row of tableRows) {
+      if (!row["firstName"] && !row["lastName"] && !row["email"]) {
+        addNewRow = false;
+      }
+    }
+    if (addNewRow) {
+      _tableRows.push({
+        id: Math.floor(Math.random() * 100),
+        username: "Harry Potter",
+        avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+        firstName: "",
+        lastName: "",
+        email: "",
+      });
+    }
+    setTableRows(_tableRows);
   };
-
   const deleteFilter = (index: any, fromDash: boolean) => {
     const _oldFilters = [...filters];
     _oldFilters.splice(index, 1);
@@ -586,70 +645,184 @@ export const Students: InstructorLayoutPage = () => {
     };
     setFilters(_filters);
   };
-  const studentsProfile = () => (
-    <Box sx={{ borderRadius: "16px", m: 0, border: 1 }}>
-      {"  "}
-      <Box sx={{ textAlign: "right" }}>
-        <IconButton onClick={handleOpenCloseProfile}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <Box sx={{ textAlign: "center", height: "200px" }}>
-        <Box sx={{ display: "flex", ml: "33%", mb: "5%", mt: "10%", flexDirection: "row" }}>
-          <Box>
-            <OptimizedAvatar
-              name={openedProfile.username}
-              imageUrl={openedProfile.avatar}
-              renderAsAvatar={true}
-              contained={false}
-              sx={{ mr: "15px" }}
-            />
-            <div
-              className={openedProfile.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-              style={{ fontSize: "1px", marginLeft: "35px" }}
-            ></div>
-          </Box>
-          <LinkNext href={"#"}>
-            <Link>
-              {" "}
-              <>{openedProfile.firstName + openedProfile.lastName}</>
-            </Link>
-          </LinkNext>
-        </Box>
 
-        <Box sx={{ mr: "30px" }}>{openedProfile.email}</Box>
-        <Button
-          variant="contained"
-          onClick={() => {
-            console.log("takemetothe profile");
-          }}
-          sx={{
-            color: theme => theme.palette.common.white,
-            background: theme => theme.palette.common.orange,
-            fontSize: 13,
-            fontWeight: "700",
-            my: { xs: "0px", md: "auto" },
-            mt: { xs: "15px", md: "auto" },
-            marginLeft: { xs: "0px", md: "32px" },
-            marginRight: "40px",
-            paddingX: "30px",
-            borderRadius: 1,
-            textAlign: "center",
-            alignSelf: "center",
-          }}
-        >
-          See Profile
-        </Button>
-      </Box>
-    </Box>
-  );
+  const addFilter = () => {
+    const newFilter = {
+      title: "Total Poitns",
+      operation: "<",
+      value: 10,
+    };
+    const updateFilters = [...filters, newFilter];
+    setFilters(updateFilters);
+  };
+
   const openThisProfile = (row: any) => {
     if (!isMovil) return;
     setOpenedProfile(row);
     handleOpenCloseProfile();
   };
 
-  const list = () => (
+  const saveTableChanges = () => {
+    const _tableRow = tableRows.slice();
+    let students = [];
+
+    for (let row of _tableRow) {
+      if (!row.firstName || !row.lastName || !row.email) {
+        _tableRow.splice(_tableRow.indexOf(row), 1);
+      }
+    }
+    setTableRows(_tableRow);
+    for (let row of _tableRow) {
+      students.push({
+        email: row.email,
+        fName: row.firstName,
+        lName: row.lastName,
+      });
+    }
+    const payloadAPI = { students };
+    console.log(payloadAPI);
+    return setEditMode(!editMode);
+  };
+  const discardTableChanges = () => {
+    setEditMode(!editMode);
+  };
+  const editValues = (column: any, index: any, event: any) => {
+    event.preventDefault();
+    console.log(event);
+    let _tableRows = tableRows.slice();
+    _tableRows[index][column] = event.target.value;
+    setTableRows([..._tableRows]);
+  };
+
+  const handleClick = (colmn: any, event: any) => {
+    setSelectedColumn(keysColumns[colmn]);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const sortLowHigh = () => {
+    const _tableRows = tableRows.slice();
+    if (["firstName", "lastName", "email"].includes(selectedColumn)) {
+      _tableRows.sort((a, b) => {
+        const nameA = a[selectedColumn].toUpperCase();
+        const nameB = b[selectedColumn].toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      _tableRows.sort((a, b) => a[selectedColumn] - b[selectedColumn]);
+    }
+    setTableRows(_tableRows);
+    handleClose();
+  };
+  const sortHighLow = () => {
+    const _tableRows = tableRows.slice();
+    if (["firstName", "lastName", "email"].includes(selectedColumn)) {
+      _tableRows.sort((a, b) => {
+        const nameA = a[selectedColumn].toUpperCase();
+        const nameB = b[selectedColumn].toUpperCase();
+        if (nameA > nameB) {
+          return -1;
+        }
+        if (nameA < nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      _tableRows.sort((a, b) => b[selectedColumn] - a[selectedColumn]);
+    }
+    setTableRows(_tableRows);
+    handleClose();
+  };
+  const deleteRow = (index: number) => {
+    const _tableRows = tableRows.slice();
+    _tableRows.splice(index, 1);
+    setTableRows(_tableRows);
+  };
+  const searchByNameEmail = (newValue: string) => {
+    const _tableRows = tableRows.slice();
+
+    const newTable = _tableRows.filter(row => {
+      return (
+        row.firstName.toLowerCase().includes(newValue) ||
+        row.lastName.toLowerCase().includes(newValue) ||
+        row.email.toLowerCase().includes(newValue)
+      );
+    });
+    setTableRows(newTable);
+  };
+  const addNewStudent = () => {
+    const _tableRow = tableRows.slice();
+    _tableRow.push({
+      id: Math.floor(Math.random() * 100),
+      username: "Harry Potter",
+      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+      firstName: "",
+      lastName: "",
+      email: "",
+    });
+    setTableRows(_tableRow);
+  };
+  const handleNewSearh = (event: any) => {
+    setSearchValue(event.target.value);
+    if (!event.target.value) return setTableRows(rows.slice());
+    searchByNameEmail(event.target.value.toLowerCase());
+  };
+
+  const handleEditAndAdd = () => {
+    const _tableRow = tableRows.slice();
+    if (editMode) {
+      saveTableChanges();
+      return setEditMode(!editMode);
+    } else {
+      updateTableRows();
+    }
+    _tableRow.push({
+      id: Math.floor(Math.random() * 100),
+      username: "Harry Potter",
+      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+      firstName: "",
+      lastName: "",
+      email: "",
+    });
+    setTableRows(_tableRow);
+    setEditMode(!editMode);
+  };
+
+  const addNewData = () => {
+    const _tableRow = tableRows.slice();
+    const email = CSVRowData.columns.filter((elm: any) => {
+      return elm.includes("Email");
+    })[0];
+    const fName = CSVRowData.columns.filter((elm: any) => {
+      return elm.includes("First Name");
+    })[0];
+    const lName = CSVRowData.columns.filter((elm: any) => {
+      return elm.includes("Last Name");
+    })[0];
+    for (let row of CSVRowData.rows) {
+      const newObject = {
+        username: "username",
+        avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+        firstName: row[fName],
+        lastName: row[lName],
+        email: row[email],
+      };
+      _tableRow.push(newObject);
+    }
+    setTableRows(_tableRow);
+    setOpenUploadModal(false);
+  };
+  const filer = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
         <IconButton onClick={handleOpenCloseFilter}>
@@ -761,190 +934,63 @@ export const Students: InstructorLayoutPage = () => {
     </>
   );
 
-  const saveTableChanges = () => {
-    const _tableRow = tableRows.slice();
-    let students = [];
+  const studentsProfile = () => (
+    <Box sx={{ borderRadius: "16px", m: 0, border: 1 }}>
+      {"  "}
+      <Box sx={{ textAlign: "right" }}>
+        <IconButton onClick={handleOpenCloseProfile}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Box sx={{ textAlign: "center", height: "200px" }}>
+        <Box sx={{ display: "flex", ml: "33%", mb: "5%", mt: "10%", flexDirection: "row" }}>
+          <Box>
+            <OptimizedAvatar
+              name={openedProfile.username}
+              imageUrl={openedProfile.avatar}
+              renderAsAvatar={true}
+              contained={false}
+              sx={{ mr: "15px" }}
+            />
+            <div
+              className={openedProfile.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+              style={{ fontSize: "1px", marginLeft: "35px" }}
+            ></div>
+          </Box>
+          <LinkNext href={"#"}>
+            <Link>
+              {" "}
+              <>{openedProfile.firstName + openedProfile.lastName}</>
+            </Link>
+          </LinkNext>
+        </Box>
 
-    for (let row of _tableRow) {
-      if (!row.firstName || !row.lastName || !row.email) {
-        _tableRow.splice(_tableRow.indexOf(row), 1);
-      }
-    }
-    setTableRows(_tableRow);
-    for (let row of _tableRow) {
-      students.push({
-        email: row.email,
-        fName: row.firstName,
-        lName: row.lastName,
-      });
-    }
-    const payloadAPI = { students };
-    console.log(payloadAPI);
-    return setEditMode(!editMode);
-
-    setEditMode(false);
-  };
-  const discardTableChanges = () => {
-    setEditMode(!editMode);
-  };
-  const editValues = (column: any, index: any, event: any) => {
-    event.preventDefault();
-    let _tableRows = tableRows.slice();
-    _tableRows[index][column] = event.target.value;
-    setTableRows([..._tableRows]);
-    setTimeout(() => {
-      event.target.focus();
-    }, 10);
-  };
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClick = (colmn: any, event: any) => {
-    setSelectedColumn(keysColumns[colmn]);
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-
-  const id = open ? "simple-popover" : undefined;
-
-  const sortLowHigh = () => {
-    const _tableRows = tableRows.slice();
-    if (["firstName", "lastName", "email"].includes(selectedColumn)) {
-      _tableRows.sort((a, b) => {
-        const nameA = a[selectedColumn].toUpperCase();
-        const nameB = b[selectedColumn].toUpperCase();
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      _tableRows.sort((a, b) => a[selectedColumn] - b[selectedColumn]);
-    }
-    setTableRows(_tableRows);
-    handleClose();
-  };
-  const sortHighLow = () => {
-    const _tableRows = tableRows.slice();
-    if (["firstName", "lastName", "email"].includes(selectedColumn)) {
-      _tableRows.sort((a, b) => {
-        const nameA = a[selectedColumn].toUpperCase();
-        const nameB = b[selectedColumn].toUpperCase();
-        if (nameA > nameB) {
-          return -1;
-        }
-        if (nameA < nameB) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      _tableRows.sort((a, b) => b[selectedColumn] - a[selectedColumn]);
-    }
-    setTableRows(_tableRows);
-    handleClose();
-  };
-  const deleteRow = (index: number) => {
-    const _tableRows = tableRows.slice();
-    _tableRows.splice(index, 1);
-    setTableRows(_tableRows);
-  };
-  const searchByNameEmail = (newValue: string) => {
-    const _tableRows = tableRows.slice();
-
-    const newTable = _tableRows.filter(row => {
-      return (
-        row.firstName.toLowerCase().includes(newValue) ||
-        row.lastName.toLowerCase().includes(newValue) ||
-        row.email.toLowerCase().includes(newValue)
-      );
-    });
-    setTableRows(newTable);
-  };
-  const handleNewSearh = (event: any) => {
-    setSearchValue(event.target.value);
-    if (!event.target.value) return setTableRows(rows.slice());
-    searchByNameEmail(event.target.value.toLowerCase());
-  };
-  const editAndAdd = () => {
-    const _tableRow = tableRows.slice();
-    if (editMode) {
-      saveTableChanges();
-      return setEditMode(!editMode);
-    }
-    _tableRow.push({
-      id: Math.floor(Math.random() * 100),
-      username: "Harry Potter",
-      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-      firstName: "",
-      lastName: "",
-      email: "",
-    });
-    setTableRows(_tableRow);
-    setEditMode(!editMode);
-  };
-
-  const addNewData = () => {
-    const _tableRow = tableRows.slice();
-    const email = CSVRowData.columns.filter((elm: any) => {
-      return elm.includes("Email");
-    })[0];
-    const fName = CSVRowData.columns.filter((elm: any) => {
-      return elm.includes("First Name");
-    })[0];
-    const lName = CSVRowData.columns.filter((elm: any) => {
-      return elm.includes("Last Name");
-    })[0];
-    for (let row of CSVRowData.rows) {
-      const newObject = {
-        username: "username",
-        avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-        firstName: row[fName],
-        lastName: row[lName],
-        email: row[email],
-      };
-      _tableRow.push(newObject);
-    }
-    setTableRows(_tableRow);
-    setOpenUploadModal(false);
-  };
-  useEffect(() => {
-    let addNewRow = true;
-    let _tableRows = tableRows.slice();
-    if (!editMode) {
-      for (let row of _tableRows) {
-        if (!row.firstName || !row.lastName || !row.email) {
-          _tableRows.splice(_tableRows.indexOf(row), 1);
-        }
-      }
-      return setTableRows(_tableRows);
-    }
-
-    for (let row of tableRows) {
-      if (!row["firstName"] && !row["lastName"] && !row["email"]) {
-        addNewRow = false;
-      }
-    }
-    if (addNewRow) {
-      _tableRows.push({
-        id: Math.floor(Math.random() * 100),
-        username: "Harry Potter",
-        avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-        firstName: "",
-        lastName: "",
-        email: "",
-      });
-    }
-    setTableRows(_tableRows);
-  }, [editMode, tableRows]);
+        <Box sx={{ mr: "30px" }}>{openedProfile.email}</Box>
+        <Button
+          variant="contained"
+          onClick={() => {
+            console.log("takemetothe profile");
+          }}
+          sx={{
+            color: theme => theme.palette.common.white,
+            background: theme => theme.palette.common.orange,
+            fontSize: 13,
+            fontWeight: "700",
+            my: { xs: "0px", md: "auto" },
+            mt: { xs: "15px", md: "auto" },
+            marginLeft: { xs: "0px", md: "32px" },
+            marginRight: "40px",
+            paddingX: "30px",
+            borderRadius: 1,
+            textAlign: "center",
+            alignSelf: "center",
+          }}
+        >
+          See Profile
+        </Button>
+      </Box>
+    </Box>
+  );
   return (
     <>
       <Box className="student-dashboard" sx={{ width: "100%" }}>
@@ -979,10 +1025,11 @@ export const Students: InstructorLayoutPage = () => {
               sx={{
                 width: { sm: 200, md: 300 },
                 "& .MuiInputBase-root": {
-                  height: 60,
+                  height: isMovil ? 40 : 60,
                 },
                 alignSelf: "center",
-                py: "50px",
+                pl: isMovil ? "10px" : "0px",
+                pt: isMovil ? "14px" : "0px",
                 backgroundColor: theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#F5F5F5",
               }}
               id="outlined-basic"
@@ -1026,7 +1073,7 @@ export const Students: InstructorLayoutPage = () => {
                 </Button>
                 <Button
                   variant="contained"
-                  onClick={editAndAdd}
+                  onClick={handleEditAndAdd}
                   sx={{
                     color: theme => theme.palette.common.white,
                     background: theme => theme.palette.common.black,
@@ -1066,7 +1113,7 @@ export const Students: InstructorLayoutPage = () => {
               </>
             )}
             <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
-              {list()}
+              {filer()}
             </Drawer>
           </Box>
         </Box>
@@ -1101,7 +1148,6 @@ export const Students: InstructorLayoutPage = () => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  {!isMovil && <TableCell align="right"> {""}</TableCell>}
                   {keys.map(colmn => {
                     return (
                       <TableCell
@@ -1272,6 +1318,27 @@ export const Students: InstructorLayoutPage = () => {
               >
                 Add students from a csv file
               </Button>
+              <Button
+                variant="text"
+                sx={{
+                  color: theme => theme.palette.common.black,
+                  backgroundColor: "#EDEDED",
+                  fontSize: 16,
+                  fontWeight: "700",
+                  my: { xs: "0px", md: "auto" },
+                  mt: { xs: "15px", md: "auto" },
+                  marginLeft: { xs: "0px", md: "32px" },
+                  marginRight: "40px",
+                  paddingX: "30px",
+                  borderRadius: 1,
+                  textAlign: "center",
+                  alignSelf: "center",
+                }}
+                onClick={addNewStudent}
+              >
+                <AddIcon /> Add a new student
+              </Button>
+
               <Modal
                 keepMounted
                 open={openUploadModal}
@@ -1309,7 +1376,6 @@ export const Students: InstructorLayoutPage = () => {
                   </Box>
                 </Box>
               </Modal>
-
               <Box sx={{ textAlign: "right" }}>
                 <Button
                   variant="text"
