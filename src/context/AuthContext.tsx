@@ -21,7 +21,6 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   const handleError = useCallback(
     ({ error, errorMessage, showErrorToast = true }: ErrorOptions) => {
       //TODO: setup error reporting in google cloud
-      console.log("TODO: setup error reporting in google cloud", error, errorMessage, showErrorToast);
       if (showErrorToast) {
         const errorString = typeof error === "string" ? error : "";
         enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {

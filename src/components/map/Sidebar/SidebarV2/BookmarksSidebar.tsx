@@ -75,7 +75,6 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
     });
     return () => {
-      console.log("UNMOUNT BOOKMARKS");
       bookmarkSnapshot();
     };
   }, [db, username]);
