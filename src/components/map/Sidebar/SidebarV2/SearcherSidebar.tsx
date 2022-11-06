@@ -241,7 +241,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
       width={430}
       // anchor="right"
       SidebarOptions={
-        <Box sx={{ p: "10px", borderBottom: 1, borderColor: "divider", width: "100%" }}>
+        <Box
+          sx={{
+            p: "10px",
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+          }}
+        >
           {showTagSelector && (
             <div id="tagModal">
               <Modal onClick={setShowTagSelectorClick} returnLeft={true}>
