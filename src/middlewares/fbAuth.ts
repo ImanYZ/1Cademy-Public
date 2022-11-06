@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase-admin/firestore";
 import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
 import { admin, db } from "../lib/firestoreServer/admin";
@@ -59,32 +60,47 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
       console.error(errorMessage);
       return { status: 500, data: errorMessage };
     }
-    if (creditsData.docs.length !== 0) {
-      const credits = creditsData.docs[0].data();
-      delete credits.createdAt;
-      delete credits.credits;
-      delete credits.tag;
-      userData = {
-        ...userData,
-        ...credits,
-      };
-      try {
-        reputationsData = await db
-          .collection("reputations")
-          .where("uname", "==", userData.uname)
-          .where("tagId", "==", userData.tagId)
-          .limit(1)
-          .get();
-      } catch (err) {
-        errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag;
-        console.error(errorMessage);
-        return { status: 500, data: errorMessage };
-      }
-    } else {
-      errorMessage = "The credits object does not exist!";
+    if (!creditsData.docs.length) {
+      // Creating empty credits
+      const creditDoc = db.collection("credits").doc();
+      await creditDoc.set({
+        createdAt: Timestamp.now(),
+        credits: 0,
+        deepA: 750,
+        deepAInst: 210,
+        iInstValue: 4,
+        iValue: 10,
+        ltermA: 1375,
+        meanA: 300,
+        meanAInst: 84,
+        tag: userData.tag,
+        tagId: userData.tagId,
+      });
+
+      creditsData = { docs: [await creditDoc.get()] };
+    }
+
+    const credits = creditsData.docs[0].data() || {};
+    delete credits.createdAt;
+    delete credits.credits;
+    delete credits.tag;
+    userData = {
+      ...userData,
+      ...credits,
+    };
+    try {
+      reputationsData = await db
+        .collection("reputations")
+        .where("uname", "==", userData.uname)
+        .where("tagId", "==", userData.tagId)
+        .limit(1)
+        .get();
+    } catch (err) {
+      errorMessage = "The user " + userData.uname + " does not have reputations for the tag " + userData.tag;
       console.error(errorMessage);
       return { status: 500, data: errorMessage };
     }
+
     if (reputationsData.docs.length !== 0) {
       const reputations = reputationsData.docs[0].data();
       delete reputations.createdAt;
