@@ -56,7 +56,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
-const rows: any = [
+const rows = [
   {
     id: 0,
     username: "username",
@@ -471,25 +471,40 @@ const columns: string[] = [
   "lastActivity",
 ];
 
-const keys: string[] = ["userProfile", ...columns];
+const keys = [
+  "First Name",
+  "Last Name",
+  "Email",
+  "Total Poitns",
+  "Wrongs",
+  "Corrects",
+  "Awards",
+  "New Proposals",
+  "Edit Node Proposals",
+  "Proposals Points",
+  "Questions",
+  "Question Points",
+  "Vote",
+  "Vote Points",
+  "Last Activity",
+];
 
 const keysColumns: any = {
-  userProfile: "User Profile",
-  firstName: "First Name",
-  lastName: "Last Name",
-  email: "Email",
-  totalPoints: "Total Poitns",
-  wrongs: "Wrongs",
-  corrects: "Corrects",
-  awards: "Awards",
-  newPorposals: "New Proposals",
-  editNodeProposals: "Edit Node Proposals",
-  proposalsPoints: "Proposals Points",
-  questions: "Questions",
-  questionPoints: "Question Points",
-  vote: "Vote",
-  votePoints: "Vote Points",
-  lastactivity: "Last Activity",
+  "First Name": "firstName",
+  "Last Name": "lastName",
+  Email: "email",
+  "Total Poitns": "totalPoints",
+  Wrongs: "wrongs",
+  Corrects: "corrects",
+  Awards: "awards",
+  "New Proposals": "newPorposals",
+  "Edit Node Proposals": "editNodeProposals",
+  "Proposals Points": "proposalsPoints",
+  Questions: "questions",
+  "Question Points": "questionPoints",
+  Vote: "vote",
+  "Vote Points": "votePoints",
+  "Last Activity": "lastActivity",
 };
 
 export const Students: InstructorLayoutPage = () => {
@@ -672,13 +687,14 @@ export const Students: InstructorLayoutPage = () => {
 
   const editValues = (column: any, index: any, event: any) => {
     event.preventDefault();
-    console.log(event);
     let _tableRows: any = tableRows.slice();
     _tableRows[index][column] = event.target.value;
+    console.log({ column, index, tableRow: _tableRows[index][column] });
     setTableRows([..._tableRows]);
   };
 
   const handleClick = (colmn: any, event: any) => {
+    // console.log("handleClick", colmn);
     setSelectedColumn(keysColumns[colmn]);
     setAnchorEl(event.currentTarget);
   };
@@ -736,7 +752,7 @@ export const Students: InstructorLayoutPage = () => {
   const searchByNameEmail = (newValue: string) => {
     const _tableRows = tableRows.slice();
 
-    const newTable = _tableRows.filter((row: any) => {
+    const newTable = _tableRows.filter(row => {
       return (
         row.firstName.toLowerCase().includes(newValue) ||
         row.lastName.toLowerCase().includes(newValue) ||
@@ -773,14 +789,14 @@ export const Students: InstructorLayoutPage = () => {
     } else {
       updateTableRows();
     }
-    // _tableRow.push({
-    //   id: Math.floor(Math.random() * 100),
-    //   username: "Harry Potter",
-    //   avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-    //   firstName: "",
-    //   lastName: "",
-    //   email: "",
-    // });
+    _tableRow.push({
+      id: Math.floor(Math.random() * 100),
+      username: "Harry Potter",
+      avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+      firstName: "",
+      lastName: "",
+      email: "",
+    });
     setTableRows(_tableRow);
     setEditMode(!editMode);
   };
@@ -1130,10 +1146,12 @@ export const Students: InstructorLayoutPage = () => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  {keys.map((colmn, index) => {
+                  {!isMovil && <TableCell>{""}</TableCell>}
+                  {keys.map((colmn: any, keyIndex) => {
+                    // console.log({ colmn });
                     return (
                       <TableCell
-                        key={index}
+                        key={keyIndex}
                         sx={
                           ["firstName", "lastName"].includes(colmn) && isMovil
                             ? {
@@ -1151,21 +1169,21 @@ export const Students: InstructorLayoutPage = () => {
                         align="left"
                       >
                         <div style={{ display: "flex", flexDirection: "row" }}>
-                          {colmn !== "userProfile" && (
-                            <>
-                              <div>{keysColumns[colmn]}</div>
-                              {!isMovil && (
-                                <IconButton
-                                  id={id}
-                                  onClick={event => handleClick(colmn, event)}
-                                  style={{ paddingTop: "10px" }}
-                                >
-                                  {" "}
-                                  <ArrowDropDownIcon viewBox="1 9 24 24" />
-                                </IconButton>
-                              )}
-                            </>
-                          )}
+                          {/* {colmn !== "userProfile" && */}
+                          <>
+                            <div>{colmn}</div>
+                            {!isMovil && (
+                              <IconButton
+                                id={id}
+                                onClick={event => handleClick(colmn, event)}
+                                style={{ paddingTop: "10px" }}
+                              >
+                                {" "}
+                                <ArrowDropDownIcon viewBox="1 9 24 24" />
+                              </IconButton>
+                            )}
+                          </>
+                          {/* } */}
                         </div>
                         <Popover
                           id={id}
@@ -1207,78 +1225,86 @@ export const Students: InstructorLayoutPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tableRows.map((row: any, index: number) => (
-                  <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                    {!isMovil && (
-                      <TableCell align="left">
-                        <OptimizedAvatar
-                          name={row.username}
-                          imageUrl={row.avatar}
-                          renderAsAvatar={true}
-                          contained={false}
-                        />
-                        <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-                      </TableCell>
-                    )}
-                    {columns.map((colmn, index) => {
-                      return (
-                        <TableCell
-                          key={index}
-                          sx={
-                            ["firstName", "lastName"].includes(colmn) && isMovil
-                              ? {
-                                  position: "sticky",
-                                  left: colmn === "lastName" ? 90 : 0,
-                                  backgroundColor: theme =>
-                                    theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
-                                  fontWeight: "10px",
-                                  fontSize: "14px",
-                                }
-                              : isMovil
-                              ? { fontWeight: "10px", fontSize: "14px" }
-                              : {}
-                          }
-                          align="left"
-                        >
-                          {editMode && ["firstName", "lastName", "email"].includes(colmn) ? (
-                            <TextField
-                              style={{ width: colmn === "email" ? "200px" : "150px" }}
-                              value={row[colmn]}
-                              onChange={event => editValues(colmn, index, event)}
-                              id="outlined-basic"
-                              variant="outlined"
-                            />
-                          ) : (
-                            <>
-                              {["firstName", "lastName"].includes(colmn) ? (
-                                <LinkNext href={isMovil ? "#" : "#"}>
-                                  <Link onClick={() => openThisProfile(row)}>
-                                    {" "}
-                                    <>{row[colmn]}</>
-                                  </Link>
-                                </LinkNext>
-                              ) : (
-                                <>{row[colmn]}</>
-                              )}
-                            </>
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                    {editMode && (
-                      <TableCell align="right">
-                        <IconButton onClick={() => deleteRow(index)}>
-                          <DeleteIcon
-                            sx={{
-                              color: "red",
-                              borderRadius: "50%",
-                            }}
+                {tableRows.map((row: any, rowIndex) => {
+                  // if (rowIndex === 0) {
+                  //   console.log({ row });
+                  // }
+                  return (
+                    <TableRow key={rowIndex} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                      {!isMovil && (
+                        <TableCell align="left">
+                          <OptimizedAvatar
+                            name={row.username}
+                            imageUrl={row.avatar}
+                            renderAsAvatar={true}
+                            contained={false}
                           />
-                        </IconButton>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
+                          <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+                        </TableCell>
+                      )}
+                      {columns.map((colmn, columnIndex) => {
+                        // console.log({ value: row[colmn] });
+                        return (
+                          <TableCell
+                            key={columnIndex}
+                            sx={
+                              ["firstName", "lastName"].includes(colmn) && isMovil
+                                ? {
+                                    position: "sticky",
+                                    left: colmn === "lastName" ? 90 : 0,
+                                    backgroundColor: theme =>
+                                      theme.palette.mode === "dark"
+                                        ? theme.palette.common.darkGrayBackground
+                                        : "#FFFFFF",
+                                    fontWeight: "10px",
+                                    fontSize: "14px",
+                                  }
+                                : isMovil
+                                ? { fontWeight: "10px", fontSize: "14px" }
+                                : {}
+                            }
+                            align="left"
+                          >
+                            {editMode && ["firstName", "lastName", "email"].includes(colmn) ? (
+                              <TextField
+                                style={{ width: colmn === "email" ? "200px" : "150px" }}
+                                value={row[colmn]}
+                                onChange={event => editValues(colmn, rowIndex, event)}
+                                id="outlined-basic"
+                                variant="outlined"
+                              />
+                            ) : (
+                              <>
+                                {["firstName", "lastName"].includes(colmn) ? (
+                                  <LinkNext href={isMovil ? "#" : "#"}>
+                                    <Link onClick={() => openThisProfile(row)}>
+                                      {" "}
+                                      <>{row[colmn]}</>
+                                    </Link>
+                                  </LinkNext>
+                                ) : (
+                                  <>{row[colmn]}</>
+                                )}
+                              </>
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                      {editMode && (
+                        <TableCell align="right">
+                          <IconButton onClick={() => deleteRow(rowIndex)}>
+                            <DeleteIcon
+                              sx={{
+                                color: "red",
+                                borderRadius: "50%",
+                              }}
+                            />
+                          </IconButton>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
