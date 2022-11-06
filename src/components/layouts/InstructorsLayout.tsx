@@ -4,6 +4,7 @@ import { collection, getDocs, getFirestore, query, where } from "firebase/firest
 import { NextPage } from "next";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
+import { User } from "src/knowledgeTypes";
 
 import { useAuth } from "../../context/AuthContext";
 import { Instructor } from "../../instructorsTypes";
@@ -29,6 +30,7 @@ const OPTIONS: Option[] = [
 type InstructorsLayoutPageProps = {
   selectedSemester: string | undefined;
   selectedCourse: string | undefined;
+  user: User;
 };
 
 type Props = {
@@ -71,6 +73,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       const intructor = userNodeDoc.docs[0].data() as Instructor;
       setInstructor(intructor);
       const courses = getCoursesByInstructor(intructor);
+      console.log("COURSESSS:", { courses });
       const semester = Object.keys(courses);
       setSemesters(semester);
       setAllCourses(courses);
@@ -84,6 +87,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
+    console.log("New Courses", newCourses);
     setSelectedCourse(newCourses[0]);
   }, [allCourses, selectedSemester]);
 
@@ -124,7 +128,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         />
       </Box>
 
-      {children({ selectedSemester, selectedCourse })}
+      {children({ selectedSemester, selectedCourse, user })}
     </Box>
   );
 };

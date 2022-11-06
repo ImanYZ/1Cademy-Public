@@ -4,4 +4,7 @@ export type Instructor = IInstructor;
 
 export type CourseTag = ICourseTag;
 
-export type SemesterStudentVoteStat = ISemesterStudentVoteStat;
+export type SemesterStudentVoteStat = ISemesterStudentVoteStat & {
+  links: number;
+  nodes: number;
+};

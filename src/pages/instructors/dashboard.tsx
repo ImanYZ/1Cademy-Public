@@ -1,9 +1,12 @@
 import PlaceIcon from "@mui/icons-material/Place";
 import SquareIcon from "@mui/icons-material/Square";
-import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
+import { Divider, Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
+import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { SemesterStudentVoteStat } from "src/instructorsTypes";
 
 import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -114,15 +117,83 @@ const BoxLegend = () => {
   );
 };
 
-const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
-  // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
+const Semester = "2gbmyJVzQY1FBafjBtRx";
 
+type SemesterStats = {
+  newNodeProposals: number;
+  editProposals: number;
+  links: number;
+  nodes: number;
+  votes: number;
+  questions: number;
+};
+
+const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, user }) => {
+  // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
+  console.log({ selectedCourse, selectedSemester });
   const theme = useTheme();
   // const [screenSize, setScreenSize] = useState(null);
-
+  const db = getFirestore();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
+  const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
+  const [students, setStudents] = useState<number>(0);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const getSemesterData = async () => {
+      const semesterRef = collection(db, "tmpSemesterStudentVoteStat");
+      const q = query(semesterRef, where("tagId", "==", Semester));
+      const semesterDoc = await getDocs(q);
+      if (!semesterDoc.docs.length) return;
+
+      const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      setSemesterStats(getSemStat(semester));
+    };
+    getSemesterData();
+  }, [db, user]);
+  useEffect(() => {
+    console.log("SemesterStarts", semesterStats);
+  }, [semesterStats]);
+
+  //STATIC "MODIFTY"
+  useEffect(() => {
+    const getSemesterStudents = async () => {
+      const semesterRef = doc(db, "semesters", Semester);
+      const semesterDoc = await getDoc(semesterRef);
+      if (!semesterDoc.exists()) return;
+
+      setStudents(semesterDoc.data().students.length);
+    };
+    getSemesterStudents();
+  }, [db]);
+
+  const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
+    let newNodeProposals = 0;
+    let editProposals = 0;
+    let links = 0;
+    let nodes = 0;
+    let votes = 0;
+    let questions = 0;
+
+    data.map(stat => {
+      newNodeProposals += stat.newNodes;
+      editProposals += stat.improvements;
+      links += stat.links;
+      nodes += stat.nodes;
+      votes += stat.votes;
+      questions += stat.questions;
+    });
+    return {
+      newNodeProposals,
+      editProposals,
+      links,
+      nodes,
+      questions,
+      votes,
+    };
+  };
   // useEffect(()=>{
 
   // })
@@ -165,9 +236,72 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
           gap: "16px",
         }}
       >
-        <Paper sx={{ p: "16px" }}>
+        <Paper
+          sx={{
+            px: "32px",
+            py: "40px",
+          }}
+        >
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                columnGap: "16px",
+                color: "white",
+                flexWrap: "wrap",
+                paddingBottom: "12px",
+              }}
+            >
+              <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>
+                SI <span style={{ fontSize: "30px" }}>106</span>
+              </Typography>
+              <span>Fall 22</span>
+              <span>Students: {students !== 0 ? students : "*"}</span>
+              <span>Introduction to Information Science</span>
+            </Box>
+            <Divider />
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 64px",
+                justifyContent: "center",
+                alignItems: "end",
+                py: "12px",
+                textAlign: "center",
+                columnGap: "16px",
+              }}
+            >
+              <span style={{ color: "#303134" }}>Spaceeesssssssssss</span>
+              <span>Numbers</span>
+            </Box>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 64px",
+                justifyContent: "center",
+                alignItems: "center",
+                textAlign: "center",
+                columnGap: "16px",
+                rowGap: "24px",
+              }}
+            >
+              <span style={{ textAlign: "left" }}>New Node Proposals</span>
+              <span>{semesterStats?.newNodeProposals}</span>
+              <span style={{ textAlign: "left" }}>Edit Proposals</span>
+              <span>{semesterStats?.editProposals}</span>
+              <span style={{ textAlign: "left" }}>Links</span>
+              <span>{semesterStats?.links}</span>
+              <span style={{ textAlign: "left" }}>Nodes</span>
+              <span>{semesterStats?.nodes}</span>
+              <span style={{ textAlign: "left" }}>Votes</span>
+              <span>{semesterStats?.votes}</span>
+              <span style={{ textAlign: "left" }}>Questions</span>
+              <span>{semesterStats?.questions}</span>
+            </Box>
+          </Box>
           <Typography>
-            hello world {selectedSemester} + {selectedCourse}
             {/* // NewNodeProposal = newNodes
 // editProposals = improvements
 // links
@@ -208,7 +342,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
                 <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
                 <span>{`>50%`}</span>
                 <SquareIcon fontSize="inherit" sx={{ fill: "#FF8A33" }} />
-                <span>{`<=100%`}</span>
+                <span>{`<=10%`}</span>
               </Box>
             </Box>
           </Box>
