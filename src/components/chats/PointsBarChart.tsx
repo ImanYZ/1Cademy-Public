@@ -60,13 +60,22 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   console.log({ groups });
 
   const columns = ["Proposals", "Questions"];
+
+  // remove axis if exist to avoid overdrawing
+  svg.select("#axis-x").remove();
+  svg.select("#axis-y").remove();
+
   // Add X axis
   const x = d3.scaleBand().domain(columns).range([0, width]).padding(0.2);
-  svg.append("g").attr("transform", `translate(20, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
+  svg
+    .append("g")
+    .attr("id", "axis-x")
+    .attr("transform", `translate(20, ${height})`)
+    .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
   const y = d3.scaleLinear().domain([0, 60]).range([height, 0]);
-  svg.append("g").attr("transform", `translate(20, 0)`).call(d3.axisLeft(y));
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(20, 0)`).call(d3.axisLeft(y));
 
   // color palette = one color per subgroup
   console.log({ subgroups });

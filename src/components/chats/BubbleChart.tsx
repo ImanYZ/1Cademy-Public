@@ -75,13 +75,20 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin
   // const groups = data.map(d => d.month).flatMap(c => c);
   // console.log({ groups });
 
+  // remove axis if exists
+  svg.select("#axis-x").remove();
+  svg.select("#axis-y").remove();
   // Add X axis
   const x = d3.scaleLinear().domain([0, 500]).range([0, width]);
-  svg.select("#axis-x").attr("transform", `translate(30, ${height})`).call(d3.axisBottom(x).tickSizeOuter(0));
+  svg
+    .append("g")
+    .attr("id", "axis-x")
+    .attr("transform", `translate(30, ${height})`)
+    .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
   const y = d3.scaleLinear().domain([-10, 100]).range([height, 0]);
-  svg.select("#axis-y").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
   // color palette = one color per subgroup
@@ -160,8 +167,6 @@ export const BubbleChart = ({ width, margin, theme }: BubblePlotProps) => {
 
   return (
     <svg ref={svg}>
-      <g id="axis-x"></g>
-      <g id="axis-y"></g>
       <g id="bubbles"></g>
       <g id="nums"></g>
     </svg>
