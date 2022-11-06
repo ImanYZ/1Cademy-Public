@@ -113,8 +113,6 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         //   page,
         // });
 
-        console.log("data", data.data);
-
         const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
         setSearchResults({
           data: newData,
@@ -125,7 +123,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         // };
         setIsRetrieving(false);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setIsRetrieving(false);
       }
     },

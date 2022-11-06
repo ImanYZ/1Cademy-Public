@@ -41,7 +41,7 @@ const SignUpPage: NextPageWithLayout = () => {
           }
         );
       } catch (error) {
-        console.log(error);
+        console.error(error);
         handleError({ error, showErrorToast: false });
       }
     },
