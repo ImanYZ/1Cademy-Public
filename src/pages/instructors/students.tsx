@@ -1406,15 +1406,23 @@ export const Students: InstructorLayoutPage = () => {
         </Drawer>
       </Box>
       <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)}>
-        <DialogTitle>Add students from a csv file</DialogTitle>
+        <DialogTitle>
+          <Typography variant="h3" fontWeight={"bold"} component="h2">
+            Add students from a csv file
+          </Typography>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
             <CSVBtn getCSVRowData={getCSVRowData} />
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={addNewData}>Add data to Table</Button>
-          <Button onClick={() => setOpenUploadModal(false)}>Cancel</Button>
+          <Button variant="contained" onClick={addNewData}>
+            Add data to Table
+          </Button>
+          <Button variant="contained" onClick={() => setOpenUploadModal(false)}>
+            Cancel
+          </Button>
         </DialogActions>
       </Dialog>
     </>
