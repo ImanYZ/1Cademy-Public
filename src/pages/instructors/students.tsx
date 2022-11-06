@@ -81,11 +81,9 @@ const rows = [
   },
   {
     id: 1,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
-
     firstName: "Edna ",
     lastName: " Roberts",
     email: "samirbes@umich.edu",
@@ -104,11 +102,9 @@ const rows = [
   },
   {
     id: 2,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
     firstName: "Belle ",
     lastName: " Douglas",
     email: "samirbes@umich.edu",
@@ -127,12 +123,10 @@ const rows = [
   },
   {
     id: 3,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
     online: true,
-
     firstName: "Jay",
     lastName: "Tyler",
     email: "samirbes@umich.edu",
@@ -151,12 +145,10 @@ const rows = [
   },
   {
     id: 4,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
     online: true,
-
     firstName: "Darrell",
     lastName: "Harrington",
     email: "samirbes@umich.edu",
@@ -175,12 +167,10 @@ const rows = [
   },
   {
     id: 5,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
     online: true,
-
     firstName: "Johanna",
     lastName: "Bailey",
     email: "samirbes@umich.edu",
@@ -199,12 +189,10 @@ const rows = [
   },
   {
     id: 6,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
     online: true,
-
     firstName: "Effie",
     lastName: "Vega",
     email: "samirbes@umich.edu",
@@ -223,11 +211,9 @@ const rows = [
   },
   {
     id: 7,
-
     username: "username",
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
     firstName: "Lida",
     lastName: "Jordan",
     email: "samirbes@umich.edu",
@@ -485,40 +471,25 @@ const columns: string[] = [
   "lastActivity",
 ];
 
-const keys = [
-  "First Name",
-  "Last Name",
-  "Email",
-  "Total Poitns",
-  "Wrongs",
-  "Corrects",
-  "Awards",
-  "New Proposals",
-  "Edit Node Proposals",
-  "Proposals Points",
-  "Questions",
-  "Question Points",
-  "Vote",
-  "Vote Points",
-  "Last Activity",
-];
+const keys: string[] = ["userProfile", ...columns];
 
 const keysColumns: any = {
-  "First Name": "firstName",
-  "Last Name": "lastName",
-  Email: "email",
-  "Total Poitns": "totalPoints",
-  Wrongs: "wrongs",
-  Corrects: "corrects",
-  Awards: "awards",
-  "New Proposals": "newPorposals",
-  "Edit Node Proposals": "editNodeProposals",
-  "Proposals Points": "proposalsPoints",
-  Questions: "questions",
-  "Question Points": "questionPoints",
-  Vote: "vote",
-  "Vote Points": "votePoints",
-  "Last Activity": "lastActivity",
+  userProfile: "User Profile",
+  firstName: "First Name",
+  lastName: "Last Name",
+  email: "Email",
+  totalPoints: "Total Poitns",
+  wrongs: "Wrongs",
+  corrects: "Corrects",
+  awards: "Awards",
+  newPorposals: "New Proposals",
+  editNodeProposals: "Edit Node Proposals",
+  proposalsPoints: "Proposals Points",
+  questions: "Questions",
+  questionPoints: "Question Points",
+  vote: "Vote",
+  votePoints: "Vote Points",
+  lastactivity: "Last Activity",
 };
 
 export const Students: InstructorLayoutPage = () => {
@@ -1003,7 +974,6 @@ export const Students: InstructorLayoutPage = () => {
     </Box>
   );
 
-  console.log("query");
   return (
     <>
       <Box className="student-dashboard" sx={{ width: "100%" }}>
@@ -1147,7 +1117,6 @@ export const Students: InstructorLayoutPage = () => {
             })}{" "}
           </Stack>
         )}
-
         <hr />
         <Box
           sx={{
@@ -1161,15 +1130,15 @@ export const Students: InstructorLayoutPage = () => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  {keys.map((colmn, index) => {
+                  {keys.map((colmn: any, index) => {
                     return (
                       <TableCell
                         key={index}
                         sx={
-                          ["First Name", "Last Name"].includes(colmn) && isMovil
+                          ["firstName", "lastName"].includes(colmn) && isMovil
                             ? {
                                 position: "sticky",
-                                left: colmn === "Last Name" ? 90 : 0,
+                                left: colmn === "lastName" ? 90 : 0,
                                 backgroundColor: theme =>
                                   theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
                                 fontWeight: "10px",
@@ -1182,16 +1151,20 @@ export const Students: InstructorLayoutPage = () => {
                         align="left"
                       >
                         <div style={{ display: "flex", flexDirection: "row" }}>
-                          <div> {colmn}</div>
-                          {!isMovil && (
-                            <IconButton
-                              id={id}
-                              onClick={event => handleClick(colmn, event)}
-                              style={{ paddingTop: "10px" }}
-                            >
-                              {" "}
-                              <ArrowDropDownIcon viewBox="1 9 24 24" />
-                            </IconButton>
+                          {colmn !== "userProfile" && (
+                            <>
+                              <div>{keysColumns[colmn]}</div>
+                              {!isMovil && (
+                                <IconButton
+                                  id={id}
+                                  onClick={event => handleClick(colmn, event)}
+                                  style={{ paddingTop: "10px" }}
+                                >
+                                  {" "}
+                                  <ArrowDropDownIcon viewBox="1 9 24 24" />
+                                </IconButton>
+                              )}
+                            </>
                           )}
                         </div>
                         <Popover
