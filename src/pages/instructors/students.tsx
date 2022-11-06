@@ -3,17 +3,20 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-// import { createStyles, makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Link, Modal, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Drawer from "@mui/material/Drawer";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
-// import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
@@ -38,8 +41,8 @@ import {
   getFirestore,
   /*   limit, */
   onSnapshot,
-  /*  Query,
   query,
+  /*  Query,
   setDoc,
   Timestamp,
   updateDoc,
@@ -53,6 +56,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 
 import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
+
 const rows: GridRowsProp = [
   {
     id: 0,
@@ -498,6 +502,7 @@ const keys = [
   "Vote Points",
   "Last Activity",
 ];
+
 const keysColumns: any = {
   "First Name": "firstName",
   "Last Name": "lastName",
@@ -515,8 +520,8 @@ const keysColumns: any = {
   "Vote Points": "votePoints",
   "Last Activity": "lastActivity",
 };
+
 export const Students: InstructorLayoutPage = () => {
-  // const classes = useStyles();
   const [tableRows, setTableRows] = useState(rows.slice());
   const [CSVRowData, getCSVRowData] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
@@ -539,13 +544,14 @@ export const Students: InstructorLayoutPage = () => {
   const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const db = getFirestore();
 
   const id = open ? "simple-popover" : undefined;
 
   useEffect(() => {
     if (isMovil) setEditMode(false);
   }, [isMovil]);
-  const db = getFirestore();
+
   useEffect(() => {
     if (!db) return;
 
@@ -582,6 +588,7 @@ export const Students: InstructorLayoutPage = () => {
       handleOpenCloseFilter();
     }
   };
+
   const handleChangeFilter = (event: any) => {
     const newFilter = {
       title: event.target.value,
@@ -613,12 +620,14 @@ export const Students: InstructorLayoutPage = () => {
     }
     setTableRows(_tableRows);
   };
+
   const deleteFilter = (index: any, fromDash: boolean) => {
     const _oldFilters = [...filters];
     _oldFilters.splice(index, 1);
     setFilters(_oldFilters);
     handleFilterBy(_oldFilters, fromDash);
   };
+
   const handleChangeOperation = (index: number, event: any) => {
     const _filters = [...filters];
     _filters[index] = {
@@ -681,11 +690,12 @@ export const Students: InstructorLayoutPage = () => {
     }
     const payloadAPI = { students };
     console.log(payloadAPI);
-    return setEditMode(!editMode);
-  };
-  const discardTableChanges = () => {
     setEditMode(!editMode);
+    return;
   };
+
+  const discardTableChanges = () => setEditMode(!editMode);
+
   const editValues = (column: any, index: any, event: any) => {
     event.preventDefault();
     console.log(event);
@@ -699,9 +709,7 @@ export const Students: InstructorLayoutPage = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClose = () => setAnchorEl(null);
 
   const sortLowHigh = () => {
     const _tableRows = tableRows.slice();
@@ -723,6 +731,7 @@ export const Students: InstructorLayoutPage = () => {
     setTableRows(_tableRows);
     handleClose();
   };
+
   const sortHighLow = () => {
     const _tableRows = tableRows.slice();
     if (["firstName", "lastName", "email"].includes(selectedColumn)) {
@@ -743,11 +752,13 @@ export const Students: InstructorLayoutPage = () => {
     setTableRows(_tableRows);
     handleClose();
   };
+
   const deleteRow = (index: number) => {
     const _tableRows = tableRows.slice();
     _tableRows.splice(index, 1);
     setTableRows(_tableRows);
   };
+
   const searchByNameEmail = (newValue: string) => {
     const _tableRows = tableRows.slice();
 
@@ -760,6 +771,7 @@ export const Students: InstructorLayoutPage = () => {
     });
     setTableRows(newTable);
   };
+
   const addNewStudent = () => {
     const _tableRow = tableRows.slice();
     _tableRow.push({
@@ -772,6 +784,7 @@ export const Students: InstructorLayoutPage = () => {
     });
     setTableRows(_tableRow);
   };
+
   const handleNewSearh = (event: any) => {
     setSearchValue(event.target.value);
     if (!event.target.value) return setTableRows(rows.slice());
@@ -822,6 +835,7 @@ export const Students: InstructorLayoutPage = () => {
     setTableRows(_tableRow);
     setOpenUploadModal(false);
   };
+
   const filer = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
@@ -991,6 +1005,8 @@ export const Students: InstructorLayoutPage = () => {
       </Box>
     </Box>
   );
+
+  console.log("query");
   return (
     <>
       <Box className="student-dashboard" sx={{ width: "100%" }}>
@@ -1010,6 +1026,26 @@ export const Students: InstructorLayoutPage = () => {
               flexDirection: "row",
             }}
           >
+            <Button
+              variant="text"
+              sx={{
+                color: theme => theme.palette.common.black,
+                backgroundColor: "#EDEDED",
+                fontSize: 16,
+                fontWeight: "700",
+                my: { xs: "0px", md: "auto" },
+                mt: { xs: "15px", md: "auto" },
+                marginLeft: { xs: "0px", md: "32px" },
+                marginRight: "40px",
+                paddingX: "30px",
+                borderRadius: 1,
+                textAlign: "center",
+                alignSelf: "center",
+              }}
+              onClick={() => setOpenUploadModal(true)}
+            >
+              Add students from a csv file
+            </Button>
             <Typography variant="h1" component="h2">
               Sl
             </Typography>
@@ -1298,7 +1334,7 @@ export const Students: InstructorLayoutPage = () => {
           </TableContainer>
           {editMode && (
             <Box sx={{ mt: "50px" }}>
-              <Button
+              {/* <Button
                 variant="text"
                 sx={{
                   color: theme => theme.palette.common.black,
@@ -1317,7 +1353,7 @@ export const Students: InstructorLayoutPage = () => {
                 onClick={() => setOpenUploadModal(true)}
               >
                 Add students from a csv file
-              </Button>
+              </Button> */}
               <Button
                 variant="text"
                 sx={{
@@ -1338,44 +1374,6 @@ export const Students: InstructorLayoutPage = () => {
               >
                 <AddIcon /> Add a new student
               </Button>
-
-              <Modal
-                keepMounted
-                open={openUploadModal}
-                aria-labelledby="keep-mounted-modal-title"
-                aria-describedby="keep-mounted-modal-description"
-              >
-                <Box
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 500,
-                    height: 200,
-                    backgroundColor: "grey",
-                    border: "2px solid #000",
-                  }}
-                >
-                  <Box sx={{ textAlign: "center" }}>
-                    <Typography sx={{ color: "balck" }} id="keep-mounted-modal-title" variant="h6" component="h2">
-                      Add students from a csv file
-                    </Typography>
-                    <Box sx={{ textAlign: "center" }}>
-                      <CSVBtn getCSVRowData={getCSVRowData} />
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ display: "flex", mr: "50px", ml: "50px", justifyContent: "space-between" }}>
-                    <Button variant="contained" onClick={addNewData}>
-                      Add to the table
-                    </Button>
-                    <Button variant="contained" onClick={() => setOpenUploadModal(false)}>
-                      Cancel
-                    </Button>
-                  </Box>
-                </Box>
-              </Modal>
               <Box sx={{ textAlign: "right" }}>
                 <Button
                   variant="text"
@@ -1427,6 +1425,18 @@ export const Students: InstructorLayoutPage = () => {
           {studentsProfile()}
         </Drawer>
       </Box>
+      <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)}>
+        <DialogTitle>Add students from a csv file</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <CSVBtn getCSVRowData={getCSVRowData} />
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={addNewData}>Add data to Table</Button>
+          <Button onClick={() => setOpenUploadModal(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

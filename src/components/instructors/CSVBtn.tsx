@@ -31,14 +31,7 @@ export const CSVBtn = ({ getCSVRowData }: any) => {
     getCSVRowData({ columns: headerKeys, rows: array });
   };
 
-  return (
-    <div style={{ textAlign: "center" }}>
-      <form>
-        <input type={"file"} id={"csvFileInput"} accept={".csv"} onChange={handleOnChange} />
-      </form>
-      <br />
-    </div>
-  );
+  return <input type={"file"} id={"csvFileInput"} accept={".csv"} onChange={handleOnChange} />;
 };
 
 export default CSVBtn;
