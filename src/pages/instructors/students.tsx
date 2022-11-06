@@ -523,7 +523,10 @@ const keysColumns: any = {
 
 export const Students: InstructorLayoutPage = () => {
   const [tableRows, setTableRows] = useState(rows.slice());
-  const [CSVRowData, getCSVRowData] = useState<any>([]);
+  const [CSVData, getCSVData] = useState<any>({
+    columns: [],
+    rows: [],
+  });
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [openUploadModal, setOpenUploadModal] = useState(false);
@@ -578,9 +581,9 @@ export const Students: InstructorLayoutPage = () => {
     let _tableRows = rows.slice();
     for (let filter of filters) {
       if (filter.operation === "<") {
-        _tableRows = _tableRows.filter(row => row[filterChoices[filter.title]] <= filter.value);
+        _tableRows = _tableRows.filter((row: any) => row[filterChoices[filter.title]] <= filter.value);
       } else if (filter.operation === ">") {
-        _tableRows = _tableRows.filter(row => row[filterChoices[filter.title]] >= filter.value);
+        _tableRows = _tableRows.filter((row: any) => row[filterChoices[filter.title]] >= filter.value);
       }
     }
     setTableRows(_tableRows);
@@ -602,7 +605,7 @@ export const Students: InstructorLayoutPage = () => {
   //TO-DO
   const updateTableRows = () => {
     let addNewRow = true;
-    let _tableRows = tableRows.slice();
+    let _tableRows: any = tableRows.slice();
     for (let row of tableRows) {
       if (!row["firstName"] && !row["lastName"] && !row["email"]) {
         addNewRow = false;
@@ -699,7 +702,7 @@ export const Students: InstructorLayoutPage = () => {
   const editValues = (column: any, index: any, event: any) => {
     event.preventDefault();
     console.log(event);
-    let _tableRows = tableRows.slice();
+    let _tableRows: any = tableRows.slice();
     _tableRows[index][column] = event.target.value;
     setTableRows([..._tableRows]);
   };
@@ -714,7 +717,7 @@ export const Students: InstructorLayoutPage = () => {
   const sortLowHigh = () => {
     const _tableRows = tableRows.slice();
     if (["firstName", "lastName", "email"].includes(selectedColumn)) {
-      _tableRows.sort((a, b) => {
+      _tableRows.sort((a: any, b: any) => {
         const nameA = a[selectedColumn].toUpperCase();
         const nameB = b[selectedColumn].toUpperCase();
         if (nameA < nameB) {
@@ -726,7 +729,7 @@ export const Students: InstructorLayoutPage = () => {
         return 0;
       });
     } else {
-      _tableRows.sort((a, b) => a[selectedColumn] - b[selectedColumn]);
+      _tableRows.sort((a: any, b: any) => a[selectedColumn] - b[selectedColumn]);
     }
     setTableRows(_tableRows);
     handleClose();
@@ -735,7 +738,7 @@ export const Students: InstructorLayoutPage = () => {
   const sortHighLow = () => {
     const _tableRows = tableRows.slice();
     if (["firstName", "lastName", "email"].includes(selectedColumn)) {
-      _tableRows.sort((a, b) => {
+      _tableRows.sort((a: any, b: any) => {
         const nameA = a[selectedColumn].toUpperCase();
         const nameB = b[selectedColumn].toUpperCase();
         if (nameA > nameB) {
@@ -747,7 +750,7 @@ export const Students: InstructorLayoutPage = () => {
         return 0;
       });
     } else {
-      _tableRows.sort((a, b) => b[selectedColumn] - a[selectedColumn]);
+      _tableRows.sort((a: any, b: any) => b[selectedColumn] - a[selectedColumn]);
     }
     setTableRows(_tableRows);
     handleClose();
@@ -773,7 +776,7 @@ export const Students: InstructorLayoutPage = () => {
   };
 
   const addNewStudent = () => {
-    const _tableRow = tableRows.slice();
+    const _tableRow: any = tableRows.slice();
     _tableRow.push({
       id: Math.floor(Math.random() * 100),
       username: "Harry Potter",
@@ -792,7 +795,7 @@ export const Students: InstructorLayoutPage = () => {
   };
 
   const handleEditAndAdd = () => {
-    const _tableRow = tableRows.slice();
+    const _tableRow: any = tableRows.slice();
     if (editMode) {
       saveTableChanges();
       return setEditMode(!editMode);
@@ -813,17 +816,11 @@ export const Students: InstructorLayoutPage = () => {
 
   const addNewData = () => {
     const _tableRow = tableRows.slice();
-    const email = CSVRowData.columns.filter((elm: any) => {
-      return elm.includes("Email");
-    })[0];
-    const fName = CSVRowData.columns.filter((elm: any) => {
-      return elm.includes("First Name");
-    })[0];
-    const lName = CSVRowData.columns.filter((elm: any) => {
-      return elm.includes("Last Name");
-    })[0];
-    for (let row of CSVRowData.rows) {
-      const newObject = {
+    const email = CSVData.columns.find((elm: any) => elm?.includes("Email"));
+    const fName = CSVData.columns.find((elm: any) => elm?.includes("First Name"));
+    const lName = CSVData.columns.find((elm: any) => elm?.includes("Last Name"));
+    for (let row of CSVData.rows) {
+      const newObject: any = {
         username: "username",
         avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
         firstName: row[fName],
@@ -1164,9 +1161,10 @@ export const Students: InstructorLayoutPage = () => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  {keys.map(colmn => {
+                  {keys.map((colmn, index) => {
                     return (
                       <TableCell
+                        key={index}
                         sx={
                           ["First Name", "Last Name"].includes(colmn) && isMovil
                             ? {
@@ -1182,7 +1180,6 @@ export const Students: InstructorLayoutPage = () => {
                             : {}
                         }
                         align="left"
-                        key={colmn}
                       >
                         <div style={{ display: "flex", flexDirection: "row" }}>
                           <div> {colmn}</div>
@@ -1237,8 +1234,8 @@ export const Students: InstructorLayoutPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tableRows.map((row, index) => (
-                  <TableRow key={row.firstName} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                {tableRows.map((row: any, index) => (
+                  <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                     {!isMovil && (
                       <TableCell align="left">
                         <OptimizedAvatar
@@ -1250,10 +1247,10 @@ export const Students: InstructorLayoutPage = () => {
                         <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
                       </TableCell>
                     )}
-                    {columns.map(colmn => {
+                    {columns.map((colmn, index) => {
                       return (
                         <TableCell
-                          key={colmn}
+                          key={index}
                           sx={
                             ["firstName", "lastName"].includes(colmn) && isMovil
                               ? {
@@ -1413,11 +1410,11 @@ export const Students: InstructorLayoutPage = () => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <CSVBtn getCSVRowData={getCSVRowData} />
+            <CSVBtn getCSVData={getCSVData} isOpen={openUploadModal} />
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={addNewData}>
+          <Button disabled={CSVData?.rows?.length <= 0} variant="contained" onClick={addNewData}>
             Add data to Table
           </Button>
           <Button variant="contained" onClick={() => setOpenUploadModal(false)}>

@@ -1,7 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 
-export const CSVBtn = ({ getCSVRowData }: any) => {
+export const CSVBtn = ({ getCSVData, isOpen }: any) => {
   const fileReader = new FileReader();
+
+  useEffect(() => {
+    if (!isOpen) {
+      getCSVData({
+        columns: [],
+        rows: [],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleOnChange = (e: any) => {
     const file = e.target.files[0];
@@ -27,8 +37,7 @@ export const CSVBtn = ({ getCSVRowData }: any) => {
       return obj;
     });
     const headerKeys = Object.keys(Object.assign({}, ...array));
-
-    getCSVRowData({ columns: headerKeys, rows: array });
+    getCSVData({ columns: headerKeys, rows: array });
   };
 
   return <input type={"file"} id={"csvFileInput"} accept={".csv"} onChange={handleOnChange} />;
