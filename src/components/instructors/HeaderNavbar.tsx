@@ -11,8 +11,6 @@ type HeaderNavbarProps = { options: Option[] };
 const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
   const router = useRouter();
 
-  console.log("router.route", router.route);
-
   const getTabSelected = () => {
     const tabSelected = options.findIndex(cur => cur.route === router.route);
     return tabSelected >= 0 ? tabSelected : false;

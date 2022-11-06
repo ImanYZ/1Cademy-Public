@@ -73,7 +73,7 @@ export const SignUpPersonalInfo = ({ formikProps }: SignUpBasicInformationProps)
         // await updateCitiesByState(state_prov)
         setFieldValue("city", city);
       } catch (err) {
-        console.log("cant autocomplete country state city");
+        console.warn("cant autocomplete country state city");
       }
     };
 

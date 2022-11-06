@@ -233,7 +233,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         // };
         setIsRetrieving(false);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setIsRetrieving(false);
       }
     },
