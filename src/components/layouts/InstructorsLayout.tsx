@@ -1,12 +1,17 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { NextPage } from "next";
-import React, { FC, ReactNode } from "react";
+// import { useRouter } from "next/router";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 
+import { useAuth } from "../../context/AuthContext";
+import { Instructor } from "../../instructorsTypes";
+// import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
-import { useSemesterFilter } from "../instructors/useSemesterFilter";
+// import { useSemesterFilter } from "../instructors/useSemesterFilter";
 
 export type Option = {
   id: string;
@@ -33,20 +38,70 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
   getLayout?: (page: InstructorLayoutPage) => ReactNode;
 };
 export const InstructorsLayout: FC<Props> = ({ children }) => {
-  // const [{ isAuthenticated }] = useAuth();
-  // const router = useRouter();
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     router.replace(ROUTES.dashboard);
-  //   }
-  // }, [isAuthenticated, router]);
-
+  const [{ user }] = useAuth();
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
-    useSemesterFilter();
+  const [instructor, setInstructor] = useState<Instructor | null>(null);
+  const [semesters, setSemesters] = useState<string[]>([]);
+  const [allCourses, setAllCourses] = useState<CoursesResult>({});
+  const [selectedSemester, setSelectedSemester] = useState<string | undefined>(undefined);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<string | undefined>(undefined);
 
+  // TODO: create useEffect to load semesters
+
+  const db = getFirestore();
+
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     router.replace(ROUTES.signIn);
+  //   }
+  // }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!user) return console.warn("Not user found, wait please");
+
+    const getInstructor = async () => {
+      const instructorsRef = collection(db, "instructors");
+      const q = query(instructorsRef, where("uname", "==", user.uname));
+      const userNodeDoc = await getDocs(q);
+      if (!userNodeDoc.docs.length) return;
+
+      const intructor = userNodeDoc.docs[0].data() as Instructor;
+      setInstructor(intructor);
+      const courses = getCoursesByInstructor(intructor);
+      const semester = Object.keys(courses);
+      setSemesters(semester);
+      setAllCourses(courses);
+    };
+
+    getInstructor();
+  }, [db, user]);
+
+  useEffect(() => {
+    if (!selectedSemester) return setCourses([]);
+
+    const newCourses = getCourseBySemester(selectedSemester, allCourses);
+    setCourses(newCourses);
+    setSelectedCourse(newCourses[0]);
+  }, [allCourses, selectedSemester]);
+
+  // useEffect(() => {
+  //   // const getCourses
+  // });
+
+  // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
+  //   useSemesterFilter();
+
+  console.log(user);
+  if (!user)
+    return (
+      <Box>
+        <h1>Not user found, lets wait a moment</h1>;
+      </Box>
+    );
+  if (!instructor) return <h1>Not instructor found, lets wait a moment</h1>;
   return (
     <Box
       sx={{
@@ -72,4 +127,24 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       {children({ selectedSemester, selectedCourse })}
     </Box>
   );
+};
+
+const getCourseBySemester = (semester: string | undefined, courses: { [key: string]: string[] }): string[] => {
+  if (!semester) return [];
+  return courses[semester] ?? [];
+};
+
+// const getFirstCourse = (semester: string | undefined, courses: { [key: string]: string[] }): string | undefined => {
+//   const coursesBySemester = getCourseBySemester(semester, courses);
+//   return coursesBySemester[0] ?? undefined;
+// };
+
+type CoursesResult = {
+  [key: string]: string[];
+};
+const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
+  return instructor.courses.reduce((acu: CoursesResult, cur) => {
+    const tmpValues = acu[cur.title] ?? [];
+    return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
+  }, {});
 };

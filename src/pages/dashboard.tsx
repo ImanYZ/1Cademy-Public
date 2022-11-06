@@ -3954,7 +3954,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip>
-              partType: {lastNodeOperation.current}
+              {/* partType: {lastNodeOperation.current} */}
             </div>
           )}
 
