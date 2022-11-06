@@ -59,6 +59,46 @@ const data: BoxData = {
   },
 };
 
+// This mock previuly has :{date: "2022-09-27T00:00:00.000Z",num: 9,netVotes: 9,averageVotes: 1,}
+const TRENDS_DATA = [
+  {
+    date: new Date("2/1/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/2/22"),
+    num: 20,
+  },
+  {
+    date: new Date("2/4/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/5/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/6/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/7/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/8/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/9/22"),
+    num: 9,
+  },
+  {
+    date: new Date("2/10/22"),
+    num: 9,
+  },
+];
+
 const BoxLegend = () => {
   return (
     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
@@ -281,7 +321,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={[]}
+            trendData={TRENDS_DATA}
           />
         </Paper>
         <Paper
@@ -307,34 +347,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={[]}
-          />
-        </Paper>
-
-        <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <TrendPlot
-            title={"New Node Points"}
-            // heightTop={(354 * width) / 1045}
-            // heightBottom={(160 * width) / 1045}
-            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-            // width={WIDTH}
-            width={isMovil ? 300 : isTablet ? 600 : 1045}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of Proposals"}
-            theme={"Dark"}
-            x="date"
-            y="num"
-            trendData={[]}
+            trendData={TRENDS_DATA}
           />
         </Paper>
 
@@ -361,7 +374,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={[]}
+            trendData={TRENDS_DATA}
           />
         </Paper>
 
@@ -388,7 +401,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={[]}
+            trendData={TRENDS_DATA}
           />
         </Paper>
 
@@ -415,7 +428,34 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse })
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={[]}
+            trendData={TRENDS_DATA}
+          />
+        </Paper>
+
+        <Paper
+          sx={{
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <TrendPlot
+            title={"New Node Points"}
+            // heightTop={(354 * width) / 1045}
+            // heightBottom={(160 * width) / 1045}
+            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
+            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
+            // width={WIDTH}
+            width={isMovil ? 300 : isTablet ? 600 : 1045}
+            scaleX={"time"}
+            labelX={"Day"}
+            scaleY={"linear"}
+            labelY={"# of Proposals"}
+            theme={"Dark"}
+            x="date"
+            y="num"
+            trendData={TRENDS_DATA}
           />
         </Paper>
       </Box>
