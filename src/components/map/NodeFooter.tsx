@@ -5,17 +5,27 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import DraftsIcon from "@mui/icons-material/Drafts";
+import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import ImageIcon from "@mui/icons-material/Image";
+import LinkIcon from "@mui/icons-material/Link";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MailIcon from "@mui/icons-material/Mail";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import RedditIcon from "@mui/icons-material/Reddit";
+import ReplyAllIcon from "@mui/icons-material/ReplyAll";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import TwitterIcon from "@mui/icons-material/Twitter";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
+import { Badge, Menu, MenuItem } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import React, { useCallback, useEffect,useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { OpenSidebar } from "@/pages/dashboard";
@@ -125,11 +135,45 @@ const NodeFooter = ({
   user,
   setOpenSideBar,
 }: NodeFooterProps) => {
+  const router = useRouter();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
+  const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const messageTwitter = () => {
+    return `1Cademy - Collaboratively Designing Learning Pathways 
+        ${encodeURIComponent(url)}`;
+  };
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+  const [openSocialMenu, setOpenSocialMenu] = useState<boolean>(false);
+  useEffect(() => {
+    const URL = window.location.href;
+    setUrl(URL);
+  }, [router]);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleSocialMenuClick = () => {
+    setOpenSocialMenu(true);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSocialMenuClose = () => {
+    setOpenSocialMenu(false);
+  };
+
+  const onShareByLink = () => {
+    let { protocol, hostname } = new URL(window.location.href);
+    let url: any = protocol + "//" + hostname + "/n/" + identifier;
+    navigator.clipboard.writeText(url);
+    setOpenSocialMenu(false);
+  };
 
   const selectReferences = useCallback(
     (event: any) => {
@@ -192,6 +236,7 @@ const NodeFooter = ({
 
   const selectCitations = useCallback(
     (event: any) => {
+      openNodePart(event, "Citations");
       selectNode(event, "Citations");
     },
     [selectNode]
@@ -253,6 +298,60 @@ const NodeFooter = ({
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
           <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+          <Box
+            className="tab-button-node-footer"
+            sx={{
+              marginLeft: "5px",
+              marginRight: "5px",
+            }}
+          >
+            <MemoizedMetaButton
+              onClick={selectPendingProposals}
+              tooltip="Propose/evaluate versions of this node."
+              // {
+              //   shortenNumber(proposalsNum, 2, false) +
+              //   " proposal" +
+              //   (proposalsNum > 1 ? "s" : "") +
+              //   " exist" +
+              //   (proposalsNum === 1 ? "s" : "") +
+              //   " on this node. Click to propose an improvement or review a proposal on the pending proposals list."
+              // }
+              tooltipPosition="top"
+              style={{
+                borderTopRightRadius: "8px",
+                borderTopLeftRadius: "8px",
+              }}
+            >
+              <>
+                <CreateIcon sx={{ fontSize: "16px" }} />
+                <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
+              </>
+            </MemoizedMetaButton>
+          </Box>
+          <Box className="vote-area">
+            <MemoizedMetaButton onClick={wrongNode} tooltip="Vote to delete node." tooltipPosition="top">
+              <Box
+                className="delete-vote"
+                sx={{
+                  display: "flex",
+                }}
+              >
+                <span>{shortenNumber(wrongNum, 2, false)}</span>
+                <CloseIcon sx={{ fontSize: "18px", color: markedWrong ? "red" : "inherit", marginLeft: "10px" }} />
+              </Box>
+            </MemoizedMetaButton>
+            <Box className="vertical-row"></Box>
+            <MemoizedMetaButton onClick={correctNode} tooltip="Vote to prevent further changes." tooltipPosition="top">
+              <Box
+                sx={{
+                  display: "flex",
+                }}
+              >
+                <span>{shortenNumber(correctNum, 2, false)}</span>
+                <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "10px" }} />
+              </Box>
+            </MemoizedMetaButton>
+          </Box>
           {/* <span
             className={"TooltipText " + (open ? "Top" : "Bottom")}
             onClick={preventEventPropagation}
@@ -276,7 +375,7 @@ const NodeFooter = ({
             {!editable && !unaccepted ? (
               // Accepted nodes
               <>
-                <MemoizedMetaButton
+                {/* <MemoizedMetaButton
                   onClick={narrateNode}
                   tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
                   tooltipPosition="top"
@@ -286,25 +385,8 @@ const NodeFooter = ({
                   ) : (
                     <RecordVoiceOverIcon sx={{ fontSize: "16px" }} />
                   )}
-                </MemoizedMetaButton>
-                <MemoizedMetaButton
-                  onClick={selectPendingProposals}
-                  tooltip="Propose/evaluate versions of this node."
-                  // {
-                  //   shortenNumber(proposalsNum, 2, false) +
-                  //   " proposal" +
-                  //   (proposalsNum > 1 ? "s" : "") +
-                  //   " exist" +
-                  //   (proposalsNum === 1 ? "s" : "") +
-                  //   " on this node. Click to propose an improvement or review a proposal on the pending proposals list."
-                  // }
-                  tooltipPosition="top"
-                >
-                  <>
-                    <CreateIcon sx={{ fontSize: "16px" }} />
-                    <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
-                  </>
-                </MemoizedMetaButton>
+                </MemoizedMetaButton> */}
+
                 {/* <MemoizedMetaButton
                   onClick={selectAcceptedProposals}
                   tooltip="See version history."
@@ -329,6 +411,9 @@ const NodeFooter = ({
                   onClick={uploadImageClicked}
                   tooltip="Upload an image for this node."
                   tooltipPosition="top"
+                  style={{
+                    marginRight: "5px",
+                  }}
                 >
                   <>
                     <ImageIcon sx={{ fontSize: "16px" }} />
@@ -350,86 +435,100 @@ const NodeFooter = ({
             )}
             {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
+                <Box
+                  className="tab-button-node-footer"
+                  sx={{
+                    background: openPart === "Citations" ? "#484848" : "#303030",
+                  }}
+                >
+                  <MemoizedMetaButton
+                    onClick={selectCitations}
+                    tooltip="View nodes that have cited this node."
+                    tooltipPosition="top"
+                    style={{
+                      borderTopRightRadius: "8px",
+                      borderTopLeftRadius: "8px",
+                    }}
+                  >
+                    <>
+                      {citationsSelected ? (
+                        <>
+                          <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
+                          <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
+                        </>
+                      ) : (
+                        <>
+                          <ArrowForwardIcon sx={{ fontSize: "16px" }} />
+                          <MenuBookIcon sx={{ fontSize: "16px" }} />
+                        </>
+                      )}
+                      {/* <span>{shortenNumber(citations[identifier]?.size ?? 0, 2, false)}</span> */}
+                    </>
+                  </MemoizedMetaButton>
+                </Box>
+                <Box
+                  className="tab-button-node-footer"
+                  sx={{
+                    background: openPart === "Tags" ? "#484848" : "#303030",
+                  }}
+                >
+                  <MemoizedMetaButton
+                    onClick={selectTags}
+                    tooltip="View tags assigned to this node."
+                    tooltipPosition="top"
+                    style={{
+                      borderTopRightRadius: "8px",
+                      borderTopLeftRadius: "8px",
+                    }}
+                  >
+                    <>
+                      <LocalOfferIcon
+                        // className={openPart === "Tags" ? "orange-text" : "grey-text"}
+                        color={openPart === "Tags" ? "primary" : "secondary"}
+                        sx={{ fontSize: "16px" }}
+                      />
+                      <span>{shortenNumber(tags.length, 2, false)}</span>
+                    </>
+                  </MemoizedMetaButton>
+                </Box>
+              </>
+            ) : (
+              <Box
+                className="tab-button-node-footer"
+                sx={{
+                  background: openPart === "References" ? "#484848" : "#303030",
+                }}
+              >
                 <MemoizedMetaButton
-                  onClick={selectCitations}
-                  tooltip="View nodes that have cited this node."
+                  onClick={selectReferences}
+                  tooltip="View tags and citations used in this node."
                   tooltipPosition="top"
+                  style={{
+                    borderTopRightRadius: "8px",
+                    borderTopLeftRadius: "8px",
+                  }}
                 >
                   <>
-                    {citationsSelected ? (
-                      <>
-                        <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                        <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                      </>
-                    ) : (
-                      <>
-                        <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                        <MenuBookIcon sx={{ fontSize: "16px" }} />
-                      </>
-                    )}
-                    {/* <span>{shortenNumber(citations[identifier]?.size ?? 0, 2, false)}</span> */}
-                  </>
-                </MemoizedMetaButton>
-
-                <MemoizedMetaButton
-                  onClick={selectTags}
-                  tooltip="View tags assigned to this node."
-                  tooltipPosition="top"
-                >
-                  <>
+                    <MenuBookIcon
+                      // className={openPart === "References" ? "orange-text" : "grey-text"}
+                      color={openPart === "References" ? "primary" : "inherit"}
+                      sx={{ fontSize: "16px" }}
+                    />
+                    <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
+                    <Box component={"span"}> | </Box>
                     <LocalOfferIcon
-                      // className={openPart === "Tags" ? "orange-text" : "grey-text"}
-                      color={openPart === "Tags" ? "primary" : "secondary"}
+                      // className={openPart === "References" ? "orange-text" : "grey-text"}
+                      color={openPart === "References" ? "primary" : "inherit"}
                       sx={{ fontSize: "16px" }}
                     />
                     <span>{shortenNumber(tags.length, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
-              </>
-            ) : (
-              <MemoizedMetaButton
-                onClick={selectReferences}
-                tooltip="View tags and citations used in this node."
-                tooltipPosition="top"
-              >
-                <>
-                  <MenuBookIcon
-                    // className={openPart === "References" ? "orange-text" : "grey-text"}
-                    color={openPart === "References" ? "primary" : "inherit"}
-                    sx={{ fontSize: "16px" }}
-                  />
-                  <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
-                  <Box component={"span"}> | </Box>
-                  <LocalOfferIcon
-                    // className={openPart === "References" ? "orange-text" : "grey-text"}
-                    color={openPart === "References" ? "primary" : "inherit"}
-                    sx={{ fontSize: "16px" }}
-                  />
-                  <span>{shortenNumber(tags.length, 2, false)}</span>
-                </>
-              </MemoizedMetaButton>
+              </Box>
             )}
             {!editable && !unaccepted && (
               <>
-                <MemoizedMetaButton onClick={wrongNode} tooltip="Vote to delete node." tooltipPosition="top">
-                  <>
-                    <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit" }} />
-                    <span>{shortenNumber(wrongNum, 2, false)}</span>
-                  </>
-                </MemoizedMetaButton>
-
-                <MemoizedMetaButton
-                  onClick={correctNode}
-                  tooltip="Vote to prevent further changes."
-                  tooltipPosition="top"
-                >
-                  <>
-                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
-                    <span>{shortenNumber(correctNum, 2, false)}</span>
-                  </>
-                </MemoizedMetaButton>
-
-                <MemoizedMetaButton
+                {/* <MemoizedMetaButton
                   onClick={bookmark}
                   tooltip="Bookmark this node."
                   // {
@@ -477,7 +576,7 @@ const NodeFooter = ({
                     {isStudied ? <DraftsIcon sx={{ fontSize: "16px" }} /> : <MailIcon sx={{ fontSize: "16px" }} />}
                     <span>{shortenNumber(studied, 2, false)}</span>
                   </>
-                </MemoizedMetaButton>
+                </MemoizedMetaButton> */}
                 {/* <MemoizedMetaButton
                   onClick={event => {}}
                   tooltip="# of comments and Q&amp;As about this node."
@@ -517,31 +616,42 @@ const NodeFooter = ({
                 </MemoizedMetaButton> */}
               </>
             )}
-            <MemoizedMetaButton
-              onClick={selectLinkingWords}
-              tooltip="View parent and child nodes."
-              // {
-              //   "This node has " +
-              //   shortenNumber(parents.length, 2, false) +
-              //   " parent node" +
-              //   (parents.length === 1 ? "" : "s") +
-              //   " and " +
-              //   shortenNumber(children.length, 2, false) +
-              //   " child node" +
-              //   (children.length === 1 ? "." : "s.") +
-              //   " Click to see the child and parent nodes of this node."
-              // }
-              tooltipPosition="top"
+            <Box
+              className="tab-button-node-footer"
+              sx={{
+                background: openPart === "LinkingWords" ? "#484848" : "#303030",
+              }}
             >
-              <>
-                <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
-                <SwapHorizIcon
-                  sx={{ fontSize: "16px" }}
-                  color={openPart === "LinkingWords" ? "primary" : "secondary"}
-                />
-                <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
-              </>
-            </MemoizedMetaButton>
+              <MemoizedMetaButton
+                onClick={selectLinkingWords}
+                tooltip="View parent and child nodes."
+                // {
+                //   "This node has " +
+                //   shortenNumber(parents.length, 2, false) +
+                //   " parent node" +
+                //   (parents.length === 1 ? "" : "s") +
+                //   " and " +
+                //   shortenNumber(children.length, 2, false) +
+                //   " child node" +
+                //   (children.length === 1 ? "." : "s.") +
+                //   " Click to see the child and parent nodes of this node."
+                // }
+                tooltipPosition="top"
+                style={{
+                  borderTopRightRadius: "8px",
+                  borderTopLeftRadius: "8px",
+                }}
+              >
+                <>
+                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <SwapHorizIcon
+                    sx={{ fontSize: "16px" }}
+                    color={openPart === "LinkingWords" ? "primary" : "secondary"}
+                  />
+                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                </>
+              </MemoizedMetaButton>
+            </Box>
           </Box>
         ) : (
           <Box
@@ -631,6 +741,257 @@ const NodeFooter = ({
             </MemoizedMetaButton> */}
           </Box>
         )}
+        <IconButton
+          aria-label="more"
+          id="long-button"
+          aria-controls={openMenu ? "long-menu" : undefined}
+          aria-expanded={openMenu ? "true" : undefined}
+          aria-haspopup="true"
+          onClick={handleClick}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+        <Menu
+          id="long-menu"
+          MenuListProps={{
+            "aria-labelledby": "long-button",
+          }}
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleClose}
+          PaperProps={{
+            style: {
+              width: "20ch",
+            },
+          }}
+          sx={{
+            display: "flex",
+            justifyContent: "flex-start",
+          }}
+        >
+          <MenuItem>
+            <MemoizedMetaButton
+              onClick={markStudied}
+              tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
+              // {
+              //   (!isStudied
+              //     ? "You've not marked this node as Studied. "
+              //     : `This node is ${
+              //         changed ? "changed" : "not chagned"
+              //       } since the last time you marked it as Studied. `) +
+              //   shortenNumber(studied, 2, false) +
+              //   " 1Cademist" +
+              //   (studied === 1 ? " has" : "s have") +
+              //   " studied this node."
+              // }
+              style={{ padding: "0" }}
+              tooltipPosition="top"
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Badge
+                  className="toolbarBadge"
+                  badgeContent={shortenNumber(studied, 2, false) ?? 0}
+                  color="error"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  sx={{ wordBreak: "normal", padding: "1px" }}
+                >
+                  {isStudied ? <DraftsIcon sx={{ fontSize: "16px" }} /> : <MailIcon sx={{ fontSize: "16px" }} />}
+                </Badge>
+
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Mark as studied
+                </Box>
+                {/* <span>{shortenNumber(studied, 2, false)}</span> */}
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+          <MenuItem>
+            <MemoizedMetaButton
+              onClick={bookmark}
+              tooltip="Bookmark this node."
+              // {
+              //   `You've ${
+              //     !bookmarked ? "not " : ""
+              //   }bookmarked this node. ` +
+              //   shortenNumber(bookmarks, 2, false) +
+              //   " 1Cademist" +
+              //   (bookmarks === 1 ? " has" : "s have") +
+              //   " bookmarked this node."
+              // }
+              tooltipPosition="top"
+              style={{ padding: "0" }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Badge
+                  className="toolbarBadge"
+                  badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
+                  color="error"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  sx={{ wordBreak: "normal", padding: "1px" }}
+                >
+                  {bookmarked ? (
+                    <BookmarkIcon color={bookmarked ? "primary" : "secondary"} sx={{ fontSize: "16px" }} />
+                  ) : (
+                    <BookmarkBorderIcon
+                      // color={bookmarked ? "orange-text" : "grey-text"}
+                      // className={bookmarked ? "orange-text" : "grey-text"}
+                      color={bookmarked ? "primary" : "secondary"}
+                      sx={{ fontSize: "16px" }}
+                    />
+                  )}
+                </Badge>
+
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Bookmark
+                </Box>
+                {/* <span>{shortenNumber(bookmarks, 2, false)}</span> */}
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+          <MenuItem>
+            <MemoizedMetaButton
+              onClick={narrateNode}
+              tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
+              tooltipPosition="top"
+              style={{ padding: "0" }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                {isSpeaking ? (
+                  <VoiceOverOffIcon sx={{ fontSize: "16px" }} />
+                ) : (
+                  <RecordVoiceOverIcon sx={{ fontSize: "16px" }} />
+                )}
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Narrate Node
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+          <MenuItem>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "flex", alignItems: "center" }} onClick={handleSocialMenuClick}>
+                <ReplyAllIcon sx={{ fontSize: "16px", transform: "scaleX(-1)" }} />
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Share Node
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+        </Menu>
+
+        {/*Social Buttons Menu */}
+        <Menu
+          id="long-menu"
+          MenuListProps={{
+            "aria-labelledby": "long-button",
+          }}
+          anchorEl={anchorEl}
+          open={openSocialMenu}
+          onClose={handleSocialMenuClose}
+          sx={{
+            top: "80px",
+            left: "190px",
+          }}
+          PaperProps={{
+            style: {
+              width: "20ch",
+            },
+          }}
+        >
+          <MenuItem>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "flex", alignItems: "center" }} onClick={onShareByLink}>
+                <IconButton
+                  sx={{
+                    color: "#BDBDBD",
+                    padding: "0",
+                  }}
+                  aria-label="Share on url"
+                >
+                  <LinkIcon sx={{ fontSize: "16px" }} />
+                </IconButton>
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Copy Link
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+          <MenuItem>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton
+                  href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
+                  sx={{
+                    color: "#BDBDBD",
+                    padding: "0",
+                  }}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Share on Twitter"
+                >
+                  <TwitterIcon sx={{ fontSize: "16px" }} />
+                </IconButton>
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Twitter
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+
+          <MenuItem>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <RedditIcon sx={{ fontSize: "16px" }} />
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Reddit
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+
+          <MenuItem>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
+                  sx={{
+                    color: "#BDBDBD",
+                    padding: "0",
+                  }}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Share on Facebook"
+                >
+                  <FacebookRoundedIcon sx={{ fontSize: "16px" }} />
+                </IconButton>
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Facebook
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+          <MenuItem>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton
+                  href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
+                  sx={{
+                    color: "#BDBDBD",
+                    padding: "0",
+                  }}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Share on Linkedin"
+                >
+                  <LinkedInIcon sx={{ fontSize: "16px" }} />
+                </IconButton>
+                <Box component="span" sx={{ marginLeft: "10px" }}>
+                  Linkdein
+                </Box>
+              </Box>
+            </MemoizedMetaButton>
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );
