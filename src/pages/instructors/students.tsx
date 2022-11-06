@@ -7,7 +7,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Modal, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Link, Modal, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import Drawer from "@mui/material/Drawer";
@@ -28,12 +28,13 @@ import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { GridRowsProp } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import LinkNext from "next/link";
+import React, { useEffect, useState } from "react";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
+import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
-import CSVBtn from "./CSVBtn";
 const rows: GridRowsProp = [
   {
     id: 0,
@@ -442,7 +443,6 @@ const filterChoices: any = {
   "Question Points": "questionPoints",
   Vote: "vote",
   "Vote Points": "votePoints",
-  "Last Activity": "lastActivity",
 };
 
 const columns: string[] = [
@@ -500,7 +500,7 @@ const keysColumns: any = {
 export const Students: InstructorLayoutPage = () => {
   // const classes = useStyles();
   const [tableRows, setTableRows] = useState(rows.slice());
-  const [CSVRowData, getCSVRowData] = useState([]);
+  const [CSVRowData, getCSVRowData] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [openUploadModal, setOpenUploadModal] = useState(false);
@@ -609,7 +609,12 @@ export const Students: InstructorLayoutPage = () => {
               style={{ fontSize: "1px", marginLeft: "35px" }}
             ></div>
           </Box>
-          <a href="#">{openedProfile.firstName + openedProfile.lastName}</a>
+          <LinkNext href={"#"}>
+            <Link>
+              {" "}
+              <>{openedProfile.firstName + openedProfile.lastName}</>
+            </Link>
+          </LinkNext>
         </Box>
 
         <Box sx={{ mr: "30px" }}>{openedProfile.email}</Box>
@@ -643,6 +648,7 @@ export const Students: InstructorLayoutPage = () => {
     setOpenedProfile(row);
     handleOpenCloseProfile();
   };
+
   const list = () => (
     <>
       <Box sx={{ textAlign: "right" }}>
@@ -654,14 +660,15 @@ export const Students: InstructorLayoutPage = () => {
       <Box
         role="presentation"
         sx={{
-          width: "300px",
+          width: isMovil ? "300px" : "500px",
           display: "flex",
           flexDirection: "column",
           height: "90%",
+          px: "10px",
           justifyContent: "space-between",
         }}
       >
-        <Box sx={{ ml: "50px", width: "400px" }}>
+        <Box sx={{ width: "100%" }}>
           <Typography sx={{ mb: "10px" }}>Filter By</Typography>
 
           {filters.length > 0 ? (
@@ -669,13 +676,13 @@ export const Students: InstructorLayoutPage = () => {
               {filters.map((filter, index) => {
                 return (
                   <>
-                    <Paper key={index} elevation={6} sx={{ mb: "13px" }}>
+                    <Paper key={index} elevation={6} sx={{ mb: "13px", width: !isMovil ? "80%" : "100%" }}>
                       <Box sx={{ textAlign: "right" }}>
                         <IconButton onClick={() => deleteFilter(index, true)}>
                           <DeleteForeverIcon />
                         </IconButton>
                       </Box>
-                      <Box sx={{ width: "367px", ml: "5px", mr: "10px", paddingBottom: "10px" }}>
+                      <Box sx={{ px: "10px" }}>
                         <FormControl fullWidth>
                           <Select value={filter.title} onChange={event => handleChangeChoice(index, event)}>
                             {Object.keys(filterChoices).map((choice, index) => {
@@ -688,7 +695,7 @@ export const Students: InstructorLayoutPage = () => {
                           </Select>
                         </FormControl>
                       </Box>
-                      <Box sx={{ display: "flex", flexDirection: "row", paddingBottom: "25px" }}>
+                      <Box sx={{ display: "flex", flexDirection: "row", p: "10px 10px 10px 10px" }}>
                         <Box sx={{ minWidth: 80, ml: "5px", mr: "10px" }}>
                           <FormControl fullWidth>
                             <Select value={filter.operation} onChange={event => handleChangeOperation(index, event)}>
@@ -698,7 +705,7 @@ export const Students: InstructorLayoutPage = () => {
                           </FormControl>
                         </Box>
                         <TextField
-                          sx={{ height: "5px", width: "70%" }}
+                          sx={{ height: "5px" }}
                           id="outlined-basic"
                           placeholder="Enter a value"
                           variant="outlined"
@@ -719,7 +726,7 @@ export const Students: InstructorLayoutPage = () => {
               </Box>
             </>
           ) : (
-            <Box sx={{ width: "367px", ml: "5px", mr: "10px", paddingBottom: "10px" }}>
+            <Box sx={{ width: "100%", paddingBottom: "10px" }}>
               <FormControl fullWidth>
                 <Select displayEmpty name="Enter a value" onChange={handleChangeFilter}>
                   {Object.keys(filterChoices).map((choice, index) => {
@@ -741,12 +748,8 @@ export const Students: InstructorLayoutPage = () => {
             sx={{
               color: theme => theme.palette.common.white,
               background: theme => theme.palette.common.orange,
-              height: { xs: "40px", md: "55px" },
-              width: { xs: "50%", md: "auto" },
               fontSize: 16,
               fontWeight: "700",
-              marginLeft: { xs: "0px", md: "32px" },
-              marginRight: "40px",
               paddingX: "30px",
               borderRadius: 1,
             }}
@@ -762,33 +765,36 @@ export const Students: InstructorLayoutPage = () => {
     const _tableRow = tableRows.slice();
     let students = [];
 
-    if (editMode) {
-      for (let row of _tableRow) {
-        if (!row.firstName || !row.lastName || !row.email) {
-          _tableRow.splice(_tableRow.indexOf(row), 1);
-        }
+    for (let row of _tableRow) {
+      if (!row.firstName || !row.lastName || !row.email) {
+        _tableRow.splice(_tableRow.indexOf(row), 1);
       }
-      setTableRows(_tableRow);
-      for (let row of _tableRow) {
-        students.push({
-          email: row.email,
-          fName: row.firstName,
-          lName: row.lastName,
-        });
-      }
-      const payloadAPI = { students };
-      console.log(payloadAPI);
-      return setEditMode(!editMode);
     }
+    setTableRows(_tableRow);
+    for (let row of _tableRow) {
+      students.push({
+        email: row.email,
+        fName: row.firstName,
+        lName: row.lastName,
+      });
+    }
+    const payloadAPI = { students };
+    console.log(payloadAPI);
+    return setEditMode(!editMode);
+
     setEditMode(false);
   };
   const discardTableChanges = () => {
     setEditMode(!editMode);
   };
   const editValues = (column: any, index: any, event: any) => {
+    event.preventDefault();
     let _tableRows = tableRows.slice();
     _tableRows[index][column] = event.target.value;
-    setTableRows(_tableRows);
+    setTableRows([..._tableRows]);
+    setTimeout(() => {
+      event.target.focus();
+    }, 10);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -875,7 +881,7 @@ export const Students: InstructorLayoutPage = () => {
       return setEditMode(!editMode);
     }
     _tableRow.push({
-      id: 16,
+      id: Math.floor(Math.random() * 100),
       username: "Harry Potter",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
@@ -888,20 +894,57 @@ export const Students: InstructorLayoutPage = () => {
 
   const addNewData = () => {
     const _tableRow = tableRows.slice();
+    const email = CSVRowData.columns.filter((elm: any) => {
+      return elm.includes("Email");
+    })[0];
+    const fName = CSVRowData.columns.filter((elm: any) => {
+      return elm.includes("First Name");
+    })[0];
+    const lName = CSVRowData.columns.filter((elm: any) => {
+      return elm.includes("Last Name");
+    })[0];
     for (let row of CSVRowData.rows) {
       const newObject = {
         username: "username",
         avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
-        firstName: row["First Name"],
-        lastName: row["Last Name"],
-        email: row["Email"],
+        firstName: row[fName],
+        lastName: row[lName],
+        email: row[email],
       };
       _tableRow.push(newObject);
     }
     setTableRows(_tableRow);
     setOpenUploadModal(false);
   };
+  useEffect(() => {
+    let addNewRow = true;
+    let _tableRows = tableRows.slice();
+    if (!editMode) {
+      for (let row of _tableRows) {
+        if (!row.firstName || !row.lastName || !row.email) {
+          _tableRows.splice(_tableRows.indexOf(row), 1);
+        }
+      }
+      return setTableRows(_tableRows);
+    }
 
+    for (let row of tableRows) {
+      if (!row["firstName"] && !row["lastName"] && !row["email"]) {
+        addNewRow = false;
+      }
+    }
+    if (addNewRow) {
+      _tableRows.push({
+        id: Math.floor(Math.random() * 100),
+        username: "Harry Potter",
+        avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+        firstName: "",
+        lastName: "",
+        email: "",
+      });
+    }
+    setTableRows(_tableRows);
+  }, [editMode, tableRows]);
   return (
     <>
       <Box className="student-dashboard" sx={{ width: "100%" }}>
@@ -928,23 +971,18 @@ export const Students: InstructorLayoutPage = () => {
               106
             </Typography>
 
-            <Typography sx={{ fontSize: "14.5px" }} variant="h5" component="h2">
-              Students:
-            </Typography>
-            <Typography sx={{ fontSize: "14.5px" }} variant="h5" component="h2">
-              50
-            </Typography>
+            <Typography component="h2">Students:</Typography>
+            <Typography component="h2">50</Typography>
           </Box>
           <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
             <TextField
               sx={{
                 width: { sm: 200, md: 300 },
                 "& .MuiInputBase-root": {
-                  height: 40,
+                  height: 60,
                 },
                 alignSelf: "center",
-                mt: 2.5,
-                ml: 3,
+                py: "50px",
                 backgroundColor: theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#F5F5F5",
               }}
               id="outlined-basic"
@@ -1033,7 +1071,7 @@ export const Students: InstructorLayoutPage = () => {
           </Box>
         </Box>
         {filters.length > 0 && !openFilter && (
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={2} sx={{ py: "10px", px: "10px" }}>
             {filters?.map((filter, index) => {
               return (
                 <>
@@ -1041,7 +1079,7 @@ export const Students: InstructorLayoutPage = () => {
                     key={index}
                     label={filter.title + " " + filter.operation + " " + filter.value}
                     onDelete={() => deleteFilter(index, false)}
-                    sx={{ fontSize: "20px" }}
+                    sx={{ fontSize: isMovil ? "10px" : "20px" }}
                   />
                   {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
                 </>
@@ -1071,10 +1109,14 @@ export const Students: InstructorLayoutPage = () => {
                           ["First Name", "Last Name"].includes(colmn) && isMovil
                             ? {
                                 position: "sticky",
-                                left: colmn === "Last Name" ? 120 : 0,
+                                left: colmn === "Last Name" ? 90 : 0,
                                 backgroundColor: theme =>
                                   theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                                fontWeight: "10px",
+                                fontSize: "14px",
                               }
+                            : isMovil
+                            ? { fontWeight: "10px", fontSize: "14px" }
                             : {}
                         }
                         align="left"
@@ -1082,14 +1124,16 @@ export const Students: InstructorLayoutPage = () => {
                       >
                         <div style={{ display: "flex", flexDirection: "row" }}>
                           <div> {colmn}</div>
-                          <IconButton
-                            id={id}
-                            onClick={event => handleClick(colmn, event)}
-                            style={{ paddingTop: "10px" }}
-                          >
-                            {" "}
-                            <ArrowDropDownIcon viewBox="1 9 24 24" />
-                          </IconButton>
+                          {!isMovil && (
+                            <IconButton
+                              id={id}
+                              onClick={event => handleClick(colmn, event)}
+                              style={{ paddingTop: "10px" }}
+                            >
+                              {" "}
+                              <ArrowDropDownIcon viewBox="1 9 24 24" />
+                            </IconButton>
+                          )}
                         </div>
                         <Popover
                           id={id}
@@ -1100,12 +1144,27 @@ export const Students: InstructorLayoutPage = () => {
                             vertical: "top",
                             horizontal: "left",
                           }}
+                          elevation={1}
                         >
-                          <Box sx={{ width: "250px", display: "flex", flexDirection: "column" }}>
-                            <Button sx={{ p: 2, fontSize: "20px" }} onClick={sortLowHigh}>
+                          <Box sx={{ width: "200px", color: "black", display: "flex", flexDirection: "column" }}>
+                            <Button
+                              sx={{
+                                p: 2,
+                                fontSize: "17px",
+                                color: theme.palette.mode === "dark" ? "white" : "#757575",
+                              }}
+                              onClick={sortLowHigh}
+                            >
                               Sort Low to High
                             </Button>
-                            <Button sx={{ p: 2, fontSize: "20px" }} onClick={sortHighLow}>
+                            <Button
+                              sx={{
+                                p: 2,
+                                fontSize: "17px",
+                                color: theme.palette.mode === "dark" ? "white" : "#757575",
+                              }}
+                              onClick={sortHighLow}
+                            >
                               Sort High to Low
                             </Button>
                           </Box>
@@ -1137,10 +1196,14 @@ export const Students: InstructorLayoutPage = () => {
                             ["firstName", "lastName"].includes(colmn) && isMovil
                               ? {
                                   position: "sticky",
-                                  left: colmn === "lastName" ? 120 : 0,
+                                  left: colmn === "lastName" ? 90 : 0,
                                   backgroundColor: theme =>
                                     theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                                  fontWeight: "10px",
+                                  fontSize: "14px",
                                 }
+                              : isMovil
+                              ? { fontWeight: "10px", fontSize: "14px" }
                               : {}
                           }
                           align="left"
@@ -1156,10 +1219,12 @@ export const Students: InstructorLayoutPage = () => {
                           ) : (
                             <>
                               {["firstName", "lastName"].includes(colmn) ? (
-                                <a href="#" onClick={() => openThisProfile(row)}>
-                                  {" "}
-                                  <>{row[colmn]}</>
-                                </a>
+                                <LinkNext href={isMovil ? "#" : "#"}>
+                                  <Link onClick={() => openThisProfile(row)}>
+                                    {" "}
+                                    <>{row[colmn]}</>
+                                  </Link>
+                                </LinkNext>
                               ) : (
                                 <>{row[colmn]}</>
                               )}
@@ -1223,7 +1288,6 @@ export const Students: InstructorLayoutPage = () => {
                     height: 200,
                     backgroundColor: "grey",
                     border: "2px solid #000",
-                    mt: "50px",
                   }}
                 >
                   <Box sx={{ textAlign: "center" }}>
