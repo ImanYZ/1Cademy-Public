@@ -18,19 +18,44 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   const [state, dispatch] = useReducer(authReducer, store || INITIAL_STATE);
   const { enqueueSnackbar } = useSnackbar();
 
-  const loadUser = useCallback(async (userId: string) => {
-    try {
-      const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId);
+  const handleError = useCallback(
+    ({ error, errorMessage, showErrorToast = true }: ErrorOptions) => {
+      //TODO: setup error reporting in google cloud
+      console.log("TODO: setup error reporting in google cloud", error, errorMessage, showErrorToast);
+      if (showErrorToast) {
+        const errorString = typeof error === "string" ? error : "";
+        enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {
+          variant: "error",
+          autoHideDuration: 10000,
+        });
+      }
+    },
+    [enqueueSnackbar]
+  );
 
-      if (user && reputation) {
-        dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background, view } });
-      } else {
+  const loadUser = useCallback(
+    async (userId: string) => {
+      try {
+        const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId);
+        if (!user) {
+          handleError({ error: "Cant find user" });
+          return;
+        }
+        if (!reputation) {
+          handleError({ error: "Cant find user" });
+          return;
+        }
+        if (user && reputation) {
+          dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background, view } });
+        } else {
+          dispatch({ type: "logoutSuccess" });
+        }
+      } catch (error) {
         dispatch({ type: "logoutSuccess" });
       }
-    } catch (error) {
-      dispatch({ type: "logoutSuccess" });
-    }
-  }, []);
+    },
+    [handleError]
+  );
 
   useEffect(() => {
     const auth = getAuth();
@@ -46,18 +71,6 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
     });
     return () => unsubscriber();
   }, [loadUser]);
-
-  const handleError = ({ error, errorMessage, showErrorToast = true }: ErrorOptions) => {
-    //TODO: setup error reporting in google cloud
-    console.log("TODO: setup error reporting in google cloud", error, errorMessage, showErrorToast);
-    if (showErrorToast) {
-      const errorString = typeof error === "string" ? error : "";
-      enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {
-        variant: "error",
-        autoHideDuration: 10000,
-      });
-    }
-  };
 
   const dispatchActions = { dispatch, handleError };
 
