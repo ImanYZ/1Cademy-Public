@@ -115,6 +115,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           displayName: uname,
           password: uuidv4().replace(/-/g, ""),
         });
+        await getAuth().setCustomUserClaims(authUser.uid, {
+          student: true,
+        });
 
         const userRef = db.collection("users").doc();
         batch.set(userRef, {
