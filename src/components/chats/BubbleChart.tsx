@@ -51,7 +51,11 @@ function drawChart(
   width: number,
   height: number,
   margin: BubbleMargin,
-  theme: UserTheme
+  theme: UserTheme,
+  maxAxisX: number,
+  maxAxisY: number,
+  minAxisX: number,
+  minAxisY: number
 ) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
@@ -88,7 +92,7 @@ function drawChart(
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
   // Add X axis
-  const x = d3.scaleLinear().domain([0, 20]).range([0, width]);
+  const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, width]);
   svg
     .append("g")
     .attr("id", "axis-x")
@@ -96,7 +100,7 @@ function drawChart(
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  const y = d3.scaleLinear().domain([-10, 40]).range([height, 0]);
+  const y = d3.scaleLinear().domain([minAxisY, maxAxisY]).range([height, 0]);
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
@@ -122,7 +126,7 @@ function drawChart(
     .attr("cx", d => x(d.votes))
     .attr("cy", d => y(d.points))
     // .attr("height", d => y(d[0]) - y(d[1]))
-    .attr("r", d => d.students)
+    .attr("r", d => d.students * 4 + 10)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
@@ -156,8 +160,21 @@ type BubblePlotProps = {
   width: number;
   margin: BubbleMargin;
   theme: UserTheme;
+  maxAxisX: number;
+  maxAxisY: number;
+  minAxisX: number;
+  minAxisY: number;
 };
-export const BubbleChart = ({ width, margin, theme, data }: BubblePlotProps) => {
+export const BubbleChart = ({
+  width,
+  margin,
+  theme,
+  data,
+  maxAxisX,
+  maxAxisY,
+  minAxisX,
+  minAxisY,
+}: BubblePlotProps) => {
   console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
 
@@ -170,9 +187,9 @@ export const BubbleChart = ({ width, margin, theme, data }: BubblePlotProps) => 
     (svgRef: any) => {
       console.log("svg callbak");
 
-      drawChart(svgRef, data, width, height, margin, theme);
+      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY);
     },
-    [data, margin, theme, width]
+    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, theme, width]
   );
 
   return (

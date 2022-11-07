@@ -29,7 +29,7 @@ const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 // const chartWidth = 100;
 // const chartHeight = 100;
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: StackedBarStats[]) {
+function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: StackedBarStats[], maxAxisY: number) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -72,12 +72,12 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: StackedBarStats
   svg
     .append("g")
     .attr("id", "axis-x")
-    .attr("transform", `translate(20, ${height + 5})`)
+    .attr("transform", `translate(25, ${height + 5})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  const y = d3.scaleLinear().domain([0, 50]).range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(20, 5)`).call(d3.axisLeft(y));
+  const y = d3.scaleLinear().domain([0, maxAxisY]).range([height, 0]);
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(25, 5)`).call(d3.axisLeft(y));
 
   // color palette = one color per subgroup
   console.log({ subgroups });
@@ -163,13 +163,14 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: StackedBarStats
     .attr("y", d => y(d[1]))
     .attr("height", d => y(d[0]) - y(d[1]))
     .attr("width", x.bandwidth())
-    .attr("transform", `translate(20, 5)`);
+    .attr("transform", `translate(25, 5)`);
 }
 
 type StackedBarProps = {
   data: StackedBarStats[];
+  maxAxisY: number;
 };
-export const PointsBarChart = ({ data }: StackedBarProps) => {
+export const PointsBarChart = ({ data, maxAxisY }: StackedBarProps) => {
   console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
 
@@ -180,9 +181,9 @@ export const PointsBarChart = ({ data }: StackedBarProps) => {
 
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data);
+      drawChart(svgRef, data, maxAxisY);
     },
-    [data]
+    [data, maxAxisY]
   );
 
   return (

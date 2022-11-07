@@ -108,8 +108,8 @@ type Trends = {
 // ];
 
 const Semester = "2gbmyJVzQY1FBafjBtRx";
-const completionProposals = 50;
-const completionQuestions = 50;
+const completionProposals = 70;
+const completionQuestions = 40;
 
 export type StackedBarStats = {
   index: number;
@@ -123,6 +123,14 @@ export type BubbleStats = {
   students: number;
   votes: number;
   points: number;
+};
+
+type BubbleStatsData = {
+  bubbleStats: BubbleStats[];
+  maxVote: number;
+  maxVotePoints: number;
+  minVote: number;
+  minVotePoints: number;
 };
 
 type SemesterStats = {
@@ -160,8 +168,18 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [students, setStudents] = useState<number>(0);
+
+  // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
+  const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
+
+  // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
+  const [maxBubbleAxisX, setMaxBubbleAxisX] = useState<number>(0);
+  const [maxBubbleAxisY, setMaxBubbleAxisY] = useState<number>(0);
+  const [minBubbleAxisX, setMinBubbleAxisX] = useState<number>(0);
+  const [minBubbleAxisY, setMinBubbleAxisY] = useState<number>(0);
+
   const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
   const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
   // const [newNodePoints, setNewNodePoints] = useState(second);
@@ -169,8 +187,12 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
   const [editProposalsTrend, setEditProposalsTrend] = useState<Trends[]>([]);
 
-  const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStats[] => {
+  const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStatsData => {
     const bubbleStats: BubbleStats[] = [];
+    let maxVote: number = 0;
+    let maxVotePoints: number = 0;
+    let minVote: number = 1000;
+    let minVotePoints: number = 1000;
 
     data.map(d => {
       let bubbleStat: BubbleStats = {
@@ -189,8 +211,18 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
         bubbleStat.students += 1;
         bubbleStats.push(bubbleStat);
       }
+      if (d.votes + 10 > maxVote) maxVote = d.votes + 10;
+      if (d.votePoints + 4 > maxVotePoints) maxVotePoints = d.votePoints + 4;
+      if (d.votes - 10 < minVote) minVote = d.votes - 10;
+      if (d.votePoints - 4 < minVotePoints) minVotePoints = d.votePoints - 4;
     });
-    return bubbleStats;
+    return {
+      bubbleStats,
+      maxVote,
+      maxVotePoints,
+      minVote,
+      minVotePoints,
+    };
   }, []);
 
   const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
@@ -210,16 +242,15 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStats(getSemStat(semester));
       setStackedBar(getStackedBarStat(semester));
-      setBubble(getBubbleStats(semester));
-      const bubbles = getBubbleStats(semester);
-      console.log("BUBBLES", bubbles);
+      const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semester);
+      setBubble(bubbleStats);
+      setMaxBubbleAxisX(maxVote);
+      setMaxBubbleAxisY(maxVotePoints);
+      setMinBubbleAxisX(minVote);
+      setMinBubbleAxisY(minVotePoints);
     };
     getSemesterData();
   }, [db, getBubbleStats, user]);
-
-  useEffect(() => {
-    console.log("SemesterStarts", semesterStats);
-  }, [semesterStats]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -229,6 +260,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       if (!semesterDoc.exists()) return;
 
       setStudents(semesterDoc.data().students.length);
+      setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
   }, [db]);
@@ -241,9 +273,6 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       if (!userDailyStatDoc.docs.length) return;
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      console.log("userDailyStats", userDailyStats);
-      const links = getTrendsData(userDailyStats, "links");
-      console.log("links", links);
       setLinksTrend(getTrendsData(userDailyStats, "links"));
       setQuestionsTrend(getTrendsData(userDailyStats, "questions"));
       setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst", "Votes"));
@@ -348,7 +377,6 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   // useEffect(()=>{
 
   // })
-  console.log("first", theme.breakpoints);
   // const isMovil = useMediaQuery(theme.breakpoints.values());
 
   // const [width, setWith] = useState(0);
@@ -497,7 +525,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             </Box>
           </Box>
           <Box sx={{ alignSelf: "center" }}>
-            <PointsBarChart data={stackedBar} />
+            <PointsBarChart data={stackedBar} maxAxisY={maxStackedBarAxisY} />
           </Box>
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>
@@ -507,6 +535,10 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             width={isMovil ? 220 : 500}
             margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
             theme={"Dark"}
+            maxAxisX={maxBubbleAxisX}
+            maxAxisY={maxBubbleAxisY}
+            minAxisX={minBubbleAxisX}
+            minAxisY={minBubbleAxisY}
           />
         </Paper>
       </Box>
