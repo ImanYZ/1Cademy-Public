@@ -2748,6 +2748,31 @@ button.MuiTab-textColorInherit:focus {
   align-items: flex-start;
   margin-left: 10px;
 }
+
+/* table edit component css */
+
+.student-dashboard-table .editable-cell {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  opacity: 0.6;
+}
+
+.student-dashboard-table .not-editable-cell {
+  pointer-events: none;
+}
+
+/* table edit component css */
+
+.student-dashboard-table .editable-cell {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  opacity: 0.6;
+}
+
 @media (max-width: 600px) {
   .scroll-styled {
     display: flex;

@@ -186,7 +186,13 @@ const ProposalsSidebar = ({
               </div> */}
             </div>
           </Box>
-          <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
+          <Box
+            sx={{
+              borderBottom: 1,
+              borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+              width: "100%",
+            }}
+          >
             <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
               {tabsItems.map((tabItem: any, idx: number) => (
                 <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
