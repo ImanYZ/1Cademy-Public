@@ -16,6 +16,7 @@ export type ISemesterStudent = {
 
 // document id should be semester id as well
 export type ISemester = {
+  documentId?: string;
   instructors: string[]; // list of uid/uname
   title: string;
   tagId: string; // semester tag id
@@ -68,6 +69,7 @@ export type ICourseTag = {
 };
 
 export type IInstructor = {
+  documentId?: string;
   uname: string;
   courses: ICourseTag[];
   createdAt: Timestamp;
@@ -75,6 +77,7 @@ export type IInstructor = {
 };
 
 export type ICourse = {
+  documentId?: string;
   title: string;
   node: string;
   pTagIds: string[];
@@ -100,6 +103,7 @@ export type ISemesterStudentStatDay = {
 };
 
 export type ISemesterStudentStat = {
+  documentId?: string;
   tagId: string; // tagId of semester
   uname: string;
   days: ISemesterStudentStatDay[];
@@ -110,6 +114,7 @@ export type ISemesterStudentStat = {
 
 // semesterStudentVoteStats
 export type ISemesterStudentVoteStat = {
+  documentId?: string;
   tagId: string; // tagId of semester
   uname: string;
   upVotes: number;

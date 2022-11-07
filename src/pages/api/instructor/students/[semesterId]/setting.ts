@@ -1,31 +1,26 @@
-import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
-import { getAuth } from "firebase-admin/auth";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "@/lib/firestoreServer/admin";
 import { Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
-import { ISemester, ISemesterStudentStat } from "src/types/ICourse";
+import { ISemester } from "src/types/ICourse";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { ISemesterSyllabusItem } from "src/types/ICourse";
-import { arrayToChunks, initializeNewReputationData } from "src/utils";
-import { searchAvailableUnameByEmail } from "src/utils/instructor";
-import { db } from "typesenseIndexer";
-import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
 
-type InstructorSemesterSettingPayload = {
+export type InstructorSemesterSettingPayload = {
   syllabus: ISemesterSyllabusItem[];
   days: number;
   nodeProposals: {
-    startDate: Timestamp;
-    endDate: Timestamp;
+    startDate: string;
+    endDate: string;
     numPoints: number;
     numProposalPerDay: number;
     totalDaysOfCourse: number;
   };
   questionProposals: {
-    startDate: Timestamp;
-    endDate: Timestamp;
+    startDate: string;
+    endDate: string;
     numPoints: number;
     numQuestionsPerDay: number;
     totalDaysOfCourse: number;
@@ -130,6 +125,20 @@ const processNodeIdsFromSyllabusChildren = async ({
 }: IProcessNodeParam): Promise<[WriteBatch, number]> => {
   for (const child of children) {
     if (child.node) {
+      if (updateNodes) {
+        const childNodeRef = db.collection("nodes").doc(child.node);
+        batch.update(childNodeRef, {
+          parents: [
+            {
+              parentId: parentId,
+              title: parentTitle,
+              nodeType: "Relation",
+            },
+          ],
+          title: child.title,
+        });
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
       nodeIds.push(child.node);
     } else if (updateNodes) {
       const newId = await createNode(batch, userData, child.title, parentId, parentTitle, universityTitle);
@@ -137,7 +146,6 @@ const processNodeIdsFromSyllabusChildren = async ({
       child.node = newId;
     }
     if (child.children && child.children.length) {
-      const parentNode = (await db.collection("nodes").doc(String(child.node)).get()).data() as INode;
       [batch, writeCounts] = await processNodeIdsFromSyllabusChildren({
         batch,
         writeCounts,
@@ -146,7 +154,7 @@ const processNodeIdsFromSyllabusChildren = async ({
         updateNodes,
         userData,
         parentId: String(child.node),
-        parentTitle: parentNode.title,
+        parentTitle: child.title,
         universityTitle,
       });
     }
@@ -203,6 +211,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     for (const syllabusItem of payload.syllabus) {
       if (syllabusItem.node) {
         nodeIds.push(syllabusItem.node);
+      } else {
+        const newId = await createNode(
+          batch,
+          userData,
+          syllabusItem.title,
+          semesterData.tagId,
+          semesterNodeData.title,
+          semesterData.uTitle
+        );
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        syllabusItem.node = newId;
       }
       if (syllabusItem.children) {
         [batch, writeCounts] = await processNodeIdsFromSyllabusChildren({
@@ -212,8 +231,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           nodeIds,
           updateNodes: true,
           userData,
-          parentId: semesterData.tagId,
-          parentTitle: semesterNodeData.title,
+          parentId: syllabusItem.node,
+          parentTitle: syllabusItem.title,
           universityTitle: semesterData.uTitle,
         });
       }
@@ -224,7 +243,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     for (const removedNodeId of removedNodeIds) {
       const nodeRef = db.collection("nodes").doc(removedNodeId);
       const nodeData = (await nodeRef.get()).data() as INode;
-      nodeData.deleted = false;
+      nodeData.deleted = true;
       batch.update(nodeRef, nodeData);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
