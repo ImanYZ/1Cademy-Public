@@ -2,10 +2,12 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { NextPage } from "next";
+import Image from "next/image";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { User } from "src/knowledgeTypes";
 
+import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import { useAuth } from "../../context/AuthContext";
 import { Instructor } from "../../instructorsTypes";
 // import ROUTES from "../../lib/utils/routes";
@@ -63,7 +65,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
-
+    window.document.body.classList.remove("Image");
     const getInstructor = async () => {
       const instructorsRef = collection(db, "instructors");
       const q = query(instructorsRef, where("uname", "==", user.uname));
@@ -73,7 +75,6 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       const intructor = userNodeDoc.docs[0].data() as Instructor;
       setInstructor(intructor);
       const courses = getCoursesByInstructor(intructor);
-      console.log("COURSESSS:", { courses });
       const semester = Object.keys(courses);
       setSemesters(semester);
       setAllCourses(courses);
@@ -87,25 +88,26 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
-    console.log("New Courses", newCourses);
     setSelectedCourse(newCourses[0]);
   }, [allCourses, selectedSemester]);
-
-  // useEffect(() => {
-  //   // const getCourses
-  // });
 
   // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
   //   useSemesterFilter();
 
-  console.log(user);
-  if (!user)
+  if (!user || !instructor)
     return (
-      <Box>
-        <h1>Not user found, lets wait a moment</h1>;
-      </Box>
+      <div className="CenterredLoadingImageContainer">
+        <Image
+          className="CenterredLoadingImage"
+          loading="lazy"
+          src={LoadingImg}
+          alt="Loading"
+          width={250}
+          height={250}
+        />
+      </div>
     );
-  if (!instructor) return <h1>Not instructor found, lets wait a moment</h1>;
+  // if (!instructor) return <h1>Not instructor found, lets wait a moment</h1>;
   return (
     <Box
       sx={{
