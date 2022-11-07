@@ -118,6 +118,16 @@ const BoxLegend = () => {
 };
 
 const Semester = "2gbmyJVzQY1FBafjBtRx";
+const completionProposals = 50;
+const completionQuestions = 50;
+
+export type rate = {
+  index: number;
+  alessEqualTen: number;
+  bgreaterTen: number;
+  cgreaterFifty: number;
+  dgreaterHundred: number;
+};
 
 type SemesterStats = {
   newNodeProposals: number;
@@ -138,6 +148,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [students, setStudents] = useState<number>(0);
+  const [stackedBar, setStackedBar] = useState<rate[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -150,6 +161,9 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
 
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStats(getSemStat(semester));
+      const stackedBarStat = getStackedBarStat(semester);
+      console.log("Buuble Stats", stackedBarStat);
+      setStackedBar(getStackedBarStat(semester));
     };
     getSemesterData();
   }, [db, user]);
@@ -194,6 +208,51 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       votes,
     };
   };
+
+  const getStackedBarStat = (data: SemesterStudentVoteStat[]): rate[] => {
+    const stackedBarStats: rate[] = [];
+    const ProposalsRate: rate = {
+      index: 0,
+      alessEqualTen: 0,
+      bgreaterTen: 0,
+      cgreaterFifty: 0,
+      dgreaterHundred: 0,
+    };
+    const QuestionsRate: rate = {
+      index: 1,
+      alessEqualTen: 0,
+      bgreaterTen: 0,
+      cgreaterFifty: 0,
+      dgreaterHundred: 0,
+    };
+    data.map(d => {
+      const proposals = d.totalPoints;
+      const question = d.questionPoints;
+
+      if (proposals > (100 * completionProposals) / 100) {
+        ProposalsRate.dgreaterHundred += 1;
+      } else if (proposals > (50 * completionProposals) / 100) {
+        ProposalsRate.cgreaterFifty += 1;
+      } else if (proposals > (10 * completionProposals) / 100) {
+        ProposalsRate.bgreaterTen += 1;
+      } else if (proposals <= (10 * completionProposals) / 100) {
+        ProposalsRate.alessEqualTen += 1;
+      }
+      if (question > (100 * completionQuestions) / 100) {
+        QuestionsRate.dgreaterHundred += 1;
+      } else if (question > (50 * completionQuestions) / 100) {
+        QuestionsRate.cgreaterFifty += 1;
+      } else if (question > (10 * completionQuestions) / 100) {
+        QuestionsRate.bgreaterTen += 1;
+      } else if (question <= (10 * completionQuestions) / 100) {
+        QuestionsRate.alessEqualTen += 1;
+      }
+    });
+    stackedBarStats.push(ProposalsRate);
+    stackedBarStats.push(QuestionsRate);
+    return stackedBarStats;
+  };
+
   // useEffect(()=>{
 
   // })
@@ -347,7 +406,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             </Box>
           </Box>
           <Box sx={{ alignSelf: "center" }}>
-            <PointsBarChart />
+            <PointsBarChart data={stackedBar} />
           </Box>
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>

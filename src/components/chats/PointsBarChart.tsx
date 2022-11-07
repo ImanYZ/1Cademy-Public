@@ -1,6 +1,8 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
 
+import { rate } from "@/pages/instructors/dashboard";
+
 // const columns = ["fruit", "vegetable"];
 const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
 const LESS_EQUAL_THAN_10_COLOR_ALPHA = "rgba(255, 196, 153, .75)";
@@ -11,10 +13,10 @@ const GREATER_THAN_50_COLOR_ALPHA = "rgba(167, 216, 65, .75)";
 const GREATER_THAN_100_COLOR = "rgb(56, 142, 60)";
 const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 
-var data = [
-  { month: 0, apples: 2, bananas: 3, cherries: 15, dates: 30 },
-  { month: 1, apples: 13, bananas: 17, cherries: 7, dates: 13 },
-];
+// var data = [
+//   { month: 0, apples: 2, bananas: 3, cherries: 15, dates: 30 },
+//   { month: 1, apples: 13, bananas: 17, cherries: 7, dates: 13 },
+// ];
 // // const data = [
 // //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
 // //   { category: "vegetable", yes: 5, no: 4, maybe: 9 },
@@ -27,7 +29,7 @@ var data = [
 // const chartWidth = 100;
 // const chartHeight = 100;
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
+function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: rate[]) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -53,10 +55,10 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // List of subgroups = header of the csv files = soil condition here
-  const subgroups = ["month", "apples", "bananas", "cherries", "dates"].slice(1);
+  const subgroups = ["index", "alessEqualTen", "bgreaterTen", "cgreaterFifty", "dgreaterHundred"].slice(1);
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
-  const groups = data.map(d => d.month).flatMap(c => c);
+  const groups = data.map(d => d.index).flatMap(c => c);
   console.log({ groups });
 
   const columns = ["Proposals", "Questions"];
@@ -70,12 +72,12 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
   svg
     .append("g")
     .attr("id", "axis-x")
-    .attr("transform", `translate(20, ${height})`)
+    .attr("transform", `translate(20, ${height + 5})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  const y = d3.scaleLinear().domain([0, 60]).range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(20, 0)`).call(d3.axisLeft(y));
+  const y = d3.scaleLinear().domain([0, 50]).range([height, 0]);
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(20, 5)`).call(d3.axisLeft(y));
 
   // color palette = one color per subgroup
   console.log({ subgroups });
@@ -94,6 +96,8 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
     .range([LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
   //stack the data? --> stack per subgroup
   const stackedData = d3.stack().keys(subgroups)(data);
+
+  console.log("stackedData", stackedData);
 
   //tooltip
   const tooltip = d3.select("#tool-tip");
@@ -152,17 +156,20 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>) {
       tooltip.style("opacity", 0).style("pointer-events", "none");
     })
     .attr("x", d => {
-      const x1: number = d.data["month"];
+      const x1: number = d.data["index"];
       console.log({ x1 });
       return x(columns[x1]) ?? 0;
     })
     .attr("y", d => y(d[1]))
     .attr("height", d => y(d[0]) - y(d[1]))
     .attr("width", x.bandwidth())
-    .attr("transform", `translate(20, 0)`);
+    .attr("transform", `translate(20, 5)`);
 }
 
-export const PointsBarChart = () => {
+type StackedBarProps = {
+  data: rate[];
+};
+export const PointsBarChart = ({ data }: StackedBarProps) => {
   console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
 
@@ -171,10 +178,12 @@ export const PointsBarChart = () => {
   //     drawChart(svg);
   //   }, [svg]);
 
-  const svg = useCallback((svgRef: any) => {
-    console.log("svg callbak");
-    drawChart(svgRef);
-  }, []);
+  const svg = useCallback(
+    (svgRef: any) => {
+      drawChart(svgRef, data);
+    },
+    [data]
+  );
 
   return (
     <div id="box-plot-container" style={{ position: "relative" }}>
