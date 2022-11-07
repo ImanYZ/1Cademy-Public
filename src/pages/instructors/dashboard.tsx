@@ -68,44 +68,44 @@ type Trends = {
   num: number;
 };
 // This mock previuly has :{date: "2022-09-27T00:00:00.000Z",num: 9,netVotes: 9,averageVotes: 1,}
-const TRENDS_DATA = [
-  {
-    date: new Date("2/1/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/2/22"),
-    num: 20,
-  },
-  {
-    date: new Date("2/4/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/5/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/6/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/7/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/8/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/9/22"),
-    num: 9,
-  },
-  {
-    date: new Date("2/10/22"),
-    num: 9,
-  },
-];
+// const TRENDS_DATA = [
+//   {
+//     date: new Date("2/1/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/2/22"),
+//     num: 20,
+//   },
+//   {
+//     date: new Date("2/4/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/5/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/6/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/7/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/8/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/9/22"),
+//     num: 9,
+//   },
+//   {
+//     date: new Date("2/10/22"),
+//     num: 9,
+//   },
+// ];
 
 const Semester = "2gbmyJVzQY1FBafjBtRx";
 const completionProposals = 50;
@@ -166,6 +166,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   // const [newNodePoints, setNewNodePoints] = useState(second);
   const [votesTrends, setVotesTrends] = useState<Trends[]>([]);
   const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
+  const [editProposalsTrend, setEditProposalsTrend] = useState<Trends[]>([]);
 
   const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStats[] => {
     const bubbleStats: BubbleStats[] = [];
@@ -244,8 +245,9 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       console.log("links", links);
       setLinksTrend(getTrendsData(userDailyStats, "links"));
       setQuestionsTrend(getTrendsData(userDailyStats, "questions"));
-      setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst"));
+      setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst", "Votes"));
       setNodesTrends(getTrendsData(userDailyStats, "newNodes"));
+      setEditProposalsTrend(getTrendsData(userDailyStats, "newNodes", "editProposals"));
     };
     getUserDailyStat();
   }, [db]);
@@ -320,16 +322,21 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
     return stackedBarStats;
   };
 
-  const getTrendsData = (data: SemesterStudentStat[], key: keyof ISemesterStudentStatDay): Trends[] => {
+  const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
     const trends: Trends[] = [];
     data.map(dailyStat => {
       dailyStat.days.map(dayStat => {
-        if (key === "agreementsWithInst") {
+        if (type && type === "Votes") {
           trends.push({
             date: new Date(dayStat.day),
-            num: (dayStat[key] as number) + dayStat["disagreementsWithInst"],
+            num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
           });
-        } else {
+        } else if (type && type === "editProposals") {
+          trends.push({
+            date: new Date(dayStat.day),
+            num: dayStat["proposals"] - dayStat["newNodes"],
+          });
+        } else if (key) {
           trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
         }
       });
@@ -585,7 +592,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           </Box>
           {!isMovil && <BoxLegend />}
         </Paper>
-        <Paper
+        {/* <Paper
           sx={{
             p: isMovil ? "10px" : isTablet ? "20px" : "40px",
             display: "flex",
@@ -610,7 +617,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             y="num"
             trendData={TRENDS_DATA}
           />
-        </Paper>
+        </Paper> */}
         <Paper
           sx={{
             p: isMovil ? "10px" : isTablet ? "20px" : "40px",
@@ -634,7 +641,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={TRENDS_DATA}
+            trendData={editProposalsTrend}
           />
         </Paper>
 
