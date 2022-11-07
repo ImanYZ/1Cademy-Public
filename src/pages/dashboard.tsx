@@ -604,19 +604,24 @@ const Dashboard = ({}: DashboardProps) => {
             if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
               if (!node) {
+                console.log("fillDagre:modified:!node");
                 // <---  CHECK I change this from nodes
                 const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
               } else {
+                console.log("fillDagre:modified:node");
                 const currentNode: FullNodeData = {
                   ...cur,
                   left: node.left,
                   top: node.top,
                 }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
 
+                console.log("fillDagre:modified:compare2Nodes", { cur, node });
                 if (!compare2Nodes(cur, node)) {
+                  console.log("fillDagre:modified:areDirents", { cur, node });
                   const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+                  console.log("👉:fillDagre:modified:areDirents:res", res);
                   tmpNodes = res.oldNodes;
                   tmpEdges = res.oldEdges;
                 }
@@ -768,6 +773,7 @@ const Dashboard = ({}: DashboardProps) => {
             //   if(cur.nodeChangeType==='modified' &&)
             // })
             // here we are filling dagger
+            devLog("5:user Nodes Snapshot:visibleFullNodesMerged", visibleFullNodesMerged);
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
 
             if (!Object.keys(newNodes).length) {
@@ -2727,7 +2733,7 @@ const Dashboard = ({}: DashboardProps) => {
       setOpenSidebar(null);
       scrollToNode(nodeBookState.selectedNode);
     },
-    [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
+    [nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode]
   );
 
   const selectNode = useCallback(
@@ -2906,6 +2912,12 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.height;
           getMapGraph("/proposeNodeImprovement", postData);
           scrollToNode(nodeBookState.selectedNode);
+
+          // console.log("add task", 1);
+          // setTimeout(() => {
+          //   console.log("add task", 2);
+          //   addTask(null);
+          // }, 4000);
         }
       }
     },
@@ -3967,7 +3979,19 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip>
-              partType: {lastNodeOperation.current}
+              <Box
+                sx={{
+                  position: "fixed",
+                  bottom: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                {Object.keys(graph.edges).map((cur, idx) => (
+                  <h6 key={idx}>{cur}</h6>
+                ))}
+              </Box>
             </div>
           )}
 

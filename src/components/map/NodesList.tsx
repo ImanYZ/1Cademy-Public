@@ -230,6 +230,8 @@ const NodesList = ({
 // export default NodesList;
 // export const MemoizedNodeList = NodesList;
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
+  const compareNodesResult = compareNodes(prev.nodes, next.nodes);
+  console.log("compareNodesResult", { compareNodesResult, prev: prev.nodes, next: next.nodes });
   return (
     compareNodes(prev.nodes, next.nodes) &&
     // prev.selectionType === next.selectionType &&
