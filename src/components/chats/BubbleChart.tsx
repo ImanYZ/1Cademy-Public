@@ -106,10 +106,13 @@ function drawChart(
   console.log({ x, y });
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
+
+  // @ts-ignore
   const color = d3
     .scaleThreshold()
-    .domain([-50, 0, 20, 100])
+    .domain([-50, 0, 20, 100]) // @ts-ignore
     .range(["white", RED_ALPHA, ORANGE_ALPHA, GREEN_ALPHA, "white"]);
+  // @ts-ignore
   const borderColor = d3.scaleThreshold().domain([-10, 0, 20, 100]).range(["white", RED, ORANGE, GREEN, "white"]);
 
   svg
