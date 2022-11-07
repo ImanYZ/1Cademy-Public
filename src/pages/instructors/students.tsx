@@ -1168,7 +1168,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           </TableContainer>
         </Box>
         {editMode ? (
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
             <Box>
               <CSVBtn
                 variant="text"
