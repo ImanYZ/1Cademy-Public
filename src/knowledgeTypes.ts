@@ -345,6 +345,8 @@ export type UserView = "Graph" | "Masonry";
 
 export type UserBackground = "Color" | "Image";
 
+export type UserRole = "INSTRUCTOR" | "STUDENT" | null;
+
 export type User = {
   blocked?: boolean;
   chooseUname?: boolean;
@@ -387,6 +389,7 @@ export type User = {
   // major?: string; //CHECK: I commented this because we have deMajor
   // instit?: string; //CHECK: I commented this because we have deInstit
   fieldOfInterest: string;
+  role: UserRole;
 };
 
 export type userSettings = {
@@ -546,7 +549,7 @@ export interface SignUpFormValues {
   clickedCP: boolean;
 }
 
-export interface SignUpData extends Omit<User, "userId"> {
+export interface SignUpData extends Omit<User, "userId" | "role"> {
   password: string;
   background: UserBackground;
   theme: UserTheme;

@@ -2,9 +2,13 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 const Page: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   console.log("currentSemester", currentSemester);
   return (
-    <p>
-      hello world {selectedSemester} + {selectedCourse}
-    </p>
+    <div>
+      <p>
+        hello world {selectedSemester} + {selectedCourse}
+      </p>
+      {selectedCourse && <h2>config selected course</h2>}
+      {!selectedCourse && <h2>create course</h2>}
+    </div>
   );
 };
 

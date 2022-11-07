@@ -5,10 +5,11 @@ import { useRouter } from "next/router";
 import React from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
+import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarProps = { options: Option[] };
-const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
+type HeaderNavbarProps = { options: Option[]; user: User };
+const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
   const router = useRouter();
 
   const getTabSelected = () => {
@@ -32,46 +33,48 @@ const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
             <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
           </Box>
         </LightTooltip>
-        <Tabs
-          value={getTabSelected()}
-          variant="scrollable"
-          scrollButtons="auto"
-          aria-label="scrollable auto tabs navigation bar"
-          sx={{
-            px: "25px",
-            marginLeft: "auto",
-            fontWeight: 400,
-            display: { xs: "none", md: "flex" },
-            "& .MuiTab-root": {
-              color: "#AAAAAA",
-            },
-            "& .MuiTab-root.Mui-selected": {
-              color: "common.white",
-            },
-            "& .MuiTabs-indicator": {
-              backgroundColor: "common.orange",
-            },
-          }}
-        >
-          {options.map((page, idx) => (
-            <LightTooltip key={idx} title={page.title}>
-              <Tab
-                onClick={event => {
-                  event.preventDefault();
-                  router.push(page.route);
-                }}
-                color="inherit"
-                label={page.label}
-                aria-label={page.title}
-                sx={{
-                  fontFamily: "Work Sans,sans-serif",
-                  fontSize: "15px",
-                  letterSpacing: "-1px",
-                }}
-              />
-            </LightTooltip>
-          ))}
-        </Tabs>
+        {user.role === "INSTRUCTOR" && (
+          <Tabs
+            value={getTabSelected()}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="scrollable auto tabs navigation bar"
+            sx={{
+              px: "25px",
+              marginLeft: "auto",
+              fontWeight: 400,
+              display: { xs: "none", md: "flex" },
+              "& .MuiTab-root": {
+                color: "#AAAAAA",
+              },
+              "& .MuiTab-root.Mui-selected": {
+                color: "common.white",
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: "common.orange",
+              },
+            }}
+          >
+            {options.map((page, idx) => (
+              <LightTooltip key={idx} title={page.title}>
+                <Tab
+                  onClick={event => {
+                    event.preventDefault();
+                    router.push(page.route);
+                  }}
+                  color="inherit"
+                  label={page.label}
+                  aria-label={page.title}
+                  sx={{
+                    fontFamily: "Work Sans,sans-serif",
+                    fontSize: "15px",
+                    letterSpacing: "-1px",
+                  }}
+                />
+              </LightTooltip>
+            ))}
+          </Tabs>
+        )}
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
           <Button
             onClick={() => router.push("/dashboard")}
@@ -89,17 +92,19 @@ const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
               color: theme => theme.palette.common.gray,
             }}
           >
-            <Image
-              src={"/lightModeLibraryBackground.jpg"}
-              alt={"name"}
-              width="55px"
-              height="55px"
-              quality={40}
-              objectFit="cover"
-              style={{
-                borderRadius: "50%",
-              }}
-            />
+            <Tooltip title={user.role ?? ""}>
+              <Image
+                src={user.imageUrl ?? ""}
+                alt={"name"}
+                width="55px"
+                height="55px"
+                quality={40}
+                objectFit="cover"
+                style={{
+                  borderRadius: "50%",
+                }}
+              />
+            </Tooltip>
           </Box>
         </Box>
       </Toolbar>
