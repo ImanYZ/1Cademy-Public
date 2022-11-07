@@ -379,7 +379,7 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
 
       const node = (await db.collection("nodes").doc(String(semesterData.syllabus[0].node)).get()).data() as INode;
 
-      expect(node.title).toEqual("Ch.1 TEST TITLE");
+      expect(node.title).toEqual(`Ch.1 TEST TITLE - ${semesterNode.title}`);
     });
   });
 
