@@ -264,7 +264,7 @@ MainSidebarProps) => {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "10px",
-                height: isSafari ? "400px" : "376px",
+                height: isSafari ? "400px" : "375px",
               }}
             >
               <Box sx={{ marginTop: "20px" }}>
