@@ -235,7 +235,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
     if (!currentSemester || !currentSemester.tagId) return;
 
     const getSemesterData = async () => {
-      const semesterRef = collection(db, "tmpSemesterStudentVoteStat");
+      const semesterRef = collection(db, "semesterStudentVoteStat");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
       const semesterDoc = await getDocs(q);
       if (!semesterDoc.docs.length) {
@@ -276,7 +276,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
     const getUserDailyStat = async () => {
-      const userDailyStatRef = collection(db, "tmpSemesterStudentStat");
+      const userDailyStatRef = collection(db, "semesterStudentStat");
       const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
       const userDailyStatDoc = await getDocs(q);
       if (!userDailyStatDoc.docs.length) {
