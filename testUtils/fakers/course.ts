@@ -33,13 +33,14 @@ type IFakeSemesterOptions = {
   documentId?: string;
   course?: INode;
   university?: INode;
+  department?: INode;
   program?: INode;
   instructor?: IUser;
   title?: string;
   tagId?: string;
 };
 export const createSemester = (params: IFakeSemesterOptions): ISemester => {
-  const { documentId, instructor, title, tagId, university, course, program } = params;
+  const { documentId, instructor, title, tagId, university, course, program, department } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
     instructors: [instructor?.documentId || faker.datatype.uuid()],
@@ -47,6 +48,8 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
     tagId: tagId || faker.datatype.uuid(),
     uTagId: university?.documentId || faker.datatype.uuid(),
     uTitle: university?.title || faker.datatype.string(),
+    dTagId: department?.documentId || faker.datatype.uuid(),
+    dTitle: department?.title || faker.datatype.string(),
     cTagId: course?.documentId || faker.datatype.uuid(),
     cTitle: course?.title || faker.datatype.string(),
     pTitle: program?.title || faker.datatype.string(), // program tile

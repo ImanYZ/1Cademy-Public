@@ -220,32 +220,32 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         },
         syllabus: [
           {
-            title: "Ch1. Mock Chapter 1",
+            title: "Mock Chapter 1",
             children: [
               {
-                title: "Ch1.1. Mock Chapter 1.1",
+                title: "Mock Chapter 1.1",
               },
               {
-                title: "Ch1.2. Mock Chapter 1.2",
+                title: "Mock Chapter 1.2",
               },
             ],
           },
           {
-            title: "Ch2. Mock Chapter 2",
+            title: "Mock Chapter 2",
             children: [
               {
-                title: "Ch2.1. Mock Chapter 2.1",
+                title: "Mock Chapter 2.1",
               },
             ],
           },
           {
-            title: "Ch3. Mock Chapter 3",
+            title: "Mock Chapter 3",
             children: [
               {
-                title: "Ch3.1. Mock Chapter 3.1",
+                title: "Mock Chapter 3.1",
               },
               {
-                title: "Ch3.2. Mock Chapter 3.2",
+                title: "Mock Chapter 3.2",
               },
             ],
           },
@@ -274,6 +274,7 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         expect(syllabusItem.node?.length).toBeGreaterThan(0);
 
         const nodeDoc = await db.collection("nodes").doc(String(syllabusItem.node)).get();
+        console.log(nodeDoc.data()?.title);
         expect(nodeDoc.exists).toBeTruthy();
 
         if (syllabusItem.children && syllabusItem.children.length) {
@@ -326,8 +327,6 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         },
       });
 
-      console.log(semesterData.syllabus);
-
       const res = HttpMock.createResponse();
       await settingHandler(req, res as any);
 
@@ -337,6 +336,51 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
       const _semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
       const _semesterData = _semesterDoc.data() as ISemester;
       expect(_semesterData.syllabus[0].node?.length).toBeGreaterThan(0);
+    });
+
+    it("check if changes in syllabus change node title as well", async () => {
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+
+      semesterData.syllabus[0].title = "TEST TITLE";
+
+      const body = {
+        days: semesterData.days,
+        nodeProposals: {
+          startDate: moment().format("YYYY-MM-DD"),
+          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          numPoints: 1,
+          numProposalPerDay: 1,
+          totalDaysOfCourse: 30,
+        },
+        questionProposals: {
+          startDate: moment().format("YYYY-MM-DD"),
+          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: 30,
+        },
+        votes: semesterData.votes,
+        syllabus: semesterData.syllabus,
+      } as InstructorSemesterSettingPayload;
+
+      const req: any = HttpMock.createRequest({
+        method: "POST",
+        query: {
+          semesterId: semester.documentId,
+        },
+        body,
+        headers: {
+          authorization: "Bearer " + accessToken,
+        },
+      });
+
+      const res = HttpMock.createResponse();
+      await settingHandler(req, res as any);
+
+      const node = (await db.collection("nodes").doc(String(semesterData.syllabus[0].node)).get()).data() as INode;
+
+      expect(node.title).toEqual("Ch.1 TEST TITLE");
     });
   });
 
