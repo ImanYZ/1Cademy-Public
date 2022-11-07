@@ -527,8 +527,6 @@ export const Students: InstructorLayoutPage = () => {
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [openProfile, setOpenProfile] = useState(false);
-  const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
-  const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
@@ -562,6 +560,9 @@ export const Students: InstructorLayoutPage = () => {
       semestersSnapshot();
     };
   }, [db]);
+
+  const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
+  const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
 
   //this to filter the results
   const handleFilterBy = (filters: any, fromDash: boolean) => {
@@ -758,7 +759,7 @@ export const Students: InstructorLayoutPage = () => {
   const searchByNameEmail = (newValue: string) => {
     const _tableRows = tableRows.slice();
 
-    const newTable = _tableRows.filter(row => {
+    const newTable = _tableRows.filter((row: any) => {
       return (
         row.firstName.toLowerCase().includes(newValue) ||
         row.lastName.toLowerCase().includes(newValue) ||
@@ -1000,167 +1001,277 @@ export const Students: InstructorLayoutPage = () => {
 
   return (
     <>
-      <Box className="student-dashboard" sx={{ width: "100%" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            flexDirection: isMovil ? "column" : "row",
-          }}
-        >
+      <Box
+        className="student-dashboard"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-around",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <Box>
           <Box
             sx={{
               display: "flex",
-              alignItems: "center",
-              width: "500px",
-              flexDirection: "row",
-              px: "15px",
+              justifyContent: "space-between",
+              flexDirection: isMovil ? "column" : "row",
             }}
           >
-            <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h1" component="h2">
-              Sl 106
-            </Typography>
-            <Typography sx={{ fontFamily: "fangsong" }} component="h2">
-              Students:
-            </Typography>
-            <Typography sx={{ fontFamily: "fangsong" }} component="h2">
-              {tableRows.length}
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
-            <TextField
+            <Box
               sx={{
-                width: { sm: 200, md: 300 },
-                "& .MuiInputBase-root": {
-                  height: isMovil ? 40 : 60,
-                },
-                alignSelf: "center",
-                pl: isMovil ? "10px" : "0px",
-                pt: isMovil ? "14px" : "0px",
-                backgroundColor: theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#F5F5F5",
+                display: "flex",
+                alignItems: "center",
+                width: "500px",
+                flexDirection: "row",
+                px: "15px",
               }}
-              id="outlined-basic"
-              value={searchValue}
-              onChange={handleNewSearh}
-              placeholder={!isMovil ? "search name or email" : "search"}
-              InputProps={{
-                endAdornment: (
-                  <IconButton
-                    onClick={() => {
-                      searchByNameEmail(searchValue.toLowerCase());
+            >
+              <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h1" component="h2">
+                Sl 106
+              </Typography>
+              <Typography sx={{ fontFamily: "fangsong" }} component="h2">
+                Students:
+              </Typography>
+              <Typography sx={{ fontFamily: "fangsong" }} component="h2">
+                {tableRows.length}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
+              <TextField
+                sx={{
+                  width: { sm: 200, md: 300 },
+                  "& .MuiInputBase-root": {
+                    height: isMovil ? 40 : 60,
+                  },
+                  alignSelf: "center",
+                  pl: isMovil ? "10px" : "0px",
+                  pt: isMovil ? "14px" : "0px",
+                  backgroundColor: theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#F5F5F5",
+                }}
+                id="outlined-basic"
+                value={searchValue}
+                onChange={handleNewSearh}
+                placeholder={!isMovil ? "search name or email" : "search"}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton
+                      onClick={() => {
+                        searchByNameEmail(searchValue.toLowerCase());
+                      }}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  ),
+                }}
+              />
+              {!isMovil ? (
+                <>
+                  <Button
+                    variant="contained"
+                    disabled={editMode}
+                    onClick={handleOpenCloseFilter}
+                    sx={{
+                      color: theme => theme.palette.common.white,
+                      background: theme => theme.palette.common.orange,
+                      height: { xs: "40px", md: "55px" },
+                      width: { xs: "50%", md: "auto" },
+                      fontSize: 16,
+                      fontWeight: "700",
+                      my: { xs: "0px", md: "auto" },
+                      mt: { xs: "15px", md: "auto" },
+                      marginLeft: { xs: "0px", md: "32px" },
+                      paddingX: "30px",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
                     }}
                   >
-                    <SearchIcon />
-                  </IconButton>
-                ),
-              }}
-            />
-            {!isMovil ? (
-              <>
-                <Button
-                  variant="contained"
-                  onClick={handleOpenCloseFilter}
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.orange,
-                    height: { xs: "40px", md: "55px" },
-                    width: { xs: "50%", md: "auto" },
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                >
-                  Filter By
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={handleEditAndAdd}
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.black,
-                    height: { xs: "40px", md: "55px" },
-                    width: { xs: "50%", md: "auto" },
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                >
-                  <EditIcon /> Edit/Add
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="contained"
-                  onClick={handleOpenCloseFilter}
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.black,
-                    height: { xs: "40px", md: "55px" },
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    ml: "15px",
-                  }}
-                >
-                  <FilterAltIcon /> Filter
-                </Button>
-              </>
+                    Filter By
+                  </Button>
+                  <Button
+                    variant="contained"
+                    disabled={editMode}
+                    onClick={handleEditAndAdd}
+                    sx={{
+                      color: theme => theme.palette.common.white,
+                      background: theme => theme.palette.common.black,
+                      height: { xs: "40px", md: "55px" },
+                      width: { xs: "50%", md: "auto" },
+                      fontSize: 16,
+                      fontWeight: "700",
+                      my: { xs: "0px", md: "auto" },
+                      mt: { xs: "15px", md: "auto" },
+                      marginLeft: { xs: "0px", md: "32px" },
+                      marginRight: "40px",
+                      paddingX: "30px",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                  >
+                    <EditIcon /> Edit/Add
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="contained"
+                    onClick={handleOpenCloseFilter}
+                    sx={{
+                      color: theme => theme.palette.common.white,
+                      background: theme => theme.palette.common.black,
+                      height: { xs: "40px", md: "55px" },
+                      my: { xs: "0px", md: "auto" },
+                      mt: { xs: "15px", md: "auto" },
+                      ml: "15px",
+                    }}
+                  >
+                    <FilterAltIcon /> Filter
+                  </Button>
+                </>
+              )}
+              <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
+                {filer()}
+              </Drawer>
+            </Box>
+          </Box>
+          <Box>
+            {filters.length > 0 && !openFilter && (
+              <Stack direction="row" spacing={2} sx={{ py: "10px", px: "10px" }}>
+                {filters?.map((filter, index) => {
+                  return (
+                    <>
+                      <Chip
+                        key={index}
+                        label={filter.title + " " + filter.operation + " " + filter.value}
+                        onDelete={() => deleteFilter(index, false)}
+                        sx={{ fontSize: isMovil ? "10px" : "20px" }}
+                      />
+                      {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
+                    </>
+                  );
+                })}{" "}
+              </Stack>
             )}
-            <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
-              {filer()}
-            </Drawer>
           </Box>
         </Box>
-        {filters.length > 0 && !openFilter && (
-          <Stack direction="row" spacing={2} sx={{ py: "10px", px: "10px" }}>
-            {filters?.map((filter, index) => {
-              return (
-                <>
-                  <Chip
-                    key={index}
-                    label={filter.title + " " + filter.operation + " " + filter.value}
-                    onDelete={() => deleteFilter(index, false)}
-                    sx={{ fontSize: isMovil ? "10px" : "20px" }}
-                  />
-                  {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
-                </>
-              );
-            })}{" "}
-          </Stack>
-        )}
-        <hr />
         <Box
           sx={{
-            mt: "40px",
-            mr: !isMovil ? "70px" : "0px",
-            ml: !isMovil ? "30px" : "0px",
-            mb: !isMovil ? "90px" : "0px",
-            height: "100%",
+            border: "1px solid #fff",
+            borderRightWidth: 0,
+            borderLeftWidth: 0,
           }}
         >
-          <TableContainer component={Paper}>
-            <Table aria-label="simple table">
+          <TableContainer
+            component={Paper}
+            sx={{
+              // maxHeight: 500,
+              height: 600,
+            }}
+          >
+            <Table
+              stickyHeader
+              aria-label="simple table"
+              sx={
+                {
+                  // height: "max-content",
+                }
+              }
+            >
               <TableHead>
                 <TableRow>
                   {!isMovil && <TableCell>{""}</TableCell>}
-                  {keys.map((colmn: any, keyIndex) => {
-                    // console.log({ colmn });
-                    return (
+                  {keys.map((colmn: string, keyIndex: number) => (
+                    <TableCell
+                      key={keyIndex}
+                      sx={
+                        ["firstName", "lastName"].includes(colmn) && isMovil
+                          ? {
+                              position: "sticky",
+                              left: colmn === "lastName" ? 90 : 0,
+                              backgroundColor: theme =>
+                                theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                              fontWeight: "10px",
+                              fontSize: "14px",
+                            }
+                          : isMovil
+                          ? { fontWeight: "10px", fontSize: "14px" }
+                          : { fontSize: "14px" }
+                      }
+                      align="left"
+                    >
+                      <div style={{ display: "flex", flexDirection: "row" }}>
+                        <>
+                          <div>{colmn}</div>
+                          {!isMovil && (
+                            <IconButton
+                              id={id}
+                              onClick={event => handleClick(colmn, event)}
+                              style={{ paddingTop: "10px" }}
+                            >
+                              {" "}
+                              <ArrowDropDownIcon viewBox="1 9 24 24" />
+                            </IconButton>
+                          )}
+                        </>
+                      </div>
+                      <Popover
+                        id={id}
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handleClose}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        elevation={1}
+                      >
+                        <Box sx={{ width: "200px", color: "black", display: "flex", flexDirection: "column" }}>
+                          <Button
+                            sx={{
+                              p: 2,
+                              fontSize: "14px",
+                              color: theme.palette.mode === "dark" ? "white" : "#757575",
+                            }}
+                            onClick={sortLowHigh}
+                          >
+                            Sort Low to High
+                          </Button>
+                          <Button
+                            sx={{
+                              p: 2,
+                              fontSize: "14px",
+                              color: theme.palette.mode === "dark" ? "white" : "#757575",
+                            }}
+                            onClick={sortHighLow}
+                          >
+                            Sort High to Low
+                          </Button>
+                        </Box>
+                      </Popover>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tableRows.map((row: any, rowIndex: number) => (
+                  <TableRow key={rowIndex} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                    {!isMovil && (
+                      <TableCell align="left">
+                        <OptimizedAvatar
+                          name={row.username}
+                          imageUrl={row.avatar}
+                          renderAsAvatar={true}
+                          contained={false}
+                        />
+                        <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+                      </TableCell>
+                    )}
+                    {columns.map((colmn: string, columnIndex: number) => (
                       <TableCell
-                        key={keyIndex}
+                        key={columnIndex}
                         sx={
                           ["firstName", "lastName"].includes(colmn) && isMovil
                             ? {
@@ -1177,149 +1288,51 @@ export const Students: InstructorLayoutPage = () => {
                         }
                         align="left"
                       >
-                        <div style={{ display: "flex", flexDirection: "row" }}>
-                          {/* {colmn !== "userProfile" && */}
+                        {editMode && ["firstName", "lastName", "email"].includes(colmn) ? (
+                          <TextField
+                            style={{ width: colmn === "email" ? "200px" : "150px" }}
+                            value={row[colmn]}
+                            onChange={event => editValues(colmn, rowIndex, event)}
+                            id="outlined-basic"
+                            variant="outlined"
+                          />
+                        ) : (
                           <>
-                            <div>{colmn}</div>
-                            {!isMovil && (
-                              <IconButton
-                                id={id}
-                                onClick={event => handleClick(colmn, event)}
-                                style={{ paddingTop: "10px" }}
-                              >
-                                {" "}
-                                <ArrowDropDownIcon viewBox="1 9 24 24" />
-                              </IconButton>
+                            {["firstName", "lastName"].includes(colmn) ? (
+                              <LinkNext href={isMovil ? "#" : "#"}>
+                                <Link onClick={() => openThisProfile(row)}>
+                                  {" "}
+                                  <>{row[colmn]}</>
+                                </Link>
+                              </LinkNext>
+                            ) : (
+                              <>{row[colmn]}</>
                             )}
                           </>
-                          {/* } */}
-                        </div>
-                        <Popover
-                          id={id}
-                          open={open}
-                          anchorEl={anchorEl}
-                          onClose={handleClose}
-                          anchorOrigin={{
-                            vertical: "top",
-                            horizontal: "left",
-                          }}
-                          elevation={1}
-                        >
-                          <Box sx={{ width: "200px", color: "black", display: "flex", flexDirection: "column" }}>
-                            <Button
-                              sx={{
-                                p: 2,
-                                fontSize: "14px",
-                                color: theme.palette.mode === "dark" ? "white" : "#757575",
-                              }}
-                              onClick={sortLowHigh}
-                            >
-                              Sort Low to High
-                            </Button>
-                            <Button
-                              sx={{
-                                p: 2,
-                                fontSize: "14px",
-                                color: theme.palette.mode === "dark" ? "white" : "#757575",
-                              }}
-                              onClick={sortHighLow}
-                            >
-                              Sort High to Low
-                            </Button>
-                          </Box>
-                        </Popover>
+                        )}
                       </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tableRows.map((row: any, rowIndex) => {
-                  // if (rowIndex === 0) {
-                  //   console.log({ row });
-                  // }
-                  return (
-                    <TableRow key={rowIndex} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                      {!isMovil && (
-                        <TableCell align="left">
-                          <OptimizedAvatar
-                            name={row.username}
-                            imageUrl={row.avatar}
-                            renderAsAvatar={true}
-                            contained={false}
+                    ))}
+                    {editMode && (
+                      <TableCell align="right">
+                        <IconButton onClick={() => deleteRow(rowIndex)}>
+                          <DeleteIcon
+                            sx={{
+                              color: "red",
+                              borderRadius: "50%",
+                            }}
                           />
-                          <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-                        </TableCell>
-                      )}
-                      {columns.map((colmn, columnIndex) => {
-                        // console.log({ value: row[colmn] });
-                        return (
-                          <TableCell
-                            key={columnIndex}
-                            sx={
-                              ["firstName", "lastName"].includes(colmn) && isMovil
-                                ? {
-                                    position: "sticky",
-                                    left: colmn === "lastName" ? 90 : 0,
-                                    backgroundColor: theme =>
-                                      theme.palette.mode === "dark"
-                                        ? theme.palette.common.darkGrayBackground
-                                        : "#FFFFFF",
-                                    fontWeight: "10px",
-                                    fontSize: "14px",
-                                  }
-                                : isMovil
-                                ? { fontWeight: "10px", fontSize: "14px" }
-                                : { fontSize: "14px" }
-                            }
-                            align="left"
-                          >
-                            {editMode && ["firstName", "lastName", "email"].includes(colmn) ? (
-                              <TextField
-                                style={{ width: colmn === "email" ? "200px" : "150px" }}
-                                value={row[colmn]}
-                                onChange={event => editValues(colmn, rowIndex, event)}
-                                id="outlined-basic"
-                                variant="outlined"
-                              />
-                            ) : (
-                              <>
-                                {["firstName", "lastName"].includes(colmn) ? (
-                                  <LinkNext href={isMovil ? "#" : "#"}>
-                                    <Link onClick={() => openThisProfile(row)}>
-                                      {" "}
-                                      <>{row[colmn]}</>
-                                    </Link>
-                                  </LinkNext>
-                                ) : (
-                                  <>{row[colmn]}</>
-                                )}
-                              </>
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                      {editMode && (
-                        <TableCell align="right">
-                          <IconButton onClick={() => deleteRow(rowIndex)}>
-                            <DeleteIcon
-                              sx={{
-                                color: "red",
-                                borderRadius: "50%",
-                              }}
-                            />
-                          </IconButton>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  );
-                })}
+                        </IconButton>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
-          <hr />
-          {editMode && (
-            <Box sx={{ mt: "50px" }}>
+        </Box>
+        {editMode ? (
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Box>
               <Button
                 variant="text"
                 sx={{
@@ -1360,57 +1373,59 @@ export const Students: InstructorLayoutPage = () => {
               >
                 <AddIcon /> Add a new student
               </Button>
-              <Box sx={{ textAlign: "right" }}>
-                <Button
-                  variant="text"
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  onClick={() => discardTableChanges()}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="contained"
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.orange,
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  onClick={() => saveTableChanges()}
-                >
-                  Save Changes
-                </Button>
-              </Box>
             </Box>
-          )}
-        </Box>
-        <Drawer
-          sx={{ backgroundColor: "transparent" }}
-          anchor={"bottom"}
-          open={openProfile}
-          onClose={handleOpenCloseProfile}
-        >
-          {studentsProfile()}
-        </Drawer>
+            <Box>
+              <Button
+                variant="text"
+                sx={{
+                  color: theme => theme.palette.common.white,
+                  fontSize: 16,
+                  fontWeight: "700",
+                  my: { xs: "0px", md: "auto" },
+                  marginLeft: { xs: "0px", md: "32px" },
+                  marginRight: "40px",
+                  paddingX: "30px",
+                  borderRadius: 1,
+                  textAlign: "center",
+                  alignSelf: "center",
+                }}
+                onClick={() => discardTableChanges()}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                sx={{
+                  color: theme => theme.palette.common.white,
+                  background: theme => theme.palette.common.orange,
+                  fontSize: 16,
+                  fontWeight: "700",
+                  my: { xs: "0px", md: "auto" },
+                  marginLeft: { xs: "0px", md: "32px" },
+                  marginRight: "40px",
+                  paddingX: "30px",
+                  borderRadius: 1,
+                  textAlign: "center",
+                  alignSelf: "center",
+                }}
+                onClick={() => saveTableChanges()}
+              >
+                Save Changes
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <div></div>
+        )}
       </Box>
+      <Drawer
+        sx={{ backgroundColor: "transparent" }}
+        anchor={"bottom"}
+        open={openProfile}
+        onClose={handleOpenCloseProfile}
+      >
+        {studentsProfile()}
+      </Drawer>
       <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)}>
         <DialogTitle>
           <Typography variant="h3" fontWeight={"bold"} component="h2">
