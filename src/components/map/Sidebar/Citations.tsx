@@ -79,9 +79,6 @@ const Citations = ({ openLinkedNode, identifier }: CitationsProps) => {
     [openLinkedNode]
   );
 
-  console.log("x", citationList);
-  // TODO: get citations from the nodes collection in data base
-
   return (
     <Box component={"ul"} sx={{ px: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
       {citationList.map(cur => (

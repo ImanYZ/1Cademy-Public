@@ -2,7 +2,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -91,9 +91,17 @@ const ProposalItem = (props: any) => {
           {proposalSummaries.length > 0
             ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
                 return (
-                  <p style={{ margin: "0px" }} key={"Summary" + props.proposal.id + prSummaryIdx}>
+                  <Box
+                    component="p"
+                    sx={{
+                      margin: "0px",
+                      color: theme =>
+                        theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
+                    }}
+                    key={"Summary" + props.proposal.id + prSummaryIdx}
+                  >
                     {prSummary}
-                  </p>
+                  </Box>
                 );
               })
             : props.proposal.summary && (

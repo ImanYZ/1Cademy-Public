@@ -2,7 +2,7 @@ import { Timestamp } from "firebase-admin/firestore";
 
 export type ISemesterSyllabusItem = {
   title: string;
-  node: string;
+  node?: string;
   children?: ISemesterSyllabusItem[];
 };
 
@@ -16,6 +16,7 @@ export type ISemesterStudent = {
 
 // document id should be semester id as well
 export type ISemester = {
+  documentId?: string;
   instructors: string[]; // list of uid/uname
   title: string;
   tagId: string; // semester tag id
@@ -68,6 +69,7 @@ export type ICourseTag = {
 };
 
 export type IInstructor = {
+  documentId?: string;
   uname: string;
   courses: ICourseTag[];
   createdAt: Timestamp;
@@ -75,6 +77,7 @@ export type IInstructor = {
 };
 
 export type ICourse = {
+  documentId?: string;
   title: string;
   node: string;
   pTagIds: string[];
@@ -91,9 +94,16 @@ export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022
   proposals: number;
   questions: number;
+
+  newNodes: number;
+  links: number; // improvements on children and parent links
+
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
 };
 
 export type ISemesterStudentStat = {
+  documentId?: string;
   tagId: string; // tagId of semester
   uname: string;
   days: ISemesterStudentStatDay[];
@@ -104,6 +114,7 @@ export type ISemesterStudentStat = {
 
 // semesterStudentVoteStats
 export type ISemesterStudentVoteStat = {
+  documentId?: string;
   tagId: string; // tagId of semester
   uname: string;
   upVotes: number;
@@ -116,6 +127,7 @@ export type ISemesterStudentVoteStat = {
   totalPoints: number;
   newNodes: number;
   improvements: number;
+  links: number;
   questions: number;
   questionPoints: number;
   votes: number;

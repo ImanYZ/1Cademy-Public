@@ -1,4 +1,4 @@
-import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "@/lib/firestoreServer/admin";
 import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.config";
 import { getAuth as frontGetAuth, sendPasswordResetEmail } from "firebase/auth";
 import { getAuth } from "firebase-admin/auth";
@@ -10,7 +10,6 @@ import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { initializeNewReputationData } from "src/utils";
 import { searchAvailableUnameByEmail } from "src/utils/instructor";
-import { db } from "typesenseIndexer";
 import { v4 as uuidv4 } from "uuid";
 
 type InstructorSemesterSignUpPayload = {
@@ -25,6 +24,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   initFirebaseClientSDK();
   const frontAuth = frontGetAuth();
   try {
+    if (!req.body?.data?.user?.instructor) {
+      throw new Error("your are not instructor");
+    }
+    const instructorUname = req.body.data.user.userData.uname;
+
     let batch = db.batch();
     let writeCounts = 0;
 
@@ -33,6 +37,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const semesterRef = db.collection("semesters").doc(String(semesterId));
     const semesterData = (await semesterRef.get()).data() as ISemester;
+
+    // check if current user is a instructor and access to this course
+    if (semesterData.instructors.indexOf(instructorUname) === -1) {
+      throw new Error("access denied");
+    }
 
     const semesterNodeData = (await db.collection("nodes").doc(semesterData.tagId).get()).data() as INode;
 

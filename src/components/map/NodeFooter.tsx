@@ -139,7 +139,6 @@ const NodeFooter = ({
   );
   const selectTags = useCallback(
     (event: any) => {
-      console.log("Click tags");
       openNodePart(event, "Tags");
     },
     [openNodePart]

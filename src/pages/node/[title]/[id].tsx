@@ -76,7 +76,6 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
     const auth = getAuth();
     const userAuthObj = auth?.currentUser;
     if (userAuthObj !== null && node?.title && node?.id) {
-      console.log({ userAuthObj, node });
       router.push({
         pathname: "/dashboard",
         query: { nodeId: node?.id },
