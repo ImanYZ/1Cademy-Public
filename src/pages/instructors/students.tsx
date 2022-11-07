@@ -7,11 +7,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
@@ -504,13 +499,8 @@ const keysColumns: any = {
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse }) => {
   const [tableRows, setTableRows] = useState(rows.slice());
-  const [CSVData, getCSVData] = useState<any>({
-    columns: [],
-    rows: [],
-  });
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [openUploadModal, setOpenUploadModal] = useState(false);
   const [filters, setFilters] = useState<
     {
       title: string;
@@ -805,8 +795,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     setEditMode(!editMode);
   };
 
-  const addNewData = () => {
+  const addNewData = (dataFromCSV: any) => {
     const _tableRow = tableRows.slice();
+    const CSVData = dataFromCSV;
     const email = CSVData.columns.find((elm: any) => elm?.includes("Email"));
     const fName = CSVData.columns.find((elm: any) => elm?.includes("First Name"));
     const lName = CSVData.columns.find((elm: any) => elm?.includes("Last Name"));
@@ -821,11 +812,31 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       _tableRow.push(newObject);
     }
     setTableRows(_tableRow);
-    setOpenUploadModal(false);
   };
 
   return (
     <>
+      {/* Drawers */}
+      <StudentFilters
+        isMovil={isMovil}
+        filters={filters}
+        addFilter={addFilter}
+        openFilter={openFilter}
+        deleteFilter={deleteFilter}
+        filterChoices={filterChoices}
+        handleFilterBy={handleFilterBy}
+        editFilterValue={editFilterValue}
+        handleChangeChoice={handleChangeChoice}
+        handleChangeFilter={handleChangeFilter}
+        handleOpenCloseFilter={handleOpenCloseFilter}
+        handleChangeOperation={handleChangeOperation}
+      />
+      <StudentsProfile
+        openProfile={openProfile}
+        openedProfile={openedProfile}
+        handleOpenCloseProfile={handleOpenCloseProfile}
+      />
+      {/* Main Component */}
       <Box
         className="student-dashboard"
         sx={{
@@ -958,20 +969,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   </Button>
                 </>
               )}
-              <StudentFilters
-                isMovil={isMovil}
-                filters={filters}
-                addFilter={addFilter}
-                openFilter={openFilter}
-                deleteFilter={deleteFilter}
-                filterChoices={filterChoices}
-                handleFilterBy={handleFilterBy}
-                editFilterValue={editFilterValue}
-                handleChangeChoice={handleChangeChoice}
-                handleChangeFilter={handleChangeFilter}
-                handleOpenCloseFilter={handleOpenCloseFilter}
-                handleChangeOperation={handleChangeOperation}
-              />
             </Box>
           </Box>
           <Box>
@@ -1173,10 +1170,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
         {editMode ? (
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Box>
-              <Button
+              <CSVBtn
                 variant="text"
-                sx={{
-                  color: theme => theme.palette.common.black,
+                addNewData={addNewData}
+                buttonStyles={{
                   backgroundColor: "#EDEDED",
                   fontSize: 16,
                   fontWeight: "700",
@@ -1189,10 +1186,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   textAlign: "center",
                   alignSelf: "center",
                 }}
-                onClick={() => setOpenUploadModal(true)}
-              >
-                Add students from a csv file
-              </Button>
+                BtnText={"Add students from a csv file"}
+              />
               <Button
                 variant="text"
                 sx={{
@@ -1258,31 +1253,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           <div></div>
         )}
       </Box>
-      <StudentsProfile
-        openProfile={openProfile}
-        openedProfile={openedProfile}
-        handleOpenCloseProfile={handleOpenCloseProfile}
-      />
-      <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)}>
-        <DialogTitle>
-          <Typography variant="h3" fontWeight={"bold"} component="h2">
-            Add students from a csv file
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            <CSVBtn getCSVData={getCSVData} isOpen={openUploadModal} />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button disabled={CSVData?.rows?.length <= 0} variant="contained" onClick={addNewData}>
-            Add data to Table
-          </Button>
-          <Button variant="contained" onClick={() => setOpenUploadModal(false)}>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 };
