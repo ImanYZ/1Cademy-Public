@@ -167,7 +167,6 @@ const processNodeIdsFromSyllabusItem = async ({
 
   if (item.node) {
     if (updateNodes) {
-      // TODO: update content if its updated
       const _nodeRef = db.collection("nodes").doc(item.node);
       batch.update(_nodeRef, {
         title: `Ch.${chapter} ${item.title}`,
