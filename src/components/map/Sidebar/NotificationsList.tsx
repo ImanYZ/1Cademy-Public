@@ -117,6 +117,24 @@ const NotificationsList = (props: NotificationsListProps) => {
     [lastIndex, props.notifications.length]
   );
 
+  const YOUR_NODE_TEXT = (notification: any) => {
+    const notificationTypeMsg = (() => {
+      if (notification.aType === "Correct") return "received a Correct mark!";
+      if (notification.aType === "CorrectRM") return "lost a Correct mark!";
+      if (notification.aType === "Wrong") return "received a Wrong mark!";
+      if (notification.aType === "WrongRM") return "lost a Wrong mark!";
+      if (notification.aType === "Award") return "received an Award!";
+      if (notification.aType === "AwardRM") return "lost an Award!";
+      if (notification.aType === "Accept") return "just got accepted!";
+      if (notification.aType === "Delete") return "just got deleted!";
+      return;
+    })();
+    if (notificationTypeMsg) {
+      return `Your node ${notificationTypeMsg}`;
+    }
+    return "";
+  };
+
   return (
     <>
       {notifications.map(notification => {
@@ -170,20 +188,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                     : notification.oType === "AccProposal"
                     ? " Your accepted proposal "
                     : notification.oType === "Node"
-                    ? " Your node " +
-                      (notification.aType === "Correct"
-                        ? "received a Correct mark!"
-                        : notification.aType === "CorrectRM"
-                        ? "lost a Correct mark!"
-                        : notification.aType === "Wrong"
-                        ? "received a Wrong mark!"
-                        : notification.aType === "WrongRM"
-                        ? "lost a Wrong mark!"
-                        : notification.aType === "Award"
-                        ? "received an Award!"
-                        : notification.aType === "AwardRM"
-                        ? "lost an Award!"
-                        : notification.aType === "Accept" && "just got accepted!")
+                    ? YOUR_NODE_TEXT(notification)
                     : notification.oType === "Propo"
                     ? " Your node got a proposal for "
                     : notification.oType === "PropoAccept" &&
