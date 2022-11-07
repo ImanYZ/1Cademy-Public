@@ -92,7 +92,7 @@ export const useWorkerQueue = ({
 
         setDidWork(true);
         setGraph(({ nodes, edges }) => {
-          console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
+          // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];

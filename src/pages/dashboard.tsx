@@ -605,24 +605,24 @@ const Dashboard = ({}: DashboardProps) => {
             if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
               if (!node) {
-                console.log("fillDagre:modified:!node");
+                // console.log("fillDagre:modified:!node");
                 // <---  CHECK I change this from nodes
                 const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
               } else {
-                console.log("fillDagre:modified:node");
+                // console.log("fillDagre:modified:node");
                 const currentNode: FullNodeData = {
                   ...cur,
                   left: node.left,
                   top: node.top,
                 }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
 
-                console.log("fillDagre:modified:compare2Nodes", { cur, node });
+                // console.log("fillDagre:modified:compare2Nodes", { cur, node });
                 if (!compare2Nodes(cur, node)) {
-                  console.log("fillDagre:modified:areDirents", { cur, node });
+                  // console.log("fillDagre:modified:areDirents", { cur, node });
                   const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
-                  console.log("👉:fillDagre:modified:areDirents:res", res);
+                  // console.log("👉:fillDagre:modified:areDirents:res", res);
                   tmpNodes = res.oldNodes;
                   tmpEdges = res.oldEdges;
                 }
@@ -3991,7 +3991,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip
+              {/* <Tooltip
                 title={"worker"}
                 sx={{
                   position: "fixed",
@@ -4004,8 +4004,8 @@ const Dashboard = ({}: DashboardProps) => {
                 <IconButton onClick={() => addTask(null)}>
                   <CodeIcon />
                 </IconButton>
-              </Tooltip>
-              <Box
+              </Tooltip> */}
+              {/* <Box
                 sx={{
                   position: "fixed",
                   bottom: "60px",
@@ -4017,7 +4017,7 @@ const Dashboard = ({}: DashboardProps) => {
                 {Object.keys(graph.edges).map((cur, idx) => (
                   <h6 key={idx}>{cur}</h6>
                 ))}
-              </Box>
+              </Box> */}
             </div>
           )}
 
