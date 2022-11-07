@@ -323,6 +323,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
         display: "flex",
         flexDirection: "column",
         gap: "16px",
+        overflowX: "hidden",
       }}
     >
       <Box
@@ -344,10 +345,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                columnGap: "16px",
+                columnGap: "8px",
                 color: "white",
-                flexWrap: "wrap",
-                paddingBottom: "12px",
               }}
             >
               <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>
@@ -355,8 +354,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
               </Typography>
               <span>Fall 22</span>
               <span>Students: {students !== 0 ? students : "*"}</span>
-              <span>Introduction to Information Science</span>
             </Box>
+            <span>Introduction to Information Science</span>
             <Divider />
             <Box
               sx={{
@@ -447,11 +446,11 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           </Box>
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>
-          <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
+          <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
           <BubbleChart
             data={bubble}
             width={isMovil ? 220 : 500}
-            margin={{ top: 10, right: 0, bottom: 20, left: 50 }}
+            margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
             theme={"Dark"}
           />
         </Paper>

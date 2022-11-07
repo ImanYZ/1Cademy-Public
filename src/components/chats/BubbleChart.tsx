@@ -49,6 +49,7 @@ function drawChart(
   svgRef: React.RefObject<SVGSVGElement>,
   data: BubbleStats[],
   width: number,
+  height: number,
   margin: BubbleMargin,
   theme: UserTheme
 ) {
@@ -60,7 +61,7 @@ function drawChart(
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
   //   width = 500 - margin.left - margin.right,
-  const height = 400 - margin.top - margin.bottom;
+  height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   //   const svg = d3
@@ -91,12 +92,12 @@ function drawChart(
   svg
     .append("g")
     .attr("id", "axis-x")
-    .attr("transform", `translate(30, ${height})`)
+    .attr("transform", `translate(30, ${height + 5})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
   const y = d3.scaleLinear().domain([-10, 40]).range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
   // color palette = one color per subgroup
@@ -125,7 +126,7 @@ function drawChart(
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
-    .attr("transform", `translate(30, 0)`);
+    .attr("transform", `translate(30, 5)`);
   svg
     .select("#nums")
     .selectAll("text")
@@ -139,7 +140,7 @@ function drawChart(
     .attr("alignment-baseline", "central")
     .text(d => d.students)
     .style("font-size", "24px")
-    .attr("transform", `translate(30, 0)`);
+    .attr("transform", `translate(30, 5)`);
 
   // d => (d.points !== 0 ? borderColor(d.points) : GRAY)
   // .append("text")            // append text
@@ -164,19 +165,23 @@ export const BubbleChart = ({ width, margin, theme, data }: BubblePlotProps) => 
   //     console.log("call svg");
   //     drawChart(svg);
   //   }, [svg]);
-
+  const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
       console.log("svg callbak");
-      drawChart(svgRef, data, width, margin, theme);
+
+      drawChart(svgRef, data, width, height, margin, theme);
     },
     [data, margin, theme, width]
   );
 
   return (
-    <svg ref={svg}>
+    <svg ref={svg} style={{ position: "relative" }}>
       <g id="bubbles"></g>
       <g id="nums"></g>
+      <text style={{ fontSize: "16px" }} x={width - 40} y={height} fill="white">
+        # of Votes
+      </text>
     </svg>
   );
 };
