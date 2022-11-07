@@ -100,6 +100,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       const semester = Object.keys(courses);
       setSemesters(semester);
       setAllCourses(courses);
+      setSelectedSemester(semester[0]);
     };
 
     getInstructor();
@@ -114,10 +115,10 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   }, [allCourses, selectedSemester]);
 
   useEffect(() => {
-    console.log("effect runs");
+    // console.log("effect runs");
     if (!instructor) return;
     if (!selectedCourse) return;
-    console.log("selectedCourseee", selectedCourse);
+    // console.log("selectedCourseee", selectedCourse);
     const current = selectCourse(selectedCourse, instructor);
 
     setCurrentSemester(current);
