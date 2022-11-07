@@ -241,6 +241,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
+        setSemesterStats([]);
         return;
       }
 
@@ -278,7 +279,14 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       const userDailyStatRef = collection(db, "tmpSemesterStudentStat");
       const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
       const userDailyStatDoc = await getDocs(q);
-      if (!userDailyStatDoc.docs.length) return;
+      if (!userDailyStatDoc.docs.length) {
+        setLinksTrend([]);
+        setQuestionsTrend([]);
+        setVotesTrends([]);
+        setNodesTrends([]);
+        setEditProposalsTrend([]);
+        return;
+      }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
       setLinksTrend(getTrendsData(userDailyStats, "links"));
