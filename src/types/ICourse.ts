@@ -24,6 +24,8 @@ export type ISemester = {
   uTitle: string; // university tag name
   cTagId: string; // course tag id
   cTitle: string; // course tag
+  dTitle: string; // department tile
+  dTagId: string; // department tag id
   pTitle: string; // program tile
   pTagId: string; // program tag id
   // tagIds: string[];
