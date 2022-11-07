@@ -875,7 +875,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 {tableRows.length}
               </Typography>
             </Box>
-            <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
+            <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row", paddingBottom: "15px" }}>
               <TextField
                 sx={{
                   width: { sm: 200, md: 300 },

@@ -52,26 +52,22 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
         border: "solid 2px royalBlue",
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
+        minHeight: "100vh",
       }}
     >
-      <Box>
-        {!isMovil && <HeaderNavbar options={OPTIONS} />}
-        {isMovil && <HeaderNavbarMovil options={OPTIONS} />}
-        {/* <HeaderNavbar /> */}
-        <Box sx={{ display: "flex", justifyContent: "center", py: "10px", px: { xs: "10px", xl: "0px" } }}>
-          <SemesterFilter
-            semesters={semesters}
-            selectedSemester={selectedSemester}
-            setSelectedSemester={setSelectedSemester}
-            courses={courses}
-            selectedCourse={selectedCourse}
-            setSelectedCourse={setSelectedCourse}
-            isMovil={isMovil}
-          />
-        </Box>
+      {!isMovil && <HeaderNavbar options={OPTIONS} />}
+      {isMovil && <HeaderNavbarMovil options={OPTIONS} />}
+      {/* <HeaderNavbar /> */}
+      <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
+        <SemesterFilter
+          semesters={semesters}
+          selectedSemester={selectedSemester}
+          setSelectedSemester={setSelectedSemester}
+          courses={courses}
+          selectedCourse={selectedCourse}
+          setSelectedCourse={setSelectedCourse}
+          isMovil={isMovil}
+        />
       </Box>
       {children({ selectedSemester, selectedCourse })}
     </Box>
