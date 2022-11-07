@@ -46,7 +46,7 @@ type BubbleMargin = {
 };
 
 function drawChart(
-  svgRef: React.RefObject<SVGSVGElement>,
+  svgRef: SVGGElement,
   data: BubbleStats[],
   width: number,
   height: number,

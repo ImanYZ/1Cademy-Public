@@ -29,7 +29,7 @@ const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 // const chartWidth = 100;
 // const chartHeight = 100;
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: StackedBarStats[], maxAxisY: number) {
+function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: number) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;

@@ -12,7 +12,7 @@ type boxPlotMargin = {
 };
 
 function drawChart(
-  svgRef: React.RefObject<SVGSVGElement>,
+  svgRef: SVGGElement,
   identifier: string,
   data: Chapter,
   width: number,
