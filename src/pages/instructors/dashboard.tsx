@@ -108,8 +108,8 @@ type Trends = {
 // ];
 
 const Semester = "2gbmyJVzQY1FBafjBtRx";
-const completionProposals = 70;
-const completionQuestions = 40;
+const completionProposals = 100;
+const completionQuestions = 100;
 
 export type StackedBarStats = {
   index: number;
@@ -232,10 +232,11 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
 
   useEffect(() => {
     if (!user) return;
+    if (!currentSemester || !currentSemester.tagId) return;
 
     const getSemesterData = async () => {
       const semesterRef = collection(db, "tmpSemesterStudentVoteStat");
-      const q = query(semesterRef, where("tagId", "==", Semester));
+      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
       const semesterDoc = await getDocs(q);
       if (!semesterDoc.docs.length) return;
 
@@ -250,7 +251,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       setMinBubbleAxisY(minVotePoints);
     };
     getSemesterData();
-  }, [db, getBubbleStats, user]);
+  }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, user]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -266,9 +267,10 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   }, [db]);
 
   useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId) return;
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "tmpSemesterStudentStat");
-      const q = query(userDailyStatRef, where("tagId", "==", Semester));
+      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
       const userDailyStatDoc = await getDocs(q);
       if (!userDailyStatDoc.docs.length) return;
 
@@ -280,7 +282,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       setEditProposalsTrend(getTrendsData(userDailyStats, "newNodes", "editProposals"));
     };
     getUserDailyStat();
-  }, [db]);
+  }, [currentSemester, currentSemester?.tagId, db]);
 
   const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
     let newNodeProposals = 0;
