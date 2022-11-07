@@ -49,6 +49,7 @@ type IProcessNodeParam = {
   tagIds: string[];
   tags: string[];
   chapter: string;
+  semesterTitle: string;
 };
 
 const createNodeContent = (children: INodeLink[]) => {
@@ -146,6 +147,7 @@ const processNodeIdsFromSyllabusItem = async ({
   tagIds,
   tags,
   chapter,
+  semesterTitle,
 }: IProcessNodeParam): Promise<[WriteBatch, number]> => {
   const children: INodeLink[] = [];
   const childRefs: {
@@ -158,7 +160,7 @@ const processNodeIdsFromSyllabusItem = async ({
       childRefs[child.title] = childRef;
       children.push({
         node: childRef.id,
-        title: `Ch.${chapter}.${subChapter} ${child.title}`,
+        title: `Ch.${chapter}.${subChapter} ${child.title} - ${semesterTitle}`,
         nodeType: "Relation",
       });
       subChapter++;
@@ -169,7 +171,7 @@ const processNodeIdsFromSyllabusItem = async ({
     if (updateNodes) {
       const _nodeRef = db.collection("nodes").doc(item.node);
       batch.update(_nodeRef, {
-        title: `Ch.${chapter} ${item.title}`,
+        title: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
         parents: [
           {
             node: parentId,
@@ -198,12 +200,13 @@ const processNodeIdsFromSyllabusItem = async ({
           updateNodes,
           userData,
           parentId: nodeRef.id,
-          parentTitle: `Ch.${chapter} ${item.title}`,
+          parentTitle: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
           universityTitle,
           nodeRef: childRef,
           tagIds,
           tags,
           chapter: `${chapter}.${subChapter}`,
+          semesterTitle,
         });
         subChapter++;
       }
@@ -211,7 +214,7 @@ const processNodeIdsFromSyllabusItem = async ({
     await createNode(
       batch,
       userData,
-      `Ch.${chapter} ${item.title}`,
+      `Ch.${chapter} ${item.title} - ${semesterTitle}`,
       parentId,
       parentTitle,
       universityTitle,
@@ -287,6 +290,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           tagIds,
           tags,
           chapter: "1",
+          semesterTitle: semesterNodeData.title,
         });
       }
     }
@@ -307,6 +311,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         tagIds,
         tags,
         chapter: String(chapter),
+        semesterTitle: semesterNodeData.title,
       });
       chapter++;
     }
