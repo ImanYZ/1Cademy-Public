@@ -73,7 +73,11 @@ const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
           ))}
         </Tabs>
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
-          <Button color="secondary" sx={{ wordBreak: "normal", width: "233px", p: "12px 24px 12px 37px" }}>
+          <Button
+            onClick={() => router.push("/dashboard")}
+            color="secondary"
+            sx={{ wordBreak: "normal", width: "233px", p: "12px 24px 12px 37px" }}
+          >
             <ArrowForwardIosIcon fontSize="small" sx={{ mr: "20px" }} />
             GO TO NOTEBOOK
           </Button>

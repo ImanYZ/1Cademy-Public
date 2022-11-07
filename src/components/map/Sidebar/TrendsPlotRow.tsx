@@ -42,6 +42,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
       let twoThirdIndex = Math.floor((props.trendData.length * 2) / 3);
       let twoThirdValue = props.trendData[twoThirdIndex][props.x];
       if (props.x === "date") {
+        console.log({ oneThirdValue, twoThirdValue });
         oneThirdValue = new Date(oneThirdValue);
         twoThirdValue = new Date(twoThirdValue);
       }

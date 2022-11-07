@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+
+import { Instructor } from "../../instructorsTypes";
 const MOCK_SEMESTERS: string[] = [
   "Winter-2022",
   "Spring-2022",
@@ -34,13 +36,18 @@ const getFirstCourse = (semester: string | undefined, courses: { [key: string]: 
   return coursesBySemester[0] ?? undefined;
 };
 
-export const useSemesterFilter = () => {
+type UseSemesterFilterProps = {
+  instructor: Instructor;
+};
+
+export const useSemesterFilter = ({ instructor }: UseSemesterFilterProps) => {
   const [semesters /* setSemesters */] = useState<string[]>(MOCK_SEMESTERS);
   const [selectedSemester, setSelectedSemester] = useState<string | undefined>(MOCK_SEMESTERS[0] ?? undefined);
   const [courses, setCourses] = useState<any[]>(getCourseBySemester(selectedSemester, MOCK_COURSES));
   const [selectedCourse, setSelectedCourse] = useState<string | undefined>(
     getFirstCourse(selectedSemester, MOCK_COURSES)
   );
+  console.log({ instructor });
 
   // TODO: create useEffect to load semesters
 
