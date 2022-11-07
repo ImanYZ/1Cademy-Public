@@ -5,7 +5,7 @@ import { Divider, Paper, Typography /* useTheme */, useMediaQuery, useTheme } fr
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SemesterStudentVoteStat } from "src/instructorsTypes";
 
 import { BoxChart } from "@/components/chats/BoxChart";
@@ -121,12 +121,18 @@ const Semester = "2gbmyJVzQY1FBafjBtRx";
 const completionProposals = 50;
 const completionQuestions = 50;
 
-export type rate = {
+export type StackedBarStats = {
   index: number;
   alessEqualTen: number;
   bgreaterTen: number;
   cgreaterFifty: number;
   dgreaterHundred: number;
+};
+
+export type BubbleStats = {
+  students: number;
+  votes: number;
+  points: number;
 };
 
 type SemesterStats = {
@@ -148,7 +154,37 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [students, setStudents] = useState<number>(0);
-  const [stackedBar, setStackedBar] = useState<rate[]>([]);
+  const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
+  const [bubble, setBubble] = useState<BubbleStats[]>([]);
+
+  const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStats[] => {
+    const bubbleStats: BubbleStats[] = [];
+
+    data.map(d => {
+      let bubbleStat: BubbleStats = {
+        students: 0,
+        votes: 0,
+        points: 0,
+      };
+      const votes = d.votes;
+      const votePoints = d.votePoints;
+      const index = findBubble(bubbleStats, votes, votePoints);
+      if (index >= 0) {
+        bubbleStats[index].students += 1;
+      } else {
+        bubbleStat.votes = votes;
+        bubbleStat.points = votePoints;
+        bubbleStat.students += 1;
+        bubbleStats.push(bubbleStat);
+      }
+    });
+    return bubbleStats;
+  }, []);
+
+  const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
+    const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
+    return index;
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -161,12 +197,13 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
 
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStats(getSemStat(semester));
-      const stackedBarStat = getStackedBarStat(semester);
-      console.log("Buuble Stats", stackedBarStat);
       setStackedBar(getStackedBarStat(semester));
+      setBubble(getBubbleStats(semester));
+      const bubbles = getBubbleStats(semester);
+      console.log("BUBBLES", bubbles);
     };
     getSemesterData();
-  }, [db, user]);
+  }, [db, getBubbleStats, user]);
   useEffect(() => {
     console.log("SemesterStarts", semesterStats);
   }, [semesterStats]);
@@ -209,16 +246,16 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
     };
   };
 
-  const getStackedBarStat = (data: SemesterStudentVoteStat[]): rate[] => {
-    const stackedBarStats: rate[] = [];
-    const ProposalsRate: rate = {
+  const getStackedBarStat = (data: SemesterStudentVoteStat[]): StackedBarStats[] => {
+    const stackedBarStats: StackedBarStats[] = [];
+    const ProposalsRate: StackedBarStats = {
       index: 0,
       alessEqualTen: 0,
       bgreaterTen: 0,
       cgreaterFifty: 0,
       dgreaterHundred: 0,
     };
-    const QuestionsRate: rate = {
+    const QuestionsRate: StackedBarStats = {
       index: 1,
       alessEqualTen: 0,
       bgreaterTen: 0,
@@ -412,6 +449,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
         <Paper sx={{ px: "32px", py: "40px" }}>
           <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
           <BubbleChart
+            data={bubble}
             width={isMovil ? 220 : 500}
             margin={{ top: 10, right: 0, bottom: 20, left: 50 }}
             theme={"Dark"}

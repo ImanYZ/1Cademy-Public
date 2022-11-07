@@ -2,6 +2,8 @@ import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { BubbleStats } from "@/pages/instructors/dashboard";
+
 // const columns = ["fruit", "vegetable"];
 
 const GREEN = "rgb(56, 142, 60)";
@@ -13,18 +15,18 @@ const GRAY_ALPHA = "rgba(237, 237, 237, 0.5)";
 const ORANGE = "rgb(255, 138, 51)";
 const ORANGE_ALPHA = "rgba(251, 204, 169, 0.5)";
 
-const BUBBLE_MOCK = [
-  { students: 30, votes: 170, points: 40 },
-  { students: 70, votes: 150, points: 19 },
-  { students: 70, votes: 350, points: 79 },
-  { students: 30, votes: 270, points: 18 },
-  { students: 25, votes: 330, points: 20 },
-  { students: 35, votes: 120, points: 60 },
-  { students: 20, votes: 340, points: -10 },
-  { students: 10, votes: 140, points: 80 },
-  { students: 30, votes: 110, points: 0 },
-  { students: 15, votes: 370, points: -2 },
-];
+// const data = [
+//   { students: 30, votes: 170, points: 40 },
+//   { students: 70, votes: 150, points: 19 },
+//   { students: 70, votes: 350, points: 79 },
+//   { students: 30, votes: 270, points: 18 },
+//   { students: 25, votes: 330, points: 20 },
+//   { students: 35, votes: 120, points: 60 },
+//   { students: 20, votes: 340, points: -10 },
+//   { students: 10, votes: 140, points: 80 },
+//   { students: 30, votes: 110, points: 0 },
+//   { students: 15, votes: 370, points: -2 },
+// ];
 // // const data = [
 // //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
 // //   { category: "vegetable", yes: 5, no: 4, maybe: 9 },
@@ -43,12 +45,18 @@ type BubbleMargin = {
   left: number;
 };
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin: BubbleMargin, theme: UserTheme) {
+function drawChart(
+  svgRef: React.RefObject<SVGSVGElement>,
+  data: BubbleStats[],
+  width: number,
+  margin: BubbleMargin,
+  theme: UserTheme
+) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
   const svg = d3.select(svgRef);
-
+  console.warn(theme);
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
   //   width = 500 - margin.left - margin.right,
@@ -79,7 +87,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
   // Add X axis
-  const x = d3.scaleLinear().domain([0, 500]).range([0, width]);
+  const x = d3.scaleLinear().domain([0, 20]).range([0, width]);
   svg
     .append("g")
     .attr("id", "axis-x")
@@ -87,7 +95,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  const y = d3.scaleLinear().domain([-10, 100]).range([height, 0]);
+  const y = d3.scaleLinear().domain([-10, 40]).range([height, 0]);
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 0)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
@@ -103,7 +111,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin
     .select("#bubbles")
     .selectAll("circle")
     // Enter in the stack data = loop key per key = group per group
-    .data(BUBBLE_MOCK)
+    .data(data)
     // .join("g")
     .join("circle")
     .attr("fill", d => (d.points !== 0 ? color(d.points) : GRAY_ALPHA))
@@ -117,22 +125,21 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
-    .append("text")
     .attr("transform", `translate(30, 0)`);
   svg
     .select("#nums")
     .selectAll("text")
     // Enter in the stack data = loop key per key = group per group
-    .data(BUBBLE_MOCK)
+    .data(data)
     .join("text")
     .attr("fill", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    .attr("stroke", theme === "Dark" ? "white" : "black")
     .attr("x", d => x(d.votes))
     .attr("y", d => y(d.points))
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "central")
-    .text("2")
-    .style("font-size", "24px");
+    .text(d => d.students)
+    .style("font-size", "24px")
+    .attr("transform", `translate(30, 0)`);
 
   // d => (d.points !== 0 ? borderColor(d.points) : GRAY)
   // .append("text")            // append text
@@ -144,11 +151,12 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, width: number, margin
 }
 
 type BubblePlotProps = {
+  data: BubbleStats[];
   width: number;
   margin: BubbleMargin;
   theme: UserTheme;
 };
-export const BubbleChart = ({ width, margin, theme }: BubblePlotProps) => {
+export const BubbleChart = ({ width, margin, theme, data }: BubblePlotProps) => {
   console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
 
@@ -160,9 +168,9 @@ export const BubbleChart = ({ width, margin, theme }: BubblePlotProps) => {
   const svg = useCallback(
     (svgRef: any) => {
       console.log("svg callbak");
-      drawChart(svgRef, width, margin, theme);
+      drawChart(svgRef, data, width, margin, theme);
     },
-    [margin, width]
+    [data, margin, theme, width]
   );
 
   return (

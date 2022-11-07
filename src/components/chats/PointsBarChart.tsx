@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
 
-import { rate } from "@/pages/instructors/dashboard";
+import { StackedBarStats } from "@/pages/instructors/dashboard";
 
 // const columns = ["fruit", "vegetable"];
 const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
@@ -29,7 +29,7 @@ const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 // const chartWidth = 100;
 // const chartHeight = 100;
 
-function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: rate[]) {
+function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: StackedBarStats[]) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -167,7 +167,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, data: rate[]) {
 }
 
 type StackedBarProps = {
-  data: rate[];
+  data: StackedBarStats[];
 };
 export const PointsBarChart = ({ data }: StackedBarProps) => {
   console.log("PointsBarChart");
