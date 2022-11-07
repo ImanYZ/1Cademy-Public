@@ -49,6 +49,7 @@ type IProcessNodeParam = {
   tagIds: string[];
   tags: string[];
   chapter: string;
+  semesterTitle: string;
 };
 
 const createNodeContent = (children: INodeLink[]) => {
@@ -146,7 +147,16 @@ const processNodeIdsFromSyllabusItem = async ({
   tagIds,
   tags,
   chapter,
+  semesterTitle,
 }: IProcessNodeParam): Promise<[WriteBatch, number]> => {
+  if (!nodeRef) {
+    if (item.node) {
+      nodeRef = db.collection("nodes").doc(item.node);
+    } else {
+      nodeRef = db.collection("nodes").doc();
+    }
+  }
+
   const children: INodeLink[] = [];
   const childRefs: {
     [title: string]: DocumentReference;
@@ -158,8 +168,31 @@ const processNodeIdsFromSyllabusItem = async ({
       childRefs[child.title] = childRef;
       children.push({
         node: childRef.id,
-        title: `Ch.${chapter}.${subChapter} ${child.title}`,
+        title: `Ch.${chapter}.${subChapter} ${child.title} - ${semesterTitle}`,
         nodeType: "Relation",
+      });
+      subChapter++;
+    }
+  }
+
+  if (item.children && item.children.length) {
+    for (const child of item.children) {
+      const childRef = childRefs[child.title];
+      [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
+        batch,
+        writeCounts,
+        item: child,
+        nodeIds,
+        updateNodes,
+        userData,
+        parentId: nodeRef.id,
+        parentTitle: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
+        universityTitle,
+        nodeRef: childRef,
+        tagIds,
+        tags,
+        chapter: `${chapter}.${subChapter}`,
+        semesterTitle,
       });
       subChapter++;
     }
@@ -167,9 +200,8 @@ const processNodeIdsFromSyllabusItem = async ({
 
   if (item.node) {
     if (updateNodes) {
-      const _nodeRef = db.collection("nodes").doc(item.node);
-      batch.update(_nodeRef, {
-        title: `Ch.${chapter} ${item.title}`,
+      batch.update(nodeRef, {
+        title: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
         parents: [
           {
             node: parentId,
@@ -184,34 +216,10 @@ const processNodeIdsFromSyllabusItem = async ({
     }
     nodeIds.push(item.node);
   } else if (updateNodes) {
-    if (!nodeRef) {
-      nodeRef = db.collection("nodes").doc();
-    }
-    if (item.children && item.children.length) {
-      for (const child of item.children) {
-        const childRef = childRefs[child.title];
-        [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
-          batch,
-          writeCounts,
-          item: child,
-          nodeIds,
-          updateNodes,
-          userData,
-          parentId: nodeRef.id,
-          parentTitle: `Ch.${chapter} ${item.title}`,
-          universityTitle,
-          nodeRef: childRef,
-          tagIds,
-          tags,
-          chapter: `${chapter}.${subChapter}`,
-        });
-        subChapter++;
-      }
-    }
     await createNode(
       batch,
       userData,
-      `Ch.${chapter} ${item.title}`,
+      `Ch.${chapter} ${item.title} - ${semesterTitle}`,
       parentId,
       parentTitle,
       universityTitle,
@@ -287,6 +295,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           tagIds,
           tags,
           chapter: "1",
+          semesterTitle: semesterNodeData.title,
         });
       }
     }
@@ -307,6 +316,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         tagIds,
         tags,
         chapter: String(chapter),
+        semesterTitle: semesterNodeData.title,
       });
       chapter++;
     }
