@@ -238,7 +238,11 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       const semesterRef = collection(db, "tmpSemesterStudentVoteStat");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
       const semesterDoc = await getDocs(q);
-      if (!semesterDoc.docs.length) return;
+      if (!semesterDoc.docs.length) {
+        setBubble([]);
+        setStackedBar([]);
+        return;
+      }
 
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStats(getSemStat(semester));
@@ -249,6 +253,8 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       setMaxBubbleAxisY(maxVotePoints);
       setMinBubbleAxisX(minVote);
       setMinBubbleAxisY(minVotePoints);
+      const bubbles = getBubbleStats(semester);
+      console.log("Bubbles", bubbles);
     };
     getSemesterData();
   }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, user]);
