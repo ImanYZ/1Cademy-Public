@@ -142,35 +142,48 @@ const processNodeIdsFromSyllabusItem = async ({
   tags,
   chapter,
 }: IProcessNodeParam): Promise<[WriteBatch, number]> => {
+  const children: INodeLink[] = [];
+  const childRefs: {
+    [title: string]: DocumentReference;
+  } = {};
+  let subChapter = 1;
+  if (item.children && item.children.length) {
+    for (const child of item.children) {
+      const childRef = child.node ? db.collection("nodes").doc(child.node) : db.collection("nodes").doc();
+      childRefs[child.title] = childRef;
+      children.push({
+        node: childRef.id,
+        title: `Ch.${chapter}.${subChapter} ${child.title}`,
+        nodeType: "Relation",
+      });
+      subChapter++;
+    }
+  }
+
   if (item.node) {
-    // TOOD: need to update title for children -> parent entry
-    const _nodeRef = db.collection("nodes").doc(item.node);
-    batch.update(_nodeRef, {
-      title: `Ch.${chapter} ${item.title}`,
-      parents: [
-        {
-          node: parentId,
-          title: parentTitle,
-          nodeType: "Relation",
-        },
-      ],
-    });
-    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    if (updateNodes) {
+      const _nodeRef = db.collection("nodes").doc(item.node);
+      batch.update(_nodeRef, {
+        title: `Ch.${chapter} ${item.title}`,
+        parents: [
+          {
+            node: parentId,
+            title: parentTitle,
+            nodeType: "Relation",
+          },
+        ],
+        children,
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
     nodeIds.push(item.node);
   } else if (updateNodes) {
     if (!nodeRef) {
       nodeRef = db.collection("nodes").doc();
     }
-    const children: INodeLink[] = [];
-    let subChapter = 1;
     if (item.children && item.children.length) {
       for (const child of item.children) {
-        const childRef = db.collection("nodes").doc();
-        children.push({
-          node: childRef.id,
-          title: child.title,
-          nodeType: "Relation",
-        });
+        const childRef = childRefs[child.title];
         [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
           batch,
           writeCounts,
