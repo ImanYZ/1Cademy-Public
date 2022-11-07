@@ -1,8 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
@@ -14,13 +12,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import Drawer from "@mui/material/Drawer";
-import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
-import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
-import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -54,6 +48,7 @@ import React, { useEffect, useState } from "react";
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
 import CSVBtn from "../../components/instructors/CSVBtn";
+import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
 const rows: any = [
@@ -526,7 +521,7 @@ export const Students: InstructorLayoutPage = () => {
   const [searchValue, setSearchValue] = useState("");
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
-  const [openProfile, setOpenProfile] = useState(false);
+  const [openProfile, setOpenProfile] = useState(true);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
@@ -829,176 +824,6 @@ export const Students: InstructorLayoutPage = () => {
     setOpenUploadModal(false);
   };
 
-  const filer = () => (
-    <>
-      <Box sx={{ textAlign: "right" }}>
-        <IconButton onClick={handleOpenCloseFilter}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
-      <Box
-        role="presentation"
-        sx={{
-          width: isMovil ? "300px" : "500px",
-          display: "flex",
-          flexDirection: "column",
-          height: "90%",
-          px: "10px",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box sx={{ width: "100%" }}>
-          <Typography sx={{ mb: "10px" }}>Filter By</Typography>
-
-          {filters.length > 0 ? (
-            <>
-              {filters.map((filter, index) => {
-                return (
-                  <>
-                    <Paper key={index} elevation={6} sx={{ mb: "13px", width: !isMovil ? "80%" : "100%" }}>
-                      <Box sx={{ textAlign: "right" }}>
-                        <IconButton onClick={() => deleteFilter(index, true)}>
-                          <DeleteForeverIcon />
-                        </IconButton>
-                      </Box>
-                      <Box sx={{ px: "10px" }}>
-                        <FormControl fullWidth>
-                          <Select value={filter.title} onChange={event => handleChangeChoice(index, event)}>
-                            {Object.keys(filterChoices).map((choice, index) => {
-                              return (
-                                <MenuItem key={index} value={choice}>
-                                  {choice}
-                                </MenuItem>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-                      </Box>
-                      <Box sx={{ display: "flex", flexDirection: "row", p: "10px 10px 10px 10px" }}>
-                        <Box sx={{ minWidth: 80, ml: "5px", mr: "10px" }}>
-                          <FormControl fullWidth>
-                            <Select value={filter.operation} onChange={event => handleChangeOperation(index, event)}>
-                              <MenuItem value={"<"}>{"<"}</MenuItem>
-                              <MenuItem value={">"}>{">"}</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                        <TextField
-                          sx={{ height: "5px" }}
-                          id="outlined-basic"
-                          placeholder="Enter a value"
-                          variant="outlined"
-                          onChange={event => editFilterValue(index, event)}
-                          value={filter.value}
-                        />
-                      </Box>
-                    </Paper>
-                    <>{filters.length - 1 !== index && <>AND</>}</>
-                  </>
-                );
-              })}
-              <Box sx={{ mt: "10px" }}>
-                <IconButton onClick={addFilter}>
-                  <AddIcon />
-                </IconButton>
-                {"Add a Filter"}
-              </Box>
-            </>
-          ) : (
-            <Box sx={{ width: "100%", paddingBottom: "10px" }}>
-              <FormControl fullWidth>
-                <Select displayEmpty name="Enter a value" onChange={handleChangeFilter}>
-                  {Object.keys(filterChoices).map((choice, index) => {
-                    return (
-                      <MenuItem key={index} value={choice}>
-                        {choice}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-            </Box>
-          )}
-        </Box>
-        <Box sx={{ textAlign: "center" }}>
-          <Button
-            variant="contained"
-            onClick={() => handleFilterBy(filters, false)}
-            sx={{
-              color: theme => theme.palette.common.white,
-              background: theme => theme.palette.common.orange,
-              fontSize: 16,
-              fontWeight: "700",
-              paddingX: "30px",
-              borderRadius: 1,
-            }}
-          >
-            Filter result
-          </Button>
-        </Box>
-      </Box>
-    </>
-  );
-
-  const studentsProfile = () => (
-    <Box sx={{ borderRadius: "16px", m: 0, border: 1 }}>
-      {"  "}
-      <Box sx={{ textAlign: "right" }}>
-        <IconButton onClick={handleOpenCloseProfile}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <Box sx={{ textAlign: "center", height: "200px" }}>
-        <Box sx={{ display: "flex", ml: "33%", mb: "5%", mt: "10%", flexDirection: "row" }}>
-          <Box>
-            <OptimizedAvatar
-              name={openedProfile.username}
-              imageUrl={openedProfile.avatar}
-              renderAsAvatar={true}
-              contained={false}
-              sx={{ mr: "15px" }}
-            />
-            <div
-              className={openedProfile.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-              style={{ fontSize: "1px", marginLeft: "35px" }}
-            ></div>
-          </Box>
-          <LinkNext href={"#"}>
-            <Link>
-              {" "}
-              <>{openedProfile.firstName + openedProfile.lastName}</>
-            </Link>
-          </LinkNext>
-        </Box>
-
-        <Box sx={{ mr: "30px" }}>{openedProfile.email}</Box>
-        <Button
-          variant="contained"
-          onClick={() => {
-            console.log("takemetothe profile");
-          }}
-          sx={{
-            color: theme => theme.palette.common.white,
-            background: theme => theme.palette.common.orange,
-            fontSize: 13,
-            fontWeight: "700",
-            my: { xs: "0px", md: "auto" },
-            mt: { xs: "15px", md: "auto" },
-            marginLeft: { xs: "0px", md: "32px" },
-            marginRight: "40px",
-            paddingX: "30px",
-            borderRadius: 1,
-            textAlign: "center",
-            alignSelf: "center",
-          }}
-        >
-          See Profile
-        </Button>
-      </Box>
-    </Box>
-  );
-
   return (
     <>
       <Box
@@ -1132,9 +957,20 @@ export const Students: InstructorLayoutPage = () => {
                   </Button>
                 </>
               )}
-              <Drawer anchor={"right"} open={openFilter} onClose={handleOpenCloseFilter}>
-                {filer()}
-              </Drawer>
+              <StudentFilters
+                isMovil={isMovil}
+                filters={filters}
+                addFilter={addFilter}
+                openFilter={openFilter}
+                deleteFilter={deleteFilter}
+                filterChoices={filterChoices}
+                handleFilterBy={handleFilterBy}
+                editFilterValue={editFilterValue}
+                handleChangeChoice={handleChangeChoice}
+                handleChangeFilter={handleChangeFilter}
+                handleOpenCloseFilter={handleOpenCloseFilter}
+                handleChangeOperation={handleChangeOperation}
+              />
             </Box>
           </Box>
           <Box>
@@ -1418,14 +1254,11 @@ export const Students: InstructorLayoutPage = () => {
           <div></div>
         )}
       </Box>
-      <Drawer
-        sx={{ backgroundColor: "transparent" }}
-        anchor={"bottom"}
-        open={openProfile}
-        onClose={handleOpenCloseProfile}
-      >
-        {studentsProfile()}
-      </Drawer>
+      <StudentsProfile
+        openProfile={openProfile}
+        openedProfile={openedProfile}
+        handleOpenCloseProfile={handleOpenCloseProfile}
+      />
       <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)}>
         <DialogTitle>
           <Typography variant="h3" fontWeight={"bold"} component="h2">
