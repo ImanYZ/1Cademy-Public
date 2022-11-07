@@ -241,7 +241,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
-        setSemesterStats([]);
+        setSemesterStats(null);
         return;
       }
 
