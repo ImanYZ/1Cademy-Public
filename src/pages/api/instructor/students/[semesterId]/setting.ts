@@ -147,6 +147,13 @@ const processNodeIdsFromSyllabusItem = async ({
     const _nodeRef = db.collection("nodes").doc(item.node);
     batch.update(_nodeRef, {
       title: `Ch.${chapter} ${item.title}`,
+      parents: [
+        {
+          node: parentId,
+          title: parentTitle,
+          nodeType: "Relation",
+        },
+      ],
     });
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     nodeIds.push(item.node);

@@ -274,7 +274,6 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         expect(syllabusItem.node?.length).toBeGreaterThan(0);
 
         const nodeDoc = await db.collection("nodes").doc(String(syllabusItem.node)).get();
-        console.log(nodeDoc.data()?.title);
         expect(nodeDoc.exists).toBeTruthy();
 
         if (syllabusItem.children && syllabusItem.children.length) {
