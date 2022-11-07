@@ -56,7 +56,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 import CSVBtn from "../../components/instructors/CSVBtn";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
-const rows = [
+const rows: any = [
   {
     id: 0,
     username: "username",
@@ -531,6 +531,7 @@ export const Students: InstructorLayoutPage = () => {
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
+  const [savedTableState, setSavedTableState] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const db = getFirestore();
@@ -552,7 +553,7 @@ export const Students: InstructorLayoutPage = () => {
       if (!docChanges.length) return;
       for (let change of docChanges) {
         if (change.type === "added" || change.type === "modified") {
-          setTableRows(change.doc.data().students.splice());
+          // setTableRows(change.doc.data().students.splice());
           console.log(":::: :::: ::: :data from Database ::: ::::: ", change.doc.data().students.splice());
         }
       }
@@ -683,7 +684,12 @@ export const Students: InstructorLayoutPage = () => {
     return;
   };
 
-  const discardTableChanges = () => setEditMode(!editMode);
+  const discardTableChanges = () => {
+    const _savedTableState = savedTableState.slice();
+    setTableRows(_savedTableState);
+    setSavedTableState([]);
+    setEditMode(!editMode);
+  };
 
   const editValues = (column: any, index: any, event: any) => {
     event.preventDefault();
@@ -787,6 +793,8 @@ export const Students: InstructorLayoutPage = () => {
       saveTableChanges();
       return setEditMode(!editMode);
     } else {
+      const _tableRows = tableRows.slice();
+      setSavedTableState(_tableRows);
       updateTableRows();
     }
     _tableRow.push({
@@ -1001,23 +1009,23 @@ export const Students: InstructorLayoutPage = () => {
           }}
         >
           <Box
-            style={{
+            sx={{
               display: "flex",
               alignItems: "center",
-              width: "30%",
-              justifyContent: "space-evenly",
+              width: "500px",
               flexDirection: "row",
+              px: "15px",
             }}
           >
-            <Typography variant="h1" component="h2">
-              Sl
+            <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h1" component="h2">
+              Sl 106
             </Typography>
-            <Typography variant="h1" component="h5">
-              106
+            <Typography sx={{ fontFamily: "fangsong" }} component="h2">
+              Students:
             </Typography>
-
-            <Typography component="h2">Students:</Typography>
-            <Typography component="h2">50</Typography>
+            <Typography sx={{ fontFamily: "fangsong" }} component="h2">
+              {tableRows.length}
+            </Typography>
           </Box>
           <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row" }}>
             <TextField
@@ -1140,6 +1148,7 @@ export const Students: InstructorLayoutPage = () => {
             mr: !isMovil ? "70px" : "0px",
             ml: !isMovil ? "30px" : "0px",
             mb: !isMovil ? "90px" : "0px",
+            height: "100%",
           }}
         >
           <TableContainer component={Paper}>
@@ -1164,7 +1173,7 @@ export const Students: InstructorLayoutPage = () => {
                               }
                             : isMovil
                             ? { fontWeight: "10px", fontSize: "14px" }
-                            : {}
+                            : { fontSize: "14px" }
                         }
                         align="left"
                       >
@@ -1200,7 +1209,7 @@ export const Students: InstructorLayoutPage = () => {
                             <Button
                               sx={{
                                 p: 2,
-                                fontSize: "17px",
+                                fontSize: "14px",
                                 color: theme.palette.mode === "dark" ? "white" : "#757575",
                               }}
                               onClick={sortLowHigh}
@@ -1210,7 +1219,7 @@ export const Students: InstructorLayoutPage = () => {
                             <Button
                               sx={{
                                 p: 2,
-                                fontSize: "17px",
+                                fontSize: "14px",
                                 color: theme.palette.mode === "dark" ? "white" : "#757575",
                               }}
                               onClick={sortHighLow}
@@ -1261,7 +1270,7 @@ export const Students: InstructorLayoutPage = () => {
                                   }
                                 : isMovil
                                 ? { fontWeight: "10px", fontSize: "14px" }
-                                : {}
+                                : { fontSize: "14px" }
                             }
                             align="left"
                           >
@@ -1308,6 +1317,7 @@ export const Students: InstructorLayoutPage = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <hr />
           {editMode && (
             <Box sx={{ mt: "50px" }}>
               <Button
