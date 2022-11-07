@@ -10,10 +10,9 @@ import Chapter from "../../components/instructors/setting/Chapter";
 import Proposal from "../../components/instructors/setting/Proposal";
 import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
-const CourseSetting: InstructorLayoutPage = ({ currentSemester, selectedSemester, selectedCourse }) => {
+const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   console.log(currentSemester, "currentSemester");
   const db = getFirestore();
-  const semesterId = "uKI3kMAhMllXyahRayEO";
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
     syllabus: [],
@@ -42,32 +41,34 @@ const CourseSetting: InstructorLayoutPage = ({ currentSemester, selectedSemester
   });
 
   useEffect(() => {
-    const semesterSnapshot = onSnapshot(doc(db, "semesters", semesterId), snapshot => {
-      let semester: any = snapshot.data();
-      if (semester) {
-        setSemester((prevSemester: any) => {
-          return {
-            ...prevSemester,
-            days: semester.days,
-            syllabus: semester.syllabus,
-            nodeProposals: {
-              ...semester.nodeProposals,
-              startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-DD-MM"),
-              endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-DD-MM"),
-            },
-            questionProposals: {
-              ...semester.questionProposals,
-              startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-DD-MM"),
-              endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-DD-MM"),
-            },
-            votes: semester.votes,
-          };
-        });
-        setChapters(semester.syllabus);
-      }
-    });
-    return () => semesterSnapshot();
-  }, [selectedSemester, selectedCourse]);
+    if (currentSemester) {
+      const semesterSnapshot = onSnapshot(doc(db, "semesters", currentSemester.tagId), snapshot => {
+        let semester: any = snapshot.data();
+        if (semester) {
+          setSemester((prevSemester: any) => {
+            return {
+              ...prevSemester,
+              days: semester.days,
+              syllabus: semester.syllabus,
+              nodeProposals: {
+                ...semester.nodeProposals,
+                startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-DD-MM"),
+                endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-DD-MM"),
+              },
+              questionProposals: {
+                ...semester.questionProposals,
+                startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-DD-MM"),
+                endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-DD-MM"),
+              },
+              votes: semester.votes,
+            };
+          });
+          setChapters(semester.syllabus);
+        }
+      });
+      return () => semesterSnapshot();
+    }
+  }, [selectedSemester, selectedCourse, currentSemester]);
 
   const inputsHandler = (e: any, type: any, field: any = null) => {
     if (type === "nodeProposals") {
@@ -136,7 +137,7 @@ const CourseSetting: InstructorLayoutPage = ({ currentSemester, selectedSemester
       }
     });
     let payload = { ...semester, syllabus: chaptersData };
-    let response = await Post("/instructor/students/" + semesterId + "/setting", payload);
+    let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
     console.log(response, "response");
   };
 
@@ -144,7 +145,12 @@ const CourseSetting: InstructorLayoutPage = ({ currentSemester, selectedSemester
     <Box sx={{ padding: "20px" }}>
       <Grid container spacing={5}>
         <Grid item xs={12} md={6}>
-          <Chapter chapters={chapters} setChapters={setChapters} onSubmitHandler={onSubmitHandler} />
+          <Chapter
+            currentSemester={currentSemester}
+            chapters={chapters}
+            setChapters={setChapters}
+            onSubmitHandler={onSubmitHandler}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
           <Proposal semester={semester} inputsHandler={inputsHandler} />
