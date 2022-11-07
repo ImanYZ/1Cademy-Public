@@ -651,13 +651,15 @@ export const compareAndUpdateNodeLinks = (
     console.log("compareAndUpdateNodeLinks:child", { newLink, newChildren: newNode.children, child });
     // if false, this child link is on the map but in updated data from database, it doesn't exist anymore
     if (newLink === false) {
-      console.log("removeDagEdge");
+      console.log("removeDagEdge", g);
       // child link should be removed from map
       oldEdges = removeDagEdge(g, nodeId, child.node, oldEdges);
+      console.log("removeDagEdge:result", g);
       // indicates that some properties of the child link need to be updated
     } else if (newLink !== true) {
-      console.log("setDagEdge");
+      console.log("setDagEdge", g);
       oldEdges = setDagEdge(g, nodeId, child.node, newLink, oldEdges);
+      console.log("setDagEdge:result", g);
     }
   }
   // for each parent of node on the map
@@ -668,12 +670,14 @@ export const compareAndUpdateNodeLinks = (
     // if false, this parent link is on the map but in updated data from database, it doesn't exist anymore
     if (newLink === false) {
       // parent link should be removed from map
-      console.log("removeDagEdge");
+      console.log("removeDagEdge", g);
       oldEdges = removeDagEdge(g, parent.node, nodeId, oldEdges);
+      console.log("removeDagEdge:result", g);
       // indicates that some properties of the parent link need to be updated
     } else if (newLink !== true) {
-      console.log("setDagEdge");
+      console.log("setDagEdge", g);
       oldEdges = setDagEdge(g, parent.node, nodeId, newLink, oldEdges);
+      console.log("setDagEdge:result", g);
     }
   }
   // looks at new parent/child links that never existed before to node with nodeId

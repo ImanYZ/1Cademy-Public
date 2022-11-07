@@ -216,6 +216,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
   const previousLengthNodes = useRef(0);
+  const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
   //Notificatios
@@ -747,6 +748,7 @@ const Dashboard = ({}: DashboardProps) => {
           //   // setEdges(edges=>{
           //   // })
           // });
+
           setGraph(({ nodes, edges }) => {
             // Here we are merging with previous nodes left and top
             const visibleFullNodesMerged = visibleFullNodes.map(cur => {
@@ -999,6 +1001,16 @@ const Dashboard = ({}: DashboardProps) => {
     }
     previousLengthNodes.current = currentLengthNodes;
   }, [addTask, graph.nodes]);
+
+  useEffect(() => {
+    const currentLengthEdges = Object.keys(graph.edges).length;
+    if (currentLengthEdges !== previousLengthEdges.current) {
+      // call worker to rerender all
+      devLog("CHANGE NH 🚀", "recalculate");
+      addTask(null);
+    }
+    previousLengthEdges.current = currentLengthEdges;
+  }, [addTask, graph.edges]);
   //called whenever isSubmitting changes
   // changes style of cursor
 
@@ -3976,6 +3988,20 @@ const Dashboard = ({}: DashboardProps) => {
               >
                 {/* DEVTOOLS */}
                 <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                  <CodeIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                title={"worker"}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "100px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <IconButton onClick={() => addTask(null)}>
                   <CodeIcon />
                 </IconButton>
               </Tooltip>
