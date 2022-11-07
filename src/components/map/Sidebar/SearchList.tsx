@@ -221,7 +221,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         //   page,
         // });
 
-        console.log("data", data.data);
+        // console.log("data", data.data);
 
         const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
         setSearchResults({
@@ -233,7 +233,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
         // };
         setIsRetrieving(false);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setIsRetrieving(false);
       }
     },

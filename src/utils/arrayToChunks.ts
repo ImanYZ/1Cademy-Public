@@ -1,5 +1,4 @@
-export const arrayToChunks = (inputArray: any[]) => {
-  const perChunk = 499;
+export const arrayToChunks = (inputArray: any[], perChunk: number = 499) => {
   const result = inputArray.reduce((resultArray, item, index) => {
     const chunkIndex = Math.floor(index / perChunk);
 

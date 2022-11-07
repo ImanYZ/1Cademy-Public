@@ -120,6 +120,7 @@ type NodeProps = {
   proposeNodeImprovement: any;
   proposeNewChild: any;
   scrollToNode: any;
+  openSidebar: OpenSidebar;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -210,6 +211,7 @@ const Node = ({
   proposeNewChild,
   cleanEditorLink,
   scrollToNode,
+  openSidebar,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -253,7 +255,8 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        const isSimilar = blockSize === previousHeightRef.current; /* && topPosition === previousTopRef.current */
+        // console.log("->", { blockSize, previousHeight: previousHeightRef.current });
+        const isSimilar = blockSize === previousHeightRef.current;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
         if (isSimilar) return;
@@ -493,6 +496,7 @@ const Node = ({
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
+      setReason("");
       cleanEditorLink();
     }
   }, [editable]);
@@ -890,6 +894,7 @@ const Node = ({
               saveProposedChildNode={saveProposedChildNode}
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}
+              setAbleToPropose={setAbleToPropose}
               ableToPropose={ableToPropose}
               isLoading={isLoading}
             />
@@ -1034,7 +1039,7 @@ const Node = ({
           </div>
         </div>
       )}
-      {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
+      {openSidebar === "PROPOSALS" && nodeBookState.selectedNode == identifier ? (
         <>
           <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
           <Box sx={{ p: "13px 10px" }}>
@@ -1155,6 +1160,7 @@ export const MemoizedNode = React.memo(Node);
 //     prevProps.studied === nextProps.studied &&
 //     prevProps.isStudied === nextProps.isStudied &&
 //     prevProps.changed === nextProps.changed &&
+
 //     prevProps.changedAt === nextProps.changedAt &&
 //     prevProps.lastVisit.getTime() === nextProps.lastVisit.getTime() &&
 //     prevProps.bookmarked === nextProps.bookmarked &&

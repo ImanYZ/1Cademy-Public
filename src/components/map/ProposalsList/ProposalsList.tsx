@@ -173,9 +173,17 @@ const ProposalsList = (props: ProposalsListProps) => {
                   {proposalSummaries.length > 0 ? (
                     proposalSummaries.map((prSummary: any, sIdx: number) => {
                       return (
-                        <p style={{ margin: "0" }} key={"Summary" + proposal.id + sIdx}>
+                        <Box
+                          component="p"
+                          sx={{
+                            margin: "0",
+                            color: theme =>
+                              theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
+                          }}
+                          key={"Summary" + proposal.id + sIdx}
+                        >
                           {prSummary}
-                        </p>
+                        </Box>
                       );
                     })
                   ) : (

@@ -25,7 +25,6 @@ type BookmarksListProps = {
 const ELEMENTS_PER_PAGE = 13;
 
 export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksListProps) => {
-  console.log("bookmarks", bookmarks);
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
 
   // useEffect(() => {

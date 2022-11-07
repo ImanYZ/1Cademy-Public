@@ -75,7 +75,6 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
     });
     return () => {
-      console.log("UNMOUNT BOOKMARKS");
       bookmarkSnapshot();
     };
   }, [db, username]);
@@ -101,7 +100,13 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       width={430}
       // anchor="right"
       SidebarOptions={
-        <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+          }}
+        >
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
             {[{ title: "Updated" }, { title: "Studied" }].map((tabItem: any, idx: number) => (
               <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />

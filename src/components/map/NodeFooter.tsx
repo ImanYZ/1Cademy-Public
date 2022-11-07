@@ -17,7 +17,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useRef, useState } from "react";
 
-import { useNodeBook } from "@/context/NodeBookContext";
 import { OpenSidebar } from "@/pages/dashboard";
 
 import { User } from "../../knowledgeTypes";
@@ -80,7 +79,6 @@ type NodeFooterProps = {
 
 const NodeFooter = ({
   open,
-  identifier,
   // activeNode,
   citationsSelected,
   // proposalsSelected,
@@ -129,7 +127,6 @@ const NodeFooter = ({
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const inputEl = useRef<HTMLInputElement>(null);
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
   const selectReferences = useCallback(
     (event: any) => {
@@ -139,24 +136,28 @@ const NodeFooter = ({
   );
   const selectTags = useCallback(
     (event: any) => {
-      console.log("Click tags");
       openNodePart(event, "Tags");
     },
     [openNodePart]
   );
   const selectPendingProposals = useCallback(
     (event: any) => {
-      if (nodeBookState.nodeId != identifier) {
-        nodeBookDispatch({
-          type: "setOpenEditButton",
-          payload: { status: true, nodeId: identifier },
-        });
-      } else {
-        nodeBookDispatch({
-          type: "setOpenEditButton",
-          payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
-        });
-      }
+      // if (nodeBookState.selectedNode === identifier) {
+      //   console.log("this is selected");
+      // }
+      // TODO: remove openEditButton and nodeId global states
+      // openNodePart(event, "PendingProposals");
+      // if (nodeBookState.nodeId != identifier) {
+      //   nodeBookDispatch({
+      //     type: "setOpenEditButton",
+      //     payload: { status: true, nodeId: identifier },
+      //   });
+      // } else {
+      //   nodeBookDispatch({
+      //     type: "setOpenEditButton",
+      //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
+      //   });
+      // }
       selectNode(event, "Proposals"); // Pass correct data
     },
     [selectNode]

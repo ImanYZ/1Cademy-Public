@@ -51,7 +51,6 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
   const snapshot = useCallback((q: Query<DocumentData>) => {
     const notificationsSnapshot = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
-      console.log("docChanges ", docChanges);
       if (!docChanges.length) return null;
 
       // const checkedNotificationsDict: any = checkedNotifications.reduce((acu, cur) => {
@@ -220,7 +219,13 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
       // anchor="right"
       onClose={onClose}
       SidebarOptions={
-        <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+          }}
+        >
           <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"}>
             {[{ title: "Unread" }, { title: "Read" }].map((tabItem: any, idx: number) => (
               <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />

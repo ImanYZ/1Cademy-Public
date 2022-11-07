@@ -2,9 +2,11 @@ import { ThemeProvider } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import dayjs from "dayjs";
+import { getAuth } from "firebase/auth";
 import { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
+import { useEffect } from "react";
 
 import LinkedNodes from "@/components/LinkedNodes";
 import { NodeHead } from "@/components/NodeHead";
@@ -70,6 +72,17 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 
 const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) => {
   const router = useRouter();
+  useEffect(() => {
+    const auth = getAuth();
+    const userAuthObj = auth?.currentUser;
+    if (userAuthObj !== null && node?.title && node?.id) {
+      router.push({
+        pathname: "/dashboard",
+        query: { nodeId: node?.id },
+      });
+      return;
+    }
+  }, [node, router]);
 
   if (router.isFallback) {
     return (
