@@ -149,9 +149,10 @@ const BoxLegend = () => {
   );
 };
 
-const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, user }) => {
+const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, user, currentSemester }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
   console.log({ selectedCourse, selectedSemester });
+  console.log("currentSemester", currentSemester);
   const theme = useTheme();
   // const [screenSize, setScreenSize] = useState(null);
   const db = getFirestore();

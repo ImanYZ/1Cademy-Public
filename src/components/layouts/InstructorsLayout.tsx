@@ -6,6 +6,7 @@ import Image from "next/image";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { User } from "src/knowledgeTypes";
+import { ICourseTag } from "src/types/ICourse";
 
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import { useAuth } from "../../context/AuthContext";
@@ -33,6 +34,7 @@ type InstructorsLayoutPageProps = {
   selectedSemester: string | undefined;
   selectedCourse: string | undefined;
   user: User;
+  currentSemester: ICourseTag | undefined;
 };
 
 type Props = {
@@ -52,7 +54,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [selectedSemester, setSelectedSemester] = useState<string | undefined>(undefined);
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string | undefined>(undefined);
-
+  const [currentSemester, setCurrentSemester] = useState<ICourseTag | undefined>(undefined);
   // TODO: create useEffect to load semesters
 
   const db = getFirestore();
@@ -90,6 +92,16 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     setCourses(newCourses);
     setSelectedCourse(newCourses[0]);
   }, [allCourses, selectedSemester]);
+
+  useEffect(() => {
+    console.log("effect runs");
+    if (!instructor) return;
+    if (!selectedCourse) return;
+    console.log("selectedCourseee", selectedCourse);
+    const current = selectCourse(selectedCourse, instructor);
+
+    setCurrentSemester(current);
+  }, [instructor, selectedCourse]);
 
   // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
   //   useSemesterFilter();
@@ -130,7 +142,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         />
       </Box>
 
-      {children({ selectedSemester, selectedCourse, user })}
+      {children({ selectedSemester, selectedCourse, user, currentSemester })}
     </Box>
   );
 };
@@ -153,4 +165,7 @@ const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
     const tmpValues = acu[cur.title] ?? [];
     return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
   }, {});
+};
+const selectCourse = (description: string, instructor: Instructor): ICourseTag | undefined => {
+  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle}` === description);
 };
