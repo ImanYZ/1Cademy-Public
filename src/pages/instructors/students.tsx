@@ -507,7 +507,7 @@ const keysColumns: any = {
   "Last Activity": "lastActivity",
 };
 
-export const Students: InstructorLayoutPage = () => {
+export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse }) => {
   const [tableRows, setTableRows] = useState(rows.slice());
   const [CSVData, getCSVData] = useState<any>({
     columns: [],
@@ -1009,6 +1009,7 @@ export const Students: InstructorLayoutPage = () => {
           justifyContent: "space-around",
           width: "100%",
           height: "100%",
+          px: "20px",
         }}
       >
         <Box>
@@ -1029,7 +1030,7 @@ export const Students: InstructorLayoutPage = () => {
               }}
             >
               <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h1" component="h2">
-                Sl 106
+                {selectedCourse}
               </Typography>
               <Typography sx={{ fontFamily: "fangsong" }} component="h2">
                 Students:
@@ -1209,9 +1210,12 @@ export const Students: InstructorLayoutPage = () => {
                             <IconButton
                               id={id}
                               onClick={event => handleClick(colmn, event)}
-                              style={{ paddingTop: "10px" }}
+                              sx={{
+                                "&:hover": {
+                                  background: "none",
+                                },
+                              }}
                             >
-                              {" "}
                               <ArrowDropDownIcon viewBox="1 9 24 24" />
                             </IconButton>
                           )}
@@ -1316,8 +1320,8 @@ export const Students: InstructorLayoutPage = () => {
                       <TableCell align="right">
                         <IconButton onClick={() => deleteRow(rowIndex)}>
                           <DeleteIcon
+                            color="error"
                             sx={{
-                              color: "red",
                               borderRadius: "50%",
                             }}
                           />
