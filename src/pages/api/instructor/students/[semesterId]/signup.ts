@@ -1,4 +1,4 @@
-import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "@/lib/firestoreServer/admin";
 import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.config";
 import { getAuth as frontGetAuth, sendPasswordResetEmail } from "firebase/auth";
 import { getAuth } from "firebase-admin/auth";
@@ -10,7 +10,6 @@ import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { initializeNewReputationData } from "src/utils";
 import { searchAvailableUnameByEmail } from "src/utils/instructor";
-import { db } from "typesenseIndexer";
 import { v4 as uuidv4 } from "uuid";
 
 type InstructorSemesterSignUpPayload = {
