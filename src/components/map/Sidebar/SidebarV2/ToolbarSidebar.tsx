@@ -37,6 +37,12 @@ type MainSidebarProps = {
   pendingProposalsNum: number;
 };
 
+// TODO:
+// create a utils function to detect OS and Browser
+// for using cross browser functionality issues
+const isSafari =
+  typeof window === "undefined" ? false : /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+
 export const ToolbarSidebar = ({
   open,
   onClose,
@@ -249,9 +255,17 @@ MainSidebarProps) => {
             className="toolbar"
             sx={{ overflow: "hidden", display: { xs: isMenuOpen ? "block" : "none", sm: "block" } }}
           >
+            {/* IMPORTANT : if you modify the height you must modify the Box below  */}
+
             <Box
               // className="toolbar-options"
-              sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", height: "376px" }}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "10px",
+                height: isSafari ? "400px" : "375px",
+              }}
             >
               <Box sx={{ marginTop: "20px" }}>
                 <MemoizedMetaButton
@@ -646,7 +660,7 @@ MainSidebarProps) => {
                 </>
               )}
             </Box>
-            <Box sx={{ height: "calc(100vh - 400px)", paddingBottom: "20px" }}>
+            <Box sx={{ height: isSafari ? "calc(100vh - 400px)" : "calc(100vh - 375px)", paddingBottom: "20px" }}>
               {user?.tag && leaderboardType && (
                 <UsersStatusList
                   // reputationsLoaded={props.reputationsLoaded}

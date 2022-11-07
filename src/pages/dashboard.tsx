@@ -216,6 +216,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
   const previousLengthNodes = useRef(0);
+  const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
   //Notificatios
@@ -604,19 +605,24 @@ const Dashboard = ({}: DashboardProps) => {
             if (cur.nodeChangeType === "modified" && cur.visible) {
               const node = acu.newNodes[cur.node];
               if (!node) {
+                // console.log("fillDagre:modified:!node");
                 // <---  CHECK I change this from nodes
                 const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
               } else {
+                // console.log("fillDagre:modified:node");
                 const currentNode: FullNodeData = {
                   ...cur,
                   left: node.left,
                   top: node.top,
                 }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
 
+                // console.log("fillDagre:modified:compare2Nodes", { cur, node });
                 if (!compare2Nodes(cur, node)) {
+                  // console.log("fillDagre:modified:areDirents", { cur, node });
                   const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+                  // console.log("👉:fillDagre:modified:areDirents:res", res);
                   tmpNodes = res.oldNodes;
                   tmpEdges = res.oldEdges;
                 }
@@ -742,6 +748,7 @@ const Dashboard = ({}: DashboardProps) => {
           //   // setEdges(edges=>{
           //   // })
           // });
+
           setGraph(({ nodes, edges }) => {
             // Here we are merging with previous nodes left and top
             const visibleFullNodesMerged = visibleFullNodes.map(cur => {
@@ -768,6 +775,7 @@ const Dashboard = ({}: DashboardProps) => {
             //   if(cur.nodeChangeType==='modified' &&)
             // })
             // here we are filling dagger
+            devLog("5:user Nodes Snapshot:visibleFullNodesMerged", visibleFullNodesMerged);
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
 
             if (!Object.keys(newNodes).length) {
@@ -993,6 +1001,16 @@ const Dashboard = ({}: DashboardProps) => {
     }
     previousLengthNodes.current = currentLengthNodes;
   }, [addTask, graph.nodes]);
+
+  useEffect(() => {
+    const currentLengthEdges = Object.keys(graph.edges).length;
+    if (currentLengthEdges !== previousLengthEdges.current) {
+      // call worker to rerender all
+      devLog("CHANGE NH 🚀", "recalculate");
+      addTask(null);
+    }
+    previousLengthEdges.current = currentLengthEdges;
+  }, [addTask, graph.edges]);
   //called whenever isSubmitting changes
   // changes style of cursor
 
@@ -1594,7 +1612,8 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookDispatch, nodeBookState.selectionType]
   );
 
-  const setNodeParts = useMemoizedCallback((nodeId, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    // console.log("setNodeParts");
     setGraph(({ nodes: oldNodes, edges }) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
@@ -2723,17 +2742,30 @@ const Dashboard = ({}: DashboardProps) => {
 
         return { nodes: newNodes, edges };
       });
+      setOpenSidebar(null);
       scrollToNode(nodeBookState.selectedNode);
     },
-    [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
+    [nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode]
   );
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType, openSidebar });
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
+        }
+
+        if (chosenType === "Proposals") {
+          if (openSidebar === "PROPOSALS" && nodeId === nodeBookState.selectedNode) {
+            setOpenSidebar(null);
+          } else {
+            setOpenSidebar("PROPOSALS");
+            setSelectedNodeType(nodeType);
+            nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          }
+          return;
         }
         if (chosenType === "Citations") {
           if (openSidebar === "CITATIONS") {
@@ -2777,7 +2809,6 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    // TODO: CHECK dependencies
     [
       nodeBookState.choosingNode,
       nodeBookState.selectionType,
@@ -2893,6 +2924,12 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.height;
           getMapGraph("/proposeNodeImprovement", postData);
           scrollToNode(nodeBookState.selectedNode);
+
+          // console.log("add task", 1);
+          // setTimeout(() => {
+          //   console.log("add task", 2);
+          //   addTask(null);
+          // }, 4000);
         }
       }
     },
@@ -3954,7 +3991,33 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip>
-              {/* partType: {lastNodeOperation.current} */}
+              {/* <Tooltip
+                title={"worker"}
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "100px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <IconButton onClick={() => addTask(null)}>
+                  <CodeIcon />
+                </IconButton>
+              </Tooltip> */}
+              {/* <Box
+                sx={{
+                  position: "fixed",
+                  bottom: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                {Object.keys(graph.edges).map((cur, idx) => (
+                  <h6 key={idx}>{cur}</h6>
+                ))}
+              </Box> */}
             </div>
           )}
 
@@ -4016,6 +4079,7 @@ const Dashboard = ({}: DashboardProps) => {
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
                   scrollToNode={scrollToNode}
+                  openSidebar={openSidebar}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
