@@ -1,5 +1,6 @@
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
-const Page: InstructorLayoutPage = ({ selectedSemester, selectedCourse }) => {
+const Page: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
+  console.log("currentSemester", currentSemester);
   return (
     <p>
       hello world {selectedSemester} + {selectedCourse}
