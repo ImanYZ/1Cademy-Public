@@ -10,7 +10,6 @@ import {
   Chip,
   CircularProgress,
   Divider,
-  FormControl,
   IconButton,
   InputAdornment,
   ListItemIcon,
@@ -242,7 +241,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
       width={430}
       // anchor="right"
       SidebarOptions={
-        <Box sx={{ p: "10px", borderBottom: 1, borderColor: "divider", width: "100%" }}>
+        <Box
+          sx={{
+            p: "10px",
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+          }}
+        >
           {showTagSelector && (
             <div id="tagModal">
               <Modal onClick={setShowTagSelectorClick} returnLeft={true}>
@@ -271,53 +277,53 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <FormControl id="nodeSelect">
-                      <Select
-                        multiple
-                        MenuProps={{ id: "nodeSelectMenu" }}
-                        value={nodeTypes}
-                        variant="outlined"
-                        displayEmpty
-                        renderValue={() => "Types"}
-                        onChange={onChangeNoteType}
-                      >
-                        {NODE_TYPES_ARRAY.map(nodeType => (
-                          // <FilterNodeTypes
-                          //   id="nodeTypesSelect"
-                          //   className="searchSelect"
-                          //   key={nodeType}
-                          //   value={nodeType}
-                          //   nodeTypes={nodeTypes}
-                          //   // setNodeTypesClick={setNodeTypesClick}
-                          //   nodeType={nodeType}
-                          // />
-                          // CHECK: THIS was in FilterNodeTypes
-                          <MenuItem
-                            className="searchSelect"
-                            key={nodeType}
-                            value={nodeType}
-                            id="nodeTypesSelect"
-                            /*onClick={props.setNodeTypesClick(props.nodeType)}*/
-                            // className={props.className}
-                          >
-                            <Checkbox
-                              className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
-                              checked={nodeTypes.includes(nodeType)}
+                    <Select
+                      multiple
+                      MenuProps={{ id: "nodeSelectMenu" }}
+                      value={nodeTypes}
+                      variant="outlined"
+                      displayEmpty
+                      renderValue={() => "Types"}
+                      onChange={onChangeNoteType}
+                      sx={{
+                        height: "46.31px",
+                        marginLeft: "-14px",
+                        zIndex: "99",
+                      }}
+                    >
+                      {NODE_TYPES_ARRAY.map(nodeType => (
+                        // <FilterNodeTypes
+                        //   id="nodeTypesSelect"
+                        //   className="searchSelect"
+                        //   key={nodeType}
+                        //   value={nodeType}
+                        //   nodeTypes={nodeTypes}
+                        //   // setNodeTypesClick={setNodeTypesClick}
+                        //   nodeType={nodeType}
+                        // />
+                        // CHECK: THIS was in FilterNodeTypes
+                        <MenuItem
+                          className="searchSelect"
+                          key={nodeType}
+                          value={nodeType}
+                          id="nodeTypesSelect"
+                          /*onClick={props.setNodeTypesClick(props.nodeType)}*/
+                          // className={props.className}
+                        >
+                          <Checkbox
+                            className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                            checked={nodeTypes.includes(nodeType)}
+                          />
+                          <ListItemIcon>
+                            <NodeTypeIcon
+                              className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                              nodeType={nodeType}
                             />
-                            <ListItemIcon>
-                              <NodeTypeIcon
-                                className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
-                                nodeType={nodeType}
-                              />
-                            </ListItemIcon>
-                            <ListItemText
-                              className={nodeTypes.includes(nodeType) ? "selected" : ""}
-                              primary={nodeType}
-                            />
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                          </ListItemIcon>
+                          <ListItemText className={nodeTypes.includes(nodeType) ? "selected" : ""} primary={nodeType} />
+                        </MenuItem>
+                      ))}
+                    </Select>
                     <Divider orientation="vertical" id="searchDivider" />
                   </InputAdornment>
                 ),

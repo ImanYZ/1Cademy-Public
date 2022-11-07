@@ -1415,12 +1415,11 @@ const Dashboard = ({}: DashboardProps) => {
                 type: chosenNodeObj.nodeType,
               },
             ];
+            const chosenNodeId = nodeBookState.chosenNode.id;
             if (removedParents.includes(nodeBookState.chosenNode.id)) {
-              const chosenNodeId = nodeBookState.chosenNode.id;
               setRemovedParents(removedParents.filter((nId: string) => nId !== chosenNodeId));
             } else {
-              const choosingNodeId = nodeBookState.choosingNode.id;
-              setAddedParents(oldAddedParents => [...oldAddedParents, choosingNodeId]);
+              setAddedParents(oldAddedParents => [...oldAddedParents, chosenNodeId]);
             }
 
             if (nodeBookState.chosenNode && nodeBookState.choosingNode) {
@@ -1595,7 +1594,8 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookDispatch, nodeBookState.selectionType]
   );
 
-  const setNodeParts = useMemoizedCallback((nodeId, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    // console.log("setNodeParts");
     setGraph(({ nodes: oldNodes, edges }) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
@@ -2731,10 +2731,22 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType });
+      devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType, openSidebar });
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {
           reloadPermanentGraph();
+        }
+
+        if (chosenType === "Proposals") {
+          if (openSidebar === "PROPOSALS" && nodeId === nodeBookState.selectedNode) {
+            setOpenSidebar(null);
+          } else {
+            setOpenSidebar("PROPOSALS");
+            setSelectedNodeType(nodeType);
+            nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          }
+          return;
         }
         if (chosenType === "Citations") {
           if (openSidebar === "CITATIONS") {
@@ -2778,7 +2790,6 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    // TODO: CHECK dependencies
     [
       nodeBookState.choosingNode,
       nodeBookState.selectionType,
@@ -4017,6 +4028,7 @@ const Dashboard = ({}: DashboardProps) => {
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
                   scrollToNode={scrollToNode}
+                  openSidebar={openSidebar}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>

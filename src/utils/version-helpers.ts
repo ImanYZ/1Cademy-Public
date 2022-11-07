@@ -1488,7 +1488,6 @@ export const versionCreateUpdate = async ({
           await detach(async () => {
             let linkedNode, linkedNodeChanges;
             let batch = db.batch();
-            let newBatch = batch;
             let writeCounts = 0;
             for (let addedParent of addedParents) {
               linkedNode = await getNode({ nodeId: addedParent });
@@ -1499,8 +1498,8 @@ export const versionCreateUpdate = async ({
                 updatedAt: currentTimestamp,
               };
 
-              newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
-              [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+              batch.update(linkedNode.nodeRef, linkedNodeChanges);
+              [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
               [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
                 batch,
@@ -1520,8 +1519,8 @@ export const versionCreateUpdate = async ({
                 updatedAt: currentTimestamp,
               };
 
-              newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
-              [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+              batch.update(linkedNode.nodeRef, linkedNodeChanges);
+              [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
               [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
                 batch,
@@ -1541,8 +1540,8 @@ export const versionCreateUpdate = async ({
                 updatedAt: currentTimestamp,
               };
 
-              newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
-              [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+              batch.update(linkedNode.nodeRef, linkedNodeChanges);
+              [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
               [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
                 batch,
@@ -1562,8 +1561,8 @@ export const versionCreateUpdate = async ({
                 updatedAt: currentTimestamp,
               };
 
-              newBatch.update(linkedNode.nodeRef, linkedNodeChanges);
-              [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+              batch.update(linkedNode.nodeRef, linkedNodeChanges);
+              [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
               [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
                 batch,
