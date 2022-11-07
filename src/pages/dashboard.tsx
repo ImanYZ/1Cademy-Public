@@ -1595,7 +1595,8 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookDispatch, nodeBookState.selectionType]
   );
 
-  const setNodeParts = useMemoizedCallback((nodeId, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    // console.log("setNodeParts");
     setGraph(({ nodes: oldNodes, edges }) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
