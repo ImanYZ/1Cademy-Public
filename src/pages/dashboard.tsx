@@ -2724,6 +2724,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         return { nodes: newNodes, edges };
       });
+      setOpenSidebar(null);
       scrollToNode(nodeBookState.selectedNode);
     },
     [nodeBookState, reloadPermanentGraph, scrollToNode, nodeBookState.selectedNode]
