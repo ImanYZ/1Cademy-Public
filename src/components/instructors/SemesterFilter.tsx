@@ -7,6 +7,8 @@ import {
   SelectChangeEvent,
   ToggleButton,
   ToggleButtonGroup,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
@@ -19,6 +21,7 @@ type SemesterFilterProps = {
   selectedCourse: string | undefined;
   setSelectedCourse: any;
   isMovil: boolean;
+  role: string;
 };
 
 export const SemesterFilter = ({
@@ -29,7 +32,11 @@ export const SemesterFilter = ({
   selectedCourse,
   setSelectedCourse,
   isMovil,
+  role,
 }: SemesterFilterProps) => {
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
+
   const onChangeSemester = (event: SelectChangeEvent) => {
     setSelectedSemester(event.target.value as string);
   };
@@ -43,9 +50,16 @@ export const SemesterFilter = ({
   };
 
   return (
-    <Box sx={{ display: "flex", gap: { xs: "8px", md: "16px" }, justifyContent: "space-between" }}>
-      <Box sx={{ display: "flex", gap: { xs: "8px", md: "16px" } }}>
-        <FormControl>
+    <Box
+      sx={{
+        display: "flex",
+        gap: { xs: "6px", md: "16px" },
+        justifyContent: { xs: "center", md: "space-between" },
+        flexWrap: "wrap",
+      }}
+    >
+      <Box sx={{ display: "flex", gap: { xs: "6px", md: "16px" } }}>
+        <FormControl size={matches ? "small" : "medium"}>
           <InputLabel id="semester-filter-label">Semester</InputLabel>
           <Select
             labelId="semester-filter-label"
@@ -73,7 +87,7 @@ export const SemesterFilter = ({
           </ToggleButtonGroup>
         )}
         {isMovil && (
-          <FormControl>
+          <FormControl size={matches ? "small" : "medium"}>
             <InputLabel id="course-filter-label">Courses</InputLabel>
             <Select
               labelId="course-filter-label"
@@ -93,7 +107,11 @@ export const SemesterFilter = ({
         )}
       </Box>
 
-      <Button variant={"contained"}>New Course</Button>
+      {role === "instructor" && (
+        <Button onClick={() => setSelectedCourse(undefined)} variant={"contained"} size={matches ? "small" : "medium"}>
+          New Course
+        </Button>
+      )}
     </Box>
   );
 };

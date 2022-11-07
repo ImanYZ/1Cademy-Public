@@ -8,8 +8,8 @@ import React, { useState } from "react";
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarMovilProps = { options: Option[] };
-const HeaderNavbarMovil = ({ options }: HeaderNavbarMovilProps) => {
+type HeaderNavbarMovilProps = { options: Option[]; role: string };
+const HeaderNavbarMovil = ({ options, role }: HeaderNavbarMovilProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
 
@@ -73,37 +73,38 @@ const HeaderNavbarMovil = ({ options }: HeaderNavbarMovilProps) => {
               zIndex: 10,
             }}
           >
-            {options.map((page, idx) => (
-              <LinkNext
-                key={idx}
-                onClick={event => {
-                  event.preventDefault();
-                  router.push(page.route);
-                }}
-                color="inherit"
-                style={{
-                  fontFamily: "Work Sans,sans-serif",
-                  fontSize: "18px",
-                  fontWeight: 400,
-                }}
-                href={page.route}
-              >
-                <Link
-                  sx={{
+            {role === "instructor" &&
+              options.map((page, idx) => (
+                <LinkNext
+                  key={idx}
+                  onClick={event => {
+                    event.preventDefault();
+                    router.push(page.route);
+                  }}
+                  color="inherit"
+                  style={{
                     fontFamily: "Work Sans,sans-serif",
                     fontSize: "18px",
                     fontWeight: 400,
-                    textDecoration: "none",
-                    color: theme => theme.palette.common.white,
-                    cursor: "pointer",
-                    borderBottom: theme =>
-                      router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
                   }}
+                  href={page.route}
                 >
-                  {page.label}
-                </Link>
-              </LinkNext>
-            ))}
+                  <Link
+                    sx={{
+                      fontFamily: "Work Sans,sans-serif",
+                      fontSize: "18px",
+                      fontWeight: 400,
+                      textDecoration: "none",
+                      color: theme => theme.palette.common.white,
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                  >
+                    {page.label}
+                  </Link>
+                </LinkNext>
+              ))}
             <Button
               variant="outlined"
               color="secondary"

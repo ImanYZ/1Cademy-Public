@@ -3,6 +3,7 @@ import { Box } from "@mui/system";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { NextPage } from "next";
 import Image from "next/image";
+import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { User } from "src/knowledgeTypes";
@@ -11,6 +12,7 @@ import { ICourseTag } from "src/types/ICourse";
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import { useAuth } from "../../context/AuthContext";
 import { Instructor } from "../../instructorsTypes";
+import ROUTES from "../../lib/utils/routes";
 // import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
@@ -58,7 +60,21 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   // TODO: create useEffect to load semesters
 
   const db = getFirestore();
+  const router = useRouter();
 
+  let role = "instructor";
+
+  useEffect(() => {
+    const allowAccessByRole = async () => {
+      if (!role) return router.push(ROUTES.dashboard);
+      if (!["instructor", "student"].includes(role)) return router.push(ROUTES.dashboard);
+      if (role === "student" && router.route !== ROUTES.instructorsStudents) return router.push(ROUTES.dashboard);
+      // in this case is instructor he can see all
+    };
+    allowAccessByRole();
+  }, [role, router]);
+
+  // router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
   // useEffect(() => {
   //   if (!isAuthenticated) {
   //     router.replace(ROUTES.signIn);
@@ -68,6 +84,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
     window.document.body.classList.remove("Image");
+    console.log("user", user);
     const getInstructor = async () => {
       const instructorsRef = collection(db, "instructors");
       const q = query(instructorsRef, where("uname", "==", user.uname));
@@ -128,8 +145,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={OPTIONS} />}
-      {isMovil && <HeaderNavbarMovil options={OPTIONS} />}
+      {!isMovil && <HeaderNavbar options={OPTIONS} role={role} />}
+      {isMovil && <HeaderNavbarMovil options={OPTIONS} role={role} />}
       {/* <HeaderNavbar /> */}
       <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
         <SemesterFilter
@@ -140,6 +157,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
           selectedCourse={selectedCourse}
           setSelectedCourse={setSelectedCourse}
           isMovil={isMovil}
+          role={role}
         />
       </Box>
 

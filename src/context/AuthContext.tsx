@@ -61,6 +61,7 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
 
     const unsubscriber = onAuthStateChanged(auth, user => {
       if (user) {
+        console.log("USER", user);
         //sign in
         loadUser(user.uid);
       } else {

@@ -7,8 +7,8 @@ import React from "react";
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarProps = { options: Option[] };
-const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
+type HeaderNavbarProps = { options: Option[]; role: string };
+const HeaderNavbar = ({ options, role }: HeaderNavbarProps) => {
   const router = useRouter();
 
   const getTabSelected = () => {
@@ -32,46 +32,48 @@ const HeaderNavbar = ({ options }: HeaderNavbarProps) => {
             <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
           </Box>
         </LightTooltip>
-        <Tabs
-          value={getTabSelected()}
-          variant="scrollable"
-          scrollButtons="auto"
-          aria-label="scrollable auto tabs navigation bar"
-          sx={{
-            px: "25px",
-            marginLeft: "auto",
-            fontWeight: 400,
-            display: { xs: "none", md: "flex" },
-            "& .MuiTab-root": {
-              color: "#AAAAAA",
-            },
-            "& .MuiTab-root.Mui-selected": {
-              color: "common.white",
-            },
-            "& .MuiTabs-indicator": {
-              backgroundColor: "common.orange",
-            },
-          }}
-        >
-          {options.map((page, idx) => (
-            <LightTooltip key={idx} title={page.title}>
-              <Tab
-                onClick={event => {
-                  event.preventDefault();
-                  router.push(page.route);
-                }}
-                color="inherit"
-                label={page.label}
-                aria-label={page.title}
-                sx={{
-                  fontFamily: "Work Sans,sans-serif",
-                  fontSize: "15px",
-                  letterSpacing: "-1px",
-                }}
-              />
-            </LightTooltip>
-          ))}
-        </Tabs>
+        {role === "instructor" && (
+          <Tabs
+            value={getTabSelected()}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="scrollable auto tabs navigation bar"
+            sx={{
+              px: "25px",
+              marginLeft: "auto",
+              fontWeight: 400,
+              display: { xs: "none", md: "flex" },
+              "& .MuiTab-root": {
+                color: "#AAAAAA",
+              },
+              "& .MuiTab-root.Mui-selected": {
+                color: "common.white",
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: "common.orange",
+              },
+            }}
+          >
+            {options.map((page, idx) => (
+              <LightTooltip key={idx} title={page.title}>
+                <Tab
+                  onClick={event => {
+                    event.preventDefault();
+                    router.push(page.route);
+                  }}
+                  color="inherit"
+                  label={page.label}
+                  aria-label={page.title}
+                  sx={{
+                    fontFamily: "Work Sans,sans-serif",
+                    fontSize: "15px",
+                    letterSpacing: "-1px",
+                  }}
+                />
+              </LightTooltip>
+            ))}
+          </Tabs>
+        )}
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
           <Button
             onClick={() => router.push("/dashboard")}
