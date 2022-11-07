@@ -7,8 +7,9 @@ import { FC } from "react";
 import React from "react";
 type Props = {
   inputsHandler: any;
+  semester: any;
 };
-const Vote: FC<Props> = ({ inputsHandler }) => {
+const Vote: FC<Props> = ({ semester, inputsHandler }) => {
   return (
     <>
       <Grid item xs={12} md={6}>
@@ -42,7 +43,8 @@ const Vote: FC<Props> = ({ inputsHandler }) => {
                 Each student will earn&nbsp;
                 <FilledInput
                   id="filled-adornment-weight"
-                  onChange={inputsHandler("weight")}
+                  value={semester.votes.pointIncrementOnAgreement}
+                  onChange={event => inputsHandler(event, "votes", "pointIncrementOnAgreement")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
                       <InputAdornment position="end">points/vote</InputAdornment>
@@ -74,7 +76,8 @@ const Vote: FC<Props> = ({ inputsHandler }) => {
                 Each student will lose&nbsp;
                 <FilledInput
                   id="filled-adornment-weight"
-                  onChange={inputsHandler("weight")}
+                  value={semester.votes.pointDecrementOnAgreement}
+                  onChange={event => inputsHandler(event, "votes", "pointDecrementOnAgreement")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
                       <InputAdornment position="end">points/vote</InputAdornment>
@@ -138,7 +141,8 @@ const Vote: FC<Props> = ({ inputsHandler }) => {
                 a student gets from their classmates/instructor(s) on their proposals, they will earn&nbsp;
                 <FilledInput
                   id="filled-adornment-weight"
-                  onChange={inputsHandler("weight")}
+                  value={semester.votes.onReceiveVote}
+                  onChange={event => inputsHandler(event, "votes", "onReceiveVote")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
                       <InputAdornment position="end">points/vote</InputAdornment>
@@ -181,7 +185,8 @@ const Vote: FC<Props> = ({ inputsHandler }) => {
                 a student gets from their classmates/instructor(s) on their proposals, they will lose&nbsp;
                 <FilledInput
                   id="filled-adornment-weight"
-                  onChange={inputsHandler("weight")}
+                  value={semester.votes.onReceiveDownVote}
+                  onChange={event => inputsHandler(event, "votes", "onReceiveDownVote")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
                       <InputAdornment position="end">points/vote</InputAdornment>
@@ -222,7 +227,8 @@ const Vote: FC<Props> = ({ inputsHandler }) => {
                 a student gets from their instructor(s) on their proposals, they will earn&nbsp;
                 <FilledInput
                   id="filled-adornment-weight"
-                  onChange={inputsHandler("weight")}
+                  value={semester.votes.onReceiveStar}
+                  onChange={event => inputsHandler(event, "votes", "onReceiveStar")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
                       <InputAdornment position="end">points/vote</InputAdornment>

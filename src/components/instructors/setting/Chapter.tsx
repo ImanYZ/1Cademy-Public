@@ -12,9 +12,9 @@ import React, { useState } from "react";
 type Props = {
   chapters: any;
   setChapters: any;
-  chaptersData: any;
+  onSubmitHandler: any;
 };
-const Chapter: FC<Props> = ({ chapters, setChapters }) => {
+const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler }) => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
   const [newChapter, setNewChapter] = useState<boolean>(false);
   const [newSubChapter, setNewSubChapter] = useState<boolean>(false);
@@ -22,19 +22,6 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   const [newChapterEditText, setNewChapterEditText] = useState<string>("");
   const [newSubChapterText, setNewSubChapterText] = useState<string>("");
   const [newSubChapterEditText, setNewSubChapterEditText] = useState<string>("");
-
-  // const [inputField, setInputField] = useState<any>({
-  //   node_proposal_from: "",
-  //   node_proposal_to: "",
-  //   node_proposal_points: "",
-  //   node_proposal_propose_per_day: "",
-  //   node_proposal_days: "",
-  //   question_proposal_from: "",
-  //   question_proposal_to: "",
-  //   question_proposal_points: "",
-  //   question_proposal_propose_per_day: "",
-  //   question_proposal_days: "",
-  // });
 
   const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
     setExpanded(newExpanded ? panel : false);
@@ -56,15 +43,12 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     setNewSubChapterText(event.target.value);
   };
 
-  // const inputsHandler = (e: any) => {
-  //   setInputField({ [e.target.name]: e.target.value });
-  // };
-
   const createNewChapter = () => {
     if (newChapterText.length > 0) {
       let id = Math.floor(Math.random() * (100 - 1 + 1));
       let chapterData = {
-        id: id,
+        node: id,
+        isNew: true,
         title: newChapterText,
       };
       setChapters([...chapters, chapterData]);
@@ -77,14 +61,15 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     if (newSubChapterText.length > 0) {
       let id = Math.floor(Math.random() * (100 - 1 + 1));
       let chapterData = {
-        id: id,
+        node: id,
+        isNew: true,
         title: newSubChapterText,
       };
-      let chapterIndex = chapters.findIndex((chapter: any) => chapter.id == chapterId);
-      if (chapters[chapterIndex].subChapters) {
-        chapters[chapterIndex].subChapters = [...chapters[chapterIndex].subChapters, chapterData];
+      let chapterIndex = chapters.findIndex((chapter: any) => chapter.node == chapterId);
+      if (chapters[chapterIndex].children) {
+        chapters[chapterIndex].children = [...chapters[chapterIndex].children, chapterData];
       } else {
-        chapters[chapterIndex]["subChapters"] = [chapterData];
+        chapters[chapterIndex]["children"] = [chapterData];
       }
       setChapters([...chapters]);
       setNewSubChapter(false);
@@ -97,7 +82,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     setNewChapterEditText(chapter.title);
     setChapters((current: any) => {
       return current.map((prevChap: any) => {
-        if (prevChap.id == chapter.id) {
+        if (prevChap.node == chapter.node) {
           return { ...prevChap, editable: true };
         } else {
           return { ...prevChap, editable: false };
@@ -112,13 +97,14 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     setNewSubChapterEditText(subChapter.title);
     setChapters((current: any) => {
       return current.map((prevChap: any) => {
-        if (prevChap.id == chapterId) {
-          prevChap.subChapters.map((subChap: any) => {
+        if (prevChap.node == chapterId) {
+          console.log(prevChap, "prevChap");
+          prevChap.children.map((subChap: any) => {
             subChap["editable"] = false;
           });
-          let subChapterIndex = prevChap.subChapters.findIndex((subChap: any) => subChap.id == subChapter.id);
+          let subChapterIndex = prevChap.children.findIndex((subChap: any) => subChap.node == subChapter.node);
           if (subChapterIndex != -1) {
-            prevChap.subChapters[subChapterIndex] = { ...prevChap.subChapters[subChapterIndex], editable: true };
+            prevChap.children[subChapterIndex] = { ...prevChap.children[subChapterIndex], editable: true };
           }
         }
         return prevChap;
@@ -130,7 +116,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     if (newChapterEditText.length > 0) {
       setChapters((current: any) => {
         return current.map((prevChap: any) => {
-          if (prevChap.id == id) {
+          if (prevChap.node == id) {
             return { ...prevChap, title: newChapterEditText, editable: false };
           }
           return prevChap;
@@ -143,7 +129,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   const cancelChatperEdit = (id: number) => {
     setChapters((current: any) => {
       return current.map((prevChap: any) => {
-        if (prevChap.id == id) {
+        if (prevChap.node == id) {
           return { ...prevChap, editable: false };
         }
         return prevChap;
@@ -156,11 +142,11 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     if (newSubChapterEditText.length > 0) {
       setChapters((current: any) => {
         return current.map((prevChap: any) => {
-          if (prevChap.id == chapterId) {
-            let subChapterIndex = prevChap.subChapters.findIndex((subChap: any) => subChap.id == subChapterId);
+          if (prevChap.node == chapterId) {
+            let subChapterIndex = prevChap.children.findIndex((subChap: any) => subChap.node == subChapterId);
             if (subChapterIndex != -1) {
-              prevChap.subChapters[subChapterIndex] = {
-                ...prevChap.subChapters[subChapterIndex],
+              prevChap.children[subChapterIndex] = {
+                ...prevChap.children[subChapterIndex],
                 title: newSubChapterEditText,
                 editable: false,
               };
@@ -176,11 +162,11 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   const cancelSubChatperEdit = (chapterId: number, subChapterId: number) => {
     setChapters((current: any) => {
       return current.map((prevChap: any) => {
-        if (prevChap.id == chapterId) {
-          let subChapterIndex = prevChap.subChapters.findIndex((subChap: any) => subChap.id == subChapterId);
+        if (prevChap.node == chapterId) {
+          let subChapterIndex = prevChap.children.findIndex((subChap: any) => subChap.node == subChapterId);
           if (subChapterIndex != -1) {
-            prevChap.subChapters[subChapterIndex] = {
-              ...prevChap.subChapters[subChapterIndex],
+            prevChap.children[subChapterIndex] = {
+              ...prevChap.children[subChapterIndex],
               editable: false,
             };
           }
@@ -192,7 +178,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   };
 
   const deleteChapter = (id: number) => {
-    let chapterIndex = chapters.findIndex((chap: any) => chap.id == id);
+    let chapterIndex = chapters.findIndex((chap: any) => chap.node == id);
     chapters.splice(chapterIndex, 1);
     setChapters([...chapters]);
   };
@@ -200,10 +186,10 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   const deleteSubChapter = (chapterId: number, subChapterId: number) => {
     setChapters((current: any) => {
       return current.map((prevChap: any) => {
-        if (prevChap.id == chapterId) {
-          let subChapterIndex = prevChap.subChapters.findIndex((subChap: any) => subChap.id == subChapterId);
+        if (prevChap.node == chapterId) {
+          let subChapterIndex = prevChap.children.findIndex((subChap: any) => subChap.node == subChapterId);
           if (subChapterIndex != -1) {
-            prevChap.subChapters.splice(subChapterIndex, 1);
+            prevChap.children.splice(subChapterIndex, 1);
           }
         }
         return prevChap;
@@ -276,7 +262,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
         {chapters &&
           chapters.map((chapter: any, index: number) => {
             return (
-              <Box key={chapter.id}>
+              <Box key={chapter.node}>
                 {chapter.editable ? (
                   <TextField
                     placeholder="Add new subchapter"
@@ -295,7 +281,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                 color: theme => theme.palette.common.orange,
                               },
                             }}
-                            onClick={() => editChapter(chapter.id)}
+                            onClick={() => editChapter(chapter.node)}
                           />
                           <CancelIcon
                             sx={{
@@ -305,9 +291,21 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                 color: theme => theme.palette.common.orange,
                               },
                             }}
-                            onClick={() => cancelChatperEdit(chapter.id)}
+                            onClick={() => cancelChatperEdit(chapter.node)}
                           />
                         </Box>
+                      ),
+                      startAdornment: (
+                        <Typography
+                          sx={{
+                            width: {
+                              xs: "130px",
+                              md: "110px",
+                            },
+                          }}
+                        >
+                          Ch. {index + 1}
+                        </Typography>
                       ),
                     }}
                     sx={{
@@ -321,8 +319,8 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                 ) : (
                   <Accordion
                     style={{ boxShadow: "none" }}
-                    expanded={expanded === chapter.id}
-                    onChange={handleChange(chapter.id)}
+                    expanded={expanded === chapter.node}
+                    onChange={handleChange(chapter.node)}
                   >
                     <AccordionSummary
                       aria-controls="panel1d-content"
@@ -338,7 +336,10 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                         flexDirection: "row-reverse",
                       }}
                     >
-                      <Typography sx={{ marginLeft: "10px" }}>{chapter.title}</Typography>
+                      <Typography sx={{ marginLeft: "10px" }}>
+                        Ch. {index + 1}&nbsp;
+                        {chapter.title}
+                      </Typography>
                       <CreateIcon
                         sx={{
                           color: "#757575",
@@ -375,13 +376,13 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                             paddingBottom: "8px",
                           }}
                         >
-                          {chapter.subChapters &&
-                            chapter.subChapters.map((subChapter: any, subIndex: number) => {
+                          {chapter.children &&
+                            chapter.children.map((subChapter: any, subIndex: number) => {
                               if (subChapter.editable) {
                                 return (
-                                  <Box key={subChapter.id}>
+                                  <Box key={subChapter.node}>
                                     <TextField
-                                      placeholder="Add new subchapter"
+                                      placeholder="Edit new subchapter"
                                       variant="standard"
                                       fullWidth
                                       value={newSubChapterEditText}
@@ -397,7 +398,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                                   color: theme => theme.palette.common.orange,
                                                 },
                                               }}
-                                              onClick={() => editSubChapter(chapter.id, subChapter.id)}
+                                              onClick={() => editSubChapter(chapter.node, subChapter.node)}
                                             />
                                             <CancelIcon
                                               sx={{
@@ -407,7 +408,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                                   color: theme => theme.palette.common.orange,
                                                 },
                                               }}
-                                              onClick={() => cancelSubChatperEdit(chapter.id, subChapter.id)}
+                                              onClick={() => cancelSubChatperEdit(chapter.node, subChapter.node)}
                                             />
                                           </Box>
                                         ),
@@ -439,7 +440,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                               }
                               return (
                                 <Box
-                                  key={subChapter.id}
+                                  key={subChapter.node}
                                   style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
                                 >
                                   <Typography sx={{ width: "auto" }}>
@@ -457,7 +458,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                       },
                                     }}
                                     fontSize="small"
-                                    onClick={event => makeSubChapterEditable(event, chapter.id, subChapter)}
+                                    onClick={event => makeSubChapterEditable(event, chapter.node, subChapter)}
                                   />
                                   <DeleteIcon
                                     sx={{
@@ -471,7 +472,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                       },
                                     }}
                                     fontSize="small"
-                                    onClick={() => deleteSubChapter(chapter.id, subChapter.id)}
+                                    onClick={() => deleteSubChapter(chapter.node, subChapter.node)}
                                   />
                                 </Box>
                               );
@@ -494,7 +495,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                         color: theme => theme.palette.common.orange,
                                       },
                                     }}
-                                    onClick={() => createNewSubChapter(chapter.id)}
+                                    onClick={() => createNewSubChapter(chapter.node)}
                                   />
                                   <CancelIcon
                                     sx={{
@@ -517,13 +518,14 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                                     },
                                   }}
                                 >
-                                  Ch. {index + 1}.{chapter.subChapters ? chapter.subChapters.length + 1 : 1}
+                                  Ch. {index + 1}.{chapter.children ? chapter.children.length + 1 : 1}
                                 </Typography>
                               ),
                             }}
                             sx={{
                               fontWeight: 400,
-                              marginBottom: "5px",
+                              marginBottom: "10px",
+                              marginLeft: "10px",
                               width: "50%",
                               display: "block",
                             }}
@@ -578,10 +580,23 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
                   />
                 </Box>
               ),
+              startAdornment: (
+                <Typography
+                  sx={{
+                    width: {
+                      xs: "130px",
+                      md: "110px",
+                    },
+                  }}
+                >
+                  Ch. {chapters.length + 1}
+                </Typography>
+              ),
             }}
             sx={{
               fontWeight: 400,
-              marginBottom: "5px",
+              marginTop: "10px",
+              marginBottom: "10px",
               width: "50%",
               display: "block",
             }}
@@ -602,6 +617,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
       </Box>
       <Box display="flex" justifyContent="flex-end" alignItems="flex-end">
         <Button
+          onClick={onSubmitHandler}
           variant="contained"
           className="btn waves-effect waves-light hoverable green"
           sx={{
