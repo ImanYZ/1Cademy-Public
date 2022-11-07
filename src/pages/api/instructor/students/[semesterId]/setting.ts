@@ -1,31 +1,27 @@
-import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
-import { getAuth } from "firebase-admin/auth";
-import { Timestamp, WriteBatch } from "firebase-admin/firestore";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "@/lib/firestoreServer/admin";
+import { DocumentReference, Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
-import { ISemester, ISemesterStudentStat } from "src/types/ICourse";
+import { ISemester } from "src/types/ICourse";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { ISemesterSyllabusItem } from "src/types/ICourse";
-import { arrayToChunks, initializeNewReputationData } from "src/utils";
-import { searchAvailableUnameByEmail } from "src/utils/instructor";
-import { db } from "typesenseIndexer";
-import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
+import { INodeLink } from "src/types/INodeLink";
 
-type InstructorSemesterSettingPayload = {
+export type InstructorSemesterSettingPayload = {
   syllabus: ISemesterSyllabusItem[];
   days: number;
   nodeProposals: {
-    startDate: Timestamp;
-    endDate: Timestamp;
+    startDate: string;
+    endDate: string;
     numPoints: number;
     numProposalPerDay: number;
     totalDaysOfCourse: number;
   };
   questionProposals: {
-    startDate: Timestamp;
-    endDate: Timestamp;
+    startDate: string;
+    endDate: string;
     numPoints: number;
     numQuestionsPerDay: number;
     totalDaysOfCourse: number;
@@ -42,13 +38,25 @@ type InstructorSemesterSettingPayload = {
 type IProcessNodeParam = {
   batch: WriteBatch;
   writeCounts: number;
-  children: ISemesterSyllabusItem[];
+  item: ISemesterSyllabusItem;
   nodeIds: string[];
   updateNodes: boolean;
   userData: IUser;
   parentId: string;
   parentTitle: string;
   universityTitle: string;
+  nodeRef: DocumentReference | null;
+  tagIds: string[];
+  tags: string[];
+  chapter: string;
+};
+
+const createNodeContent = (children: INodeLink[]) => {
+  let content = "";
+  for (const child of children) {
+    content += `${child.title}\n`;
+  }
+  return content;
 };
 
 const createNode = async (
@@ -57,9 +65,16 @@ const createNode = async (
   nodeTitle: string,
   parentId: string,
   parentTitle: string,
-  universityTitle: string
+  universityTitle: string,
+  nodeRef: DocumentReference | null,
+  children: INodeLink[],
+  tagIds: string[],
+  tags: string[]
 ): Promise<string> => {
-  const nodeRef = db.collection("nodes").doc();
+  if (!nodeRef) {
+    nodeRef = db.collection("nodes").doc();
+  }
+  let content = createNodeContent(children);
   batch.set(nodeRef, {
     aChooseUname: userData.chooseUname,
     aImgUrl: userData.imageUrl,
@@ -82,12 +97,10 @@ const createNode = async (
     nodeImage: "",
     comments: 0,
     deleted: false,
-    content: "",
+    content,
     choices: [],
     viewers: 0,
     versions: 1,
-    tags: [],
-    tagIds: [],
     height: 0,
     studied: 0,
     references: [],
@@ -101,7 +114,7 @@ const createNode = async (
         label: "",
       },
     ],
-    children: [],
+    children,
     institNames: [universityTitle],
     institutions: {
       [universityTitle]: {
@@ -113,43 +126,102 @@ const createNode = async (
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
     maxVersionRating: 0,
+    tagIds,
+    tags,
   } as INode);
   return nodeRef.id;
 };
 
-const processNodeIdsFromSyllabusChildren = async ({
+const processNodeIdsFromSyllabusItem = async ({
   batch,
   writeCounts,
-  children,
+  item,
   nodeIds,
   updateNodes = false,
   userData,
   parentId,
   parentTitle,
   universityTitle,
+  nodeRef,
+  tagIds,
+  tags,
+  chapter,
 }: IProcessNodeParam): Promise<[WriteBatch, number]> => {
-  for (const child of children) {
-    if (child.node) {
-      nodeIds.push(child.node);
-    } else if (updateNodes) {
-      const newId = await createNode(batch, userData, child.title, parentId, parentTitle, universityTitle);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      child.node = newId;
-    }
-    if (child.children && child.children.length) {
-      const parentNode = (await db.collection("nodes").doc(String(child.node)).get()).data() as INode;
-      [batch, writeCounts] = await processNodeIdsFromSyllabusChildren({
-        batch,
-        writeCounts,
-        children: child.children,
-        nodeIds,
-        updateNodes,
-        userData,
-        parentId: String(child.node),
-        parentTitle: parentNode.title,
-        universityTitle,
+  const children: INodeLink[] = [];
+  const childRefs: {
+    [title: string]: DocumentReference;
+  } = {};
+  let subChapter = 1;
+  if (item.children && item.children.length) {
+    for (const child of item.children) {
+      const childRef = child.node ? db.collection("nodes").doc(child.node) : db.collection("nodes").doc();
+      childRefs[child.title] = childRef;
+      children.push({
+        node: childRef.id,
+        title: `Ch.${chapter}.${subChapter} ${child.title}`,
+        nodeType: "Relation",
       });
+      subChapter++;
     }
+  }
+
+  if (item.node) {
+    if (updateNodes) {
+      const _nodeRef = db.collection("nodes").doc(item.node);
+      batch.update(_nodeRef, {
+        title: `Ch.${chapter} ${item.title}`,
+        parents: [
+          {
+            node: parentId,
+            title: parentTitle,
+            nodeType: "Relation",
+          },
+        ],
+        children,
+        content: createNodeContent(children),
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+    nodeIds.push(item.node);
+  } else if (updateNodes) {
+    if (!nodeRef) {
+      nodeRef = db.collection("nodes").doc();
+    }
+    if (item.children && item.children.length) {
+      for (const child of item.children) {
+        const childRef = childRefs[child.title];
+        [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
+          batch,
+          writeCounts,
+          item: child,
+          nodeIds,
+          updateNodes,
+          userData,
+          parentId: nodeRef.id,
+          parentTitle: `Ch.${chapter} ${item.title}`,
+          universityTitle,
+          nodeRef: childRef,
+          tagIds,
+          tags,
+          chapter: `${chapter}.${subChapter}`,
+        });
+        subChapter++;
+      }
+    }
+    await createNode(
+      batch,
+      userData,
+      `Ch.${chapter} ${item.title}`,
+      parentId,
+      parentTitle,
+      universityTitle,
+      nodeRef,
+      children,
+      tagIds,
+      tags
+    );
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    item.node = nodeRef.id;
   }
   return [batch, writeCounts];
 };
@@ -180,43 +252,63 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     const semesterNodeData = (await db.collection("nodes").doc(semesterData.tagId).get()).data() as INode;
+    // university, department, program, course and semester
+    const _tagIds = [
+      semesterData.uTagId,
+      semesterData.dTagId,
+      semesterData.pTagId,
+      semesterData.cTagId,
+      semesterData.tagId,
+    ];
+    const tagNodes = await db.collection("nodes").where("__name__", "in", _tagIds).get();
+    const tagIds: string[] = [];
+    const tags: string[] = [];
+    for (const tagNode of tagNodes.docs) {
+      tagIds.push(tagNode.id);
+      tags.push(tagNode.data()?.title);
+    }
 
     for (const syllabusItem of semesterData.syllabus) {
       if (syllabusItem.node) {
         existingNodeIds.push(syllabusItem.node);
       }
       if (syllabusItem.children) {
-        [batch, writeCounts] = await processNodeIdsFromSyllabusChildren({
+        [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
           batch,
           writeCounts,
-          children: syllabusItem.children,
+          item: syllabusItem,
           nodeIds: existingNodeIds,
           updateNodes: false,
           userData,
           parentId: semesterData.tagId,
           parentTitle: semesterNodeData.title,
           universityTitle: semesterData.uTitle,
+          nodeRef: null,
+          tagIds,
+          tags,
+          chapter: "1",
         });
       }
     }
 
+    let chapter = 1;
     for (const syllabusItem of payload.syllabus) {
-      if (syllabusItem.node) {
-        nodeIds.push(syllabusItem.node);
-      }
-      if (syllabusItem.children) {
-        [batch, writeCounts] = await processNodeIdsFromSyllabusChildren({
-          batch,
-          writeCounts,
-          children: syllabusItem.children,
-          nodeIds,
-          updateNodes: true,
-          userData,
-          parentId: semesterData.tagId,
-          parentTitle: semesterNodeData.title,
-          universityTitle: semesterData.uTitle,
-        });
-      }
+      [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
+        batch,
+        writeCounts,
+        item: syllabusItem,
+        nodeIds,
+        updateNodes: true,
+        userData,
+        parentId: semesterData.tagId,
+        parentTitle: semesterNodeData.title,
+        universityTitle: semesterData.uTitle,
+        nodeRef: null,
+        tagIds,
+        tags,
+        chapter: String(chapter),
+      });
+      chapter++;
     }
 
     const removedNodeIds = existingNodeIds.filter((existingNodeId: string) => nodeIds.indexOf(existingNodeId) === -1);
@@ -224,7 +316,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     for (const removedNodeId of removedNodeIds) {
       const nodeRef = db.collection("nodes").doc(removedNodeId);
       const nodeData = (await nodeRef.get()).data() as INode;
-      nodeData.deleted = false;
+      nodeData.deleted = true;
       batch.update(nodeRef, nodeData);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
