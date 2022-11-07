@@ -51,6 +51,14 @@ type IProcessNodeParam = {
   chapter: string;
 };
 
+const createNodeContent = (children: INodeLink[]) => {
+  let content = "";
+  for (const child of children) {
+    content += `${child.title}\n`;
+  }
+  return content;
+};
+
 const createNode = async (
   batch: WriteBatch,
   userData: IUser,
@@ -66,10 +74,7 @@ const createNode = async (
   if (!nodeRef) {
     nodeRef = db.collection("nodes").doc();
   }
-  let content = "";
-  for (const child of children) {
-    content += `${child.title}\n`;
-  }
+  let content = createNodeContent(children);
   batch.set(nodeRef, {
     aChooseUname: userData.chooseUname,
     aImgUrl: userData.imageUrl,
@@ -162,6 +167,7 @@ const processNodeIdsFromSyllabusItem = async ({
 
   if (item.node) {
     if (updateNodes) {
+      // TODO: update content if its updated
       const _nodeRef = db.collection("nodes").doc(item.node);
       batch.update(_nodeRef, {
         title: `Ch.${chapter} ${item.title}`,
@@ -173,6 +179,7 @@ const processNodeIdsFromSyllabusItem = async ({
           },
         ],
         children,
+        content: createNodeContent(children),
       });
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
