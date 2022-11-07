@@ -1,4 +1,4 @@
-import { ICourseTag, IInstructor, ISemesterStudentVoteStat } from "./types/ICourse";
+import { ICourseTag, IInstructor, ISemesterStudentStat, ISemesterStudentVoteStat } from "./types/ICourse";
 
 export type Instructor = IInstructor;
 
@@ -8,3 +8,5 @@ export type SemesterStudentVoteStat = ISemesterStudentVoteStat & {
   links: number;
   nodes: number;
 };
+
+export type SemesterStudentStat = ISemesterStudentStat;

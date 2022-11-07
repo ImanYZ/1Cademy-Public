@@ -6,7 +6,8 @@ import { Divider, Paper, Typography /* useTheme */, useMediaQuery, useTheme } fr
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
-import { SemesterStudentVoteStat } from "src/instructorsTypes";
+import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
+import { ISemesterStudentStatDay } from "src/types/ICourse";
 
 import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -62,6 +63,10 @@ const data: BoxData = {
   },
 };
 
+type Trends = {
+  date: Date;
+  num: number;
+};
 // This mock previuly has :{date: "2022-09-27T00:00:00.000Z",num: 9,netVotes: 9,averageVotes: 1,}
 const TRENDS_DATA = [
   {
@@ -102,21 +107,6 @@ const TRENDS_DATA = [
   },
 ];
 
-const BoxLegend = () => {
-  return (
-    <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
-      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
-        <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
-      </Box>
-      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
-        <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
-      </Box>
-    </Box>
-  );
-};
-
 const Semester = "2gbmyJVzQY1FBafjBtRx";
 const completionProposals = 50;
 const completionQuestions = 50;
@@ -144,6 +134,21 @@ type SemesterStats = {
   questions: number;
 };
 
+const BoxLegend = () => {
+  return (
+    <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
+      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+        <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
+      </Box>
+      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
+        <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+      </Box>
+    </Box>
+  );
+};
+
 const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, user }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
   console.log({ selectedCourse, selectedSemester });
@@ -156,6 +161,11 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
   const [students, setStudents] = useState<number>(0);
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
+  const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
+  const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
+  // const [newNodePoints, setNewNodePoints] = useState(second);
+  const [votesTrends, setVotesTrends] = useState<Trends[]>([]);
+  const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
 
   const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStats[] => {
     const bubbleStats: BubbleStats[] = [];
@@ -204,6 +214,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
     };
     getSemesterData();
   }, [db, getBubbleStats, user]);
+
   useEffect(() => {
     console.log("SemesterStarts", semesterStats);
   }, [semesterStats]);
@@ -218,6 +229,25 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       setStudents(semesterDoc.data().students.length);
     };
     getSemesterStudents();
+  }, [db]);
+
+  useEffect(() => {
+    const getUserDailyStat = async () => {
+      const userDailyStatRef = collection(db, "tmpSemesterStudentStat");
+      const q = query(userDailyStatRef, where("tagId", "==", Semester));
+      const userDailyStatDoc = await getDocs(q);
+      if (!userDailyStatDoc.docs.length) return;
+
+      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      console.log("userDailyStats", userDailyStats);
+      const links = getTrendsData(userDailyStats, "links");
+      console.log("links", links);
+      setLinksTrend(getTrendsData(userDailyStats, "links"));
+      setQuestionsTrend(getTrendsData(userDailyStats, "questions"));
+      setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst"));
+      setNodesTrends(getTrendsData(userDailyStats, "newNodes"));
+    };
+    getUserDailyStat();
   }, [db]);
 
   const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
@@ -290,6 +320,23 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
     return stackedBarStats;
   };
 
+  const getTrendsData = (data: SemesterStudentStat[], key: keyof ISemesterStudentStatDay): Trends[] => {
+    const trends: Trends[] = [];
+    data.map(dailyStat => {
+      dailyStat.days.map(dayStat => {
+        if (key === "agreementsWithInst") {
+          trends.push({
+            date: new Date(dayStat.day),
+            num: (dayStat[key] as number) + dayStat["disagreementsWithInst"],
+          });
+        } else {
+          trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
+        }
+      });
+    });
+    return trends;
+  };
+  // (dayStat.day as any).toDate()
   // useEffect(()=>{
 
   // })
@@ -573,7 +620,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           }}
         >
           <TrendPlot
-            title={"New Node Points"}
+            title={"Edit proposals"}
             // heightTop={(354 * width) / 1045}
             // heightBottom={(160 * width) / 1045}
             heightTop={isMovil ? 150 : isTablet ? 250 : 354}
@@ -600,7 +647,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           }}
         >
           <TrendPlot
-            title={"New Node Points"}
+            title={"Links"}
             // heightTop={(354 * width) / 1045}
             // heightBottom={(160 * width) / 1045}
             heightTop={isMovil ? 150 : isTablet ? 250 : 354}
@@ -614,7 +661,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={TRENDS_DATA}
+            trendData={linksTrend}
           />
         </Paper>
 
@@ -627,7 +674,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           }}
         >
           <TrendPlot
-            title={"New Node Points"}
+            title={"Nodes"}
             // heightTop={(354 * width) / 1045}
             // heightBottom={(160 * width) / 1045}
             heightTop={isMovil ? 150 : isTablet ? 250 : 354}
@@ -641,7 +688,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={TRENDS_DATA}
+            trendData={nodesTrends}
           />
         </Paper>
 
@@ -654,7 +701,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           }}
         >
           <TrendPlot
-            title={"New Node Points"}
+            title={"Votes"}
             // heightTop={(354 * width) / 1045}
             // heightBottom={(160 * width) / 1045}
             heightTop={isMovil ? 150 : isTablet ? 250 : 354}
@@ -668,7 +715,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={TRENDS_DATA}
+            trendData={votesTrends}
           />
         </Paper>
 
@@ -681,7 +728,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
           }}
         >
           <TrendPlot
-            title={"New Node Points"}
+            title={"Questions"}
             // heightTop={(354 * width) / 1045}
             // heightBottom={(160 * width) / 1045}
             heightTop={isMovil ? 150 : isTablet ? 250 : 354}
@@ -695,7 +742,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
             theme={"Dark"}
             x="date"
             y="num"
-            trendData={TRENDS_DATA}
+            trendData={questionsTrend}
           />
         </Paper>
       </Box>
