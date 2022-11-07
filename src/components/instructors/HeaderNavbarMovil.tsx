@@ -6,11 +6,11 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
-import { UserRole } from "../../knowledgeTypes";
+import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarMovilProps = { options: Option[]; role: UserRole };
-const HeaderNavbarMovil = ({ options, role }: HeaderNavbarMovilProps) => {
+type HeaderNavbarMovilProps = { options: Option[]; user: User };
+const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
 
@@ -74,7 +74,7 @@ const HeaderNavbarMovil = ({ options, role }: HeaderNavbarMovilProps) => {
               zIndex: 10,
             }}
           >
-            {role === "INSTRUCTOR" &&
+            {user.role === "INSTRUCTOR" &&
               options.map((page, idx) => (
                 <LinkNext
                   key={idx}
