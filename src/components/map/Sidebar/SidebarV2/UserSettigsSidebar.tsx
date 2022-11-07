@@ -337,7 +337,7 @@ export const UserSettigsSidebar = ({
           // console.log("CALLING API", nodeBookState.chosenNode.id);
           setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
-          let { reputation } = await retrieveAuthenticatedUser(user.userId);
+          let { reputation } = await retrieveAuthenticatedUser(user.userId, null);
 
           setIsLoading(false);
           // await axios.post(`/changeDefaultTag/${chosenNode}`);

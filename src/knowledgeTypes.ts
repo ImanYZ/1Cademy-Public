@@ -549,7 +549,7 @@ export interface SignUpFormValues {
   clickedCP: boolean;
 }
 
-export interface SignUpData extends Omit<User, "userId"> {
+export interface SignUpData extends Omit<User, "userId" | "role"> {
   password: string;
   background: UserBackground;
   theme: UserTheme;

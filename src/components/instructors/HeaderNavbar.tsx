@@ -94,7 +94,7 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
           >
             <Tooltip title={user.role ?? ""}>
               <Image
-                src={user.imageUrl}
+                src={user.imageUrl ?? ""}
                 alt={"name"}
                 width="55px"
                 height="55px"

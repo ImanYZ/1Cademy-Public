@@ -1162,7 +1162,7 @@ const Dashboard = ({}: DashboardProps) => {
           // window.location.reload();
         }
       }
-      let { reputation } = await retrieveAuthenticatedUser(user!.userId);
+      let { reputation } = await retrieveAuthenticatedUser(user!.userId, null);
       if (reputation) {
         dispatch({ type: "setReputation", payload: reputation });
       }
