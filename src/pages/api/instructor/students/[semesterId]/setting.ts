@@ -149,6 +149,14 @@ const processNodeIdsFromSyllabusItem = async ({
   chapter,
   semesterTitle,
 }: IProcessNodeParam): Promise<[WriteBatch, number]> => {
+  if (!nodeRef) {
+    if (item.node) {
+      nodeRef = db.collection("nodes").doc(item.node);
+    } else {
+      nodeRef = db.collection("nodes").doc();
+    }
+  }
+
   const children: INodeLink[] = [];
   const childRefs: {
     [title: string]: DocumentReference;
@@ -167,10 +175,32 @@ const processNodeIdsFromSyllabusItem = async ({
     }
   }
 
+  if (item.children && item.children.length) {
+    for (const child of item.children) {
+      const childRef = childRefs[child.title];
+      [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
+        batch,
+        writeCounts,
+        item: child,
+        nodeIds,
+        updateNodes,
+        userData,
+        parentId: nodeRef.id,
+        parentTitle: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
+        universityTitle,
+        nodeRef: childRef,
+        tagIds,
+        tags,
+        chapter: `${chapter}.${subChapter}`,
+        semesterTitle,
+      });
+      subChapter++;
+    }
+  }
+
   if (item.node) {
     if (updateNodes) {
-      const _nodeRef = db.collection("nodes").doc(item.node);
-      batch.update(_nodeRef, {
+      batch.update(nodeRef, {
         title: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
         parents: [
           {
@@ -186,31 +216,6 @@ const processNodeIdsFromSyllabusItem = async ({
     }
     nodeIds.push(item.node);
   } else if (updateNodes) {
-    if (!nodeRef) {
-      nodeRef = db.collection("nodes").doc();
-    }
-    if (item.children && item.children.length) {
-      for (const child of item.children) {
-        const childRef = childRefs[child.title];
-        [batch, writeCounts] = await processNodeIdsFromSyllabusItem({
-          batch,
-          writeCounts,
-          item: child,
-          nodeIds,
-          updateNodes,
-          userData,
-          parentId: nodeRef.id,
-          parentTitle: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
-          universityTitle,
-          nodeRef: childRef,
-          tagIds,
-          tags,
-          chapter: `${chapter}.${subChapter}`,
-          semesterTitle,
-        });
-        subChapter++;
-      }
-    }
     await createNode(
       batch,
       userData,
