@@ -6,9 +6,10 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
+import { UserRole } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarMovilProps = { options: Option[]; role: string };
+type HeaderNavbarMovilProps = { options: Option[]; role: UserRole };
 const HeaderNavbarMovil = ({ options, role }: HeaderNavbarMovilProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
@@ -73,7 +74,7 @@ const HeaderNavbarMovil = ({ options, role }: HeaderNavbarMovilProps) => {
               zIndex: 10,
             }}
           >
-            {role === "instructor" &&
+            {role === "INSTRUCTOR" &&
               options.map((page, idx) => (
                 <LinkNext
                   key={idx}

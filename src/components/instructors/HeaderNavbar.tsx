@@ -5,10 +5,11 @@ import { useRouter } from "next/router";
 import React from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
+import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarProps = { options: Option[]; role: string };
-const HeaderNavbar = ({ options, role }: HeaderNavbarProps) => {
+type HeaderNavbarProps = { options: Option[]; user: User };
+const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
   const router = useRouter();
 
   const getTabSelected = () => {
@@ -32,7 +33,7 @@ const HeaderNavbar = ({ options, role }: HeaderNavbarProps) => {
             <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
           </Box>
         </LightTooltip>
-        {role === "instructor" && (
+        {user.role === "INSTRUCTOR" && (
           <Tabs
             value={getTabSelected()}
             variant="scrollable"
@@ -91,17 +92,19 @@ const HeaderNavbar = ({ options, role }: HeaderNavbarProps) => {
               color: theme => theme.palette.common.gray,
             }}
           >
-            <Image
-              src={"/lightModeLibraryBackground.jpg"}
-              alt={"name"}
-              width="55px"
-              height="55px"
-              quality={40}
-              objectFit="cover"
-              style={{
-                borderRadius: "50%",
-              }}
-            />
+            <Tooltip title={user.role ?? ""}>
+              <Image
+                src={user.imageUrl}
+                alt={"name"}
+                width="55px"
+                height="55px"
+                quality={40}
+                objectFit="cover"
+                style={{
+                  borderRadius: "50%",
+                }}
+              />
+            </Tooltip>
           </Box>
         </Box>
       </Toolbar>

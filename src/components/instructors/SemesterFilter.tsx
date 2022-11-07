@@ -13,6 +13,8 @@ import {
 import { Box } from "@mui/system";
 import React from "react";
 
+import { UserRole } from "../../knowledgeTypes";
+
 type SemesterFilterProps = {
   semesters: string[];
   selectedSemester: string | undefined;
@@ -21,7 +23,7 @@ type SemesterFilterProps = {
   selectedCourse: string | undefined;
   setSelectedCourse: any;
   isMovil: boolean;
-  role: string;
+  role: UserRole;
 };
 
 export const SemesterFilter = ({
@@ -107,7 +109,7 @@ export const SemesterFilter = ({
         )}
       </Box>
 
-      {role === "instructor" && (
+      {role === "INSTRUCTOR" && (
         <Button onClick={() => setSelectedCourse(undefined)} variant={"contained"} size={matches ? "small" : "medium"}>
           New Course
         </Button>

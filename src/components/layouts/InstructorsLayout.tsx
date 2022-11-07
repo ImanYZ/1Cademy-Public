@@ -62,17 +62,20 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const db = getFirestore();
   const router = useRouter();
 
-  let role = "instructor";
+  // let role = "instructor";
 
   useEffect(() => {
     const allowAccessByRole = async () => {
+      if (!user) return;
+
+      const role = user?.role;
       if (!role) return router.push(ROUTES.dashboard);
-      if (!["instructor", "student"].includes(role)) return router.push(ROUTES.dashboard);
-      if (role === "student" && router.route !== ROUTES.instructorsStudents) return router.push(ROUTES.dashboard);
+      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
+      if (role === "STUDENT" && router.route !== ROUTES.instructorsStudents) return router.push(ROUTES.dashboard);
       // in this case is instructor he can see all
     };
     allowAccessByRole();
-  }, [role, router]);
+  }, [router, user, user?.role]);
 
   // router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
   // useEffect(() => {
@@ -145,8 +148,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={OPTIONS} role={role} />}
-      {isMovil && <HeaderNavbarMovil options={OPTIONS} role={role} />}
+      {!isMovil && <HeaderNavbar options={OPTIONS} user={user} />}
+      {isMovil && <HeaderNavbarMovil options={OPTIONS} user={user} />}
       {/* <HeaderNavbar /> */}
       <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
         <SemesterFilter
@@ -157,7 +160,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
           selectedCourse={selectedCourse}
           setSelectedCourse={setSelectedCourse}
           isMovil={isMovil}
-          role={role}
+          role={user.role}
         />
       </Box>
 
