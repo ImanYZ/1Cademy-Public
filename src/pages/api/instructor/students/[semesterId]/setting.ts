@@ -54,7 +54,7 @@ type IProcessNodeParam = {
 const createNodeContent = (children: INodeLink[]) => {
   let content = "";
   for (const child of children) {
-    content += `${child.title}\n`;
+    content += `- ${child.title}\n`;
   }
   return content;
 };
