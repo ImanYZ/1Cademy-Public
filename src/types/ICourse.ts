@@ -10,7 +10,8 @@ export type ISemesterStudent = {
   uname: string;
   chooseUname: boolean;
   imageUrl: string;
-  fullname: string;
+  fName: string;
+  lName: string;
   email: string;
 };
 

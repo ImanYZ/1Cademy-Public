@@ -72,7 +72,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           semesterData.students.push({
             chooseUname: false,
             email: userData.email,
-            fullname: `${addedStudent.fName} ${addedStudent.lName}`,
+            fName: addedStudent.fName,
+            lName: addedStudent.lName,
             imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
             uname: userData.uname,
           });
@@ -229,7 +230,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         semesterData.students.push({
           chooseUname: false,
           email: addedStudent.email,
-          fullname: `${addedStudent.fName} ${addedStudent.lName}`,
+          fName: addedStudent.fName,
+          lName: addedStudent.lName,
           imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
           uname,
         });
