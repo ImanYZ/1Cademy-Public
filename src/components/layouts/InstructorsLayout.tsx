@@ -52,6 +52,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
         border: "solid 2px royalBlue",
+        minHeight: "100vh",
       }}
     >
       {!isMovil && <HeaderNavbar options={OPTIONS} />}
@@ -68,7 +69,6 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
           isMovil={isMovil}
         />
       </Box>
-
       {children({ selectedSemester, selectedCourse })}
     </Box>
   );

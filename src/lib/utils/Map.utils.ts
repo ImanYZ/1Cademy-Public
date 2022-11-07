@@ -232,7 +232,6 @@ export const setTypeVisibilityOfChildInsideParent = (oldNodes: any, nodeId: stri
 
 // for every node downloaded from the database
 export const addReference = (nodeId: string, nodeData: NodeFireStore) => {
-  console.log("addReference");
   if (nodeData.nodeType === "Reference") {
     if (!(nodeId in citations)) {
       citations[nodeId] = new Set();
