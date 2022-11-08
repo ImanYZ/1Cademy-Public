@@ -1,12 +1,9 @@
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import SearchIcon from "@mui/icons-material/Search";
 import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
+import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
 
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
@@ -58,6 +55,7 @@ export const ToolbarSidebar = ({
 }: //   mapRendered = true,
 MainSidebarProps) => {
   const db = getFirestore();
+  const router = useRouter();
 
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
   // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
@@ -66,9 +64,14 @@ MainSidebarProps) => {
 
   const [anchorEl, setAnchorEl] = useState<any>(null);
 
+  const gapUsersBtwOptions = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 50 : 0;
+  const safariOffset = 400 + gapUsersBtwOptions;
+  const chromeOffset = 375 + gapUsersBtwOptions;
+
   const onOpenLeaderboardOptions = (event: React.MouseEvent<any>) => {
     setAnchorEl(event.target);
   };
+
   const onCloseLeaderBoardOptions = () => {
     setAnchorEl(null);
   };
@@ -264,7 +267,7 @@ MainSidebarProps) => {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "10px",
-                height: isSafari ? "400px" : "375px",
+                height: isSafari ? safariOffset : chromeOffset,
               }}
             >
               <Box sx={{ marginTop: "20px" }}>
@@ -372,7 +375,8 @@ MainSidebarProps) => {
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
                     sx={{ wordBreak: "normal", padding: "1px", marginLeft: isMenuOpen ? "20px" : "0px" }}
                   >
-                    {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
+                    {/* {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />} */}
+                    🔔
                   </Badge>
                   <Box
                     component="span"
@@ -413,7 +417,8 @@ MainSidebarProps) => {
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
                     sx={{ wordBreak: "normal", padding: "1px", marginLeft: isMenuOpen ? "20px" : "0px" }}
                   >
-                    <BookmarkBorderIcon className="material-icons" />
+                    {/* <BookmarkBorderIcon className="material-icons" /> */}
+                    🔖
                   </Badge>
                   <Box
                     component="span"
@@ -454,7 +459,8 @@ MainSidebarProps) => {
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
                     sx={{ padding: "1px", wordBreak: "normal", marginLeft: isMenuOpen ? "20px" : "0px" }}
                   >
-                    <FormatListBulletedIcon />
+                    {/* <FormatListBulletedIcon /> */}
+                    ✏️
                   </Badge>
                   <Box
                     component="span"
@@ -477,7 +483,63 @@ MainSidebarProps) => {
                   </Box>
                 </Box>
               </MemoizedMetaButton>
+              {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
+                <MemoizedMetaButton onClick={() => router.push("/instructors/dashboard")}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                      height: "30px",
+                    }}
+                  >
+                    <Box
+                      className="LeaderbaordIcon toolbarBadge"
+                      sx={{
+                        fontSize: "20px",
+                        padding: "1px",
+                        wordBreak: "normal",
+                        marginLeft: isMenuOpen ? "20px" : "0px",
+                      }}
+                    >
+                      🎓
+                    </Box>
 
+                    <Box
+                      component="span"
+                      className="toolbarButtonDescription"
+                      sx={{
+                        fontSize: "15px",
+                        lineHeight: isMenuOpen ? "16px" : "0",
+                        height: isMenuOpen ? "41px" : "0",
+                        width: isMenuOpen ? "100px" : "0",
+                        overflow: "hidden",
+                        visibility: isMenuOpen ? "visible" : "hidden",
+                        transition: isMenuOpen
+                          ? "visibility 1s, line-height 1s, height 1s;"
+                          : "visibility 0s, line-height 0s, height 0s",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <div
+                        id=""
+                        style={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          maxWidth: "90px",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Dashboard
+                      </div>
+                    </Box>
+                  </Box>
+                </MemoizedMetaButton>
+              )}
               {/* leaderboard options */}
               {user?.tag && (
                 <>
@@ -511,6 +573,7 @@ MainSidebarProps) => {
                       >
                         🏆
                       </Box>
+
                       {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
                       {/* {!props.reputationsLoaded && (
                       <div className="preloader-wrapper small active">
@@ -660,7 +723,7 @@ MainSidebarProps) => {
                 </>
               )}
             </Box>
-            <Box sx={{ height: isSafari ? "calc(100vh - 400px)" : "calc(100vh - 375px)", paddingBottom: "20px" }}>
+            <Box sx={{ height: `calc(100vh - ${isSafari ? safariOffset : chromeOffset}px)`, paddingBottom: "20px" }}>
               {user?.tag && leaderboardType && (
                 <UsersStatusList
                   // reputationsLoaded={props.reputationsLoaded}

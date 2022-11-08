@@ -89,7 +89,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
-    window.document.body.classList.remove("Image");
+    // window.document.body.classList.remove("Image");
     console.log("user", user);
     const getInstructor = async () => {
       const instructorsRef = collection(db, "instructors");
