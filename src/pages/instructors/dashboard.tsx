@@ -308,7 +308,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
       newNodeProposals += stat.newNodes;
       editProposals += stat.improvements;
       links += stat.links;
-      nodes += stat.nodes;
+      nodes += stat.improvements + stat.newNodes;
       votes += stat.votes;
       questions += stat.questions;
     });

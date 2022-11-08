@@ -58,8 +58,8 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
   const subgroups = ["index", "alessEqualTen", "bgreaterTen", "cgreaterFifty", "dgreaterHundred"].slice(1);
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
-  const groups = data.map(d => d.index).flatMap(c => c);
-  console.log({ groups });
+  // const groups = data.map(d => d.index).flatMap(c => c);
+  // console.log({ groups });
 
   const columns = ["Proposals", "Questions"];
 
@@ -80,7 +80,6 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(25, 5)`).call(d3.axisLeft(y));
 
   // color palette = one color per subgroup
-  console.log({ subgroups });
   const colorApha = d3
     .scaleOrdinal()
     .domain(subgroups)
@@ -96,8 +95,6 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
     .range([LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
   //stack the data? --> stack per subgroup
   const stackedData = d3.stack().keys(subgroups)(data);
-
-  console.log("stackedData", stackedData);
 
   //tooltip
   const tooltip = d3.select("#tool-tip");
@@ -121,17 +118,13 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
     .data(d => d)
     .join("rect")
     .on("mouseover", function (e, d) {
-      console.log(e);
-      console.log({ enter: d });
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       const parentNode = _this.parentNode as any;
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key;
-      console.log({ parentNode: selectedNode.datum() });
       const subGroupValue = d.data[subgroupName];
       const middle = y((d[0] + d[1]) / 2);
-      console.log({ middle });
       d3.select(this)
         .transition()
         .style("fill", color(subgroupName) as string);
@@ -141,9 +134,7 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
         .style("top", `${middle}px`)
         .style("left", `${1.6 * x.bandwidth()}px`);
     })
-    .on("mouseout", function (e, d) {
-      console.log(e);
-      console.log(d);
+    .on("mouseout", function () {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
 
@@ -157,7 +148,6 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
     })
     .attr("x", d => {
       const x1: number = d.data["index"];
-      console.log({ x1 });
       return x(columns[x1]) ?? 0;
     })
     .attr("y", d => y(d[1]))
@@ -171,7 +161,6 @@ type StackedBarProps = {
   maxAxisY: number;
 };
 export const PointsBarChart = ({ data, maxAxisY }: StackedBarProps) => {
-  console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
 
   //   useEffect(() => {
