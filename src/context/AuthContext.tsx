@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useSnackbar } from "notistack";
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useReducer } from "react";
-import { AuthActions, AuthState, ErrorOptions } from "src/knowledgeTypes";
+import { AuthActions, AuthState, ErrorOptions, UserRole } from "src/knowledgeTypes";
 
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import authReducer, { INITIAL_STATE } from "@/lib/reducers/auth";
@@ -33,9 +33,9 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   );
 
   const loadUser = useCallback(
-    async (userId: string) => {
+    async (userId: string, role: UserRole) => {
       try {
-        const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId);
+        const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId, role);
         if (!user) {
           handleError({ error: "Cant find user" });
           return;
@@ -59,10 +59,12 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   useEffect(() => {
     const auth = getAuth();
 
-    const unsubscriber = onAuthStateChanged(auth, user => {
+    const unsubscriber = onAuthStateChanged(auth, async user => {
       if (user) {
+        const res = await user.getIdTokenResult(true);
+        const role: UserRole = res.claims["instructor"] ? "INSTRUCTOR" : res.claims["student"] ? "STUDENT" : null;
         //sign in
-        loadUser(user.uid);
+        loadUser(user.uid, role);
       } else {
         //sign out
         dispatch({ type: "logoutSuccess" });

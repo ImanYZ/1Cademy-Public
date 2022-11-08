@@ -254,11 +254,21 @@ const Dashboard = ({}: DashboardProps) => {
 
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           setMapInteractionValue(() => {
+            const windowSize = window.innerWidth;
+            let defaultScale;
+            if (windowSize < 400) {
+              defaultScale = 0.45;
+            } else if (windowSize < 600) {
+              defaultScale = 0.55;
+            } else {
+              defaultScale = 0.94;
+            }
+
             return {
-              scale: 0.94,
+              scale: defaultScale,
               translation: {
-                x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * 0.94,
-                y: (window.innerHeight / 3.4 - originalNode.offsetTop) * 0.94,
+                x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
               },
             };
           });
@@ -1152,7 +1162,7 @@ const Dashboard = ({}: DashboardProps) => {
           // window.location.reload();
         }
       }
-      let { reputation } = await retrieveAuthenticatedUser(user!.userId);
+      let { reputation } = await retrieveAuthenticatedUser(user!.userId, null);
       if (reputation) {
         dispatch({ type: "setReputation", payload: reputation });
       }
@@ -3991,6 +4001,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip>
+
               {/* <Tooltip
                 title={"worker"}
                 sx={{

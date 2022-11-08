@@ -9,4 +9,5 @@ export const registeredUser: User = {
   userId: "007",
   foundFrom: "internet",
   occupation: "developer",
+  role: null,
 };

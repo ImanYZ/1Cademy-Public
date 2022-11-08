@@ -1,18 +1,15 @@
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth as adminGetAuth } from "firebase-admin/auth";
 import HttpMock from "node-mocks-http";
 import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.config";
 import { createCredit } from "testUtils/fakers/credit";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 
-import moment from "moment";
 import { admin, db } from "src/lib/firestoreServer/admin";
-import settingHandler, {
-  InstructorSemesterSettingPayload,
-} from "src/pages/api/instructor/students/[semesterId]/setting";
-import { ISemester, ISemesterSyllabusItem } from "src/types/ICourse";
-import { INode } from "src/types/INode";
+import signupHandler, { InstructorSemesterSignUpPayload } from "src/pages/api/instructor/students/[semesterId]/signup";
+import { ISemester } from "src/types/ICourse";
 import { createCourse, createInstructor, createSemester } from "testUtils/fakers/course";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { getDefaultUser } from "testUtils/fakers/user";
@@ -20,7 +17,7 @@ import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
 
-describe("POST /api/instructor/students/:semesterId/setting", () => {
+describe("POST /api/instructor/students/:semesterId/signup", () => {
   const users = [getDefaultUser({})];
   const nodes = [
     getDefaultNode({
@@ -195,62 +192,28 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
 
-  describe("should be able to update syllabus", () => {
+  describe("should be able to call signup", () => {
+    const students = [
+      {
+        email: "ameer@1cademy.com",
+        fName: "Ameer",
+        lName: "Hamza",
+      },
+      {
+        email: "sam@1cademy.com",
+        fName: "Sam",
+        lName: "Ouhra",
+      },
+      {
+        email: "haroon@1cademy.com",
+        fName: "Haroon",
+        lName: "Waheed",
+      },
+    ];
     beforeAll(async () => {
       const body = {
-        days: 30,
-        nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numProposalPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numQuestionsPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        votes: {
-          onReceiveDownVote: 1,
-          onReceiveVote: 1,
-          onReceiveStar: 1,
-        },
-        syllabus: [
-          {
-            title: "Mock Chapter 1",
-            children: [
-              {
-                title: "Mock Chapter 1.1",
-              },
-              {
-                title: "Mock Chapter 1.2",
-              },
-            ],
-          },
-          {
-            title: "Mock Chapter 2",
-            children: [
-              {
-                title: "Mock Chapter 2.1",
-              },
-            ],
-          },
-          {
-            title: "Mock Chapter 3",
-            children: [
-              {
-                title: "Mock Chapter 3.1",
-              },
-              {
-                title: "Mock Chapter 3.2",
-              },
-            ],
-          },
-        ],
-      } as InstructorSemesterSettingPayload;
+        students,
+      } as InstructorSemesterSignUpPayload;
 
       const req: any = HttpMock.createRequest({
         method: "POST",
@@ -264,104 +227,36 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
       });
 
       const res = HttpMock.createResponse();
-      await settingHandler(req, res as any);
+      await signupHandler(req, res as any);
     });
 
-    it("check if syllabus node are created", async () => {
-      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
-      const semesterData = semesterDoc.data() as ISemester;
-      const testNodeIds = async (syllabusItem: ISemesterSyllabusItem) => {
-        expect(syllabusItem.node?.length).toBeGreaterThan(0);
-
-        const nodeDoc = await db.collection("nodes").doc(String(syllabusItem.node)).get();
-        expect(nodeDoc.exists).toBeTruthy();
-
-        if (syllabusItem.children && syllabusItem.children.length) {
-          for (const _syllabusItem of syllabusItem.children) {
-            await testNodeIds(_syllabusItem);
-          }
-        }
-      };
-
-      for (const syllabusItem of semesterData.syllabus) {
-        await testNodeIds(syllabusItem);
+    it("check if users got created", async () => {
+      for (const student of students) {
+        const userDocs = await db.collection("users").where("email", "==", student.email).get();
+        expect(userDocs.docs.length).toEqual(1);
+        expect(userDocs.docs[0].data()?.email).toEqual(student.email);
+        expect(userDocs.docs[0].data()?.fName).toEqual(student.fName);
+        expect(userDocs.docs[0].data()?.lName).toEqual(student.lName);
       }
     });
 
-    it("check if flag removed node as deleted in syllabus", async () => {
-      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
-      const semesterData = semesterDoc.data() as ISemester;
-
-      const nodeId = semesterData.syllabus[0].node;
-      delete semesterData.syllabus[0].node;
-
-      const body = {
-        days: semesterData.days,
-        nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numProposalPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numQuestionsPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        votes: semesterData.votes,
-        syllabus: semesterData.syllabus,
-      } as InstructorSemesterSettingPayload;
-
-      const req: any = HttpMock.createRequest({
-        method: "POST",
-        query: {
-          semesterId: semester.documentId,
-        },
-        body,
-        headers: {
-          authorization: "Bearer " + accessToken,
-        },
-      });
-
-      const res = HttpMock.createResponse();
-      await settingHandler(req, res as any);
-
-      const node = (await db.collection("nodes").doc(String(nodeId)).get()).data() as INode;
-      expect(node.deleted).toEqual(true);
-
-      const _semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
-      const _semesterData = _semesterDoc.data() as ISemester;
-      expect(_semesterData.syllabus[0].node?.length).toBeGreaterThan(0);
+    it("created users should have auth attached to them", async () => {
+      for (const student of students) {
+        const user = await adminGetAuth().getUserByEmail(student.email);
+        const userDocs = await db.collection("users").where("userId", "==", user.uid).get();
+        expect(userDocs.docs.length).toEqual(1);
+      }
     });
 
-    it("check if changes in syllabus change node title as well", async () => {
-      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
-      const semesterData = semesterDoc.data() as ISemester;
-
-      semesterData.syllabus[0].title = "TEST TITLE";
-
+    it("check if by added increment student in array, new account gets created and other retains", async () => {
+      students.push({
+        email: "waleed@1cademy.com",
+        fName: "Waleed",
+        lName: "Ahmad",
+      });
       const body = {
-        days: semesterData.days,
-        nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numProposalPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numQuestionsPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        votes: semesterData.votes,
-        syllabus: semesterData.syllabus,
-      } as InstructorSemesterSettingPayload;
+        students,
+      } as InstructorSemesterSignUpPayload;
 
       const req: any = HttpMock.createRequest({
         method: "POST",
@@ -375,11 +270,51 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
       });
 
       const res = HttpMock.createResponse();
-      await settingHandler(req, res as any);
+      await signupHandler(req, res as any);
 
-      const node = (await db.collection("nodes").doc(String(semesterData.syllabus[0].node)).get()).data() as INode;
+      for (const student of students) {
+        const userDocs = await db.collection("users").where("email", "==", student.email).get();
+        expect(userDocs.docs.length).toEqual(1);
+        expect(userDocs.docs[0].data()?.email).toEqual(student.email);
+        expect(userDocs.docs[0].data()?.fName).toEqual(student.fName);
+        expect(userDocs.docs[0].data()?.lName).toEqual(student.lName);
+      }
 
-      expect(node.title).toEqual(`Ch.1 TEST TITLE - ${semesterNode.title}`);
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+      const filteredStudents = semesterData.students.filter(
+        student => student.email === students[students.length - 1].email
+      );
+      expect(filteredStudents.length).toEqual(1);
+    });
+
+    it("check if by added increment student in array, new account gets created and other retains", async () => {
+      const removedStudents = students.splice(students.length - 1, 1);
+      const body = {
+        students,
+      } as InstructorSemesterSignUpPayload;
+
+      const req: any = HttpMock.createRequest({
+        method: "POST",
+        query: {
+          semesterId: semester.documentId,
+        },
+        body,
+        headers: {
+          authorization: "Bearer " + accessToken,
+        },
+      });
+
+      const res = HttpMock.createResponse();
+      await signupHandler(req, res as any);
+
+      const userDocs = await db.collection("users").where("email", "==", removedStudents[0].email).get();
+      expect(userDocs.docs.length).toEqual(1);
+
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+      const filteredStudents = semesterData.students.filter(student => student.email === removedStudents[0].email);
+      expect(filteredStudents.length).toEqual(0);
     });
   });
 
