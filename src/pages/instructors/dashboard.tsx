@@ -107,7 +107,7 @@ type Trends = {
 //   },
 // ];
 
-const Semester = "2gbmyJVzQY1FBafjBtRx";
+// const Semester = "2gbmyJVzQY1FBafjBtRx";
 const completionProposals = 100;
 const completionQuestions = 100;
 
@@ -157,10 +157,9 @@ const BoxLegend = () => {
   );
 };
 
-const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, user, currentSemester }) => {
+const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
-  console.log({ selectedCourse, selectedSemester });
-  console.log("currentSemester", currentSemester);
+
   const theme = useTheme();
   // const [screenSize, setScreenSize] = useState(null);
   const db = getFirestore();
@@ -235,7 +234,7 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
     if (!currentSemester || !currentSemester.tagId) return;
 
     const getSemesterData = async () => {
-      const semesterRef = collection(db, "semesterStudentVoteStat");
+      const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
       const semesterDoc = await getDocs(q);
       if (!semesterDoc.docs.length) {
@@ -254,31 +253,30 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
       setMaxBubbleAxisY(maxVotePoints);
       setMinBubbleAxisX(minVote);
       setMinBubbleAxisY(minVotePoints);
-      const bubbles = getBubbleStats(semester);
-      console.log("Bubbles", bubbles);
     };
     getSemesterData();
   }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, user]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId) return;
     const getSemesterStudents = async () => {
-      const semesterRef = doc(db, "semesters", Semester);
+      const semesterRef = doc(db, "semesters", currentSemester.tagId);
       const semesterDoc = await getDoc(semesterRef);
       if (!semesterDoc.exists()) return;
-
       setStudents(semesterDoc.data().students.length);
       setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
-  }, [db]);
+  }, [currentSemester, currentSemester?.tagId, db]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
     const getUserDailyStat = async () => {
-      const userDailyStatRef = collection(db, "semesterStudentStat");
+      const userDailyStatRef = collection(db, "semesterStudentStats");
       const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
       const userDailyStatDoc = await getDocs(q);
+
       if (!userDailyStatDoc.docs.length) {
         setLinksTrend([]);
         setQuestionsTrend([]);
@@ -449,12 +447,12 @@ const Instructors: InstructorLayoutPage = ({ selectedSemester, selectedCourse, u
               }}
             >
               <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>
-                SI <span style={{ fontSize: "30px" }}>106</span>
+                {currentSemester?.cTitle.split(" ")[0]}{" "}
               </Typography>
-              <span>Fall 22</span>
-              <span>Students: {students !== 0 ? students : "*"}</span>
+              <span>{currentSemester?.title}</span>
+              <span> {students !== 0 ? `Students: ${students}` : ""}</span>
             </Box>
-            <span>Introduction to Information Science</span>
+            <span>{currentSemester?.pTitle}</span>
             <Divider />
             <Box
               sx={{
