@@ -13,9 +13,9 @@ const GREATER_THAN_50_COLOR_ALPHA = "rgba(167, 216, 65, .75)";
 const GREATER_THAN_100_COLOR = "rgb(56, 142, 60)";
 const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 
-// var data = [
-//   { month: 0, apples: 2, bananas: 3, cherries: 15, dates: 30 },
-//   { month: 1, apples: 13, bananas: 17, cherries: 7, dates: 13 },
+// var data1 = [
+//   { index: 0, alessEqualTen: 12, bgreaterTen: 11, cgreaterFifty: 1, dgreaterHundred: 0 },
+//   { index: 1, alessEqualTen: 7, bgreaterTen: 7, cgreaterFifty: 7, dgreaterHundred: 7 },
 // ];
 // // const data = [
 // //   { category: "fruit", yes: 6, no: 7, maybe: 8 },

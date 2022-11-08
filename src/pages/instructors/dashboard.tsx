@@ -7,7 +7,7 @@ import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
-import { ISemesterStudentStatDay } from "src/types/ICourse";
+import { ISemester, ISemesterStudentStatDay } from "src/types/ICourse";
 
 import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -108,8 +108,8 @@ type Trends = {
 // ];
 
 // const Semester = "2gbmyJVzQY1FBafjBtRx";
-const completionProposals = 100;
-const completionQuestions = 100;
+// const completionProposals = 100;
+// const completionQuestions = 100;
 
 export type StackedBarStats = {
   index: number;
@@ -142,6 +142,11 @@ type SemesterStats = {
   questions: number;
 };
 
+type MaxPoints = {
+  maxProposalsPoints: number;
+  maxQuestionsPoints: number;
+};
+
 const BoxLegend = () => {
   return (
     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
@@ -167,6 +172,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [students, setStudents] = useState<number>(0);
+  //
+
+  const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
+  const [maxQuestionsPoints, setMaxQestionsPoints] = useState<number>(0);
 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
@@ -210,10 +219,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
         bubbleStat.students += 1;
         bubbleStats.push(bubbleStat);
       }
-      if (d.votes + 10 > maxVote) maxVote = d.votes + 10;
-      if (d.votePoints + 4 > maxVotePoints) maxVotePoints = d.votePoints + 4;
-      if (d.votes - 10 < minVote) minVote = d.votes - 10;
-      if (d.votePoints - 4 < minVotePoints) minVotePoints = d.votePoints - 4;
+      if (d.votes > maxVote) maxVote = d.votes;
+      if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
+      if (d.votes < minVote) minVote = d.votes;
+      if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
     });
     return {
       bubbleStats,
@@ -228,6 +237,118 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
     const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
     return index;
   };
+
+  const getStackedBarStat = useCallback(
+    (data: SemesterStudentVoteStat[]): StackedBarStats[] => {
+      const stackedBarStats: StackedBarStats[] = [];
+      const ProposalsRate: StackedBarStats = {
+        index: 0,
+        alessEqualTen: 0,
+        bgreaterTen: 0,
+        cgreaterFifty: 0,
+        dgreaterHundred: 0,
+      };
+      const QuestionsRate: StackedBarStats = {
+        index: 1,
+        alessEqualTen: 0,
+        bgreaterTen: 0,
+        cgreaterFifty: 0,
+        dgreaterHundred: 0,
+      };
+      // const mock: SemesterStudentVoteStat[] = [data[0], data[1]];
+      // const mock2 = [
+      //   {
+      //     lastActivity: {
+      //       seconds: 1617926400,
+      //       nanoseconds: 0,
+      //     },
+      //     disagreementsWithInst: 72,
+      //     upVotes: 3253,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     questionPoints: 171,
+      //     votes: 250,
+      //     agreementsWithInst: 178,
+      //     uname: "elizadh",
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 755000000,
+      //     },
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 755000000,
+      //     },
+      //     votePoints: 106,
+      //     instVotes: 43,
+      //     deleted: false,
+      //     questions: 171,
+      //     totalPoints: 401,
+      //     links: 50,
+      //     improvements: 94,
+      //     newNodes: 210,
+      //     downVotes: 73,
+      //   },
+      //   {
+      //     deleted: false,
+      //     votes: 256,
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 757000000,
+      //     },
+      //     downVotes: 2620,
+      //     disagreementsWithInst: 64,
+      //     instVotes: 19,
+      //     questionPoints: 194,
+      //     questions: 194,
+      //     lastActivity: {
+      //       seconds: 1617753600,
+      //       nanoseconds: 0,
+      //     },
+      //     improvements: 89,
+      //     totalPoints: 10,
+      //     newNodes: 225,
+      //     upVotes: 1189,
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 757000000,
+      //     },
+      //     agreementsWithInst: 192,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     uname: "rwilmer",
+      //     votePoints: 128,
+      //     links: 48,
+      //   },
+      // ];
+      // console.log("mock", mock);
+      data.map(d => {
+        const proposals = d.totalPoints;
+        const question = d.questionPoints;
+        if (proposals > (100 * maxProposalsPoints) / 100) {
+          ProposalsRate.dgreaterHundred += 1;
+        } else if (proposals > (50 * maxProposalsPoints) / 100) {
+          ProposalsRate.cgreaterFifty += 1;
+        } else if (proposals > (10 * maxProposalsPoints) / 100) {
+          ProposalsRate.bgreaterTen += 1;
+        } else if (proposals <= (10 * maxProposalsPoints) / 100) {
+          ProposalsRate.alessEqualTen += 1;
+        }
+        if (question > (100 * maxQuestionsPoints) / 100) {
+          QuestionsRate.dgreaterHundred += 1;
+        } else if (question > (50 * maxQuestionsPoints) / 100) {
+          QuestionsRate.cgreaterFifty += 1;
+        } else if (question > (10 * maxQuestionsPoints) / 100) {
+          QuestionsRate.bgreaterTen += 1;
+        } else if (question <= (10 * maxQuestionsPoints) / 100) {
+          QuestionsRate.alessEqualTen += 1;
+        }
+        console.log({ proposals, ProposalsRate });
+      });
+
+      stackedBarStats.push(ProposalsRate);
+      stackedBarStats.push(QuestionsRate);
+      return stackedBarStats;
+    },
+    [maxProposalsPoints, maxQuestionsPoints]
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -249,13 +370,16 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
       setStackedBar(getStackedBarStat(semester));
       const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semester);
       setBubble(bubbleStats);
+
+      console.log("semester", semester);
+      console.log("getStackedBarStat", getStackedBarStat(semester));
       setMaxBubbleAxisX(maxVote);
       setMaxBubbleAxisY(maxVotePoints);
       setMinBubbleAxisX(minVote);
       setMinBubbleAxisY(minVotePoints);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, user]);
+  }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, getStackedBarStat, user]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -264,6 +388,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
       const semesterRef = doc(db, "semesters", currentSemester.tagId);
       const semesterDoc = await getDoc(semesterRef);
       if (!semesterDoc.exists()) return;
+
+      const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
+        semesterDoc.data() as ISemester
+      );
+      console.log("maxProposalsPoints", { maxProposalsPoints, maxQuestionsPoints });
+      setMaxProposalsPoints(maxProposalsPoints);
+      setMaxQestionsPoints(maxQuestionsPoints);
+
       setStudents(semesterDoc.data().students.length);
       setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
@@ -296,6 +428,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db]);
 
+  const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
+    return {
+      maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
+      maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+    };
+  };
+
   const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
     let newNodeProposals = 0;
     let editProposals = 0;
@@ -320,50 +459,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
       questions,
       votes,
     };
-  };
-
-  const getStackedBarStat = (data: SemesterStudentVoteStat[]): StackedBarStats[] => {
-    const stackedBarStats: StackedBarStats[] = [];
-    const ProposalsRate: StackedBarStats = {
-      index: 0,
-      alessEqualTen: 0,
-      bgreaterTen: 0,
-      cgreaterFifty: 0,
-      dgreaterHundred: 0,
-    };
-    const QuestionsRate: StackedBarStats = {
-      index: 1,
-      alessEqualTen: 0,
-      bgreaterTen: 0,
-      cgreaterFifty: 0,
-      dgreaterHundred: 0,
-    };
-    data.map(d => {
-      const proposals = d.totalPoints;
-      const question = d.questionPoints;
-
-      if (proposals > (100 * completionProposals) / 100) {
-        ProposalsRate.dgreaterHundred += 1;
-      } else if (proposals > (50 * completionProposals) / 100) {
-        ProposalsRate.cgreaterFifty += 1;
-      } else if (proposals > (10 * completionProposals) / 100) {
-        ProposalsRate.bgreaterTen += 1;
-      } else if (proposals <= (10 * completionProposals) / 100) {
-        ProposalsRate.alessEqualTen += 1;
-      }
-      if (question > (100 * completionQuestions) / 100) {
-        QuestionsRate.dgreaterHundred += 1;
-      } else if (question > (50 * completionQuestions) / 100) {
-        QuestionsRate.cgreaterFifty += 1;
-      } else if (question > (10 * completionQuestions) / 100) {
-        QuestionsRate.bgreaterTen += 1;
-      } else if (question <= (10 * completionQuestions) / 100) {
-        QuestionsRate.alessEqualTen += 1;
-      }
-    });
-    stackedBarStats.push(ProposalsRate);
-    stackedBarStats.push(QuestionsRate);
-    return stackedBarStats;
   };
 
   const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {

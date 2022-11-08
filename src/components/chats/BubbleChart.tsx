@@ -110,7 +110,7 @@ function drawChart(
   // @ts-ignore
   const color = d3
     .scaleThreshold()
-    .domain([-50, 0, 20, 100]) // @ts-ignore
+    .domain([-50, 0, 20, 40]) // @ts-ignore
     .range(["white", RED_ALPHA, ORANGE_ALPHA, GREEN_ALPHA, "white"]);
   // @ts-ignore
   const borderColor = d3.scaleThreshold().domain([-10, 0, 20, 100]).range(["white", RED, ORANGE, GREEN, "white"]);
@@ -129,25 +129,25 @@ function drawChart(
     .attr("cx", d => x(d.votes))
     .attr("cy", d => y(d.points))
     // .attr("height", d => y(d[0]) - y(d[1]))
-    .attr("r", d => d.students * 4 + 10)
+    .attr("r", 10)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
     .attr("transform", `translate(30, 5)`);
-  svg
-    .select("#nums")
-    .selectAll("text")
-    // Enter in the stack data = loop key per key = group per group
-    .data(data)
-    .join("text")
-    .attr("fill", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    .attr("x", d => x(d.votes))
-    .attr("y", d => y(d.points))
-    .attr("text-anchor", "middle")
-    .attr("alignment-baseline", "central")
-    .text(d => d.students)
-    .style("font-size", "24px")
-    .attr("transform", `translate(30, 5)`);
+  // svg
+  //   .select("#nums")
+  //   .selectAll("text")
+  //   // Enter in the stack data = loop key per key = group per group
+  //   .data(data)
+  //   .join("text")
+  //   .attr("fill", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
+  //   .attr("x", d => x(d.votes))
+  //   .attr("y", d => y(d.points))
+  //   .attr("text-anchor", "middle")
+  //   .attr("alignment-baseline", "central")
+  //   .text(d => d.students)
+  //   .style("font-size", "24px")
+  //   .attr("transform", `translate(30, 5)`);
 
   // d => (d.points !== 0 ? borderColor(d.points) : GRAY)
   // .append("text")            // append text
