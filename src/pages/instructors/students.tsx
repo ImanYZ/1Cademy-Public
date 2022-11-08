@@ -481,7 +481,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     setTableRows(_tableRow);
   };
   //TO-DO
-  // if (!currentSemester) return <Typography>You don't have semester</Typography>;
+  if (!currentSemester) return <Typography>You don't have semester</Typography>;
   // if (!tableRows.length) return <Typography>you don't a user </Typography>;
   return (
     <>
