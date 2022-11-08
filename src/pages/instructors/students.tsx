@@ -99,6 +99,7 @@ const keysColumns: any = {
 };
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
+  const [rows, setRows] = useState<any>([]);
   const [tableRows, setTableRows] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -199,6 +200,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             });
           }
           setTableRows(_rows.slice());
+          setRows(_rows.slice());
         }
       }
     });
@@ -212,7 +214,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   //this to filter the results
   const handleFilterBy = (filters: any, fromDash: boolean) => {
-    let _tableRows = tableRows.slice();
+    let _tableRows = rows.slice();
     for (let filter of filters) {
       if (filter.operation === "<") {
         _tableRows = _tableRows.filter((row: any) => row[filterChoices[filter.title]] <= filter.value);
@@ -407,7 +409,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const searchByNameEmail = (newValue: string) => {
-    const _tableRows = tableRows.slice();
+    const _tableRows = rows.slice();
 
     const newTable = _tableRows.filter((row: any) => {
       return (
@@ -532,14 +534,14 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 px: "15px",
               }}
             >
-              <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h1" component="h2">
+              <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h4" component="h2">
                 {selectedCourse}
               </Typography>
-              <Typography sx={{ fontFamily: "fangsong" }} component="h2">
+              <Typography sx={{ fontFamily: "fangsong", pr: "5px" }} component="h2">
                 Students:
               </Typography>
               <Typography sx={{ fontFamily: "fangsong" }} component="h2">
-                {tableRows.length}
+                {rows.length}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row", paddingBottom: "15px" }}>
