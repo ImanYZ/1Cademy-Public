@@ -139,18 +139,37 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       const intructor = docChanges[0].doc.data() as Instructor;
       console.log("snapshot:instructor:", intructor);
       setInstructor(intructor);
-      const courses = getCoursesByInstructor(intructor);
-      console.log("snapshot:courses:", courses);
-      const semester = Object.keys(courses);
-      console.log("snapshot:semester:", semester);
+      const newAllCourses = getCoursesByInstructor(intructor);
+      console.log("snapshot:courses:", newAllCourses);
+      const newSemesters = Object.keys(newAllCourses);
+      console.log("snapshot:semester:", newSemesters);
 
-      if (!semester.length) {
+      if (!newSemesters.length) {
         router.push(ROUTES.instructorsSettings);
       }
 
-      setSemesters(semester);
-      setAllCourses(courses);
-      setSelectedSemester(semester[0]);
+      const lastSemester = newSemesters.slice(-1)[0];
+      console.log("snapshot:lastSemester", lastSemester);
+
+      setSemesters(prevSemester => {
+        setSelectedSemester(selectedSemester => {
+          if (!selectedSemester) {
+            console.log("snapshot:setSelected first semester", newSemesters[0]);
+            // setSelectedSemester(newSemesters[0]);
+            return newSemesters[0];
+          }
+          if (!prevSemester.includes(lastSemester)) {
+            // only if a semester is added we need to auto select
+            console.log("snapshot:setSelected last semester", lastSemester);
+            // setSelectedSemester(lastSemester);
+            return lastSemester;
+          }
+
+          return selectedSemester;
+        });
+        return newSemesters;
+      });
+      setAllCourses(newAllCourses);
     });
 
     return () => unsub();
