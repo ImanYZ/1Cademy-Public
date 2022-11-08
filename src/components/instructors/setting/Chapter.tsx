@@ -266,7 +266,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
               <Box key={chapter.node}>
                 {chapter.editable ? (
                   <TextField
-                    placeholder="Add new subchapter"
+                    placeholder="Edit chapter"
                     variant="standard"
                     fullWidth
                     value={newChapterEditText}
@@ -374,7 +374,6 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
                           style={{
                             borderLeft: "dotted 1px black",
                             paddingLeft: "10px",
-                            paddingBottom: "8px",
                           }}
                         >
                           {chapter.children &&
@@ -383,7 +382,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
                                 return (
                                   <Box key={subChapter.node}>
                                     <TextField
-                                      placeholder="Edit new subchapter"
+                                      placeholder="Edit subchapter"
                                       variant="standard"
                                       fullWidth
                                       value={newSubChapterEditText}
@@ -442,7 +441,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
                               return (
                                 <Box
                                   key={subChapter.node}
-                                  style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+                                  style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}
                                 >
                                   <Typography sx={{ width: "auto" }}>
                                     Ch. {index + 1}.{subIndex + 1} {subChapter.title}

@@ -16,27 +16,27 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
     syllabus: [],
-    days: 0,
+    days: 100,
     nodeProposals: {
       startDate: "",
       endDate: "",
-      numPoints: 0,
-      numProposalPerDay: 0,
-      totalDaysOfCourse: 0,
+      numPoints: 1,
+      numProposalPerDay: 1,
+      totalDaysOfCourse: 50,
     },
     questionProposals: {
       startDate: "",
       endDate: "",
-      numPoints: 0,
-      numQuestionsPerDay: 0,
-      totalDaysOfCourse: 0,
+      numPoints: 1,
+      numQuestionsPerDay: 1,
+      totalDaysOfCourse: 50,
     },
     votes: {
-      pointIncrementOnAgreement: 0,
-      pointDecrementOnAgreement: 0,
-      onReceiveVote: 0,
-      onReceiveDownVote: 0,
-      onReceiveStar: 0,
+      pointIncrementOnAgreement: 1,
+      pointDecrementOnAgreement: 1,
+      onReceiveVote: 1,
+      onReceiveDownVote: 1,
+      onReceiveStar: 1,
     },
   });
 
@@ -74,8 +74,16 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     if (type === "nodeProposals") {
       if (field == "startDate" || field == "endDate") {
         setSemester({ ...semester, nodeProposals: { ...semester.nodeProposals, [field]: String(e.target.value) } });
+      } else if (field == "numPoints") {
+        setSemester({
+          ...semester,
+          nodeProposals: { ...semester.nodeProposals, [field]: Number(e.target.value) },
+        });
       } else {
-        setSemester({ ...semester, nodeProposals: { ...semester.nodeProposals, [field]: Number(e.target.value) } });
+        setSemester({
+          ...semester,
+          nodeProposals: { ...semester.nodeProposals, [field]: Number(parseInt(e.target.value)) },
+        });
       }
     } else if (type === "questionProposals") {
       if (field == "startDate" || field == "endDate") {
@@ -83,10 +91,15 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: String(e.target.value) },
         });
-      } else {
+      } else if (field == "numPoints") {
         setSemester({
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: Number(e.target.value) },
+        });
+      } else {
+        setSemester({
+          ...semester,
+          questionProposals: { ...semester.questionProposals, [field]: Number(parseInt(e.target.value)) },
         });
       }
     } else if (type === "votes") {
@@ -98,7 +111,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       if (e.target) {
         setSemester({
           ...semester,
-          days: Number(e.target.value),
+          days: Number(parseInt(e.target.value)),
         });
       }
     }

@@ -678,6 +678,24 @@ select:-webkit-autofill:focus {
   margin: 0;
 }
 
+/* Firefox */
+.remove-arrow-buttons input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.light-calender ::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.dark-calender ::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
+.unselect-date-placeholder ::-webkit-datetime-edit-year-field:not([aria-valuenow]),
+.unselect-date-placeholder ::-webkit-datetime-edit-month-field:not([aria-valuenow]),
+.unselect-date-placeholder ::-webkit-datetime-edit-day-field:not([aria-valuenow]) {
+  color: transparent;
+}
 /* .instructor-settings-main h2,
 h3,
 h4,
