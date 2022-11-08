@@ -12,7 +12,7 @@ import { initializeNewReputationData } from "src/utils";
 import { searchAvailableUnameByEmail } from "src/utils/instructor";
 import { v4 as uuidv4 } from "uuid";
 
-type InstructorSemesterSignUpPayload = {
+export type InstructorSemesterSignUpPayload = {
   students: {
     email: string;
     fName: string;
