@@ -124,13 +124,13 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key;
       const subGroupValue = d.data[subgroupName];
-      const middle = y((d[0] + d[1]) / 2);
+      const middle = y((3 * (d[0] + d[1])) / 4);
       d3.select(this)
         .transition()
         .style("fill", color(subgroupName) as string);
       tooltip
         .html("subgroup: " + subgroupName + "<br>" + "Value" + subGroupValue)
-        .style("opacity", 0)
+        .style("opacity", 1)
         .style("top", `${middle}px`)
         .style("left", `${1.6 * x.bandwidth()}px`);
     })
@@ -189,6 +189,7 @@ export const PointsBarChart = ({ data, maxAxisY }: StackedBarProps) => {
           borderRadius: "2px",
           opacity: "0",
           padding: "2px 4px",
+          color: "white",
         }}
       ></div>
     </div>

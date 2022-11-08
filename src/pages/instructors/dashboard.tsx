@@ -1,4 +1,4 @@
-import PlaceIcon from "@mui/icons-material/Place";
+// import PlaceIcon from "@mui/icons-material/Place";
 import SquareIcon from "@mui/icons-material/Square";
 import { Divider, Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
 import { ISemester, ISemesterStudentStatDay } from "src/types/ICourse";
 
-import { BoxChart } from "@/components/chats/BoxChart";
+// import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
 
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
@@ -24,44 +24,44 @@ export type BoxData = {
   "Vote Points": Chapter;
 };
 
-const data: BoxData = {
-  "Proposal Points": {
-    "The way of the program": [20, 23, 24, 24, 24, 25, 30],
-    "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    // "Fruitfuwwel functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    // "1Fruiwwtful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    // "1Fruwitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    // "1Frwuitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    // "1wFruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    // "1Fwruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-  },
-  "Question Points": {
-    // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    // "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    // Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    "The way of the program": [20, 23, 24, 24, 24, 25, 30],
-    "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-  },
-  "Vote Points": {
-    // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    // "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    // Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
-    "The way of the program": [20, 23, 24, 24, 24, 25, 30],
-    "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-    "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-  },
-};
+// const data: BoxData = {
+//   "Proposal Points": {
+//     "The way of the program": [20, 23, 24, 24, 24, 25, 30],
+//     "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+//     Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     // "Fruitfuwwel functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     // "1Fruiwwtful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     // "1Fruwitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     // "1Frwuitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     // "1wFruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     // "1Fwruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//   },
+//   "Question Points": {
+//     // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+//     // "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+//     // Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+//     "The way of the program": [20, 23, 24, 24, 24, 25, 30],
+//     "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+//     Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//   },
+//   "Vote Points": {
+//     // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+//     // "Variables, expressions and ...": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+//     // Functions: [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
+//     "The way of the program": [20, 23, 24, 24, 24, 25, 30],
+//     "Variables, expressions and ...": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+//     Functions: [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//     "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
+//   },
+// };
 
 type Trends = {
   date: Date;
@@ -147,20 +147,20 @@ type MaxPoints = {
   maxQuestionsPoints: number;
 };
 
-const BoxLegend = () => {
-  return (
-    <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
-      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
-        <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
-      </Box>
-      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
-        <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
-      </Box>
-    </Box>
-  );
-};
+// const BoxLegend = () => {
+//   return (
+//     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
+//       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+//         <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+//         <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
+//       </Box>
+//       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+//         <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
+//         <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+//       </Box>
+//     </Box>
+//   );
+// };
 
 const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
@@ -505,6 +505,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
 
   // useEffect(() => {}, [isSmall, isMedium]);
 
+  const formatNumber = (num: number | undefined) => {
+    try {
+      if (!num) return 0;
+      return num.toLocaleString("en-US");
+    } catch (error) {
+      return num;
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -575,17 +584,17 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
               }}
             >
               <span style={{ textAlign: "left" }}>New Node Proposals</span>
-              <span>{semesterStats?.newNodeProposals}</span>
+              <span>{formatNumber(semesterStats?.newNodeProposals)}</span>
               <span style={{ textAlign: "left" }}>Edit Proposals</span>
-              <span>{semesterStats?.editProposals}</span>
+              <span>{formatNumber(semesterStats?.editProposals)}</span>
               <span style={{ textAlign: "left" }}>Links</span>
-              <span>{semesterStats?.links}</span>
+              <span>{formatNumber(semesterStats?.links)}</span>
               <span style={{ textAlign: "left" }}>Nodes</span>
-              <span>{semesterStats?.nodes}</span>
+              <span>{formatNumber(semesterStats?.nodes)}</span>
               <span style={{ textAlign: "left" }}>Votes</span>
-              <span>{semesterStats?.votes}</span>
+              <span>{formatNumber(semesterStats?.votes)}</span>
               <span style={{ textAlign: "left" }}>Questions</span>
-              <span>{semesterStats?.questions}</span>
+              <span>{formatNumber(semesterStats?.questions)}</span>
             </Box>
           </Box>
           <Typography>
@@ -659,7 +668,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
           gap: "16px",
         }}
       >
-        <Paper
+        {/* <Paper
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -733,7 +742,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             </Box>
           </Box>
           {!isMovil && <BoxLegend />}
-        </Paper>
+        </Paper> */}
         {/* <Paper
           sx={{
             p: isMovil ? "10px" : isTablet ? "20px" : "40px",
