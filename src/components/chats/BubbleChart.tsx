@@ -6,14 +6,23 @@ import { BubbleStats } from "@/pages/instructors/dashboard";
 
 // const columns = ["fruit", "vegetable"];
 
-const GREEN = "rgb(56, 142, 60)";
-const GREEN_ALPHA = "rgba(129, 199, 132, 0.5)";
-const RED = "rgb(239, 83, 80)";
-const RED_ALPHA = "rgba(239, 83, 80, 0.5)";
+// const GREEN = "rgb(56, 142, 60)";
+// const GREEN_ALPHA = "rgba(129, 199, 132, 0.5)";
+// const RED = "rgb(239, 83, 80)";
+// const RED_ALPHA = "rgba(239, 83, 80, 0.5)";
 const GRAY = "rgb(117, 117, 117)";
 const GRAY_ALPHA = "rgba(237, 237, 237, 0.5)";
-const ORANGE = "rgb(255, 138, 51)";
-const ORANGE_ALPHA = "rgba(251, 204, 169, 0.5)";
+// const ORANGE = "rgb(255, 138, 51)";
+// const ORANGE_ALPHA = "rgba(251, 204, 169, 0.5)";
+
+const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
+const LESS_EQUAL_THAN_10_COLOR_ALPHA = "rgba(255, 196, 153, .75)";
+const GREATER_THAN_10_COLOR = "rgb(249, 226, 208 )";
+const GREATER_THAN_10_COLOR_ALPHA = "rgba(249, 226, 208, .75)";
+const GREATER_THAN_50_COLOR = "rgb(167, 216, 65 )";
+const GREATER_THAN_50_COLOR_ALPHA = "rgba(167, 216, 65, .75)";
+const GREATER_THAN_100_COLOR = "rgb(56, 142, 60)";
+const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 
 // const data = [
 //   { students: 30, votes: 170, points: 40 },
@@ -110,10 +119,19 @@ function drawChart(
   // @ts-ignore
   const color = d3
     .scaleThreshold()
-    .domain([-50, 0, 20, 40]) // @ts-ignore
-    .range(["white", RED_ALPHA, ORANGE_ALPHA, GREEN_ALPHA, "white"]);
+    .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
+    .range([
+      RED,
+      LESS_EQUAL_THAN_10_COLOR_ALPHA,
+      GREATER_THAN_10_COLOR_ALPHA,
+      GREATER_THAN_50_COLOR_ALPHA,
+      GREATER_THAN_100_COLOR_ALPHA,
+    ]);
   // @ts-ignore
-  const borderColor = d3.scaleThreshold().domain([-10, 0, 20, 100]).range(["white", RED, ORANGE, GREEN, "white"]);
+  const borderColor = d3
+    .scaleThreshold()
+    .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
+    .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
     .select("#bubbles")
@@ -199,7 +217,7 @@ export const BubbleChart = ({
     <svg ref={svg} style={{ position: "relative" }}>
       <g id="bubbles"></g>
       <g id="nums"></g>
-      <text style={{ fontSize: "16px" }} x={width - 40} y={height} fill="white">
+      <text style={{ fontSize: "16px", color: theme === "Dark" ? "white" : "black" }} x={width - 40} y={height}>
         # of Votes
       </text>
     </svg>

@@ -124,7 +124,7 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key;
       const subGroupValue = d.data[subgroupName];
-      const middle = y((3 * (d[0] + d[1])) / 4);
+      const middle = y((d[0] + d[1]) / 2);
       d3.select(this)
         .transition()
         .style("fill", color(subgroupName) as string);
@@ -185,10 +185,10 @@ export const PointsBarChart = ({ data, maxAxisY }: StackedBarProps) => {
         style={{
           position: "absolute",
           background: "#303134",
-          boxShadow: "0 1px 1px 1px black",
-          borderRadius: "2px",
+          // boxShadow: "0 1px 1px 1px black",
+          borderRadius: "5px",
           opacity: "0",
-          padding: "2px 4px",
+          padding: "4px 4px",
           color: "white",
         }}
       ></div>

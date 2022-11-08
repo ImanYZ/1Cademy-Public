@@ -118,7 +118,13 @@ export type StackedBarStats = {
   cgreaterFifty: number;
   dgreaterHundred: number;
 };
-
+// export type StudentStackedBarStats = {
+//   index: number;
+//   alessEqualTen: ISt;
+//   bgreaterTen: number;
+//   cgreaterFifty: number;
+//   dgreaterHundred: number;
+// };
 export type BubbleStats = {
   students: number;
   votes: number;
@@ -147,6 +153,12 @@ type MaxPoints = {
   maxQuestionsPoints: number;
 };
 
+// type RateCondition = {
+//   lessEqualThanTen: number;
+//   greaterThanTen: number;
+//   greaterThanFifty: number;
+//   greaterThanHundred: number;
+// };
 // const BoxLegend = () => {
 //   return (
 //     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
@@ -175,7 +187,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   //
 
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
-  const [maxQuestionsPoints, setMaxQestionsPoints] = useState<number>(0);
+  const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
+  // const [rateCondition, setRateCondition] = useState<RateCondition | null>(null);
 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
@@ -394,7 +407,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
       );
       console.log("maxProposalsPoints", { maxProposalsPoints, maxQuestionsPoints });
       setMaxProposalsPoints(maxProposalsPoints);
-      setMaxQestionsPoints(maxQuestionsPoints);
+      setMaxQuestionsPoints(maxQuestionsPoints);
 
       setStudents(semesterDoc.data().students.length);
       setMaxStackedBarAxisY(semesterDoc.data().students.length);
@@ -637,7 +650,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
                 <span>{`>10%`}</span>
                 <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
                 <span>{`>50%`}</span>
-                <SquareIcon fontSize="inherit" sx={{ fill: "#FF8A33" }} />
+                <SquareIcon fontSize="inherit" sx={{ fill: "rgba(255, 196, 153, 0.75)" }} />
                 <span>{`<=10%`}</span>
               </Box>
             </Box>
@@ -647,7 +660,32 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
           </Box>
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>
-          <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "15px 1fr 15px 1fr",
+                alignItems: "center",
+                columnGap: "2px",
+                fontSize: "12px",
+                marginRight: "16px",
+              }}
+            >
+              <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
+              <span>{`> 100%`}</span>
+              <SquareIcon fontSize="inherit" sx={{ fill: "#F9E2D0" }} />
+              <span>{`> 10%`}</span>
+              <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
+              <span>{`> 50%`}</span>
+              <SquareIcon fontSize="inherit" sx={{ fill: "rgb(255, 196, 153)" }} />
+              <span>{`<= 10%`}</span>
+              <SquareIcon fontSize="inherit" sx={{ fill: "rgb(117, 117, 117)" }} />
+              <span>{`= 0%`}</span>
+              <SquareIcon fontSize="inherit" sx={{ fill: "rgb(239, 83, 80)" }} />
+              <span>{`<= 0%`}</span>
+            </Box>
+          </Box>
           <BubbleChart
             data={bubble}
             width={isMovil ? 220 : 500}
