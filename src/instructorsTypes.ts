@@ -1,4 +1,4 @@
-import { ICourseTag, IInstructor, ISemesterStudentStat, ISemesterStudentVoteStat } from "./types/ICourse";
+import { ICourseTag, IInstructor, ISemester, ISemesterStudentStat, ISemesterStudentVoteStat } from "./types/ICourse";
 
 export type Instructor = IInstructor;
 
@@ -10,3 +10,5 @@ export type SemesterStudentVoteStat = ISemesterStudentVoteStat & {
 };
 
 export type SemesterStudentStat = ISemesterStudentStat;
+
+export type Semester = ISemester;

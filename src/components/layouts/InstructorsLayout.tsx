@@ -1,4 +1,4 @@
-import { useMediaQuery, useTheme } from "@mui/material";
+import { Typography, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { NextPage } from "next";
@@ -40,6 +40,8 @@ type InstructorsLayoutPageProps = {
   selectedCourse: string | null;
   user: User;
   currentSemester: ICourseTag | null;
+  isLoading: boolean;
+  setIsLoading: (newIsLoading: boolean) => void;
 };
 
 type Props = {
@@ -60,6 +62,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
   // TODO: create useEffect to load semesters
 
   const db = getFirestore();
@@ -122,55 +126,63 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     const instructorsRef = collection(db, "instructors");
     const q = query(instructorsRef, where("uname", "==", user.uname));
 
-    const unsub = onSnapshot(q, async snapshot => {
-      const docChanges = snapshot.docChanges();
+    const unsub = onSnapshot(
+      q,
+      async snapshot => {
+        const docChanges = snapshot.docChanges();
 
-      // devLog("1:userNodes Snapshot:changes", docChanges);
-      if (!docChanges.length) {
-        // setIsSubmitting(false);
-        // setFirstLoading(false);
-        // setNoNodesFoundMessage(true);
-        console.log("no instructor");
-        return null;
-      }
+        setIsLoading(false);
+        // devLog("1:userNodes Snapshot:changes", docChanges);
+        if (!docChanges.length) {
+          // setIsSubmitting(false);
+          // setFirstLoading(false);
+          // setNoNodesFoundMessage(true);
+          console.log("no instructor");
+          return null;
+        }
 
-      // docChanges[0].doc.data()
-      // const intructor = userNodeDoc.docs[0].data() as Instructor;
-      const intructor = docChanges[0].doc.data() as Instructor;
-      console.log("snapshot:instructor:", intructor);
-      setInstructor(intructor);
-      const newAllCourses = getCoursesByInstructor(intructor);
-      console.log("snapshot:courses:", newAllCourses);
-      const newSemesters = Object.keys(newAllCourses);
-      console.log("snapshot:semester:", newSemesters);
+        // docChanges[0].doc.data()
+        // const intructor = userNodeDoc.docs[0].data() as Instructor;
+        const intructor = docChanges[0].doc.data() as Instructor;
+        console.log("snapshot:instructor:", intructor);
+        setInstructor(intructor);
+        const newAllCourses = getCoursesByInstructor(intructor);
+        console.log("snapshot:courses:", newAllCourses);
+        const newSemesters = Object.keys(newAllCourses);
+        console.log("snapshot:semester:", newSemesters);
 
-      if (!newSemesters.length) {
-        router.push(ROUTES.instructorsSettings);
-      }
+        if (!newSemesters.length) {
+          router.push(ROUTES.instructorsSettings);
+        }
 
-      const lastSemester = newSemesters.slice(-1)[0];
-      console.log("snapshot:lastSemester", lastSemester);
+        const lastSemester = newSemesters.slice(-1)[0];
+        console.log("snapshot:lastSemester", lastSemester);
 
-      setSemesters(prevSemester => {
-        setSelectedSemester(selectedSemester => {
-          if (!selectedSemester) {
-            console.log("snapshot:setSelected first semester", newSemesters[0]);
-            // setSelectedSemester(newSemesters[0]);
-            return newSemesters[0];
-          }
-          if (!prevSemester.includes(lastSemester)) {
-            // only if a semester is added we need to auto select
-            console.log("snapshot:setSelected last semester", lastSemester);
-            // setSelectedSemester(lastSemester);
-            return lastSemester;
-          }
+        setSemesters(prevSemester => {
+          setSelectedSemester(selectedSemester => {
+            if (!selectedSemester) {
+              console.log("snapshot:setSelected first semester", newSemesters[0]);
+              // setSelectedSemester(newSemesters[0]);
+              return newSemesters[0];
+            }
+            if (!prevSemester.includes(lastSemester)) {
+              // only if a semester is added we need to auto select
+              console.log("snapshot:setSelected last semester", lastSemester);
+              // setSelectedSemester(lastSemester);
+              return lastSemester;
+            }
 
-          return selectedSemester;
+            return selectedSemester;
+          });
+          return newSemesters;
         });
-        return newSemesters;
-      });
-      setAllCourses(newAllCourses);
-    });
+        setAllCourses(newAllCourses);
+      },
+      error => {
+        console.error(error);
+        setIsLoading(false);
+      }
+    );
 
     return () => unsub();
     // const getInstructor = async () => {
@@ -219,9 +231,12 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
-  if (!user)
+  if (isLoading)
     return (
-      <div className="CenterredLoadingImageContainer">
+      <Box
+        className="CenterredLoadingImageContainer"
+        sx={{ background: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F5F5F5") }}
+      >
         <Image
           className="CenterredLoadingImage"
           loading="lazy"
@@ -230,8 +245,10 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
           width={250}
           height={250}
         />
-      </div>
+      </Box>
     );
+
+  if (!user) return <Typography>No user</Typography>;
 
   return (
     <Box
@@ -257,7 +274,14 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         />
       </Box>
 
-      {children({ selectedSemester, selectedCourse, user, currentSemester })}
+      {children({
+        selectedSemester,
+        selectedCourse,
+        user,
+        currentSemester,
+        isLoading,
+        setIsLoading: (newIsLoading: boolean) => setIsLoading(newIsLoading),
+      })}
     </Box>
   );
 };
