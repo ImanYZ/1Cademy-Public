@@ -73,7 +73,7 @@ export const TrendPlot = ({
       <Box sx={{ width, height: heightTop /* border: "solid 2px royalblue" */ }}>
         <VictoryChart
           // padding={{ top: 22, left: 36, right: 0, bottom: 70 }}
-          padding={{ top: 10, left: 40, right: 22, bottom: 40 }}
+          padding={{ top: 10, left: 40, right: 22, bottom: 50 }}
           width={width}
           height={heightTop}
           theme={VictoryTheme.material}
