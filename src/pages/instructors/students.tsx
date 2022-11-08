@@ -757,6 +757,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       </Popover>
                     </TableCell>
                   ))}
+                  {editMode && <TableCell>{""}</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
