@@ -11,9 +11,11 @@ import {
   useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
+import { useRouter } from "next/router";
 import React from "react";
 
 import { UserRole } from "../../knowledgeTypes";
+import ROUTES from "../../lib/utils/routes";
 
 type SemesterFilterProps = {
   semesters: string[];
@@ -39,6 +41,7 @@ export const SemesterFilter = ({
   console.log("selectedSemester", selectedSemester);
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));
+  const router = useRouter();
 
   const onChangeSemester = (event: SelectChangeEvent) => {
     setSelectedSemester(event.target.value as string);
@@ -50,6 +53,11 @@ export const SemesterFilter = ({
 
   const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
     setSelectedCourse(newAlignment);
+  };
+
+  const onNewCourse = () => {
+    setSelectedCourse(null);
+    router.push(ROUTES.instructorsSettings);
   };
 
   return (
@@ -111,7 +119,7 @@ export const SemesterFilter = ({
       </Box>
 
       {role === "INSTRUCTOR" && (
-        <Button onClick={() => setSelectedCourse(null)} variant={"contained"} size={matches ? "small" : "medium"}>
+        <Button onClick={() => onNewCourse()} variant={"contained"} size={matches ? "small" : "medium"}>
           New Course
         </Button>
       )}
