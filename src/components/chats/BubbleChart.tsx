@@ -8,8 +8,8 @@ import { BubbleStats } from "@/pages/instructors/dashboard";
 
 // const GREEN = "rgb(56, 142, 60)";
 // const GREEN_ALPHA = "rgba(129, 199, 132, 0.5)";
-// const RED = "rgb(239, 83, 80)";
-// const RED_ALPHA = "rgba(239, 83, 80, 0.5)";
+const RED = "rgb(239, 83, 80)";
+const RED_ALPHA = "rgba(239, 83, 80, 0.5)";
 const GRAY = "rgb(117, 117, 117)";
 const GRAY_ALPHA = "rgba(237, 237, 237, 0.5)";
 // const ORANGE = "rgb(255, 138, 51)";
@@ -121,7 +121,7 @@ function drawChart(
     .scaleThreshold()
     .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
     .range([
-      RED,
+      RED_ALPHA,
       LESS_EQUAL_THAN_10_COLOR_ALPHA,
       GREATER_THAN_10_COLOR_ALPHA,
       GREATER_THAN_50_COLOR_ALPHA,
