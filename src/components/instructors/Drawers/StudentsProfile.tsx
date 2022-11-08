@@ -21,26 +21,26 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
         <Box sx={{ display: "flex", ml: "33%", mb: "5%", mt: "10%", flexDirection: "row" }}>
           <Box>
             <OptimizedAvatar
-              name={openedProfile.username}
-              imageUrl={openedProfile.avatar}
+              name={openedProfile?.username}
+              imageUrl={openedProfile?.avatar}
               renderAsAvatar={true}
               contained={false}
               sx={{ mr: "15px" }}
             />
             <div
-              className={openedProfile.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+              className={openedProfile?.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
               style={{ fontSize: "1px", marginLeft: "35px" }}
             ></div>
           </Box>
           <LinkNext href={"#"}>
             <Link>
               {" "}
-              <>{openedProfile.firstName + openedProfile.lastName}</>
+              <>{openedProfile?.firstName + openedProfile?.lastName}</>
             </Link>
           </LinkNext>
         </Box>
 
-        <Box sx={{ mr: "30px" }}>{openedProfile.email}</Box>
+        <Box sx={{ mr: "30px" }}>{openedProfile?.email}</Box>
         <Button
           variant="contained"
           onClick={() => {

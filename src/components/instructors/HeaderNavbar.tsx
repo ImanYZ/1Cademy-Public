@@ -78,8 +78,14 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
           <Button
             onClick={() => router.push("/dashboard")}
-            color="secondary"
-            sx={{ wordBreak: "normal", width: "233px", p: "12px 24px 12px 37px" }}
+            // color="secondary"
+            sx={{
+              wordBreak: "normal",
+              width: "233px",
+              p: "12px 24px 12px 37px",
+              background: theme => theme.palette.common.darkGrayBackground,
+              color: theme => theme.palette.common.white,
+            }}
           >
             <ArrowForwardIosIcon fontSize="small" sx={{ mr: "20px" }} />
             GO TO NOTEBOOK
@@ -93,17 +99,19 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
             }}
           >
             <Tooltip title={user.role ?? ""}>
-              <Image
-                src={user.imageUrl ?? ""}
-                alt={"name"}
-                width="55px"
-                height="55px"
-                quality={40}
-                objectFit="cover"
-                style={{
-                  borderRadius: "50%",
-                }}
-              />
+              <Box>
+                <Image
+                  src={user.imageUrl ?? ""}
+                  alt={"name"}
+                  width="55px"
+                  height="55px"
+                  quality={40}
+                  objectFit="cover"
+                  style={{
+                    borderRadius: "50%",
+                  }}
+                />
+              </Box>
             </Tooltip>
           </Box>
         </Box>

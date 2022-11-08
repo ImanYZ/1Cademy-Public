@@ -17,10 +17,10 @@ import { UserRole } from "../../knowledgeTypes";
 
 type SemesterFilterProps = {
   semesters: string[];
-  selectedSemester: string | undefined;
+  selectedSemester: string | null;
   setSelectedSemester: any;
   courses: string[];
-  selectedCourse: string | undefined;
+  selectedCourse: string | null;
   setSelectedCourse: any;
   isMovil: boolean;
   role: UserRole;
@@ -36,6 +36,7 @@ export const SemesterFilter = ({
   isMovil,
   role,
 }: SemesterFilterProps) => {
+  console.log("selectedSemester", selectedSemester);
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -66,7 +67,7 @@ export const SemesterFilter = ({
           <Select
             labelId="semester-filter-label"
             id="semester-filter"
-            value={selectedSemester}
+            value={selectedSemester ?? ""}
             label="Semester"
             onChange={onChangeSemester}
             sx={{ width: "140px" }}
@@ -94,7 +95,7 @@ export const SemesterFilter = ({
             <Select
               labelId="course-filter-label"
               id="course-filter"
-              value={selectedCourse}
+              value={selectedCourse ?? ""}
               label="Course"
               onChange={onChangeCourse2}
               sx={{ width: "140px" }}
@@ -110,7 +111,7 @@ export const SemesterFilter = ({
       </Box>
 
       {role === "INSTRUCTOR" && (
-        <Button onClick={() => setSelectedCourse(undefined)} variant={"contained"} size={matches ? "small" : "medium"}>
+        <Button onClick={() => setSelectedCourse(null)} variant={"contained"} size={matches ? "small" : "medium"}>
           New Course
         </Button>
       )}
