@@ -36,10 +36,10 @@ const OPTIONS: Option[] = [
 ];
 
 type InstructorsLayoutPageProps = {
-  selectedSemester: string | undefined;
-  selectedCourse: string | undefined;
+  selectedSemester: string | null;
+  selectedCourse: string | null;
   user: User;
-  currentSemester: ICourseTag | undefined;
+  currentSemester: ICourseTag | null;
 };
 
 type Props = {
@@ -56,10 +56,10 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
-  const [selectedSemester, setSelectedSemester] = useState<string | undefined>(undefined);
+  const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string | undefined>(undefined);
-  const [currentSemester, setCurrentSemester] = useState<ICourseTag | undefined>(undefined);
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
   // TODO: create useEffect to load semesters
 
   const db = getFirestore();
@@ -112,7 +112,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     };
 
     getInstructor();
-  }, [db, user]);
+  }, [db, router, user]);
 
   useEffect(() => {
     if (!selectedSemester) return setCourses([]);
@@ -129,7 +129,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     // console.log("selectedCourseee", selectedCourse);
     const current = selectCourse(selectedCourse, instructor);
 
-    setCurrentSemester(current);
+    setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
   // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
