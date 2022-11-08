@@ -22,11 +22,11 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
         <LightTooltip title="1Cademy's Landing Page">
           <Box
             color="inherit"
-            onClick={() => open("https://1cademy.us/home#LandingSection", "_blank")}
+            // onClick={() => open("https://1cademy.us/home#LandingSection", "_blank")}
             sx={{
               fontSize: 24,
               margin: "4px 0px 0px 0px",
-              cursor: "pointer",
+              // cursor: "pointer",
               mr: { xs: "20px", md: "0px" },
             }}
           >
@@ -85,6 +85,7 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
               p: "12px 24px 12px 37px",
               background: theme => theme.palette.common.darkGrayBackground,
               color: theme => theme.palette.common.white,
+              borderColor: theme => theme.palette.common.white,
             }}
           >
             <ArrowForwardIosIcon fontSize="small" sx={{ mr: "20px" }} />

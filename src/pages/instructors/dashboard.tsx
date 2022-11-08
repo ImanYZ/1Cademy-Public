@@ -544,10 +544,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
               <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>
                 {currentSemester?.cTitle.split(" ")[0]}{" "}
               </Typography>
-              <span>{currentSemester?.title}</span>
-              <span> {students !== 0 ? `Students: ${students}` : ""}</span>
+              <Typography>{currentSemester?.title}</Typography>
+              <Typography> {students !== 0 ? `Students: ${students}` : ""}</Typography>
             </Box>
-            <span>{currentSemester?.pTitle}</span>
+            <Typography>{currentSemester?.pTitle}</Typography>
             <Divider />
             <Box
               sx={{
@@ -560,7 +560,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
                 columnGap: "16px",
               }}
             >
-              <span style={{ color: "#303134" }}>Spaceeesssssssssss</span>
+              <Typography style={{ color: "#303134" }}></Typography>
               <span>Numbers</span>
             </Box>
             <Box
@@ -780,7 +780,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             labelX={"Day"}
             scaleY={"linear"}
             labelY={"# of edit Proposals"}
-            theme={"Dark"}
+            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
             x="date"
             y="num"
             trendData={editProposalsTrend}
@@ -807,7 +807,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             labelX={"Day"}
             scaleY={"linear"}
             labelY={"# of Links"}
-            theme={"Dark"}
+            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
             x="date"
             y="num"
             trendData={linksTrend}
@@ -834,7 +834,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             labelX={"Day"}
             scaleY={"linear"}
             labelY={"# of Nodes"}
-            theme={"Dark"}
+            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
             x="date"
             y="num"
             trendData={nodesTrends}
@@ -861,7 +861,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             labelX={"Day"}
             scaleY={"linear"}
             labelY={"# of Votes"}
-            theme={"Dark"}
+            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
             x="date"
             y="num"
             trendData={votesTrends}
@@ -888,7 +888,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             labelX={"Day"}
             scaleY={"linear"}
             labelY={"# of Questions"}
-            theme={"Dark"}
+            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
             x="date"
             y="num"
             trendData={questionsTrend}

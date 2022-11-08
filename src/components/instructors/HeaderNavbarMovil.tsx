@@ -1,5 +1,5 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { AppBar, Box, Button, IconButton, Link, Toolbar } from "@mui/material";
+import { AppBar, Box, Button, IconButton, Link, Toolbar, Tooltip } from "@mui/material";
 import Image from "next/image";
 import LinkNext from "next/link";
 import { useRouter } from "next/router";
@@ -20,17 +20,21 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
         <Toolbar sx={{ height: "75px", justifyContent: "space-between" }}>
           <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start", gap: "24px" }}>
             <IconButton onClick={() => setShowMenu(showMenu => !showMenu)}>
-              <MenuIcon />
+              <MenuIcon
+                sx={{
+                  color: theme => theme.palette.common.white,
+                }}
+              />
             </IconButton>
           </Box>
 
           <Box
             color="inherit"
-            onClick={() => open("https://1cademy.us/home#LandingSection", "_blank")}
+            // onClick={() => open("https://1cademy.us/home#LandingSection", "_blank")}
             sx={{
               fontSize: 24,
               margin: "4px 0px 0px 0px",
-              cursor: "pointer",
+              // cursor: "pointer",
               mr: { xs: "20px", md: "0px" },
             }}
           >
@@ -46,17 +50,21 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                 color: theme => theme.palette.common.gray,
               }}
             >
-              <Image
-                src={"/lightModeLibraryBackground.jpg"}
-                alt={"name"}
-                width="55px"
-                height="55px"
-                quality={40}
-                objectFit="cover"
-                style={{
-                  borderRadius: "50%",
-                }}
-              />
+              <Tooltip title={user.role ?? ""}>
+                <Box>
+                  <Image
+                    src={user.imageUrl ?? ""}
+                    alt={"name"}
+                    width="55px"
+                    height="55px"
+                    quality={40}
+                    objectFit="cover"
+                    style={{
+                      borderRadius: "50%",
+                    }}
+                  />
+                </Box>
+              </Tooltip>
             </Box>
           </Box>
         </Toolbar>
@@ -108,8 +116,16 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
               ))}
             <Button
               variant="outlined"
-              color="secondary"
-              sx={{ wordBreak: "normal", width: "233px", p: "16px 24px", fontSize: "15px" }}
+              // color="secondary"
+              sx={{
+                wordBreak: "normal",
+                width: "233px",
+                p: "16px 24px",
+                fontSize: "15px",
+                background: theme => theme.palette.common.darkGrayBackground,
+                color: theme => theme.palette.common.white,
+                borderColor: theme => theme.palette.common.white,
+              }}
               onClick={() => router.push("/dashboard")}
             >
               GO TO NOTEBOOK
