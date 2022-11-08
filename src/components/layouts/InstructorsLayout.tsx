@@ -26,17 +26,20 @@ export type Option = {
   route: string;
 };
 
+const SETTING_OPTION: Option = { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" };
+
 const OPTIONS: Option[] = [
   { id: "02", label: "DASHBOARD", title: "DASHBOARD", route: "/instructors/dashboard" },
   { id: "03", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
-  { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
+  // { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
+  SETTING_OPTION,
 ];
 
 type InstructorsLayoutPageProps = {
-  selectedSemester: string | undefined;
-  selectedCourse: string | undefined;
+  selectedSemester: string | null;
+  selectedCourse: string | null;
   user: User;
-  currentSemester: ICourseTag | undefined;
+  currentSemester: ICourseTag | null;
 };
 
 type Props = {
@@ -53,10 +56,10 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
-  const [selectedSemester, setSelectedSemester] = useState<string | undefined>(undefined);
+  const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string | undefined>(undefined);
-  const [currentSemester, setCurrentSemester] = useState<ICourseTag | undefined>(undefined);
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
   // TODO: create useEffect to load semesters
 
   const db = getFirestore();
@@ -98,13 +101,18 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       setInstructor(intructor);
       const courses = getCoursesByInstructor(intructor);
       const semester = Object.keys(courses);
+
+      if (!semester.length) {
+        router.push(ROUTES.instructorsSettings);
+      }
+
       setSemesters(semester);
       setAllCourses(courses);
       setSelectedSemester(semester[0]);
     };
 
     getInstructor();
-  }, [db, user]);
+  }, [db, router, user]);
 
   useEffect(() => {
     if (!selectedSemester) return setCourses([]);
@@ -121,11 +129,13 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     // console.log("selectedCourseee", selectedCourse);
     const current = selectCourse(selectedCourse, instructor);
 
-    setCurrentSemester(current);
+    setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
   // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
   //   useSemesterFilter();
+
+  const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
   if (!user)
     return (
@@ -149,8 +159,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={OPTIONS} user={user} />}
-      {isMovil && <HeaderNavbarMovil options={OPTIONS} user={user} />}
+      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
+      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
       {/* <HeaderNavbar /> */}
       <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
         <SemesterFilter
