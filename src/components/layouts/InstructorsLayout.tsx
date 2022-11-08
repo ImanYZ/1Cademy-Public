@@ -40,6 +40,8 @@ type InstructorsLayoutPageProps = {
   selectedCourse: string | null;
   user: User;
   currentSemester: ICourseTag | null;
+  allCourses?: string[];
+  setAllCourses?: any;
 };
 
 type Props = {
@@ -105,7 +107,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       if (!semester.length) {
         router.push(ROUTES.instructorsSettings);
       }
-
+      console.log(courses, "courses");
       setSemesters(semester);
       setAllCourses(courses);
       setSelectedSemester(semester[0]);
@@ -175,7 +177,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         />
       </Box>
 
-      {children({ selectedSemester, selectedCourse, user, currentSemester })}
+      {children({ selectedSemester, selectedCourse, user, currentSemester, allCourses, setAllCourses })}
     </Box>
   );
 };

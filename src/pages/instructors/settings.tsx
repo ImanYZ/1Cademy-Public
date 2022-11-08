@@ -1,8 +1,10 @@
-import { Grid } from "@mui/material";
+import { Button, Grid, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import { useFormik } from "formik";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import * as yup from "yup";
 
 import { Post } from "@/lib/mapApi";
 
@@ -10,8 +12,22 @@ import Chapter from "../../components/instructors/setting/Chapter";
 import Proposal from "../../components/instructors/setting/Proposal";
 import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
-const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
-  console.log(currentSemester, "currentSemester");
+
+const validationSchema = yup.object({
+  courseCode: yup.string().required("Course code is required"),
+  semesterName: yup.string().required("Semester name is required"),
+  programName: yup.string().required("Program name is required"),
+  departmentName: yup.string().required("Department name is required"),
+  universityTitle: yup.string().required("University title is required"),
+});
+
+const CourseSetting: InstructorLayoutPage = ({
+  selectedSemester,
+  selectedCourse,
+  currentSemester,
+  allCourses,
+  setAllCourses,
+}) => {
   const db = getFirestore();
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
@@ -37,6 +53,26 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       onReceiveVote: 0,
       onReceiveDownVote: 0,
       onReceiveStar: 0,
+    },
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      courseCode: "",
+      semesterName: "",
+      programName: "",
+      departmentName: "",
+      universityTitle: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: values => {
+      console.log(values, "values");
+      console.log(selectedSemester, "selectedSemester");
+      console.log(allCourses, "allCourses");
+      console.log(values, "values");
+      allCourses[String(selectedSemester)] = [...allCourses[String(selectedSemester)], values.courseCode];
+
+      setAllCourses(Object.assign({}, allCourses));
     },
   });
 
@@ -140,6 +176,79 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
     console.log(response, "response");
   };
+
+  if (!selectedCourse) {
+    return (
+      <Box sx={{ marginTop: "50px" }}>
+        <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Grid item xs={12} md={4}>
+            <form
+              onSubmit={formik.handleSubmit}
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "25px" }}
+            >
+              <TextField
+                fullWidth
+                id="courseCode"
+                name="courseCode"
+                label="Course Code"
+                value={formik.values.courseCode}
+                onChange={formik.handleChange}
+                error={formik.touched.courseCode && Boolean(formik.errors.courseCode)}
+                helperText={formik.touched.courseCode && formik.errors.courseCode}
+              />
+
+              <TextField
+                fullWidth
+                id="semesterName"
+                name="semesterName"
+                label="Semester Name"
+                value={formik.values.semesterName}
+                onChange={formik.handleChange}
+                error={formik.touched.semesterName && Boolean(formik.errors.semesterName)}
+                helperText={formik.touched.semesterName && formik.errors.semesterName}
+              />
+
+              <TextField
+                fullWidth
+                id="programName"
+                name="programName"
+                label="Program Name"
+                value={formik.values.programName}
+                onChange={formik.handleChange}
+                error={formik.touched.programName && Boolean(formik.errors.programName)}
+                helperText={formik.touched.programName && formik.errors.programName}
+              />
+
+              <TextField
+                fullWidth
+                id="departmentName"
+                name="departmentName"
+                label="Department Name"
+                value={formik.values.departmentName}
+                onChange={formik.handleChange}
+                error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
+                helperText={formik.touched.departmentName && formik.errors.departmentName}
+              />
+
+              <TextField
+                fullWidth
+                id="universityTitle"
+                name="universityTitle"
+                label="University Title"
+                value={formik.values.universityTitle}
+                onChange={formik.handleChange}
+                error={formik.touched.universityTitle && Boolean(formik.errors.universityTitle)}
+                helperText={formik.touched.universityTitle && formik.errors.universityTitle}
+              />
+              <Button color="primary" variant="contained" fullWidth type="submit">
+                Submit
+              </Button>
+            </form>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ padding: "20px" }}>
