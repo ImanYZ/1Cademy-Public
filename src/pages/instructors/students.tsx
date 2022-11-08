@@ -205,7 +205,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     return () => {
       semestersSnapshot();
     };
-  }, [db, states, currentSemester]);
+  }, [db, states, currentSemester, usersStatus]);
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
@@ -326,6 +326,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       });
     }
     const payloadAPI = { students };
+    setEditMode(!editMode);
     if (!currentSemester) return;
     const mapUrl = "/instructor/students/" + currentSemester.tagId + "/signup";
     try {
@@ -333,7 +334,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     } catch (error) {
       console.log(error);
     }
-    setEditMode(!editMode);
     return;
   };
 
