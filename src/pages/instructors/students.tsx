@@ -24,8 +24,8 @@ import {
   collection,
   /*   doc,
   DocumentData,
-  getDoc,
-  getDocs, */
+  getDoc,*/
+  getDocs,
   getFirestore,
   /*   limit, */
   onSnapshot,
@@ -34,8 +34,9 @@ import {
   setDoc,
   Timestamp,
   updateDoc,
+   */
   where,
-  writeBatch, */
+  /*   writeBatch, */
 } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
@@ -45,389 +46,6 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 import CSVBtn from "../../components/instructors/CSVBtn";
 import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
-
-const rows: any = [
-  {
-    id: 0,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
-    online: true,
-    firstName: "Derrick ",
-    lastName: "Schultz",
-    email: "ouhrac@gmail.com",
-    totalPoints: 74,
-    corrects: 40,
-    wrongs: 51,
-    awards: 86,
-    newPorposals: 31,
-    editNodeProposals: 67,
-    proposalsPoints: 77,
-    questions: 10,
-    questionPoints: 63,
-    vote: 17,
-    votePoints: 86,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 1,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FDjVODLkqLFh1Q0cOQb2ZTeY61Ax1%2FFri%2C%2028%20May%202021%2023%3A12%3A42%20GMT.jpg?alt=media&token=28743d60-3af4-4ebc-8ea3-c017dd089759",
-    firstName: "Edna ",
-    lastName: " Roberts",
-    email: "samirbes@umich.edu",
-    totalPoints: 50,
-    corrects: 68,
-    wrongs: 67,
-    awards: 79,
-    newPorposals: 71,
-    editNodeProposals: 38,
-    proposalsPoints: 87,
-    questions: 12,
-    questionPoints: 81,
-    vote: 39,
-    votePoints: 83,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 2,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    firstName: "Belle ",
-    lastName: " Douglas",
-    email: "samirbes@umich.edu",
-    totalPoints: 60,
-    corrects: 80,
-    wrongs: 7,
-    awards: 97,
-    newPorposals: 49,
-    editNodeProposals: 24,
-    proposalsPoints: 97,
-    questions: 17,
-    questionPoints: 95,
-    vote: 99,
-    votePoints: 93,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 3,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    online: true,
-    firstName: "Jay",
-    lastName: "Tyler",
-    email: "samirbes@umich.edu",
-    totalPoints: 92,
-    corrects: 95,
-    wrongs: 77,
-    awards: 3,
-    newPorposals: 6,
-    editNodeProposals: 58,
-    proposalsPoints: 80,
-    questions: 72,
-    questionPoints: 24,
-    vote: 96,
-    votePoints: 41,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 4,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    online: true,
-    firstName: "Darrell",
-    lastName: "Harrington",
-    email: "samirbes@umich.edu",
-    totalPoints: 43,
-    corrects: 61,
-    wrongs: 76,
-    awards: 62,
-    newPorposals: 88,
-    editNodeProposals: 88,
-    proposalsPoints: 46,
-    questions: 35,
-    questionPoints: 49,
-    vote: 25,
-    votePoints: 59,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 5,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
-    online: true,
-    firstName: "Johanna",
-    lastName: "Bailey",
-    email: "samirbes@umich.edu",
-    totalPoints: 46,
-    corrects: 27,
-    wrongs: 95,
-    awards: 23,
-    newPorposals: 77,
-    editNodeProposals: 78,
-    proposalsPoints: 81,
-    questions: 63,
-    questionPoints: 36,
-    vote: 74,
-    votePoints: 14,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 6,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F4C8KJnOpiiV8sAADc9NU4r2yX4H2%2FWed%2C%2009%20Jun%202021%2001%3A36%3A30%20GMT.png?alt=media&token=0b613e16-aead-4995-84a0-d60088c9b2d5",
-    online: true,
-    firstName: "Effie",
-    lastName: "Vega",
-    email: "samirbes@umich.edu",
-    totalPoints: 5,
-    corrects: 54,
-    wrongs: 13,
-    awards: 32,
-    newPorposals: 62,
-    editNodeProposals: 76,
-    proposalsPoints: 24,
-    questions: 83,
-    questionPoints: 93,
-    vote: 26,
-    votePoints: 84,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 7,
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-    firstName: "Lida",
-    lastName: "Jordan",
-    email: "samirbes@umich.edu",
-    totalPoints: 90,
-    corrects: 94,
-    wrongs: 55,
-    awards: 15,
-    newPorposals: 23,
-    editNodeProposals: 54,
-    proposalsPoints: 2,
-    questions: 60,
-    questionPoints: 31,
-    vote: 29,
-    votePoints: 95,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 8,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
-    firstName: "Genevieve",
-    lastName: "Todd",
-    email: "samirbes@umich.edu",
-    totalPoints: 11,
-    corrects: 98,
-    wrongs: 30,
-    awards: 45,
-    newPorposals: 72,
-    editNodeProposals: 21,
-    proposalsPoints: 84,
-    questions: 36,
-    questionPoints: 4,
-    vote: 9,
-    votePoints: 56,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 9,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
-    firstName: "Wayne",
-    lastName: "Edwards",
-    email: "samirbes@umich.edu",
-    totalPoints: 17,
-    corrects: 3,
-    wrongs: 24,
-    awards: 89,
-    newPorposals: 58,
-    editNodeProposals: 53,
-    proposalsPoints: 90,
-    questions: 24,
-    questionPoints: 50,
-    vote: 97,
-    votePoints: 74,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 10,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
-
-    firstName: "Isaac",
-    lastName: "Thompson",
-    email: "samirbes@umich.edu",
-    totalPoints: 40,
-    corrects: 69,
-    wrongs: 16,
-    awards: 28,
-    newPorposals: 15,
-    editNodeProposals: 95,
-    proposalsPoints: 78,
-    questions: 90,
-    questionPoints: 72,
-    vote: 38,
-    votePoints: 80,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 11,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F7ETTaIqUqNa8DnUJbqPr40EaELm1%2FMon%2C%2024%20May%202021%2018%3A53%3A14%20GMT.JPG?alt=media&token=fd53fbbc-f948-4437-9354-35d7ca1f0114",
-
-    firstName: "Rosetta",
-    lastName: "Lucas",
-    email: "samirbes@umich.edu",
-    totalPoints: 5,
-    corrects: 32,
-    wrongs: 46,
-    awards: 5,
-    newPorposals: 7,
-    editNodeProposals: 26,
-    proposalsPoints: 4,
-    questions: 86,
-    questionPoints: 56,
-    vote: 60,
-    votePoints: 19,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 12,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
-    firstName: "Harold ",
-    lastName: "Robbins",
-    email: "samirbes@umich.edu",
-    totalPoints: 94,
-    corrects: 41,
-    wrongs: 32,
-    awards: 66,
-    newPorposals: 41,
-    editNodeProposals: 99,
-    proposalsPoints: 1,
-    questions: 92,
-    questionPoints: 95,
-    vote: 22,
-    votePoints: 5,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 13,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
-
-    firstName: "Alan",
-    lastName: "Medina",
-    email: "samirbes@umich.edu",
-    totalPoints: 74,
-    corrects: 81,
-    wrongs: 11,
-    awards: 27,
-    newPorposals: 98,
-    editNodeProposals: 22,
-    proposalsPoints: 71,
-    questions: 5,
-    questionPoints: 69,
-    vote: 81,
-    votePoints: 66,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 14,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F6SqMFFrfljRfTovuY4NsBEhh23G2%2FThu%2C%2021%20Jan%202021%2023%3A12%3A24%20GMT.png?alt=media&token=6c1c1afe-ab14-4c02-b42c-be6206987866",
-
-    firstName: "Ray",
-    lastName: "Phelps",
-    email: "samirbes@umich.edu",
-    totalPoints: 77,
-    corrects: 61,
-    wrongs: 61,
-    awards: 3,
-    newPorposals: 87,
-    editNodeProposals: 86,
-    proposalsPoints: 10,
-    questions: 4,
-    questionPoints: 7,
-    vote: 57,
-    votePoints: 87,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 15,
-
-    username: "username",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
-    firstName: "Lilly",
-    lastName: "McKinney",
-    email: "samirbes@umich.edu",
-    totalPoints: 80,
-    corrects: 77,
-    wrongs: 57,
-    awards: 56,
-    newPorposals: 2,
-    editNodeProposals: 51,
-    proposalsPoints: 70,
-    questions: 25,
-    questionPoints: 6,
-    vote: 65,
-    votePoints: 71,
-    lastActivity: "02/22/22",
-  },
-  {
-    id: 16,
-
-    username: "Harry Potter",
-    avatar:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F06OY9XEv4nNKuxa7npr9ZGNrfnO2%2FSat%2C%2015%20Aug%202020%2019%3A53%3A08%20GMT.jpg?alt=media&token=12e62b7f-3889-48f7-b6ab-60f9f27e94f8",
-
-    firstName: "Bertie",
-    lastName: "Collins",
-    email: "samirbes@umich.edu",
-    totalPoints: 42,
-    corrects: 94,
-    wrongs: 99,
-    awards: 55,
-    newPorposals: 47,
-    editNodeProposals: 67,
-    proposalsPoints: 99,
-    questions: 89,
-    questionPoints: 24,
-    vote: 26,
-    votePoints: 45,
-    lastActivity: "02/22/22",
-  },
-];
 
 const filterChoices: any = {
   "Total Poitns": "totalPoints",
@@ -497,8 +115,8 @@ const keysColumns: any = {
   "Last Activity": "lastActivity",
 };
 
-export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse }) => {
-  const [tableRows, setTableRows] = useState(rows.slice());
+export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
+  const [tableRows, setTableRows] = useState([]);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [filters, setFilters] = useState<
@@ -513,8 +131,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [openProfile, setOpenProfile] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [openedProfile, setOpenedProfile] = useState(rows.slice()[0]);
+  const [openedProfile, setOpenedProfile] = useState(tableRows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
+  const [states, setStates] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const db = getFirestore();
@@ -524,34 +143,82 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   useEffect(() => {
     if (isMovil) setEditMode(false);
   }, [isMovil]);
+  useEffect(() => {
+    if (!db) return;
+    if (!currentSemester) return;
+    const getStats = async () => {
+      const semestersStatsRef = collection(db, "semesterStudentVoteStats");
+      const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
+      const semestersStatsDoc = await getDocs(qe);
+      let statsData: any = [];
+      if (semestersStatsDoc.docs.length > 0) {
+        for (let doc of semestersStatsDoc.docs) {
+          const data = doc.data();
+          statsData.push(data);
+        }
+      }
+      setStates(statsData);
+    };
+    getStats();
+  }, [db, currentSemester]);
 
   useEffect(() => {
     if (!db) return;
-
+    if (!currentSemester) return;
+    if (states.length === 0) return;
+    console.log(":::::: :: ::: states :::: ", states);
     const semestersRef = collection(db, "semesters");
-    const q = query(semestersRef);
+    const q = query(semestersRef, where("tagId", "==", currentSemester.tagId));
     const semestersSnapshot = onSnapshot(q, async snapshot => {
       // console.log("on snapshot");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
       for (let change of docChanges) {
         if (change.type === "added" || change.type === "modified") {
-          // setTableRows(change.doc.data().students.splice());
-          console.log(":::: :::: ::: :data from Database ::: ::::: ", change.doc.data().students.splice());
+          const _students = change.doc.data().students;
+          const _rows: any = [];
+          for (let student of _students) {
+            const stats: any = states.filter((elm: any) => elm.uname === student.uname)[0];
+            console.log(stats);
+            _rows.push({
+              id: student.uname,
+              username: student.uname,
+              avatar: student.imageUrl,
+              online: true,
+              firstName: student.fName,
+              lastName: student.lName,
+              email: student.email,
+              totalPoints: stats.totalPoints || 0,
+              corrects: stats.corrects || 0,
+              wrongs: stats.wrongs || 0,
+              awards: stats.awards || 0,
+              newPorposals: stats.newPorposals || 0,
+              editNodeProposals: stats.editNodeProposals || 0,
+              proposalsPoints: stats.proposalsPoints || 0,
+              questions: stats.questions || 0,
+              questionPoints: stats.questionPoints || 0,
+              vote: stats.vote || 0,
+              votePoints: stats.votePoints || 0,
+              lastActivity: new Date(
+                stats.lastActivity.seconds * 1000 + stats.lastActivity.nanoseconds / 1000000
+              ).toLocaleDateString(),
+            });
+          }
+          setTableRows(_rows.slice());
         }
       }
     });
     return () => {
       semestersSnapshot();
     };
-  }, [db]);
+  }, [db, states, currentSemester]);
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
 
   //this to filter the results
   const handleFilterBy = (filters: any, fromDash: boolean) => {
-    let _tableRows = rows.slice();
+    let _tableRows = tableRows.slice();
     for (let filter of filters) {
       if (filter.operation === "<") {
         _tableRows = _tableRows.filter((row: any) => row[filterChoices[filter.title]] <= filter.value);
@@ -648,7 +315,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const saveTableChanges = () => {
-    const _tableRow = tableRows.slice();
+    const _tableRow: any = tableRows.slice();
     let students = [];
 
     for (let row of _tableRow) {
@@ -769,7 +436,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   const handleNewSearh = (event: any) => {
     setSearchValue(event.target.value);
-    if (!event.target.value) return setTableRows(rows.slice());
+    if (!event.target.value) return setTableRows(tableRows.slice());
     searchByNameEmail(event.target.value.toLowerCase());
   };
 
@@ -796,7 +463,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const addNewData = (dataFromCSV: any) => {
-    const _tableRow = tableRows.slice();
+    const _tableRow: any = tableRows.slice();
     const CSVData = dataFromCSV;
     const email = CSVData.columns.find((elm: any) => elm?.includes("Email"));
     const fName = CSVData.columns.find((elm: any) => elm?.includes("First Name"));
@@ -813,7 +480,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }
     setTableRows(_tableRow);
   };
-
+  //TO-DO
+  // if (!currentSemester) return <Typography>You don't have semester</Typography>;
+  // if (!tableRows.length) return <Typography>you don't a user </Typography>;
   return (
     <>
       {/* Drawers */}
@@ -848,7 +517,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           px: "20px",
         }}
       >
-        <Box>
+        <Box sx={{}}>
           <Box
             sx={{
               display: "flex",
