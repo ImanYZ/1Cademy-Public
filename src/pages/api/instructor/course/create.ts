@@ -1,5 +1,5 @@
 import { commitBatch, db } from "@/lib/firestoreServer/admin";
-import { Timestamp } from "firebase-admin/firestore";
+import { DocumentReference, Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { ICourse, IInstructor, ISemester } from "src/types/ICourse";
@@ -13,6 +13,42 @@ export type InstructorCourseCreatePayload = {
   departmentName: string;
   universityName: string;
 };
+
+async function createNodeVersion(nodeRef: DocumentReference, node: INode, instructor: IUser) {
+  return {
+    versionRef: db.collection("relationVersions").doc(),
+    versionData: {
+      content: node.content,
+      title: node.title,
+      fullname: `${instructor.fName} ${instructor.lName}`,
+      children: node.children,
+      addedInstitContris: false,
+      accepted: true,
+      imageUrl: instructor.imageUrl,
+      updatedAt: new Date(),
+      chooseUname: instructor.chooseUname,
+      node: nodeRef.id,
+      parents: node.parents,
+      addedParents: false,
+      deleted: false,
+      corrects: 1,
+      proposer: instructor.uname,
+      viewers: 1,
+      proposal: "",
+      removedParents: false,
+      awards: 0,
+      summary: "",
+      nodeImage: "",
+      referenceIds: node.referenceIds,
+      references: node.references,
+      referenceLabels: node.referenceLabels,
+      wrongs: 0,
+      createdAt: new Date(),
+      tags: node.tags,
+      tagIds: node.tagIds,
+    },
+  };
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   let batch = db.batch();
@@ -118,6 +154,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       maxVersionRating: 0,
     };
     batch.set(_universityNode, university);
+
+    const userNodeRef = db.collection("userNodes").doc();
+    batch.set(userNodeRef, {
+      visible: true,
+      open: false,
+      bookmarked: false,
+      changed: false,
+      correct: false,
+      createdAt: new Date(),
+      deleted: false,
+      isStudied: false,
+      node: _universityNode.id,
+      updatedAt: new Date(),
+      user: instructorId,
+      wrong: false,
+    });
+
+    const { versionRef, versionData } = await createNodeVersion(_universityNode, university, userData);
+    batch.set(versionRef, versionData);
   }
 
   // 3. Create Department Node
@@ -187,6 +242,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       maxVersionRating: 0,
     };
     batch.set(_departmentNode, department);
+
+    const userNodeRef = db.collection("userNodes").doc();
+    batch.set(userNodeRef, {
+      visible: true,
+      open: false,
+      bookmarked: false,
+      changed: false,
+      correct: false,
+      createdAt: new Date(),
+      deleted: false,
+      isStudied: false,
+      node: _departmentNode.id,
+      updatedAt: new Date(),
+      user: instructorId,
+      wrong: false,
+    });
+
+    const { versionRef, versionData } = await createNodeVersion(_departmentNode, department, userData);
+    batch.set(versionRef, versionData);
   }
 
   // 4. Create Program Node
@@ -256,6 +330,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       maxVersionRating: 0,
     };
     batch.set(_programNode, program);
+
+    const userNodeRef = db.collection("userNodes").doc();
+    batch.set(userNodeRef, {
+      visible: true,
+      open: false,
+      bookmarked: false,
+      changed: false,
+      correct: false,
+      createdAt: new Date(),
+      deleted: false,
+      isStudied: false,
+      node: _programNode.id,
+      updatedAt: new Date(),
+      user: instructorId,
+      wrong: false,
+    });
+
+    const { versionRef, versionData } = await createNodeVersion(_programNode, program, userData);
+    batch.set(versionRef, versionData);
   }
 
   // 5. Create Course Node
@@ -325,6 +418,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       maxVersionRating: 0,
     };
     batch.set(_courseNode, course);
+
+    const userNodeRef = db.collection("userNodes").doc();
+    batch.set(userNodeRef, {
+      visible: true,
+      open: false,
+      bookmarked: false,
+      changed: false,
+      correct: false,
+      createdAt: new Date(),
+      deleted: false,
+      isStudied: false,
+      node: _courseNode.id,
+      updatedAt: new Date(),
+      user: instructorId,
+      wrong: false,
+    });
+
+    const { versionRef, versionData } = await createNodeVersion(_courseNode, course, userData);
+    batch.set(versionRef, versionData);
   }
 
   // 6. Create Semester Node
@@ -394,6 +506,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       maxVersionRating: 0,
     };
     batch.set(_semesterNode, semester);
+
+    const userNodeRef = db.collection("userNodes").doc();
+    batch.set(userNodeRef, {
+      visible: true,
+      open: false,
+      bookmarked: false,
+      changed: false,
+      correct: false,
+      createdAt: new Date(),
+      deleted: false,
+      isStudied: false,
+      node: _semesterNode.id,
+      updatedAt: new Date(),
+      user: instructorId,
+      wrong: false,
+    });
+
+    const { versionRef, versionData } = await createNodeVersion(_semesterNode, semester, userData);
+    batch.set(versionRef, versionData);
   }
 
   await commitBatch(batch);
