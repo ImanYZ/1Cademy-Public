@@ -7,7 +7,7 @@ import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
-import { ISemester, ISemesterStudentStatDay } from "src/types/ICourse";
+import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -117,14 +117,28 @@ export type StackedBarStats = {
   bgreaterTen: number;
   cgreaterFifty: number;
   dgreaterHundred: number;
+  students?: ISemesterStudent;
 };
-// export type StudentStackedBarStats = {
-//   index: number;
-//   alessEqualTen: ISt;
-//   bgreaterTen: number;
-//   cgreaterFifty: number;
-//   dgreaterHundred: number;
-// };
+export type StudentStackedBarStats = {
+  index: number;
+  alessEqualTen: string[];
+  bgreaterTen: string[];
+  cgreaterFifty: string[];
+  dgreaterHundred: string[];
+};
+export type StudentStackedBarStatsObject = {
+  index: number;
+  alessEqualTen: ISemesterStudent[];
+  bgreaterTen: ISemesterStudent[];
+  cgreaterFifty: ISemesterStudent[];
+  dgreaterHundred: ISemesterStudent[];
+};
+export type StackedBarStatsData = {
+  stackedBarStats: StackedBarStats[];
+  studentStackedBarProposalsStats: StudentStackedBarStats;
+  studentStackedBarQuestionsStats: StudentStackedBarStats;
+};
+
 export type BubbleStats = {
   students: number;
   votes: number;
@@ -183,7 +197,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
-  const [students, setStudents] = useState<number>(0);
+  const [studentsCounter, setStudentsCounter] = useState<number>(0);
+  const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
   //
 
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
@@ -193,7 +208,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
-
+  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStats | null>(null);
+  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStats | null>(null);
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [maxBubbleAxisX, setMaxBubbleAxisX] = useState<number>(0);
@@ -252,8 +268,22 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
   };
 
   const getStackedBarStat = useCallback(
-    (data: SemesterStudentVoteStat[]): StackedBarStats[] => {
+    (data: SemesterStudentVoteStat[]): StackedBarStatsData => {
       const stackedBarStats: StackedBarStats[] = [];
+      const studentProposalsRate: StudentStackedBarStats = {
+        index: 0,
+        alessEqualTen: [],
+        bgreaterTen: [],
+        cgreaterFifty: [],
+        dgreaterHundred: [],
+      };
+      const studentQuestionsRate: StudentStackedBarStats = {
+        index: 1,
+        alessEqualTen: [],
+        bgreaterTen: [],
+        cgreaterFifty: [],
+        dgreaterHundred: [],
+      };
       const ProposalsRate: StackedBarStats = {
         index: 0,
         alessEqualTen: 0,
@@ -268,97 +298,290 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
         cgreaterFifty: 0,
         dgreaterHundred: 0,
       };
-      // const mock: SemesterStudentVoteStat[] = [data[0], data[1]];
-      // const mock2 = [
+      // const mock: SemesterStudentVoteStat[] = [data[0], data[1], data[2], data[4]];
+      // const mock = [
       //   {
+      //     votes: 217,
+      //     links: 46,
+      //     newNodes: 190,
+      //     votePoints: 97,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     totalPoints: 350,
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 757000000,
+      //     },
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 757000000,
+      //     },
+      //     questionPoints: 153,
+      //     improvements: 77,
+      //     questions: 153,
+      //     upVotes: 1602,
+      //     lastActivity: {
+      //       seconds: 1617840000,
+      //       nanoseconds: 0,
+      //     },
+      //     disagreementsWithInst: 60,
+      //     deleted: false,
+      //     instVotes: 11,
+      //     downVotes: 1200,
+      //     uname: "johnwisniewski",
+      //     agreementsWithInst: 157,
+      //   },
+      //   {
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     upVotes: 2849,
+      //     disagreementsWithInst: 69,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     newNodes: 205,
+      //     links: 41,
+      //     downVotes: 625,
+      //     questions: 174,
+      //     agreementsWithInst: 173,
+      //     instVotes: 151,
       //     lastActivity: {
       //       seconds: 1617926400,
       //       nanoseconds: 0,
       //     },
-      //     disagreementsWithInst: 72,
-      //     upVotes: 3253,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     questionPoints: 171,
-      //     votes: 250,
-      //     agreementsWithInst: 178,
-      //     uname: "elizadh",
-      //     createdAt: {
+      //     updatedAt: {
       //       seconds: 1667862140,
-      //       nanoseconds: 755000000,
+      //       nanoseconds: 756000000,
       //     },
+      //     totalPoints: 350,
+      //     deleted: false,
+      //     questionPoints: 60,
+      //     uname: "ironhulk19",
+      //     improvements: 90,
+      //     votes: 242,
+      //     votePoints: 104,
+      //   },
+      //   {
       //     updatedAt: {
       //       seconds: 1667862140,
       //       nanoseconds: 755000000,
       //     },
-      //     votePoints: 106,
-      //     instVotes: 43,
+      //     questions: 216,
+      //     newNodes: 258,
+      //     agreementsWithInst: 194,
       //     deleted: false,
-      //     questions: 171,
-      //     totalPoints: 401,
-      //     links: 50,
-      //     improvements: 94,
-      //     newNodes: 210,
-      //     downVotes: 73,
+      //     questionPoints: 150,
+      //     upVotes: 2176,
+      //     votePoints: 108,
+      //     downVotes: 1979,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     improvements: 93,
+      //     links: 43,
+      //     totalPoints: 402,
+      //     uname: "Shahbab-Ahmed",
+      //     disagreementsWithInst: 86,
+      //     votes: 280,
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 755000000,
+      //     },
+      //     lastActivity: {
+      //       seconds: 1617926400,
+      //       nanoseconds: 0,
+      //     },
+      //     instVotes: 14,
+      //   },
+
+      //   {
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     votes: 211,
+      //     totalPoints: 50,
+      //     questionPoints: 202,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     links: 25,
+      //     improvements: 64,
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     votePoints: 73,
+      //     downVotes: 532,
+      //     instVotes: 87,
+      //     deleted: false,
+      //     questions: 166,
+      //     disagreementsWithInst: 69,
+      //     agreementsWithInst: 142,
+      //     upVotes: 1213,
+      //     lastActivity: {
+      //       seconds: 1617926400,
+      //       nanoseconds: 0,
+      //     },
+      //     newNodes: 198,
+      //     uname: "turrenk",
       //   },
       //   {
+      //     uname: "Catherine Huang",
+      //     upVotes: 469,
+      //     instVotes: 56,
+      //     lastActivity: {
+      //       seconds: 1617840000,
+      //       nanoseconds: 0,
+      //     },
+      //     questions: 138,
+      //     newNodes: 176,
+      //     downVotes: 163,
+      //     totalPoints: 10,
+      //     votes: 205,
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     agreementsWithInst: 158,
+      //     links: 37,
+      //     disagreementsWithInst: 47,
+      //     questionPoints: 90,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     votePoints: 111,
       //     deleted: false,
-      //     votes: 256,
+      //     improvements: 75,
+      //   },
+      //   {
+      //     questions: 167,
       //     createdAt: {
       //       seconds: 1667862140,
       //       nanoseconds: 757000000,
       //     },
-      //     downVotes: 2620,
-      //     disagreementsWithInst: 64,
-      //     instVotes: 19,
-      //     questionPoints: 194,
-      //     questions: 194,
+      //     questionPoints: 100,
+      //     disagreementsWithInst: 53,
+      //     votePoints: 118,
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 757000000,
+      //     },
+      //     instVotes: 6,
       //     lastActivity: {
       //       seconds: 1617753600,
       //       nanoseconds: 0,
       //     },
-      //     improvements: 89,
-      //     totalPoints: 10,
-      //     newNodes: 225,
-      //     upVotes: 1189,
+      //     agreementsWithInst: 171,
+      //     improvements: 71,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     links: 27,
+      //     newNodes: 208,
+      //     votes: 224,
+      //     upVotes: 2464,
+      //     downVotes: 128,
+      //     uname: "elijah-fox",
+      //     totalPoints: 420,
+      //     deleted: false,
+      //   },
+      //   {
+      //     newNodes: 200,
+      //     agreementsWithInst: 167,
+      //     updatedAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     votePoints: 101,
+      //     links: 38,
+      //     downVotes: 30,
+      //     uname: "adsturza",
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 756000000,
+      //     },
+      //     upVotes: 3231,
+      //     votes: 233,
+      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
+      //     questionPoints: 75,
+      //     questions: 169,
+      //     totalPoints: 150,
+      //     instVotes: 10,
+      //     deleted: false,
+      //     lastActivity: {
+      //       seconds: 1617926400,
+      //       nanoseconds: 0,
+      //     },
+      //     improvements: 85,
+      //     disagreementsWithInst: 66,
+      //   },
+      //   {
+      //     improvements: 98,
+      //     votes: 275,
+      //     totalPoints: 90,
+      //     upVotes: 216,
+      //     uname: "maxzhang",
+      //     lastActivity: {
+      //       seconds: 1617840000,
+      //       nanoseconds: 0,
+      //     },
+      //     questionPoints: 10,
+      //     downVotes: 3519,
+      //     instVotes: 48,
+      //     disagreementsWithInst: 70,
+      //     newNodes: 242,
       //     updatedAt: {
       //       seconds: 1667862140,
       //       nanoseconds: 757000000,
       //     },
-      //     agreementsWithInst: 192,
+      //     deleted: false,
+      //     questions: 199,
+      //     agreementsWithInst: 205,
+      //     votePoints: 135,
       //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     uname: "rwilmer",
-      //     votePoints: 128,
-      //     links: 48,
+      //     createdAt: {
+      //       seconds: 1667862140,
+      //       nanoseconds: 757000000,
+      //     },
+      //     links: 51,
       //   },
       // ];
-      // console.log("mock", mock);
       data.map(d => {
+        if (d.deleted) return;
         const proposals = d.totalPoints;
         const question = d.questionPoints;
         if (proposals > (100 * maxProposalsPoints) / 100) {
           ProposalsRate.dgreaterHundred += 1;
+          studentProposalsRate.dgreaterHundred.push(d.uname);
         } else if (proposals > (50 * maxProposalsPoints) / 100) {
           ProposalsRate.cgreaterFifty += 1;
+          studentProposalsRate.cgreaterFifty.push(d.uname);
         } else if (proposals > (10 * maxProposalsPoints) / 100) {
           ProposalsRate.bgreaterTen += 1;
+          studentProposalsRate.bgreaterTen.push(d.uname);
         } else if (proposals <= (10 * maxProposalsPoints) / 100) {
           ProposalsRate.alessEqualTen += 1;
+          studentProposalsRate.alessEqualTen.push(d.uname);
         }
         if (question > (100 * maxQuestionsPoints) / 100) {
           QuestionsRate.dgreaterHundred += 1;
+          studentQuestionsRate.dgreaterHundred.push(d.uname);
         } else if (question > (50 * maxQuestionsPoints) / 100) {
           QuestionsRate.cgreaterFifty += 1;
+          studentQuestionsRate.cgreaterFifty.push(d.uname);
         } else if (question > (10 * maxQuestionsPoints) / 100) {
           QuestionsRate.bgreaterTen += 1;
+          studentQuestionsRate.bgreaterTen.push(d.uname);
         } else if (question <= (10 * maxQuestionsPoints) / 100) {
           QuestionsRate.alessEqualTen += 1;
+          studentQuestionsRate.alessEqualTen.push(d.uname);
         }
         console.log({ proposals, ProposalsRate });
       });
 
       stackedBarStats.push(ProposalsRate);
       stackedBarStats.push(QuestionsRate);
-      return stackedBarStats;
+      return {
+        stackedBarStats: stackedBarStats,
+        studentStackedBarProposalsStats: studentProposalsRate,
+        studentStackedBarQuestionsStats: studentQuestionsRate,
+      };
     },
     [maxProposalsPoints, maxQuestionsPoints]
   );
@@ -380,12 +603,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
 
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStats(getSemStat(semester));
-      setStackedBar(getStackedBarStat(semester));
+
+      //Data for stacked bar Plot
+      const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } =
+        getStackedBarStat(semester);
+      setStackedBar(stackedBarStats);
+      setProposalsStudents(studentStackedBarProposalsStats);
+      setQuestionsStudents(studentStackedBarQuestionsStats);
+      console.log("STUDENTS STACK", { studentStackedBarProposalsStats, studentStackedBarQuestionsStats });
+
+      //Data for Bubble Plot
       const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semester);
       setBubble(bubbleStats);
-
-      console.log("semester", semester);
-      console.log("getStackedBarStat", getStackedBarStat(semester));
       setMaxBubbleAxisX(maxVote);
       setMaxBubbleAxisY(maxVotePoints);
       setMinBubbleAxisX(minVote);
@@ -408,8 +637,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
       console.log("maxProposalsPoints", { maxProposalsPoints, maxQuestionsPoints });
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
-
-      setStudents(semesterDoc.data().students.length);
+      setStudentsCounter(semesterDoc.data().students.length);
+      setStudents(semesterDoc.data().students);
       setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
@@ -567,7 +796,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
                 {currentSemester?.cTitle.split(" ")[0]}{" "}
               </Typography>
               <Typography>{currentSemester?.title}</Typography>
-              <Typography> {students !== 0 ? `Students: ${students}` : ""}</Typography>
+              <Typography> {studentsCounter !== 0 ? `Students: ${studentsCounter}` : ""}</Typography>
             </Box>
             <Typography>{currentSemester?.pTitle}</Typography>
             <Divider />
@@ -656,7 +885,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
             </Box>
           </Box>
           <Box sx={{ alignSelf: "center" }}>
-            <PointsBarChart data={stackedBar} maxAxisY={maxStackedBarAxisY} />
+            <PointsBarChart
+              data={stackedBar}
+              students={students}
+              proposalsStudents={proposalsStudents}
+              questionsStudents={questionsStudents}
+              maxAxisY={maxStackedBarAxisY}
+              theme={"Light"}
+            />
           </Box>
         </Paper>
         <Paper sx={{ px: "32px", py: "40px" }}>
@@ -683,7 +919,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester }) => {
               <SquareIcon fontSize="inherit" sx={{ fill: "rgb(117, 117, 117)" }} />
               <span>{`= 0%`}</span>
               <SquareIcon fontSize="inherit" sx={{ fill: "rgb(239, 83, 80)" }} />
-              <span>{`<= 0%`}</span>
+              <span>{`< 0%`}</span>
             </Box>
           </Box>
           <BubbleChart
