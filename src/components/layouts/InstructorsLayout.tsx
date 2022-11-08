@@ -26,10 +26,13 @@ export type Option = {
   route: string;
 };
 
+const SETTING_OPTION: Option = { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" };
+
 const OPTIONS: Option[] = [
   { id: "02", label: "DASHBOARD", title: "DASHBOARD", route: "/instructors/dashboard" },
   { id: "03", label: "STUDENTS", title: "STUDENTS", route: "/instructors/students" },
-  { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
+  // { id: "05", label: "SETTINGS", title: "SETTINGS", route: "/instructors/settings" },
+  SETTING_OPTION,
 ];
 
 type InstructorsLayoutPageProps = {
@@ -98,6 +101,11 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       setInstructor(intructor);
       const courses = getCoursesByInstructor(intructor);
       const semester = Object.keys(courses);
+
+      if (!semester.length) {
+        router.push(ROUTES.instructorsSettings);
+      }
+
       setSemesters(semester);
       setAllCourses(courses);
       setSelectedSemester(semester[0]);
@@ -127,6 +135,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
   //   useSemesterFilter();
 
+  const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
+
   if (!user)
     return (
       <div className="CenterredLoadingImageContainer">
@@ -149,8 +159,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={OPTIONS} user={user} />}
-      {isMovil && <HeaderNavbarMovil options={OPTIONS} user={user} />}
+      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
+      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
       {/* <HeaderNavbar /> */}
       <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
         <SemesterFilter
