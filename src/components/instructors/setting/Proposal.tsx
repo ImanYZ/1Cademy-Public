@@ -1,3 +1,4 @@
+import { useTheme } from "@emotion/react";
 import { FilledInput, InputAdornment, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
@@ -7,8 +8,13 @@ type Props = {
   inputsHandler: any;
 };
 const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
+  const layoutTheme: any = useTheme();
+
   return (
-    <Box className="remove-arrow-buttons" sx={{ padding: "40px 40px", boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }}>
+    <Box
+      className="remove-arrow-buttons unselect-date-placeholder"
+      sx={{ padding: "40px 40px", boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }}
+    >
       <Typography variant="h3">Proposals & Practice</Typography>
       <Box>
         <Typography mt={3} variant="h4">
@@ -26,15 +32,17 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
             aria-describedby="filled-weight-helper-text"
             inputProps={{
               "aria-label": "days",
+              min: 1,
+              pattern: "[0-9]",
             }}
             sx={{
               border: "none",
               paddingBottom: "10px",
               height: "40px",
-              width: "90px",
+              width: "100px",
             }}
           />
-          &nbsp;in total
+          &nbsp;in total.
         </Typography>
       </Box>
       <Box sx={{ marginTop: "50px" }}>
@@ -44,7 +52,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
           <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
             From&nbsp;
             <FilledInput
-              className="remove-outer-inner-buttons"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
               type="date"
               value={semester.nodeProposals.startDate}
               id="filled-adornment-weight"
@@ -58,11 +66,18 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 height: "40px",
                 width: "150px",
                 borderBottom: "orange",
+                color: theme =>
+                  semester.nodeProposals.startDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
               }}
             />
             &nbsp; to &nbsp;
             <FilledInput
               type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
               value={semester.nodeProposals.endDate}
               id="filled-adornment-weight"
               onChange={event => inputsHandler(event, "nodeProposals", "endDate")}
@@ -75,11 +90,17 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 height: "40px",
                 width: "150px",
                 borderBottom: "orange",
+                color: theme =>
+                  semester.nodeProposals.endDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
               }}
             />
             &nbsp;each student can get&nbsp;
             <FilledInput
-              id="filled-adornment-weight"
+              type="number"
               value={semester.nodeProposals.numPoints}
               onChange={event => inputsHandler(event, "nodeProposals", "numPoints")}
               endAdornment={
@@ -90,6 +111,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               aria-describedby="filled-weight-helper-text"
               inputProps={{
                 "aria-label": "days",
+                min: 1,
               }}
               sx={{
                 paddingBottom: "10px",
@@ -143,7 +165,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 borderBottom: "orange",
               }}
             />
-            &nbsp; of the course
+            &nbsp; of the course.
           </Typography>
         </Box>
       </Box>
@@ -155,6 +177,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
             From&nbsp;
             <FilledInput
               type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
               value={semester.questionProposals.startDate}
               id="filled-adornment-weight"
               onChange={event => inputsHandler(event, "questionProposals", "startDate")}
@@ -167,11 +190,18 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 height: "40px",
                 width: "150px",
                 borderBottom: "orange",
+                color: theme =>
+                  semester.questionProposals.startDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
               }}
             />
             &nbsp; to &nbsp;
             <FilledInput
               type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
               value={semester.questionProposals.endDate}
               id="filled-adornment-weight"
               onChange={event => inputsHandler(event, "questionProposals", "endDate")}
@@ -184,11 +214,17 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 height: "40px",
                 width: "150px",
                 borderBottom: "orange",
+                color: theme =>
+                  semester.questionProposals.endDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
               }}
             />
             &nbsp;each student can get&nbsp;
             <FilledInput
-              id="filled-adornment-weight"
+              type="number"
               value={semester.questionProposals.numPoints}
               onChange={event => inputsHandler(event, "questionProposals", "numPoints")}
               endAdornment={
@@ -199,6 +235,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               aria-describedby="filled-weight-helper-text"
               inputProps={{
                 "aria-label": "days",
+                min: 1,
               }}
               sx={{
                 paddingBottom: "10px",
@@ -221,6 +258,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               aria-describedby="filled-weight-helper-text"
               inputProps={{
                 "aria-label": "days",
+                min: 1,
               }}
               sx={{
                 paddingBottom: "10px",
@@ -243,6 +281,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               aria-describedby="filled-weight-helper-text"
               inputProps={{
                 "aria-label": "days",
+                min: 1,
               }}
               sx={{
                 paddingBottom: "10px",
@@ -251,7 +290,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 borderBottom: "orange",
               }}
             />
-            &nbsp; of the course
+            &nbsp; of the course.
           </Typography>
         </Box>
       </Box>

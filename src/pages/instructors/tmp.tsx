@@ -1,6 +1,6 @@
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 const Page: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
-  console.log("currentSemester", currentSemester);
+  console.log("snapshot:currentSemester", currentSemester);
   return (
     <div>
       <p>

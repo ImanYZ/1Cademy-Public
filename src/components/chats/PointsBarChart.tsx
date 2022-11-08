@@ -130,7 +130,7 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
         .style("fill", color(subgroupName) as string);
       tooltip
         .html("subgroup: " + subgroupName + "<br>" + "Value" + subGroupValue)
-        .style("opacity", 0)
+        .style("opacity", 1)
         .style("top", `${middle}px`)
         .style("left", `${1.6 * x.bandwidth()}px`);
     })
@@ -185,10 +185,11 @@ export const PointsBarChart = ({ data, maxAxisY }: StackedBarProps) => {
         style={{
           position: "absolute",
           background: "#303134",
-          boxShadow: "0 1px 1px 1px black",
-          borderRadius: "2px",
+          // boxShadow: "0 1px 1px 1px black",
+          borderRadius: "5px",
           opacity: "0",
-          padding: "2px 4px",
+          padding: "4px 4px",
+          color: "white",
         }}
       ></div>
     </div>
