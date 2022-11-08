@@ -2,11 +2,13 @@ import { Button, Grid } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Institution } from "src/knowledgeTypes";
 
 import { Post } from "@/lib/mapApi";
 
+import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import Chapter from "../../components/instructors/setting/Chapter";
 import NewCourse from "../../components/instructors/setting/NewCourse";
 import Proposal from "../../components/instructors/setting/Proposal";
@@ -176,7 +178,23 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
     console.log(response, "response");
   };
-
+  if (institutions.length == 0) {
+    return (
+      <Box
+        className="CenterredLoadingImageContainer"
+        sx={{ background: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F5F5F5") }}
+      >
+        <Image
+          className="CenterredLoadingImage"
+          loading="lazy"
+          src={LoadingImg}
+          alt="Loading"
+          width={250}
+          height={250}
+        />
+      </Box>
+    );
+  }
   if (!selectedCourse) {
     return <NewCourse institutions={institutions} />;
   }
@@ -207,6 +225,13 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           className="btn waves-effect waves-light hoverable green"
           sx={{
             color: theme => theme.palette.common.white,
+            background: "green",
+            fontWeight: "bold",
+            padding: "10px 50px",
+            marginTop: "20px",
+            ":hover": {
+              background: "green",
+            },
           }}
         >
           Submit
