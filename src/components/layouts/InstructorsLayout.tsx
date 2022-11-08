@@ -1,6 +1,6 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -87,20 +87,62 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   //   }
   // }, [isAuthenticated, router]);
 
+  // useEffect(() => {
+  //   if (!user) return console.warn("Not user found, wait please");
+  //   // window.document.body.classList.remove("Image");
+  //   console.log("user", user);
+  //   const getInstructor = async () => {
+  //     const instructorsRef = collection(db, "instructors");
+  //     const q = query(instructorsRef, where("uname", "==", user.uname));
+  //     const userNodeDoc = await getDocs(q);
+  //     if (!userNodeDoc.docs.length) return;
+
+  //     const intructor = userNodeDoc.docs[0].data() as Instructor;
+  //     setInstructor(intructor);
+  //     const courses = getCoursesByInstructor(intructor);
+  //     const semester = Object.keys(courses);
+
+  //     if (!semester.length) {
+  //       router.push(ROUTES.instructorsSettings);
+  //     }
+
+  //     setSemesters(semester);
+  //     setAllCourses(courses);
+  //     setSelectedSemester(semester[0]);
+  //   };
+
+  //   getInstructor();
+  // }, [db, router, user]);
+
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
     // window.document.body.classList.remove("Image");
     console.log("user", user);
-    const getInstructor = async () => {
-      const instructorsRef = collection(db, "instructors");
-      const q = query(instructorsRef, where("uname", "==", user.uname));
-      const userNodeDoc = await getDocs(q);
-      if (!userNodeDoc.docs.length) return;
 
-      const intructor = userNodeDoc.docs[0].data() as Instructor;
+    const instructorsRef = collection(db, "instructors");
+    const q = query(instructorsRef, where("uname", "==", user.uname));
+
+    const unsub = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+
+      // devLog("1:userNodes Snapshot:changes", docChanges);
+      if (!docChanges.length) {
+        // setIsSubmitting(false);
+        // setFirstLoading(false);
+        // setNoNodesFoundMessage(true);
+        console.log("no instructor");
+        return null;
+      }
+
+      // docChanges[0].doc.data()
+      // const intructor = userNodeDoc.docs[0].data() as Instructor;
+      const intructor = docChanges[0].doc.data() as Instructor;
+      console.log("snapshot:instructor:", intructor);
       setInstructor(intructor);
       const courses = getCoursesByInstructor(intructor);
+      console.log("snapshot:courses:", courses);
       const semester = Object.keys(courses);
+      console.log("snapshot:semester:", semester);
 
       if (!semester.length) {
         router.push(ROUTES.instructorsSettings);
@@ -109,9 +151,30 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       setSemesters(semester);
       setAllCourses(courses);
       setSelectedSemester(semester[0]);
-    };
+    });
 
-    getInstructor();
+    return () => unsub();
+    // const getInstructor = async () => {
+    //   const instructorsRef = collection(db, "instructors");
+    //   const q = query(instructorsRef, where("uname", "==", user.uname));
+    //   const userNodeDoc = await getDocs(q);
+    //   if (!userNodeDoc.docs.length) return;
+
+    //   const intructor = userNodeDoc.docs[0].data() as Instructor;
+    //   setInstructor(intructor);
+    //   const courses = getCoursesByInstructor(intructor);
+    //   const semester = Object.keys(courses);
+
+    //   if (!semester.length) {
+    //     router.push(ROUTES.instructorsSettings);
+    //   }
+
+    //   setSemesters(semester);
+    //   setAllCourses(courses);
+    //   setSelectedSemester(semester[0]);
+    // };
+
+    // getInstructor();
   }, [db, router, user]);
 
   useEffect(() => {
