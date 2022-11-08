@@ -8,6 +8,9 @@ import { IUser } from "src/types/IUser";
 import { ISemesterSyllabusItem } from "src/types/ICourse";
 import moment from "moment";
 import { INodeLink } from "src/types/INodeLink";
+import { INodeVersion } from "src/types/INodeVersion";
+import { detach } from "src/utils/helpers";
+import { getAllUserNodes, signalAllUserNodesChanges } from "src/utils";
 
 export type InstructorSemesterSettingPayload = {
   syllabus: ISemesterSyllabusItem[];
@@ -60,6 +63,91 @@ const createNodeContent = (children: INodeLink[]) => {
   return content;
 };
 
+const createVersion = async (
+  nodeData: INode | null,
+  nodeChanges: any,
+  nodeRef: DocumentReference,
+  userData: IUser,
+  isNew: boolean = false
+) => {
+  let titleChanged = false;
+  let contentChanged = false;
+  let addedParents = false;
+  let addedChildren = false;
+  let removedParents = false;
+  let removedChildren = false;
+  if (nodeData) {
+    // calculate changed values
+    if (nodeChanges.title && nodeData.title !== nodeChanges.title) {
+      titleChanged = true;
+    }
+
+    if (nodeChanges.content && nodeData.content !== nodeChanges.content) {
+      titleChanged = true;
+    }
+
+    if (nodeChanges.children) {
+      const changesChildIds: string[] = nodeChanges.children.map((child: any) => child.node);
+      const childIds: string[] = nodeData.children.map(child => child.node);
+      const _addedChildren = changesChildIds.filter(changesChildId => childIds.indexOf(changesChildId) === -1);
+      const _removedChildren = childIds.filter(childId => changesChildIds.indexOf(childId) === -1);
+      addedChildren = !!_addedChildren.length;
+      removedChildren = !!_removedChildren.length;
+    }
+
+    if (nodeChanges.parents) {
+      const changesParentIds: string[] = nodeChanges.parents.map((parent: any) => parent.node);
+      const parentIds: string[] = nodeData.parents.map(parent => parent.node);
+      const _addedParents = changesParentIds.filter(changesParentId => parentIds.indexOf(changesParentId) === -1);
+      const _removedParents = parentIds.filter(parentId => changesParentIds.indexOf(parentId) === -1);
+      addedParents = !!_addedParents.length;
+      removedParents = !!_removedParents.length;
+    }
+  }
+
+  const anythingChanged =
+    titleChanged || contentChanged || addedParents || addedChildren || removedParents || removedChildren;
+  if (anythingChanged || isNew) {
+    let versionData = {
+      content: nodeChanges.content || nodeData?.content,
+      title: nodeChanges.title || nodeData?.title,
+      fullname: `${userData.fName} ${userData.lName}`,
+      children: (nodeChanges.children as INodeLink[]) || nodeData?.children,
+      addedInstitContris: false,
+      accepted: true,
+      imageUrl: userData.imageUrl,
+      updatedAt: new Date(),
+      chooseUname: userData.chooseUname,
+      node: nodeRef.id,
+      parents: (nodeChanges.parents as INodeLink[]) || nodeData?.parents,
+      deleted: false,
+      corrects: 1,
+      proposer: userData.uname,
+      viewers: 1,
+      proposal: "", // reason of purposed changes
+      addedParents,
+      removedParents,
+      changedContent: contentChanged,
+      changedTitle: titleChanged,
+      addedChildren,
+      removedChildren,
+      awards: 0,
+      summary: "",
+      nodeImage: "",
+      referenceIds: nodeData?.referenceIds || [],
+      references: nodeData?.references || [],
+      referenceLabels: nodeData?.referenceLabels || [],
+      wrongs: 0,
+      createdAt: new Date(),
+      tags: nodeData?.tags || [],
+      tagIds: nodeData?.tagIds || [],
+    } as INodeVersion;
+    return { versionRef: db.collection("relationVersions").doc(), versionData };
+  }
+
+  return { versionRef: null, versionData: null };
+};
+
 const createNode = async (
   batch: WriteBatch,
   userData: IUser,
@@ -76,7 +164,7 @@ const createNode = async (
     nodeRef = db.collection("nodes").doc();
   }
   let content = createNodeContent(children);
-  batch.set(nodeRef, {
+  const nodeData = {
     aChooseUname: userData.chooseUname,
     aImgUrl: userData.imageUrl,
     aFullname: `${userData.fName} ${userData.lName}`,
@@ -129,7 +217,13 @@ const createNode = async (
     maxVersionRating: 0,
     tagIds,
     tags,
-  } as INode);
+  } as INode;
+  batch.set(nodeRef, nodeData);
+  // first version
+  const { versionRef, versionData } = await createVersion(nodeData, {}, nodeRef, userData, true);
+  if (versionRef) {
+    batch.set(versionRef, versionData);
+  }
   return nodeRef.id;
 };
 
@@ -200,7 +294,7 @@ const processNodeIdsFromSyllabusItem = async ({
 
   if (item.node) {
     if (updateNodes) {
-      batch.update(nodeRef, {
+      const nodeChanges = {
         title: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
         parents: [
           {
@@ -211,12 +305,20 @@ const processNodeIdsFromSyllabusItem = async ({
         ],
         children,
         content: createNodeContent(children),
-      });
+      };
+
+      const nodeData = (await nodeRef.get()).data() as INode;
+      const { versionRef, versionData } = await createVersion(nodeData, nodeChanges, nodeRef, userData, false);
+      if (versionRef) {
+        batch.set(versionRef, versionData);
+      }
+
+      batch.update(nodeRef, nodeChanges);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
     nodeIds.push(item.node);
   } else if (updateNodes) {
-    await createNode(
+    const newId = await createNode(
       batch,
       userData,
       `Ch.${chapter} ${item.title} - ${semesterTitle}`,
@@ -229,7 +331,23 @@ const processNodeIdsFromSyllabusItem = async ({
       tags
     );
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-    item.node = nodeRef.id;
+    item.node = newId;
+    // Creating userNodes
+    const userNodeRef = db.collection("userNodes").doc();
+    batch.set(userNodeRef, {
+      visible: true,
+      open: false,
+      bookmarked: false,
+      changed: false,
+      correct: false,
+      createdAt: new Date(),
+      deleted: false,
+      isStudied: false,
+      node: newId,
+      updatedAt: new Date(),
+      user: userData.uname,
+      wrong: false,
+    });
   }
   return [batch, writeCounts];
 };
@@ -329,6 +447,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       nodeData.deleted = true;
       batch.update(nodeRef, nodeData);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      // TODO: move these to queues in future
+      await detach(async () => {
+        let { userNodesRefs, userNodesData }: any = await getAllUserNodes({ nodeId: removedNodeId });
+        let batch = db.batch();
+        let writeCounts = 0;
+        [batch, writeCounts] = await signalAllUserNodesChanges({
+          batch,
+          userNodesRefs,
+          userNodesData,
+          nodeChanges: {},
+          major: true,
+          deleted: true,
+          currentTimestamp: Timestamp.now(),
+          writeCounts,
+        });
+        await commitBatch(batch);
+      });
+      // TODO: remove tags of nodes if a node getting deleted
     }
 
     semesterData.syllabus = payload.syllabus;

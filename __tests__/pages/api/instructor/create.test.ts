@@ -143,6 +143,8 @@ describe("POST /api/instructor/course/create", () => {
       semesterId = res._getJSONData().semesterId;
     });
 
+    const nodeIds: string[] = [];
+
     it("semester document should be created", async () => {
       const semesterRef = db.collection("semesters").doc(semesterId);
       expect((await semesterRef.get()).exists).toBeTruthy();
@@ -151,8 +153,27 @@ describe("POST /api/instructor/course/create", () => {
     it("university node should be created", async () => {
       const semesterRef = db.collection("semesters").doc(semesterId);
       const semesterData = (await semesterRef.get()).data() as ISemester;
+      nodeIds.push(
+        semesterData.tagId,
+        semesterData.uTagId,
+        semesterData.dTagId,
+        semesterData.pTagId,
+        semesterData.cTagId
+      );
       const universityNodeRef = db.collection("nodes").doc(semesterData.uTagId);
       expect((await universityNodeRef.get()).exists).toBeTruthy();
+    });
+
+    it("university usernode for instructor should be created", async () => {
+      const semesterRef = db.collection("semesters").doc(semesterId);
+      const semesterData = (await semesterRef.get()).data() as ISemester;
+      const universityNodes = await db
+        .collection("userNodes")
+        .where("user", "==", users[0].uname)
+        .where("node", "==", semesterData.uTagId)
+        .get();
+      expect(universityNodes.docs.length).toEqual(1);
+      expect(universityNodes.docs[0].data()?.visible).toBeTruthy();
     });
 
     it("department node should be created", async () => {
@@ -162,11 +183,35 @@ describe("POST /api/instructor/course/create", () => {
       expect((await departmentNodeRef.get()).exists).toBeTruthy();
     });
 
+    it("department usernode for instructor should be created", async () => {
+      const semesterRef = db.collection("semesters").doc(semesterId);
+      const semesterData = (await semesterRef.get()).data() as ISemester;
+      const universityNodes = await db
+        .collection("userNodes")
+        .where("user", "==", users[0].uname)
+        .where("node", "==", semesterData.dTagId)
+        .get();
+      expect(universityNodes.docs.length).toEqual(1);
+      expect(universityNodes.docs[0].data()?.visible).toBeTruthy();
+    });
+
     it("program node should be created", async () => {
       const semesterRef = db.collection("semesters").doc(semesterId);
       const semesterData = (await semesterRef.get()).data() as ISemester;
       const programNodeRef = db.collection("nodes").doc(semesterData.pTagId);
       expect((await programNodeRef.get()).exists).toBeTruthy();
+    });
+
+    it("program usernode for instructor should be created", async () => {
+      const semesterRef = db.collection("semesters").doc(semesterId);
+      const semesterData = (await semesterRef.get()).data() as ISemester;
+      const universityNodes = await db
+        .collection("userNodes")
+        .where("user", "==", users[0].uname)
+        .where("node", "==", semesterData.pTagId)
+        .get();
+      expect(universityNodes.docs.length).toEqual(1);
+      expect(universityNodes.docs[0].data()?.visible).toBeTruthy();
     });
 
     it("course node should be created", async () => {
@@ -176,11 +221,42 @@ describe("POST /api/instructor/course/create", () => {
       expect((await courseNodeRef.get()).exists).toBeTruthy();
     });
 
+    it("course usernode for instructor should be created", async () => {
+      const semesterRef = db.collection("semesters").doc(semesterId);
+      const semesterData = (await semesterRef.get()).data() as ISemester;
+      const universityNodes = await db
+        .collection("userNodes")
+        .where("user", "==", users[0].uname)
+        .where("node", "==", semesterData.cTagId)
+        .get();
+      expect(universityNodes.docs.length).toEqual(1);
+      expect(universityNodes.docs[0].data()?.visible).toBeTruthy();
+    });
+
     it("semester node should be created", async () => {
       const semesterRef = db.collection("semesters").doc(semesterId);
       const semesterData = (await semesterRef.get()).data() as ISemester;
       const semesterNodeRef = db.collection("nodes").doc(semesterData.tagId);
       expect((await semesterNodeRef.get()).exists).toBeTruthy();
+    });
+
+    it("semester usernode for instructor should be created", async () => {
+      const semesterRef = db.collection("semesters").doc(semesterId);
+      const semesterData = (await semesterRef.get()).data() as ISemester;
+      const universityNodes = await db
+        .collection("userNodes")
+        .where("user", "==", users[0].uname)
+        .where("node", "==", semesterData.tagId)
+        .get();
+      expect(universityNodes.docs.length).toEqual(1);
+      expect(universityNodes.docs[0].data()?.visible).toBeTruthy();
+    });
+
+    it("check if version documents exists for created nodes", async () => {
+      for (const nodeId of nodeIds) {
+        const versionDocs = await db.collection("relationVersions").where("node", "==", nodeId).get();
+        expect(versionDocs.docs.length).toEqual(1);
+      }
     });
   });
 
