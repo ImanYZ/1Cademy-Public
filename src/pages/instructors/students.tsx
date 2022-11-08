@@ -35,7 +35,7 @@ const filterChoices: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newPorposals",
+  "New Proposals": "newProposals",
   "Edit Node Proposals": "editNodeProposals",
   "Proposals Points": "proposalsPoints",
   Questions: "questions",
@@ -52,7 +52,7 @@ const columns: string[] = [
   "wrongs",
   "corrects",
   "awards",
-  "newPorposals",
+  "newProposals",
   "editNodeProposals",
   "proposalsPoints",
   "questions",
@@ -88,7 +88,7 @@ const keysColumns: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newPorposals",
+  "New Proposals": "newProposals",
   "Edit Node Proposals": "editNodeProposals",
   "Proposals Points": "proposalsPoints",
   Questions: "questions",
@@ -118,6 +118,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [savedTableState, setSavedTableState] = useState([]);
   const [states, setStates] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [usersStatus, setUsersStatus] = useState([]);
   const open = Boolean(anchorEl);
   const db = getFirestore();
 
@@ -131,15 +132,26 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     if (!currentSemester) return;
     const getStats = async () => {
       const semestersStatsRef = collection(db, "semesterStudentVoteStats");
+      const statusRef = collection(db, "status");
+      const qeStatus = query(statusRef);
+      const statusDoc = await getDocs(qeStatus);
       const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
       const semestersStatsDoc = await getDocs(qe);
       let statsData: any = [];
+      let status: any = [];
       if (semestersStatsDoc.docs.length > 0) {
         for (let doc of semestersStatsDoc.docs) {
           const data = doc.data();
           statsData.push(data);
         }
       }
+      if (statusDoc.docs.length > 0) {
+        for (let doc of statusDoc.docs) {
+          const data = doc.data();
+          status.push(data);
+        }
+      }
+      setUsersStatus(status);
       setStates(statsData);
     };
     getStats();
@@ -157,21 +169,23 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       for (let change of docChanges) {
         if (change.type === "added" || change.type === "modified") {
           const _students = change.doc.data().students;
+          const { numPoints, numProposalPerDay } = change.doc.data().nodeProposals;
           const _rows: any = [];
           for (let student of _students) {
             const stats: any = states.filter((elm: any) => elm.uname === student.uname)[0];
+            const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
             _rows.push({
               id: student.uname,
               username: student.uname,
               avatar: student.imageUrl,
-              online: true,
+              online: userStat?.state,
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
               totalPoints: stats?.totalPoints || 0,
-              newPorposals: stats?.newNodes || 0,
+              newProposals: stats?.newNodes || 0,
               editNodeProposals: stats?.improvements || 0,
-              proposalsPoints: stats?.proposalsPoints || 0, //TO-DO
+              proposalsPoints: stats?.improvements * (numPoints / numProposalPerDay) || 0, //TO-DO
               corrects: stats?.upVotes || 0,
               wrongs: stats?.downVotes || 0,
               awards: stats?.instVotes || 0,
