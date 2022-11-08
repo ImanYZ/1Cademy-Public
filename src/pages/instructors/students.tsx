@@ -43,7 +43,7 @@ import React, { useEffect, useState } from "react";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
-import CSVBtn from "../../components/instructors/CSVBtn";
+import CSVBtn from "../../components/CSVBtn";
 import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 

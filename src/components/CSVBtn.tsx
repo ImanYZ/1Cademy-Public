@@ -43,18 +43,19 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles }: any) => {
     const array = csvRows.map((i: any) => {
       const values = i.split(",");
       const obj = csvHeader.reduce((object: any, header: any, index: any) => {
-        object[header] = values[index];
+        const cleanHeader = header.trim();
+        object[cleanHeader] = values[index];
         return object;
       }, {});
       return obj;
     });
     const headerKeys = Object.keys(Object.assign({}, ...array));
-    setCSVData({ columns: headerKeys, rows: array });
+    const cleanHeaderKeys = headerKeys.map(x => x.replace("\r", "").trim());
+    setCSVData({ columns: cleanHeaderKeys, rows: array });
   };
 
   const handleAddData = () => {
     console.log({ CSVData });
-    addNewData();
     addNewData(CSVData);
     setOpenUploadModal(false);
   };
