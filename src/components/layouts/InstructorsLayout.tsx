@@ -1,6 +1,6 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -89,31 +89,113 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   //   }
   // }, [isAuthenticated, router]);
 
+  // useEffect(() => {
+  //   if (!user) return console.warn("Not user found, wait please");
+  //   // window.document.body.classList.remove("Image");
+  //   console.log("user", user);
+  //   const getInstructor = async () => {
+  //     const instructorsRef = collection(db, "instructors");
+  //     const q = query(instructorsRef, where("uname", "==", user.uname));
+  //     const userNodeDoc = await getDocs(q);
+  //     if (!userNodeDoc.docs.length) return;
+
+  //     const intructor = userNodeDoc.docs[0].data() as Instructor;
+  //     setInstructor(intructor);
+  //     const courses = getCoursesByInstructor(intructor);
+  //     const semester = Object.keys(courses);
+
+  //     if (!semester.length) {
+  //       router.push(ROUTES.instructorsSettings);
+  //     }
+
+  //     setSemesters(semester);
+  //     setAllCourses(courses);
+  //     setSelectedSemester(semester[0]);
+  //   };
+
+  //   getInstructor();
+  // }, [db, router, user]);
+
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
     // window.document.body.classList.remove("Image");
     console.log("user", user);
-    const getInstructor = async () => {
-      const instructorsRef = collection(db, "instructors");
-      const q = query(instructorsRef, where("uname", "==", user.uname));
-      const userNodeDoc = await getDocs(q);
-      if (!userNodeDoc.docs.length) return;
 
-      const intructor = userNodeDoc.docs[0].data() as Instructor;
+    const instructorsRef = collection(db, "instructors");
+    const q = query(instructorsRef, where("uname", "==", user.uname));
+
+    const unsub = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+
+      // devLog("1:userNodes Snapshot:changes", docChanges);
+      if (!docChanges.length) {
+        // setIsSubmitting(false);
+        // setFirstLoading(false);
+        // setNoNodesFoundMessage(true);
+        console.log("no instructor");
+        return null;
+      }
+
+      // docChanges[0].doc.data()
+      // const intructor = userNodeDoc.docs[0].data() as Instructor;
+      const intructor = docChanges[0].doc.data() as Instructor;
+      console.log("snapshot:instructor:", intructor);
       setInstructor(intructor);
-      const courses = getCoursesByInstructor(intructor);
-      const semester = Object.keys(courses);
+      const newAllCourses = getCoursesByInstructor(intructor);
+      console.log("snapshot:courses:", newAllCourses);
+      const newSemesters = Object.keys(newAllCourses);
+      console.log("snapshot:semester:", newSemesters);
 
-      if (!semester.length) {
+      if (!newSemesters.length) {
         router.push(ROUTES.instructorsSettings);
       }
-      console.log(courses, "courses");
-      setSemesters(semester);
-      setAllCourses(courses);
-      setSelectedSemester(semester[0]);
-    };
 
-    getInstructor();
+      const lastSemester = newSemesters.slice(-1)[0];
+      console.log("snapshot:lastSemester", lastSemester);
+
+      setSemesters(prevSemester => {
+        setSelectedSemester(selectedSemester => {
+          if (!selectedSemester) {
+            console.log("snapshot:setSelected first semester", newSemesters[0]);
+            // setSelectedSemester(newSemesters[0]);
+            return newSemesters[0];
+          }
+          if (!prevSemester.includes(lastSemester)) {
+            // only if a semester is added we need to auto select
+            console.log("snapshot:setSelected last semester", lastSemester);
+            // setSelectedSemester(lastSemester);
+            return lastSemester;
+          }
+
+          return selectedSemester;
+        });
+        return newSemesters;
+      });
+      setAllCourses(newAllCourses);
+    });
+
+    return () => unsub();
+    // const getInstructor = async () => {
+    //   const instructorsRef = collection(db, "instructors");
+    //   const q = query(instructorsRef, where("uname", "==", user.uname));
+    //   const userNodeDoc = await getDocs(q);
+    //   if (!userNodeDoc.docs.length) return;
+
+    //   const intructor = userNodeDoc.docs[0].data() as Instructor;
+    //   setInstructor(intructor);
+    //   const courses = getCoursesByInstructor(intructor);
+    //   const semester = Object.keys(courses);
+
+    //   if (!semester.length) {
+    //     router.push(ROUTES.instructorsSettings);
+    //   }
+
+    //   setSemesters(semester);
+    //   setAllCourses(courses);
+    //   setSelectedSemester(semester[0]);
+    // };
+
+    // getInstructor();
   }, [db, router, user]);
 
   useEffect(() => {

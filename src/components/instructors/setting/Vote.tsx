@@ -13,7 +13,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
   return (
     <>
       <Grid item xs={12} md={6}>
-        <Box sx={{ padding: "40px 40px" }}>
+        <Box className="remove-arrow-buttons" sx={{ padding: "40px 40px" }}>
           <Box sx={{ marginTop: "20px" }}>
             <Typography variant="h3">Votes</Typography>
             <Typography
@@ -42,7 +42,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
               >
                 Each student will earn&nbsp;
                 <FilledInput
-                  id="filled-adornment-weight"
+                  type="number"
                   value={semester.votes.pointIncrementOnAgreement}
                   onChange={event => inputsHandler(event, "votes", "pointIncrementOnAgreement")}
                   endAdornment={
@@ -53,16 +53,17 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
+                    min: 1,
                   }}
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
                 &nbsp; by casting on other's proposals, which is in agreement with the instructors(s)' vote on the same
-                proposal
+                proposal.
               </Typography>
             </Box>
             <Box sx={{ display: "flex", flexWrap: "wrap", alignContent: "center", alignItems: "baseline" }}>
@@ -75,7 +76,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
               >
                 Each student will lose&nbsp;
                 <FilledInput
-                  id="filled-adornment-weight"
+                  type="number"
                   value={semester.votes.pointDecrementOnAgreement}
                   onChange={event => inputsHandler(event, "votes", "pointDecrementOnAgreement")}
                   endAdornment={
@@ -86,23 +87,24 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
+                    min: 1,
                   }}
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
                 &nbsp; by casting on other's proposals, which is in disagreement with the instructors(s)' vote on the
-                same proposal
+                same proposal.
               </Typography>
             </Box>
           </Box>
         </Box>
       </Grid>
       <Grid item xs={12} md={6}>
-        <Box sx={{ padding: "40px 40px" }}>
+        <Box className="remove-arrow-buttons" sx={{ padding: "40px 40px" }}>
           <Box sx={{ marginTop: "50px" }}>
             <Typography
               variant="h4"
@@ -140,7 +142,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                 />
                 a student gets from their classmates/instructor(s) on their proposals, they will earn&nbsp;
                 <FilledInput
-                  id="filled-adornment-weight"
+                  type="number"
                   value={semester.votes.onReceiveVote}
                   onChange={event => inputsHandler(event, "votes", "onReceiveVote")}
                   endAdornment={
@@ -151,15 +153,17 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
+                    min: 1,
                   }}
                   autoFocus={true}
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
+                .
               </Typography>
             </Box>
             <Box>
@@ -184,7 +188,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                 />
                 a student gets from their classmates/instructor(s) on their proposals, they will lose&nbsp;
                 <FilledInput
-                  id="filled-adornment-weight"
+                  type="number"
                   value={semester.votes.onReceiveDownVote}
                   onChange={event => inputsHandler(event, "votes", "onReceiveDownVote")}
                   endAdornment={
@@ -195,14 +199,16 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
+                    min: 1,
                   }}
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
+                .
               </Typography>
             </Box>
             <Box>
@@ -226,7 +232,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                 />
                 a student gets from their instructor(s) on their proposals, they will earn&nbsp;
                 <FilledInput
-                  id="filled-adornment-weight"
+                  type="number"
                   value={semester.votes.onReceiveStar}
                   onChange={event => inputsHandler(event, "votes", "onReceiveStar")}
                   endAdornment={
@@ -237,14 +243,16 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
+                    min: 1,
                   }}
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
+                .
               </Typography>
             </Box>
           </Box>

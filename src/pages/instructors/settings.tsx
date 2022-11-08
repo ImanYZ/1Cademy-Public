@@ -1,78 +1,45 @@
-import { Button, Grid, TextField } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { Box } from "@mui/system";
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
-import { useFormik } from "formik";
+import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import * as yup from "yup";
+import { Institution } from "src/knowledgeTypes";
 
 import { Post } from "@/lib/mapApi";
 
 import Chapter from "../../components/instructors/setting/Chapter";
+import NewCourse from "../../components/instructors/setting/NewCourse";
 import Proposal from "../../components/instructors/setting/Proposal";
 import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
-const validationSchema = yup.object({
-  courseCode: yup.string().required("Course code is required"),
-  semesterName: yup.string().required("Semester name is required"),
-  programName: yup.string().required("Program name is required"),
-  departmentName: yup.string().required("Department name is required"),
-  universityTitle: yup.string().required("University title is required"),
-});
-
-const CourseSetting: InstructorLayoutPage = ({
-  selectedSemester,
-  selectedCourse,
-  currentSemester,
-  allCourses,
-  setAllCourses,
-}) => {
+const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   const db = getFirestore();
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
     syllabus: [],
-    days: 0,
+    days: 100,
     nodeProposals: {
       startDate: "",
       endDate: "",
-      numPoints: 0,
-      numProposalPerDay: 0,
-      totalDaysOfCourse: 0,
+      numPoints: 1,
+      numProposalPerDay: 1,
+      totalDaysOfCourse: 50,
     },
     questionProposals: {
       startDate: "",
       endDate: "",
-      numPoints: 0,
-      numQuestionsPerDay: 0,
-      totalDaysOfCourse: 0,
+      numPoints: 1,
+      numQuestionsPerDay: 1,
+      totalDaysOfCourse: 50,
     },
     votes: {
-      pointIncrementOnAgreement: 0,
-      pointDecrementOnAgreement: 0,
-      onReceiveVote: 0,
-      onReceiveDownVote: 0,
-      onReceiveStar: 0,
-    },
-  });
-
-  const formik = useFormik({
-    initialValues: {
-      courseCode: "",
-      semesterName: "",
-      programName: "",
-      departmentName: "",
-      universityTitle: "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: values => {
-      console.log(values, "values");
-      console.log(selectedSemester, "selectedSemester");
-      console.log(allCourses, "allCourses");
-      console.log(values, "values");
-      allCourses[String(selectedSemester)] = [...allCourses[String(selectedSemester)], values.courseCode];
-
-      setAllCourses(Object.assign({}, allCourses));
+      pointIncrementOnAgreement: 1,
+      pointDecrementOnAgreement: 1,
+      onReceiveVote: 1,
+      onReceiveDownVote: 1,
+      onReceiveStar: 1,
     },
   });
 
@@ -88,13 +55,13 @@ const CourseSetting: InstructorLayoutPage = ({
               syllabus: semester.syllabus,
               nodeProposals: {
                 ...semester.nodeProposals,
-                startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-DD-MM"),
-                endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-DD-MM"),
+                startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-MM-DD"),
               },
               questionProposals: {
                 ...semester.questionProposals,
-                startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-DD-MM"),
-                endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-DD-MM"),
+                startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-MM-DD"),
               },
               votes: semester.votes,
             };
@@ -106,12 +73,40 @@ const CourseSetting: InstructorLayoutPage = ({
     }
   }, [selectedSemester, selectedCourse, currentSemester]);
 
+  useEffect(() => {
+    const retrieveInstitutions = async () => {
+      const db = getFirestore();
+      const institutionsRef = collection(db, "institutions");
+      const q = query(institutionsRef);
+
+      const querySnapshot = await getDocs(q);
+      let institutions: Institution[] = [];
+      querySnapshot.forEach(doc => {
+        institutions.push({ id: doc.id, ...doc.data() } as Institution);
+      });
+
+      const institutionSorted = institutions
+        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
+        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+      setInstitutions(institutionSorted.slice(0, 10));
+    };
+    retrieveInstitutions();
+  }, []);
+
   const inputsHandler = (e: any, type: any, field: any = null) => {
     if (type === "nodeProposals") {
       if (field == "startDate" || field == "endDate") {
         setSemester({ ...semester, nodeProposals: { ...semester.nodeProposals, [field]: String(e.target.value) } });
+      } else if (field == "numPoints") {
+        setSemester({
+          ...semester,
+          nodeProposals: { ...semester.nodeProposals, [field]: Number(e.target.value) },
+        });
       } else {
-        setSemester({ ...semester, nodeProposals: { ...semester.nodeProposals, [field]: Number(e.target.value) } });
+        setSemester({
+          ...semester,
+          nodeProposals: { ...semester.nodeProposals, [field]: Number(parseInt(e.target.value)) },
+        });
       }
     } else if (type === "questionProposals") {
       if (field == "startDate" || field == "endDate") {
@@ -119,10 +114,15 @@ const CourseSetting: InstructorLayoutPage = ({
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: String(e.target.value) },
         });
-      } else {
+      } else if (field == "numPoints") {
         setSemester({
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: Number(e.target.value) },
+        });
+      } else {
+        setSemester({
+          ...semester,
+          questionProposals: { ...semester.questionProposals, [field]: Number(parseInt(e.target.value)) },
         });
       }
     } else if (type === "votes") {
@@ -134,7 +134,7 @@ const CourseSetting: InstructorLayoutPage = ({
       if (e.target) {
         setSemester({
           ...semester,
-          days: Number(e.target.value),
+          days: Number(parseInt(e.target.value)),
         });
       }
     }
@@ -178,76 +178,7 @@ const CourseSetting: InstructorLayoutPage = ({
   };
 
   if (!selectedCourse) {
-    return (
-      <Box sx={{ marginTop: "50px" }}>
-        <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <Grid item xs={12} md={4}>
-            <form
-              onSubmit={formik.handleSubmit}
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "25px" }}
-            >
-              <TextField
-                fullWidth
-                id="courseCode"
-                name="courseCode"
-                label="Course Code"
-                value={formik.values.courseCode}
-                onChange={formik.handleChange}
-                error={formik.touched.courseCode && Boolean(formik.errors.courseCode)}
-                helperText={formik.touched.courseCode && formik.errors.courseCode}
-              />
-
-              <TextField
-                fullWidth
-                id="semesterName"
-                name="semesterName"
-                label="Semester Name"
-                value={formik.values.semesterName}
-                onChange={formik.handleChange}
-                error={formik.touched.semesterName && Boolean(formik.errors.semesterName)}
-                helperText={formik.touched.semesterName && formik.errors.semesterName}
-              />
-
-              <TextField
-                fullWidth
-                id="programName"
-                name="programName"
-                label="Program Name"
-                value={formik.values.programName}
-                onChange={formik.handleChange}
-                error={formik.touched.programName && Boolean(formik.errors.programName)}
-                helperText={formik.touched.programName && formik.errors.programName}
-              />
-
-              <TextField
-                fullWidth
-                id="departmentName"
-                name="departmentName"
-                label="Department Name"
-                value={formik.values.departmentName}
-                onChange={formik.handleChange}
-                error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
-                helperText={formik.touched.departmentName && formik.errors.departmentName}
-              />
-
-              <TextField
-                fullWidth
-                id="universityTitle"
-                name="universityTitle"
-                label="University Title"
-                value={formik.values.universityTitle}
-                onChange={formik.handleChange}
-                error={formik.touched.universityTitle && Boolean(formik.errors.universityTitle)}
-                helperText={formik.touched.universityTitle && formik.errors.universityTitle}
-              />
-              <Button color="primary" variant="contained" fullWidth type="submit">
-                Submit
-              </Button>
-            </form>
-          </Grid>
-        </Grid>
-      </Box>
-    );
+    return <NewCourse institutions={institutions} />;
   }
 
   return (
@@ -268,6 +199,19 @@ const CourseSetting: InstructorLayoutPage = ({
       <Grid sx={{ boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }} container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
+      <Box display="flex" justifyContent="center" alignItems="center">
+        <Button
+          onClick={onSubmitHandler}
+          disabled={!currentSemester}
+          variant="contained"
+          className="btn waves-effect waves-light hoverable green"
+          sx={{
+            color: theme => theme.palette.common.white,
+          }}
+        >
+          Submit
+        </Button>
+      </Box>
     </Box>
   );
 };
