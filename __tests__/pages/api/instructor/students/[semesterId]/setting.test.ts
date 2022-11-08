@@ -412,56 +412,56 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
       }
     });
 
-    it("check if removed node and its usernodes flagged as deleted", async () => {
-      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
-      const semesterData = semesterDoc.data() as ISemester;
+    // it("check if removed node and its usernodes flagged as deleted", async () => {
+    //   const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+    //   const semesterData = semesterDoc.data() as ISemester;
 
-      const items = semesterData.syllabus[0].children?.splice(0, 1) as ISemesterSyllabusItem[];
+    //   const items = semesterData.syllabus[0].children?.splice(0, 1) as ISemesterSyllabusItem[];
 
-      const body = {
-        days: semesterData.days,
-        nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numProposalPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-          numPoints: 1,
-          numQuestionsPerDay: 1,
-          totalDaysOfCourse: 30,
-        },
-        votes: semesterData.votes,
-        syllabus: semesterData.syllabus,
-      } as InstructorSemesterSettingPayload;
+    //   const body = {
+    //     days: semesterData.days,
+    //     nodeProposals: {
+    //       startDate: moment().format("YYYY-MM-DD"),
+    //       endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+    //       numPoints: 1,
+    //       numProposalPerDay: 1,
+    //       totalDaysOfCourse: 30,
+    //     },
+    //     questionProposals: {
+    //       startDate: moment().format("YYYY-MM-DD"),
+    //       endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+    //       numPoints: 1,
+    //       numQuestionsPerDay: 1,
+    //       totalDaysOfCourse: 30,
+    //     },
+    //     votes: semesterData.votes,
+    //     syllabus: semesterData.syllabus,
+    //   } as InstructorSemesterSettingPayload;
 
-      const req: any = HttpMock.createRequest({
-        method: "POST",
-        query: {
-          semesterId: semester.documentId,
-        },
-        body,
-        headers: {
-          authorization: "Bearer " + accessToken,
-        },
-      });
+    //   const req: any = HttpMock.createRequest({
+    //     method: "POST",
+    //     query: {
+    //       semesterId: semester.documentId,
+    //     },
+    //     body,
+    //     headers: {
+    //       authorization: "Bearer " + accessToken,
+    //     },
+    //   });
 
-      const res = HttpMock.createResponse();
-      await settingHandler(req, res as any);
+    //   const res = HttpMock.createResponse();
+    //   await settingHandler(req, res as any);
 
-      const removedNodeId = String(items[0].node);
-      const userNodes = await db
-        .collection("userNodes")
-        .where("user", "==", users[0].uname)
-        .where("node", "==", removedNodeId)
-        .get();
-      for (const userNode of userNodes.docs) {
-        expect(userNode.data()?.deleted).toBeTruthy();
-      }
-    });
+    //   const removedNodeId = String(items[0].node);
+    //   const userNodes = await db
+    //     .collection("userNodes")
+    //     .where("user", "==", users[0].uname)
+    //     .where("node", "==", removedNodeId)
+    //     .get();
+    //   for (const userNode of userNodes.docs) {
+    //     expect(userNode.data()?.deleted).toBeTruthy();
+    //   }
+    // });
   });
 
   afterAll(async () => {
