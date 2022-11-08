@@ -1,9 +1,5 @@
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import SearchIcon from "@mui/icons-material/Search";
 import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
@@ -379,7 +375,8 @@ MainSidebarProps) => {
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
                     sx={{ wordBreak: "normal", padding: "1px", marginLeft: isMenuOpen ? "20px" : "0px" }}
                   >
-                    {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />}
+                    {/* {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />} */}
+                    🔔
                   </Badge>
                   <Box
                     component="span"
@@ -420,7 +417,8 @@ MainSidebarProps) => {
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
                     sx={{ wordBreak: "normal", padding: "1px", marginLeft: isMenuOpen ? "20px" : "0px" }}
                   >
-                    <BookmarkBorderIcon className="material-icons" />
+                    {/* <BookmarkBorderIcon className="material-icons" /> */}
+                    🔖
                   </Badge>
                   <Box
                     component="span"
@@ -461,7 +459,8 @@ MainSidebarProps) => {
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
                     sx={{ padding: "1px", wordBreak: "normal", marginLeft: isMenuOpen ? "20px" : "0px" }}
                   >
-                    <FormatListBulletedIcon />
+                    {/* <FormatListBulletedIcon /> */}
+                    ✏️
                   </Badge>
                   <Box
                     component="span"
