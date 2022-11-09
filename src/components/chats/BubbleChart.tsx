@@ -3,7 +3,9 @@ import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
-import { BubbleStats } from "@/pages/instructors/dashboard";
+import { BubbleStats } from "../../instructorsTypes";
+
+// import { BubbleStats } from "@/pages/instructors/dashboard";
 
 // const columns = ["fruit", "vegetable"];
 
