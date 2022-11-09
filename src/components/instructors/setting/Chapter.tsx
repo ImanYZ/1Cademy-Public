@@ -13,9 +13,9 @@ type Props = {
   chapters: any;
   setChapters: any;
   onSubmitHandler?: any;
-  currentSemester?: any;
+  selectedCourse?: any;
 };
-const Chapter: FC<Props> = ({ chapters, setChapters }) => {
+const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
   const [newChapter, setNewChapter] = useState<boolean>(false);
   const [newSubChapter, setNewSubChapter] = useState<boolean>(false);
@@ -248,7 +248,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
     >
       <Typography variant="h3">Course Syllabus</Typography>
       <Typography variant="h4" mt={5}>
-        S1 106 Introduction to Information Science
+        {selectedCourse}
       </Typography>
       <Box mt={5}>
         <Typography sx={{ color: "#A5A5A5", fontSize: "0.8rem!important" }} variant="h5">

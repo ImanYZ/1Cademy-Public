@@ -1,4 +1,11 @@
-import { ICourseTag, IInstructor, ISemester, ISemesterStudentStat, ISemesterStudentVoteStat } from "./types/ICourse";
+import {
+  ICourseTag,
+  IInstructor,
+  ISemester,
+  ISemesterStudent,
+  ISemesterStudentStat,
+  ISemesterStudentVoteStat,
+} from "./types/ICourse";
 
 export type Instructor = IInstructor;
 
@@ -39,6 +46,7 @@ export type BubbleStats = {
   students: number;
   votes: number;
   points: number;
+  studentsList: ISemesterStudent[];
 };
 
 export type MaxPoints = {

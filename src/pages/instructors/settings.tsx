@@ -1,4 +1,6 @@
-import { Button, Grid } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { Grid } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
@@ -17,6 +19,8 @@ import { InstructorLayoutPage, InstructorsLayout } from "../../components/layout
 
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   const db = getFirestore();
+  const [loaded, setLoaded] = useState(false);
+  const [requestLoader, setRequestLoader] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
@@ -91,6 +95,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
         .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
       setInstitutions(institutionSorted.slice(0, 10));
+      setLoaded(true);
     };
     retrieveInstitutions();
   }, []);
@@ -143,6 +148,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   };
 
   const onSubmitHandler = async () => {
+    setRequestLoader(true);
     let chaptersData = chapters.map((x: any) => {
       return {
         ...x,
@@ -176,9 +182,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     });
     let payload = { ...semester, syllabus: chaptersData };
     let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
+    setRequestLoader(false);
     console.log(response, "response");
   };
-  if (institutions.length == 0) {
+  if (!loaded) {
     return (
       <Box
         className="CenterredLoadingImageContainer"
@@ -204,7 +211,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       <Grid container spacing={5}>
         <Grid item xs={12} md={6}>
           <Chapter
-            currentSemester={currentSemester}
+            selectedCourse={selectedCourse}
             chapters={chapters}
             setChapters={setChapters}
             onSubmitHandler={onSubmitHandler}
@@ -217,25 +224,27 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       <Grid sx={{ boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }} container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <Button
+      <Box display="flex" justifyContent="center" alignItems="center" gap="10px">
+        <LoadingButton
           onClick={onSubmitHandler}
-          disabled={!currentSemester}
+          loading={requestLoader}
           variant="contained"
-          className="btn waves-effect waves-light hoverable green"
+          color="success"
+          loadingIndicator={
+            <CircularProgress
+              sx={{ color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#555") }}
+            />
+          }
           sx={{
             color: theme => theme.palette.common.white,
-            background: "green",
             fontWeight: "bold",
-            padding: "10px 50px",
+            padding: "15px 80px",
             marginTop: "20px",
-            ":hover": {
-              background: "green",
-            },
+            fontSize: "20px",
           }}
         >
           Submit
-        </Button>
+        </LoadingButton>
       </Box>
     </Box>
   );

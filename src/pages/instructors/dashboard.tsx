@@ -219,7 +219,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     // update data in buble
     if (!semesterStudentVoteState.length) return setBubble([]);
 
-    const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semesterStudentVoteState);
+    const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
+      semesterStudentVoteState,
+      students
+    );
     setBubble(bubbleStats);
     setBubbleAxis({
       maxAxisX: maxVote,
@@ -227,7 +230,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       minAxisX: minVote,
       minAxisY: minVotePoints,
     });
-  }, [semesterStudentVoteState]);
+  }, [semesterStudentVoteState, students]);
 
   useEffect(() => {
     // update data in stackbar
@@ -720,28 +723,45 @@ export default withAuthUser({
   shouldRedirectToHomeIfAuthenticated: false,
 })(PageWrapper);
 
-export const getBubbleStats = (data: SemesterStudentVoteStat[]): BubbleStatsData => {
+export const getBubbleStats = (
+  data: SemesterStudentVoteStat[],
+  students: ISemesterStudent[] | null
+): BubbleStatsData => {
   const bubbleStats: BubbleStats[] = [];
   let maxVote: number = 0;
   let maxVotePoints: number = 0;
   let minVote: number = 1000;
   let minVotePoints: number = 1000;
 
+  if (!students)
+    return {
+      bubbleStats,
+      maxVote,
+      maxVotePoints,
+      minVote,
+      minVotePoints,
+    };
   data.map(d => {
     let bubbleStat: BubbleStats = {
       students: 0,
       votes: 0,
       points: 0,
+      studentsList: [],
     };
     const votes = d.votes;
     const votePoints = d.votePoints;
     const index = findBubble(bubbleStats, votes, votePoints);
+
+    const studentObject: ISemesterStudent | undefined = students.find((user: any) => user.uname === d.uname);
+
     if (index >= 0) {
       bubbleStats[index].students += 1;
+      if (studentObject) bubbleStat.studentsList.push(studentObject);
     } else {
       bubbleStat.votes = votes;
       bubbleStat.points = votePoints;
       bubbleStat.students += 1;
+      if (studentObject) bubbleStat.studentsList = [studentObject];
       bubbleStats.push(bubbleStat);
     }
     if (d.votes > maxVote) maxVote = d.votes;
