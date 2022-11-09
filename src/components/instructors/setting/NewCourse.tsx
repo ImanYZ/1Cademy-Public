@@ -1,7 +1,9 @@
-import { Autocomplete, Button, Grid, TextField } from "@mui/material";
+import CreateIcon from "@mui/icons-material/Create";
+import { LoadingButton } from "@mui/lab";
+import { Autocomplete, Grid, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { useFormik } from "formik";
-import { FC, HTMLAttributes } from "react";
+import { FC, HTMLAttributes, useState } from "react";
 import React from "react";
 import { Institution } from "src/knowledgeTypes";
 import * as yup from "yup";
@@ -22,6 +24,7 @@ const validationSchema = yup.object({
 
 const NewCourse: FC<Props> = ({ institutions }) => {
   const [{ user }] = useAuth();
+  const [requestLoader, setRequestLoader] = useState(false);
   const getNameFromInstitutionSelected = () => {
     if (!user?.deInstit) return null;
     const foundInstitution = institutions.find((cur: any) => cur.name === user?.deInstit);
@@ -39,7 +42,9 @@ const NewCourse: FC<Props> = ({ institutions }) => {
     },
     validationSchema: validationSchema,
     onSubmit: async values => {
+      setRequestLoader(true);
       await Post("/instructor/course/create", values);
+      setRequestLoader(false);
     },
   });
   return (
@@ -123,9 +128,22 @@ const NewCourse: FC<Props> = ({ institutions }) => {
               fullWidth
               sx={{ mb: "16px" }}
             />
-            <Button color="primary" variant="contained" fullWidth type="submit">
+            <LoadingButton
+              type="submit"
+              loading={requestLoader}
+              endIcon={<CreateIcon />}
+              loadingPosition="end"
+              variant="contained"
+              sx={{
+                color: theme => theme.palette.common.white,
+                fontWeight: "bold",
+                padding: "15px 80px",
+                marginTop: "20px",
+                fontSize: "15px",
+              }}
+            >
               Create
-            </Button>
+            </LoadingButton>
           </form>
         </Grid>
       </Grid>
