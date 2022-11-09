@@ -183,6 +183,11 @@ function drawChart(
         .style("opacity", 1)
         .style("top", `${e.offsetY + 20}px`)
         .style("left", `${e.offsetX + d.votes}px`);
+    })
+    .on("mouseout", function () {
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
+      tooltip.style("opacity", 0).style("pointer-events", "none");
     });
   // svg
   //   .select("#nums")
