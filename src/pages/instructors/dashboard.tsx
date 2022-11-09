@@ -770,29 +770,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
-    // return (
-    //   <Box
-    //     sx={{
-    //       m: "0 auto",
-    //       height: "calc(100vh - 200px)",
-    //       display: "grid",
-    //       placeItems: "center",
-    //       overflowX: "hidden",
-    //       textAlign: "center",
-    //     }}
-    //   >
-    //     <Typography
-    //       variant="h4"
-    //       sx={{
-    //         fontSize: "36px",
-    //         fontWeight: "400",
-    //         color: theme => (theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)"),
-    //       }}
-    //     >
-    //       There is no data yet <br></br> to show
-    //     </Typography>
-    //   </Box>
-    // );
   }
   if (!currentSemester) return <h1>No data from semester</h1>;
 
@@ -886,17 +863,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
             <>
-              <Legend
-                title={"Completion rate"}
-                options={[
-                  { title: ">100%", color: "#388E3C" },
-                  { title: ">10%", color: "#F9E2D0" },
-                  { title: ">50%", color: "rgb(255, 196, 153)" },
-                  { title: "<=10%", color: "rgb(117, 117, 117)" },
-                  { title: "= 0%", color: "rgb(117, 117, 117)" },
-                ]}
-              />
-              {/* <Box
+              <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -905,30 +872,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 }}
               >
                 <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "15px 1fr 15px 1fr",
-                    alignItems: "center",
-                    columnGap: "2px",
-                    fontSize: "12px",
-                    marginRight: "16px",
-                  }}
-                >
-                  <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
-                  <span>{`> 100%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "#F9E2D0" }} />
-                  <span>{`> 10%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
-                  <span>{`> 50%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "rgb(255, 196, 153)" }} />
-                  <span>{`<= 10%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "rgb(117, 117, 117)" }} />
-                  <span>{`= 0%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "rgb(239, 83, 80)" }} />
-                  <span>{`< 0%`}</span>
-                </Box>
-              </Box> */}
+                <Legend
+                  title={"Completion rate"}
+                  options={[
+                    { title: ">100%", color: "#388E3C" },
+                    { title: ">10%", color: "#F9E2D0" },
+                    { title: ">50%", color: "#A7D841" },
+                    { title: "<=10%", color: "rgb(255, 196, 153)" },
+                    { title: "= 0%", color: "rgb(117, 117, 117)" },
+                    { title: "< 0%", color: "rgb(239, 83, 80)" },
+                  ]}
+                />
+              </Box>
               <BubbleChart
                 data={bubble}
                 width={isMovil ? 220 : 500}
