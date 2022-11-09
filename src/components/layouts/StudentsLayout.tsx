@@ -63,6 +63,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
+  const [queryUname, setQueryUname] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
   // TODO: create useEffect to load semesters
@@ -71,6 +72,13 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
+    const uname = router.query["uname"] as string;
+    console.log("uname", uname);
+    setQueryUname(uname);
+  }, [router.query]);
+
+  useEffect(() => {
+    if (!queryUname) return;
     const allowAccessByRole = async () => {
       if (!user) return;
 
@@ -84,18 +92,18 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       // in this case is instructor he can see all
     };
     allowAccessByRole();
-  }, [router, user, user?.role]);
+  }, [queryUname, router, user, user?.role]);
 
   useEffect(() => {
+    if (!queryUname) return;
     if (!user) return console.warn("Not user found, wait please");
     // window.document.body.classList.remove("Image");
 
-    const studentUsername = "rwilmer";
     console.log("get Semesters", user);
     const getSemesters = async () => {
       console.log("will get semester", 1);
       const semestersRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semestersRef, where("uname", "==", studentUsername));
+      const q = query(semestersRef, where("uname", "==", queryUname));
       const semesterStudentDocs = await getDocs(q);
       if (!semesterStudentDocs.docs.length) {
         // there is not semesters by that user
@@ -147,18 +155,20 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     };
 
     getSemesters();
-  }, [db, router, user]);
+  }, [db, queryUname, router, user]);
 
   useEffect(() => {
+    if (!queryUname) return;
     if (!selectedSemester) return setCourses([]);
 
     console.log("selected semester: will set courses and selected course");
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
     setSelectedCourse(newCourses[0]);
-  }, [allCourses, selectedSemester]);
+  }, [allCourses, queryUname, selectedSemester]);
 
   useEffect(() => {
+    if (!queryUname) return;
     if (!user) return;
     if (!selectedCourse) return;
 
@@ -178,7 +188,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         uTitle: semesterFound.uTitle,
       });
     }
-  }, [allSemesters, selectedCourse, user]);
+  }, [allSemesters, queryUname, selectedCourse, user]);
 
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
