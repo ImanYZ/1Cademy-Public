@@ -1,7 +1,9 @@
 import * as d3 from "d3";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { UserTheme } from "src/knowledgeTypes";
+import { ISemesterStudent } from "src/types/ICourse";
 
-import { StackedBarStats } from "@/pages/instructors/dashboard";
+import { StackedBarStats, StudentStackedBarStats, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
 
 // const columns = ["fruit", "vegetable"];
 const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
@@ -29,7 +31,14 @@ const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
 // const chartWidth = 100;
 // const chartHeight = 100;
 
-function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: number) {
+function drawChart(
+  svgRef: SVGGElement,
+  data: StackedBarStats[],
+  maxAxisY: number,
+  studentProposalsRate: StudentStackedBarStatsObject | null,
+  studentQuestionsRate: StudentStackedBarStatsObject | null,
+  theme: UserTheme
+) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -97,14 +106,37 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
   const stackedData = d3.stack().keys(subgroups)(data);
 
   //tooltip
-  const tooltip = d3.select("#tool-tip");
+  const tooltip = d3.select("#boxplot-tool-tip");
   // .append("div");
   // .style("position", "absolute")
   // .style("opacity", 0)
   // .attr("class", "tooltip")
   // .style("background-color", "#303134")
   // .style("border-radius", "5px")
+
   // .style("padding", "10px");
+
+  const htmlTooltip = (users: ISemesterStudent[]) => {
+    const html = users.map(user => {
+      return `<div class="tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      <img
+        class="tooltip-user-image"
+        src="${user.imageUrl}"
+        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
+        loading="lazy"
+        />
+      <span>
+         ${user.fName}
+
+         ${user.lName}
+      </span></div>
+      `;
+    });
+    const wrapper = `<div id="users-tooltip">
+      ${html.join(" ")}
+    </div>`;
+    return wrapper;
+  };
   svg
 
     .select("#bars")
@@ -122,17 +154,25 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
       if (!_this || !_this.parentNode) return;
       const parentNode = _this.parentNode as any;
       const selectedNode = d3.select(parentNode) as any;
-      const subgroupName = selectedNode.datum().key;
-      const subGroupValue = d.data[subgroupName];
-      const middle = y((d[0] + d[1]) / 2);
+      const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
+      console.log("parentNode", e, d);
+      let html = "";
+      if (d.data.index === 0) {
+        // @ts-ignore
+        html = htmlTooltip(studentProposalsRate[subgroupName]);
+      } else {
+        // @ts-ignore
+        html = htmlTooltip(studentQuestionsRate[subgroupName]);
+      }
+      const middle = e.offsetY;
       d3.select(this)
         .transition()
         .style("fill", color(subgroupName) as string);
       tooltip
-        .html("subgroup: " + subgroupName + "<br>" + "Value" + subGroupValue)
+        .html(`${html}`)
         .style("opacity", 1)
         .style("top", `${middle}px`)
-        .style("left", `${1.6 * x.bandwidth()}px`);
+        .style("left", `${d.data.index === 0 ? 1.7 * x.bandwidth() : 2.95 * x.bandwidth()}px`);
     })
     .on("mouseout", function () {
       const _this = this as any;
@@ -158,40 +198,90 @@ function drawChart(svgRef: SVGGElement, data: StackedBarStats[], maxAxisY: numbe
 
 type StackedBarProps = {
   data: StackedBarStats[];
+  students: ISemesterStudent[] | null;
+  proposalsStudents: StudentStackedBarStats | null;
+  questionsStudents: StudentStackedBarStats | null;
   maxAxisY: number;
+  theme: UserTheme;
 };
-export const PointsBarChart = ({ data, maxAxisY }: StackedBarProps) => {
+export const PointsBarChart = ({
+  data,
+  students,
+  proposalsStudents,
+  questionsStudents,
+  maxAxisY,
+  theme,
+}: StackedBarProps) => {
   //   const svg = useRef<SVGSVGElement>(null);
+  const [studentProposalsRate, setStudentProposalsRate] = useState<StudentStackedBarStatsObject | null>(null);
+  const [studentQuestionsRate, setStudentQuestionsRate] = useState<StudentStackedBarStatsObject | null>(null);
 
   //   useEffect(() => {
   //     console.log("call svg");
   //     drawChart(svg);
   //   }, [svg]);
-
+  console.log("STACKEED", { students, proposalsStudents, questionsStudents });
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data, maxAxisY);
+      drawChart(svgRef, data, maxAxisY, studentProposalsRate, studentQuestionsRate, theme);
     },
-    [data, maxAxisY]
+    [data, maxAxisY, studentProposalsRate, studentQuestionsRate, theme]
   );
+
+  useEffect(() => {
+    console.log("ruuuun");
+    if (!students || !proposalsStudents || !questionsStudents) return;
+
+    const alessEqualTenP = proposalsStudents.alessEqualTen;
+    const bgreaterTen = proposalsStudents.bgreaterTen;
+    const cgreaterFifty = proposalsStudents.cgreaterFifty;
+    const dgreaterHundred = proposalsStudents.dgreaterHundred;
+
+    const alessEqualTenQ = questionsStudents.alessEqualTen;
+    const bgreaterTeQ = questionsStudents.bgreaterTen;
+    const cgreaterFiftQ = questionsStudents.cgreaterFifty;
+    const dgreaterHundreQ = questionsStudents.dgreaterHundred;
+
+    const studentsAlessEqualTenP = students.filter(s => alessEqualTenP.find(x => x === s.uname));
+    const studentBgreaterTen = students.filter(s => bgreaterTen.find(x => x === s.uname));
+    const studentCgreaterFifty = students.filter(s => cgreaterFifty.find(x => x === s.uname));
+    const studentDgreaterHundred = students.filter(s => dgreaterHundred.find(x => x === s.uname));
+
+    const studentsAlessEqualTenQ = students.filter(s => alessEqualTenQ.find(x => x === s.uname));
+    const studentBgreaterTenQ = students.filter(s => bgreaterTeQ.find(x => x === s.uname));
+    const studentCgreaterFiftyQ = students.filter(s => cgreaterFiftQ.find(x => x === s.uname));
+    const studentDgreaterHundredQ = students.filter(s => dgreaterHundreQ.find(x => x === s.uname));
+
+    setStudentProposalsRate({
+      index: 0,
+      alessEqualTen: studentsAlessEqualTenP,
+      bgreaterTen: studentBgreaterTen,
+      cgreaterFifty: studentCgreaterFifty,
+      dgreaterHundred: studentDgreaterHundred,
+    });
+    setStudentQuestionsRate({
+      index: 1,
+      alessEqualTen: studentsAlessEqualTenQ,
+      bgreaterTen: studentBgreaterTenQ,
+      cgreaterFifty: studentCgreaterFiftyQ,
+      dgreaterHundred: studentDgreaterHundredQ,
+    });
+    console.log("lessequal", studentsAlessEqualTenP, studentBgreaterTen, studentCgreaterFifty, studentDgreaterHundred);
+    console.log(
+      "lessequalQ",
+      studentsAlessEqualTenQ,
+      studentBgreaterTenQ,
+      studentCgreaterFiftyQ,
+      studentDgreaterHundredQ
+    );
+  }, [proposalsStudents, questionsStudents, students]);
 
   return (
     <div id="box-plot-container" style={{ position: "relative" }}>
       <svg ref={svg}>
         <g id="bars"></g>
       </svg>
-      <div
-        id="tool-tip"
-        style={{
-          position: "absolute",
-          background: "#303134",
-          // boxShadow: "0 1px 1px 1px black",
-          borderRadius: "5px",
-          opacity: "0",
-          padding: "4px 4px",
-          color: "white",
-        }}
-      ></div>
+      <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
     </div>
   );
 };
