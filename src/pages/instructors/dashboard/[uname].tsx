@@ -99,7 +99,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     // update data in buble
     if (!semesterStudentVoteState.length) return setBubble([]);
 
-    const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semesterStudentVoteState);
+    const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
+      semesterStudentVoteState,
+      students
+    );
     setBubble(bubbleStats);
     setBubbleAxis({
       maxAxisX: maxVote,
@@ -107,7 +110,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       minAxisX: minVote,
       minAxisY: minVotePoints,
     });
-  }, [semesterStudentVoteState]);
+  }, [semesterStudentVoteState, students]);
 
   useEffect(() => {
     // update data in stackbar

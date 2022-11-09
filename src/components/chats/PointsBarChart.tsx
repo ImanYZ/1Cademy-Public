@@ -157,7 +157,7 @@ function drawChart(
       const parentNode = _this.parentNode as any;
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
-      console.log("parentNode", e, d);
+      // console.log("parentNode", e, d);
       let html = "";
       if (d.data.index === 0) {
         // @ts-ignore
