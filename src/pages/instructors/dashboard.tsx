@@ -14,6 +14,7 @@ import { BubbleChart } from "@/components/chats/BubbleChart";
 
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../components/chats/TrendPlot";
+import withAuthUser from "../../components/hoc/withAuthUser";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 export type Chapter = {
   [key: string]: number[];
@@ -1443,14 +1444,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 const PageWrapper = () => {
   return <InstructorsLayout>{props => <Instructors {...props} />}</InstructorsLayout>;
 };
-export default PageWrapper;
 
-// const NodeBook = () => (
-//   <NodeBookProvider>
-//     <Dashboard />
-//   </NodeBookProvider>
-// );
-// export default withAuthUser({
-//   shouldRedirectToLogin: true,
-//   shouldRedirectToHomeIfAuthenticated: false,
-// })(NodeBook);
+// if session: page continue here and managed role by layout
+// if no session redirect to login
+export default withAuthUser({
+  shouldRedirectToLogin: true,
+  shouldRedirectToHomeIfAuthenticated: false,
+})(PageWrapper);

@@ -32,7 +32,7 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
               style={{ fontSize: "1px", marginLeft: "35px" }}
             ></div>
           </Box>
-          <LinkNext href={"#"}>
+          <LinkNext href="#">
             <Link>
               {" "}
               <>{openedProfile?.firstName + openedProfile?.lastName}</>
@@ -43,9 +43,7 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
         <Box sx={{ mr: "30px" }}>{openedProfile?.email}</Box>
         <Button
           variant="contained"
-          onClick={() => {
-            console.log("takemetothe profile");
-          }}
+          href={"#"}
           sx={{
             color: theme => theme.palette.common.white,
             background: theme => theme.palette.common.orange,

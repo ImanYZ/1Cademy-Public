@@ -12,10 +12,10 @@ import React, { useState } from "react";
 type Props = {
   chapters: any;
   setChapters: any;
-  onSubmitHandler: any;
-  currentSemester: any;
+  onSubmitHandler?: any;
+  currentSemester?: any;
 };
-const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSemester }) => {
+const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
   const [newChapter, setNewChapter] = useState<boolean>(false);
   const [newSubChapter, setNewSubChapter] = useState<boolean>(false);
@@ -242,7 +242,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
   return (
     <Box
       sx={{
-        padding: "40px 40px 80px 40px",
+        padding: "40px 40px 40px 40px",
         boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
       }}
     >
@@ -266,7 +266,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
               <Box key={chapter.node}>
                 {chapter.editable ? (
                   <TextField
-                    placeholder="Add new subchapter"
+                    placeholder="Edit chapter"
                     variant="standard"
                     fullWidth
                     value={newChapterEditText}
@@ -374,7 +374,6 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
                           style={{
                             borderLeft: "dotted 1px black",
                             paddingLeft: "10px",
-                            paddingBottom: "8px",
                           }}
                         >
                           {chapter.children &&
@@ -383,7 +382,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
                                 return (
                                   <Box key={subChapter.node}>
                                     <TextField
-                                      placeholder="Edit new subchapter"
+                                      placeholder="Edit subchapter"
                                       variant="standard"
                                       fullWidth
                                       value={newSubChapterEditText}
@@ -442,7 +441,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
                               return (
                                 <Box
                                   key={subChapter.node}
-                                  style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+                                  style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}
                                 >
                                   <Typography sx={{ width: "auto" }}>
                                     Ch. {index + 1}.{subIndex + 1} {subChapter.title}
@@ -614,19 +613,6 @@ const Chapter: FC<Props> = ({ chapters, setChapters, onSubmitHandler, currentSem
           onClick={() => setNewChapter(true)}
         >
           Add new chapter
-        </Button>
-      </Box>
-      <Box display="flex" justifyContent="flex-end" alignItems="flex-end">
-        <Button
-          onClick={onSubmitHandler}
-          disabled={!currentSemester}
-          variant="contained"
-          className="btn waves-effect waves-light hoverable green"
-          sx={{
-            color: theme => theme.palette.common.white,
-          }}
-        >
-          Submit
         </Button>
       </Box>
     </Box>

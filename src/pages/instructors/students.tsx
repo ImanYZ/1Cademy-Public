@@ -19,31 +19,14 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import {
-  /* addDoc, */
-  collection,
-  /*   doc,
-  DocumentData,
-  getDoc,*/
-  getDocs,
-  getFirestore,
-  /*   limit, */
-  onSnapshot,
-  query,
-  /*  Query,
-  setDoc,
-  Timestamp,
-  updateDoc,
-   */
-  where,
-  /*   writeBatch, */
-} from "firebase/firestore";
+import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
-import CSVBtn from "../../components/instructors/CSVBtn";
+import { postWithToken } from "../../../src/lib/mapApi";
+import CSVBtn from "../../components/CSVBtn";
 import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
@@ -52,7 +35,7 @@ const filterChoices: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newPorposals",
+  "New Proposals": "newProposals",
   "Edit Node Proposals": "editNodeProposals",
   "Proposals Points": "proposalsPoints",
   Questions: "questions",
@@ -69,7 +52,7 @@ const columns: string[] = [
   "wrongs",
   "corrects",
   "awards",
-  "newPorposals",
+  "newProposals",
   "editNodeProposals",
   "proposalsPoints",
   "questions",
@@ -105,7 +88,7 @@ const keysColumns: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newPorposals",
+  "New Proposals": "newProposals",
   "Edit Node Proposals": "editNodeProposals",
   "Proposals Points": "proposalsPoints",
   Questions: "questions",
@@ -116,6 +99,7 @@ const keysColumns: any = {
 };
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
+  const [rows, setRows] = useState<any>([]);
   const [tableRows, setTableRows] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -135,6 +119,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [savedTableState, setSavedTableState] = useState([]);
   const [states, setStates] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [usersStatus, setUsersStatus] = useState([]);
   const open = Boolean(anchorEl);
   const db = getFirestore();
 
@@ -148,15 +133,26 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     if (!currentSemester) return;
     const getStats = async () => {
       const semestersStatsRef = collection(db, "semesterStudentVoteStats");
+      const statusRef = collection(db, "status");
+      const qeStatus = query(statusRef);
+      const statusDoc = await getDocs(qeStatus);
       const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
       const semestersStatsDoc = await getDocs(qe);
       let statsData: any = [];
+      let status: any = [];
       if (semestersStatsDoc.docs.length > 0) {
         for (let doc of semestersStatsDoc.docs) {
           const data = doc.data();
           statsData.push(data);
         }
       }
+      if (statusDoc.docs.length > 0) {
+        for (let doc of statusDoc.docs) {
+          const data = doc.data();
+          status.push(data);
+        }
+      }
+      setUsersStatus(status);
       setStates(statsData);
     };
     getStats();
@@ -166,59 +162,59 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     if (!db) return;
     if (!currentSemester) return;
     if (states.length === 0) return;
-    console.log(":::::: :: ::: states :::: ", states);
     const semestersRef = collection(db, "semesters");
     const q = query(semestersRef, where("tagId", "==", currentSemester.tagId));
     const semestersSnapshot = onSnapshot(q, async snapshot => {
-      // console.log("on snapshot");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
       for (let change of docChanges) {
         if (change.type === "added" || change.type === "modified") {
           const _students = change.doc.data().students;
+          const { numPoints, numProposalPerDay } = change.doc.data().nodeProposals;
           const _rows: any = [];
           for (let student of _students) {
             const stats: any = states.filter((elm: any) => elm.uname === student.uname)[0];
-            console.log(stats);
+            const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
             _rows.push({
               id: student.uname,
               username: student.uname,
               avatar: student.imageUrl,
-              online: true,
+              online: userStat?.state,
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
-              totalPoints: stats.totalPoints || 0,
-              corrects: stats.corrects || 0,
-              wrongs: stats.wrongs || 0,
-              awards: stats.awards || 0,
-              newPorposals: stats.newPorposals || 0,
-              editNodeProposals: stats.editNodeProposals || 0,
-              proposalsPoints: stats.proposalsPoints || 0,
-              questions: stats.questions || 0,
-              questionPoints: stats.questionPoints || 0,
-              vote: stats.vote || 0,
-              votePoints: stats.votePoints || 0,
+              totalPoints: stats?.totalPoints || 0,
+              newProposals: stats?.newNodes || 0,
+              editNodeProposals: stats?.improvements || 0,
+              proposalsPoints: stats?.improvements * (numPoints / numProposalPerDay) || 0, //TO-DO
+              corrects: stats?.upVotes || 0,
+              wrongs: stats?.downVotes || 0,
+              awards: stats?.instVotes || 0,
+              questions: stats?.questions || 0,
+              questionPoints: stats?.questionPoints || 0,
+              vote: stats?.votes || 0,
+              votePoints: stats?.votePoints || 0,
               lastActivity: new Date(
-                stats.lastActivity.seconds * 1000 + stats.lastActivity.nanoseconds / 1000000
+                stats?.lastActivity.seconds * 1000 + stats?.lastActivity.nanoseconds / 1000000
               ).toLocaleDateString(),
             });
           }
           setTableRows(_rows.slice());
+          setRows(_rows.slice());
         }
       }
     });
     return () => {
       semestersSnapshot();
     };
-  }, [db, states, currentSemester]);
+  }, [db, states, currentSemester, usersStatus]);
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
 
   //this to filter the results
   const handleFilterBy = (filters: any, fromDash: boolean) => {
-    let _tableRows = tableRows.slice();
+    let _tableRows = rows.slice();
     for (let filter of filters) {
       if (filter.operation === "<") {
         _tableRows = _tableRows.filter((row: any) => row[filterChoices[filter.title]] <= filter.value);
@@ -314,7 +310,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     handleOpenCloseProfile();
   };
 
-  const saveTableChanges = () => {
+  const saveTableChanges = async () => {
     const _tableRow: any = tableRows.slice();
     let students = [];
 
@@ -332,8 +328,14 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       });
     }
     const payloadAPI = { students };
-    console.log(payloadAPI);
     setEditMode(!editMode);
+    if (!currentSemester) return;
+    const mapUrl = "/instructor/students/" + currentSemester.tagId + "/signup";
+    try {
+      await postWithToken(mapUrl, payloadAPI);
+    } catch (error) {
+      console.log(error);
+    }
     return;
   };
 
@@ -348,12 +350,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     event.preventDefault();
     let _tableRows: any = tableRows.slice();
     _tableRows[index][column] = event.target.value;
-    console.log({ column, index, tableRow: _tableRows[index][column] });
     setTableRows([..._tableRows]);
   };
 
   const handleClick = (colmn: any, event: any) => {
-    // console.log("handleClick", colmn);
     setSelectedColumn(keysColumns[colmn]);
     setAnchorEl(event.currentTarget);
   };
@@ -409,7 +409,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const searchByNameEmail = (newValue: string) => {
-    const _tableRows = tableRows.slice();
+    const _tableRows = rows.slice();
 
     const newTable = _tableRows.filter((row: any) => {
       return (
@@ -512,9 +512,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-around",
-          width: "100%",
           height: "100%",
-          px: "20px",
+          maxWidth: "1384px",
+          py: "10px",
+          m: "auto",
+          px: { xs: "10px", xl: "0px" },
         }}
       >
         <Box sx={{}}>
@@ -531,17 +533,17 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 alignItems: "center",
                 width: "500px",
                 flexDirection: "row",
-                px: "15px",
+                gap: "15px",
               }}
             >
-              <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h1" component="h2">
+              <Typography sx={{ fontFamily: "math" }} variant="h4" component="h2">
                 {selectedCourse}
               </Typography>
               <Typography sx={{ fontFamily: "fangsong" }} component="h2">
                 Students:
               </Typography>
               <Typography sx={{ fontFamily: "fangsong" }} component="h2">
-                {tableRows.length}
+                {rows.length}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row", paddingBottom: "15px" }}>
@@ -610,7 +612,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       my: { xs: "0px", md: "auto" },
                       mt: { xs: "15px", md: "auto" },
                       marginLeft: { xs: "0px", md: "32px" },
-                      marginRight: "40px",
                       paddingX: "30px",
                       borderRadius: 1,
                       textAlign: "center",
@@ -759,6 +760,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       </Popover>
                     </TableCell>
                   ))}
+                  {editMode && <TableCell>{""}</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -848,7 +850,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   fontWeight: "700",
                   my: { xs: "0px", md: "auto" },
                   mt: { xs: "15px", md: "auto" },
-                  marginLeft: { xs: "0px", md: "32px" },
                   marginRight: "40px",
                   paddingX: "30px",
                   borderRadius: 1,
@@ -883,6 +884,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 variant="text"
                 sx={{
                   color: theme => theme.palette.common.white,
+                  background: theme => theme.palette.common.black,
                   fontSize: 16,
                   fontWeight: "700",
                   my: { xs: "0px", md: "auto" },
@@ -906,7 +908,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   fontWeight: "700",
                   my: { xs: "0px", md: "auto" },
                   marginLeft: { xs: "0px", md: "32px" },
-                  marginRight: "40px",
                   paddingX: "30px",
                   borderRadius: 1,
                   textAlign: "center",

@@ -1,42 +1,47 @@
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { Box } from "@mui/system";
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { Institution } from "src/knowledgeTypes";
 
 import { Post } from "@/lib/mapApi";
 
+import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import Chapter from "../../components/instructors/setting/Chapter";
+import NewCourse from "../../components/instructors/setting/NewCourse";
 import Proposal from "../../components/instructors/setting/Proposal";
 import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
+
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
-  console.log(currentSemester, "currentSemester");
   const db = getFirestore();
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
     syllabus: [],
-    days: 0,
+    days: 100,
     nodeProposals: {
       startDate: "",
       endDate: "",
-      numPoints: 0,
-      numProposalPerDay: 0,
-      totalDaysOfCourse: 0,
+      numPoints: 1,
+      numProposalPerDay: 1,
+      totalDaysOfCourse: 50,
     },
     questionProposals: {
       startDate: "",
       endDate: "",
-      numPoints: 0,
-      numQuestionsPerDay: 0,
-      totalDaysOfCourse: 0,
+      numPoints: 1,
+      numQuestionsPerDay: 1,
+      totalDaysOfCourse: 50,
     },
     votes: {
-      pointIncrementOnAgreement: 0,
-      pointDecrementOnAgreement: 0,
-      onReceiveVote: 0,
-      onReceiveDownVote: 0,
-      onReceiveStar: 0,
+      pointIncrementOnAgreement: 1,
+      pointDecrementOnAgreement: 1,
+      onReceiveVote: 1,
+      onReceiveDownVote: 1,
+      onReceiveStar: 1,
     },
   });
 
@@ -52,13 +57,13 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
               syllabus: semester.syllabus,
               nodeProposals: {
                 ...semester.nodeProposals,
-                startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-DD-MM"),
-                endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-DD-MM"),
+                startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-MM-DD"),
               },
               questionProposals: {
                 ...semester.questionProposals,
-                startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-DD-MM"),
-                endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-DD-MM"),
+                startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-MM-DD"),
               },
               votes: semester.votes,
             };
@@ -70,12 +75,40 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     }
   }, [selectedSemester, selectedCourse, currentSemester]);
 
+  useEffect(() => {
+    const retrieveInstitutions = async () => {
+      const db = getFirestore();
+      const institutionsRef = collection(db, "institutions");
+      const q = query(institutionsRef);
+
+      const querySnapshot = await getDocs(q);
+      let institutions: Institution[] = [];
+      querySnapshot.forEach(doc => {
+        institutions.push({ id: doc.id, ...doc.data() } as Institution);
+      });
+
+      const institutionSorted = institutions
+        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
+        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+      setInstitutions(institutionSorted.slice(0, 10));
+    };
+    retrieveInstitutions();
+  }, []);
+
   const inputsHandler = (e: any, type: any, field: any = null) => {
     if (type === "nodeProposals") {
       if (field == "startDate" || field == "endDate") {
         setSemester({ ...semester, nodeProposals: { ...semester.nodeProposals, [field]: String(e.target.value) } });
+      } else if (field == "numPoints") {
+        setSemester({
+          ...semester,
+          nodeProposals: { ...semester.nodeProposals, [field]: Number(e.target.value) },
+        });
       } else {
-        setSemester({ ...semester, nodeProposals: { ...semester.nodeProposals, [field]: Number(e.target.value) } });
+        setSemester({
+          ...semester,
+          nodeProposals: { ...semester.nodeProposals, [field]: Number(parseInt(e.target.value)) },
+        });
       }
     } else if (type === "questionProposals") {
       if (field == "startDate" || field == "endDate") {
@@ -83,10 +116,15 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: String(e.target.value) },
         });
-      } else {
+      } else if (field == "numPoints") {
         setSemester({
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: Number(e.target.value) },
+        });
+      } else {
+        setSemester({
+          ...semester,
+          questionProposals: { ...semester.questionProposals, [field]: Number(parseInt(e.target.value)) },
         });
       }
     } else if (type === "votes") {
@@ -98,7 +136,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       if (e.target) {
         setSemester({
           ...semester,
-          days: Number(e.target.value),
+          days: Number(parseInt(e.target.value)),
         });
       }
     }
@@ -140,6 +178,26 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
     console.log(response, "response");
   };
+  if (institutions.length == 0) {
+    return (
+      <Box
+        className="CenterredLoadingImageContainer"
+        sx={{ background: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F5F5F5") }}
+      >
+        <Image
+          className="CenterredLoadingImage"
+          loading="lazy"
+          src={LoadingImg}
+          alt="Loading"
+          width={250}
+          height={250}
+        />
+      </Box>
+    );
+  }
+  if (!selectedCourse) {
+    return <NewCourse institutions={institutions} />;
+  }
 
   return (
     <Box sx={{ padding: "20px" }}>
@@ -159,6 +217,26 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       <Grid sx={{ boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }} container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
+      <Box display="flex" justifyContent="center" alignItems="center">
+        <Button
+          onClick={onSubmitHandler}
+          disabled={!currentSemester}
+          variant="contained"
+          className="btn waves-effect waves-light hoverable green"
+          sx={{
+            color: theme => theme.palette.common.white,
+            background: "green",
+            fontWeight: "bold",
+            padding: "10px 50px",
+            marginTop: "20px",
+            ":hover": {
+              background: "green",
+            },
+          }}
+        >
+          Submit
+        </Button>
+      </Box>
     </Box>
   );
 };
