@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
-import { User } from "src/knowledgeTypes";
+import { User, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
 
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
@@ -40,6 +40,7 @@ type InstructorsLayoutPageProps = {
   selectedCourse: string | null;
   user: User;
   currentSemester: ICourseTag | null;
+  settings: UserSettings;
   isLoading: boolean;
   setIsLoading: (newIsLoading: boolean) => void;
 };
@@ -51,7 +52,7 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
   getLayout?: (page: InstructorLayoutPage) => ReactNode;
 };
 export const StudentsLayout: FC<Props> = ({ children }) => {
-  const [{ user }] = useAuth();
+  const [{ user, settings }] = useAuth();
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -225,6 +226,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         currentSemester,
         isLoading,
         setIsLoading: (newIsLoading: boolean) => setIsLoading(newIsLoading),
+        settings,
       })}
     </Box>
   );

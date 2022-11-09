@@ -1,6 +1,5 @@
 // import PlaceIcon from "@mui/icons-material/Place";
-import SquareIcon from "@mui/icons-material/Square";
-import { Divider, Paper, Skeleton, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
+import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
@@ -12,9 +11,16 @@ import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
 
+import { Legend } from "../../components/chats/Legend";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../components/chats/TrendPlot";
 import withAuthUser from "../../components/hoc/withAuthUser";
+import { GeneralPlotStats } from "../../components/instructors/dashboard/GeneralPlotStats";
+import { NoDataMessage } from "../../components/instructors/NoDataMessage";
+import { BubblePlotStatsSkeleton } from "../../components/instructors/skeletons/BubblePlotStatsSkeleton";
+import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons/GeneralPlotStatsSkeleton";
+import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
+import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 export type Chapter = {
   [key: string]: number[];
@@ -735,6 +741,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     });
     return trends;
   };
+
+  const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
+  const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
+  const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
   // (dayStat.day as any).toDate()
   // useEffect(()=>{
 
@@ -758,222 +768,33 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   // useEffect(() => {}, [isSmall, isMedium]);
 
-  const formatNumber = (num: number | undefined) => {
-    try {
-      if (!num) return 0;
-      return num.toLocaleString("en-US");
-    } catch (error) {
-      return num;
-    }
-  };
-
-  const GeneralPlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Skeleton variant="rectangular" sx={{ width: "100px", height: "32px", borderRadius: "20px" }} />
-          <Skeleton variant="rectangular" sx={{ width: "50px", height: "20px", borderRadius: "20px" }} />
-          <Skeleton variant="rectangular" sx={{ width: "70px", height: "20px", borderRadius: "20px" }} />
-        </Box>
-        <Skeleton variant="rectangular" sx={{ width: "100%", height: "16px", borderRadius: "20px", marginY: "16px" }} />
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr ",
-            justifyContent: "space-between",
-            alignItems: "end",
-            gap: "40px",
-          }}
-        >
-          {new Array(12).fill(0).map((x, i) => (
-            <Skeleton
-              key={i}
-              variant="rectangular"
-              sx={{
-                width: i % 2 === 0 ? "150px" : "30px",
-                height: "20px",
-                borderRadius: "20px",
-                justifySelf: i % 2 === 0 ? "start" : "end",
-              }}
-            />
-          ))}
-        </Box>
-      </Box>
-    );
-  };
-  const StackedBarPlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
-          <Skeleton variant="rectangular" sx={{ width: "100px", height: "20px", borderRadius: "20px" }} />
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "20px", borderRadius: "20px", justifySelf: "end" }}
-          />
-          <Skeleton variant="rectangular" sx={{ width: "100px", height: "20px", borderRadius: "20px" }} />
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "40px", borderRadius: "20px", justifySelf: "end" }}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr ",
-            justifyContent: "center",
-            alignItems: "end",
-            gap: "20px",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "70px",
-              height: "370px",
-              borderRadius: "2px",
-              marginY: "16px",
-              justifySelf: "end",
-              marginBottom: "2px",
-            }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "70px",
-              height: "370px",
-              borderRadius: "2px",
-              marginY: "16px",
-              justifySelf: "start",
-              marginBottom: "2px",
-            }}
-          />
-        </Box>
-      </Box>
-    );
-  };
-  const BubblePlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "20px", borderRadius: "20px", justifySelf: "end" }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "40px", borderRadius: "20px", justifySelf: "end" }}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            justifyContent: "center",
-            alignItems: "end",
-            gap: "20px",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "100%",
-              height: "400px",
-              borderRadius: "5px",
-              marginY: "16px",
-              justifySelf: "end",
-              marginBottom: "2px",
-            }}
-          />
-        </Box>
-      </Box>
-    );
-  };
-
-  const StudentDailyPlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            justifyContent: "center",
-            alignItems: "end",
-            gap: "8px",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: isMovil ? "300px" : isTablet ? "600px" : "1045px",
-              height: isMovil ? "120px" : isTablet ? "250px" : "354px",
-              borderRadius: "5px",
-              justifySelf: "center",
-              margin: "0",
-            }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "30px",
-              height: "16px",
-              borderRadius: "15px",
-              justifySelf: "center",
-              margin: "2px",
-            }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: isMovil ? "300px" : isTablet ? "600px" : "1045px",
-              height: isMovil ? "50px" : isTablet ? "120px" : "160px",
-              borderRadius: "5px",
-              justifySelf: "center",
-              marginBottom: "0",
-            }}
-          />
-        </Box>
-      </Box>
-    );
-  };
-
   if (!thereIsData && !isLoading) {
-    return (
-      <Box
-        sx={{
-          m: "0 auto",
-          height: "calc(100vh - 200px)",
-          display: "grid",
-          placeItems: "center",
-          overflowX: "hidden",
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            fontSize: "36px",
-            fontWeight: "400",
-            color: settings.theme === "Light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-          }}
-        >
-          There is no data yet <br></br> to show
-        </Typography>
-      </Box>
-    );
+    return <NoDataMessage />;
+    // return (
+    //   <Box
+    //     sx={{
+    //       m: "0 auto",
+    //       height: "calc(100vh - 200px)",
+    //       display: "grid",
+    //       placeItems: "center",
+    //       overflowX: "hidden",
+    //       textAlign: "center",
+    //     }}
+    //   >
+    //     <Typography
+    //       variant="h4"
+    //       sx={{
+    //         fontSize: "36px",
+    //         fontWeight: "400",
+    //         color: theme => (theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)"),
+    //       }}
+    //     >
+    //       There is no data yet <br></br> to show
+    //     </Typography>
+    //   </Box>
+    // );
   }
+  if (!currentSemester) return <h1>No data from semester</h1>;
 
   return (
     <Box
@@ -1003,63 +824,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
-            <Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  columnGap: "8px",
-                  color: "white",
-                }}
-              >
-                <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>
-                  {currentSemester?.cTitle.split(" ")[0]}{" "}
-                </Typography>
-                <Typography>{currentSemester?.title}</Typography>
-                <Typography> {studentsCounter !== 0 ? `Students: ${studentsCounter}` : ""}</Typography>
-              </Box>
-              <Typography>{currentSemester?.pTitle}</Typography>
-              <Divider />
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 64px",
-                  justifyContent: "center",
-                  alignItems: "end",
-                  py: "12px",
-                  textAlign: "center",
-                  columnGap: "16px",
-                }}
-              >
-                <Typography style={{ color: "#303134" }}></Typography>
-                <span>Numbers</span>
-              </Box>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 64px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  columnGap: "16px",
-                  rowGap: "24px",
-                }}
-              >
-                <span style={{ textAlign: "left" }}>New Node Proposals</span>
-                <span>{formatNumber(semesterStats?.newNodeProposals)}</span>
-                <span style={{ textAlign: "left" }}>Edit Proposals</span>
-                <span>{formatNumber(semesterStats?.editProposals)}</span>
-                <span style={{ textAlign: "left" }}>Links</span>
-                <span>{formatNumber(semesterStats?.links)}</span>
-                <span style={{ textAlign: "left" }}>Nodes</span>
-                <span>{formatNumber(semesterStats?.nodes)}</span>
-                <span style={{ textAlign: "left" }}>Votes</span>
-                <span>{formatNumber(semesterStats?.votes)}</span>
-                <span style={{ textAlign: "left" }}>Questions</span>
-                <span>{formatNumber(semesterStats?.questions)}</span>
-              </Box>
-            </Box>
+            <GeneralPlotStats
+              courseTitle={currentSemester.cTitle.split(" ")[0]}
+              programTitle={currentSemester.pTitle}
+              semesterStats={semesterStats}
+              semesterTitle={currentSemester.title}
+              studentsCounter={studentsCounter}
+            />
           )}
         </Paper>
         <Paper
@@ -1088,27 +859,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
                   <Typography># of Students</Typography>
                 </Box>
-                <Box>
-                  <Typography sx={{ fontSize: "12px" }}>Completion rate</Typography>
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "15px 1fr 15px 1fr",
-                      alignItems: "center",
-                      columnGap: "2px",
-                      fontSize: "12px",
-                    }}
-                  >
-                    <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
-                    <span>{`>100%`}</span>
-                    <SquareIcon fontSize="inherit" sx={{ fill: "#F9E2D0" }} />
-                    <span>{`>10%`}</span>
-                    <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
-                    <span>{`>50%`}</span>
-                    <SquareIcon fontSize="inherit" sx={{ fill: "rgba(255, 196, 153, 0.75)" }} />
-                    <span>{`<=10%`}</span>
-                  </Box>
-                </Box>
+                <Legend
+                  title={"Completion rate"}
+                  options={[
+                    { title: ">100%", color: "#388E3C" },
+                    { title: ">10%", color: "#F9E2D0" },
+                    { title: ">50%", color: "#A7D841" },
+                    { title: "<=10%", color: "rgba(255, 196, 153, 0.75)" },
+                  ]}
+                />
               </Box>
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
@@ -1127,7 +886,17 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
             <>
-              <Box
+              <Legend
+                title={"Completion rate"}
+                options={[
+                  { title: ">100%", color: "#388E3C" },
+                  { title: ">10%", color: "#F9E2D0" },
+                  { title: ">50%", color: "rgb(255, 196, 153)" },
+                  { title: "<=10%", color: "rgb(117, 117, 117)" },
+                  { title: "= 0%", color: "rgb(117, 117, 117)" },
+                ]}
+              />
+              {/* <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -1159,7 +928,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   <SquareIcon fontSize="inherit" sx={{ fill: "rgb(239, 83, 80)" }} />
                   <span>{`< 0%`}</span>
                 </Box>
-              </Box>
+              </Box> */}
               <BubbleChart
                 data={bubble}
                 width={isMovil ? 220 : 500}
@@ -1294,9 +1063,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               width: "100%",
             }}
           >
-            <StudentDailyPlotStatsSkeleton />
+            <StudentDailyPlotStatsSkeleton isMovil={isMovil} isTablet={isTablet} />
           </Paper>
         )}
+
         {!isLoading && (
           <>
             <Paper
@@ -1309,12 +1079,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Edit proposals"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1336,12 +1103,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Links"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1363,12 +1127,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Nodes"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1390,12 +1151,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Votes"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1417,12 +1175,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Questions"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
