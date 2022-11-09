@@ -19,6 +19,7 @@ export const GeneralPlotStats = ({
   programTitle,
   courseTitle,
 }: GeneralPlotStatsProps) => {
+  console.log("semesterStats", semesterStats);
   return (
     <Box>
       <Box

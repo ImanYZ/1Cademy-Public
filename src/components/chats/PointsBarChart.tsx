@@ -3,7 +3,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
-import { StackedBarStats, StudentStackedBarStats, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
+import { StudentStackedBarStats, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
+
+import { StackedBarStats } from "../../instructorsTypes";
 
 // const columns = ["fruit", "vegetable"];
 const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";

@@ -4,8 +4,17 @@ import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
-import { SemesterStudentStat, SemesterStudentVoteStat, Trends } from "src/instructorsTypes";
+import { useEffect, useState } from "react";
+import {
+  BubbleAxis,
+  BubbleStats,
+  MaxPoints,
+  SemesterStats,
+  SemesterStudentStat,
+  SemesterStudentVoteStat,
+  StackedBarStats,
+  Trends,
+} from "src/instructorsTypes";
 import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
@@ -22,6 +31,7 @@ import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons
 import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
+import { getSemStat, getStackedBarStat } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
 };
@@ -75,13 +85,13 @@ export type BoxData = {
 //   num: number;
 // };
 
-export type StackedBarStats = {
-  index: number;
-  alessEqualTen: number;
-  bgreaterTen: number;
-  cgreaterFifty: number;
-  dgreaterHundred: number;
-};
+// export type StackedBarStats = {
+//   index: number;
+//   alessEqualTen: number;
+//   bgreaterTen: number;
+//   cgreaterFifty: number;
+//   dgreaterHundred: number;
+// };
 export type StudentStackedBarStats = {
   index: number;
   alessEqualTen: string[];
@@ -102,11 +112,11 @@ export type StackedBarStatsData = {
   studentStackedBarQuestionsStats: StudentStackedBarStats;
 };
 
-export type BubbleStats = {
-  students: number;
-  votes: number;
-  points: number;
-};
+// export type BubbleStats = {
+//   students: number;
+//   votes: number;
+//   points: number;
+// };
 
 type BubbleStatsData = {
   bubbleStats: BubbleStats[];
@@ -116,19 +126,10 @@ type BubbleStatsData = {
   minVotePoints: number;
 };
 
-type SemesterStats = {
-  newNodeProposals: number;
-  editProposals: number;
-  links: number;
-  nodes: number;
-  votes: number;
-  questions: number;
-};
-
-type MaxPoints = {
-  maxProposalsPoints: number;
-  maxQuestionsPoints: number;
-};
+// type MaxPoints = {
+//   maxProposalsPoints: number;
+//   maxQuestionsPoints: number;
+// };
 
 // const BoxLegend = () => {
 //   return (
@@ -169,10 +170,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStats | null>(null);
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
-  const [maxBubbleAxisX, setMaxBubbleAxisX] = useState<number>(0);
-  const [maxBubbleAxisY, setMaxBubbleAxisY] = useState<number>(0);
-  const [minBubbleAxisX, setMinBubbleAxisX] = useState<number>(0);
-  const [minBubbleAxisY, setMinBubbleAxisY] = useState<number>(0);
+  const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
   const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
   const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
@@ -186,367 +184,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   //No stats data
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
-  const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStatsData => {
-    const bubbleStats: BubbleStats[] = [];
-    let maxVote: number = 0;
-    let maxVotePoints: number = 0;
-    let minVote: number = 1000;
-    let minVotePoints: number = 1000;
-
-    data.map(d => {
-      let bubbleStat: BubbleStats = {
-        students: 0,
-        votes: 0,
-        points: 0,
-      };
-      const votes = d.votes;
-      const votePoints = d.votePoints;
-      const index = findBubble(bubbleStats, votes, votePoints);
-      if (index >= 0) {
-        bubbleStats[index].students += 1;
-      } else {
-        bubbleStat.votes = votes;
-        bubbleStat.points = votePoints;
-        bubbleStat.students += 1;
-        bubbleStats.push(bubbleStat);
-      }
-      if (d.votes > maxVote) maxVote = d.votes;
-      if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
-      if (d.votes < minVote) minVote = d.votes;
-      if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
-    });
-    return {
-      bubbleStats,
-      maxVote,
-      maxVotePoints,
-      minVote,
-      minVotePoints,
-    };
-  }, []);
-
-  const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
-    const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
-    return index;
-  };
-
-  const getStackedBarStat = useCallback(
-    (data: SemesterStudentVoteStat[]): StackedBarStatsData => {
-      const stackedBarStats: StackedBarStats[] = [];
-      const studentProposalsRate: StudentStackedBarStats = {
-        index: 0,
-        alessEqualTen: [],
-        bgreaterTen: [],
-        cgreaterFifty: [],
-        dgreaterHundred: [],
-      };
-      const studentQuestionsRate: StudentStackedBarStats = {
-        index: 1,
-        alessEqualTen: [],
-        bgreaterTen: [],
-        cgreaterFifty: [],
-        dgreaterHundred: [],
-      };
-      const ProposalsRate: StackedBarStats = {
-        index: 0,
-        alessEqualTen: 0,
-        bgreaterTen: 0,
-        cgreaterFifty: 0,
-        dgreaterHundred: 0,
-      };
-      const QuestionsRate: StackedBarStats = {
-        index: 1,
-        alessEqualTen: 0,
-        bgreaterTen: 0,
-        cgreaterFifty: 0,
-        dgreaterHundred: 0,
-      };
-
-      // const mock = [
-      //   {
-      //     votes: 217,
-      //     links: 46,
-      //     newNodes: 190,
-      //     votePoints: 97,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     totalPoints: 350,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     questionPoints: 153,
-      //     improvements: 77,
-      //     questions: 153,
-      //     upVotes: 1602,
-      //     lastActivity: {
-      //       seconds: 1617840000,
-      //       nanoseconds: 0,
-      //     },
-      //     disagreementsWithInst: 60,
-      //     deleted: false,
-      //     instVotes: 11,
-      //     downVotes: 1200,
-      //     uname: "johnwisniewski",
-      //     agreementsWithInst: 157,
-      //   },
-      //   {
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     upVotes: 2849,
-      //     disagreementsWithInst: 69,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     newNodes: 205,
-      //     links: 41,
-      //     downVotes: 625,
-      //     questions: 174,
-      //     agreementsWithInst: 173,
-      //     instVotes: 151,
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     totalPoints: 350,
-      //     deleted: false,
-      //     questionPoints: 60,
-      //     uname: "ironhulk19",
-      //     improvements: 90,
-      //     votes: 242,
-      //     votePoints: 104,
-      //   },
-      //   {
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 755000000,
-      //     },
-      //     questions: 216,
-      //     newNodes: 258,
-      //     agreementsWithInst: 194,
-      //     deleted: false,
-      //     questionPoints: 150,
-      //     upVotes: 2176,
-      //     votePoints: 108,
-      //     downVotes: 1979,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     improvements: 93,
-      //     links: 43,
-      //     totalPoints: 402,
-      //     uname: "Shahbab-Ahmed",
-      //     disagreementsWithInst: 86,
-      //     votes: 280,
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 755000000,
-      //     },
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     instVotes: 14,
-      //   },
-
-      //   {
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     votes: 211,
-      //     totalPoints: 50,
-      //     questionPoints: 202,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     links: 25,
-      //     improvements: 64,
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     votePoints: 73,
-      //     downVotes: 532,
-      //     instVotes: 87,
-      //     deleted: false,
-      //     questions: 166,
-      //     disagreementsWithInst: 69,
-      //     agreementsWithInst: 142,
-      //     upVotes: 1213,
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     newNodes: 198,
-      //     uname: "turrenk",
-      //   },
-      //   {
-      //     uname: "Catherine Huang",
-      //     upVotes: 469,
-      //     instVotes: 56,
-      //     lastActivity: {
-      //       seconds: 1617840000,
-      //       nanoseconds: 0,
-      //     },
-      //     questions: 138,
-      //     newNodes: 176,
-      //     downVotes: 163,
-      //     totalPoints: 10,
-      //     votes: 205,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     agreementsWithInst: 158,
-      //     links: 37,
-      //     disagreementsWithInst: 47,
-      //     questionPoints: 90,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     votePoints: 111,
-      //     deleted: false,
-      //     improvements: 75,
-      //   },
-      //   {
-      //     questions: 167,
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     questionPoints: 100,
-      //     disagreementsWithInst: 53,
-      //     votePoints: 118,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     instVotes: 6,
-      //     lastActivity: {
-      //       seconds: 1617753600,
-      //       nanoseconds: 0,
-      //     },
-      //     agreementsWithInst: 171,
-      //     improvements: 71,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     links: 27,
-      //     newNodes: 208,
-      //     votes: 224,
-      //     upVotes: 2464,
-      //     downVotes: 128,
-      //     uname: "elijah-fox",
-      //     totalPoints: 420,
-      //     deleted: false,
-      //   },
-      //   {
-      //     newNodes: 200,
-      //     agreementsWithInst: 167,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     votePoints: 101,
-      //     links: 38,
-      //     downVotes: 30,
-      //     uname: "adsturza",
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     upVotes: 3231,
-      //     votes: 233,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     questionPoints: 75,
-      //     questions: 169,
-      //     totalPoints: 150,
-      //     instVotes: 10,
-      //     deleted: false,
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     improvements: 85,
-      //     disagreementsWithInst: 66,
-      //   },
-      //   {
-      //     improvements: 98,
-      //     votes: 275,
-      //     totalPoints: 90,
-      //     upVotes: 216,
-      //     uname: "maxzhang",
-      //     lastActivity: {
-      //       seconds: 1617840000,
-      //       nanoseconds: 0,
-      //     },
-      //     questionPoints: 10,
-      //     downVotes: 3519,
-      //     instVotes: 48,
-      //     disagreementsWithInst: 70,
-      //     newNodes: 242,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     deleted: false,
-      //     questions: 199,
-      //     agreementsWithInst: 205,
-      //     votePoints: 135,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     links: 51,
-      //   },
-      // ];
-      data.map(d => {
-        if (d.deleted) return;
-        const proposals = d.totalPoints;
-        const question = d.questionPoints;
-        if (proposals > (100 * maxProposalsPoints) / 100) {
-          ProposalsRate.dgreaterHundred += 1;
-          studentProposalsRate.dgreaterHundred.push(d.uname);
-        } else if (proposals > (50 * maxProposalsPoints) / 100) {
-          ProposalsRate.cgreaterFifty += 1;
-          studentProposalsRate.cgreaterFifty.push(d.uname);
-        } else if (proposals > (10 * maxProposalsPoints) / 100) {
-          ProposalsRate.bgreaterTen += 1;
-          studentProposalsRate.bgreaterTen.push(d.uname);
-        } else if (proposals <= (10 * maxProposalsPoints) / 100) {
-          ProposalsRate.alessEqualTen += 1;
-          studentProposalsRate.alessEqualTen.push(d.uname);
-        }
-        if (question > (100 * maxQuestionsPoints) / 100) {
-          QuestionsRate.dgreaterHundred += 1;
-          studentQuestionsRate.dgreaterHundred.push(d.uname);
-        } else if (question > (50 * maxQuestionsPoints) / 100) {
-          QuestionsRate.cgreaterFifty += 1;
-          studentQuestionsRate.cgreaterFifty.push(d.uname);
-        } else if (question > (10 * maxQuestionsPoints) / 100) {
-          QuestionsRate.bgreaterTen += 1;
-          studentQuestionsRate.bgreaterTen.push(d.uname);
-        } else if (question <= (10 * maxQuestionsPoints) / 100) {
-          QuestionsRate.alessEqualTen += 1;
-          studentQuestionsRate.alessEqualTen.push(d.uname);
-        }
-        console.log({ proposals, ProposalsRate });
-      });
-
-      stackedBarStats.push(ProposalsRate);
-      stackedBarStats.push(QuestionsRate);
-      return {
-        stackedBarStats: stackedBarStats,
-        studentStackedBarProposalsStats: studentProposalsRate,
-        studentStackedBarQuestionsStats: studentQuestionsRate,
-      };
-    },
-    [maxProposalsPoints, maxQuestionsPoints]
-  );
+  const [semesterStudentVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -554,7 +192,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
+      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
       const semesterDoc = await getDocs(q);
       if (!semesterDoc.docs.length) {
         setBubble([]);
@@ -562,31 +200,48 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         setSemesterStats(null);
         setIsLoading(false);
         setThereIsData(false);
+        setSemesterStudentVoteState([]);
         return;
       }
 
+      // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      setSemesterStudentVoteState(semester);
+
       setSemesterStats(getSemStat(semester));
-
-      //Data for stacked bar Plot
-      const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } =
-        getStackedBarStat(semester);
-      setStackedBar(stackedBarStats);
-      setProposalsStudents(studentStackedBarProposalsStats);
-      setQuestionsStudents(studentStackedBarQuestionsStats);
-
-      //Data for Bubble Plot
-      const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semester);
-      setBubble(bubbleStats);
-      setMaxBubbleAxisX(maxVote);
-      setMaxBubbleAxisY(maxVotePoints);
-      setMinBubbleAxisX(minVote);
-      setMinBubbleAxisY(minVotePoints);
       setIsLoading(false);
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, getStackedBarStat, user]);
+  }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
+
+  useEffect(() => {
+    // update data in buble
+    if (!semesterStudentVoteState.length) return setBubble([]);
+
+    const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semesterStudentVoteState);
+    setBubble(bubbleStats);
+    setBubbleAxis({
+      maxAxisX: maxVote,
+      maxAxisY: maxVotePoints,
+      minAxisX: minVote,
+      minAxisY: minVotePoints,
+    });
+  }, [semesterStudentVoteState]);
+
+  useEffect(() => {
+    // update data in stackbar
+    if (!semesterStudentVoteState.length) return setStackedBar([]);
+
+    const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
+      semesterStudentVoteState,
+      maxProposalsPoints,
+      maxQuestionsPoints
+    );
+    setStackedBar(stackedBarStats);
+    setProposalsStudents(studentStackedBarProposalsStats);
+    setQuestionsStudents(studentStackedBarQuestionsStats);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -645,32 +300,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     };
   };
 
-  const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
-    let newNodeProposals = 0;
-    let editProposals = 0;
-    let links = 0;
-    let nodes = 0;
-    let votes = 0;
-    let questions = 0;
-
-    data.map(stat => {
-      newNodeProposals += stat.newNodes;
-      editProposals += stat.improvements;
-      links += stat.links;
-      nodes += stat.improvements + stat.newNodes;
-      votes += stat.votes;
-      questions += stat.questions;
-    });
-    return {
-      newNodeProposals,
-      editProposals,
-      links,
-      nodes,
-      questions,
-      votes,
-    };
-  };
-
   const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
     const trends: Trends[] = [];
     data.map(dailyStat => {
@@ -700,7 +329,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
-  if (!currentSemester) return <h1>No data from semester</h1>;
+  if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
 
   return (
     <Box
@@ -818,10 +447,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 width={isMovil ? 220 : 500}
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
                 theme={settings.theme}
-                maxAxisX={maxBubbleAxisX}
-                maxAxisY={maxBubbleAxisY}
-                minAxisX={minBubbleAxisX}
-                minAxisY={minBubbleAxisY}
+                maxAxisX={bubbleAxis.maxAxisX}
+                maxAxisY={bubbleAxis.maxAxisY}
+                minAxisX={bubbleAxis.minAxisX}
+                minAxisY={bubbleAxis.minAxisY}
               />
             </>
           )}
@@ -1090,3 +719,46 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(PageWrapper);
+
+export const getBubbleStats = (data: SemesterStudentVoteStat[]): BubbleStatsData => {
+  const bubbleStats: BubbleStats[] = [];
+  let maxVote: number = 0;
+  let maxVotePoints: number = 0;
+  let minVote: number = 1000;
+  let minVotePoints: number = 1000;
+
+  data.map(d => {
+    let bubbleStat: BubbleStats = {
+      students: 0,
+      votes: 0,
+      points: 0,
+    };
+    const votes = d.votes;
+    const votePoints = d.votePoints;
+    const index = findBubble(bubbleStats, votes, votePoints);
+    if (index >= 0) {
+      bubbleStats[index].students += 1;
+    } else {
+      bubbleStat.votes = votes;
+      bubbleStat.points = votePoints;
+      bubbleStat.students += 1;
+      bubbleStats.push(bubbleStat);
+    }
+    if (d.votes > maxVote) maxVote = d.votes;
+    if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
+    if (d.votes < minVote) minVote = d.votes;
+    if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
+  });
+  return {
+    bubbleStats,
+    maxVote,
+    maxVotePoints,
+    minVote,
+    minVotePoints,
+  };
+};
+
+const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
+  const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
+  return index;
+};
