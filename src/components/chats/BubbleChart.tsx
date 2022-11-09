@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
+import { ISemesterStudent } from "src/types/ICourse";
 
 import { BubbleStats } from "@/pages/instructors/dashboard";
 
@@ -66,6 +67,30 @@ function drawChart(
   minAxisX: number,
   minAxisY: number
 ) {
+  const htmlTooltip = (users: ISemesterStudent[]) => {
+    const html = users.map(user => {
+      return `<div class="tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      <img
+        class="tooltip-user-image"
+        src="${user.imageUrl}"
+        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
+        loading="lazy"
+        />
+      <span>
+         ${user.fName}
+
+         ${user.lName}
+      </span></div>
+      `;
+    });
+    const wrapper = `<div id="users-tooltip">
+      ${html.join(" ")}
+    </div>`;
+    return wrapper;
+  };
+
+  const tooltip = d3.select("#boxplot-tool-tip");
+
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -151,7 +176,17 @@ function drawChart(
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("opacity", 0.8)
-    .attr("transform", `translate(30, 5)`);
+    .attr("transform", `translate(30, 5)`)
+    .on("mouseover", function (e, d) {
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
+      let html = htmlTooltip(d.studentsList);
+      tooltip
+        .html(`${html}`)
+        .style("opacity", 1)
+        .style("top", `${e.offsetY + 20}px`)
+        .style("left", `${e.offsetX + d.votes}px`);
+    });
   // svg
   //   .select("#nums")
   //   .selectAll("text")
@@ -214,12 +249,15 @@ export const BubbleChart = ({
   );
 
   return (
-    <svg ref={svg} style={{ position: "relative" }}>
-      <g id="bubbles"></g>
-      <g id="nums"></g>
-      <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 40} y={height}>
-        # of Votes
-      </text>
-    </svg>
+    <>
+      <svg ref={svg} style={{ position: "relative" }}>
+        <g id="bubbles"></g>
+        <g id="nums"></g>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 40} y={height}>
+          # of Votes
+        </text>
+      </svg>
+      <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
+    </>
   );
 };

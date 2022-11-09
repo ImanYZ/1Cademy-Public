@@ -143,6 +143,7 @@ export type BubbleStats = {
   students: number;
   votes: number;
   points: number;
+  studentsList: ISemesterStudent[];
 };
 
 type BubbleStatsData = {
@@ -229,43 +230,60 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   //No stats data
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
-  const getBubbleStats = useCallback((data: SemesterStudentVoteStat[]): BubbleStatsData => {
-    const bubbleStats: BubbleStats[] = [];
-    let maxVote: number = 0;
-    let maxVotePoints: number = 0;
-    let minVote: number = 1000;
-    let minVotePoints: number = 1000;
+  const getBubbleStats = useCallback(
+    (data: SemesterStudentVoteStat[]): BubbleStatsData => {
+      const bubbleStats: BubbleStats[] = [];
+      let maxVote: number = 0;
+      let maxVotePoints: number = 0;
+      let minVote: number = 1000;
+      let minVotePoints: number = 1000;
 
-    data.map(d => {
-      let bubbleStat: BubbleStats = {
-        students: 0,
-        votes: 0,
-        points: 0,
+      if (!students)
+        return {
+          bubbleStats,
+          maxVote,
+          maxVotePoints,
+          minVote,
+          minVotePoints,
+        };
+      data.map(d => {
+        let bubbleStat: BubbleStats = {
+          students: 0,
+          votes: 0,
+          points: 0,
+          studentsList: [],
+        };
+        const votes = d.votes;
+        const votePoints = d.votePoints;
+        const index = findBubble(bubbleStats, votes, votePoints);
+
+        const studentObject: ISemesterStudent | undefined = students.find((user: any) => user.uname === d.uname);
+
+        if (index >= 0) {
+          bubbleStats[index].students += 1;
+          if (studentObject) bubbleStat.studentsList.push(studentObject);
+        } else {
+          bubbleStat.votes = votes;
+          bubbleStat.points = votePoints;
+          bubbleStat.students += 1;
+          if (studentObject) bubbleStat.studentsList = [studentObject];
+          bubbleStats.push(bubbleStat);
+        }
+        if (d.votes > maxVote) maxVote = d.votes;
+        if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
+        if (d.votes < minVote) minVote = d.votes;
+        if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
+      });
+      return {
+        bubbleStats,
+        maxVote,
+        maxVotePoints,
+        minVote,
+        minVotePoints,
       };
-      const votes = d.votes;
-      const votePoints = d.votePoints;
-      const index = findBubble(bubbleStats, votes, votePoints);
-      if (index >= 0) {
-        bubbleStats[index].students += 1;
-      } else {
-        bubbleStat.votes = votes;
-        bubbleStat.points = votePoints;
-        bubbleStat.students += 1;
-        bubbleStats.push(bubbleStat);
-      }
-      if (d.votes > maxVote) maxVote = d.votes;
-      if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
-      if (d.votes < minVote) minVote = d.votes;
-      if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
-    });
-    return {
-      bubbleStats,
-      maxVote,
-      maxVotePoints,
-      minVote,
-      minVotePoints,
-    };
-  }, []);
+    },
+    [students]
+  );
 
   const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
     const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
