@@ -12,3 +12,8 @@ export type SemesterStudentVoteStat = ISemesterStudentVoteStat & {
 export type SemesterStudentStat = ISemesterStudentStat;
 
 export type Semester = ISemester;
+
+export type Trends = {
+  date: Date;
+  num: number;
+};

@@ -5,7 +5,7 @@ import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
-import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
+import { SemesterStudentStat, SemesterStudentVoteStat, Trends } from "src/instructorsTypes";
 import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
@@ -70,10 +70,10 @@ export type BoxData = {
 //   },
 // };
 
-type Trends = {
-  date: Date;
-  num: number;
-};
+// type Trends = {
+//   date: Date;
+//   num: number;
+// };
 
 export type StackedBarStats = {
   index: number;
@@ -149,8 +149,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
 
   const theme = useTheme();
-  // const [screenSize, setScreenSize] = useState(null);
   const db = getFirestore();
+
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
