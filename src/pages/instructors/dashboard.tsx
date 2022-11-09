@@ -1,21 +1,37 @@
 // import PlaceIcon from "@mui/icons-material/Place";
-import SquareIcon from "@mui/icons-material/Square";
-import { Divider, Paper, Skeleton, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
+import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
-import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
+import { useEffect, useState } from "react";
+import {
+  BubbleAxis,
+  BubbleStats,
+  MaxPoints,
+  SemesterStats,
+  SemesterStudentStat,
+  SemesterStudentVoteStat,
+  StackedBarStats,
+  Trends,
+} from "src/instructorsTypes";
 import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
 
+import { Legend } from "../../components/chats/Legend";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../components/chats/TrendPlot";
 import withAuthUser from "../../components/hoc/withAuthUser";
+import { GeneralPlotStats } from "../../components/instructors/dashboard/GeneralPlotStats";
+import { NoDataMessage } from "../../components/instructors/NoDataMessage";
+import { BubblePlotStatsSkeleton } from "../../components/instructors/skeletons/BubblePlotStatsSkeleton";
+import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons/GeneralPlotStatsSkeleton";
+import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
+import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
+import { getSemStat, getStackedBarStat } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
 };
@@ -64,61 +80,18 @@ export type BoxData = {
 //   },
 // };
 
-type Trends = {
-  date: Date;
-  num: number;
-};
-// This mock previuly has :{date: "2022-09-27T00:00:00.000Z",num: 9,netVotes: 9,averageVotes: 1,}
-// const TRENDS_DATA = [
-//   {
-//     date: new Date("2/1/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/2/22"),
-//     num: 20,
-//   },
-//   {
-//     date: new Date("2/4/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/5/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/6/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/7/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/8/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/9/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/10/22"),
-//     num: 9,
-//   },
-// ];
+// type Trends = {
+//   date: Date;
+//   num: number;
+// };
 
-// const Semester = "2gbmyJVzQY1FBafjBtRx";
-// const completionProposals = 100;
-// const completionQuestions = 100;
-
-export type StackedBarStats = {
-  index: number;
-  alessEqualTen: number;
-  bgreaterTen: number;
-  cgreaterFifty: number;
-  dgreaterHundred: number;
-};
+// export type StackedBarStats = {
+//   index: number;
+//   alessEqualTen: number;
+//   bgreaterTen: number;
+//   cgreaterFifty: number;
+//   dgreaterHundred: number;
+// };
 export type StudentStackedBarStats = {
   index: number;
   alessEqualTen: string[];
@@ -139,12 +112,11 @@ export type StackedBarStatsData = {
   studentStackedBarQuestionsStats: StudentStackedBarStats;
 };
 
-export type BubbleStats = {
-  students: number;
-  votes: number;
-  points: number;
-  studentsList: ISemesterStudent[];
-};
+// export type BubbleStats = {
+//   students: number;
+//   votes: number;
+//   points: number;
+// };
 
 type BubbleStatsData = {
   bubbleStats: BubbleStats[];
@@ -154,26 +126,11 @@ type BubbleStatsData = {
   minVotePoints: number;
 };
 
-type SemesterStats = {
-  newNodeProposals: number;
-  editProposals: number;
-  links: number;
-  nodes: number;
-  votes: number;
-  questions: number;
-};
-
-type MaxPoints = {
-  maxProposalsPoints: number;
-  maxQuestionsPoints: number;
-};
-
-// type RateCondition = {
-//   lessEqualThanTen: number;
-//   greaterThanTen: number;
-//   greaterThanFifty: number;
-//   greaterThanHundred: number;
+// type MaxPoints = {
+//   maxProposalsPoints: number;
+//   maxQuestionsPoints: number;
 // };
+
 // const BoxLegend = () => {
 //   return (
 //     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
@@ -193,8 +150,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
 
   const theme = useTheme();
-  // const [screenSize, setScreenSize] = useState(null);
   const db = getFirestore();
+
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
@@ -213,10 +170,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStats | null>(null);
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
-  const [maxBubbleAxisX, setMaxBubbleAxisX] = useState<number>(0);
-  const [maxBubbleAxisY, setMaxBubbleAxisY] = useState<number>(0);
-  const [minBubbleAxisX, setMinBubbleAxisX] = useState<number>(0);
-  const [minBubbleAxisY, setMinBubbleAxisY] = useState<number>(0);
+  const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
   const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
   const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
@@ -230,384 +184,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   //No stats data
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
-  const getBubbleStats = useCallback(
-    (data: SemesterStudentVoteStat[]): BubbleStatsData => {
-      const bubbleStats: BubbleStats[] = [];
-      let maxVote: number = 0;
-      let maxVotePoints: number = 0;
-      let minVote: number = 1000;
-      let minVotePoints: number = 1000;
-
-      if (!students)
-        return {
-          bubbleStats,
-          maxVote,
-          maxVotePoints,
-          minVote,
-          minVotePoints,
-        };
-      data.map(d => {
-        let bubbleStat: BubbleStats = {
-          students: 0,
-          votes: 0,
-          points: 0,
-          studentsList: [],
-        };
-        const votes = d.votes;
-        const votePoints = d.votePoints;
-        const index = findBubble(bubbleStats, votes, votePoints);
-
-        const studentObject: ISemesterStudent | undefined = students.find((user: any) => user.uname === d.uname);
-
-        if (index >= 0) {
-          bubbleStats[index].students += 1;
-          if (studentObject) bubbleStat.studentsList.push(studentObject);
-        } else {
-          bubbleStat.votes = votes;
-          bubbleStat.points = votePoints;
-          bubbleStat.students += 1;
-          if (studentObject) bubbleStat.studentsList = [studentObject];
-          bubbleStats.push(bubbleStat);
-        }
-        if (d.votes > maxVote) maxVote = d.votes;
-        if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
-        if (d.votes < minVote) minVote = d.votes;
-        if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
-      });
-      return {
-        bubbleStats,
-        maxVote,
-        maxVotePoints,
-        minVote,
-        minVotePoints,
-      };
-    },
-    [students]
-  );
-
-  const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
-    const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
-    return index;
-  };
-
-  const getStackedBarStat = useCallback(
-    (data: SemesterStudentVoteStat[]): StackedBarStatsData => {
-      const stackedBarStats: StackedBarStats[] = [];
-      const studentProposalsRate: StudentStackedBarStats = {
-        index: 0,
-        alessEqualTen: [],
-        bgreaterTen: [],
-        cgreaterFifty: [],
-        dgreaterHundred: [],
-      };
-      const studentQuestionsRate: StudentStackedBarStats = {
-        index: 1,
-        alessEqualTen: [],
-        bgreaterTen: [],
-        cgreaterFifty: [],
-        dgreaterHundred: [],
-      };
-      const ProposalsRate: StackedBarStats = {
-        index: 0,
-        alessEqualTen: 0,
-        bgreaterTen: 0,
-        cgreaterFifty: 0,
-        dgreaterHundred: 0,
-      };
-      const QuestionsRate: StackedBarStats = {
-        index: 1,
-        alessEqualTen: 0,
-        bgreaterTen: 0,
-        cgreaterFifty: 0,
-        dgreaterHundred: 0,
-      };
-      // const mock: SemesterStudentVoteStat[] = [data[0], data[1], data[2], data[4]];
-      // const mock = [
-      //   {
-      //     votes: 217,
-      //     links: 46,
-      //     newNodes: 190,
-      //     votePoints: 97,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     totalPoints: 350,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     questionPoints: 153,
-      //     improvements: 77,
-      //     questions: 153,
-      //     upVotes: 1602,
-      //     lastActivity: {
-      //       seconds: 1617840000,
-      //       nanoseconds: 0,
-      //     },
-      //     disagreementsWithInst: 60,
-      //     deleted: false,
-      //     instVotes: 11,
-      //     downVotes: 1200,
-      //     uname: "johnwisniewski",
-      //     agreementsWithInst: 157,
-      //   },
-      //   {
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     upVotes: 2849,
-      //     disagreementsWithInst: 69,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     newNodes: 205,
-      //     links: 41,
-      //     downVotes: 625,
-      //     questions: 174,
-      //     agreementsWithInst: 173,
-      //     instVotes: 151,
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     totalPoints: 350,
-      //     deleted: false,
-      //     questionPoints: 60,
-      //     uname: "ironhulk19",
-      //     improvements: 90,
-      //     votes: 242,
-      //     votePoints: 104,
-      //   },
-      //   {
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 755000000,
-      //     },
-      //     questions: 216,
-      //     newNodes: 258,
-      //     agreementsWithInst: 194,
-      //     deleted: false,
-      //     questionPoints: 150,
-      //     upVotes: 2176,
-      //     votePoints: 108,
-      //     downVotes: 1979,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     improvements: 93,
-      //     links: 43,
-      //     totalPoints: 402,
-      //     uname: "Shahbab-Ahmed",
-      //     disagreementsWithInst: 86,
-      //     votes: 280,
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 755000000,
-      //     },
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     instVotes: 14,
-      //   },
-
-      //   {
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     votes: 211,
-      //     totalPoints: 50,
-      //     questionPoints: 202,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     links: 25,
-      //     improvements: 64,
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     votePoints: 73,
-      //     downVotes: 532,
-      //     instVotes: 87,
-      //     deleted: false,
-      //     questions: 166,
-      //     disagreementsWithInst: 69,
-      //     agreementsWithInst: 142,
-      //     upVotes: 1213,
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     newNodes: 198,
-      //     uname: "turrenk",
-      //   },
-      //   {
-      //     uname: "Catherine Huang",
-      //     upVotes: 469,
-      //     instVotes: 56,
-      //     lastActivity: {
-      //       seconds: 1617840000,
-      //       nanoseconds: 0,
-      //     },
-      //     questions: 138,
-      //     newNodes: 176,
-      //     downVotes: 163,
-      //     totalPoints: 10,
-      //     votes: 205,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     agreementsWithInst: 158,
-      //     links: 37,
-      //     disagreementsWithInst: 47,
-      //     questionPoints: 90,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     votePoints: 111,
-      //     deleted: false,
-      //     improvements: 75,
-      //   },
-      //   {
-      //     questions: 167,
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     questionPoints: 100,
-      //     disagreementsWithInst: 53,
-      //     votePoints: 118,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     instVotes: 6,
-      //     lastActivity: {
-      //       seconds: 1617753600,
-      //       nanoseconds: 0,
-      //     },
-      //     agreementsWithInst: 171,
-      //     improvements: 71,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     links: 27,
-      //     newNodes: 208,
-      //     votes: 224,
-      //     upVotes: 2464,
-      //     downVotes: 128,
-      //     uname: "elijah-fox",
-      //     totalPoints: 420,
-      //     deleted: false,
-      //   },
-      //   {
-      //     newNodes: 200,
-      //     agreementsWithInst: 167,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     votePoints: 101,
-      //     links: 38,
-      //     downVotes: 30,
-      //     uname: "adsturza",
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 756000000,
-      //     },
-      //     upVotes: 3231,
-      //     votes: 233,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     questionPoints: 75,
-      //     questions: 169,
-      //     totalPoints: 150,
-      //     instVotes: 10,
-      //     deleted: false,
-      //     lastActivity: {
-      //       seconds: 1617926400,
-      //       nanoseconds: 0,
-      //     },
-      //     improvements: 85,
-      //     disagreementsWithInst: 66,
-      //   },
-      //   {
-      //     improvements: 98,
-      //     votes: 275,
-      //     totalPoints: 90,
-      //     upVotes: 216,
-      //     uname: "maxzhang",
-      //     lastActivity: {
-      //       seconds: 1617840000,
-      //       nanoseconds: 0,
-      //     },
-      //     questionPoints: 10,
-      //     downVotes: 3519,
-      //     instVotes: 48,
-      //     disagreementsWithInst: 70,
-      //     newNodes: 242,
-      //     updatedAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     deleted: false,
-      //     questions: 199,
-      //     agreementsWithInst: 205,
-      //     votePoints: 135,
-      //     tagId: "LzFpJBUnml6U6I8c6Cpw",
-      //     createdAt: {
-      //       seconds: 1667862140,
-      //       nanoseconds: 757000000,
-      //     },
-      //     links: 51,
-      //   },
-      // ];
-      data.map(d => {
-        if (d.deleted) return;
-        const proposals = d.totalPoints;
-        const question = d.questionPoints;
-        if (proposals > (100 * maxProposalsPoints) / 100) {
-          ProposalsRate.dgreaterHundred += 1;
-          studentProposalsRate.dgreaterHundred.push(d.uname);
-        } else if (proposals > (50 * maxProposalsPoints) / 100) {
-          ProposalsRate.cgreaterFifty += 1;
-          studentProposalsRate.cgreaterFifty.push(d.uname);
-        } else if (proposals > (10 * maxProposalsPoints) / 100) {
-          ProposalsRate.bgreaterTen += 1;
-          studentProposalsRate.bgreaterTen.push(d.uname);
-        } else if (proposals <= (10 * maxProposalsPoints) / 100) {
-          ProposalsRate.alessEqualTen += 1;
-          studentProposalsRate.alessEqualTen.push(d.uname);
-        }
-        if (question > (100 * maxQuestionsPoints) / 100) {
-          QuestionsRate.dgreaterHundred += 1;
-          studentQuestionsRate.dgreaterHundred.push(d.uname);
-        } else if (question > (50 * maxQuestionsPoints) / 100) {
-          QuestionsRate.cgreaterFifty += 1;
-          studentQuestionsRate.cgreaterFifty.push(d.uname);
-        } else if (question > (10 * maxQuestionsPoints) / 100) {
-          QuestionsRate.bgreaterTen += 1;
-          studentQuestionsRate.bgreaterTen.push(d.uname);
-        } else if (question <= (10 * maxQuestionsPoints) / 100) {
-          QuestionsRate.alessEqualTen += 1;
-          studentQuestionsRate.alessEqualTen.push(d.uname);
-        }
-        console.log({ proposals, ProposalsRate });
-      });
-
-      stackedBarStats.push(ProposalsRate);
-      stackedBarStats.push(QuestionsRate);
-      return {
-        stackedBarStats: stackedBarStats,
-        studentStackedBarProposalsStats: studentProposalsRate,
-        studentStackedBarQuestionsStats: studentQuestionsRate,
-      };
-    },
-    [maxProposalsPoints, maxQuestionsPoints]
-  );
+  const [semesterStudentVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -615,7 +192,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
+      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
       const semesterDoc = await getDocs(q);
       if (!semesterDoc.docs.length) {
         setBubble([]);
@@ -623,31 +200,51 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         setSemesterStats(null);
         setIsLoading(false);
         setThereIsData(false);
+        setSemesterStudentVoteState([]);
         return;
       }
 
+      // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      setSemesterStudentVoteState(semester);
+
       setSemesterStats(getSemStat(semester));
-
-      //Data for stacked bar Plot
-      const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } =
-        getStackedBarStat(semester);
-      setStackedBar(stackedBarStats);
-      setProposalsStudents(studentStackedBarProposalsStats);
-      setQuestionsStudents(studentStackedBarQuestionsStats);
-
-      //Data for Bubble Plot
-      const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(semester);
-      setBubble(bubbleStats);
-      setMaxBubbleAxisX(maxVote);
-      setMaxBubbleAxisY(maxVotePoints);
-      setMinBubbleAxisX(minVote);
-      setMinBubbleAxisY(minVotePoints);
       setIsLoading(false);
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, getBubbleStats, getStackedBarStat, user]);
+  }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
+
+  useEffect(() => {
+    // update data in buble
+    if (!semesterStudentVoteState.length) return setBubble([]);
+
+    const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
+      semesterStudentVoteState,
+      students
+    );
+    setBubble(bubbleStats);
+    setBubbleAxis({
+      maxAxisX: maxVote,
+      maxAxisY: maxVotePoints,
+      minAxisX: minVote,
+      minAxisY: minVotePoints,
+    });
+  }, [semesterStudentVoteState, students]);
+
+  useEffect(() => {
+    // update data in stackbar
+    if (!semesterStudentVoteState.length) return setStackedBar([]);
+
+    const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
+      semesterStudentVoteState,
+      maxProposalsPoints,
+      maxQuestionsPoints
+    );
+    setStackedBar(stackedBarStats);
+    setProposalsStudents(studentStackedBarProposalsStats);
+    setQuestionsStudents(studentStackedBarQuestionsStats);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -706,32 +303,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     };
   };
 
-  const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
-    let newNodeProposals = 0;
-    let editProposals = 0;
-    let links = 0;
-    let nodes = 0;
-    let votes = 0;
-    let questions = 0;
-
-    data.map(stat => {
-      newNodeProposals += stat.newNodes;
-      editProposals += stat.improvements;
-      links += stat.links;
-      nodes += stat.improvements + stat.newNodes;
-      votes += stat.votes;
-      questions += stat.questions;
-    });
-    return {
-      newNodeProposals,
-      editProposals,
-      links,
-      nodes,
-      questions,
-      votes,
-    };
-  };
-
   const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
     const trends: Trends[] = [];
     data.map(dailyStat => {
@@ -753,245 +324,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     });
     return trends;
   };
-  // (dayStat.day as any).toDate()
-  // useEffect(()=>{
 
-  // })
-  // const isMovil = useMediaQuery(theme.breakpoints.values());
-
-  // const [width, setWith] = useState(0);
-  // const getWith = useCallback(ref => {
-  //   if (!ref) return 0;
-
-  //   // console.log({ ref: ref.clientWidth });
-  //   setWith(ref.clientWidth);
-  // }, []);
-
-  // const getWith = useCallback(ref => {
-  //   if (!ref) return 0;
-
-  //   // console.log({ ref: ref.clientWidth });
-  //   setWith(ref.clientWidth);
-  // }, []);
-
-  // useEffect(() => {}, [isSmall, isMedium]);
-
-  const formatNumber = (num: number | undefined) => {
-    try {
-      if (!num) return 0;
-      return num.toLocaleString("en-US");
-    } catch (error) {
-      return num;
-    }
-  };
-
-  const GeneralPlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Skeleton variant="rectangular" sx={{ width: "100px", height: "32px", borderRadius: "20px" }} />
-          <Skeleton variant="rectangular" sx={{ width: "50px", height: "20px", borderRadius: "20px" }} />
-          <Skeleton variant="rectangular" sx={{ width: "70px", height: "20px", borderRadius: "20px" }} />
-        </Box>
-        <Skeleton variant="rectangular" sx={{ width: "100%", height: "16px", borderRadius: "20px", marginY: "16px" }} />
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr ",
-            justifyContent: "space-between",
-            alignItems: "end",
-            gap: "40px",
-          }}
-        >
-          {new Array(12).fill(0).map((x, i) => (
-            <Skeleton
-              key={i}
-              variant="rectangular"
-              sx={{
-                width: i % 2 === 0 ? "150px" : "30px",
-                height: "20px",
-                borderRadius: "20px",
-                justifySelf: i % 2 === 0 ? "start" : "end",
-              }}
-            />
-          ))}
-        </Box>
-      </Box>
-    );
-  };
-  const StackedBarPlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
-          <Skeleton variant="rectangular" sx={{ width: "100px", height: "20px", borderRadius: "20px" }} />
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "20px", borderRadius: "20px", justifySelf: "end" }}
-          />
-          <Skeleton variant="rectangular" sx={{ width: "100px", height: "20px", borderRadius: "20px" }} />
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "40px", borderRadius: "20px", justifySelf: "end" }}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr ",
-            justifyContent: "center",
-            alignItems: "end",
-            gap: "20px",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "70px",
-              height: "370px",
-              borderRadius: "2px",
-              marginY: "16px",
-              justifySelf: "end",
-              marginBottom: "2px",
-            }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "70px",
-              height: "370px",
-              borderRadius: "2px",
-              marginY: "16px",
-              justifySelf: "start",
-              marginBottom: "2px",
-            }}
-          />
-        </Box>
-      </Box>
-    );
-  };
-  const BubblePlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "20px", borderRadius: "20px", justifySelf: "end" }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{ width: "100px", height: "40px", borderRadius: "20px", justifySelf: "end" }}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            justifyContent: "center",
-            alignItems: "end",
-            gap: "20px",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "100%",
-              height: "400px",
-              borderRadius: "5px",
-              marginY: "16px",
-              justifySelf: "end",
-              marginBottom: "2px",
-            }}
-          />
-        </Box>
-      </Box>
-    );
-  };
-
-  const StudentDailyPlotStatsSkeleton = () => {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            justifyContent: "center",
-            alignItems: "end",
-            gap: "8px",
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: isMovil ? "300px" : isTablet ? "600px" : "1045px",
-              height: isMovil ? "120px" : isTablet ? "250px" : "354px",
-              borderRadius: "5px",
-              justifySelf: "center",
-              margin: "0",
-            }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: "30px",
-              height: "16px",
-              borderRadius: "15px",
-              justifySelf: "center",
-              margin: "2px",
-            }}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{
-              width: isMovil ? "300px" : isTablet ? "600px" : "1045px",
-              height: isMovil ? "50px" : isTablet ? "120px" : "160px",
-              borderRadius: "5px",
-              justifySelf: "center",
-              marginBottom: "0",
-            }}
-          />
-        </Box>
-      </Box>
-    );
-  };
+  const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
+  const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
+  const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
 
   if (!thereIsData && !isLoading) {
-    return (
-      <Box
-        sx={{
-          m: "0 auto",
-          height: "calc(100vh - 200px)",
-          display: "grid",
-          placeItems: "center",
-          overflowX: "hidden",
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            fontSize: "36px",
-            fontWeight: "400",
-            color: settings.theme === "Light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-          }}
-        >
-          There is no data yet <br></br> to show
-        </Typography>
-      </Box>
-    );
+    return <NoDataMessage />;
   }
+  if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
 
   return (
     <Box
@@ -1021,63 +362,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
-            <Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  columnGap: "8px",
-                  color: "white",
-                }}
-              >
-                <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>
-                  {currentSemester?.cTitle.split(" ")[0]}{" "}
-                </Typography>
-                <Typography>{currentSemester?.title}</Typography>
-                <Typography> {studentsCounter !== 0 ? `Students: ${studentsCounter}` : ""}</Typography>
-              </Box>
-              <Typography>{currentSemester?.pTitle}</Typography>
-              <Divider />
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 64px",
-                  justifyContent: "center",
-                  alignItems: "end",
-                  py: "12px",
-                  textAlign: "center",
-                  columnGap: "16px",
-                }}
-              >
-                <Typography style={{ color: "#303134" }}></Typography>
-                <span>Numbers</span>
-              </Box>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 64px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  columnGap: "16px",
-                  rowGap: "24px",
-                }}
-              >
-                <span style={{ textAlign: "left" }}>New Node Proposals</span>
-                <span>{formatNumber(semesterStats?.newNodeProposals)}</span>
-                <span style={{ textAlign: "left" }}>Edit Proposals</span>
-                <span>{formatNumber(semesterStats?.editProposals)}</span>
-                <span style={{ textAlign: "left" }}>Links</span>
-                <span>{formatNumber(semesterStats?.links)}</span>
-                <span style={{ textAlign: "left" }}>Nodes</span>
-                <span>{formatNumber(semesterStats?.nodes)}</span>
-                <span style={{ textAlign: "left" }}>Votes</span>
-                <span>{formatNumber(semesterStats?.votes)}</span>
-                <span style={{ textAlign: "left" }}>Questions</span>
-                <span>{formatNumber(semesterStats?.questions)}</span>
-              </Box>
-            </Box>
+            <GeneralPlotStats
+              courseTitle={currentSemester.cTitle.split(" ")[0]}
+              programTitle={currentSemester.pTitle}
+              semesterStats={semesterStats}
+              semesterTitle={currentSemester.title}
+              studentsCounter={studentsCounter}
+            />
           )}
         </Paper>
         <Paper
@@ -1106,27 +397,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
                   <Typography># of Students</Typography>
                 </Box>
-                <Box>
-                  <Typography sx={{ fontSize: "12px" }}>Completion rate</Typography>
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "15px 1fr 15px 1fr",
-                      alignItems: "center",
-                      columnGap: "2px",
-                      fontSize: "12px",
-                    }}
-                  >
-                    <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
-                    <span>{`>100%`}</span>
-                    <SquareIcon fontSize="inherit" sx={{ fill: "#F9E2D0" }} />
-                    <span>{`>10%`}</span>
-                    <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
-                    <span>{`>50%`}</span>
-                    <SquareIcon fontSize="inherit" sx={{ fill: "rgba(255, 196, 153, 0.75)" }} />
-                    <span>{`<=10%`}</span>
-                  </Box>
-                </Box>
+                <Legend
+                  title={"Completion rate"}
+                  options={[
+                    { title: ">100%", color: "#388E3C" },
+                    { title: ">10%", color: "#F9E2D0" },
+                    { title: ">50%", color: "#A7D841" },
+                    { title: "<=10%", color: "rgba(255, 196, 153, 0.75)" },
+                  ]}
+                />
               </Box>
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
@@ -1154,39 +433,27 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 }}
               >
                 <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "15px 1fr 15px 1fr",
-                    alignItems: "center",
-                    columnGap: "2px",
-                    fontSize: "12px",
-                    marginRight: "16px",
-                  }}
-                >
-                  <SquareIcon fontSize="inherit" sx={{ fill: "#388E3C" }} />
-                  <span>{`> 100%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "#F9E2D0" }} />
-                  <span>{`> 10%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "#A7D841" }} />
-                  <span>{`> 50%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "rgb(255, 196, 153)" }} />
-                  <span>{`<= 10%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "rgb(117, 117, 117)" }} />
-                  <span>{`= 0%`}</span>
-                  <SquareIcon fontSize="inherit" sx={{ fill: "rgb(239, 83, 80)" }} />
-                  <span>{`< 0%`}</span>
-                </Box>
+                <Legend
+                  title={"Completion rate"}
+                  options={[
+                    { title: ">100%", color: "#388E3C" },
+                    { title: ">10%", color: "#F9E2D0" },
+                    { title: ">50%", color: "#A7D841" },
+                    { title: "<=10%", color: "rgb(255, 196, 153)" },
+                    { title: "= 0%", color: "rgb(117, 117, 117)" },
+                    { title: "< 0%", color: "rgb(239, 83, 80)" },
+                  ]}
+                />
               </Box>
               <BubbleChart
                 data={bubble}
                 width={isMovil ? 220 : 500}
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
                 theme={settings.theme}
-                maxAxisX={maxBubbleAxisX}
-                maxAxisY={maxBubbleAxisY}
-                minAxisX={minBubbleAxisX}
-                minAxisY={minBubbleAxisY}
+                maxAxisX={bubbleAxis.maxAxisX}
+                maxAxisY={bubbleAxis.maxAxisY}
+                minAxisX={bubbleAxis.minAxisX}
+                minAxisY={bubbleAxis.minAxisY}
               />
             </>
           )}
@@ -1312,9 +579,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               width: "100%",
             }}
           >
-            <StudentDailyPlotStatsSkeleton />
+            <StudentDailyPlotStatsSkeleton isMovil={isMovil} isTablet={isTablet} />
           </Paper>
         )}
+
         {!isLoading && (
           <>
             <Paper
@@ -1327,12 +595,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Edit proposals"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1354,12 +619,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Links"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1381,12 +643,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Nodes"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1408,12 +667,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Votes"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1435,12 +691,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             >
               <TrendPlot
                 title={"Questions"}
-                // heightTop={(354 * width) / 1045}
-                // heightBottom={(160 * width) / 1045}
-                heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-                heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-                // width={WIDTH}
-                width={isMovil ? 300 : isTablet ? 600 : 1045}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
                 scaleX={"time"}
                 labelX={"Day"}
                 scaleY={"linear"}
@@ -1469,3 +722,63 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(PageWrapper);
+
+export const getBubbleStats = (
+  data: SemesterStudentVoteStat[],
+  students: ISemesterStudent[] | null
+): BubbleStatsData => {
+  const bubbleStats: BubbleStats[] = [];
+  let maxVote: number = 0;
+  let maxVotePoints: number = 0;
+  let minVote: number = 1000;
+  let minVotePoints: number = 1000;
+
+  if (!students)
+    return {
+      bubbleStats,
+      maxVote,
+      maxVotePoints,
+      minVote,
+      minVotePoints,
+    };
+  data.map(d => {
+    let bubbleStat: BubbleStats = {
+      students: 0,
+      votes: 0,
+      points: 0,
+      studentsList: [],
+    };
+    const votes = d.votes;
+    const votePoints = d.votePoints;
+    const index = findBubble(bubbleStats, votes, votePoints);
+
+    const studentObject: ISemesterStudent | undefined = students.find((user: any) => user.uname === d.uname);
+
+    if (index >= 0) {
+      bubbleStats[index].students += 1;
+      if (studentObject) bubbleStat.studentsList.push(studentObject);
+    } else {
+      bubbleStat.votes = votes;
+      bubbleStat.points = votePoints;
+      bubbleStat.students += 1;
+      if (studentObject) bubbleStat.studentsList = [studentObject];
+      bubbleStats.push(bubbleStat);
+    }
+    if (d.votes > maxVote) maxVote = d.votes;
+    if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
+    if (d.votes < minVote) minVote = d.votes;
+    if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
+  });
+  return {
+    bubbleStats,
+    maxVote,
+    maxVotePoints,
+    minVote,
+    minVotePoints,
+  };
+};
+
+const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
+  const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
+  return index;
+};

@@ -3,7 +3,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
-import { StackedBarStats, StudentStackedBarStats, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
+import { StudentStackedBarStats, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
+
+import { StackedBarStats } from "../../instructorsTypes";
 
 // const columns = ["fruit", "vegetable"];
 const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
@@ -155,7 +157,7 @@ function drawChart(
       const parentNode = _this.parentNode as any;
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
-      console.log("parentNode", e, d);
+      // console.log("parentNode", e, d);
       let html = "";
       if (d.data.index === 0) {
         // @ts-ignore

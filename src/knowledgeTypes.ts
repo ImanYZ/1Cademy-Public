@@ -392,7 +392,7 @@ export type User = {
   role: UserRole;
 };
 
-export type userSettings = {
+export type UserSettings = {
   background: UserBackground;
   theme: UserTheme;
   view: UserView;
@@ -447,7 +447,7 @@ export interface AuthState {
   readonly isAuthInitialized: boolean;
   readonly user: User | null;
   readonly reputation: Reputation | null;
-  readonly settings: userSettings;
+  readonly settings: UserSettings;
 }
 
 export type AuthActions = {

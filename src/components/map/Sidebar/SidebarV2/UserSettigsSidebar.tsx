@@ -18,7 +18,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
-import { DispatchAuthActions, Reputation, User, userSettings, UserTheme } from "src/knowledgeTypes";
+import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
@@ -45,7 +45,7 @@ type UserSettingsSidebarProps = {
   onClose: () => void;
   theme: UserTheme;
   user: User;
-  settings: userSettings;
+  settings: UserSettings;
   userReputation: Reputation;
   dispatch: React.Dispatch<DispatchAuthActions>;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
