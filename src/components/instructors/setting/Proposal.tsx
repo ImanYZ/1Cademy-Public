@@ -116,7 +116,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               sx={{
                 paddingBottom: "10px",
                 height: "40px",
-                width: "100px",
+                width: "120px",
                 borderBottom: "orange",
               }}
             />
@@ -161,7 +161,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               sx={{
                 paddingBottom: "10px",
                 height: "40px",
-                width: "90px",
+                width: "110px",
                 borderBottom: "orange",
               }}
             />
@@ -240,7 +240,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               sx={{
                 paddingBottom: "10px",
                 height: "40px",
-                width: "100px",
+                width: "120px",
                 borderBottom: "orange",
               }}
             />
@@ -286,7 +286,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               sx={{
                 paddingBottom: "10px",
                 height: "40px",
-                width: "90px",
+                width: "110px",
                 borderBottom: "orange",
               }}
             />

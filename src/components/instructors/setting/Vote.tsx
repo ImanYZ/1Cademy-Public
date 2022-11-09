@@ -13,8 +13,8 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
   return (
     <>
       <Grid item xs={12} md={6}>
-        <Box className="remove-arrow-buttons" sx={{ padding: "40px 40px" }}>
-          <Box sx={{ marginTop: "20px" }}>
+        <Box className="remove-arrow-buttons" sx={{ padding: "30px 40px" }}>
+          <Box sx={{ marginTop: "10px" }}>
             <Typography variant="h3">Votes</Typography>
             <Typography
               variant="h4"
@@ -58,7 +58,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
@@ -92,7 +92,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
@@ -105,7 +105,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
       </Grid>
       <Grid item xs={12} md={6}>
         <Box className="remove-arrow-buttons" sx={{ padding: "40px 40px" }}>
-          <Box sx={{ marginTop: "50px" }}>
+          <Box sx={{ marginTop: "10px" }}>
             <Typography
               variant="h4"
               sx={{
@@ -113,7 +113,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                 fontWeight: 500,
                 marginTop: {
                   xs: "20px",
-                  md: "110px",
+                  md: "60px",
                 },
               }}
             >
@@ -159,7 +159,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
@@ -204,7 +204,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />
@@ -248,7 +248,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "140px",
+                    width: "150px",
                     borderBottom: "orange",
                   }}
                 />

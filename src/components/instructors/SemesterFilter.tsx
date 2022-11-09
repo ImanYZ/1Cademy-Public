@@ -57,6 +57,7 @@ export const SemesterFilter = ({
 
   const onNewCourse = () => {
     setSelectedCourse(null);
+    if (router.route === ROUTES.instructorsSettings) return;
     router.push(ROUTES.instructorsSettings);
   };
 
