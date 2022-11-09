@@ -74,49 +74,6 @@ type Trends = {
   date: Date;
   num: number;
 };
-// This mock previuly has :{date: "2022-09-27T00:00:00.000Z",num: 9,netVotes: 9,averageVotes: 1,}
-// const TRENDS_DATA = [
-//   {
-//     date: new Date("2/1/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/2/22"),
-//     num: 20,
-//   },
-//   {
-//     date: new Date("2/4/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/5/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/6/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/7/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/8/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/9/22"),
-//     num: 9,
-//   },
-//   {
-//     date: new Date("2/10/22"),
-//     num: 9,
-//   },
-// ];
-
-// const Semester = "2gbmyJVzQY1FBafjBtRx";
-// const completionProposals = 100;
-// const completionQuestions = 100;
 
 export type StackedBarStats = {
   index: number;
@@ -173,12 +130,6 @@ type MaxPoints = {
   maxQuestionsPoints: number;
 };
 
-// type RateCondition = {
-//   lessEqualThanTen: number;
-//   greaterThanTen: number;
-//   greaterThanFifty: number;
-//   greaterThanHundred: number;
-// };
 // const BoxLegend = () => {
 //   return (
 //     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
@@ -309,7 +260,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         cgreaterFifty: 0,
         dgreaterHundred: 0,
       };
-      // const mock: SemesterStudentVoteStat[] = [data[0], data[1], data[2], data[4]];
+
       // const mock = [
       //   {
       //     votes: 217,
@@ -745,28 +696,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
-  // (dayStat.day as any).toDate()
-  // useEffect(()=>{
-
-  // })
-  // const isMovil = useMediaQuery(theme.breakpoints.values());
-
-  // const [width, setWith] = useState(0);
-  // const getWith = useCallback(ref => {
-  //   if (!ref) return 0;
-
-  //   // console.log({ ref: ref.clientWidth });
-  //   setWith(ref.clientWidth);
-  // }, []);
-
-  // const getWith = useCallback(ref => {
-  //   if (!ref) return 0;
-
-  //   // console.log({ ref: ref.clientWidth });
-  //   setWith(ref.clientWidth);
-  // }, []);
-
-  // useEffect(() => {}, [isSmall, isMedium]);
 
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
