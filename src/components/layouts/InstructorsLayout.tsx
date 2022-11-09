@@ -254,7 +254,6 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     <Box
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
-        border: "solid 2px royalBlue",
         minHeight: "100vh",
       }}
     >
