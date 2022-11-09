@@ -52,7 +52,9 @@ export const SemesterFilter = ({
   };
 
   const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
-    setSelectedCourse(newAlignment);
+    if (newAlignment) {
+      setSelectedCourse(newAlignment);
+    }
   };
 
   const onNewCourse = () => {
