@@ -512,9 +512,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-around",
-          width: "100%",
           height: "100%",
-          px: "20px",
+          maxWidth: "1384px",
+          py: "10px",
+          m: "auto",
+          px: { xs: "10px", xl: "0px" },
         }}
       >
         <Box sx={{}}>
@@ -531,13 +533,13 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 alignItems: "center",
                 width: "500px",
                 flexDirection: "row",
-                px: "15px",
+                gap: "15px",
               }}
             >
-              <Typography sx={{ fontFamily: "math", px: "15px" }} variant="h4" component="h2">
+              <Typography sx={{ fontFamily: "math" }} variant="h4" component="h2">
                 {selectedCourse}
               </Typography>
-              <Typography sx={{ fontFamily: "fangsong", pr: "5px" }} component="h2">
+              <Typography sx={{ fontFamily: "fangsong" }} component="h2">
                 Students:
               </Typography>
               <Typography sx={{ fontFamily: "fangsong" }} component="h2">
@@ -610,7 +612,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       my: { xs: "0px", md: "auto" },
                       mt: { xs: "15px", md: "auto" },
                       marginLeft: { xs: "0px", md: "32px" },
-                      marginRight: "40px",
                       paddingX: "30px",
                       borderRadius: 1,
                       textAlign: "center",
@@ -849,7 +850,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   fontWeight: "700",
                   my: { xs: "0px", md: "auto" },
                   mt: { xs: "15px", md: "auto" },
-                  marginLeft: { xs: "0px", md: "32px" },
                   marginRight: "40px",
                   paddingX: "30px",
                   borderRadius: 1,
@@ -908,7 +908,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   fontWeight: "700",
                   my: { xs: "0px", md: "auto" },
                   marginLeft: { xs: "0px", md: "32px" },
-                  marginRight: "40px",
                   paddingX: "30px",
                   borderRadius: 1,
                   textAlign: "center",
