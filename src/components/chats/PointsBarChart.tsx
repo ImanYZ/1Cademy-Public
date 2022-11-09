@@ -35,8 +35,8 @@ function drawChart(
   svgRef: SVGGElement,
   data: StackedBarStats[],
   maxAxisY: number,
-  studentProposalsRate: StudentStackedBarStatsObject,
-  studentQuestionsRate: StudentStackedBarStatsObject,
+  studentProposalsRate: StudentStackedBarStatsObject | null,
+  studentQuestionsRate: StudentStackedBarStatsObject | null,
   theme: UserTheme
 ) {
   //   const data = [12, 5, 6, 6, 9, 10];
@@ -158,8 +158,10 @@ function drawChart(
       console.log("parentNode", e, d);
       let html = "";
       if (d.data.index === 0) {
+        // @ts-ignore
         html = htmlTooltip(studentProposalsRate[subgroupName]);
       } else {
+        // @ts-ignore
         html = htmlTooltip(studentQuestionsRate[subgroupName]);
       }
       const middle = e.offsetY;

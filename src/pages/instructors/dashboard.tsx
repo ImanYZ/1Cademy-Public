@@ -117,7 +117,6 @@ export type StackedBarStats = {
   bgreaterTen: number;
   cgreaterFifty: number;
   dgreaterHundred: number;
-  students?: ISemesterStudent;
 };
 export type StudentStackedBarStats = {
   index: number;
@@ -1164,7 +1163,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 data={bubble}
                 width={isMovil ? 220 : 500}
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
-                theme={"Dark"}
+                theme={settings.theme}
                 maxAxisX={maxBubbleAxisX}
                 maxAxisY={maxBubbleAxisY}
                 minAxisX={minBubbleAxisX}
