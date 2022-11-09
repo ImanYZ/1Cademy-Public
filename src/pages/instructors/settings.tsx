@@ -1,5 +1,6 @@
 import { LoadingButton } from "@mui/lab";
 import { Grid } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
@@ -229,6 +230,11 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           loading={requestLoader}
           variant="contained"
           color="success"
+          loadingIndicator={
+            <CircularProgress
+              sx={{ color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#555") }}
+            />
+          }
           sx={{
             color: theme => theme.palette.common.white,
             fontWeight: "bold",

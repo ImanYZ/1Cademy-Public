@@ -1,6 +1,7 @@
 import CreateIcon from "@mui/icons-material/Create";
 import { LoadingButton } from "@mui/lab";
 import { Autocomplete, Grid, TextField } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import { useFormik } from "formik";
 import { FC, HTMLAttributes, useState } from "react";
@@ -134,6 +135,11 @@ const NewCourse: FC<Props> = ({ institutions }) => {
               endIcon={<CreateIcon />}
               loadingPosition="end"
               variant="contained"
+              loadingIndicator={
+                <CircularProgress
+                  sx={{ color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#555") }}
+                />
+              }
               sx={{
                 color: theme => theme.palette.common.white,
                 fontWeight: "bold",
