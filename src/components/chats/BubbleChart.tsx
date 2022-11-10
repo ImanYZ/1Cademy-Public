@@ -236,51 +236,20 @@ export const BubbleChart = ({
   minAxisX,
   minAxisY,
 }: BubblePlotProps) => {
-  // const [width, setWidth] = useState(0);
-
-  // const { width: windowWidth } = useWindowSize();
-
-  console.log("PointsBarChart");
-  //   const svg = useRef<SVGSVGElement>(null);
-
-  //   useEffect(() => {
-  //     console.log("call svg");
-  //     drawChart(svg);
-  //   }, [svg]);
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
-      console.log("ref:svg callbak", width);
-
       drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY);
     },
     [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, theme, width]
   );
-
-  // useEffect(
-  //   () => {
-  //     drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY);
-  //   },
-  //   { windowWidth }
-  // );
-
-  // useEffect(() => {
-  //   d3.select(window).on("resize", function () {
-  //     /* your svg and chart code */
-  //     const newWidth = parseInt(d3.select(".test").style("width"), 10);
-  //     console.log("ref:new width:", newWidth - 64);
-  //     setWidth(newWidth - 64);
-  //   });
-
-  //   // return
-  // }, []);
 
   return (
     <>
       <svg ref={svg} style={{ position: "relative" }}>
         <g id="bubbles"></g>
         <g id="nums"></g>
-        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 40} y={height}>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 80} y={height}>
           # of Votes
         </text>
       </svg>
