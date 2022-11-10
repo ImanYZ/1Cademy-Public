@@ -1,5 +1,11 @@
+import { ISemesterStudent } from "src/types/ICourse";
+
 import { SemesterStats, SemesterStudentVoteStat, StackedBarStats } from "../../instructorsTypes";
-import { StackedBarStatsData, StudentStackedBarStats } from "../../pages/instructors/dashboard";
+import {
+  StackedBarStatsData,
+  StudentStackedBarStats,
+  StudentStackedBarStatsObject,
+} from "../../pages/instructors/dashboard";
 
 // TODO: Test
 export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
@@ -35,17 +41,18 @@ export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
 // TODO: test
 export const getStackedBarStat = (
   data: SemesterStudentVoteStat[],
+  students: ISemesterStudent[],
   maxProposalsPoints: number,
   maxQuestionsPoints: number
 ): StackedBarStatsData => {
   const stackedBarStats: StackedBarStats[] = [];
-  const studentProposalsRate: StudentStackedBarStats = {
+  const studentProposalsRate: StudentStackedBarStatsObject = {
     alessEqualTen: [],
     bgreaterTen: [],
     cgreaterFifty: [],
     dgreaterHundred: [],
   };
-  const studentQuestionsRate: StudentStackedBarStats = {
+  const studentQuestionsRate: StudentStackedBarStatsObject = {
     alessEqualTen: [],
     bgreaterTen: [],
     cgreaterFifty: [],
@@ -65,18 +72,26 @@ export const getStackedBarStat = (
     cgreaterFifty: 0,
     dgreaterHundred: 0,
   };
-
-  data.map(d => {
-    if (d.deleted) return;
+  const sortedByProposals = [...data].sort((x, y) => y.totalPoints - x.totalPoints);
+  const sortedByQuestions = [...data].sort((x, y) => y.questionPoints - x.questionPoints);
+  console.log("datadataa", sortedByProposals, sortedByQuestions);
+  sortedByProposals.map(d => {
     const proposals = d.totalPoints;
-    const question = d.questionPoints;
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
-    const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
+    const student = students.find(student => student.uname === d.uname);
+    if (!student) return;
+
     ProposalsRate[proposalSubgroup] += 1;
-    studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(d.uname);
+    studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
+  });
+  sortedByQuestions.map(d => {
+    const question = d.questionPoints;
+    const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
+    const student = students.find(student => student.uname === d.uname);
+    if (!student) return;
+
     QuestionsRate[questionsSubgroup] += 1;
-    studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(d.uname);
-    console.log({ proposals, ProposalsRate });
+    studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
   });
 
   stackedBarStats.push(ProposalsRate);

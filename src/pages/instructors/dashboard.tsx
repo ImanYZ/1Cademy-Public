@@ -99,7 +99,6 @@ export type StudentStackedBarStats = {
   dgreaterHundred: string[];
 };
 export type StudentStackedBarStatsObject = {
-  index: number;
   alessEqualTen: ISemesterStudent[];
   bgreaterTen: ISemesterStudent[];
   cgreaterFifty: ISemesterStudent[];
@@ -107,8 +106,12 @@ export type StudentStackedBarStatsObject = {
 };
 export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
-  studentStackedBarProposalsStats: StudentStackedBarStats;
-  studentStackedBarQuestionsStats: StudentStackedBarStats;
+  studentStackedBarProposalsStats: StudentStackedBarStatsObject;
+  studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+};
+export type StudenBarsSubgroupLocation = {
+  proposals: number;
+  questions: number;
 };
 
 // export type BubbleStats = {
@@ -165,8 +168,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
-  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStats | null>(null);
-  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStats | null>(null);
+  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
@@ -233,17 +236,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentVoteState.length) return setStackedBar([]);
+    if (!semesterStudentVoteState.length || !students) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
       semesterStudentVoteState,
+      students,
       maxProposalsPoints,
       maxQuestionsPoints
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length, students]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -409,7 +413,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  students={students}
                   proposalsStudents={proposalsStudents}
                   questionsStudents={questionsStudents}
                   maxAxisY={maxStackedBarAxisY}
