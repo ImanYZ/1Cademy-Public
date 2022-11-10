@@ -93,7 +93,6 @@ export type BoxData = {
 //   dgreaterHundred: number;
 // };
 export type StudentStackedBarStats = {
-  index: number;
   alessEqualTen: string[];
   bgreaterTen: string[];
   cgreaterFifty: string[];
@@ -432,7 +431,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   marginBottom: "16px",
                 }}
               >
-                <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
                   title={"Completion rate"}
                   options={[

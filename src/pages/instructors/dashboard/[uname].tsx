@@ -11,8 +11,7 @@ import { NoDataMessage } from "../../../components/instructors/NoDataMessage";
 import { BubblePlotStatsSkeleton } from "../../../components/instructors/skeletons/BubblePlotStatsSkeleton";
 import { GeneralPlotStatsSkeleton } from "../../../components/instructors/skeletons/GeneralPlotStatsSkeleton";
 import { StackedBarPlotStatsSkeleton } from "../../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
-import { InstructorLayoutPage } from "../../../components/layouts/InstructorsLayout";
-import { StudentsLayout } from "../../../components/layouts/StudentsLayout";
+import { InstructorLayoutPage, StudentsLayout } from "../../../components/layouts/StudentsLayout";
 import {
   BubbleAxis,
   BubbleStats,
@@ -27,7 +26,7 @@ import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "../../../types/ICourse";
 import { getBubbleStats, StudentStackedBarStats } from "../dashboard";
 
-const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, settings }) => {
+const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, settings, queryUname }) => {
   const db = getFirestore();
 
   const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
@@ -58,7 +57,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
-  const [semesterStudentVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
+  const [semesterStudentsVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
+
+  const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
 
   console.log({ user, currentSemester, isMovil });
 
@@ -96,11 +97,26 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
 
   useEffect(() => {
+    if (!queryUname) return;
+    const tagId = currentSemester?.tagId;
+    if (!tagId) return;
+    const getStudentVoteStats = async () => {
+      const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
+      const q = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
+      const semesterStudentVoteStatDoc = await getDocs(q);
+      if (!semesterStudentVoteStatDoc.docs.length) return;
+
+      setStudentVoteStat(semesterStudentVoteStatDoc.docs[0].data() as SemesterStudentVoteStat);
+    };
+    getStudentVoteStats();
+  }, [currentSemester, db, queryUname]);
+
+  useEffect(() => {
     // update data in buble
-    if (!semesterStudentVoteState.length) return setBubble([]);
+    if (!semesterStudentsVoteState.length) return setBubble([]);
 
     const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
-      semesterStudentVoteState,
+      semesterStudentsVoteState,
       students
     );
     setBubble(bubbleStats);
@@ -110,21 +126,21 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       minAxisX: minVote,
       minAxisY: minVotePoints,
     });
-  }, [semesterStudentVoteState, students]);
+  }, [semesterStudentsVoteState, students]);
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentVoteState.length) return setStackedBar([]);
+    if (!semesterStudentsVoteState.length) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
-      semesterStudentVoteState,
+      semesterStudentsVoteState,
       maxProposalsPoints,
       maxQuestionsPoints
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, semesterStudentsVoteState.length]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -247,6 +263,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               semesterStats={semesterStats}
               semesterTitle={currentSemester.title}
               studentsCounter={studentsCounter}
+              student={studentVoteStat}
             />
           )}
         </Paper>
@@ -311,7 +328,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   marginBottom: "16px",
                 }}
               >
-                <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
                   title={"Completion rate"}
                   options={[

@@ -40,14 +40,12 @@ export const getStackedBarStat = (
 ): StackedBarStatsData => {
   const stackedBarStats: StackedBarStats[] = [];
   const studentProposalsRate: StudentStackedBarStats = {
-    index: 0,
     alessEqualTen: [],
     bgreaterTen: [],
     cgreaterFifty: [],
     dgreaterHundred: [],
   };
   const studentQuestionsRate: StudentStackedBarStats = {
-    index: 1,
     alessEqualTen: [],
     bgreaterTen: [],
     cgreaterFifty: [],
@@ -72,32 +70,12 @@ export const getStackedBarStat = (
     if (d.deleted) return;
     const proposals = d.totalPoints;
     const question = d.questionPoints;
-    if (proposals > (100 * maxProposalsPoints) / 100) {
-      ProposalsRate.dgreaterHundred += 1;
-      studentProposalsRate.dgreaterHundred.push(d.uname);
-    } else if (proposals > (50 * maxProposalsPoints) / 100) {
-      ProposalsRate.cgreaterFifty += 1;
-      studentProposalsRate.cgreaterFifty.push(d.uname);
-    } else if (proposals > (10 * maxProposalsPoints) / 100) {
-      ProposalsRate.bgreaterTen += 1;
-      studentProposalsRate.bgreaterTen.push(d.uname);
-    } else if (proposals <= (10 * maxProposalsPoints) / 100) {
-      ProposalsRate.alessEqualTen += 1;
-      studentProposalsRate.alessEqualTen.push(d.uname);
-    }
-    if (question > (100 * maxQuestionsPoints) / 100) {
-      QuestionsRate.dgreaterHundred += 1;
-      studentQuestionsRate.dgreaterHundred.push(d.uname);
-    } else if (question > (50 * maxQuestionsPoints) / 100) {
-      QuestionsRate.cgreaterFifty += 1;
-      studentQuestionsRate.cgreaterFifty.push(d.uname);
-    } else if (question > (10 * maxQuestionsPoints) / 100) {
-      QuestionsRate.bgreaterTen += 1;
-      studentQuestionsRate.bgreaterTen.push(d.uname);
-    } else if (question <= (10 * maxQuestionsPoints) / 100) {
-      QuestionsRate.alessEqualTen += 1;
-      studentQuestionsRate.alessEqualTen.push(d.uname);
-    }
+    const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
+    const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
+    ProposalsRate[proposalSubgroup] += 1;
+    studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(d.uname);
+    QuestionsRate[questionsSubgroup] += 1;
+    studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(d.uname);
     console.log({ proposals, ProposalsRate });
   });
 
@@ -108,4 +86,16 @@ export const getStackedBarStat = (
     studentStackedBarProposalsStats: studentProposalsRate,
     studentStackedBarQuestionsStats: studentQuestionsRate,
   };
+};
+
+export const getStudentSubgroupInBars = (points: number, maxPoints: number): keyof StackedBarStats => {
+  if (points > (100 * maxPoints) / 100) {
+    return "dgreaterHundred";
+  } else if (points > (50 * maxPoints) / 100) {
+    return "cgreaterFifty";
+  } else if (points > (10 * maxPoints) / 100) {
+    return "bgreaterTen";
+  } else {
+    return "alessEqualTen";
+  }
 };

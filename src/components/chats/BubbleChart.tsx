@@ -257,7 +257,7 @@ export const BubbleChart = ({
       <svg ref={svg} style={{ position: "relative" }}>
         <g id="bubbles"></g>
         <g id="nums"></g>
-        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 40} y={height}>
+        <text style={{ fontSize: "19px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 40} y={height}>
           # of Votes
         </text>
       </svg>
