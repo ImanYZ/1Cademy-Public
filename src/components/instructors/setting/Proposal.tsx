@@ -6,8 +6,9 @@ import React from "react";
 type Props = {
   semester: any;
   inputsHandler: any;
+  errorState: any;
 };
-const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
+const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
   const layoutTheme: any = useTheme();
 
   return (
@@ -41,6 +42,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               height: "40px",
               width: "100px",
             }}
+            error={errorState.days}
           />
           &nbsp;in total.
         </Typography>
@@ -73,6 +75,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.nodeProposalDate}
             />
             &nbsp; to &nbsp;
             <FilledInput
@@ -97,6 +100,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.nodeProposalDate}
             />
             &nbsp;each student can get&nbsp;
             <FilledInput
@@ -164,6 +168,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 width: "110px",
                 borderBottom: "orange",
               }}
+              error={errorState.nodeProposalDay}
             />
             &nbsp; of the course.
           </Typography>
@@ -197,6 +202,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.questionProposalDate}
             />
             &nbsp; to &nbsp;
             <FilledInput
@@ -221,6 +227,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.questionProposalDate}
             />
             &nbsp;each student can get&nbsp;
             <FilledInput
@@ -289,6 +296,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 width: "110px",
                 borderBottom: "orange",
               }}
+              error={errorState.questionProposalDay}
             />
             &nbsp; of the course.
           </Typography>
