@@ -207,7 +207,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   }
 
   return (
-    <Box sx={{ padding: "20px" }}>
+    <Box sx={{ px: { xs: "10px", md: "20px" } }}>
       <Grid container spacing={5}>
         <Grid item xs={12} md={6}>
           <Chapter

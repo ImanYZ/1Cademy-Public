@@ -253,14 +253,14 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   return (
     <Box
       sx={{
-        background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
+        background: theme => (theme.palette.mode === "light" ? "rgba(245, 245, 245, 1)" : "#28282A"),
         minHeight: "100vh",
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
       {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
       {/* <HeaderNavbar /> */}
-      <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
+      <Box sx={{ width: "100%", py: "10px", m: "auto", px: { xs: "10px", md: "20px" } }}>
         <SemesterFilter
           semesters={semesters}
           selectedSemester={selectedSemester}

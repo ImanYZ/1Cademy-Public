@@ -217,9 +217,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     <Box
       sx={{
         pb: "10px",
-        maxWidth: "1384px",
+        width: "100%",
         m: "auto",
-        px: { xs: "10px", xl: "0px" },
+        px: { xs: "10px", md: "20px" },
         display: "flex",
         flexDirection: "column",
         gap: "16px",

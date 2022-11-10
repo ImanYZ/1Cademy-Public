@@ -338,9 +338,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     <Box
       sx={{
         pb: "10px",
-        maxWidth: "1384px",
+        width: "100%",
         m: "auto",
-        px: { xs: "10px", xl: "0px" },
+        px: { xs: "10px", md: "20px" },
         display: "flex",
         flexDirection: "column",
         gap: "16px",
@@ -358,6 +358,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           sx={{
             px: "32px",
             py: "40px",
+            backgroundColor: "#FFFFFF",
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
@@ -378,6 +379,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            backgroundColor: "#FFFFFF",
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
@@ -420,7 +422,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             </>
           )}
         </Paper>
-        <Paper sx={{ px: "32px", py: "40px" }}>
+        <Paper sx={{ px: "32px", py: "40px", backgroundColor: "#FFFFFF" }}>
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
             <>
@@ -577,6 +579,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               alignItems: "center",
               justifyContent: "center",
               width: "100%",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <StudentDailyPlotStatsSkeleton isMovil={isMovil} isTablet={isTablet} />
@@ -591,6 +594,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                backgroundColor: "#FFFFFF",
               }}
             >
               <TrendPlot
@@ -615,6 +619,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                backgroundColor: "#FFFFFF",
               }}
             >
               <TrendPlot
@@ -639,6 +644,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                backgroundColor: "#FFFFFF",
               }}
             >
               <TrendPlot
@@ -663,6 +669,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                backgroundColor: "#FFFFFF",
               }}
             >
               <TrendPlot
@@ -687,6 +694,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                backgroundColor: "#FFFFFF",
               }}
             >
               <TrendPlot
