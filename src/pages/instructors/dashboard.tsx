@@ -94,14 +94,12 @@ export type BoxData = {
 //   dgreaterHundred: number;
 // };
 export type StudentStackedBarStats = {
-  index: number;
   alessEqualTen: string[];
   bgreaterTen: string[];
   cgreaterFifty: string[];
   dgreaterHundred: string[];
 };
 export type StudentStackedBarStatsObject = {
-  index: number;
   alessEqualTen: ISemesterStudent[];
   bgreaterTen: ISemesterStudent[];
   cgreaterFifty: ISemesterStudent[];
@@ -109,8 +107,12 @@ export type StudentStackedBarStatsObject = {
 };
 export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
-  studentStackedBarProposalsStats: StudentStackedBarStats;
-  studentStackedBarQuestionsStats: StudentStackedBarStats;
+  studentStackedBarProposalsStats: StudentStackedBarStatsObject;
+  studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+};
+export type StudenBarsSubgroupLocation = {
+  proposals: number;
+  questions: number;
 };
 
 // export type BubbleStats = {
@@ -167,8 +169,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
-  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStats | null>(null);
-  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStats | null>(null);
+  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
@@ -269,17 +271,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentVoteState.length) return setStackedBar([]);
+    if (!semesterStudentVoteState.length || !students) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
       semesterStudentVoteState,
+      students,
       maxProposalsPoints,
       maxQuestionsPoints
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length, students]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -437,7 +440,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               >
                 <Box>
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
-                  <Typography># of Students</Typography>
                 </Box>
                 <Legend
                   title={"Completion rate"}
@@ -452,7 +454,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  students={students}
                   proposalsStudents={proposalsStudents}
                   questionsStudents={questionsStudents}
                   maxAxisY={maxStackedBarAxisY}
@@ -483,9 +484,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   marginBottom: "16px",
                 }}
               >
-                <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
-                  title={"Completion rate"}
+                  title={"Leaderboard"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -800,7 +801,730 @@ export const getBubbleStats = (
       minVote,
       minVotePoints,
     };
-  data.map(d => {
+  console.log("data", data);
+  const mock = [
+    {
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      instVotes: 43,
+      improvements: 94,
+      questionPoints: 201,
+      upVotes: 3253,
+      agreementsWithInst: 178,
+      questions: 171,
+      votePoints: 106,
+      disagreementsWithInst: 72,
+      votes: 250,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      downVotes: 73,
+      uname: "elizadh",
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      newNodes: 210,
+      totalPoints: 90,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      links: 50,
+      deleted: false,
+    },
+    {
+      totalPoints: 420,
+      improvements: 89,
+      votes: 256,
+      upVotes: 1189,
+      agreementsWithInst: 192,
+      downVotes: 2620,
+      disagreementsWithInst: 64,
+      questionPoints: 220,
+      newNodes: 225,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      deleted: false,
+      questions: 194,
+      links: 48,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      instVotes: 19,
+      uname: "rwilmer",
+      lastActivity: {
+        seconds: 1617753600,
+        nanoseconds: 0,
+      },
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      votePoints: 141,
+    },
+    {
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      totalPoints: 420,
+      newNodes: 248,
+      instVotes: 80,
+      upVotes: 4031,
+      links: 44,
+      votes: 276,
+      agreementsWithInst: 200,
+      improvements: 76,
+      questions: 200,
+      disagreementsWithInst: 76,
+      questionPoints: 10,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      uname: "nbalkovic",
+      downVotes: 0,
+      deleted: false,
+      votePoints: 70,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+    },
+    {
+      agreementsWithInst: 165,
+      disagreementsWithInst: 58,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      deleted: false,
+      instVotes: 95,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      newNodes: 217,
+      improvements: 76,
+      questionPoints: 173,
+      downVotes: 1116,
+      totalPoints: 120,
+      lastActivity: {
+        seconds: 1617753600,
+        nanoseconds: 0,
+      },
+      votes: 223,
+      upVotes: 1426,
+      questions: 173,
+      uname: "emmafinkel",
+      votePoints: 4,
+      links: 42,
+    },
+    {
+      upVotes: 98,
+      questionPoints: 201,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      votes: 258,
+      instVotes: 115,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      uname: "tallurid",
+      links: 51,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      agreementsWithInst: 178,
+      newNodes: 222,
+      improvements: 95,
+      totalPoints: 40,
+      deleted: false,
+      questions: 168,
+      votePoints: 25,
+      disagreementsWithInst: 80,
+      downVotes: 3846,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+    },
+    {
+      questions: 209,
+      questionPoints: 25,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      instVotes: 11,
+      votes: 40,
+      totalPoints: 270,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      newNodes: 252,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      votePoints: 0,
+      downVotes: 2265,
+      agreementsWithInst: 206,
+      improvements: 89,
+      deleted: false,
+      upVotes: 1619,
+      links: 40,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      uname: "pdanu",
+      disagreementsWithInst: 68,
+    },
+    {
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      deleted: false,
+      votePoints: -10,
+      votes: 269,
+      questions: 187,
+      links: 61,
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      agreementsWithInst: 199,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      upVotes: 2142,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      questionPoints: 75,
+      newNodes: 244,
+      improvements: 99,
+      totalPoints: 60,
+      uname: "jaredtut",
+      downVotes: 739,
+      disagreementsWithInst: 70,
+      instVotes: 59,
+    },
+    {
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      agreementsWithInst: 165,
+      uname: "elizadh",
+      instVotes: 75,
+      totalPoints: 104,
+      newNodes: 208,
+      downVotes: 481,
+      votes: 30,
+      upVotes: 63,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      improvements: 77,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      questions: 181,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      questionPoints: 181,
+      deleted: false,
+      votePoints: -20,
+      links: 43,
+      disagreementsWithInst: 68,
+    },
+    {
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      instVotes: 11,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      votePoints: 141,
+      votes: 217,
+      newNodes: 190,
+      disagreementsWithInst: 60,
+      improvements: 77,
+      uname: "johnwisniewski",
+      upVotes: 1602,
+      totalPoints: 114,
+      downVotes: 1200,
+      agreementsWithInst: 157,
+      links: 46,
+      deleted: false,
+      questions: 153,
+      questionPoints: 153,
+    },
+    {
+      downVotes: 625,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      votePoints: 0,
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      deleted: false,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      totalPoints: 220,
+      instVotes: 151,
+      questions: 174,
+      upVotes: 2849,
+      links: 41,
+      newNodes: 205,
+      improvements: 90,
+      uname: "ironhulk19",
+      questionPoints: 80,
+      agreementsWithInst: 173,
+      votes: 60,
+      disagreementsWithInst: 69,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+    },
+    {
+      disagreementsWithInst: 86,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      links: 43,
+      questionPoints: 50,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      questions: 216,
+      upVotes: 2176,
+      downVotes: 1979,
+      instVotes: 14,
+      newNodes: 258,
+      votePoints: 0,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      uname: "Shahbab-Ahmed",
+      agreementsWithInst: 194,
+      improvements: 93,
+      totalPoints: 300,
+      deleted: false,
+      votes: 0,
+    },
+    {
+      downVotes: 532,
+      questionPoints: 166,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      improvements: 64,
+      deleted: false,
+      instVotes: 87,
+      links: 25,
+      votePoints: 130,
+      newNodes: 198,
+      votes: 211,
+      questions: 166,
+      disagreementsWithInst: 69,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      upVotes: 1213,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      totalPoints: 96,
+      uname: "turrenk",
+      agreementsWithInst: 142,
+    },
+    {
+      improvements: 75,
+      newNodes: 176,
+      questions: 138,
+      votePoints: 11,
+      disagreementsWithInst: 47,
+      agreementsWithInst: 158,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      uname: "Catherine Huang",
+      deleted: false,
+      totalPoints: 50,
+      links: 37,
+      questionPoints: 150,
+      instVotes: 56,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      upVotes: 469,
+      votes: 205,
+      downVotes: 163,
+    },
+    {
+      lastActivity: {
+        seconds: 1617753600,
+        nanoseconds: 0,
+      },
+      links: 27,
+      instVotes: 6,
+      questions: 167,
+      upVotes: 2464,
+      deleted: false,
+      improvements: 71,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      disagreementsWithInst: 53,
+      questionPoints: 167,
+      newNodes: 208,
+      agreementsWithInst: 171,
+      votes: 120,
+      totalPoints: 15,
+      downVotes: 128,
+      votePoints: 60,
+      uname: "elijah-fox",
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+    },
+    {
+      instVotes: 10,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      downVotes: 30,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      deleted: false,
+      agreementsWithInst: 167,
+      questions: 169,
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      totalPoints: 116,
+      newNodes: 200,
+      improvements: 85,
+      questionPoints: 169,
+      uname: "adsturza",
+      disagreementsWithInst: 66,
+      links: 38,
+      votePoints: 101,
+      upVotes: 3231,
+      votes: 50,
+    },
+    {
+      uname: "maxzhang",
+      votes: 0,
+      totalPoints: 40,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      improvements: 98,
+      upVotes: 216,
+      agreementsWithInst: 205,
+      instVotes: 48,
+      questions: 199,
+      disagreementsWithInst: 70,
+      questionPoints: 199,
+      votePoints: 135,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      newNodes: 242,
+      deleted: false,
+      downVotes: 3519,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      links: 51,
+    },
+    {
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      instVotes: 113,
+      agreementsWithInst: 160,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      links: 39,
+      downVotes: 2790,
+      upVotes: 283,
+      newNodes: 220,
+      totalPoints: 20,
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      votePoints: 91,
+      questionPoints: 20,
+      uname: "sarahlatto",
+      votes: 0,
+      deleted: false,
+      improvements: 77,
+      questions: 181,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      disagreementsWithInst: 69,
+    },
+    {
+      newNodes: 257,
+      downVotes: 498,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      votes: 298,
+      disagreementsWithInst: 83,
+      questionPoints: 214,
+      agreementsWithInst: 215,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      totalPoints: 144,
+      questions: 214,
+      uname: "amberma",
+      upVotes: 1909,
+      improvements: 101,
+      votePoints: 132,
+      links: 42,
+      instVotes: 88,
+      deleted: false,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+    },
+    {
+      newNodes: 226,
+      upVotes: 2114,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      improvements: 111,
+      votes: 97,
+      instVotes: 35,
+      totalPoints: 60,
+      agreementsWithInst: 193,
+      links: 59,
+      deleted: false,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      uname: "sydlee",
+      downVotes: 1599,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      votePoints: 113,
+      questions: 186,
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      disagreementsWithInst: 80,
+      questionPoints: 90,
+    },
+    {
+      uname: "Gege Dwyer",
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      questionPoints: 189,
+      links: 56,
+      instVotes: 51,
+      upVotes: 3400,
+      disagreementsWithInst: 80,
+      totalPoints: 147,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      agreementsWithInst: 211,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      downVotes: 779,
+      questions: 189,
+      votePoints: 85,
+      deleted: false,
+      newNodes: 233,
+      improvements: 103,
+      lastActivity: {
+        seconds: 1617753600,
+        nanoseconds: 0,
+      },
+      votes: 120,
+    },
+    {
+      questionPoints: 10,
+      instVotes: 98,
+      questions: 170,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      totalPoints: 30,
+      newNodes: 210,
+      agreementsWithInst: 185,
+      upVotes: 391,
+      links: 30,
+      votes: 234,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      deleted: false,
+      downVotes: 898,
+      disagreementsWithInst: 49,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      improvements: 66,
+      uname: "metzlera",
+      votePoints: 136,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+    },
+    {
+      lastActivity: {
+        seconds: 1617926400,
+        nanoseconds: 0,
+      },
+      uname: "Peiyan",
+      instVotes: 77,
+      links: 31,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      newNodes: 248,
+      upVotes: 2564,
+      votePoints: 70,
+      downVotes: 1347,
+      agreementsWithInst: 201,
+      questionPoints: 230,
+      votes: 0,
+      improvements: 80,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      totalPoints: 401,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 757000000,
+      },
+      questions: 196,
+      deleted: false,
+      disagreementsWithInst: 70,
+    },
+    {
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      instVotes: 57,
+      links: 38,
+      uname: "hayounki",
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 756000000,
+      },
+      questions: 186,
+      upVotes: 2838,
+      improvements: 86,
+      questionPoints: 50,
+      agreementsWithInst: 185,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      newNodes: 231,
+      votePoints: 70,
+      votes: 30,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      totalPoints: 205,
+      downVotes: 855,
+      disagreementsWithInst: 79,
+      deleted: false,
+    },
+    {
+      totalPoints: 122,
+      updatedAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      newNodes: 210,
+      questions: 186,
+      tagId: "LzFpJBUnml6U6I8c6Cpw",
+      improvements: 98,
+      disagreementsWithInst: 78,
+      instVotes: 65,
+      uname: "mchalf9",
+      votes: 120,
+      votePoints: 50,
+      links: 43,
+      agreementsWithInst: 183,
+      questionPoints: 186,
+      upVotes: 3067,
+      lastActivity: {
+        seconds: 1617840000,
+        nanoseconds: 0,
+      },
+      deleted: false,
+      createdAt: {
+        seconds: 1667862140,
+        nanoseconds: 755000000,
+      },
+      downVotes: 386,
+    },
+  ];
+  mock.map(d => {
     let bubbleStat: BubbleStats = {
       students: 0,
       votes: 0,
