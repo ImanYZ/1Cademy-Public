@@ -1,6 +1,7 @@
 import { Divider, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
+import { SemesterStudentVoteStat } from "src/instructorsTypes";
 
 import { formatNumber } from "../../../lib/utils/number.utils";
 
@@ -10,6 +11,7 @@ type GeneralPlotStatsProps = {
   programTitle: string;
   studentsCounter: number;
   semesterStats: any;
+  student?: SemesterStudentVoteStat | null;
 };
 
 export const GeneralPlotStats = ({
@@ -18,6 +20,7 @@ export const GeneralPlotStats = ({
   studentsCounter,
   programTitle,
   courseTitle,
+  student,
 }: GeneralPlotStatsProps) => {
   console.log("semesterStats", semesterStats);
   return (
@@ -40,7 +43,7 @@ export const GeneralPlotStats = ({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "1fr 64px",
+          gridTemplateColumns: "1fr 72px",
           justifyContent: "center",
           alignItems: "end",
           py: "12px",
@@ -54,7 +57,7 @@ export const GeneralPlotStats = ({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "1fr 64px",
+          gridTemplateColumns: "1fr 100px",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
@@ -63,17 +66,35 @@ export const GeneralPlotStats = ({
         }}
       >
         <span style={{ textAlign: "left" }}>New Node Proposals</span>
-        <span>{formatNumber(semesterStats?.newNodeProposals)}</span>
+        <span>
+          {student ? `${formatNumber(student.newNodes)} / ` : ""}
+          {formatNumber(semesterStats?.newNodeProposals)}
+        </span>
         <span style={{ textAlign: "left" }}>Edit Proposals</span>
-        <span>{formatNumber(semesterStats?.editProposals)}</span>
+        <span>
+          {student ? `${formatNumber(student.improvements)} / ` : ""}
+          {formatNumber(semesterStats?.editProposals)}
+        </span>
         <span style={{ textAlign: "left" }}>Links</span>
-        <span>{formatNumber(semesterStats?.links)}</span>
+        <span>
+          {student ? `${formatNumber(student.links)} / ` : ""}
+          {formatNumber(semesterStats?.links)}
+        </span>
         <span style={{ textAlign: "left" }}>Nodes</span>
-        <span>{formatNumber(semesterStats?.nodes)}</span>
+        <span>
+          {student ? `${formatNumber(student.newNodes + student.improvements)} / ` : ""}
+          {formatNumber(semesterStats?.nodes)}
+        </span>
         <span style={{ textAlign: "left" }}>Votes</span>
-        <span>{formatNumber(semesterStats?.votes)}</span>
+        <span>
+          {student ? `${formatNumber(student.votes)} / ` : ""}
+          {formatNumber(semesterStats?.votes)}
+        </span>
         <span style={{ textAlign: "left" }}>Questions</span>
-        <span>{formatNumber(semesterStats?.questions)}</span>
+        <span>
+          {student ? `${formatNumber(student.questions)} / ` : ""}
+          {formatNumber(semesterStats?.questions)}
+        </span>
       </Box>
     </Box>
   );

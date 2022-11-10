@@ -707,9 +707,11 @@ p {
   position: absolute;
   background: #f8f8f8;
   box-shadow: 0 2px 8px 1px gray;
-  border-radius: 8px;
+  border-radius: 4px;
   opacity: 0;
   z-index: 999;
+  max-height: 350px;
+  overflow-y: auto;
 }
 #boxplot-tool-tip.darkMode {
   background: #303134;
@@ -747,4 +749,15 @@ p {
   margin: 0;
   margin-bottom: 1px;
   text-overflow: ellipsis;
+}
+
+#boxplot-tool-tip::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 6px;
+  height: 8px;
+}
+
+#boxplot-tool-tip::-webkit-scrollbar-thumb {
+  background: rgba(113, 113, 113, 0.663);
+  border-radius: 10px;
 }

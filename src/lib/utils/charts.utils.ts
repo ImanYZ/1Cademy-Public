@@ -1,12 +1,14 @@
+import { ISemesterStudent } from "src/types/ICourse";
+
 import { SemesterStats, SemesterStudentVoteStat, StackedBarStats } from "../../instructorsTypes";
-import { StackedBarStatsData, StudentStackedBarStats } from "../../pages/instructors/dashboard";
+import {
+  StackedBarStatsData,
+  StudentStackedBarStats,
+  StudentStackedBarStatsObject,
+} from "../../pages/instructors/dashboard";
 
 // TODO: Test
 export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
-  console.log(
-    "data",
-    data.map(c => ({ link: c.links, uname: c.uname }))
-  );
   let newNodeProposals = 0;
   let editProposals = 0;
   let links = 0;
@@ -35,19 +37,18 @@ export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
 // TODO: test
 export const getStackedBarStat = (
   data: SemesterStudentVoteStat[],
+  students: ISemesterStudent[],
   maxProposalsPoints: number,
   maxQuestionsPoints: number
 ): StackedBarStatsData => {
   const stackedBarStats: StackedBarStats[] = [];
-  const studentProposalsRate: StudentStackedBarStats = {
-    index: 0,
+  const studentProposalsRate: StudentStackedBarStatsObject = {
     alessEqualTen: [],
     bgreaterTen: [],
     cgreaterFifty: [],
     dgreaterHundred: [],
   };
-  const studentQuestionsRate: StudentStackedBarStats = {
-    index: 1,
+  const studentQuestionsRate: StudentStackedBarStatsObject = {
     alessEqualTen: [],
     bgreaterTen: [],
     cgreaterFifty: [],
@@ -67,38 +68,25 @@ export const getStackedBarStat = (
     cgreaterFifty: 0,
     dgreaterHundred: 0,
   };
-
-  data.map(d => {
-    if (d.deleted) return;
+  const sortedByProposals = [...data].sort((x, y) => y.totalPoints - x.totalPoints);
+  const sortedByQuestions = [...data].sort((x, y) => y.questionPoints - x.questionPoints);
+  sortedByProposals.map(d => {
     const proposals = d.totalPoints;
+    const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
+    const student = students.find(student => student.uname === d.uname);
+    if (!student) return;
+
+    ProposalsRate[proposalSubgroup] += 1;
+    studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
+  });
+  sortedByQuestions.map(d => {
     const question = d.questionPoints;
-    if (proposals > (100 * maxProposalsPoints) / 100) {
-      ProposalsRate.dgreaterHundred += 1;
-      studentProposalsRate.dgreaterHundred.push(d.uname);
-    } else if (proposals > (50 * maxProposalsPoints) / 100) {
-      ProposalsRate.cgreaterFifty += 1;
-      studentProposalsRate.cgreaterFifty.push(d.uname);
-    } else if (proposals > (10 * maxProposalsPoints) / 100) {
-      ProposalsRate.bgreaterTen += 1;
-      studentProposalsRate.bgreaterTen.push(d.uname);
-    } else if (proposals <= (10 * maxProposalsPoints) / 100) {
-      ProposalsRate.alessEqualTen += 1;
-      studentProposalsRate.alessEqualTen.push(d.uname);
-    }
-    if (question > (100 * maxQuestionsPoints) / 100) {
-      QuestionsRate.dgreaterHundred += 1;
-      studentQuestionsRate.dgreaterHundred.push(d.uname);
-    } else if (question > (50 * maxQuestionsPoints) / 100) {
-      QuestionsRate.cgreaterFifty += 1;
-      studentQuestionsRate.cgreaterFifty.push(d.uname);
-    } else if (question > (10 * maxQuestionsPoints) / 100) {
-      QuestionsRate.bgreaterTen += 1;
-      studentQuestionsRate.bgreaterTen.push(d.uname);
-    } else if (question <= (10 * maxQuestionsPoints) / 100) {
-      QuestionsRate.alessEqualTen += 1;
-      studentQuestionsRate.alessEqualTen.push(d.uname);
-    }
-    console.log({ proposals, ProposalsRate });
+    const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
+    const student = students.find(student => student.uname === d.uname);
+    if (!student) return;
+
+    QuestionsRate[questionsSubgroup] += 1;
+    studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
   });
 
   stackedBarStats.push(ProposalsRate);
@@ -108,4 +96,16 @@ export const getStackedBarStat = (
     studentStackedBarProposalsStats: studentProposalsRate,
     studentStackedBarQuestionsStats: studentQuestionsRate,
   };
+};
+
+export const getStudentSubgroupInBars = (points: number, maxPoints: number): keyof StackedBarStats => {
+  if (points > (100 * maxPoints) / 100) {
+    return "dgreaterHundred";
+  } else if (points > (50 * maxPoints) / 100) {
+    return "cgreaterFifty";
+  } else if (points > (10 * maxPoints) / 100) {
+    return "bgreaterTen";
+  } else {
+    return "alessEqualTen";
+  }
 };

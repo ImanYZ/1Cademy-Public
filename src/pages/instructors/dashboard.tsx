@@ -1,10 +1,9 @@
-// import PlaceIcon from "@mui/icons-material/Place";
 import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   BubbleAxis,
   BubbleStats,
@@ -31,6 +30,7 @@ import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons
 import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
+import { useWindowSize } from "../../hooks/useWindowSize";
 import { getSemStat, getStackedBarStat } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
@@ -93,14 +93,12 @@ export type BoxData = {
 //   dgreaterHundred: number;
 // };
 export type StudentStackedBarStats = {
-  index: number;
   alessEqualTen: string[];
   bgreaterTen: string[];
   cgreaterFifty: string[];
   dgreaterHundred: string[];
 };
 export type StudentStackedBarStatsObject = {
-  index: number;
   alessEqualTen: ISemesterStudent[];
   bgreaterTen: ISemesterStudent[];
   cgreaterFifty: ISemesterStudent[];
@@ -108,8 +106,12 @@ export type StudentStackedBarStatsObject = {
 };
 export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
-  studentStackedBarProposalsStats: StudentStackedBarStats;
-  studentStackedBarQuestionsStats: StudentStackedBarStats;
+  studentStackedBarProposalsStats: StudentStackedBarStatsObject;
+  studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+};
+export type StudenBarsSubgroupLocation = {
+  proposals: number;
+  questions: number;
 };
 
 // export type BubbleStats = {
@@ -166,8 +168,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
-  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStats | null>(null);
-  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStats | null>(null);
+  const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
@@ -185,6 +187,28 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
   const [semesterStudentVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
+
+  const [infoWidth, setInfoWidth] = useState(0);
+  const [stackBarWidth, setstackBarWidth] = useState(0);
+
+  const { width: windowWidth } = useWindowSize();
+
+  const infoWrapperRef = useCallback(
+    (element: HTMLDivElement) => {
+      console.log("ref:bubbleRef was called", windowWidth);
+      if (!element) return;
+      setInfoWidth(element.clientWidth);
+    },
+    [windowWidth]
+  );
+  const stackBarWrapperRef = useCallback(
+    (element: HTMLDivElement) => {
+      console.log("ref:bubbleRef was called", windowWidth);
+      if (!element) return;
+      setstackBarWidth(element.clientWidth);
+    },
+    [windowWidth]
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -234,17 +258,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentVoteState.length) return setStackedBar([]);
+    if (!semesterStudentVoteState.length || !students) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
       semesterStudentVoteState,
+      students,
       maxProposalsPoints,
       maxQuestionsPoints
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length, students]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -327,7 +352,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
-  const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+  // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+  const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
 
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
@@ -352,11 +378,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "minmax(auto, 421px) auto minmax(auto, 629px)" },
+          gridTemplateColumns: { xs: "1fr", md: `auto auto minmax(auto, 629px)` },
           gap: "16px",
         }}
       >
         <Paper
+          ref={infoWrapperRef}
           sx={{
             px: "32px",
             py: "40px",
@@ -375,6 +402,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           )}
         </Paper>
         <Paper
+          ref={stackBarWrapperRef}
           sx={{
             px: "32px",
             py: "40px",
@@ -399,7 +427,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               >
                 <Box>
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
-                  <Typography># of Students</Typography>
                 </Box>
                 <Legend
                   title={"Completion rate"}
@@ -414,7 +441,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  students={students}
                   proposalsStudents={proposalsStudents}
                   questionsStudents={questionsStudents}
                   maxAxisY={maxStackedBarAxisY}
@@ -425,11 +451,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           )}
         </Paper>
         <Paper
+          // ref={bubbleRef}
+          className="test"
           sx={{
             px: "32px",
             py: "40px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
+          component="div"
         >
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
@@ -442,9 +471,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   marginBottom: "16px",
                 }}
               >
-                <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
-                  title={"Completion rate"}
+                  title={"Leaderboard"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -457,7 +486,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               </Box>
               <BubbleChart
                 data={bubble}
-                width={isMovil ? 220 : isTablet ? 300 : 500}
+                width={
+                  isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
+                }
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
@@ -590,7 +621,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
             }}
           >
-            <StudentDailyPlotStatsSkeleton isMovil={isMovil} isTablet={isTablet} />
+            <StudentDailyPlotStatsSkeleton />
           </Paper>
         )}
 
@@ -757,6 +788,7 @@ export const getBubbleStats = (
       minVote,
       minVotePoints,
     };
+
   data.map(d => {
     let bubbleStat: BubbleStats = {
       students: 0,
