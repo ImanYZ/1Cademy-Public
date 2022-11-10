@@ -398,7 +398,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               >
                 <Box>
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
-                  <Typography># of Students</Typography>
                 </Box>
                 <Legend
                   title={"Completion rate"}
@@ -436,7 +435,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               >
                 <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
-                  title={"Completion rate"}
+                  title={"Leaderboard"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -1155,10 +1154,10 @@ export const getBubbleStats = (
       questionPoints: 167,
       newNodes: 208,
       agreementsWithInst: 171,
-      votes: 12,
+      votes: 120,
       totalPoints: 15,
       downVotes: 128,
-      votePoints: 130,
+      votePoints: 60,
       uname: "elijah-fox",
       updatedAt: {
         seconds: 1667862140,
@@ -1369,7 +1368,7 @@ export const getBubbleStats = (
       },
       improvements: 66,
       uname: "metzlera",
-      votePoints: 46,
+      votePoints: 136,
       lastActivity: {
         seconds: 1617840000,
         nanoseconds: 0,

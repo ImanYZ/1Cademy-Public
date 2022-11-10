@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
-import { BubbleStats } from "../../instructorsTypes";
+import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
 
 // import { BubbleStats } from "@/pages/instructors/dashboard";
 
@@ -67,7 +67,8 @@ function drawChart(
   maxAxisX: number,
   maxAxisY: number,
   minAxisX: number,
-  minAxisY: number
+  minAxisY: number,
+  student?: SemesterStudentVoteStat | null
 ) {
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
@@ -189,13 +190,24 @@ function drawChart(
         .html(`${html}`)
         .style("opacity", 1)
         .style("top", `${e.offsetY + 20}px`)
-        .style("left", `${e.offsetX + d.votes}px`);
+        .style("left", `${e.offsetX + maxAxisX - 50}px`);
     })
     .on("mouseout", function () {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       tooltip.style("opacity", 0).style("pointer-events", "none");
     });
+  if (student) {
+    const locationIconPath =
+      "M7 9.5C6.33696 9.5 5.70107 9.23661 5.23223 8.76777C4.76339 8.29893 4.5 7.66304 4.5 7C4.5 6.33696 4.76339 5.70107 5.23223 5.23223C5.70107 4.76339 6.33696 4.5 7 4.5C7.66304 4.5 8.29893 4.76339 8.76777 5.23223C9.23661 5.70107 9.5 6.33696 9.5 7C9.5 7.3283 9.43534 7.65339 9.3097 7.95671C9.18406 8.26002 8.99991 8.53562 8.76777 8.76777C8.53562 8.99991 8.26002 9.18406 7.95671 9.3097C7.65339 9.43534 7.3283 9.5 7 9.5ZM7 0C5.14348 0 3.36301 0.737498 2.05025 2.05025C0.737498 3.36301 0 5.14348 0 7C0 12.25 7 20 7 20C7 20 14 12.25 14 7C14 5.14348 13.2625 3.36301 11.9497 2.05025C10.637 0.737498 8.85652 0 7 0Z";
+
+    svg
+      .select("#location")
+      .selectAll("path")
+      .attr("d", locationIconPath)
+      .attr("transform", `translate(${x(student.votes + 14)},${y(student.votePoints + 12)})`)
+      .attr("fill", "#EF5350");
+  }
   // svg
   //   .select("#nums")
   //   .selectAll("text")
@@ -229,6 +241,7 @@ type BubblePlotProps = {
   maxAxisY: number;
   minAxisX: number;
   minAxisY: number;
+  student?: SemesterStudentVoteStat | null;
 };
 export const BubbleChart = ({
   width,
@@ -239,8 +252,9 @@ export const BubbleChart = ({
   maxAxisY,
   minAxisX,
   minAxisY,
+  student,
 }: BubblePlotProps) => {
-  console.log("PointsBarChart", { maxAxisX, maxAxisY, minAxisX, minAxisY });
+  console.log("PointsBarChart", student);
   //   const svg = useRef<SVGSVGElement>(null);
 
   //   useEffect(() => {
@@ -252,9 +266,9 @@ export const BubbleChart = ({
     (svgRef: any) => {
       console.log("svg callbak");
 
-      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY);
+      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student);
     },
-    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, theme, width]
+    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, student, theme, width]
   );
 
   return (
@@ -262,10 +276,15 @@ export const BubbleChart = ({
       <svg ref={svg} style={{ position: "relative" }}>
         <g id="bubbles"></g>
         <g id="nums"></g>
+        <g id="location">
+          <path></path>
+        </g>
+
         <text style={{ fontSize: "19px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 40} y={height}>
           # of Votes
         </text>
       </svg>
+
       <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
     </>
   );

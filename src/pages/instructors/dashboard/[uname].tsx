@@ -338,7 +338,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               >
                 <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
-                  title={"Leader Board"}
+                  title={"Leaderboard"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -358,6 +358,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
+                student={studentVoteStat}
               />
             </>
           )}
