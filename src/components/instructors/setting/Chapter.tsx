@@ -5,7 +5,7 @@ import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import SaveIcon from "@mui/icons-material/Save";
-import { Accordion, AccordionDetails, AccordionSummary, Button, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React, { useState } from "react";
@@ -240,11 +240,11 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
   };
 
   return (
-    <Box
+    <Paper
       sx={{
         padding: "40px 40px 40px 40px",
-        boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
       }}
+      elevation={2}
     >
       <Typography variant="h3">Course Syllabus</Typography>
       <Typography variant="h4" mt={5}>
@@ -615,7 +615,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
           Add new chapter
         </Button>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 
