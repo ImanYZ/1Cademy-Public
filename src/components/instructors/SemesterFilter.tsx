@@ -94,7 +94,12 @@ export const SemesterFilter = ({
         {!isMovil && (
           <ToggleButtonGroup value={selectedCourse} exclusive onChange={onChangeCourse} aria-label="text alignment">
             {courses.map((cur, idx) => (
-              <ToggleButton key={idx} value={cur} aria-label="left aligned">
+              <ToggleButton
+                key={idx}
+                value={cur}
+                aria-label="left aligned"
+                sx={{ border: "solid 1px rgb(185 185 185)" }}
+              >
                 {cur}
               </ToggleButton>
             ))}
