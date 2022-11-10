@@ -1,20 +1,18 @@
 import { useTheme } from "@emotion/react";
-import { FilledInput, InputAdornment, Typography } from "@mui/material";
+import { FilledInput, InputAdornment, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React from "react";
 type Props = {
   semester: any;
   inputsHandler: any;
+  errorState: any;
 };
-const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
+const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
   const layoutTheme: any = useTheme();
 
   return (
-    <Box
-      className="remove-arrow-buttons unselect-date-placeholder"
-      sx={{ padding: "40px 40px", boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }}
-    >
+    <Paper className="remove-arrow-buttons unselect-date-placeholder" sx={{ padding: "40px 40px" }} elevation={2}>
       <Typography variant="h3">Proposals & Practice</Typography>
       <Box>
         <Typography mt={3} variant="h4">
@@ -41,6 +39,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
               height: "40px",
               width: "100px",
             }}
+            error={errorState.days}
           />
           &nbsp;in total.
         </Typography>
@@ -73,6 +72,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.nodeProposalDate}
             />
             &nbsp; to &nbsp;
             <FilledInput
@@ -97,6 +97,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.nodeProposalDate}
             />
             &nbsp;each student can get&nbsp;
             <FilledInput
@@ -164,6 +165,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 width: "110px",
                 borderBottom: "orange",
               }}
+              error={errorState.nodeProposalDay}
             />
             &nbsp; of the course.
           </Typography>
@@ -197,6 +199,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.questionProposalDate}
             />
             &nbsp; to &nbsp;
             <FilledInput
@@ -221,6 +224,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                       : "black"
                     : "transparent",
               }}
+              error={errorState.questionProposalDate}
             />
             &nbsp;each student can get&nbsp;
             <FilledInput
@@ -289,12 +293,13 @@ const Proposal: FC<Props> = ({ semester, inputsHandler }) => {
                 width: "110px",
                 borderBottom: "orange",
               }}
+              error={errorState.questionProposalDay}
             />
             &nbsp; of the course.
           </Typography>
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

@@ -1,7 +1,7 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import StarIcon from "@mui/icons-material/Star";
-import { FilledInput, Grid, InputAdornment, Typography } from "@mui/material";
+import { FilledInput, Grid, InputAdornment, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React from "react";
@@ -11,7 +11,16 @@ type Props = {
 };
 const Vote: FC<Props> = ({ semester, inputsHandler }) => {
   return (
-    <>
+    <Paper
+      sx={{
+        display: "flex",
+        flexDirection: {
+          xs: "column",
+          md: "row",
+        },
+      }}
+      elevation={2}
+    >
       <Grid item xs={12} md={6}>
         <Box className="remove-arrow-buttons" sx={{ padding: "30px 40px" }}>
           <Box sx={{ marginTop: "10px" }}>
@@ -132,7 +141,6 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                 <CheckIcon
                   sx={{
                     color: "green",
-
                     marginTop: "auto",
                     marginRight: "5px",
                     marginBottom: "-5px",
@@ -258,7 +266,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
           </Box>
         </Box>
       </Grid>
-    </>
+    </Paper>
   );
 };
 

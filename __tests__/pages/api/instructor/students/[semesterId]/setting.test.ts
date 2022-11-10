@@ -157,7 +157,7 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
 
   const coursesCollection = new MockData([course], "courses");
   const semestersCollection = new MockData([semester], "semesters");
-  const instructorsCollection = new MockData([semester], "instructors");
+  const instructorsCollection = new MockData([instructor], "instructors");
 
   const collects = [
     usersCollection,

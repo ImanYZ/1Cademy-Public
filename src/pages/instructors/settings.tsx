@@ -5,6 +5,7 @@ import { Box } from "@mui/system";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { Institution } from "src/knowledgeTypes";
 
@@ -17,9 +18,18 @@ import Proposal from "../../components/instructors/setting/Proposal";
 import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
+const initialErrorsState = {
+  days: false,
+  nodeProposalDay: false,
+  nodeProposalDate: false,
+  questionProposalDay: false,
+  questionProposalDate: false,
+};
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   const db = getFirestore();
+  const { enqueueSnackbar } = useSnackbar();
   const [loaded, setLoaded] = useState(false);
+  const [errorState, setErrorState] = useState(initialErrorsState);
   const [requestLoader, setRequestLoader] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [chapters, setChapters] = useState<any>([]);
@@ -100,6 +110,16 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     retrieveInstitutions();
   }, []);
 
+  const showErrorPop = (error: string) => {
+    return enqueueSnackbar(error, {
+      variant: "error",
+      anchorOrigin: {
+        horizontal: "right",
+        vertical: "top",
+      },
+    });
+  };
+
   const inputsHandler = (e: any, type: any, field: any = null) => {
     if (type === "nodeProposals") {
       if (field == "startDate" || field == "endDate") {
@@ -148,42 +168,84 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   };
 
   const onSubmitHandler = async () => {
-    setRequestLoader(true);
-    let chaptersData = chapters.map((x: any) => {
-      return {
-        ...x,
-        children: x.children
-          ? x.children.map((y: any) => {
-              return { ...y };
-            })
-          : undefined,
-      };
-    });
+    try {
+      setRequestLoader(true);
+      let chaptersData = chapters.map((x: any) => {
+        return {
+          ...x,
+          children: x.children
+            ? x.children.map((y: any) => {
+                return { ...y };
+              })
+            : undefined,
+        };
+      });
 
-    chaptersData.map((chapter: any) => {
-      if (chapter.hasOwnProperty("editable")) {
-        delete chapter.editable;
+      chaptersData.map((chapter: any) => {
+        if (chapter.hasOwnProperty("editable")) {
+          delete chapter.editable;
+        }
+        if (chapter.isNew) {
+          delete chapter.isNew;
+          delete chapter.node;
+        }
+        if (chapter.children) {
+          chapter.children.map((subChap: any) => {
+            if (subChap.hasOwnProperty("editable")) {
+              delete subChap.editable;
+            }
+            if (subChap.isNew) {
+              delete subChap.isNew;
+              delete subChap.node;
+            }
+          });
+        }
+      });
+
+      let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
+      let questionProposalEndDate = moment(semester.questionProposals.endDate);
+      if (semester.days <= 0) {
+        setErrorState({ ...initialErrorsState, days: true });
+        showErrorPop(`Total days should be greater than 0.`);
+        setRequestLoader(false);
+        return;
+      } else if (nodeProposalEndDate.diff(semester.nodeProposals.startDate, "days") !== semester.days) {
+        setErrorState({ ...initialErrorsState, nodeProposalDate: true });
+        showErrorPop(`Date range should be ${semester.days} days in node proposal.`);
+        setRequestLoader(false);
+        return;
+      } else if (questionProposalEndDate.diff(semester.questionProposals.startDate, "days") !== semester.days) {
+        setErrorState({ ...initialErrorsState, questionProposalDate: true });
+        showErrorPop(`Date range should be ${semester.days} days in question proposal.`);
+        setRequestLoader(false);
+        return;
+      } else if (
+        semester.nodeProposals.totalDaysOfCourse > semester.days ||
+        semester.nodeProposals.totalDaysOfCourse <= 0
+      ) {
+        setErrorState({ ...initialErrorsState, nodeProposalDay: true });
+        showErrorPop(`Days should be between 1 to ${semester.days} in node proposal.`);
+        setRequestLoader(false);
+        return;
+      } else if (
+        semester.questionProposals.totalDaysOfCourse > semester.days ||
+        semester.questionProposals.totalDaysOfCourse <= 0
+      ) {
+        setErrorState({ ...initialErrorsState, questionProposalDay: true });
+        showErrorPop(`Days should be between 1 to ${semester.days} in question proposal.`);
+        setRequestLoader(false);
+        return;
+      } else {
+        setErrorState({ ...initialErrorsState });
       }
-      if (chapter.isNew) {
-        delete chapter.isNew;
-        delete chapter.node;
-      }
-      if (chapter.children) {
-        chapter.children.map((subChap: any) => {
-          if (subChap.hasOwnProperty("editable")) {
-            delete subChap.editable;
-          }
-          if (subChap.isNew) {
-            delete subChap.isNew;
-            delete subChap.node;
-          }
-        });
-      }
-    });
-    let payload = { ...semester, syllabus: chaptersData };
-    let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
-    setRequestLoader(false);
-    console.log(response, "response");
+
+      let payload = { ...semester, syllabus: chaptersData };
+      let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
+      setRequestLoader(false);
+      console.log(response, "response");
+    } catch (error: any) {
+      setRequestLoader(false);
+    }
   };
   if (!loaded) {
     return (
@@ -218,10 +280,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Proposal semester={semester} inputsHandler={inputsHandler} />
+          <Proposal errorState={errorState} semester={semester} inputsHandler={inputsHandler} />
         </Grid>
       </Grid>
-      <Grid sx={{ boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }} container spacing={0} mt={5}>
+      <Grid container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
       <Box display="flex" justifyContent="center" alignItems="center" gap="10px">
@@ -240,6 +302,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
             fontWeight: "bold",
             padding: "15px 80px",
             marginTop: "20px",
+            marginBottom: "20px",
             fontSize: "20px",
           }}
         >
