@@ -334,6 +334,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   }
   if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
 
+  console.log("dx", { isMovil, isTablet });
+
   return (
     <Box
       sx={{
@@ -455,7 +457,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               </Box>
               <BubbleChart
                 data={bubble}
-                width={isMovil ? 220 : 500}
+                width={isMovil ? 220 : isTablet ? 300 : 500}
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}

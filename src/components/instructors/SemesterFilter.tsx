@@ -67,9 +67,8 @@ export const SemesterFilter = ({
     <Box
       sx={{
         display: "flex",
-        gap: { xs: "6px", md: "16px" },
+        gap: { xs: "6px", md: "20px" },
         justifyContent: { xs: "center", md: "space-between" },
-        flexWrap: "wrap",
       }}
     >
       <Box sx={{ display: "flex", gap: { xs: "6px", md: "16px" } }}>
@@ -92,13 +91,20 @@ export const SemesterFilter = ({
         </FormControl>
 
         {!isMovil && (
-          <ToggleButtonGroup value={selectedCourse} exclusive onChange={onChangeCourse} aria-label="text alignment">
+          <ToggleButtonGroup
+            value={selectedCourse}
+            exclusive
+            onChange={onChangeCourse}
+            aria-label="text alignment"
+            sx={{ width: { sm: "500px", lg: "700px", xl: "1000px" }, overflowY: "auto" }}
+            className="scroll-styled"
+          >
             {courses.map((cur, idx) => (
               <ToggleButton
                 key={idx}
                 value={cur}
                 aria-label="left aligned"
-                sx={{ border: "solid 1px rgb(185 185 185)" }}
+                sx={{ border: "solid 1px rgb(185 185 185)", whiteSpace: " nowrap" }}
               >
                 {cur}
               </ToggleButton>

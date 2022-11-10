@@ -237,6 +237,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           sx={{
             px: "32px",
             py: "40px",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
@@ -257,6 +258,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
@@ -299,7 +301,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             </>
           )}
         </Paper>
-        <Paper sx={{ px: "32px", py: "40px" }}>
+        <Paper
+          sx={{
+            px: "32px",
+            py: "40px",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+          }}
+        >
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
             <>
@@ -352,6 +360,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <TrendPlot
@@ -376,6 +385,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <TrendPlot
@@ -400,6 +410,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <TrendPlot
@@ -424,6 +435,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <TrendPlot
@@ -448,6 +460,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <TrendPlot
