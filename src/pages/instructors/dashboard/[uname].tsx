@@ -295,7 +295,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   justifyContent: "space-between",
                   alignItems: "flex-start",
                   gap: "4px",
-                  marginBottom: "24px",
+                  marginBottom: "16px",
                 }}
               >
                 <Box>
@@ -319,7 +319,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   maxAxisY={maxStackedBarAxisY}
                   studentLocation={studentLocation}
                   theme={settings.theme}
-                  studentVoteStat={studentVoteStat}
                 />
               </Box>
             </>
@@ -334,12 +333,12 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  marginBottom: "16px",
+                  marginBottom: "12px",
                 }}
               >
                 <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
                 <Legend
-                  title={"Completion rate"}
+                  title={"Leader Board"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },

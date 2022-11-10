@@ -9,10 +9,6 @@ import {
 
 // TODO: Test
 export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
-  console.log(
-    "data",
-    data.map(c => ({ link: c.links, uname: c.uname }))
-  );
   let newNodeProposals = 0;
   let editProposals = 0;
   let links = 0;
@@ -74,7 +70,6 @@ export const getStackedBarStat = (
   };
   const sortedByProposals = [...data].sort((x, y) => y.totalPoints - x.totalPoints);
   const sortedByQuestions = [...data].sort((x, y) => y.questionPoints - x.questionPoints);
-  console.log("datadataa", sortedByProposals, sortedByQuestions);
   sortedByProposals.map(d => {
     const proposals = d.totalPoints;
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);

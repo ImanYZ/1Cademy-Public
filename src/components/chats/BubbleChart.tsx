@@ -133,17 +133,23 @@ function drawChart(
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  const y = d3.scaleLinear().domain([minAxisY, maxAxisY]).range([height, 0]);
+  const y = d3
+    .scaleLinear()
+    .domain([minAxisY, maxAxisY + 10])
+    .range([height, 0]);
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
 
+  console.log("color range", -1000, 0, maxAxisY / 10, maxAxisX / 2, maxAxisY);
+  console.log("max", maxAxisY);
+
   // @ts-ignore
   const color = d3
     .scaleThreshold()
-    .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
+    .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
     .range([
       RED_ALPHA,
       LESS_EQUAL_THAN_10_COLOR_ALPHA,
@@ -154,7 +160,7 @@ function drawChart(
   // @ts-ignore
   const borderColor = d3
     .scaleThreshold()
-    .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
+    .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
     .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
@@ -174,7 +180,6 @@ function drawChart(
     .attr("r", 10)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    .attr("opacity", 0.8)
     .attr("transform", `translate(30, 5)`)
     .on("mouseover", function (e, d) {
       const _this = this as any;
@@ -235,7 +240,7 @@ export const BubbleChart = ({
   minAxisX,
   minAxisY,
 }: BubblePlotProps) => {
-  console.log("PointsBarChart");
+  console.log("PointsBarChart", { maxAxisX, maxAxisY, minAxisX, minAxisY });
   //   const svg = useRef<SVGSVGElement>(null);
 
   //   useEffect(() => {
