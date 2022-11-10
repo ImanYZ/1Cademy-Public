@@ -7,6 +7,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
@@ -433,11 +434,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     });
     setTableRows(_tableRow);
   };
-
   const handleNewSearh = (event: any) => {
     setSearchValue(event.target.value);
-    if (!event.target.value) return setTableRows(tableRows.slice());
-    searchByNameEmail(event.target.value.toLowerCase());
+    if (!event.target.value) return setTableRows(rows.slice());
+    searchByNameEmail(event.target.value.toLowerCase().trim());
   };
 
   const handleEditAndAdd = () => {
@@ -483,6 +483,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   //TO-DO
   if (!currentSemester) return <Typography>You don't have semester</Typography>;
   // if (!tableRows.length) return <Typography>you don't a user </Typography>;
+
   return (
     <>
       {/* Drawers */}
@@ -509,17 +510,14 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       <Box
         className="student-dashboard"
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-around",
           height: "100%",
           maxWidth: "100%",
           py: "10px",
           m: "auto",
-          px: { xs: "10px", md: "20px" },
+          px: "10px",
         }}
       >
-        <Box sx={{}}>
+        <Box>
           <Box
             sx={{
               display: "flex",
@@ -531,13 +529,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               sx={{
                 display: "flex",
                 alignItems: "center",
-                width: "500px",
                 flexDirection: "row",
                 gap: "15px",
               }}
             >
-              <Typography sx={{ fontFamily: "math" }} variant="h4" component="h2">
-                {selectedCourse}
+              <Typography sx={{ fontFamily: "math" }} variant="h2" component="h2">
+                {selectedCourse?.split(" ")[0]}
               </Typography>
               <Typography sx={{ fontFamily: "fangsong" }} component="h2">
                 Students:
@@ -546,16 +543,19 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 {rows.length}
               </Typography>
             </Box>
-            <Box sx={{ display: "flex", fontWeight: "700", flexDirection: "row", paddingBottom: "15px" }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "space-between",
+                fontWeight: "700",
+                alignItems: "center",
+              }}
+            >
               <TextField
+                size="small"
                 sx={{
-                  width: { sm: 200, md: 300 },
-                  "& .MuiInputBase-root": {
-                    height: isMovil ? 40 : 60,
-                  },
                   alignSelf: "center",
-                  pl: isMovil ? "10px" : "0px",
-                  pt: isMovil ? "14px" : "0px",
                   backgroundColor: theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#F5F5F5",
                 }}
                 id="outlined-basic"
@@ -583,17 +583,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     sx={{
                       color: theme => theme.palette.common.white,
                       background: theme => theme.palette.common.orange,
-                      height: { xs: "40px", md: "55px" },
-                      width: { xs: "50%", md: "auto" },
-                      fontSize: 16,
-                      fontWeight: "700",
-                      my: { xs: "0px", md: "auto" },
-                      mt: { xs: "15px", md: "auto" },
-                      marginLeft: { xs: "0px", md: "32px" },
-                      paddingX: "30px",
-                      borderRadius: 1,
-                      textAlign: "center",
-                      alignSelf: "center",
                     }}
                   >
                     Filter By
@@ -605,20 +594,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     sx={{
                       color: theme => theme.palette.common.white,
                       background: theme => theme.palette.common.black,
-                      height: { xs: "40px", md: "55px" },
-                      width: { xs: "50%", md: "auto" },
-                      fontSize: 16,
-                      fontWeight: "700",
-                      my: { xs: "0px", md: "auto" },
-                      mt: { xs: "15px", md: "auto" },
-                      marginLeft: { xs: "0px", md: "32px" },
-                      paddingX: "30px",
-                      borderRadius: 1,
-                      textAlign: "center",
-                      alignSelf: "center",
                     }}
                   >
-                    <EditIcon /> Edit/Add
+                    <EditIcon /> Add
                   </Button>
                 </>
               ) : (
@@ -630,9 +608,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       color: theme => theme.palette.common.white,
                       background: theme => theme.palette.common.black,
                       height: { xs: "40px", md: "55px" },
-                      my: { xs: "0px", md: "auto" },
-                      mt: { xs: "15px", md: "auto" },
-                      ml: "15px",
                     }}
                   >
                     <FilterAltIcon /> Filter
@@ -661,6 +636,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             )}
           </Box>
         </Box>
+
+        <Divider sx={{ py: "10px" }} />
+
         <Box
           sx={{
             border: "1px solid #fff",
@@ -671,59 +649,57 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           <TableContainer
             component={Paper}
             sx={{
-              // maxHeight: 500,
               height: 600,
             }}
+            // onScroll={() => {
+            //   console.log("first");
+            // }}
           >
-            <Table
-              stickyHeader
-              aria-label="simple table"
-              sx={
-                {
-                  // height: "max-content",
-                }
-              }
-            >
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  {!isMovil && <TableCell>{""}</TableCell>}
-                  {keys.map((colmn: string, keyIndex: number) => (
+                  {!isMovil && <TableCell sx={{ px: "0px", width: "70px" }}>{""}</TableCell>}
+                  {keys.map((key: string, keyIndex: number) => (
                     <TableCell
+                      size="small"
                       key={keyIndex}
                       sx={
-                        ["firstName", "lastName"].includes(colmn) && isMovil
+                        ["First Name", "Last Name"].includes(key) && isMovil
                           ? {
                               position: "sticky",
-                              left: colmn === "lastName" ? 90 : 0,
+                              left: key === "Last Name" ? 60 : 0,
                               backgroundColor: theme =>
-                                theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                                theme.palette.mode === "dark"
+                                  ? theme.palette.common.darkGrayBackground
+                                  : theme.palette.common.white,
                               fontWeight: "10px",
                               fontSize: "14px",
                             }
                           : isMovil
                           ? { fontWeight: "10px", fontSize: "14px" }
-                          : { fontSize: "14px" }
+                          : { fontSize: "12px", px: "1px", width: "100px" }
                       }
                       align="left"
                     >
-                      <div style={{ display: "flex", flexDirection: "row" }}>
+                      <Box sx={{ display: "flex", flexDirection: "row" }}>
                         <>
-                          <div>{colmn}</div>
+                          <div>{key}</div>
                           {!isMovil && (
                             <IconButton
                               id={id}
-                              onClick={event => handleClick(colmn, event)}
+                              onClick={event => handleClick(key, event)}
                               sx={{
                                 "&:hover": {
                                   background: "none",
                                 },
+                                px: "0px",
                               }}
                             >
                               <ArrowDropDownIcon viewBox="1 9 24 24" />
                             </IconButton>
                           )}
                         </>
-                      </div>
+                      </Box>
                       <Popover
                         id={id}
                         open={open}
@@ -760,14 +736,14 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       </Popover>
                     </TableCell>
                   ))}
-                  {editMode && <TableCell>{""}</TableCell>}
+                  {editMode && <TableCell sx={{ px: "1px", width: "20px" }}>{""}</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {tableRows.map((row: any, rowIndex: number) => (
                   <TableRow key={rowIndex} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                     {!isMovil && (
-                      <TableCell align="left">
+                      <TableCell align="left" size="small" sx={{ px: "10px" }}>
                         <OptimizedAvatar
                           name={row.username}
                           imageUrl={row.avatar}
@@ -780,27 +756,33 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     {columns.map((colmn: string, columnIndex: number) => (
                       <TableCell
                         key={columnIndex}
+                        size="small"
                         sx={
                           ["firstName", "lastName"].includes(colmn) && isMovil
                             ? {
                                 position: "sticky",
-                                left: colmn === "lastName" ? 90 : 0,
+                                left: colmn === "lastName" ? 80 : 0,
                                 backgroundColor: theme =>
-                                  theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : "#FFFFFF",
+                                  theme.palette.mode === "dark"
+                                    ? theme.palette.common.darkGrayBackground
+                                    : theme.palette.common.white,
                                 fontWeight: "10px",
                                 fontSize: "14px",
                               }
                             : isMovil
                             ? { fontWeight: "10px", fontSize: "14px" }
-                            : { fontSize: "14px" }
+                            : { fontSize: "12px", px: "1px" }
                         }
                         align="left"
                       >
-                        {editMode && ["firstName", "lastName", "email"].includes(colmn) ? (
+                        {editMode &&
+                        !savedTableState.find((elm: any) => elm.email === row.email) &&
+                        ["firstName", "lastName", "email"].includes(colmn) ? (
                           <TextField
-                            style={{ width: colmn === "email" ? "200px" : "150px" }}
+                            style={{ width: colmn === "email" ? "150px" : "90px" }}
                             value={row[colmn]}
                             onChange={event => editValues(colmn, rowIndex, event)}
+                            size="small"
                             id="outlined-basic"
                             variant="outlined"
                           />
@@ -821,7 +803,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       </TableCell>
                     ))}
                     {editMode && (
-                      <TableCell align="right">
+                      <TableCell sx={{ px: "1px", width: "20px" }} align="right" size="small">
                         <IconButton onClick={() => deleteRow(rowIndex)}>
                           <DeleteIcon
                             color="error"
