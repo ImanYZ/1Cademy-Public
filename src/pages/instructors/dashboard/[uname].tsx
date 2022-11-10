@@ -1,7 +1,7 @@
 import PlaceIcon from "@mui/icons-material/Place";
 import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { BubbleChart } from "../../../components/chats/BubbleChart";
 import { Legend } from "../../../components/chats/Legend";
@@ -13,6 +13,7 @@ import { BubblePlotStatsSkeleton } from "../../../components/instructors/skeleto
 import { GeneralPlotStatsSkeleton } from "../../../components/instructors/skeletons/GeneralPlotStatsSkeleton";
 import { StackedBarPlotStatsSkeleton } from "../../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { InstructorLayoutPage, StudentsLayout } from "../../../components/layouts/StudentsLayout";
+import { useWindowSize } from "../../../hooks/useWindowSize";
 import {
   BubbleAxis,
   BubbleStats,
@@ -64,7 +65,29 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
-  const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+  // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+
+  const [infoWidth, setInfoWidth] = useState(0);
+  const [stackBarWidth, setstackBarWidth] = useState(0);
+
+  const { width: windowWidth } = useWindowSize();
+
+  const infoWrapperRef = useCallback(
+    (element: HTMLDivElement) => {
+      console.log("ref:bubbleRef was called", windowWidth);
+      if (!element) return;
+      setInfoWidth(element.clientWidth);
+    },
+    [windowWidth]
+  );
+  const stackBarWrapperRef = useCallback(
+    (element: HTMLDivElement) => {
+      console.log("ref:bubbleRef was called", windowWidth);
+      if (!element) return;
+      setstackBarWidth(element.clientWidth);
+    },
+    [windowWidth]
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -234,6 +257,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     };
   };
 
+  const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
+
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
@@ -260,6 +285,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         }}
       >
         <Paper
+          ref={infoWrapperRef}
           sx={{
             px: "32px",
             py: "40px",
@@ -279,6 +305,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           )}
         </Paper>
         <Paper
+          ref={stackBarWrapperRef}
           sx={{
             px: "32px",
             py: "40px",
@@ -364,7 +391,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               </Box>
               <BubbleChart
                 data={bubble}
-                width={isMovil ? 220 : 500}
+                width={
+                  isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
+                }
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}

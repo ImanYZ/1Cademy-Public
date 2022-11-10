@@ -195,28 +195,16 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const infoWrapperRef = useCallback(
     (element: HTMLDivElement) => {
-      // window.addEventListener("resize", () => {
-      //   setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      // });
       console.log("ref:bubbleRef was called", windowWidth);
       if (!element) return;
-      // const horizontalPadding = 32 * 2;
-      // const width = element.clientWidth - horizontalPadding;
-      // console.log("ref:widht", width);
       setInfoWidth(element.clientWidth);
     },
     [windowWidth]
   );
   const stackBarWrapperRef = useCallback(
     (element: HTMLDivElement) => {
-      // window.addEventListener("resize", () => {
-      //   setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      // });
       console.log("ref:bubbleRef was called", windowWidth);
       if (!element) return;
-      // const horizontalPadding = 32 * 2;
-      // const width = element.clientWidth - horizontalPadding;
-      // console.log("ref:widht", width);
       setstackBarWidth(element.clientWidth);
     },
     [windowWidth]
