@@ -31,6 +31,7 @@ import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons
 import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
+import { useWindowSize } from "../../hooks/useWindowSize";
 import { getSemStat, getStackedBarStat } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
@@ -186,6 +187,25 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const [semesterStudentVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
 
+  const [bubbleWidth /* setBubbleWidth */] = useState(0);
+
+  const { width: windowWidth } = useWindowSize();
+
+  // const bubbleRef = useCallback(
+  //   (element: HTMLDivElement) => {
+  //     // window.addEventListener("resize", () => {
+  //     //   setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+  //     // });
+  //     console.log("ref:bubbleRef was called", windowWidth);
+  //     if (!element) return;
+  //     const horizontalPadding = 32 * 2;
+  //     const width = element.clientWidth - horizontalPadding;
+  //     console.log("ref:widht", width);
+  //     setBubbleWidth(width);
+  //   },
+  //   [windowWidth]
+  // );
+
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
@@ -336,6 +356,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   console.log("dx", { isMovil, isTablet });
 
+  // const w1 = 314
+  // const w2 = 314
+
   return (
     <Box
       sx={{
@@ -351,8 +374,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     >
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "minmax(auto, 421px) auto minmax(auto, 629px)" },
+          // display: "grid",
+          // gridTemplateColumns: { xs: "1fr", md: "auto auto minmax(auto, 629px)" },
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
           gap: "16px",
         }}
       >
@@ -425,11 +450,16 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           )}
         </Paper>
         <Paper
+          // ref={bubbleRef}
+          className="test"
           sx={{
+            width: "auto",
             px: "32px",
             py: "40px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            flexBasis: "max-content",
           }}
+          component="div"
         >
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
@@ -442,7 +472,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   marginBottom: "16px",
                 }}
               >
-                <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "16px", mb: "40px" }}>Vote Points:{bubbleWidth}</Typography>
                 <Legend
                   title={"Completion rate"}
                   options={[
@@ -457,7 +487,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               </Box>
               <BubbleChart
                 data={bubble}
-                width={isMovil ? 220 : isTablet ? 300 : 500}
+                width={windowWidth / 3 - 64 - 32}
                 margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
