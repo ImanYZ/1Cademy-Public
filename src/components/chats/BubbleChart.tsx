@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
@@ -227,7 +227,7 @@ type BubblePlotProps = {
   minAxisY: number;
 };
 export const BubbleChart = ({
-  // width,
+  width,
   margin,
   theme,
   data,
@@ -236,7 +236,9 @@ export const BubbleChart = ({
   minAxisX,
   minAxisY,
 }: BubblePlotProps) => {
-  const [width, setWidth] = useState(0);
+  // const [width, setWidth] = useState(0);
+
+  // const { width: windowWidth } = useWindowSize();
 
   console.log("PointsBarChart");
   //   const svg = useRef<SVGSVGElement>(null);
@@ -255,16 +257,23 @@ export const BubbleChart = ({
     [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, theme, width]
   );
 
-  useEffect(() => {
-    d3.select(window).on("resize", function () {
-      /* your svg and chart code */
-      const newWidth = parseInt(d3.select(".test").style("width"), 10);
-      console.log("ref:new width:", newWidth - 64);
-      setWidth(newWidth - 64);
-    });
+  // useEffect(
+  //   () => {
+  //     drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY);
+  //   },
+  //   { windowWidth }
+  // );
 
-    // return
-  }, []);
+  // useEffect(() => {
+  //   d3.select(window).on("resize", function () {
+  //     /* your svg and chart code */
+  //     const newWidth = parseInt(d3.select(".test").style("width"), 10);
+  //     console.log("ref:new width:", newWidth - 64);
+  //     setWidth(newWidth - 64);
+  //   });
+
+  //   // return
+  // }, []);
 
   return (
     <>
