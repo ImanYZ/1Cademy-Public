@@ -513,10 +513,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           flexDirection: "column",
           justifyContent: "space-around",
           height: "100%",
-          maxWidth: "1384px",
+          maxWidth: "100%",
           py: "10px",
           m: "auto",
-          px: { xs: "10px", xl: "0px" },
+          px: { xs: "10px", md: "20px" },
         }}
       >
         <Box sx={{}}>

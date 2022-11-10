@@ -97,7 +97,8 @@ function drawChart(
   console.warn(theme);
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
-  //   width = 500 - margin.left - margin.right,
+  //   width = 500 - margin.left - margin.right,\
+  const widthProcessed = width - margin.left - margin.right;
   height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
@@ -109,7 +110,7 @@ function drawChart(
   //     .append("g")
   //     .attr("transform", `translate(${margin.left},${margin.top})`);
   svg
-    .attr("width", width + margin.left + margin.right)
+    .attr("width", width)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -125,7 +126,7 @@ function drawChart(
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
   // Add X axis
-  const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, width]);
+  const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, widthProcessed]);
   svg
     .append("g")
     .attr("id", "axis-x")
