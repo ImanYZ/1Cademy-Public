@@ -305,7 +305,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           <Proposal errorState={errorState} semester={semester} inputsHandler={inputsHandler} />
         </Grid>
       </Grid>
-      <Grid sx={{ boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px" }} container spacing={0} mt={5}>
+      <Grid container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
       <Box display="flex" justifyContent="center" alignItems="center" gap="10px">
@@ -344,6 +344,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
             fontWeight: "bold",
             padding: "15px 80px",
             marginTop: "20px",
+            marginBottom: "20px",
             fontSize: "20px",
           }}
         >
