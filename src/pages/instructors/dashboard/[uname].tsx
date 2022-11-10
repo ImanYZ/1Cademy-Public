@@ -1,3 +1,4 @@
+import PlaceIcon from "@mui/icons-material/Place";
 import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -323,6 +324,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   theme={settings.theme}
                 />
               </Box>
+              <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
+                <PlaceIcon sx={{ fill: "#EF5350", fontSize: "24px" }} />
+                <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+              </Box>
             </>
           )}
         </Paper>
@@ -368,6 +373,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 minAxisY={bubbleAxis.minAxisY}
                 student={studentVoteStat}
               />
+              <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
+                <PlaceIcon sx={{ fill: "#EF5350", fontSize: "24px" }} />
+                <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+              </Box>
             </>
           )}
         </Paper>
