@@ -9,8 +9,18 @@ import React from "react";
 import OptimizedAvatar from "../../../components/OptimizedAvatar";
 
 const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }: any) => (
-  <Drawer sx={{ backgroundColor: "transparent" }} anchor={"bottom"} open={openProfile} onClose={handleOpenCloseProfile}>
-    <Box sx={{ borderRadius: "16px", m: 0, border: 1 }}>
+  <Drawer
+    sx={{ backgroundColor: "transparent" }}
+    anchor={"bottom"}
+    open={openProfile}
+    PaperProps={{
+      sx: {
+        borderRadius: "16px 16px 0px 0px ",
+      },
+    }}
+    onClose={handleOpenCloseProfile}
+  >
+    <Box>
       {"  "}
       <Box sx={{ textAlign: "right" }}>
         <IconButton onClick={handleOpenCloseProfile}>
@@ -40,7 +50,7 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
           </LinkNext>
         </Box>
 
-        <Box sx={{ mr: "30px" }}>{openedProfile?.email}</Box>
+        <Box sx={{ mr: "20px" }}>{openedProfile?.email}</Box>
         <Button
           variant="contained"
           href={"#"}
@@ -52,8 +62,7 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
             my: { xs: "0px", md: "auto" },
             mt: { xs: "15px", md: "auto" },
             marginLeft: { xs: "0px", md: "32px" },
-            marginRight: "40px",
-            paddingX: "30px",
+            marginRight: "30px",
             borderRadius: 1,
             textAlign: "center",
             alignSelf: "center",
