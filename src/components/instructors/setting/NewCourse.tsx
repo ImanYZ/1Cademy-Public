@@ -49,7 +49,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
     },
   });
   return (
-    <Box sx={{ marginTop: "50px" }}>
+    <Box sx={{ marginTop: "50px", padding: "0 10px" }}>
       <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Grid item xs={12} md={4}>
           <form

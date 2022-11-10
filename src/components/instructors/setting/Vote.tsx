@@ -11,7 +11,16 @@ type Props = {
 };
 const Vote: FC<Props> = ({ semester, inputsHandler }) => {
   return (
-    <Paper sx={{ display: "flex" }} elevation={2}>
+    <Paper
+      sx={{
+        display: "flex",
+        flexDirection: {
+          xs: "column",
+          md: "row",
+        },
+      }}
+      elevation={2}
+    >
       <Grid item xs={12} md={6}>
         <Box className="remove-arrow-buttons" sx={{ padding: "30px 40px" }}>
           <Box sx={{ marginTop: "10px" }}>
