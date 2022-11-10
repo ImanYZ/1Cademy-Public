@@ -260,7 +260,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
       {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
       {/* <HeaderNavbar /> */}
-      <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
+      <Box sx={{ width: "100%", py: "10px", m: "auto", px: { xs: "10px", md: "20px" } }}>
         <SemesterFilter
           semesters={semesters}
           selectedSemester={selectedSemester}
