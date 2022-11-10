@@ -362,7 +362,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
-  const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+  // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+  const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
 
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
@@ -632,7 +633,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
             }}
           >
-            <StudentDailyPlotStatsSkeleton isMovil={isMovil} isTablet={isTablet} />
+            <StudentDailyPlotStatsSkeleton />
           </Paper>
         )}
 
