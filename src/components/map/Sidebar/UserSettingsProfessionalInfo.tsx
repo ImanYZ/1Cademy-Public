@@ -1,4 +1,4 @@
-import { Autocomplete, Box, TextField } from "@mui/material";
+import { Autocomplete, Box, createFilterOptions, TextField } from "@mui/material";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import React, { HTMLAttributes, useEffect, useState } from "react";
 import { Institution, Major, User } from "src/knowledgeTypes";
@@ -20,7 +20,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
   const [fieldOfInterest, setFieldOfInterest] = useState(user.fieldOfInterest);
-  const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
+  // const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
 
   const updateUserField = async (username: string, attributeName: string, newValue: any) => {
     const userRef = doc(db, "users", username);
@@ -89,8 +89,8 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
       const institutionSorted = institutions
         .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
         .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      setAllInstitutions(institutionSorted);
-      setInstitutions(institutionSorted.slice(0, 10));
+      // setAllInstitutions(institutionSorted);
+      setInstitutions(institutionSorted);
     };
     retrieveInstitutions();
   }, []);
@@ -110,19 +110,19 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const onChangeInstitution = (value: string) => {
-    const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
-      if (acu.length < 10) {
-        if (cur.name.includes(value)) {
-          return [...acu, cur];
-        } else {
-          return acu;
-        }
-      }
-      return acu;
-    }, []);
-    setInstitutions(foundInstitution);
-  };
+  // const onChangeInstitution = (value: string) => {
+  //   const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
+  //     if (acu.length < 10) {
+  //       if (cur.name.includes(value)) {
+  //         return [...acu, cur];
+  //       } else {
+  //         return acu;
+  //       }
+  //     }
+  //     return acu;
+  //   }, []);
+  //   setInstitutions(foundInstitution);
+  // };
   return (
     <Box data-testid="user-settings-professional-info">
       <MemoizedInputSave
@@ -134,12 +134,17 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
       />
       <Autocomplete
         id="institution"
+        loading={institutions.length === 0}
+        filterOptions={createFilterOptions({
+          matchFrom: "any",
+          limit: 20,
+        })}
         value={getNameFromInstitutionSelected()}
         onChange={(_, value) => onChangeField(user, "deInstit", value?.name || null)}
         // onBlur={() => setTouched({ ...touched, institution: true })}
-        onInputChange={(_, value) => {
-          onChangeInstitution(value);
-        }}
+        // onInputChange={(_, value) => {
+        //   onChangeInstitution(value);
+        // }}
         options={institutions}
         getOptionLabel={option => option.name}
         renderInput={params => (
@@ -151,7 +156,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
           />
         )}
         renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
-          <li {...props}>
+          <li {...props} key={option.id}>
             <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
             <div style={{ paddingLeft: "10px" }}>{option.name}</div>
           </li>
