@@ -325,7 +325,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           sx={{
             color: theme => theme.palette.common.white,
             fontWeight: "bold",
-            padding: "15px 80px",
+            padding: {
+              xs: "5px 50px",
+              md: "15px 80px",
+            },
             fontSize: "20px",
           }}
         >
@@ -344,7 +347,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           sx={{
             color: theme => theme.palette.common.white,
             fontWeight: "bold",
-            padding: "15px 80px",
+            padding: {
+              xs: "5px 50px",
+              md: "15px 80px",
+            },
             fontSize: "20px",
           }}
         >
