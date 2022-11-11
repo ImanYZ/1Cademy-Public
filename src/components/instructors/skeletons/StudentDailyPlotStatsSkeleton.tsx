@@ -2,12 +2,7 @@ import { Skeleton } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
-type StudentDailyPlotStatsSkeletonProps = {
-  isMovil: boolean;
-  isTablet: boolean;
-};
-
-export const StudentDailyPlotStatsSkeleton = ({ isMovil, isTablet }: StudentDailyPlotStatsSkeletonProps) => {
+export const StudentDailyPlotStatsSkeleton = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
       <Box
@@ -22,8 +17,8 @@ export const StudentDailyPlotStatsSkeleton = ({ isMovil, isTablet }: StudentDail
         <Skeleton
           variant="rectangular"
           sx={{
-            width: isMovil ? "300px" : isTablet ? "600px" : "1045px",
-            height: isMovil ? "120px" : isTablet ? "250px" : "354px",
+            width: "100%",
+            height: "300px",
             borderRadius: "5px",
             justifySelf: "center",
             margin: "0",
@@ -42,8 +37,8 @@ export const StudentDailyPlotStatsSkeleton = ({ isMovil, isTablet }: StudentDail
         <Skeleton
           variant="rectangular"
           sx={{
-            width: isMovil ? "300px" : isTablet ? "600px" : "1045px",
-            height: isMovil ? "50px" : isTablet ? "120px" : "160px",
+            width: "100%",
+            height: "150px",
             borderRadius: "5px",
             justifySelf: "center",
             marginBottom: "0",

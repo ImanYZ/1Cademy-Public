@@ -67,11 +67,18 @@ export const SemesterFilter = ({
     <Box
       sx={{
         display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
         gap: { xs: "6px", md: "20px" },
-        justifyContent: { xs: "center", md: "space-between" },
+        justifyContent: { xs: "center", sm: "space-between" },
       }}
     >
-      <Box sx={{ display: "flex", gap: { xs: "6px", md: "16px" } }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: { xs: "space-between", sm: "flex-start" },
+          gap: { xs: "16px", md: "16px" },
+        }}
+      >
         <FormControl size={matches ? "small" : "medium"}>
           <InputLabel id="semester-filter-label">Semester</InputLabel>
           <Select
