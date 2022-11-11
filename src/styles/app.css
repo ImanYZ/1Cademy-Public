@@ -715,7 +715,7 @@ p {
   max-height: 350px;
   overflow-y: auto;
 }
-.tooltip-plot {
+.tooltip-plot.darkMode {
   background: #303134;
   box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.5);
 }
