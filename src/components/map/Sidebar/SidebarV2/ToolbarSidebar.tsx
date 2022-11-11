@@ -1,7 +1,6 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -56,7 +55,9 @@ export const ToolbarSidebar = ({
 MainSidebarProps) => {
   const db = getFirestore();
   const router = useRouter();
+  const themeMaterial = useTheme();
 
+  const isMovil = useMediaQuery(themeMaterial.breakpoints.down("md"));
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
   // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
 
@@ -312,25 +313,27 @@ MainSidebarProps) => {
                   alignSelf: "flex-start",
                   display: "flex",
                   justifyContent: "center",
-                  gap: "5px",
+                  gap: isMenuOpen ? "6px" : "6px",
                   padding: "6px 0px",
+                  paddingLeft: isMovil ? "18px" : "0px",
                   // border: "solid 2px blue",
                   ":hover": {
                     backgroundColor: "rgba(255, 152, 0, 1)",
                   },
                 }}
               >
-                <div
+                <Box
                   className="toolbarBadge"
-                  style={{
+                  sx={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginLeft: isMenuOpen ? "20px" : "0px",
+                    fontSize: "19px",
                   }}
                 >
-                  <SearchIcon />
-                </div>
+                  🔍
+                </Box>
+
                 <Box
                   component="span"
                   className="toolbarDescription"
@@ -346,6 +349,7 @@ MainSidebarProps) => {
                     width: isMenuOpen ? "100px" : "0",
                     display: isMenuOpen ? "flex" : "block",
                     alignItems: "center",
+                    textAlign: "center",
                   }}
                 >
                   Search
