@@ -7,7 +7,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
@@ -523,6 +522,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               display: "flex",
               justifyContent: "space-between",
               flexDirection: isMovil ? "column" : "row",
+              py: "20px",
             }}
           >
             <Box
@@ -637,10 +637,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           </Box>
         </Box>
 
-        <Divider sx={{ py: "10px" }} />
-
         <Box
           sx={{
+            py: "20px",
             border: "1px solid #fff",
             borderRightWidth: 0,
             borderLeftWidth: 0,
@@ -711,11 +710,20 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         }}
                         elevation={1}
                       >
-                        <Box sx={{ width: "200px", color: "black", display: "flex", flexDirection: "column" }}>
+                        <Box
+                          sx={{
+                            width: "152px",
+                            height: "93px",
+                            color: "black",
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                        >
                           <Button
+                            size="small"
                             sx={{
                               p: 2,
-                              fontSize: "14px",
+                              fontSize: "15px",
                               color: theme.palette.mode === "dark" ? "white" : "#757575",
                             }}
                             onClick={sortLowHigh}
@@ -723,9 +731,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                             Sort Low to High
                           </Button>
                           <Button
+                            size="small"
                             sx={{
                               p: 2,
-                              fontSize: "14px",
+                              fontSize: "15px",
                               color: theme.palette.mode === "dark" ? "white" : "#757575",
                             }}
                             onClick={sortHighLow}
@@ -771,7 +780,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                               }
                             : isMovil
                             ? { fontWeight: "10px", fontSize: "14px" }
-                            : { fontSize: "12px", px: "1px" }
+                            : { fontSize: "12px", pr: colmn === "email" ? "18px" : "0px", pl: "0px" }
                         }
                         align="left"
                       >
@@ -827,6 +836,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 variant="text"
                 addNewData={addNewData}
                 buttonStyles={{
+                  ":hover": {
+                    backgroundColor: "#bdbdbd",
+                  },
                   backgroundColor: "#EDEDED",
                   fontSize: 16,
                   fontWeight: "700",
@@ -843,6 +855,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               <Button
                 variant="text"
                 sx={{
+                  ":hover": {
+                    backgroundColor: "#bdbdbd",
+                  },
                   color: theme => theme.palette.common.black,
                   backgroundColor: "#EDEDED",
                   fontSize: 16,
