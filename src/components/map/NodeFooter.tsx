@@ -378,8 +378,8 @@ const NodeFooter = ({
                 >
                   <>
                     <LocalOfferIcon
-                      // className={openPart === "Tags" ? "orange-text" : "grey-text"}
-                      color={openPart === "Tags" ? "primary" : "secondary"}
+                      className={openPart === "Tags" ? "orange-text" : "grey-text"}
+                      color={openPart === "Tags" ? "primary" : "inherit"}
                       sx={{ fontSize: "16px" }}
                     />
                     <span>{shortenNumber(tags.length, 2, false)}</span>
