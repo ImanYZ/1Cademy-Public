@@ -193,22 +193,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const { width: windowWidth } = useWindowSize();
 
-  const infoWrapperRef = useCallback(
-    (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
-      if (!element) return;
-      setInfoWidth(element.clientWidth);
-    },
-    [windowWidth]
-  );
-  const stackBarWrapperRef = useCallback(
-    (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
-      if (!element) return;
-      setstackBarWidth(element.clientWidth);
-    },
-    [windowWidth]
-  );
+  const infoWrapperRef = useCallback((element: HTMLDivElement) => {
+    if (!element) return;
+    setInfoWidth(element.clientWidth);
+  }, []);
+  const stackBarWrapperRef = useCallback((element: HTMLDivElement) => {
+    if (!element) return;
+    setstackBarWidth(element.clientWidth);
+  }, []);
 
   useEffect(() => {
     if (!user) return;

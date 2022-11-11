@@ -260,6 +260,13 @@ export function getThemedComponents(theme: Theme): {
           },
         },
       },
+      MuiDivider: {
+        styleOverrides: {
+          root: {
+            borderColor: theme.palette.mode === "dark" ? "white" : "rgba(0, 0, 0, 0.12)",
+          },
+        },
+      },
     },
   };
 }

@@ -72,9 +72,9 @@ function drawChart(
 ) {
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
-      return `<div class="tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
-        class="tooltip-user-image"
+        class="tooltip-student-image"
         src="${user.imageUrl}"
         onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
         loading="lazy"
@@ -85,12 +85,12 @@ function drawChart(
       </span></div>
       `;
     });
-    const wrapper = `<div id="users-tooltip">
+    const wrapper = `<div class="students-tooltip">
       ${html.join(" ")}
     </div>`;
     return wrapper;
   };
-  const tooltip = d3.select("#boxplot-tool-tip");
+  const tooltip = d3.select("#bubble-tool-tip");
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -184,14 +184,15 @@ function drawChart(
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("transform", `translate(30, 5)`)
     .on("mouseover", function (e, d) {
+      console.log("bubble", d);
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       let html = htmlTooltip(d.studentsList);
       tooltip
         .html(`${html}`)
         .style("opacity", 1)
-        .style("top", `${e.offsetY + 20}px`)
-        .style("left", `${e.offsetX + maxAxisX - 24}px`);
+        .style("top", `${e.offsetY + 20}px`) //-20(aprox bubble diameter) because of putting bellow bubble
+        .style("left", `${x(d.votes) - 50}px`); // - 50 because of the leth of the tooltip
     })
     .on("mouseout", function () {
       const _this = this as any;
@@ -206,7 +207,7 @@ function drawChart(
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`)
+      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`) //-23 and -24 because of right plot tranlation
       .attr("fill", "#EF5350");
   }
   // svg
@@ -264,7 +265,7 @@ export const BubbleChart = ({
   );
 
   return (
-    <>
+    <div style={{ position: "relative" }}>
       <svg ref={svg} style={{ position: "relative" }}>
         <g id="bubbles"></g>
         <g id="nums"></g>
@@ -276,8 +277,7 @@ export const BubbleChart = ({
           # of Votes
         </text>
       </svg>
-
-      <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
-    </>
+      <div id="bubble-tool-tip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
+    </div>
   );
 };
