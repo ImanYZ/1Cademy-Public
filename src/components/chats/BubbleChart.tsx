@@ -193,6 +193,9 @@ function drawChart(
         .style("opacity", 1)
         .style("top", `${e.offsetY + 20}px`) //-20(aprox bubble diameter) because of putting bellow bubble
         .style("left", `${x(d.votes) - 50}px`); // - 50 because of the leth of the tooltip
+      d3.select(this)
+        .transition()
+        .style("fill", d.points !== 0 ? borderColor(d.points) : GRAY);
     })
     .on("mouseout", function () {
       const _this = this as any;
