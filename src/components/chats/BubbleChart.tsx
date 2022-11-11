@@ -197,10 +197,13 @@ function drawChart(
         .transition()
         .style("fill", d.points !== 0 ? borderColor(d.points) : GRAY);
     })
-    .on("mouseout", function () {
+    .on("mouseout", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       tooltip.style("opacity", 0).style("pointer-events", "none");
+      d3.select(this)
+        .transition()
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
     });
   if (student) {
     const locationIconPath =
