@@ -49,7 +49,7 @@ function drawChart(
 
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 0, bottom: 30, left: 50 },
-    width = 250 - margin.left - margin.right,
+    width = 280 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
   svg
@@ -72,7 +72,7 @@ function drawChart(
   svg.select("#axis-y").remove();
 
   // Add X axis
-  const x = d3.scaleBand().domain(columns).range([0, width]).padding(0.2);
+  const x = d3.scaleBand().domain(columns).range([0, width]).paddingInner(0.4).paddingOuter(0.1);
   svg
     .append("g")
     .attr("id", "axis-x")
@@ -100,11 +100,11 @@ function drawChart(
 
   const locations = [
     {
-      x: 1.65 * x.bandwidth(),
+      x: 1.55 * x.bandwidth(),
       y: studentLocation ? studentLocation.proposals ?? 0 : 0,
     },
     {
-      x: 2.9 * x.bandwidth(),
+      x: 3.21 * x.bandwidth(),
       y: studentLocation ? studentLocation.questions ?? 0 : 0,
     },
   ];
@@ -160,6 +160,16 @@ function drawChart(
       .transition()
       .style("fill", color(subgropup) as string);
   });
+  tooltipElement?.addEventListener("touchstart", () => {
+    console.log("touch");
+    if (!event || !event.target) return;
+
+    event.preventDefault();
+    tooltip.style("pointer-events", "auto");
+    d3.select(`#${event.target.id}`)
+      .transition()
+      .style("fill", color(subgropup) as string);
+  });
   tooltipElement?.addEventListener("mouseleave", () => {
     tooltip.style("pointer-events", "none").style("opacity", 0);
     if (!event || !event.target) return;
@@ -169,14 +179,18 @@ function drawChart(
       .style("fill", colorApha(subgropup) as string);
   });
 
-  window.addEventListener("click", () => {
-    tooltip.style("pointer-events", "none").style("opacity", 0);
-    if (!event || !event.target) return;
+  window.addEventListener("click", e => {
+    e.preventDefault();
+    if (!e || !e.target || !event || !event.target) return;
+    //@ts-ignore
+    if (e.target.id.includes("bar-subgroup")) return;
 
+    tooltip.style("pointer-events", "none").style("opacity", 0);
     d3.select(`#${event.target.id}`)
       .transition()
       .style("fill", colorApha(subgropup) as string);
   });
+
   svg
     .select("#bars")
     .selectAll("g")
@@ -234,6 +248,7 @@ function drawChart(
     .attr("y", d => y(d[1]))
     .attr("height", d => y(d[0]) - y(d[1]))
     .attr("width", x.bandwidth())
+
     .attr("transform", `translate(25, 30)`);
 
   if (studentLocation) {
@@ -246,7 +261,7 @@ function drawChart(
       .data(locations)
       .join("path")
       .attr("d", locationIconPath)
-      .attr("transform", d => `translate(${d.x},${y(maxAxisY - d.y) + 10})`)
+      .attr("transform", d => `translate(${d.x},${y(maxAxisY - d.y) + 11})`)
       .attr("fill", "#EF5350");
     svg
       .select("#location-line")
