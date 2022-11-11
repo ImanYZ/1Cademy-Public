@@ -58,10 +58,16 @@ export const TrendPlot = ({
         twoThirdValue = new Date(twoThirdValue);
         console.log(1, { oneThirdValue, twoThirdValue });
       }
-      setZoomDomain({
-        // x: [twoThirdValue, oneThirdValue],
-        x: [oneThirdValue, twoThirdValue], // this depend of sort type of data
-      });
+      if (oneThirdValue >= twoThirdValue) {
+        setZoomDomain({
+          // x: [twoThirdValue, oneThirdValue],
+          x: [twoThirdValue, oneThirdValue], // this depend of sort type of data
+        });
+      } else {
+        setZoomDomain({
+          x: [oneThirdValue, twoThirdValue], // this depend of sort type of data
+        });
+      }
     }
   }, [trendData, x]);
 
@@ -95,6 +101,13 @@ export const TrendPlot = ({
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
               },
+              axisLabel: {
+                fill: theme === "Dark" ? "white" : "#454545",
+              },
+              grid: {
+                stroke: theme === "Dark" ? "white" : "#454545",
+              },
+              ticks: { size: 0 },
             }}
           />
           <VictoryAxis
@@ -108,6 +121,13 @@ export const TrendPlot = ({
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
               },
+              axisLabel: {
+                fill: theme === "Dark" ? "white" : "#454545",
+              },
+              grid: {
+                stroke: theme === "Dark" ? "white" : "#454545",
+              },
+              ticks: { size: 1 },
             }}
           />
           <VictoryBar
@@ -148,6 +168,9 @@ export const TrendPlot = ({
               tickLabels: {
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
+              },
+              grid: {
+                stroke: theme === "Dark" ? "white" : "#454545",
               },
             }}
           />
