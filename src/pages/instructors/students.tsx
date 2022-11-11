@@ -7,6 +7,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
@@ -636,11 +637,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             )}
           </Box>
         </Box>
-
+        <Divider />
         <Box
           sx={{
-            py: "20px",
-            border: "1px solid #fff",
+            py: "10px",
             borderRightWidth: 0,
             borderLeftWidth: 0,
           }}
@@ -650,9 +650,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             sx={{
               height: 600,
             }}
-            // onScroll={() => {
-            //   console.log("first");
-            // }}
           >
             <Table stickyHeader>
               <TableHead>
@@ -829,7 +826,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             </Table>
           </TableContainer>
         </Box>
-        {editMode ? (
+        {editMode && (
           <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
             <Box>
               <CSVBtn
@@ -916,8 +913,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </Button>
             </Box>
           </Box>
-        ) : (
-          <div></div>
         )}
       </Box>
     </>
