@@ -1,20 +1,17 @@
 import CreateIcon from "@mui/icons-material/Create";
 import { LoadingButton } from "@mui/lab";
-import { Autocomplete, Grid, TextField } from "@mui/material";
+import { Grid, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import { useFormik } from "formik";
-import { FC, HTMLAttributes, useState } from "react";
+import { FC, useState } from "react";
 import React from "react";
-import { Institution } from "src/knowledgeTypes";
 import * as yup from "yup";
 
-import OptimizedAvatar from "@/components/OptimizedAvatar";
+import InstitutionDropdown from "@/components/InstitutionDropdown";
 import { useAuth } from "@/context/AuthContext";
 import { Post } from "@/lib/mapApi";
-type Props = {
-  institutions: any;
-};
+type Props = {};
 const validationSchema = yup.object({
   courseCode: yup.string().required("Course is required"),
   semesterName: yup.string().required("Semester is required"),
@@ -23,16 +20,9 @@ const validationSchema = yup.object({
   universityName: yup.string().required("Institution is required"),
 });
 
-const NewCourse: FC<Props> = ({ institutions }) => {
+const NewCourse: FC<Props> = () => {
   const [{ user }] = useAuth();
   const [requestLoader, setRequestLoader] = useState(false);
-  const getNameFromInstitutionSelected = () => {
-    if (!user?.deInstit) return null;
-    const foundInstitution = institutions.find((cur: any) => cur.name === user?.deInstit);
-    if (!foundInstitution) return null;
-    return foundInstitution;
-  };
-
   const formik = useFormik({
     initialValues: {
       courseCode: "",
@@ -103,32 +93,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
               error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
               helperText={formik.touched.departmentName && formik.errors.departmentName}
             />
-
-            <Autocomplete
-              placeholder="i.e. Information Science"
-              id="institution"
-              defaultValue={getNameFromInstitutionSelected()}
-              onChange={(e, value) => formik.setFieldValue("universityName", value?.name || "")}
-              options={institutions}
-              getOptionLabel={option => option.name}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  error={formik.touched.universityName && Boolean(formik.errors.universityName)}
-                  helperText={formik.touched.universityName && formik.errors.universityName}
-                  label="Institution"
-                />
-              )}
-              renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
-                <li key={option.id} {...props}>
-                  <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
-                  <div style={{ paddingLeft: "10px" }}>{option.name}</div>
-                </li>
-              )}
-              isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
-              fullWidth
-              sx={{ mb: "16px" }}
-            />
+            <InstitutionDropdown fieldName={"universityName"} formikProps={formik} />
             <LoadingButton
               type="submit"
               loading={requestLoader}

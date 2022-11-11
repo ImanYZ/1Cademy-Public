@@ -1,9 +1,9 @@
 import { Autocomplete, Box, TextField } from "@mui/material";
-import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc } from "firebase/firestore";
-import React, { HTMLAttributes, useEffect, useState } from "react";
-import { Institution, Major, User } from "src/knowledgeTypes";
+import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { Major, User } from "src/knowledgeTypes";
 
-import OptimizedAvatar from "@/components/OptimizedAvatar";
+import InstitutionDropdown from "@/components/InstitutionDropdown";
 // import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { useAuth } from "@/context/AuthContext";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
@@ -17,10 +17,10 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
   const [{}, { dispatch }] = useAuth();
 
   const [ocupation, setOcupation] = useState(user.occupation);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  // const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
   const [fieldOfInterest, setFieldOfInterest] = useState(user.fieldOfInterest);
-  const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
+  // const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
 
   const updateUserField = async (username: string, attributeName: string, newValue: any) => {
     const userRef = doc(db, "users", username);
@@ -58,12 +58,13 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     // }
   };
 
-  const getNameFromInstitutionSelected = () => {
-    if (!user.deInstit) return null;
-    const foundInstitution = institutions.find(cur => cur.name === user.deInstit);
-    if (!foundInstitution) return null;
-    return foundInstitution;
-  };
+  // const getNameFromInstitutionSelected = () => {
+  //   if (!user.deInstit) return null;
+  //   const foundInstitution = institutions.find(cur => cur.name === user.deInstit);
+  //   if (!foundInstitution) return null;
+  //   return foundInstitution;
+  // };
+
   const getMajorByName = (deMajor?: string) => {
     if (!deMajor) return null;
     return majors.find(cur => cur.Major === deMajor) || null;
@@ -74,26 +75,26 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     setFieldOfInterest(user.fieldOfInterest ?? "");
   }, [user]);
 
-  useEffect(() => {
-    const retrieveInstitutions = async () => {
-      const db = getFirestore();
-      const institutionsRef = collection(db, "institutions");
-      const q = query(institutionsRef);
+  // useEffect(() => {
+  //   const retrieveInstitutions = async () => {
+  //     const db = getFirestore();
+  //     const institutionsRef = collection(db, "institutions");
+  //     const q = query(institutionsRef);
 
-      const querySnapshot = await getDocs(q);
-      let institutions: Institution[] = [];
-      querySnapshot.forEach(doc => {
-        institutions.push({ id: doc.id, ...doc.data() } as Institution);
-      });
+  //     const querySnapshot = await getDocs(q);
+  //     let institutions: Institution[] = [];
+  //     querySnapshot.forEach(doc => {
+  //       institutions.push({ id: doc.id, ...doc.data() } as Institution);
+  //     });
 
-      const institutionSorted = institutions
-        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
-        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      setAllInstitutions(institutionSorted);
-      setInstitutions(institutionSorted.slice(0, 10));
-    };
-    retrieveInstitutions();
-  }, []);
+  //     const institutionSorted = institutions
+  //       .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
+  //       .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+  //     setAllInstitutions(institutionSorted);
+  //     setInstitutions(institutionSorted.slice(0, 10));
+  //   };
+  //   retrieveInstitutions();
+  // }, []);
 
   useEffect(() => {
     const retrieveMajors = async () => {
@@ -110,19 +111,19 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const onChangeInstitution = (value: string) => {
-    const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
-      if (acu.length < 10) {
-        if (cur.name.includes(value)) {
-          return [...acu, cur];
-        } else {
-          return acu;
-        }
-      }
-      return acu;
-    }, []);
-    setInstitutions(foundInstitution);
-  };
+  // const onChangeInstitution = (value: string) => {
+  //   const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
+  //     if (acu.length < 10) {
+  //       if (cur.name.includes(value)) {
+  //         return [...acu, cur];
+  //       } else {
+  //         return acu;
+  //       }
+  //     }
+  //     return acu;
+  //   }, []);
+  //   setInstitutions(foundInstitution);
+  // };
   return (
     <Box data-testid="user-settings-professional-info">
       <MemoizedInputSave
@@ -132,7 +133,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, occupation: value } })}
         label="Please specify your occupation."
       />
-      <Autocomplete
+      {/* <Autocomplete
         id="institution"
         value={getNameFromInstitutionSelected()}
         onChange={(_, value) => onChangeField(user, "deInstit", value?.name || null)}
@@ -159,7 +160,8 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
         fullWidth
         sx={{ mb: "16px" }}
-      />
+      /> */}
+      <InstitutionDropdown fieldName={"deInstit"} user={user} onChangeField={onChangeField} />
       <Autocomplete
         id="major"
         value={getMajorByName(user.deMajor)}

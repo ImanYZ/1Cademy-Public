@@ -60,7 +60,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string | null>("");
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);

@@ -9,13 +9,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { collection, getDocs, getFirestore, query } from "firebase/firestore";
 import { FormikProps } from "formik";
-import { HTMLAttributes, lazy, Suspense, useEffect, useState } from "react";
-import { Institution, Major, SignUpFormValues } from "src/knowledgeTypes";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { Major, SignUpFormValues } from "src/knowledgeTypes";
 
+import InstitutionDropdown from "../components/InstitutionDropdown";
 import { EDUCATION_VALUES } from "../lib/utils/constants";
-import OptimizedAvatar from "./OptimizedAvatar";
 
 const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
 const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
@@ -31,8 +30,8 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
   const [openTermOfUse, setOpenTermsOfUse] = useState(false);
   const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
   const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
+  // const [institutions, setInstitutions] = useState<Institution[]>([]);
+  // const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
@@ -53,47 +52,48 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const retrieveInstitutions = async () => {
-      const db = getFirestore();
-      const institutionsRef = collection(db, "institutions");
-      const q = query(institutionsRef);
+  // useEffect(() => {
+  //   const retrieveInstitutions = async () => {
+  //     const db = getFirestore();
+  //     const institutionsRef = collection(db, "institutions");
+  //     const q = query(institutionsRef);
 
-      const querySnapshot = await getDocs(q);
-      let institutions: Institution[] = [];
-      querySnapshot.forEach(doc => {
-        institutions.push({ id: doc.id, ...doc.data() } as Institution);
-      });
+  //     const querySnapshot = await getDocs(q);
+  //     let institutions: Institution[] = [];
+  //     querySnapshot.forEach(doc => {
+  //       institutions.push({ id: doc.id, ...doc.data() } as Institution);
+  //     });
 
-      const institutionSorted = institutions
-        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
-        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      setAllInstitutions(institutionSorted);
+  //     const institutionSorted = institutions
+  //       .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
+  //       .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+  //     setAllInstitutions(institutionSorted);
 
-      setInstitutions(institutionSorted.slice(0, 10));
-    };
-    retrieveInstitutions();
-  }, []);
+  //     setInstitutions(institutionSorted);
+  //   };
+  //   retrieveInstitutions();
+  // }, []);
 
-  const getNameFromInstitutionSelected = () => {
-    if (!values.institution) return null;
-    const foundInstitution = institutions.find(cur => cur.name === values.institution);
-    if (!foundInstitution) return null;
-    return foundInstitution;
-  };
-  const onChangeInstitution = (value: string) => {
-    const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
-      if (acu.length < 10) {
-        if (cur.name.includes(value)) {
-          return [...acu, cur];
-        } else {
-          return acu;
-        }
-      }
-      return acu;
-    }, []);
-    setInstitutions(foundInstitution);
-  };
+  // const getNameFromInstitutionSelected = () => {
+  //   if (!values.institution) return null;
+  //   const foundInstitution = institutions.find(cur => cur.name === values.institution);
+  //   if (!foundInstitution) return null;
+  //   return foundInstitution;
+  // };
+
+  // const onChangeInstitution = (value: string) => {
+  //   const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
+  //     if (acu.length < 10) {
+  //       if (cur.name.includes(value)) {
+  //         return [...acu, cur];
+  //       } else {
+  //         return acu;
+  //       }
+  //     }
+  //     return acu;
+  //   }, []);
+  //   setInstitutions(foundInstitution);
+  // };
 
   return (
     <Box data-testid="signup-form-step-3">
@@ -127,34 +127,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         fullWidth
         sx={{ mb: "16px" }}
       />
-      <Autocomplete
-        id="institution"
-        value={getNameFromInstitutionSelected()}
-        onChange={(_, value) => setFieldValue("institution", value?.name || null)}
-        onInputChange={(_, value) => {
-          onChangeInstitution(value);
-        }}
-        onBlur={() => setTouched({ ...touched, institution: true })}
-        options={institutions}
-        getOptionLabel={option => option.name}
-        renderInput={params => (
-          <TextField
-            {...params}
-            label="Institution"
-            error={Boolean(errors.institution) && Boolean(touched.institution)}
-            helperText={touched.institution && errors.institution}
-          />
-        )}
-        renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
-          <li {...props}>
-            <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
-            <div style={{ paddingLeft: "7px" }}>{option.name}</div>
-          </li>
-        )}
-        isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
-        fullWidth
-        sx={{ mb: "16px" }}
-      />
+      <InstitutionDropdown formikProps={formikProps} />
       <Autocomplete
         id="major"
         value={majors.find(cur => cur.Major === values.major) || null}
