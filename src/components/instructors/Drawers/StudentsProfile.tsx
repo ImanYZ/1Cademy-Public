@@ -45,7 +45,10 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
             sx={{ marginLef: "50%" }}
           />
         </Box>
-        <Box sx={{ ml: "46%", mb: "5px" }} className={true ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></Box>
+        <Box
+          sx={{ ml: "46%", mb: "5px" }}
+          className={openedProfile?.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+        ></Box>
         <LinkNext href={"/instructors/dashboard/" + openedProfile?.username}>
           <Link>
             {" "}
