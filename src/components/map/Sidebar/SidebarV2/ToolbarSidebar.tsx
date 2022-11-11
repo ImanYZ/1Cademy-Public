@@ -313,9 +313,9 @@ MainSidebarProps) => {
                   alignSelf: "flex-start",
                   display: "flex",
                   justifyContent: "center",
-                  gap: isMenuOpen ? "10px" : "6px",
+                  gap: isMenuOpen ? "6px" : "6px",
                   padding: "6px 0px",
-                  paddingLeft: isMovil ? "12px" : "0px",
+                  paddingLeft: isMovil ? "18px" : "0px",
                   // border: "solid 2px blue",
                   ":hover": {
                     backgroundColor: "rgba(255, 152, 0, 1)",
