@@ -1,6 +1,10 @@
 import { LoadingButton } from "@mui/lab";
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
 import { Box } from "@mui/system";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
@@ -27,10 +31,12 @@ const initialErrorsState = {
 };
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   const db = getFirestore();
+  const [open, setOpen] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [loaded, setLoaded] = useState(false);
   const [errorState, setErrorState] = useState(initialErrorsState);
   const [requestLoader, setRequestLoader] = useState(false);
+  const [deleteLoader, setDeleteLoader] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
@@ -109,6 +115,14 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     };
     retrieveInstitutions();
   }, []);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const showErrorPop = (error: string) => {
     return enqueueSnackbar(error, {
@@ -247,6 +261,17 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       setRequestLoader(false);
     }
   };
+
+  const onDeleteHandler = async () => {
+    try {
+      setOpen(false);
+      setDeleteLoader(true);
+      await Post("/instructor/course/" + currentSemester?.tagId + "/delete", {});
+      setDeleteLoader(false);
+    } catch (error: any) {
+      setDeleteLoader(false);
+    }
+  };
   if (!loaded) {
     return (
       <Box
@@ -269,7 +294,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   }
 
   return (
-    <Box sx={{ px: { xs: "10px", md: "20px" } }}>
+    <Box sx={{ px: { xs: "10px", md: "20px" }, py: "10px" }}>
       <Grid container spacing={5}>
         <Grid item xs={12} md={6}>
           <Chapter
@@ -286,7 +311,29 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       <Grid container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
-      <Box display="flex" justifyContent="center" alignItems="center" gap="10px">
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap="10px" mt={3}>
+        <LoadingButton
+          onClick={handleClickOpen}
+          loading={deleteLoader}
+          variant="contained"
+          color="error"
+          loadingIndicator={
+            <CircularProgress
+              sx={{ color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#555") }}
+            />
+          }
+          sx={{
+            color: theme => theme.palette.common.white,
+            fontWeight: "bold",
+            padding: {
+              xs: "5px 50px",
+              md: "15px 80px",
+            },
+            fontSize: "20px",
+          }}
+        >
+          Delete
+        </LoadingButton>
         <LoadingButton
           onClick={onSubmitHandler}
           loading={requestLoader}
@@ -300,15 +347,32 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           sx={{
             color: theme => theme.palette.common.white,
             fontWeight: "bold",
-            padding: "15px 80px",
-            marginTop: "20px",
-            marginBottom: "20px",
+            padding: {
+              xs: "5px 50px",
+              md: "15px 80px",
+            },
             fontSize: "20px",
           }}
         >
           Submit
         </LoadingButton>
       </Box>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">Do you want delete this course?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>No</Button>
+          <Button onClick={onDeleteHandler} autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
