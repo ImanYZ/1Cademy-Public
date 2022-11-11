@@ -179,8 +179,11 @@ function drawChart(
       .style("fill", colorApha(subgropup) as string);
   });
 
-  window.addEventListener("click", () => {
-    if (!event || !event.target) return;
+  window.addEventListener("click", e => {
+    e.preventDefault();
+    if (!e || !e.target || !event || !event.target) return;
+    //@ts-ignore
+    if (e.target.id.includes("bar-subgropup")) return;
 
     tooltip.style("pointer-events", "none").style("opacity", 0);
     d3.select(`#${event.target.id}`)
