@@ -263,11 +263,14 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   };
 
   const onDeleteHandler = async () => {
-    setOpen(false);
-    setDeleteLoader(true);
-    setTimeout(() => {
+    try {
+      setOpen(false);
+      setDeleteLoader(true);
+      await Post("/instructor/course/" + currentSemester?.tagId + "/delete", {});
       setDeleteLoader(false);
-    }, 2000);
+    } catch (error: any) {
+      setDeleteLoader(false);
+    }
   };
   if (!loaded) {
     return (
@@ -291,7 +294,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   }
 
   return (
-    <Box sx={{ px: { xs: "10px", md: "20px" } }}>
+    <Box sx={{ px: { xs: "10px", md: "20px" }, py: "10px" }}>
       <Grid container spacing={5}>
         <Grid item xs={12} md={6}>
           <Chapter
@@ -308,7 +311,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       <Grid container spacing={0} mt={5}>
         <Vote semester={semester} inputsHandler={inputsHandler} />
       </Grid>
-      <Box display="flex" justifyContent="center" alignItems="center" gap="10px">
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap="10px" mt={3}>
         <LoadingButton
           onClick={handleClickOpen}
           loading={deleteLoader}
@@ -323,7 +326,6 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
             color: theme => theme.palette.common.white,
             fontWeight: "bold",
             padding: "15px 80px",
-            marginTop: "20px",
             fontSize: "20px",
           }}
         >
@@ -343,8 +345,6 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
             color: theme => theme.palette.common.white,
             fontWeight: "bold",
             padding: "15px 80px",
-            marginTop: "20px",
-            marginBottom: "20px",
             fontSize: "20px",
           }}
         >
