@@ -2,8 +2,11 @@ import { db } from "../lib/firestoreServer/admin";
 import { convertToTGet } from "./";
 import { DocumentData } from "firebase-admin/firestore";
 
-export const getAllUserNodes = async ({ nodeId, t }: any) => {
-  const userNodesQuery = db.collection("userNodes").where("node", "==", nodeId);
+export const getAllUserNodes = async ({ nodeId, t, onlyVisible }: any) => {
+  let userNodesQuery = db.collection("userNodes").where("node", "==", nodeId);
+  if (onlyVisible) {
+    userNodesQuery = userNodesQuery.where("visible", "==", true);
+  }
   const userNodesDocs = await convertToTGet(userNodesQuery, t);
   const userNodesData: any[] = [];
   const userNodesRefs: any[] = [];

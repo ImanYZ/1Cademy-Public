@@ -5,7 +5,7 @@ import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import SaveIcon from "@mui/icons-material/Save";
-import { Accordion, AccordionDetails, AccordionSummary, Button, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React, { useState } from "react";
@@ -13,9 +13,9 @@ type Props = {
   chapters: any;
   setChapters: any;
   onSubmitHandler?: any;
-  currentSemester?: any;
+  selectedCourse?: any;
 };
-const Chapter: FC<Props> = ({ chapters, setChapters }) => {
+const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
   const [newChapter, setNewChapter] = useState<boolean>(false);
   const [newSubChapter, setNewSubChapter] = useState<boolean>(false);
@@ -240,15 +240,15 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
   };
 
   return (
-    <Box
+    <Paper
       sx={{
         padding: "40px 40px 40px 40px",
-        boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
       }}
+      elevation={2}
     >
       <Typography variant="h3">Course Syllabus</Typography>
       <Typography variant="h4" mt={5}>
-        S1 106 Introduction to Information Science
+        {selectedCourse}
       </Typography>
       <Box mt={5}>
         <Typography sx={{ color: "#A5A5A5", fontSize: "0.8rem!important" }} variant="h5">
@@ -615,7 +615,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters }) => {
           Add new chapter
         </Button>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

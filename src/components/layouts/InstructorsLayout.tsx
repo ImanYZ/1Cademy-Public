@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
-import { User } from "src/knowledgeTypes";
+import { User, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
 
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
@@ -40,6 +40,7 @@ type InstructorsLayoutPageProps = {
   selectedCourse: string | null;
   user: User;
   currentSemester: ICourseTag | null;
+  settings: UserSettings;
   isLoading: boolean;
   setIsLoading: (newIsLoading: boolean) => void;
 };
@@ -51,10 +52,9 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
   getLayout?: (page: InstructorLayoutPage) => ReactNode;
 };
 export const InstructorsLayout: FC<Props> = ({ children }) => {
-  const [{ user }] = useAuth();
+  const [{ user, settings }] = useAuth();
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
-
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
@@ -254,14 +254,13 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     <Box
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
-        border: "solid 2px royalBlue",
         minHeight: "100vh",
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
       {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
       {/* <HeaderNavbar /> */}
-      <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
+      <Box sx={{ width: "100%", py: "10px", m: "auto", px: { xs: "10px", md: "20px" } }}>
         <SemesterFilter
           semesters={semesters}
           selectedSemester={selectedSemester}
@@ -281,6 +280,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         currentSemester,
         isLoading,
         setIsLoading: (newIsLoading: boolean) => setIsLoading(newIsLoading),
+        settings,
       })}
     </Box>
   );

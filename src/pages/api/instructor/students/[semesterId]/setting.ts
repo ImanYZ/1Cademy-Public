@@ -11,6 +11,7 @@ import { INodeLink } from "src/types/INodeLink";
 import { INodeVersion } from "src/types/INodeVersion";
 import { detach } from "src/utils/helpers";
 import { getAllUserNodes, signalAllUserNodesChanges } from "src/utils";
+import { deleteNode } from "src/utils/instructor";
 
 export type InstructorSemesterSettingPayload = {
   syllabus: ISemesterSyllabusItem[];
@@ -377,7 +378,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       throw new Error("access denied");
     }
 
-    const semesterNodeData = (await db.collection("nodes").doc(semesterData.tagId).get()).data() as INode;
+    const semesterNodeRef = db.collection("nodes").doc(semesterData.tagId);
+    const semesterNodeData = (await semesterNodeRef.get()).data() as INode;
     // university, department, program, course and semester
     const _tagIds = [
       semesterData.uTagId,
@@ -439,32 +441,37 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       chapter++;
     }
 
+    await commitBatch(batch);
+
+    writeCounts = 0;
+    batch = db.batch();
+
+    // adding chapter nodes to semester node as children
+    const semesterChildren: INodeLink[] = [];
+    for (const syllabusItem of payload.syllabus) {
+      const nodeData = (await db.collection("nodes").doc(String(syllabusItem.node)).get()).data() as INode;
+      semesterChildren.push({
+        node: String(nodeData.documentId),
+        title: nodeData.title,
+        nodeType: "Relation",
+      });
+    }
+
+    // update
+    batch.update(semesterNodeRef, {
+      children: semesterChildren,
+      changedAt: Timestamp.now(),
+    });
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
     const removedNodeIds = existingNodeIds.filter((existingNodeId: string) => nodeIds.indexOf(existingNodeId) === -1);
     // flag removed nodes as deleted=true
     for (const removedNodeId of removedNodeIds) {
-      const nodeRef = db.collection("nodes").doc(removedNodeId);
-      const nodeData = (await nodeRef.get()).data() as INode;
-      nodeData.deleted = true;
-      batch.update(nodeRef, nodeData);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      // TODO: move these to queues in future
-      await detach(async () => {
-        let { userNodesRefs, userNodesData }: any = await getAllUserNodes({ nodeId: removedNodeId });
-        let batch = db.batch();
-        let writeCounts = 0;
-        [batch, writeCounts] = await signalAllUserNodesChanges({
-          batch,
-          userNodesRefs,
-          userNodesData,
-          nodeChanges: {},
-          major: true,
-          deleted: true,
-          currentTimestamp: Timestamp.now(),
-          writeCounts,
-        });
-        await commitBatch(batch);
+      [batch, writeCounts] = await deleteNode({
+        nodeId: removedNodeId,
+        batch,
+        writeCounts,
       });
-      // TODO: remove tags of nodes if a node getting deleted
     }
 
     semesterData.syllabus = payload.syllabus;

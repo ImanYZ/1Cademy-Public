@@ -1,8 +1,11 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
+import { ISemesterStudent } from "src/types/ICourse";
 
-import { BubbleStats } from "@/pages/instructors/dashboard";
+import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
+
+// import { BubbleStats } from "@/pages/instructors/dashboard";
 
 // const columns = ["fruit", "vegetable"];
 
@@ -64,8 +67,30 @@ function drawChart(
   maxAxisX: number,
   maxAxisY: number,
   minAxisX: number,
-  minAxisY: number
+  minAxisY: number,
+  student?: SemesterStudentVoteStat | null
 ) {
+  const htmlTooltip = (users: ISemesterStudent[]) => {
+    const html = users.map(user => {
+      return `<div class="tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      <img
+        class="tooltip-user-image"
+        src="${user.imageUrl}"
+        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
+        loading="lazy"
+        />
+      <span>
+         ${user.fName}
+         ${user.lName}
+      </span></div>
+      `;
+    });
+    const wrapper = `<div id="users-tooltip">
+      ${html.join(" ")}
+    </div>`;
+    return wrapper;
+  };
+  const tooltip = d3.select("#boxplot-tool-tip");
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
@@ -73,7 +98,8 @@ function drawChart(
   console.warn(theme);
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
-  //   width = 500 - margin.left - margin.right,
+  //   width = 500 - margin.left - margin.right,\
+  const widthProcessed = width - margin.left - margin.right;
   height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
@@ -85,7 +111,7 @@ function drawChart(
   //     .append("g")
   //     .attr("transform", `translate(${margin.left},${margin.top})`);
   svg
-    .attr("width", width + margin.left + margin.right)
+    .attr("width", width)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -101,7 +127,7 @@ function drawChart(
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
   // Add X axis
-  const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, width]);
+  const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, widthProcessed]);
   svg
     .append("g")
     .attr("id", "axis-x")
@@ -109,17 +135,23 @@ function drawChart(
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
-  const y = d3.scaleLinear().domain([minAxisY, maxAxisY]).range([height, 0]);
+  const y = d3
+    .scaleLinear()
+    .domain([minAxisY, maxAxisY + 10])
+    .range([height, 0]);
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
 
   console.log({ x, y });
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
 
+  console.log("color range", -1000, 0, maxAxisY / 10, maxAxisX / 2, maxAxisY);
+  console.log("max", maxAxisY);
+
   // @ts-ignore
   const color = d3
     .scaleThreshold()
-    .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
+    .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
     .range([
       RED_ALPHA,
       LESS_EQUAL_THAN_10_COLOR_ALPHA,
@@ -130,7 +162,7 @@ function drawChart(
   // @ts-ignore
   const borderColor = d3
     .scaleThreshold()
-    .domain([-1000, 0, maxAxisY * 0.4, maxAxisY * 0.91]) // @ts-ignore
+    .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
     .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
@@ -150,8 +182,33 @@ function drawChart(
     .attr("r", 10)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    .attr("opacity", 0.8)
-    .attr("transform", `translate(30, 5)`);
+    .attr("transform", `translate(30, 5)`)
+    .on("mouseover", function (e, d) {
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
+      let html = htmlTooltip(d.studentsList);
+      tooltip
+        .html(`${html}`)
+        .style("opacity", 1)
+        .style("top", `${e.offsetY + 20}px`)
+        .style("left", `${e.offsetX + maxAxisX - 24}px`);
+    })
+    .on("mouseout", function () {
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
+      tooltip.style("opacity", 0).style("pointer-events", "none");
+    });
+  if (student) {
+    const locationIconPath =
+      "M7 9.5C6.33696 9.5 5.70107 9.23661 5.23223 8.76777C4.76339 8.29893 4.5 7.66304 4.5 7C4.5 6.33696 4.76339 5.70107 5.23223 5.23223C5.70107 4.76339 6.33696 4.5 7 4.5C7.66304 4.5 8.29893 4.76339 8.76777 5.23223C9.23661 5.70107 9.5 6.33696 9.5 7C9.5 7.3283 9.43534 7.65339 9.3097 7.95671C9.18406 8.26002 8.99991 8.53562 8.76777 8.76777C8.53562 8.99991 8.26002 9.18406 7.95671 9.3097C7.65339 9.43534 7.3283 9.5 7 9.5ZM7 0C5.14348 0 3.36301 0.737498 2.05025 2.05025C0.737498 3.36301 0 5.14348 0 7C0 12.25 7 20 7 20C7 20 14 12.25 14 7C14 5.14348 13.2625 3.36301 11.9497 2.05025C10.637 0.737498 8.85652 0 7 0Z";
+
+    svg
+      .select("#location")
+      .selectAll("path")
+      .attr("d", locationIconPath)
+      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`)
+      .attr("fill", "#EF5350");
+  }
   // svg
   //   .select("#nums")
   //   .selectAll("text")
@@ -185,6 +242,7 @@ type BubblePlotProps = {
   maxAxisY: number;
   minAxisX: number;
   minAxisY: number;
+  student?: SemesterStudentVoteStat | null;
 };
 export const BubbleChart = ({
   width,
@@ -195,31 +253,31 @@ export const BubbleChart = ({
   maxAxisY,
   minAxisX,
   minAxisY,
+  student,
 }: BubblePlotProps) => {
-  console.log("PointsBarChart");
-  //   const svg = useRef<SVGSVGElement>(null);
-
-  //   useEffect(() => {
-  //     console.log("call svg");
-  //     drawChart(svg);
-  //   }, [svg]);
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
-      console.log("svg callbak");
-
-      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY);
+      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student);
     },
-    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, theme, width]
+    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, student, theme, width]
   );
 
   return (
-    <svg ref={svg} style={{ position: "relative" }}>
-      <g id="bubbles"></g>
-      <g id="nums"></g>
-      <text style={{ fontSize: "16px", color: theme === "Dark" ? "white" : "black" }} x={width - 40} y={height}>
-        # of Votes
-      </text>
-    </svg>
+    <>
+      <svg ref={svg} style={{ position: "relative" }}>
+        <g id="bubbles"></g>
+        <g id="nums"></g>
+        <g id="location">
+          <path></path>
+        </g>
+
+        <text style={{ fontSize: "19px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 100} y={height}>
+          # of Votes
+        </text>
+      </svg>
+
+      <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
+    </>
   );
 };

@@ -702,3 +702,62 @@ h4,
 p {
   color: black !important;
 } */
+
+#boxplot-tool-tip {
+  position: absolute;
+  background: #f8f8f8;
+  box-shadow: 0 2px 8px 1px gray;
+  border-radius: 4px;
+  opacity: 0;
+  z-index: 999;
+  max-height: 350px;
+  overflow-y: auto;
+}
+#boxplot-tool-tip.darkMode {
+  background: #303134;
+  box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.5);
+}
+#users-tooltip {
+  overflow-y: auto;
+  width: 180px;
+  padding: 2px;
+  font-size: 12px;
+}
+#users-tooltip .tooltip-body {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 6px;
+  color: black;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+#users-tooltip .tooltip-body:last-child {
+  border-bottom: none;
+}
+#users-tooltip .tooltip-user-image {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+#users-tooltip .tooltip-body.darkMode {
+  color: white;
+}
+
+#users-tooltip h5 {
+  margin: 0;
+  margin-bottom: 1px;
+  text-overflow: ellipsis;
+}
+
+#boxplot-tool-tip::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 6px;
+  height: 8px;
+}
+
+#boxplot-tool-tip::-webkit-scrollbar-thumb {
+  background: rgba(113, 113, 113, 0.663);
+  border-radius: 10px;
+}

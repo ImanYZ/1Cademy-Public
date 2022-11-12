@@ -6,12 +6,12 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
-import { User } from "src/knowledgeTypes";
+import { User, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
 
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import { useAuth } from "../../context/AuthContext";
-import { Instructor, Semester, SemesterStudentVoteStat } from "../../instructorsTypes";
+import { Semester, SemesterStudentVoteStat } from "../../instructorsTypes";
 import ROUTES from "../../lib/utils/routes";
 // import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
@@ -40,6 +40,10 @@ type InstructorsLayoutPageProps = {
   selectedCourse: string | null;
   user: User;
   currentSemester: ICourseTag | null;
+  settings: UserSettings;
+  isLoading: boolean;
+  setIsLoading: (newIsLoading: boolean) => void;
+  queryUname: string;
 };
 
 type Props = {
@@ -48,12 +52,11 @@ type Props = {
 export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: InstructorLayoutPage) => ReactNode;
 };
-export const InstructorsLayout: FC<Props> = ({ children }) => {
-  const [{ user }] = useAuth();
+export const StudentsLayout: FC<Props> = ({ children }) => {
+  const [{ user, settings }] = useAuth();
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [instructor /* setInstructor */] = useState<Instructor | null>(null);
   const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
@@ -61,15 +64,26 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
+  const [queryUname, setQueryUname] = useState("");
+
+  const [isLoading, setIsLoading] = useState(true);
   // TODO: create useEffect to load semesters
 
   const db = getFirestore();
   const router = useRouter();
 
   useEffect(() => {
+    const uname = router.query["uname"] as string;
+    console.log("uname", uname);
+    setQueryUname(uname);
+  }, [router.query]);
+
+  useEffect(() => {
+    if (!queryUname) return;
     const allowAccessByRole = async () => {
       if (!user) return;
 
+      console.log("--->> router", { ...router });
       const role = user?.role;
       if (!role) return router.push(ROUTES.dashboard);
       if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
@@ -79,23 +93,25 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       // in this case is instructor he can see all
     };
     allowAccessByRole();
-  }, [router, user, user?.role]);
+  }, [queryUname, router, user, user?.role]);
 
   useEffect(() => {
+    if (!queryUname) return;
     if (!user) return console.warn("Not user found, wait please");
     // window.document.body.classList.remove("Image");
 
-    const studentUsername = "";
-    console.log("user", user);
-    const getInstructor = async () => {
+    console.log("get Semesters", user);
+    const getSemesters = async () => {
+      console.log("will get semester", 1);
       const semestersRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semestersRef, where("uname", "==", studentUsername));
+      const q = query(semestersRef, where("uname", "==", queryUname));
       const semesterStudentDocs = await getDocs(q);
       if (!semesterStudentDocs.docs.length) {
         // there is not semesters by that user
         return;
       }
 
+      console.log("will get semester", 2);
       // will map data
       const semestersStudent = semesterStudentDocs.docs.map(change => {
         const semesterData: SemesterStudentVoteStat = change.data() as SemesterStudentVoteStat;
@@ -105,6 +121,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         };
       });
 
+      console.log("will get semester", 3);
       // will get ids
       const semestersIds = semestersStudent.map(cur => cur.data.tagId);
       // will get courses
@@ -112,10 +129,12 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         const nodeRef = doc(db, "semesters", semesterId);
         return getDoc(nodeRef);
       });
+      console.log("will get semester", 4);
       const semesterDocs = await Promise.all(semestersDocsPromises);
 
       const allSemesters = semesterDocs.map(cur => cur.data()).flatMap(c => (c as Semester) || []);
 
+      console.log("will get semester", 5);
       const coursesResult = allSemesters.reduce((acu: CoursesResult, cur: Semester) => {
         const tmpValues = acu[cur.title] ?? [];
         return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
@@ -123,30 +142,38 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
       const semester = allSemesters.map(cur => cur.title);
 
+      console.log("will get semester", 6);
       if (!semester.length) {
         router.push(ROUTES.instructorsSettings);
       }
 
+      console.log("will get semester", 7);
+      console.log({ semester, allSemesters, coursesResult, semester0: semester[0] });
       setSemesters(semester);
       setAllSemesters(allSemesters);
       setAllCourses(coursesResult);
       setSelectedSemester(semester[0]);
     };
 
-    getInstructor();
-  }, [db, router, user]);
+    getSemesters();
+  }, [db, queryUname, router, user]);
 
   useEffect(() => {
+    if (!queryUname) return;
     if (!selectedSemester) return setCourses([]);
 
+    console.log("selected semester: will set courses and selected course");
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
     setSelectedCourse(newCourses[0]);
-  }, [allCourses, selectedSemester]);
+  }, [allCourses, queryUname, selectedSemester]);
 
   useEffect(() => {
+    if (!queryUname) return;
     if (!user) return;
     if (!selectedCourse) return;
+
+    console.log("selected course: will select current semester");
     const semesterFound = allSemesters.find(course => `${course.cTitle} ${course.pTitle}` === selectedCourse);
     if (!semesterFound) {
       setCurrentSemester(null);
@@ -162,7 +189,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         uTitle: semesterFound.uTitle,
       });
     }
-  }, [allSemesters, instructor, selectedCourse, user]);
+  }, [allSemesters, queryUname, selectedCourse, user]);
 
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
@@ -184,14 +211,20 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     <Box
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
-        border: "solid 2px royalBlue",
         minHeight: "100vh",
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
       {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
       {/* <HeaderNavbar /> */}
-      <Box sx={{ maxWidth: "1384px", py: "10px", m: "auto", px: { xs: "10px", xl: "0px" } }}>
+      <Box
+        sx={{
+          width: "100%",
+          py: "10px",
+          m: "auto",
+          px: { xs: "10px", md: "20px" },
+        }}
+      >
         <SemesterFilter
           semesters={semesters}
           selectedSemester={selectedSemester}
@@ -204,7 +237,16 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         />
       </Box>
 
-      {children({ selectedSemester, selectedCourse, user, currentSemester })}
+      {children({
+        selectedSemester,
+        selectedCourse,
+        user,
+        currentSemester,
+        isLoading,
+        setIsLoading: (newIsLoading: boolean) => setIsLoading(newIsLoading),
+        settings,
+        queryUname,
+      })}
     </Box>
   );
 };
@@ -214,24 +256,6 @@ const getCourseBySemester = (semester: string | undefined, courses: { [key: stri
   return courses[semester] ?? [];
 };
 
-// const getFirstCourse = (semester: string | undefined, courses: { [key: string]: string[] }): string | undefined => {
-//   const coursesBySemester = getCourseBySemester(semester, courses);
-//   return coursesBySemester[0] ?? undefined;
-// };
-
 type CoursesResult = {
   [key: string]: string[];
 };
-// const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
-//   return instructor.courses.reduce((acu: CoursesResult, cur) => {
-//     const tmpValues = acu[cur.title] ?? [];
-//     return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
-//   }, {});
-// };
-// const selectCourse = (description: string, instructor: Instructor): ICourseTag | undefined => {
-//   return instructor.courses.find(course => `${course.cTitle} ${course.pTitle}` === description);
-// };
-
-// const selectedCourseBySemester = (description: string, instructor: Instructor): ICourseTag | undefined => {
-//   return instructor.courses.find(course => `${course.cTitle} ${course.pTitle}` === description);
-// };

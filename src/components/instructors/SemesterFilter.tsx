@@ -52,7 +52,9 @@ export const SemesterFilter = ({
   };
 
   const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
-    setSelectedCourse(newAlignment);
+    if (newAlignment) {
+      setSelectedCourse(newAlignment);
+    }
   };
 
   const onNewCourse = () => {
@@ -65,12 +67,18 @@ export const SemesterFilter = ({
     <Box
       sx={{
         display: "flex",
-        gap: { xs: "6px", md: "16px" },
-        justifyContent: { xs: "center", md: "space-between" },
-        flexWrap: "wrap",
+        flexDirection: { xs: "column", sm: "row" },
+        gap: { xs: "6px", md: "20px" },
+        justifyContent: { xs: "center", sm: "space-between" },
       }}
     >
-      <Box sx={{ display: "flex", gap: { xs: "6px", md: "16px" } }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: { xs: "space-between", sm: "flex-start" },
+          gap: { xs: "16px", md: "16px" },
+        }}
+      >
         <FormControl size={matches ? "small" : "medium"}>
           <InputLabel id="semester-filter-label">Semester</InputLabel>
           <Select
@@ -90,9 +98,21 @@ export const SemesterFilter = ({
         </FormControl>
 
         {!isMovil && (
-          <ToggleButtonGroup value={selectedCourse} exclusive onChange={onChangeCourse} aria-label="text alignment">
+          <ToggleButtonGroup
+            value={selectedCourse}
+            exclusive
+            onChange={onChangeCourse}
+            aria-label="text alignment"
+            sx={{ width: { sm: "500px", lg: "700px", xl: "1000px" }, overflowY: "auto" }}
+            className="scroll-styled"
+          >
             {courses.map((cur, idx) => (
-              <ToggleButton key={idx} value={cur} aria-label="left aligned">
+              <ToggleButton
+                key={idx}
+                value={cur}
+                aria-label="left aligned"
+                sx={{ border: "solid 1px rgb(185 185 185)", whiteSpace: " nowrap" }}
+              >
                 {cur}
               </ToggleButton>
             ))}
