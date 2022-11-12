@@ -1628,11 +1628,8 @@ const Dashboard = ({}: DashboardProps) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
-      // here callback()
-      console.log("will upadte graph");
       return { nodes: newNode, edges };
     });
-    // callbacl()
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
