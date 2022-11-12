@@ -2831,7 +2831,7 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const saveProposedImprovement = useMemoizedCallback(
-    (summary: any, reason: any) => {
+    (summary: any, reason: any, onFail: any) => {
       if (!nodeBookState.selectedNode) return;
 
       nodeBookDispatch({ type: "setChosenNode", payload: null });
@@ -2898,6 +2898,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
+          onFail();
           window.alert("You've not changed anything yet!");
         } else {
           setIsSubmitting(true);
@@ -3070,7 +3071,7 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const saveProposedChildNode = useMemoizedCallback(
-    (newNodeId, summary, reason) => {
+    (newNodeId, summary, reason, onComplete) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
@@ -3129,6 +3130,8 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode(newNode.parents[0].node);
           }
         }
+
+        onComplete();
       }
     },
     [graph.nodes, getMapGraph]
