@@ -110,7 +110,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       const institutionSorted = institutions
         .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
         .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      setInstitutions(institutionSorted.slice(0, 10));
+      setInstitutions(institutionSorted);
       setLoaded(true);
     };
     retrieveInstitutions();
@@ -272,6 +272,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       setDeleteLoader(false);
     }
   };
+
   if (!loaded) {
     return (
       <Box
@@ -289,6 +290,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       </Box>
     );
   }
+
   if (!selectedCourse) {
     return <NewCourse institutions={institutions} />;
   }
