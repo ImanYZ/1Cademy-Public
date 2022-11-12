@@ -128,6 +128,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   useEffect(() => {
     if (isMovil) setEditMode(false);
+    if (!isMovil) setOpenProfile(false);
   }, [isMovil]);
   useEffect(() => {
     if (!db) return;
@@ -795,7 +796,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "#"}>
+                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
                                 <Link onClick={() => openThisProfile(row)}>
                                   {" "}
                                   <>{row[colmn]}</>
