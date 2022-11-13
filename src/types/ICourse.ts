@@ -95,20 +95,14 @@ export type ICourse = {
 
 export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022
-  chapters: {
-    node: string; // chapter node id
-    title: string; // chapter title
+  proposals: number;
+  questions: number;
 
-    proposals: number; // all pending/accepted proposals
-    questions: number;
-    nodes: number; // pending/accepted proposals of new nodes
+  newNodes: number;
+  links: number; // improvements on children and parent links
 
-    newNodes: number;
-    links: number; // improvements on children and parent links
-
-    agreementsWithInst: number;
-    disagreementsWithInst: number;
-  }[];
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
 };
 
 export type ISemesterStudentStat = {
