@@ -1,6 +1,6 @@
 import CreateIcon from "@mui/icons-material/Create";
 import { LoadingButton } from "@mui/lab";
-import { Autocomplete, Grid, TextField } from "@mui/material";
+import { Autocomplete, createFilterOptions, Grid, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import { useFormik } from "formik";
@@ -27,8 +27,15 @@ const NewCourse: FC<Props> = ({ institutions }) => {
   const [{ user }] = useAuth();
   const [requestLoader, setRequestLoader] = useState(false);
   const getNameFromInstitutionSelected = () => {
+    let instituteName: any = "";
+    if (formik.values.universityName) {
+      instituteName = formik.values.universityName;
+    } else {
+      if (!user?.deInstit) return null;
+      instituteName = user?.deInstit;
+    }
     if (!user?.deInstit) return null;
-    const foundInstitution = institutions.find((cur: any) => cur.name === user?.deInstit);
+    const foundInstitution = institutions.find((cur: any) => cur.name === instituteName);
     if (!foundInstitution) return null;
     return foundInstitution;
   };
@@ -49,7 +56,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
     },
   });
   return (
-    <Box sx={{ marginTop: "50px" }}>
+    <Box sx={{ marginTop: "50px", padding: "0 10px" }}>
       <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Grid item xs={12} md={4}>
           <form
@@ -105,9 +112,13 @@ const NewCourse: FC<Props> = ({ institutions }) => {
             />
 
             <Autocomplete
-              placeholder="i.e. Information Science"
+              loading={institutions.length === 0}
+              filterOptions={createFilterOptions({
+                matchFrom: "any",
+                limit: 20,
+              })}
               id="institution"
-              defaultValue={getNameFromInstitutionSelected()}
+              value={getNameFromInstitutionSelected()}
               onChange={(e, value) => formik.setFieldValue("universityName", value?.name || "")}
               options={institutions}
               getOptionLabel={option => option.name}
@@ -120,12 +131,11 @@ const NewCourse: FC<Props> = ({ institutions }) => {
                 />
               )}
               renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
-                <li key={option.id} {...props}>
+                <li {...props} key={option.id}>
                   <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
                   <div style={{ paddingLeft: "10px" }}>{option.name}</div>
                 </li>
               )}
-              isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
               fullWidth
               sx={{ mb: "16px" }}
             />

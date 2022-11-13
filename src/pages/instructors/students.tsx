@@ -128,6 +128,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   useEffect(() => {
     if (isMovil) setEditMode(false);
+    if (!isMovil) setOpenProfile(false);
   }, [isMovil]);
   useEffect(() => {
     if (!db) return;
@@ -523,6 +524,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               display: "flex",
               justifyContent: "space-between",
               flexDirection: isMovil ? "column" : "row",
+              py: "20px",
             }}
           >
             <Box
@@ -636,12 +638,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             )}
           </Box>
         </Box>
-
-        <Divider sx={{ py: "10px" }} />
-
+        <Divider />
         <Box
           sx={{
-            border: "1px solid #fff",
+            py: "10px",
             borderRightWidth: 0,
             borderLeftWidth: 0,
           }}
@@ -651,9 +651,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             sx={{
               height: 600,
             }}
-            // onScroll={() => {
-            //   console.log("first");
-            // }}
           >
             <Table stickyHeader>
               <TableHead>
@@ -711,11 +708,20 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         }}
                         elevation={1}
                       >
-                        <Box sx={{ width: "200px", color: "black", display: "flex", flexDirection: "column" }}>
+                        <Box
+                          sx={{
+                            width: "152px",
+                            height: "93px",
+                            color: "black",
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                        >
                           <Button
+                            size="small"
                             sx={{
                               p: 2,
-                              fontSize: "14px",
+                              fontSize: "15px",
                               color: theme.palette.mode === "dark" ? "white" : "#757575",
                             }}
                             onClick={sortLowHigh}
@@ -723,9 +729,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                             Sort Low to High
                           </Button>
                           <Button
+                            size="small"
                             sx={{
                               p: 2,
-                              fontSize: "14px",
+                              fontSize: "15px",
                               color: theme.palette.mode === "dark" ? "white" : "#757575",
                             }}
                             onClick={sortHighLow}
@@ -771,7 +778,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                               }
                             : isMovil
                             ? { fontWeight: "10px", fontSize: "14px" }
-                            : { fontSize: "12px", px: "1px" }
+                            : { fontSize: "12px", pr: colmn === "email" ? "18px" : "0px", pl: "0px" }
                         }
                         align="left"
                       >
@@ -789,7 +796,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "#"}>
+                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
                                 <Link onClick={() => openThisProfile(row)}>
                                   {" "}
                                   <>{row[colmn]}</>
@@ -820,13 +827,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             </Table>
           </TableContainer>
         </Box>
-        {editMode ? (
+        {editMode && (
           <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
             <Box>
               <CSVBtn
                 variant="text"
                 addNewData={addNewData}
                 buttonStyles={{
+                  ":hover": {
+                    backgroundColor: "#bdbdbd",
+                  },
                   backgroundColor: "#EDEDED",
                   fontSize: 16,
                   fontWeight: "700",
@@ -843,6 +853,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               <Button
                 variant="text"
                 sx={{
+                  ":hover": {
+                    backgroundColor: "#bdbdbd",
+                  },
                   color: theme => theme.palette.common.black,
                   backgroundColor: "#EDEDED",
                   fontSize: 16,
@@ -901,8 +914,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </Button>
             </Box>
           </Box>
-        ) : (
-          <div></div>
         )}
       </Box>
     </>

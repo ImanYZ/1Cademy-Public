@@ -43,6 +43,7 @@ type InstructorsLayoutPageProps = {
   settings: UserSettings;
   isLoading: boolean;
   setIsLoading: (newIsLoading: boolean) => void;
+  queryUname: string;
 };
 
 type Props = {
@@ -244,6 +245,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         isLoading,
         setIsLoading: (newIsLoading: boolean) => setIsLoading(newIsLoading),
         settings,
+        queryUname,
       })}
     </Box>
   );
