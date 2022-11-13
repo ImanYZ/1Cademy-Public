@@ -832,7 +832,6 @@ const Dashboard = ({}: DashboardProps) => {
         where("visible", "==", true),
         where("deleted", "==", false)
       );
-      console.log(q, "usernodes change query");
       const killSnapshot = snapshot(q);
       return () => {
         //   // TODO: here we need to remove nodes cause will come node again
