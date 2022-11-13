@@ -59,10 +59,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
     <Box sx={{ marginTop: "50px", padding: "0 10px" }}>
       <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Grid item xs={12} md={4}>
-          <form
-            onSubmit={formik.handleSubmit}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "25px" }}
-          >
+          <form style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "25px" }}>
             <TextField
               placeholder="i.e. SI691"
               fullWidth
@@ -141,6 +138,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
             />
             <LoadingButton
               type="submit"
+              onClick={formik.handleSubmit}
               loading={requestLoader}
               endIcon={<CreateIcon />}
               loadingPosition="end"
