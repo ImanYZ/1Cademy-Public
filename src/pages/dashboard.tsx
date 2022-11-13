@@ -720,11 +720,11 @@ const Dashboard = ({}: DashboardProps) => {
           // devLog("user Nodes Snapshot", docChanges);
           setNoNodesFoundMessage(false);
           // setIsSubmitting(true);
-          const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
+          // const docChangesFromServer = docChanges.filter(cur => !cur.doc.metadata.fromCache);
           // if (!docChangesFromServer.length) return null;
 
-          devLog("2:userNodes Snapshot:From_server", docChangesFromServer);
-          const userNodeChanges = getUserNodeChanges(docChangesFromServer);
+          // devLog("2:userNodes Snapshot:From_server", docChangesFromServer);
+          const userNodeChanges = getUserNodeChanges(docChanges);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
