@@ -65,7 +65,7 @@ export const GeneralPlotStats = ({
           rowGap: "24px",
         }}
       >
-        <span style={{ textAlign: "left" }}>New Node Proposals</span>
+        <span style={{ textAlign: "left" }}>Child Proposals</span>
         <span>
           {student ? `${formatNumber(student.newNodes)} / ` : ""}
           {formatNumber(semesterStats?.newNodeProposals)}
