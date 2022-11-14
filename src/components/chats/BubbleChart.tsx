@@ -95,7 +95,6 @@ function drawChart(
   //   const height = 120;
   //   const width = 250;
   const svg = d3.select(svgRef);
-  console.warn(theme);
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
   //   width = 500 - margin.left - margin.right,\
@@ -121,7 +120,6 @@ function drawChart(
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
   // const groups = data.map(d => d.month).flatMap(c => c);
-  // console.log({ groups });
 
   // remove axis if exists
   svg.select("#axis-x").remove();
@@ -141,12 +139,8 @@ function drawChart(
     .range([height, 0]);
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
 
-  console.log({ x, y });
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
-
-  console.log("color range", -1000, 0, maxAxisY / 10, maxAxisX / 2, maxAxisY);
-  console.log("max", maxAxisY);
 
   // @ts-ignore
   const color = d3
@@ -184,7 +178,6 @@ function drawChart(
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
     .attr("transform", `translate(30, 5)`)
     .on("mouseover", function (e, d) {
-      console.log("bubble", d);
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       let html = htmlTooltip(d.studentsList);

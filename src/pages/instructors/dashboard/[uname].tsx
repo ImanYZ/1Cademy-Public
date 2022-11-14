@@ -22,6 +22,7 @@ import {
   BubbleStats,
   MaxPoints,
   SemesterStats,
+  SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
@@ -29,7 +30,13 @@ import {
 } from "../../../instructorsTypes";
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
-import { getBubbleStats, StudenBarsSubgroupLocation, StudentStackedBarStatsObject, TrendStats } from "../dashboard";
+import {
+  getBubbleStats,
+  makeTrendData,
+  StudenBarsSubgroupLocation,
+  StudentStackedBarStatsObject,
+  TrendStats,
+} from "../dashboard";
 
 const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, settings, queryUname }) => {
   const db = getFirestore();
@@ -61,7 +68,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
   //Trend Plots
   const [trendStats, setTrendStats] = useState<TrendStats>({
-    newNodeProposals: [],
+    childProposals: [],
     editProposals: [],
     links: [],
     nodes: [],
@@ -210,25 +217,19 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ newNodeProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
-      // const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      // const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
-      // const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
-      // const links = getTrendsData(userDailyStats, "links");
-      // const nodes = getTrendsData(userDailyStats, "proposals");
-      // const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
-      // const questions = getTrendsData(userDailyStats, "questions");
-      // setTrendStats({
-      //   newNodeProposals,
-      //   editProposals,
-      //   links,
-      //   nodes,
-      //   votes,
-      //   questions,
-      // });
+      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      setTrendStats({
+        childProposals: makeTrendData(userDailyStats, "newNodes"),
+        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        links: makeTrendData(userDailyStats, "links"),
+        nodes: makeTrendData(userDailyStats, "proposals"),
+        votes: makeTrendData(userDailyStats, "votes"),
+        questions: makeTrendData(userDailyStats, "questions"),
+      });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db, queryUname]);
