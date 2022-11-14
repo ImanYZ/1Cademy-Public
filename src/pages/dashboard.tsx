@@ -3278,7 +3278,7 @@ const Dashboard = ({}: DashboardProps) => {
               delete userVersion.updatedAt;
               delete userVersion.createdAt;
               delete userVersion.user;
-              if(userVersion.hasOwnProperty("id")) {
+              if (userVersion.hasOwnProperty("id")) {
                 delete userVersion.id;
               }
               versions[versionId] = {
@@ -3808,6 +3808,9 @@ const Dashboard = ({}: DashboardProps) => {
     if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
     setOpenSidebar(null);
   };
+
+  console.error("Dashboard component is DEPRECATED");
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3821,6 +3824,7 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
+        {<div id="ChoosingNodeMessage">Dashboard component is DEPRECATED</div>}
         {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
         <Box sx={{ width: "100vw", height: "100vh" }}>
           {
