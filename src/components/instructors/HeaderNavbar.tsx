@@ -17,9 +17,8 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React from "react";
-
+import ROUTES from "@/lib/utils/routes";
 import useThemeChange from "@/hooks/useThemeChange";
-
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
@@ -102,7 +101,7 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
             />
           </FormGroup>
           <Button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push(ROUTES.dashboard)}
             // color="secondary"
             sx={{
               wordBreak: "normal",

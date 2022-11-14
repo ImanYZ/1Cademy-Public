@@ -4,7 +4,7 @@ import { Box, SxProps, Theme, Tooltip } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
-import { OpenSidebar } from "@/pages/dashboard";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNodeBook } from "../../context/NodeBookContext";
