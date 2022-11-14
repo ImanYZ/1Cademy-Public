@@ -428,7 +428,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     const _tableRow: any = tableRows.slice();
     _tableRow.push({
       id: Math.floor(Math.random() * 100),
-      username: "Harry Potter",
+      username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
       lastName: "",
@@ -790,6 +790,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                             size="small"
                             id="outlined-basic"
                             variant="outlined"
+                            helperText={
+                              savedTableState.find((elm: any) => elm.email === row["email"].trim()) && colmn === "email"
+                                ? "This Email already exist in this course"
+                                : ""
+                            }
+                            error={savedTableState.find((elm: any) => elm.email === row["email"].trim())}
                             label={{ firstName: "First Name", lastName: "Last Name", email: "Email" }[colmn]}
                           />
                         ) : (
