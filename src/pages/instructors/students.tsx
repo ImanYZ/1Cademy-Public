@@ -1,13 +1,11 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Divider, Link, TableContainer, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
@@ -15,7 +13,6 @@ import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
@@ -28,6 +25,7 @@ import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/In
 
 import { postWithToken } from "../../../src/lib/mapApi";
 import CSVBtn from "../../components/CSVBtn";
+import DeleteButton from "../../components/DeleteButton";
 import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
@@ -128,6 +126,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   useEffect(() => {
     if (isMovil) setEditMode(false);
+    if (!isMovil) setOpenProfile(false);
   }, [isMovil]);
   useEffect(() => {
     if (!db) return;
@@ -195,9 +194,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               questionPoints: stats?.questionPoints || 0,
               vote: stats?.votes || 0,
               votePoints: stats?.votePoints || 0,
-              lastActivity: new Date(
-                stats?.lastActivity.seconds * 1000 + stats?.lastActivity.nanoseconds / 1000000
-              ).toLocaleDateString(),
+              lastActivity: stats?.lastActivity
+                ? new Date(
+                    stats?.lastActivity.seconds * 1000 + stats?.lastActivity.nanoseconds / 1000000
+                  ).toLocaleDateString()
+                : new Date().toLocaleDateString(),
             });
           }
           setTableRows(_rows.slice());
@@ -323,7 +324,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     setTableRows(_tableRow);
     for (let row of _tableRow) {
       students.push({
-        email: row.email,
+        email: row.email.trim(),
         fName: row.firstName,
         lName: row.lastName,
       });
@@ -341,6 +342,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const discardTableChanges = () => {
+    window.scrollTo(0, 0);
     const _savedTableState = savedTableState.slice();
     setTableRows(_savedTableState);
     setSavedTableState([]);
@@ -441,6 +443,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const handleEditAndAdd = () => {
+    window.scrollTo(0, document.body.scrollHeight);
     const _tableRow: any = tableRows.slice();
     if (editMode) {
       saveTableChanges();
@@ -483,7 +486,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   //TO-DO
   if (!currentSemester) return <Typography>You don't have semester</Typography>;
   // if (!tableRows.length) return <Typography>you don't a user </Typography>;
-
   return (
     <>
       {/* Drawers */}
@@ -512,7 +514,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
         sx={{
           height: "100%",
           maxWidth: "100%",
-          py: "10px",
+          pt: "10px",
+          pb: !isMovil ? "200px" : "",
           m: "auto",
           px: "10px",
         }}
@@ -645,12 +648,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             borderLeftWidth: 0,
           }}
         >
-          <TableContainer
-            component={Paper}
-            sx={{
-              height: 600,
-            }}
-          >
+          <TableContainer component={Paper}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -788,14 +786,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                             style={{ width: colmn === "email" ? "150px" : "90px" }}
                             value={row[colmn]}
                             onChange={event => editValues(colmn, rowIndex, event)}
+                            autoFocus={colmn === "firstName"}
                             size="small"
                             id="outlined-basic"
                             variant="outlined"
+                            label={{ firstName: "First Name", lastName: "Last Name", email: "Email" }[colmn]}
                           />
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "#"}>
+                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
                                 <Link onClick={() => openThisProfile(row)}>
                                   {" "}
                                   <>{row[colmn]}</>
@@ -810,14 +810,25 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     ))}
                     {editMode && (
                       <TableCell sx={{ px: "1px", width: "20px" }} align="right" size="small">
-                        <IconButton onClick={() => deleteRow(rowIndex)}>
-                          <DeleteIcon
-                            color="error"
-                            sx={{
-                              borderRadius: "50%",
-                            }}
-                          />
-                        </IconButton>
+                        <DeleteButton
+                          variant="text"
+                          deleteRow={() => deleteRow(rowIndex)}
+                          buttonStyles={{
+                            ":hover": {
+                              backgroundColor: "#bdbdbd",
+                            },
+                            backgroundColor: "#EDEDED",
+                            fontSize: 16,
+                            fontWeight: "700",
+                            my: { xs: "0px", md: "auto" },
+                            mt: { xs: "15px", md: "auto" },
+                            marginRight: "40px",
+                            paddingX: "30px",
+                            borderRadius: 1,
+                            textAlign: "center",
+                            alignSelf: "center",
+                          }}
+                        />
                       </TableCell>
                     )}
                   </TableRow>

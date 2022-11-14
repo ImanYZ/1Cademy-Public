@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import React, { useCallback, useDeferredValue, useEffect, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -250,6 +250,7 @@ const Node = ({
     setTitleCopy(title);
     setContentCopy(content);
   }, [title, content]);
+
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
@@ -317,10 +318,10 @@ const Node = ({
       setAbleToPropose(false);
     }
     setTitleUpdated(true);
-    startTransition(() => {
-      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
-    });
+    // startTransition(() => {
+    //   // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+    //   setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+    // });
   };
   const onSetContent = (newContent: string) => {
     setContentCopy(newContent);
@@ -331,10 +332,10 @@ const Node = ({
         setAbleToPropose(false);
       }
     }
-    startTransition(() => {
-      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
-    });
+    // startTransition(() => {
+    //   // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+    //   setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
+    // });
   };
   const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
 
@@ -507,8 +508,14 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
+  const onBlurContent = useCallback((newContent: string) => {
+    setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
+  }, []);
+
   const onBlurNodeTitle = useCallback(
     async (newTitle: string) => {
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+
       if (titleUpdated && newTitle.trim().length > 0) {
         nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
         let nodes: any = await getSearchAutocomplete(newTitle);
@@ -688,7 +695,7 @@ const Node = ({
                 label="Please edit the node content below:"
                 value={contentCopy}
                 setValue={onSetContent}
-                // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
+                onBlurCallback={value => onBlurContent(value)}
                 // setValue={setContentCopy}
                 readOnly={!editable}
                 sxPreview={{ marginTop: "13px" }}
@@ -897,6 +904,7 @@ const Node = ({
               setAbleToPropose={setAbleToPropose}
               ableToPropose={ableToPropose}
               isLoading={isLoading}
+              onResetButton={newValue => setAbleToPropose(newValue)}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component
