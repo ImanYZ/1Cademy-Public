@@ -77,7 +77,7 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
         )}
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
           <Button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/notebook")}
             // color="secondary"
             sx={{
               wordBreak: "normal",

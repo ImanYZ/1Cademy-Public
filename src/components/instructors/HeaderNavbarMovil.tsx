@@ -126,7 +126,7 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                 color: theme => theme.palette.common.white,
                 borderColor: theme => theme.palette.common.white,
               }}
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/notebook")}
             >
               GO TO NOTEBOOK
             </Button>
