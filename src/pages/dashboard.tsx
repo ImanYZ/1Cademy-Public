@@ -3240,6 +3240,9 @@ const Dashboard = ({}: DashboardProps) => {
               delete userVersion.updatedAt;
               delete userVersion.createdAt;
               delete userVersion.user;
+              if(userVersion.hasOwnProperty("id")) {
+                delete userVersion.id;
+              }
               versions[versionId] = {
                 ...versions[versionId],
                 ...userVersion,
