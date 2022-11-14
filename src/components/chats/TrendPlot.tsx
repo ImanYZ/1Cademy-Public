@@ -46,9 +46,9 @@ export const TrendPlot = ({
 
   useEffect(() => {
     if (trendData.length !== 0) {
-      console.log({ trendData });
+      // console.log({ trendData });
       let oneThirdIndex = Math.floor(trendData.length / 3);
-      console.log(trendData[oneThirdIndex], trendData[oneThirdIndex][x]);
+      // console.log(trendData[oneThirdIndex], trendData[oneThirdIndex][x]);
       let oneThirdValue = trendData[oneThirdIndex][x];
       let twoThirdIndex = Math.floor((trendData.length * 2) / 3);
       let twoThirdValue = trendData[twoThirdIndex][x];
@@ -56,16 +56,22 @@ export const TrendPlot = ({
         // console.log({ oneThirdValue, twoThirdValue });
         oneThirdValue = new Date(oneThirdValue);
         twoThirdValue = new Date(twoThirdValue);
-        console.log(1, { oneThirdValue, twoThirdValue });
+        // console.log(1, { oneThirdValue, twoThirdValue });
       }
-      setZoomDomain({
-        // x: [twoThirdValue, oneThirdValue],
-        x: [oneThirdValue, twoThirdValue], // this depend of sort type of data
-      });
+      if (oneThirdValue >= twoThirdValue) {
+        setZoomDomain({
+          // x: [twoThirdValue, oneThirdValue],
+          x: [twoThirdValue, oneThirdValue], // this depend of sort type of data
+        });
+      } else {
+        setZoomDomain({
+          x: [oneThirdValue, twoThirdValue], // this depend of sort type of data
+        });
+      }
     }
   }, [trendData, x]);
 
-  console.log({ heightBottom, heightTop });
+  // console.log({ heightBottom, heightTop });
   return (
     <Box sx={{ width /* border: "solid 2px pink" */ }}>
       <div>{title}</div>
@@ -95,6 +101,13 @@ export const TrendPlot = ({
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
               },
+              axisLabel: {
+                fill: theme === "Dark" ? "white" : "#454545",
+              },
+              grid: {
+                stroke: theme === "Dark" ? "white" : "#454545",
+              },
+              ticks: { size: 0 },
             }}
           />
           <VictoryAxis
@@ -108,6 +121,13 @@ export const TrendPlot = ({
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
               },
+              axisLabel: {
+                fill: theme === "Dark" ? "white" : "#454545",
+              },
+              grid: {
+                stroke: theme === "Dark" ? "white" : "#454545",
+              },
+              ticks: { size: 1 },
             }}
           />
           <VictoryBar
@@ -148,6 +168,9 @@ export const TrendPlot = ({
               tickLabels: {
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
+              },
+              grid: {
+                stroke: theme === "Dark" ? "white" : "#454545",
               },
             }}
           />

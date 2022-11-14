@@ -72,9 +72,9 @@ function drawChart(
 ) {
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
-      return `<div class="tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
-        class="tooltip-user-image"
+        class="tooltip-student-image"
         src="${user.imageUrl}"
         onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
         loading="lazy"
@@ -85,17 +85,16 @@ function drawChart(
       </span></div>
       `;
     });
-    const wrapper = `<div id="users-tooltip">
+    const wrapper = `<div class="students-tooltip">
       ${html.join(" ")}
     </div>`;
     return wrapper;
   };
-  const tooltip = d3.select("#boxplot-tool-tip");
+  const tooltip = d3.select("#bubble-tool-tip");
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
   //   const width = 250;
   const svg = d3.select(svgRef);
-  console.warn(theme);
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
   //   width = 500 - margin.left - margin.right,\
@@ -121,7 +120,6 @@ function drawChart(
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
   // const groups = data.map(d => d.month).flatMap(c => c);
-  // console.log({ groups });
 
   // remove axis if exists
   svg.select("#axis-x").remove();
@@ -141,12 +139,8 @@ function drawChart(
     .range([height, 0]);
   svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
 
-  console.log({ x, y });
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
-
-  console.log("color range", -1000, 0, maxAxisY / 10, maxAxisX / 2, maxAxisY);
-  console.log("max", maxAxisY);
 
   // @ts-ignore
   const color = d3
@@ -190,13 +184,19 @@ function drawChart(
       tooltip
         .html(`${html}`)
         .style("opacity", 1)
-        .style("top", `${e.offsetY + 20}px`)
-        .style("left", `${e.offsetX + maxAxisX - 24}px`);
+        .style("top", `${e.offsetY + 20}px`) //-20(aprox bubble diameter) because of putting bellow bubble
+        .style("left", `${x(d.votes) - 50}px`); // - 50 because of the leth of the tooltip
+      d3.select(this)
+        .transition()
+        .style("fill", d.points !== 0 ? borderColor(d.points) : GRAY);
     })
-    .on("mouseout", function () {
+    .on("mouseout", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       tooltip.style("opacity", 0).style("pointer-events", "none");
+      d3.select(this)
+        .transition()
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
     });
   if (student) {
     const locationIconPath =
@@ -206,7 +206,7 @@ function drawChart(
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`)
+      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`) //-23 and -24 because of right plot tranlation
       .attr("fill", "#EF5350");
   }
   // svg
@@ -264,7 +264,7 @@ export const BubbleChart = ({
   );
 
   return (
-    <>
+    <div style={{ position: "relative" }}>
       <svg ref={svg} style={{ position: "relative" }}>
         <g id="bubbles"></g>
         <g id="nums"></g>
@@ -276,8 +276,7 @@ export const BubbleChart = ({
           # of Votes
         </text>
       </svg>
-
-      <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
-    </>
+      <div id="bubble-tool-tip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
+    </div>
   );
 };

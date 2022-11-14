@@ -10,14 +10,20 @@ import {
   MaxPoints,
   SemesterStats,
   SemesterStudentStat,
+  /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
   Trends,
 } from "src/instructorsTypes";
-import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/ICourse";
+import {
+  ISemester,
+  ISemesterStudent /* ISemesterStudentStatDay */,
+  ISemesterStudentStatChapter,
+} from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
+import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { Legend } from "../../components/chats/Legend";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
@@ -128,6 +134,14 @@ type BubbleStatsData = {
   minVotePoints: number;
 };
 
+export type TrendStats = {
+  childProposals: Trends[];
+  editProposals: Trends[];
+  links: Trends[];
+  nodes: Trends[];
+  votes: Trends[];
+  questions: Trends[];
+};
 // type MaxPoints = {
 //   maxProposalsPoints: number;
 //   maxQuestionsPoints: number;
@@ -174,12 +188,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
-  const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
-  const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
-  // const [newNodePoints, setNewNodePoints] = useState(second);
-  const [votesTrends, setVotesTrends] = useState<Trends[]>([]);
-  const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
-  const [editProposalsTrend, setEditProposalsTrend] = useState<Trends[]>([]);
+  //TrendStats
+  const [trendStats, setTrendStats] = useState<TrendStats>({
+    childProposals: [],
+    editProposals: [],
+    links: [],
+    nodes: [],
+    votes: [],
+    questions: [],
+  });
 
   //Loading Skeleton
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -193,27 +210,19 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const { width: windowWidth } = useWindowSize();
 
-  const infoWrapperRef = useCallback(
-    (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
-      if (!element) return;
-      setInfoWidth(element.clientWidth);
-    },
-    [windowWidth]
-  );
-  const stackBarWrapperRef = useCallback(
-    (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
-      if (!element) return;
-      setstackBarWidth(element.clientWidth);
-    },
-    [windowWidth]
-  );
+  const infoWrapperRef = useCallback((element: HTMLDivElement) => {
+    if (!element) return;
+    setInfoWidth(element.clientWidth);
+  }, []);
+  const stackBarWrapperRef = useCallback((element: HTMLDivElement) => {
+    if (!element) return;
+    setstackBarWidth(element.clientWidth);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-
+    console.log("currentSemester.tagId", currentSemester.tagId);
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -283,7 +292,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
       );
-      console.log("maxProposalsPoints", { maxProposalsPoints, maxQuestionsPoints });
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudentsCounter(semesterDoc.data().students.length);
@@ -302,21 +310,20 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setLinksTrend([]);
-        setQuestionsTrend([]);
-        setVotesTrends([]);
-        setNodesTrends([]);
-        setEditProposalsTrend([]);
-
+        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      setLinksTrend(getTrendsData(userDailyStats, "links"));
-      setQuestionsTrend(getTrendsData(userDailyStats, "questions"));
-      setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst", "Votes"));
-      setNodesTrends(getTrendsData(userDailyStats, "newNodes"));
-      setEditProposalsTrend(getTrendsData(userDailyStats, "newNodes", "editProposals"));
+
+      setTrendStats({
+        childProposals: makeTrendData(userDailyStats, "newNodes"),
+        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        links: makeTrendData(userDailyStats, "links"),
+        nodes: makeTrendData(userDailyStats, "proposals"),
+        votes: makeTrendData(userDailyStats, "votes"),
+        questions: makeTrendData(userDailyStats, "questions"),
+      });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -328,27 +335,28 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     };
   };
 
-  const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
-    const trends: Trends[] = [];
-    data.map(dailyStat => {
-      dailyStat.days.map(dayStat => {
-        if (type && type === "Votes") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
-          });
-        } else if (type && type === "editProposals") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["proposals"] - dayStat["newNodes"],
-          });
-        } else if (key) {
-          trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
-        }
-      });
-    });
-    return trends;
-  };
+  // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
+  //   console.log(data, key, type);
+  //   const trends: Trends[] = [];
+  //   // data.map(dailyStat => {
+  //   //   dailyStat.days.map(dayStat => {
+  //   //     if (type && type === "Votes") {
+  //   //       trends.push({
+  //   //         date: new Date(dayStat.day),
+  //   //         num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
+  //   //       });
+  //   //     } else if (type && type === "editProposals") {
+  //   //       trends.push({
+  //   //         date: new Date(dayStat.day),
+  //   //         num: dayStat["proposals"] - dayStat["newNodes"],
+  //   //       });
+  //   //     } else if (key) {
+  //   //       trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
+  //   //     }
+  //   //   });
+  //   // });
+  //   return trends;
+  // };
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
@@ -359,8 +367,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     return <NoDataMessage />;
   }
   if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
-
-  console.log("dx", { isMovil, isTablet });
 
   return (
     <Box
@@ -627,130 +633,35 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
         {!isLoading && (
           <>
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Edit proposals"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of edit Proposals"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={editProposalsTrend}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Links"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Links"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={linksTrend}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Nodes"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Nodes"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={nodesTrends}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Votes"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Votes"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={votesTrends}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Questions"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Questions"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={questionsTrend}
-              />
-            </Paper>
+            {Object.keys(trendStats).map((trendStat, i) => (
+              <Paper
+                key={i}
+                sx={{
+                  p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+                }}
+              >
+                <TrendPlot
+                  title={capitalizeFirstLetter(trendStat)
+                    .split(/(?=[A-Z])/)
+                    .join(" ")}
+                  heightTop={trendPlotHeightTop}
+                  heightBottom={trendPlotHeightBottom}
+                  width={trendPlotWith}
+                  scaleX={"time"}
+                  labelX={"Day"}
+                  scaleY={"linear"}
+                  labelY={"# of edit Proposals"}
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  x="date"
+                  y="num"
+                  trendData={trendStats[trendStat as keyof TrendStats]}
+                />
+              </Paper>
+            ))}
           </>
         )}
       </Box>
@@ -829,4 +740,39 @@ export const getBubbleStats = (
 const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
   const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
   return index;
+};
+export const makeTrendData = (data: SemesterStudentStat[], key: string): Trends[] => {
+  const dailyStudentsStat = data
+    .reduce((acu: { field: { num: number; day: string } }[], cur) => {
+      const userTrendData = cur.days.map(day => {
+        const num = day.chapters.reduce((_carry, chapter) => {
+          if (key in chapter) {
+            return _carry + (chapter[key as keyof ISemesterStudentStatChapter] as number);
+          } else if (key === "votes") {
+            return _carry + chapter.agreementsWithInst + chapter.disagreementsWithInst;
+          } else if (key === "editProposals") {
+            return _carry + chapter["proposals"] - chapter["newNodes"];
+          } else {
+            return _carry;
+          }
+        }, 0);
+
+        return { field: { num, day: day.day } };
+      });
+
+      return [...acu, ...userTrendData];
+    }, [])
+    .reduce((acu: { [key: string]: number }, cur) => {
+      return {
+        ...acu,
+        [cur.field.day]: (acu[cur.field.day] ?? 0) + cur.field.num,
+      };
+    }, {});
+
+  return Object.keys(dailyStudentsStat).map(cur => {
+    return {
+      date: new Date(cur),
+      num: dailyStudentsStat[cur],
+    };
+  }) as Trends[];
 };

@@ -112,7 +112,7 @@ function drawChart(
   const stackedData = d3.stack().keys(subgroups)(data);
 
   //tooltip
-  const tooltip = d3.select("#boxplot-tool-tip");
+  const tooltip = d3.select("#boxplot-tooltip");
   // .append("div");
   // .style("position", "absolute")
   // .style("opacity", 0)
@@ -123,10 +123,11 @@ function drawChart(
   // .style("padding", "10px");
 
   const htmlTooltip = (users: ISemesterStudent[]) => {
+    console.log("STUDENTS", users);
     const html = users.map(user => {
-      return `<div class="tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
-        class="tooltip-user-image"
+        class="tooltip-student-image"
         src="${user.imageUrl}"
         onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
         loading="lazy"
@@ -138,13 +139,13 @@ function drawChart(
       </span></div>
       `;
     });
-    const wrapper = `<div id="users-tooltip">
+    const wrapper = `<div class="students-tooltip">
       ${html.join(" ")}
     </div>`;
     return wrapper;
   };
 
-  const tooltipElement = document.getElementById("boxplot-tool-tip");
+  const tooltipElement = document.getElementById("boxplot-tooltip");
   let event: any = null;
   let subgropup: string = "";
 
@@ -183,9 +184,11 @@ function drawChart(
     e.preventDefault();
     if (!e || !e.target || !event || !event.target) return;
     //@ts-ignore
-    if (e.target.id.includes("bar-subgroup")) return;
-
-    tooltip.style("pointer-events", "none").style("opacity", 0);
+    if (!e.target.id.includes("bar-subgroup")) {
+      tooltip.style("pointer-events", "none").style("opacity", 0);
+      return;
+    }
+    tooltip.style("pointer-events", "auto").style("opacity", 1);
     d3.select(`#${event.target.id}`)
       .transition()
       .style("fill", colorApha(subgropup) as string);
@@ -202,7 +205,7 @@ function drawChart(
     // enter a second time = loop subgroup per subgroup to add all rectangles
     .data(d => d)
     .join("rect")
-    .attr("id", d => `bar-subgropup-${d.data.index}-${d[0]}-${d[1]}`)
+    .attr("id", d => `bar-subgroup-${d.data.index}-${d[0]}-${d[1]}`)
     .on("mouseover", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
@@ -226,7 +229,7 @@ function drawChart(
         .style("pointer-events", "auto")
         .style("opacity", 1)
         .style("top", `${middle}px`)
-        .style("left", `${d.data.index === 0 ? 1.7 * x.bandwidth() : 2.95 * x.bandwidth()}px`);
+        .style("left", `${d.data.index === 0 ? 1.6 * x.bandwidth() : 3.25 * x.bandwidth()}px`);
       retrieveEvent(e, subgroupName);
     })
     .on("mouseout", function (e) {
@@ -298,7 +301,7 @@ export const PointsBarChart = ({
   );
 
   return (
-    <div id="box-plot-container " style={{ position: "relative" }}>
+    <div style={{ position: "relative" }}>
       <svg ref={svg}>
         <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={5} y={20}>
           # of Students
@@ -309,7 +312,7 @@ export const PointsBarChart = ({
         <g id="location-line"></g>
       </svg>
 
-      <div id="boxplot-tool-tip" className={theme === "Light" ? "lightMode" : "darkMode"}></div>
+      <div id="boxplot-tooltip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
     </div>
   );
 };
