@@ -388,6 +388,8 @@ export const UserSettigsSidebar = ({
           | "foundFrom"
           | "birthDate"
           | "view"
+          | "showClusterOptions"
+          | "showClusters"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -452,9 +454,17 @@ export const UserSettigsSidebar = ({
           case "view":
             userLogCollection = "userViewLog";
             break;
+          case "showClusterOptions":
+            userLogCollection = "userShowClusterOptionsLog";
+            break;
+          case "showClusters":
+            userLogCollection = "userShowClustersLog";
+            break;
           default:
           // code block
         }
+
+        if (!userLogCollection) return console.error("!invalid user log collection");
 
         const userLogRef = doc(collection(db, userLogCollection));
         await setDoc(userLogRef, {
@@ -522,6 +532,27 @@ export const UserSettigsSidebar = ({
     },
     [changeAttr, dispatch]
   );
+
+  const handleShowClusterOptionsSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newShowClusterOption = !settings.showClusterOptions;
+      changeAttr("showClusterOptions")(newShowClusterOption);
+      dispatch({ type: "setShowClusterOptions", payload: newShowClusterOption });
+    },
+    [changeAttr, dispatch, settings.showClusterOptions]
+  );
+
+  const handleShowClustersSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newShowCluster = !settings.showClusters;
+      changeAttr("showClusters")(newShowCluster);
+      dispatch({ type: "setShowClusters", payload: newShowCluster });
+    },
+    [changeAttr, dispatch, settings.showClusters]
+  );
+
   const closeTagSelector = useCallback(() => {
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
@@ -712,6 +743,35 @@ export const UserSettigsSidebar = ({
               label={`Display name: ${getDisplayNameValue(user)}`}
             />
           </FormGroup>
+
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  // checked={!values.chooseUname}
+                  checked={settings.showClusterOptions}
+                  onChange={e => handleShowClusterOptionsSwitch(e)}
+                />
+              }
+              label={`Display cluster option: ${settings.showClusterOptions ? "Shown" : "Hidden"}`}
+            />
+          </FormGroup>
+
+          {settings.showClusterOptions && (
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={!values.chooseUname}
+                    checked={settings.showClusters}
+                    onChange={e => handleShowClustersSwitch(e)}
+                  />
+                }
+                label={`Clusters: ${settings.showClusters ? "Shown" : "Hidden"}`}
+              />
+            </FormGroup>
+          )}
+
           {/* {props.showHideClusters && (
 
             )}

@@ -48,6 +48,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 // import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
@@ -188,7 +189,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
 
   // object of cluster boundaries
-  // const [clusterNodes, setClusterNodes] = useState({});
+  const [clusterNodes /* setClusterNodes */] = useState({});
 
   // flag for when scrollToNode is called
   // const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -365,7 +366,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   //
 
-  // const [showClusters, setShowClusters] = useState(false);
+  const [showClusters /* setShowClusters */] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
   const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
@@ -4046,7 +4047,7 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {/* {showClusters && <ClustersList clusterNodes={clusterNodes} />} */}
+                {showClusters && <MemoizedClustersList clusterNodes={clusterNodes} />}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
                   nodes={graph.nodes}
