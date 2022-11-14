@@ -27,7 +27,7 @@ type UseWorkerQueueProps = {
   allTags: AllTagsTreeView;
   onComplete: () => void;
   setClusterNodes: any;
-  willCalculateClusters: boolean;
+  withClusters: boolean;
 };
 export const useWorkerQueue = ({
   g,
@@ -40,7 +40,7 @@ export const useWorkerQueue = ({
   allTags,
   onComplete,
   setClusterNodes,
-  willCalculateClusters,
+  withClusters,
 }: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
@@ -146,11 +146,11 @@ export const useWorkerQueue = ({
         return { ...graph.nodes[cur.id], height: cur.height };
       })
       .flatMap(cur => cur || []);
-    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags);
+    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker /* tasksToWait */]);
+  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
   const addTask = (newTask: Task) => {
     setQueue(queue => [...queue, newTask]);

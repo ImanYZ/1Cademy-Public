@@ -303,7 +303,7 @@ const Dashboard = ({}: DashboardProps) => {
     allTags,
     onComplete: onCompleteWorker,
     setClusterNodes,
-    willCalculateClusters: settings.showClusterOptions,
+    withClusters: settings.showClusterOptions,
   });
 
   // ---------------------------------------------------------------------
@@ -601,7 +601,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
-      const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any) => {
+      const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
         return fullNodes.reduce(
           (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
             let tmpNodes = {};
@@ -610,7 +610,7 @@ const Dashboard = ({}: DashboardProps) => {
             if (cur.nodeChangeType === "added") {
               const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
               // const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
-              const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags);
+              const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
               tmpNodes = res.oldNodes;
               tmpEdges = res.oldEdges;
             }
@@ -619,7 +619,15 @@ const Dashboard = ({}: DashboardProps) => {
               if (!node) {
                 // console.log("fillDagre:modified:!node");
                 // <---  CHECK I change this from nodes
-                const res = createOrUpdateNode(g.current, cur, cur.node, acu.newNodes, acu.newEdges, allTags);
+                const res = createOrUpdateNode(
+                  g.current,
+                  cur,
+                  cur.node,
+                  acu.newNodes,
+                  acu.newEdges,
+                  allTags,
+                  withClusters
+                );
                 tmpNodes = res.oldNodes;
                 tmpEdges = res.oldEdges;
               } else {
@@ -633,7 +641,15 @@ const Dashboard = ({}: DashboardProps) => {
                 // console.log("fillDagre:modified:compare2Nodes", { cur, node });
                 if (!compare2Nodes(cur, node)) {
                   // console.log("fillDagre:modified:areDirents", { cur, node });
-                  const res = createOrUpdateNode(g.current, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags);
+                  const res = createOrUpdateNode(
+                    g.current,
+                    currentNode,
+                    cur.node,
+                    acu.newNodes,
+                    acu.newEdges,
+                    allTags,
+                    withClusters
+                  );
                   // console.log("👉:fillDagre:modified:areDirents:res", res);
                   tmpNodes = res.oldNodes;
                   tmpEdges = res.oldEdges;
@@ -788,7 +804,7 @@ const Dashboard = ({}: DashboardProps) => {
             // })
             // here we are filling dagger
             devLog("5:user Nodes Snapshot:visibleFullNodesMerged", visibleFullNodesMerged);
-            const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges);
+            const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
 
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
@@ -815,7 +831,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return () => userNodesSnapshot();
     },
-    [allTags, db /* setTasksToWait */]
+    [allTags, db, settings.showClusterOptions]
   );
 
   useEffect(
@@ -840,7 +856,7 @@ const Dashboard = ({}: DashboardProps) => {
         killSnapshot();
       };
     },
-    [allTagsLoaded, db, snapshot, user?.uname]
+    [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
   useEffect(
@@ -1119,14 +1135,22 @@ const Dashboard = ({}: DashboardProps) => {
       } else {
         oldEdges = setNewParentChildrenEdges(g.current, cId, changedNode, oldEdges);
       }
-      oldNodes = setDagNode(g.current, cId, copyNode(changedNode), oldNodes, allTags, null);
+      oldNodes = setDagNode(
+        g.current,
+        cId,
+        copyNode(changedNode),
+        oldNodes,
+        allTags,
+        settings.showClusterOptions,
+        null
+      );
       delete changedNodes[cId];
     }
     // setEdges(oldEdges);
     // setNodes(oldNodes);
     setGraph({ nodes: oldNodes, edges: oldEdges });
     // setMapChanged(true);
-  }, [graph, allTags]);
+  }, [graph, allTags, settings.showClusterOptions]);
 
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
@@ -3033,7 +3057,15 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log(2, { newNodeId, newChildNode });
         // let newEdges = edges;
 
-        const newNodes = setDagNode(g.current, newNodeId, newChildNode, { ...oldNodes }, { ...allTags }, () => {});
+        const newNodes = setDagNode(
+          g.current,
+          newNodeId,
+          newChildNode,
+          { ...oldNodes },
+          { ...allTags },
+          settings.showClusterOptions,
+          () => {}
+        );
         if (!nodeBookState.selectedNode) return { nodes: newNodes, edges }; //CHECK: I add this to validate
         // console.log(3);
         const newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...edges });
@@ -3053,7 +3085,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
     },
-    [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph, graph]
+    [user, nodeBookState.selectedNode, allTags, reloadPermanentGraph, graph, settings.showClusterOptions]
   );
 
   const onNodeTitleBlur = useCallback(
@@ -3399,7 +3431,15 @@ const Dashboard = ({}: DashboardProps) => {
           // ------------------- this is required to simulate pure function
           if (!nodeN) {
             // console.log("set dag Node", nodeN);
-            newNodes = setDagNode(g.current, newNodeId, newChildNode, newNodes, allTags, null);
+            newNodes = setDagNode(
+              g.current,
+              newNodeId,
+              newChildNode,
+              newNodes,
+              allTags,
+              settings.showClusterOptions,
+              null
+            );
             newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...newEdges });
           } else {
             // add node
@@ -3446,14 +3486,22 @@ const Dashboard = ({}: DashboardProps) => {
             thisNode.choices = proposal.choices;
           }
           // setMapChanged(true);
-          const newNodes = setDagNode(g.current, nodeBookState.selectedNode, thisNode, oldNodes, allTags, null);
+          const newNodes = setDagNode(
+            g.current,
+            nodeBookState.selectedNode,
+            thisNode,
+            oldNodes,
+            allTags,
+            settings.showClusterOptions,
+            null
+          );
           // return setDagNode(selectedNode, thisNode, { ...oldNodes }, null);
           return { nodes: newNodes, edges: oldEdges };
         }
       });
       if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
     },
-    [user?.uname, nodeBookState.selectedNode, allTags, reloadPermanentGraph]
+    [user?.uname, nodeBookState.selectedNode, allTags, reloadPermanentGraph, settings.showClusterOptions]
   );
 
   const deleteProposal = useCallback(
@@ -4048,7 +4096,9 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {settings.showClusters && <MemoizedClustersList clusterNodes={clusterNodes} />}
+                {settings.showClusterOptions && settings.showClusters && (
+                  <MemoizedClustersList clusterNodes={clusterNodes} />
+                )}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
                   nodes={graph.nodes}
