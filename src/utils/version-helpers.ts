@@ -1069,6 +1069,7 @@ export const getUserVersion = async ({ versionId, nodeType, uname, t = false }: 
 
 export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
   try {
+    if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
     const nodeRating = nodeData.corrects - nodeData.wrongs;
     const versionRating = corrects - wrongs;
     if (versionRating >= nodeRating / 2) {
@@ -1511,7 +1512,7 @@ export const versionCreateUpdate = async ({
               });
             }
             for (let addedChild of addedChildren) {
-              linkedNode = await getNode({ nodeId: addedChild, t });
+              linkedNode = await getNode({ nodeId: addedChild });
               linkedNodeChanges = {
                 parents: [...linkedNode.nodeData.parents, { node: nodeId, title, label: "", type: nodeType }],
                 studied: 0,
@@ -1532,7 +1533,7 @@ export const versionCreateUpdate = async ({
               });
             }
             for (let removedParent of removedParents) {
-              linkedNode = await getNode({ nodeId: removedParent, t });
+              linkedNode = await getNode({ nodeId: removedParent });
               linkedNodeChanges = {
                 children: linkedNode.nodeData.children.filter((l: any) => l.node !== nodeId),
                 studied: 0,
@@ -1553,7 +1554,7 @@ export const versionCreateUpdate = async ({
               });
             }
             for (let removedChild of removedChildren) {
-              linkedNode = await getNode({ nodeId: removedChild, t });
+              linkedNode = await getNode({ nodeId: removedChild });
               linkedNodeChanges = {
                 parents: linkedNode.nodeData.parents.filter((l: any) => l.node !== nodeId),
                 studied: 0,

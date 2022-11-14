@@ -377,7 +377,12 @@ MainSidebarProps) => {
                     badgeContent={uncheckedNotificationsNum ?? 0}
                     color="error"
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                    sx={{ wordBreak: "normal", padding: "1px", marginLeft: isMenuOpen ? "20px" : "0px" }}
+                    sx={{
+                      wordBreak: "normal",
+                      padding: "1px",
+                      marginLeft: isMenuOpen ? "20px" : "0px",
+                      color: "ButtonHighlight",
+                    }}
                   >
                     {/* {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />} */}
                     🔔
@@ -419,7 +424,12 @@ MainSidebarProps) => {
                     badgeContent={bookmarkUpdatesNum ?? 0}
                     color="error"
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                    sx={{ wordBreak: "normal", padding: "1px", marginLeft: isMenuOpen ? "20px" : "0px" }}
+                    sx={{
+                      wordBreak: "normal",
+                      padding: "1px",
+                      marginLeft: isMenuOpen ? "20px" : "0px",
+                      color: "ButtonHighlight",
+                    }}
                   >
                     {/* <BookmarkBorderIcon className="material-icons" /> */}
                     🔖
@@ -461,7 +471,12 @@ MainSidebarProps) => {
                     badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
                     color="error"
                     anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                    sx={{ padding: "1px", wordBreak: "normal", marginLeft: isMenuOpen ? "20px" : "0px" }}
+                    sx={{
+                      padding: "1px",
+                      wordBreak: "normal",
+                      marginLeft: isMenuOpen ? "20px" : "0px",
+                      color: "ButtonHighlight",
+                    }}
                   >
                     {/* <FormatListBulletedIcon /> */}
                     ✏️
@@ -505,6 +520,7 @@ MainSidebarProps) => {
                         padding: "1px",
                         wordBreak: "normal",
                         marginLeft: isMenuOpen ? "20px" : "0px",
+                        color: "ButtonHighlight",
                       }}
                     >
                       🎓
@@ -573,6 +589,7 @@ MainSidebarProps) => {
                           padding: "1px",
                           wordBreak: "normal",
                           marginLeft: isMenuOpen ? "20px" : "0px",
+                          color: "ButtonHighlight",
                         }}
                       >
                         🏆

@@ -3,6 +3,9 @@ import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 
+import { StudentDailyPlotStatsSkeleton } from "@/components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
+import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
+
 import { BubbleChart } from "../../../components/chats/BubbleChart";
 import { Legend } from "../../../components/chats/Legend";
 import { PointsBarChart } from "../../../components/chats/PointsBarChart";
@@ -19,14 +22,14 @@ import {
   BubbleStats,
   MaxPoints,
   SemesterStats,
-  SemesterStudentStat,
+  /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
-  Trends,
+  /*  Trends, */
 } from "../../../instructorsTypes";
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
-import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "../../../types/ICourse";
-import { getBubbleStats, StudenBarsSubgroupLocation, StudentStackedBarStatsObject } from "../dashboard";
+import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
+import { getBubbleStats, StudenBarsSubgroupLocation, StudentStackedBarStatsObject, TrendStats } from "../dashboard";
 
 const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, settings, queryUname }) => {
   const db = getFirestore();
@@ -57,12 +60,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
 
   //Trend Plots
-  const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
-  const [votesTrends, setVotesTrends] = useState<Trends[]>([]);
-  const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
-  const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
-  const [editProposalsTrend, setEditProposalsTrend] = useState<Trends[]>([]);
-
+  const [trendStats, setTrendStats] = useState<TrendStats>({
+    newNodeProposals: [],
+    editProposals: [],
+    links: [],
+    nodes: [],
+    votes: [],
+    questions: [],
+  });
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
@@ -72,14 +77,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
   const { width: windowWidth } = useWindowSize();
 
-  const infoWrapperRef = useCallback(
-    (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
-      if (!element) return;
-      setInfoWidth(element.clientWidth);
-    },
-    [windowWidth]
-  );
+  const infoWrapperRef = useCallback((element: HTMLDivElement) => {
+    if (!element) return;
+    setInfoWidth(element.clientWidth);
+  }, []);
   const stackBarWrapperRef = useCallback(
     (element: HTMLDivElement) => {
       console.log("ref:bubbleRef was called", windowWidth);
@@ -200,55 +201,59 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   }, [currentSemester, currentSemester?.tagId, db]);
 
   useEffect(() => {
-    if (!currentSemester || !currentSemester.tagId) return;
-    const uname = "elizadh";
+    if (!currentSemester || !currentSemester.tagId || !queryUname) return;
+
     setIsLoading(true);
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
-      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", uname));
+      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", queryUname));
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setLinksTrend([]);
-        setQuestionsTrend([]);
-        setVotesTrends([]);
-        setNodesTrends([]);
-        setEditProposalsTrend([]);
-
+        setTrendStats({ newNodeProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      setLinksTrend(getTrendsData(userDailyStats, "links"));
-      setQuestionsTrend(getTrendsData(userDailyStats, "questions"));
-      setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst", "Votes"));
-      setNodesTrends(getTrendsData(userDailyStats, "newNodes"));
-      setEditProposalsTrend(getTrendsData(userDailyStats, "newNodes", "editProposals"));
+      // const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      // const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
+      // const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
+      // const links = getTrendsData(userDailyStats, "links");
+      // const nodes = getTrendsData(userDailyStats, "proposals");
+      // const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
+      // const questions = getTrendsData(userDailyStats, "questions");
+      // setTrendStats({
+      //   newNodeProposals,
+      //   editProposals,
+      //   links,
+      //   nodes,
+      //   votes,
+      //   questions,
+      // });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db]);
+  }, [currentSemester, currentSemester?.tagId, db, queryUname]);
 
-  const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
-    const trends: Trends[] = [];
-    data.map(dailyStat => {
-      dailyStat.days.map(dayStat => {
-        if (type && type === "Votes") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
-          });
-        } else if (type && type === "editProposals") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["proposals"] - dayStat["newNodes"],
-          });
-        } else if (key) {
-          trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
-        }
-      });
-    });
-    return trends;
-  };
+  // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
+  //   const trends: Trends[] = [];
+  //   data.map(dailyStat => {
+  //     dailyStat.days.map(dayStat => {
+  //       if (type && type === "Votes") {
+  //         trends.push({
+  //           date: new Date(dayStat.day),
+  //           num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
+  //         });
+  //       } else if (type && type === "editProposals") {
+  //         trends.push({
+  //           date: new Date(dayStat.day),
+  //           num: dayStat["proposals"] - dayStat["newNodes"],
+  //         });
+  //       } else if (key) {
+  //         trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
+  //       }
+  //     });
+  //   });
+  //   return trends;
+  // };
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
     return {
@@ -418,130 +423,54 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           gap: "16px",
         }}
       >
-        <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-          }}
-        >
-          <TrendPlot
-            title={"Edit proposals"}
-            heightTop={trendPlotHeightTop}
-            heightBottom={trendPlotHeightBottom}
-            width={trendPlotWith}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of edit Proposals"}
-            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-            x="date"
-            y="num"
-            trendData={editProposalsTrend}
-          />
-        </Paper>
+        {isLoading && (
+          <Paper
+            sx={{
+              p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            }}
+          >
+            <StudentDailyPlotStatsSkeleton />
+          </Paper>
+        )}
 
-        <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-          }}
-        >
-          <TrendPlot
-            title={"Links"}
-            heightTop={trendPlotHeightTop}
-            heightBottom={trendPlotHeightBottom}
-            width={trendPlotWith}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of Links"}
-            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-            x="date"
-            y="num"
-            trendData={linksTrend}
-          />
-        </Paper>
-
-        <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-          }}
-        >
-          <TrendPlot
-            title={"Nodes"}
-            heightTop={trendPlotHeightTop}
-            heightBottom={trendPlotHeightBottom}
-            width={trendPlotWith}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of Nodes"}
-            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-            x="date"
-            y="num"
-            trendData={nodesTrends}
-          />
-        </Paper>
-
-        <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-          }}
-        >
-          <TrendPlot
-            title={"Votes"}
-            heightTop={trendPlotHeightTop}
-            heightBottom={trendPlotHeightBottom}
-            width={trendPlotWith}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of Votes"}
-            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-            x="date"
-            y="num"
-            trendData={votesTrends}
-          />
-        </Paper>
-
-        <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-          }}
-        >
-          <TrendPlot
-            title={"Questions"}
-            heightTop={trendPlotHeightTop}
-            heightBottom={trendPlotHeightBottom}
-            width={trendPlotWith}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of Questions"}
-            theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-            x="date"
-            y="num"
-            trendData={questionsTrend}
-          />
-        </Paper>
+        {!isLoading && (
+          <>
+            {Object.keys(trendStats).map((trendStat, i) => (
+              <Paper
+                key={i}
+                sx={{
+                  p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+                }}
+              >
+                <TrendPlot
+                  title={capitalizeFirstLetter(trendStat)
+                    .split(/(?=[A-Z])/)
+                    .join(" ")}
+                  heightTop={trendPlotHeightTop}
+                  heightBottom={trendPlotHeightBottom}
+                  width={trendPlotWith}
+                  scaleX={"time"}
+                  labelX={"Day"}
+                  scaleY={"linear"}
+                  labelY={"# of edit Proposals"}
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  x="date"
+                  y="num"
+                  trendData={trendStats[trendStat as keyof TrendStats]}
+                />
+              </Paper>
+            ))}
+          </>
+        )}
       </Box>
     </Box>
   );

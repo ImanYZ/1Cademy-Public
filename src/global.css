@@ -1484,10 +1484,10 @@ button.MuiTab-textColorInherit:focus {
 }
 
 .LightMode .MetaButton {
-  color: rgba(0, 0, 0, 0.9) !important;
+  color: rgba(0, 0, 0, 0.6) !important;
 }
 .LightMode .MetaButton:hover {
-  color: rgb(0, 0, 0) !important;
+  color: rgb(0, 0, 0, 0.9) !important;
 }
 /* .MetaButton.Clickable:hover,
 .MetaButton.Clickable:focus {

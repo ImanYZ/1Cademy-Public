@@ -703,8 +703,10 @@ p {
   color: black !important;
 } */
 
-#boxplot-tool-tip {
+.tooltip-plot {
   position: absolute;
+  top: 0;
+  left: 0;
   background: #f8f8f8;
   box-shadow: 0 2px 8px 1px gray;
   border-radius: 4px;
@@ -713,17 +715,18 @@ p {
   max-height: 350px;
   overflow-y: auto;
 }
-#boxplot-tool-tip.darkMode {
+.tooltip-plot.darkMode {
   background: #303134;
   box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.5);
 }
-#users-tooltip {
+
+.students-tooltip {
   overflow-y: auto;
   width: 180px;
   padding: 2px;
   font-size: 12px;
 }
-#users-tooltip .tooltip-body {
+.students-tooltip .students-tooltip-body {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -732,32 +735,30 @@ p {
   color: black;
   border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
-#users-tooltip .tooltip-body:last-child {
+.students-tooltip .students-tooltip-body:last-child {
   border-bottom: none;
 }
-#users-tooltip .tooltip-user-image {
+.students-tooltip .tooltip-student-image {
   width: 30px;
   height: 30px;
   object-fit: cover;
   border-radius: 50%;
 }
-#users-tooltip .tooltip-body.darkMode {
+.students-tooltip .students-tooltip-body.darkMode {
   color: white;
 }
 
-#users-tooltip h5 {
-  margin: 0;
-  margin-bottom: 1px;
+.students-tooltip span {
   text-overflow: ellipsis;
 }
 
-#boxplot-tool-tip::-webkit-scrollbar {
+.tooltip-plot::-webkit-scrollbar {
   /* CHECK: I add this to hide scroll and have functionality */
   width: 6px;
   height: 8px;
 }
 
-#boxplot-tool-tip::-webkit-scrollbar-thumb {
+.tooltip-plot::-webkit-scrollbar-thumb {
   background: rgba(113, 113, 113, 0.663);
   border-radius: 10px;
 }
