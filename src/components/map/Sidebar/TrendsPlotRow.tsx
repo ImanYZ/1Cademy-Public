@@ -78,6 +78,9 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
               fontSize: 13,
               fill: props.theme === "Dark" ? "white" : "#454545",
             },
+            axisLabel: {
+              fill: props.theme === "Dark" ? "white" : "#454545",
+            },
           }}
         />
         <VictoryAxis
@@ -89,6 +92,9 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
           style={{
             tickLabels: {
               fontSize: 13,
+              fill: props.theme === "Dark" ? "white" : "#454545",
+            },
+            axisLabel: {
               fill: props.theme === "Dark" ? "white" : "#454545",
             },
           }}
