@@ -4,7 +4,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Link, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Divider, Link, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
@@ -127,6 +127,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   useEffect(() => {
     if (isMovil) setEditMode(false);
+    if (!isMovil) setOpenProfile(false);
   }, [isMovil]);
   useEffect(() => {
     if (!db) return;
@@ -636,11 +637,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             )}
           </Box>
         </Box>
-
+        <Divider />
         <Box
           sx={{
-            py: "20px",
-            border: "1px solid #fff",
+            py: "10px",
             borderRightWidth: 0,
             borderLeftWidth: 0,
           }}
@@ -650,9 +650,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             sx={{
               height: 600,
             }}
-            // onScroll={() => {
-            //   console.log("first");
-            // }}
           >
             <Table stickyHeader>
               <TableHead>
@@ -798,7 +795,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "#"}>
+                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
                                 <Link onClick={() => openThisProfile(row)}>
                                   {" "}
                                   <>{row[colmn]}</>
@@ -829,7 +826,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             </Table>
           </TableContainer>
         </Box>
-        {editMode ? (
+        {editMode && (
           <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
             <Box>
               <CSVBtn
@@ -916,8 +913,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </Button>
             </Box>
           </Box>
-        ) : (
-          <div></div>
         )}
       </Box>
     </>

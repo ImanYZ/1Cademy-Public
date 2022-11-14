@@ -191,7 +191,7 @@ function drawChart(
         .html(`${html}`)
         .style("opacity", 1)
         .style("top", `${e.offsetY + 20}px`)
-        .style("left", `${e.offsetX + maxAxisX - 50}px`);
+        .style("left", `${e.offsetX + maxAxisX - 24}px`);
     })
     .on("mouseout", function () {
       const _this = this as any;
@@ -206,7 +206,7 @@ function drawChart(
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes + 14)},${y(student.votePoints + 12)})`)
+      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`)
       .attr("fill", "#EF5350");
   }
   // svg

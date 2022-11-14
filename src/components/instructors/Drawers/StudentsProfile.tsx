@@ -22,54 +22,52 @@ const StudentsProfile = ({ openProfile, openedProfile, handleOpenCloseProfile }:
   >
     <Box>
       {"  "}
-      <Box sx={{ textAlign: "right" }}>
+      <Box>
         <IconButton onClick={handleOpenCloseProfile}>
           <CloseIcon />
         </IconButton>
       </Box>
-      <Box sx={{ textAlign: "center", height: "200px" }}>
-        <Box sx={{ display: "flex", ml: "33%", mb: "5%", mt: "10%", flexDirection: "row" }}>
-          <Box>
-            <OptimizedAvatar
-              name={openedProfile?.username}
-              imageUrl={openedProfile?.avatar}
-              renderAsAvatar={true}
-              contained={false}
-              sx={{ mr: "15px" }}
-            />
-            <div
-              className={openedProfile?.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-              style={{ fontSize: "1px", marginLeft: "35px" }}
-            ></div>
-          </Box>
-          <LinkNext href="#">
-            <Link>
-              {" "}
-              <>{openedProfile?.firstName + openedProfile?.lastName}</>
-            </Link>
-          </LinkNext>
+      <Box
+        sx={{
+          textAlign: "center",
+          height: "200px",
+          diplay: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box sx={{ pl: "46%" }}>
+          <OptimizedAvatar
+            name={openedProfile?.username}
+            imageUrl={openedProfile?.avatar}
+            renderAsAvatar={true}
+            contained={false}
+            sx={{ marginLef: "50%" }}
+          />
         </Box>
-
-        <Box sx={{ mr: "20px" }}>{openedProfile?.email}</Box>
-        <Button
-          variant="contained"
-          href={"#"}
-          sx={{
-            color: theme => theme.palette.common.white,
-            background: theme => theme.palette.common.orange,
-            fontSize: 13,
-            fontWeight: "700",
-            my: { xs: "0px", md: "auto" },
-            mt: { xs: "15px", md: "auto" },
-            marginLeft: { xs: "0px", md: "32px" },
-            marginRight: "30px",
-            borderRadius: 1,
-            textAlign: "center",
-            alignSelf: "center",
-          }}
-        >
-          See Profile
-        </Button>
+        <Box
+          sx={{ ml: "46%", mb: "5px" }}
+          className={openedProfile?.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+        ></Box>
+        <LinkNext href={"/instructors/dashboard/" + openedProfile?.username}>
+          <Link>
+            {" "}
+            <>{openedProfile?.firstName + openedProfile?.lastName}</>
+          </Link>
+        </LinkNext>
+        <Box>{openedProfile?.email}</Box>
+        <LinkNext href={"/instructors/dashboard/" + openedProfile?.username}>
+          <Button
+            variant="contained"
+            sx={{
+              color: theme => theme.palette.common.white,
+              background: theme => theme.palette.common.orange,
+              mt: { xs: "15px", md: "auto" },
+            }}
+          >
+            See Profile
+          </Button>
+        </LinkNext>
       </Box>
     </Box>
   </Drawer>
