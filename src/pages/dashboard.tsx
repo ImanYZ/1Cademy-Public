@@ -189,7 +189,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
 
   // object of cluster boundaries
-  const [clusterNodes /* setClusterNodes */] = useState({});
+  const [clusterNodes, setClusterNodes] = useState({});
 
   // flag for when scrollToNode is called
   // const [scrollToNodeInitialized, setScrollToNodeInitialized] = useState(false);
@@ -302,6 +302,8 @@ const Dashboard = ({}: DashboardProps) => {
     mapHeight,
     allTags,
     onComplete: onCompleteWorker,
+    setClusterNodes,
+    willCalculateClusters: settings.showClusterOptions,
   });
 
   // ---------------------------------------------------------------------
@@ -366,7 +368,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   //
 
-  const [showClusters /* setShowClusters */] = useState(false);
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
   const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
@@ -4047,7 +4048,7 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {showClusters && <MemoizedClustersList clusterNodes={clusterNodes} />}
+                {settings.showClusters && <MemoizedClustersList clusterNodes={clusterNodes} />}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
                   nodes={graph.nodes}

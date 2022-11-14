@@ -26,6 +26,8 @@ type UseWorkerQueueProps = {
   mapHeight: number;
   allTags: AllTagsTreeView;
   onComplete: () => void;
+  setClusterNodes: any;
+  willCalculateClusters: boolean;
 };
 export const useWorkerQueue = ({
   g,
@@ -37,6 +39,8 @@ export const useWorkerQueue = ({
   mapHeight,
   allTags,
   onComplete,
+  setClusterNodes,
+  willCalculateClusters,
 }: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
@@ -58,6 +62,7 @@ export const useWorkerQueue = ({
         oldEdges,
         allTags,
         graph: dagreUtils.mapGraphToObject(g.current),
+        willCalculateClusters,
       });
       worker.onerror = err => {
         console.error("[WORKER]error:", err);
@@ -65,7 +70,7 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
-        const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
+        const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -88,7 +93,7 @@ export const useWorkerQueue = ({
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
-        // setClusterNodes(oldClusterNodes);
+        setClusterNodes(oldClusterNodes);
 
         setDidWork(true);
         setGraph(({ nodes, edges }) => {

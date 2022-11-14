@@ -312,8 +312,10 @@ export const setDagNode = (
     // console.log("----sP---->>", { node, nodeTag: node.tagIds[0] }, [...g.nodes()]);
     // setParent sets a cluster for the node with node Id
     // node.tags[0].node: node Id of the first tag from the node data
+    console.log("setParent", nodeId, "Tag" + node.tagIds[0]);
     g.setParent(nodeId, "Tag" + node.tagIds[0]);
     // console.log("nodes", [...g.nodes()]);
+    console.log("setDagNode", g);
   }
 
   if (callback) {
@@ -393,8 +395,10 @@ export const setDagNodes = (
   individualNodeChanges.forEach(cur => {
     if (!cur?.tagIds?.length) return;
     if (!(cur.tagIds[0] in allTags)) return;
+    console.log("setParent", cur.node, "Tag" + cur.tagIds[0]);
     g.setParent(cur.node, "Tag" + cur.tagIds[0]);
   });
+  console.log("setDagNodes", g);
 
   // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
   //   // setParent sets a cluster for the node with node Id

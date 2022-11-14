@@ -65,6 +65,8 @@ const calculateClusters = (g: dagre.graphlib.Graph<{}>, oldNodes: FullNodesData,
 
   // Update OldClusterNodes
   for (let cNode in clusterRegions) {
+    const nodeN = g.node("Tag" + cNode);
+    console.log("setParent:nodeN", nodeN, cNode);
     // const nodeN = dag1.node("Tag" + cNode) as any;
     // console.log('  --- ---- --- >>', nodeN)
     oldClusterNodes[cNode] = {
@@ -74,7 +76,7 @@ const calculateClusters = (g: dagre.graphlib.Graph<{}>, oldNodes: FullNodesData,
       width: clusterRegions[cNode].xMax - clusterRegions[cNode].xMin,
       height: clusterRegions[cNode].yMax - clusterRegions[cNode].yMin,
       title: clusterRegions[cNode].title,
-      // title: nodeN.title,// CHECK I commented this, because we will use the title setted
+      // title: nodeN.title, // CHECK I commented this, because we will use the title setted
     };
   }
   return oldClusterNodes;
@@ -213,6 +215,7 @@ onmessage = e => {
     oldEdges,
     allTags,
     graph,
+    willCalculateClusters,
   } = e.data;
 
   const g = dagreUtils.mapObjectToGraph(graph);
@@ -225,7 +228,8 @@ onmessage = e => {
     oldNodes,
     oldEdges,
     allTags,
-    g
+    g,
+    willCalculateClusters
   );
   postMessage(workerResults);
 };
