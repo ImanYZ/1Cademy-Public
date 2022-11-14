@@ -753,7 +753,7 @@ export const UserSettigsSidebar = ({
                   onChange={e => handleShowClusterOptionsSwitch(e)}
                 />
               }
-              label={`Display cluster option: ${settings.showClusterOptions ? "Shown" : "Hidden"}`}
+              label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
             />
           </FormGroup>
 
@@ -767,7 +767,7 @@ export const UserSettigsSidebar = ({
                     onChange={e => handleShowClustersSwitch(e)}
                   />
                 }
-                label={`Clusters: ${settings.showClusters ? "Shown" : "Hidden"}`}
+                label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
               />
             </FormGroup>
           )}
