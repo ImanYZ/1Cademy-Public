@@ -381,7 +381,7 @@ MainSidebarProps) => {
                       wordBreak: "normal",
                       padding: "1px",
                       marginLeft: isMenuOpen ? "20px" : "0px",
-                      color: "rgba(0, 0, 0, 0.9)",
+                      color: "ButtonHighlight",
                     }}
                   >
                     {/* {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />} */}
@@ -428,7 +428,7 @@ MainSidebarProps) => {
                       wordBreak: "normal",
                       padding: "1px",
                       marginLeft: isMenuOpen ? "20px" : "0px",
-                      color: "rgba(0, 0, 0, 0.9)",
+                      color: "ButtonHighlight",
                     }}
                   >
                     {/* <BookmarkBorderIcon className="material-icons" /> */}
@@ -475,7 +475,7 @@ MainSidebarProps) => {
                       padding: "1px",
                       wordBreak: "normal",
                       marginLeft: isMenuOpen ? "20px" : "0px",
-                      color: "rgba(0, 0, 0, 0.9)",
+                      color: "ButtonHighlight",
                     }}
                   >
                     {/* <FormatListBulletedIcon /> */}
@@ -520,7 +520,7 @@ MainSidebarProps) => {
                         padding: "1px",
                         wordBreak: "normal",
                         marginLeft: isMenuOpen ? "20px" : "0px",
-                        color: "rgba(0, 0, 0, 0.9)",
+                        color: "ButtonHighlight",
                       }}
                     >
                       🎓
@@ -589,7 +589,7 @@ MainSidebarProps) => {
                           padding: "1px",
                           wordBreak: "normal",
                           marginLeft: isMenuOpen ? "20px" : "0px",
-                          color: "rgba(0, 0, 0, 0.9)",
+                          color: "ButtonHighlight",
                         }}
                       >
                         🏆
