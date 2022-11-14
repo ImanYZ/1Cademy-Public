@@ -137,8 +137,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
               sx={{ mb: "16px" }}
             />
             <LoadingButton
-              type="submit"
-              onClick={formik.handleSubmit}
+              onClick={() => formik.handleSubmit()}
               loading={requestLoader}
               endIcon={<CreateIcon />}
               loadingPosition="end"
