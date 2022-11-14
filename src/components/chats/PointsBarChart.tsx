@@ -123,6 +123,7 @@ function drawChart(
   // .style("padding", "10px");
 
   const htmlTooltip = (users: ISemesterStudent[]) => {
+    console.log("STUDENTS", users);
     const html = users.map(user => {
       return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
