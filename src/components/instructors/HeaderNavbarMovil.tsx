@@ -5,6 +5,8 @@ import LinkNext from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
+import ROUTES from "@/lib/utils/routes";
+
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
@@ -126,7 +128,7 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                 color: theme => theme.palette.common.white,
                 borderColor: theme => theme.palette.common.white,
               }}
-              onClick={() => router.push("/notebook")}
+              onClick={() => router.push(ROUTES.dashboard)}
             >
               GO TO NOTEBOOK
             </Button>

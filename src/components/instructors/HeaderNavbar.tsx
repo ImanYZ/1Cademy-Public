@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import React from "react";
 
+import ROUTES from "@/lib/utils/routes";
+
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
@@ -77,7 +79,7 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
         )}
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "24px" }}>
           <Button
-            onClick={() => router.push("/notebook")}
+            onClick={() => router.push(ROUTES.dashboard)}
             // color="secondary"
             sx={{
               wordBreak: "normal",
