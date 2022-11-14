@@ -292,7 +292,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
       );
-      console.log("maxProposalsPoints", semesterDoc.data().students);
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudentsCounter(semesterDoc.data().students.length);
@@ -304,7 +303,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
-    console.log("currentSemester.tagId", currentSemester.tagId);
     setIsLoading(true);
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
@@ -536,8 +534,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     return <NoDataMessage />;
   }
   if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
-
-  console.log("dx", { isMovil, isTablet });
 
   return (
     <Box
