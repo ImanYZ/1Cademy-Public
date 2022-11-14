@@ -37,7 +37,7 @@ const StudentFilters = ({
     <Box
       role="presentation"
       sx={{
-        width: isMovil ? "300px" : "500px",
+        width: isMovil ? "300px" : "350px",
         display: "flex",
         flexDirection: "column",
         height: "90%",
