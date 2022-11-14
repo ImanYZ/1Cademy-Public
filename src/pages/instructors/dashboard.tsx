@@ -9,12 +9,12 @@ import {
   BubbleStats,
   MaxPoints,
   SemesterStats,
-  SemesterStudentStat,
+  /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
   Trends,
 } from "src/instructorsTypes";
-import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/ICourse";
+import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -310,21 +310,21 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
-      const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
-      const links = getTrendsData(userDailyStats, "links");
-      const nodes = getTrendsData(userDailyStats, "proposals");
-      const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
-      const questions = getTrendsData(userDailyStats, "questions");
-      setTrendStats({
-        newNodeProposals,
-        editProposals,
-        links,
-        nodes,
-        votes,
-        questions,
-      });
+      // const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      // const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
+      // const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
+      // const links = getTrendsData(userDailyStats, "links");
+      // const nodes = getTrendsData(userDailyStats, "proposals");
+      // const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
+      // const questions = getTrendsData(userDailyStats, "questions");
+      // setTrendStats({
+      //   newNodeProposals,
+      //   editProposals,
+      //   links,
+      //   nodes,
+      //   votes,
+      //   questions,
+      // });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -336,27 +336,28 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     };
   };
 
-  const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
-    const trends: Trends[] = [];
-    data.map(dailyStat => {
-      dailyStat.days.map(dayStat => {
-        if (type && type === "Votes") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
-          });
-        } else if (type && type === "editProposals") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["proposals"] - dayStat["newNodes"],
-          });
-        } else if (key) {
-          trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
-        }
-      });
-    });
-    return trends;
-  };
+  // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
+  //   console.log(data, key, type);
+  //   const trends: Trends[] = [];
+  //   // data.map(dailyStat => {
+  //   //   dailyStat.days.map(dayStat => {
+  //   //     if (type && type === "Votes") {
+  //   //       trends.push({
+  //   //         date: new Date(dayStat.day),
+  //   //         num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
+  //   //       });
+  //   //     } else if (type && type === "editProposals") {
+  //   //       trends.push({
+  //   //         date: new Date(dayStat.day),
+  //   //         num: dayStat["proposals"] - dayStat["newNodes"],
+  //   //       });
+  //   //     } else if (key) {
+  //   //       trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
+  //   //     }
+  //   //   });
+  //   // });
+  //   return trends;
+  // };
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
