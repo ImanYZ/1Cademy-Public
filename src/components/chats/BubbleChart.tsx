@@ -129,7 +129,7 @@ function drawChart(
   svg
     .append("g")
     .attr("id", "axis-x")
-    .attr("transform", `translate(30, ${height + 5})`)
+    .attr("transform", `translate(30, ${height + 30})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
@@ -137,7 +137,7 @@ function drawChart(
     .scaleLinear()
     .domain([minAxisY, maxAxisY + 10])
     .range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 30)`).call(d3.axisLeft(y));
 
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
@@ -176,7 +176,7 @@ function drawChart(
     .attr("r", 10)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    .attr("transform", `translate(30, 5)`)
+    .attr("transform", `translate(30, 30)`)
     .on("mouseover", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
@@ -196,7 +196,7 @@ function drawChart(
       tooltip.style("opacity", 0).style("pointer-events", "none");
       d3.select(this)
         .transition()
-        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY_ALPHA);
     });
   if (student) {
     const locationIconPath =
@@ -206,7 +206,7 @@ function drawChart(
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`) //-23 and -24 because of right plot tranlation
+      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints)})`) //-23 and -24 because of right plot tranlation
       .attr("fill", "#EF5350");
   }
   // svg
@@ -271,8 +271,10 @@ export const BubbleChart = ({
         <g id="location">
           <path></path>
         </g>
-
-        <text style={{ fontSize: "19px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 100} y={height}>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={0} y={20}>
+          Vote Points
+        </text>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 100} y={height}>
           # of Votes
         </text>
       </svg>
