@@ -240,7 +240,9 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
                 paddingLeft: "5px",
               }}
             >
-              <div id="ComLeaderbaordChangerIcon">🏆</div>
+              <Box id="ComLeaderbaordChangerIcon" sx={{ color: "ButtonHighlight" }}>
+                🏆
+              </Box>
               <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
             </Box>
           </MemoizedMetaButton>
