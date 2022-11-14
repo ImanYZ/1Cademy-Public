@@ -3,6 +3,7 @@ import {
   Backdrop,
   Checkbox,
   CircularProgress,
+  createFilterOptions,
   FormHelperText,
   Link,
   TextField,
@@ -32,7 +33,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
   const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
   const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
+  //const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setTouched } = formikProps;
@@ -68,9 +69,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       const institutionSorted = institutions
         .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
         .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      setAllInstitutions(institutionSorted);
+      //setAllInstitutions(institutionSorted);
 
-      setInstitutions(institutionSorted.slice(0, 10));
+      setInstitutions(institutionSorted);
     };
     retrieveInstitutions();
   }, []);
@@ -81,19 +82,19 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
     if (!foundInstitution) return null;
     return foundInstitution;
   };
-  const onChangeInstitution = (value: string) => {
-    const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
-      if (acu.length < 10) {
-        if (cur.name.includes(value)) {
-          return [...acu, cur];
-        } else {
-          return acu;
-        }
-      }
-      return acu;
-    }, []);
-    setInstitutions(foundInstitution);
-  };
+  // const onChangeInstitution = (value: string) => {
+  //   const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
+  //     if (acu.length < 10) {
+  //       if (cur.name.includes(value)) {
+  //         return [...acu, cur];
+  //       } else {
+  //         return acu;
+  //       }
+  //     }
+  //     return acu;
+  //   }, []);
+  //   setInstitutions(foundInstitution);
+  // };
 
   return (
     <Box data-testid="signup-form-step-3">
@@ -129,11 +130,16 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       />
       <Autocomplete
         id="institution"
+        loading={institutions.length === 0}
+        filterOptions={createFilterOptions({
+          matchFrom: "any",
+          limit: 20,
+        })}
         value={getNameFromInstitutionSelected()}
         onChange={(_, value) => setFieldValue("institution", value?.name || null)}
-        onInputChange={(_, value) => {
-          onChangeInstitution(value);
-        }}
+        // onInputChange={(_, value) => {
+        //   onChangeInstitution(value);
+        // }}
         onBlur={() => setTouched({ ...touched, institution: true })}
         options={institutions}
         getOptionLabel={option => option.name}
@@ -146,7 +152,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
           />
         )}
         renderOption={(props: HTMLAttributes<HTMLLIElement>, option: Institution) => (
-          <li {...props}>
+          <li {...props} key={option.id}>
             <OptimizedAvatar name={option.name} imageUrl={option.logoURL} contained renderAsAvatar={false} />
             <div style={{ paddingLeft: "7px" }}>{option.name}</div>
           </li>
