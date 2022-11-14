@@ -445,12 +445,12 @@ const NodeFooter = ({
                 >
                   <>
                     {bookmarked ? (
-                      <BookmarkIcon color={bookmarked ? "primary" : "secondary"} sx={{ fontSize: "16px" }} />
+                      <BookmarkIcon color={bookmarked ? "primary" : "inherit"} sx={{ fontSize: "16px" }} />
                     ) : (
                       <BookmarkBorderIcon
                         // color={bookmarked ? "orange-text" : "grey-text"}
                         // className={bookmarked ? "orange-text" : "grey-text"}
-                        color={bookmarked ? "primary" : "secondary"}
+                        color={bookmarked ? "primary" : "inherit"}
                         sx={{ fontSize: "16px" }}
                       />
                     )}
@@ -535,10 +535,7 @@ const NodeFooter = ({
             >
               <>
                 <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
-                <SwapHorizIcon
-                  sx={{ fontSize: "16px" }}
-                  color={openPart === "LinkingWords" ? "primary" : "secondary"}
-                />
+                <SwapHorizIcon sx={{ fontSize: "16px" }} color={openPart === "LinkingWords" ? "primary" : "inherit"} />
                 <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
               </>
             </MemoizedMetaButton>
@@ -588,7 +585,7 @@ const NodeFooter = ({
                 {bookmarked ? (
                   <BookmarkIcon color={"primary"} sx={{ fontSize: "16px" }} />
                 ) : (
-                  <BookmarkBorderIcon color={"secondary"} sx={{ fontSize: "16px" }} />
+                  <BookmarkBorderIcon color={"inherit"} sx={{ fontSize: "16px" }} />
                 )}
                 <span>{shortenNumber(bookmarks, 2, false)}</span>
               </Box>
