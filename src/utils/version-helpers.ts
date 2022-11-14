@@ -1069,6 +1069,7 @@ export const getUserVersion = async ({ versionId, nodeType, uname, t = false }: 
 
 export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
   try {
+    if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
     const nodeRating = nodeData.corrects - nodeData.wrongs;
     const versionRating = corrects - wrongs;
     if (versionRating >= nodeRating / 2) {
