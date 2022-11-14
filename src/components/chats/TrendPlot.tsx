@@ -73,7 +73,7 @@ export const TrendPlot = ({
 
   // console.log({ heightBottom, heightTop });
   return (
-    <Box sx={{ width /* border: "solid 2px pink" */ }}>
+    <Box sx={{ width /* borderkj: "solid 2px pink" */ }}>
       <div>{title}</div>
 
       <Box sx={{ width, height: heightTop /* border: "solid 2px royalblue" */ }}>
