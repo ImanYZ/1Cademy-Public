@@ -101,6 +101,7 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
           justifyContent: "flex-start",
           gap: "5px",
           padding: "5px 0px",
+          cursor: "pointer",
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
@@ -108,7 +109,7 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
-            sx={{ border: "none", width: "28px", height: "28px", position: "static", cursor: "pointer" }}
+            sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
           />
           <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
         </div>
