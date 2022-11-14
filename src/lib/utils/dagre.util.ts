@@ -34,7 +34,7 @@ export type GraphObject = {
 export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
 export const COLUMN_GAP = 190; // The minimum gap between the node columns.
 
-const createGraph = () => {
+export const createGraph = () => {
   // let dag1: dagre.graphlib.Graph[] = [];
   // Using dagre for calculating location of nodes and arrows on map
   // compound: true: to cluster nodes

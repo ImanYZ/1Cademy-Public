@@ -60,7 +60,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { dagreUtils } from "../lib/utils/dagre.util";
+import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
 import {
@@ -803,7 +803,7 @@ const Dashboard = ({}: DashboardProps) => {
             //   if(cur.nodeChangeType==='modified' &&)
             // })
             // here we are filling dagger
-            devLog("5:user Nodes Snapshot:visibleFullNodesMerged", visibleFullNodesMerged);
+            devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
             const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
 
             if (!Object.keys(newNodes).length) {
@@ -1023,7 +1023,6 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     const currentLengthNodes = Object.keys(graph.nodes).length;
     if (currentLengthNodes < previousLengthNodes.current) {
-      // call worker to rerender all
       devLog("CHANGE NH 🚀", "recalculate");
       addTask(null);
     }
@@ -1031,17 +1030,22 @@ const Dashboard = ({}: DashboardProps) => {
   }, [addTask, graph.nodes]);
 
   useEffect(() => {
+    g.current = createGraph();
+    setGraph({ nodes: {}, edges: {} });
+    devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
+  }, [settings.showClusterOptions]);
+
+  useEffect(() => {
     const currentLengthEdges = Object.keys(graph.edges).length;
     if (currentLengthEdges !== previousLengthEdges.current) {
-      // call worker to rerender all
       devLog("CHANGE NH 🚀", "recalculate");
       addTask(null);
     }
     previousLengthEdges.current = currentLengthEdges;
   }, [addTask, graph.edges]);
+
   //called whenever isSubmitting changes
   // changes style of cursor
-
   useEffect(() => {
     if (isSubmitting) {
       document.body.style.cursor = "wait";
@@ -3857,6 +3861,7 @@ const Dashboard = ({}: DashboardProps) => {
                 {/* <Button onClick={() => console.log(nodeToImprove)}>nodeToImprove</Button> */}
                 <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
                 <Button onClick={() => console.log(citations)}>citations</Button>
+                <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
               </Box>
 
               <Divider />

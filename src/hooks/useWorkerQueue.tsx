@@ -62,7 +62,7 @@ export const useWorkerQueue = ({
         oldEdges,
         allTags,
         graph: dagreUtils.mapGraphToObject(g.current),
-        willCalculateClusters,
+        withClusters,
       });
       worker.onerror = err => {
         console.error("[WORKER]error:", err);
@@ -130,7 +130,7 @@ export const useWorkerQueue = ({
         }, 1000);
       };
     },
-    [allTags, g, mapHeight, mapWidth, onComplete, setGraph, setMapHeight, setMapWidth]
+    [allTags, g, mapHeight, mapWidth, onComplete, setClusterNodes, setGraph, setMapHeight, setMapWidth, withClusters]
   );
 
   useEffect(() => {

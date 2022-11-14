@@ -83,15 +83,13 @@ const calculateClusters = (g: dagre.graphlib.Graph<{}>, oldNodes: FullNodesData,
 };
 
 const layoutHandler = (
-  // mapChangedFlag: boolean,
-  // oldClusterNodes: ClusterNodes,
   oldMapWidth: number,
   oldMapHeight: any,
   oldNodes: FullNodesData,
   oldEdges: EdgesData,
   allTags: AllTagsTreeView,
   g: dagre.graphlib.Graph<{}>,
-  willCalculateClusters: boolean = false
+  withClusters: boolean = false
 ) => {
   let oldClusterNodes = {};
   const startTimer = performance.now();
@@ -104,7 +102,7 @@ const layoutHandler = (
   // DAGRE RECALCULATE LAYOUT
   // dagre.layout(dag1);
   dagre.layout(g);
-  if (willCalculateClusters) {
+  if (withClusters) {
     oldClusterNodes = calculateClusters(g, oldNodes, allTags);
   }
 
@@ -193,7 +191,7 @@ const layoutHandler = (
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
   devLog("⌚:Map Worker", `${endTimer - startTimer}ms`);
-  // console.log(`⌚[Map Worker]: ${endTimer - startTimer}ms`);
+
   return {
     /*mapChangedFlag,*/
     oldClusterNodes,
@@ -215,21 +213,11 @@ onmessage = e => {
     oldEdges,
     allTags,
     graph,
-    willCalculateClusters,
+    withClusters,
   } = e.data;
 
   const g = dagreUtils.mapObjectToGraph(graph);
 
-  const workerResults = layoutHandler(
-    // mapChangedFlag,
-    // oldClusterNodes,
-    oldMapWidth,
-    oldMapHeight,
-    oldNodes,
-    oldEdges,
-    allTags,
-    g,
-    willCalculateClusters
-  );
+  const workerResults = layoutHandler(oldMapWidth, oldMapHeight, oldNodes, oldEdges, allTags, g, withClusters);
   postMessage(workerResults);
 };
