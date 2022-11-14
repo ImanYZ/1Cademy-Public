@@ -458,13 +458,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         </Paper>
         <Paper
           // ref={bubbleRef}
-          className="test"
+          // className="test"
           sx={{
             px: "32px",
             py: "40px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
-          component="div"
         >
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
