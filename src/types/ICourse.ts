@@ -93,22 +93,24 @@ export type ICourse = {
   updatedAt: Timestamp;
 };
 
+export type ISemesterStudentStatChapter = {
+  node: string; // chapter node id
+  title: string; // chapter title
+
+  proposals: number; // all pending/accepted proposals
+  questions: number;
+  nodes: number; // pending/accepted proposals of new nodes
+
+  newNodes: number;
+  links: number; // improvements on children and parent links
+
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
+};
+
 export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022
-  chapters: {
-    node: string; // chapter node id
-    title: string; // chapter title
-
-    proposals: number; // all pending/accepted proposals
-    questions: number;
-    nodes: number; // pending/accepted proposals of new nodes
-
-    newNodes: number;
-    links: number; // improvements on children and parent links
-
-    agreementsWithInst: number;
-    disagreementsWithInst: number;
-  }[];
+  chapters: ISemesterStudentStatChapter[];
 };
 
 export type ISemesterStudentStat = {
