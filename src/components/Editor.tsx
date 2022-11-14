@@ -127,7 +127,7 @@ export const Editor = ({
           <Box sx={{ display: "flex", justifyContent: "end", alignItems: "center" }}>
             <Typography
               onClick={() => setOption("PREVIEW")}
-              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490 }}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
             >
               Preview
             </Typography>
@@ -137,7 +137,10 @@ export const Editor = ({
               size="small"
               onKeyDown={onKeyEnter}
             />
-            <Typography onClick={() => setOption("EDIT")} sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490 }}>
+            <Typography
+              onClick={() => setOption("EDIT")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
               Edit
             </Typography>
           </Box>
