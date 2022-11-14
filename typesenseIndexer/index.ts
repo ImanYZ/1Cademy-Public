@@ -280,7 +280,7 @@ const main = async () => {
   // }
   // if (CLOUD_RUN_TASK_INDEX === 2) {
   console.log("Index Nodes and References task");
-  const nodeDocs = await db.collection("nodes").where("deleted", "!=", true).get();
+  const nodeDocs = await db.collection("nodes").where("deleted", "==", false).get();
   await fillNodesIndex(nodeDocs, true);
   await fillReferencesIndex(nodeDocs, true);
   // }
