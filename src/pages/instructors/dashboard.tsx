@@ -18,6 +18,7 @@ import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "src/types/
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
+import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { Legend } from "../../components/chats/Legend";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
@@ -128,6 +129,14 @@ type BubbleStatsData = {
   minVotePoints: number;
 };
 
+export type TrendStats = {
+  newNodeProposals: Trends[];
+  editProposals: Trends[];
+  links: Trends[];
+  nodes: Trends[];
+  votes: Trends[];
+  questions: Trends[];
+};
 // type MaxPoints = {
 //   maxProposalsPoints: number;
 //   maxQuestionsPoints: number;
@@ -174,12 +183,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
-  const [linksTrend, setLinksTrend] = useState<Trends[]>([]);
-  const [questionsTrend, setQuestionsTrend] = useState<Trends[]>([]);
-  // const [newNodePoints, setNewNodePoints] = useState(second);
-  const [votesTrends, setVotesTrends] = useState<Trends[]>([]);
-  const [nodesTrends, setNodesTrends] = useState<Trends[]>([]);
-  const [editProposalsTrend, setEditProposalsTrend] = useState<Trends[]>([]);
+  //TrendStats
+  const [trendStats, setTrendStats] = useState<TrendStats>({
+    newNodeProposals: [],
+    editProposals: [],
+    links: [],
+    nodes: [],
+    votes: [],
+    questions: [],
+  });
 
   //Loading Skeleton
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -294,21 +306,25 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setLinksTrend([]);
-        setQuestionsTrend([]);
-        setVotesTrends([]);
-        setNodesTrends([]);
-        setEditProposalsTrend([]);
-
+        setTrendStats({ newNodeProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      setLinksTrend(getTrendsData(userDailyStats, "links"));
-      setQuestionsTrend(getTrendsData(userDailyStats, "questions"));
-      setVotesTrends(getTrendsData(userDailyStats, "agreementsWithInst", "Votes"));
-      setNodesTrends(getTrendsData(userDailyStats, "newNodes"));
-      setEditProposalsTrend(getTrendsData(userDailyStats, "newNodes", "editProposals"));
+      const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
+      const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
+      const links = getTrendsData(userDailyStats, "links");
+      const nodes = getTrendsData(userDailyStats, "proposals");
+      const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
+      const questions = getTrendsData(userDailyStats, "questions");
+      setTrendStats({
+        newNodeProposals,
+        editProposals,
+        links,
+        nodes,
+        votes,
+        questions,
+      });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -619,130 +635,35 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
         {!isLoading && (
           <>
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Edit proposals"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of edit Proposals"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={editProposalsTrend}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Links"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Links"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={linksTrend}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Nodes"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Nodes"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={nodesTrends}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Votes"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Votes"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={votesTrends}
-              />
-            </Paper>
-
-            <Paper
-              sx={{
-                p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              }}
-            >
-              <TrendPlot
-                title={"Questions"}
-                heightTop={trendPlotHeightTop}
-                heightBottom={trendPlotHeightBottom}
-                width={trendPlotWith}
-                scaleX={"time"}
-                labelX={"Day"}
-                scaleY={"linear"}
-                labelY={"# of Questions"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                x="date"
-                y="num"
-                trendData={questionsTrend}
-              />
-            </Paper>
+            {Object.keys(trendStats).map((trendStat, i) => (
+              <Paper
+                key={i}
+                sx={{
+                  p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+                }}
+              >
+                <TrendPlot
+                  title={capitalizeFirstLetter(trendStat)
+                    .split(/(?=[A-Z])/)
+                    .join(" ")}
+                  heightTop={trendPlotHeightTop}
+                  heightBottom={trendPlotHeightBottom}
+                  width={trendPlotWith}
+                  scaleX={"time"}
+                  labelX={"Day"}
+                  scaleY={"linear"}
+                  labelY={"# of edit Proposals"}
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  x="date"
+                  y="num"
+                  trendData={trendStats[trendStat as keyof TrendStats]}
+                />
+              </Paper>
+            ))}
           </>
         )}
       </Box>
