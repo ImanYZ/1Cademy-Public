@@ -2437,18 +2437,20 @@ const Dashboard = ({}: DashboardProps) => {
 
   const correctNode = useCallback(
     (event: any, nodeId: string) => {
+      devLog("CORRECT NODE", { nodeId });
       if (!choosingNode) {
-        // setSelectedNode(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        // setSelectedNodeType(nodeType);
-        setIsSubmitting(true);
         getMapGraph(`/correctNode/${nodeId}`);
+        setNodeParts(nodeId, node => {
+          const correct = node.correct;
+          const point = correct ? -1 : 1;
+          const corrects = node.corrects + point;
+          return { ...node, correct: !correct, corrects };
+        });
       }
       event.currentTarget.blur();
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, getMapGraph]
+    [choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
   );
 
   const wrongNode = useCallback(
