@@ -79,15 +79,16 @@ function drawChart(
     const q1 = d3.quantile(dataSortedAscending, 0.25);
     const median = d3.quantile(dataSortedAscending, 0.5);
     const q3 = d3.quantile(dataSortedAscending, 0.75);
-    if (!q1 || !q3 || !median) return;
+
+    if (q1 === undefined || q3 === undefined || median === undefined) return;
 
     const interQuantileRange = q3 - q1;
     const inferiorLimit = q1 - 1.5 * interQuantileRange;
     const superiorLimit = q3 + 1.5 * interQuantileRange;
     const min = dataSortedAscending.find(c => c >= inferiorLimit);
     const max = dataSortedDescending.find(c => c <= superiorLimit);
-    if (!min || !max) return null;
 
+    if (min === undefined || max === undefined) return null;
     return { min, max, q1, q3, median, positions: median };
   };
 
