@@ -2481,6 +2481,9 @@ const Dashboard = ({}: DashboardProps) => {
             const wrongs = node.wrongs + point;
             return { ...node, wrong: !wrong, correct: false, wrongs };
           });
+          const nNode = graph.nodes[nodeId];
+          if (nNode?.locked) return;
+
           if (willRemoveNode) {
             setGraph(({ nodes, edges }) => {
               const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
@@ -2491,7 +2494,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts, graph.nodes]
   );
 
   /////////////////////////////////////////////////////

@@ -230,6 +230,7 @@ export type NodeFireStore = {
   versions?: number;
   viewers: number;
   wrongs: number;
+  locked?: boolean;
 };
 
 export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserNodesData };
