@@ -23,6 +23,7 @@ import {
   ISemesterStudentStat,
   ISemesterStudentStatChapter,
 } from "src/types/ICourse";
+import { generalStats } from "testUtils/mockData/students.stats.data";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -59,12 +60,6 @@ export type BoxData = {
 //     "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
 //     "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
 //     "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "Fruitfuwwel functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Fruiwwtful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Fruwitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Frwuitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1wFruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Fwruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
 //   },
 //   "Question Points": {
 //     // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
@@ -251,10 +246,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      console.log("semester");
       setSemesterStudentVoteState(semester);
 
-      console.log("2:setSemesterStats");
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -320,7 +313,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     setIsLoading(true);
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
-      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
+      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
@@ -329,12 +322,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      const mock = generalStats as SemesterStudentStat[];
+      console.log("userDailyStats", mock);
 
       const res = getBoxPlotData(userDailyStats);
 
       setSemesterStats(prev => {
         if (!prev) return null;
-        const res = { ...prev, newNodeProposals: getChildProposal(userDailyStats) };
+        const res = {
+          ...prev,
+          newNodeProposals: getChildProposal(mock),
+          improvements: getEditProposals(mock),
+        };
         console.log("res:setSemesterStats", res);
         return res;
       });
@@ -887,4 +886,17 @@ export const getChildProposal = (userDailyStats: ISemesterStudentStat[]) => {
     }, 0);
   }
   return nodes;
+};
+export const getEditProposals = (userDailyStats: ISemesterStudentStat[]) => {
+  let nodes = 0;
+  let proposals = 0;
+  for (const semesterStudentStat of userDailyStats) {
+    nodes += semesterStudentStat.days.reduce((carry, day) => {
+      return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.nodes, 0);
+    }, 0);
+    proposals += semesterStudentStat.days.reduce((carry, day) => {
+      return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.proposals, 0);
+    }, 0);
+  }
+  return proposals - nodes;
 };

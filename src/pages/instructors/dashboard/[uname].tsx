@@ -33,6 +33,7 @@ import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../..
 import {
   getBubbleStats,
   getChildProposal,
+  getEditProposals,
   makeTrendData,
   StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
@@ -118,6 +119,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      console.log("semestersss", semester);
       setSemesterStudentVoteState(semester);
 
       setSemesterStats(getSemStat(semester));
@@ -225,10 +227,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStats = userDailyStatDoc.docs
         .map(dailyStat => dailyStat.data() as SemesterStudentStat)
         .slice(0, 1);
-      console.log("userDailyStats", userDailyStats);
+
       setStudentVoteStat(prev => {
         if (!prev) return null;
-        const res = { ...prev, newNodes: getChildProposal(userDailyStats) };
+        const res = {
+          ...prev,
+          newNodes: getChildProposal(userDailyStats),
+          improvements: getEditProposals(userDailyStats),
+        };
         console.log("res:setSemesterStats", res);
         return res;
       });
@@ -256,12 +262,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
       }
-
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
       setSemesterStats(prev => {
         if (!prev) return null;
-        const res = { ...prev, newNodeProposals: getChildProposal(userDailyStats) };
-        console.log("res:setSemesterStats", res);
+        const res = {
+          ...prev,
+          newNodeProposals: getChildProposal(userDailyStats),
+          improvements: getEditProposals(userDailyStats),
+        };
         return res;
       });
     };
