@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
-import { UserTheme } from "src/knowledgeTypes";
+import { UserRole, UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
 import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
@@ -68,7 +68,8 @@ function drawChart(
   maxAxisY: number,
   minAxisX: number,
   minAxisY: number,
-  student?: SemesterStudentVoteStat | null
+  student?: SemesterStudentVoteStat | null,
+  role?: UserRole
 ) {
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
@@ -180,12 +181,15 @@ function drawChart(
     .on("mouseover", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
-      let html = htmlTooltip(d.studentsList);
-      tooltip
-        .html(`${html}`)
-        .style("opacity", 1)
-        .style("top", `${e.offsetY + 20}px`) //-20(aprox bubble diameter) because of putting bellow bubble
-        .style("left", `${x(d.votes) - 50}px`); // - 50 because of the leth of the tooltip
+      if (role === "INSTRUCTOR") {
+        let html = htmlTooltip(d.studentsList);
+        tooltip
+          .html(`${html}`)
+          .style("opacity", 1)
+          .style("top", `${e.offsetY + 20}px`)
+          .style("left", `${x(d.votes) - 50}px`);
+      }
+
       d3.select(this)
         .transition()
         .style("fill", d.points !== 0 ? borderColor(d.points) : GRAY);
@@ -243,6 +247,7 @@ type BubblePlotProps = {
   minAxisX: number;
   minAxisY: number;
   student?: SemesterStudentVoteStat | null;
+  role?: UserRole;
 };
 export const BubbleChart = ({
   width,
@@ -254,13 +259,14 @@ export const BubbleChart = ({
   minAxisX,
   minAxisY,
   student,
+  role,
 }: BubblePlotProps) => {
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student);
+      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student, role);
     },
-    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, student, theme, width]
+    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, role, student, theme, width]
   );
 
   return (

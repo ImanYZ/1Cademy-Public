@@ -17,8 +17,10 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React from "react";
-import ROUTES from "@/lib/utils/routes";
+
 import useThemeChange from "@/hooks/useThemeChange";
+import ROUTES from "@/lib/utils/routes";
+
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
@@ -101,7 +103,7 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
             />
           </FormGroup>
           <Button
-            onClick={() => router.push(ROUTES.dashboard)}
+            onClick={() => window.open(ROUTES.dashboard, "_blank", "noopener,noreferrer")}
             // color="secondary"
             sx={{
               wordBreak: "normal",
@@ -161,8 +163,8 @@ const MaterialUISwitch = styled(Switch)(() => ({
     },
   },
   "& .MuiSwitch-track": {
-    opacity: 1,
-    backgroundColor: "#4D4D4D",
+    backgroundColor: "#4D4D4D!important",
+    opacity: "1!important",
     borderRadius: 22 / 2,
     "&:before, &:after": {
       content: '""',
@@ -188,6 +190,7 @@ const MaterialUISwitch = styled(Switch)(() => ({
     },
   },
   "& .MuiSwitch-thumb": {
+    backgroundColor: "#fff",
     boxShadow: "none",
     width: 21,
     height: 21,

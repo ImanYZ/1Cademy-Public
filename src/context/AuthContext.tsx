@@ -35,7 +35,8 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   const loadUser = useCallback(
     async (userId: string, role: UserRole) => {
       try {
-        const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId, role);
+        const { user, reputation, theme, background, view, showClusterOptions, showClusters } =
+          await retrieveAuthenticatedUser(userId, role);
         if (!user) {
           handleError({ error: "Cant find user" });
           return;
@@ -45,7 +46,10 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
           return;
         }
         if (user && reputation) {
-          dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background, view } });
+          dispatch({
+            type: "loginSuccess",
+            payload: { user, reputation, theme, background, view, showClusterOptions, showClusters },
+          });
         } else {
           dispatch({ type: "logoutSuccess" });
         }
