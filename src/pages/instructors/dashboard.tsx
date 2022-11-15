@@ -447,8 +447,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={proposalsStudents}
-                  questionsStudents={questionsStudents}
+                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
+                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
                   maxAxisY={maxStackedBarAxisY}
                   theme={settings.theme}
                 />
