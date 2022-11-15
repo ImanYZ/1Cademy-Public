@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
-import { UserTheme } from "src/knowledgeTypes";
+import { UserRole, UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
 import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
@@ -68,7 +68,8 @@ function drawChart(
   maxAxisY: number,
   minAxisX: number,
   minAxisY: number,
-  student?: SemesterStudentVoteStat | null
+  student?: SemesterStudentVoteStat | null,
+  role?: UserRole
 ) {
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
@@ -95,7 +96,6 @@ function drawChart(
   //   const height = 120;
   //   const width = 250;
   const svg = d3.select(svgRef);
-  console.warn(theme);
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
   //   width = 500 - margin.left - margin.right,\
@@ -121,7 +121,6 @@ function drawChart(
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
   // const groups = data.map(d => d.month).flatMap(c => c);
-  // console.log({ groups });
 
   // remove axis if exists
   svg.select("#axis-x").remove();
@@ -131,7 +130,7 @@ function drawChart(
   svg
     .append("g")
     .attr("id", "axis-x")
-    .attr("transform", `translate(30, ${height + 5})`)
+    .attr("transform", `translate(30, ${height + 30})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
@@ -139,14 +138,10 @@ function drawChart(
     .scaleLinear()
     .domain([minAxisY, maxAxisY + 10])
     .range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 5)`).call(d3.axisLeft(y));
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 30)`).call(d3.axisLeft(y));
 
-  console.log({ x, y });
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
-
-  console.log("color range", -1000, 0, maxAxisY / 10, maxAxisX / 2, maxAxisY);
-  console.log("max", maxAxisY);
 
   // @ts-ignore
   const color = d3
@@ -182,17 +177,19 @@ function drawChart(
     .attr("r", 10)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-    .attr("transform", `translate(30, 5)`)
+    .attr("transform", `translate(30, 30)`)
     .on("mouseover", function (e, d) {
-      console.log("bubble", d);
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
-      let html = htmlTooltip(d.studentsList);
-      tooltip
-        .html(`${html}`)
-        .style("opacity", 1)
-        .style("top", `${e.offsetY + 20}px`) //-20(aprox bubble diameter) because of putting bellow bubble
-        .style("left", `${x(d.votes) - 50}px`); // - 50 because of the leth of the tooltip
+      if (role === "INSTRUCTOR") {
+        let html = htmlTooltip(d.studentsList);
+        tooltip
+          .html(`${html}`)
+          .style("opacity", 1)
+          .style("top", `${e.offsetY + 20}px`)
+          .style("left", `${x(d.votes) - 50}px`);
+      }
+
       d3.select(this)
         .transition()
         .style("fill", d.points !== 0 ? borderColor(d.points) : GRAY);
@@ -203,7 +200,7 @@ function drawChart(
       tooltip.style("opacity", 0).style("pointer-events", "none");
       d3.select(this)
         .transition()
-        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY_ALPHA);
     });
   if (student) {
     const locationIconPath =
@@ -213,7 +210,7 @@ function drawChart(
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints) - 24})`) //-23 and -24 because of right plot tranlation
+      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints)})`) //-23 and -24 because of right plot tranlation
       .attr("fill", "#EF5350");
   }
   // svg
@@ -250,6 +247,7 @@ type BubblePlotProps = {
   minAxisX: number;
   minAxisY: number;
   student?: SemesterStudentVoteStat | null;
+  role?: UserRole;
 };
 export const BubbleChart = ({
   width,
@@ -261,13 +259,14 @@ export const BubbleChart = ({
   minAxisX,
   minAxisY,
   student,
+  role,
 }: BubblePlotProps) => {
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student);
+      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student, role);
     },
-    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, student, theme, width]
+    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, role, student, theme, width]
   );
 
   return (
@@ -278,8 +277,10 @@ export const BubbleChart = ({
         <g id="location">
           <path></path>
         </g>
-
-        <text style={{ fontSize: "19px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 100} y={height}>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={0} y={20}>
+          Vote Points
+        </text>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 100} y={height}>
           # of Votes
         </text>
       </svg>

@@ -22,6 +22,7 @@ import {
   BubbleStats,
   MaxPoints,
   SemesterStats,
+  SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
@@ -29,7 +30,13 @@ import {
 } from "../../../instructorsTypes";
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
-import { getBubbleStats, StudenBarsSubgroupLocation, StudentStackedBarStatsObject, TrendStats } from "../dashboard";
+import {
+  getBubbleStats,
+  makeTrendData,
+  StudenBarsSubgroupLocation,
+  StudentStackedBarStatsObject,
+  TrendStats,
+} from "../dashboard";
 
 const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, settings, queryUname }) => {
   const db = getFirestore();
@@ -61,7 +68,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
   //Trend Plots
   const [trendStats, setTrendStats] = useState<TrendStats>({
-    newNodeProposals: [],
+    childProposals: [],
     editProposals: [],
     links: [],
     nodes: [],
@@ -210,25 +217,19 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ newNodeProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
-      // const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      // const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
-      // const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
-      // const links = getTrendsData(userDailyStats, "links");
-      // const nodes = getTrendsData(userDailyStats, "proposals");
-      // const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
-      // const questions = getTrendsData(userDailyStats, "questions");
-      // setTrendStats({
-      //   newNodeProposals,
-      //   editProposals,
-      //   links,
-      //   nodes,
-      //   votes,
-      //   questions,
-      // });
+      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      setTrendStats({
+        childProposals: makeTrendData(userDailyStats, "newNodes"),
+        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        links: makeTrendData(userDailyStats, "links"),
+        nodes: makeTrendData(userDailyStats, "proposals"),
+        votes: makeTrendData(userDailyStats, "votes"),
+        questions: makeTrendData(userDailyStats, "questions"),
+      });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db, queryUname]);
@@ -349,8 +350,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={proposalsStudents}
-                  questionsStudents={questionsStudents}
+                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
+                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
                   maxAxisY={maxStackedBarAxisY}
                   studentLocation={studentLocation}
                   theme={settings.theme}
@@ -381,9 +382,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   marginBottom: "12px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderbaord Points</Typography>
                 <Legend
-                  title={"Leaderboard"}
+                  title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -399,13 +400,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 width={
                   isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
                 }
-                margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
+                margin={{ top: 10, right: 0, bottom: 60, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
                 student={studentVoteStat}
+                role={user.role}
               />
               <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
                 <PlaceIcon sx={{ fill: "#EF5350", fontSize: "24px" }} />

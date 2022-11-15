@@ -9,7 +9,7 @@ import {
 
 // TODO: Test
 export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
-  let newNodeProposals = 0;
+  let childProposals = 0;
   let editProposals = 0;
   let links = 0;
   let nodes = 0;
@@ -17,15 +17,15 @@ export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
   let questions = 0;
 
   data.map(stat => {
-    newNodeProposals += stat.newNodes;
+    childProposals += stat.nodes;
     editProposals += stat.improvements;
     links += stat.links;
-    nodes += stat.improvements + stat.newNodes;
+    nodes += stat.newNodes;
     votes += stat.votes;
     questions += stat.questions;
   });
   return {
-    newNodeProposals,
+    newNodeProposals: childProposals,
     editProposals,
     links,
     nodes,

@@ -5,11 +5,11 @@ const ROUTES = {
   signIn: "/signin",
   signUp: "/signup",
   forgotpassword: "/forgot-password",
-  dashboard: "/dashboard",
+  dashboard: "/notebook",
   instructorsDashboard: "/instructors/dashboard",
   instructorsSettings: "/instructors/settings",
   instructorsStudents: "/instructors/students",
-  instructorsDashboardStudents: "/instructors/dashboard/[id]",
+  instructorsDashboardStudents: "/instructors/dashboard/[uname]",
 };
 
 export default ROUTES;
