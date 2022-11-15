@@ -32,6 +32,7 @@ import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
 import {
   getBubbleStats,
+  getChildProposal,
   makeTrendData,
   StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
@@ -124,7 +125,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
+  }, [currentSemester, db, user]);
 
   useEffect(() => {
     if (!queryUname) return;
@@ -139,7 +140,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setStudentVoteStat(semesterStudentVoteStatDoc.docs[0].data() as SemesterStudentVoteStat);
     };
     getStudentVoteStats();
-  }, [currentSemester, db, queryUname]);
+  }, [currentSemester?.tagId, db, queryUname]);
 
   useEffect(() => {
     // update data in buble
@@ -172,7 +173,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, semesterStudentsVoteState.length, students]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, students]);
 
   // find student subgroup location in bar s
   useEffect(() => {
@@ -184,7 +185,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
 
     setStudentLocation({ proposals: proposals, questions: questions });
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, studentVoteStat]);
+  }, [semesterStudentsVoteState, studentVoteStat]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -205,7 +206,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
-  }, [currentSemester, currentSemester?.tagId, db]);
+  }, [currentSemester, db]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !queryUname) return;
@@ -216,12 +217,21 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", queryUname));
       const userDailyStatDoc = await getDocs(q);
 
+      console.log(1111111111111);
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        console.log(1111111111112);
         return;
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      setSemesterStats(prev => {
+        if (!prev) return null;
+        const res = { ...prev, newNodeProposals: getChildProposal(userDailyStats) };
+        console.log("res:setSemesterStats", res);
+        return res;
+      });
+
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
         editProposals: makeTrendData(userDailyStats, "editProposals"),
@@ -232,7 +242,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db, queryUname]);
+  }, [currentSemester, db, queryUname]);
 
   // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
   //   const trends: Trends[] = [];

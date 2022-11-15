@@ -880,7 +880,7 @@ const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
   );
 };
 
-const getChildProposal = (userDailyStats: ISemesterStudentStat[]) => {
+export const getChildProposal = (userDailyStats: ISemesterStudentStat[]) => {
   let nodes = 0;
   for (const semesterStudentStat of userDailyStats) {
     nodes += semesterStudentStat.days.reduce((carry, day) => {
