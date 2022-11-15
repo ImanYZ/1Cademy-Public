@@ -217,11 +217,44 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", queryUname));
       const userDailyStatDoc = await getDocs(q);
 
-      console.log(1111111111111);
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
-        console.log(1111111111112);
-        return;
+      }
+      console.log("userDailyStats LEN", userDailyStatDoc.docs.length);
+
+      const userDailyStats = userDailyStatDoc.docs
+        .map(dailyStat => dailyStat.data() as SemesterStudentStat)
+        .slice(0, 1);
+      console.log("userDailyStats", userDailyStats);
+      setStudentVoteStat(prev => {
+        if (!prev) return null;
+        const res = { ...prev, newNodes: getChildProposal(userDailyStats) };
+        console.log("res:setSemesterStats", res);
+        return res;
+      });
+      setTrendStats({
+        childProposals: makeTrendData(userDailyStats, "newNodes"),
+        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        links: makeTrendData(userDailyStats, "links"),
+        nodes: makeTrendData(userDailyStats, "proposals"),
+        votes: makeTrendData(userDailyStats, "votes"),
+        questions: makeTrendData(userDailyStats, "questions"),
+      });
+    };
+    getUserDailyStat();
+  }, [currentSemester, db, queryUname]);
+
+  useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId || !queryUname) return;
+
+    setIsLoading(true);
+    const getUserDailyStat = async () => {
+      const userDailyStatRef = collection(db, "semesterStudentStats");
+      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
+      const userDailyStatDoc = await getDocs(q);
+
+      if (!userDailyStatDoc.docs.length) {
+        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
@@ -230,15 +263,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         const res = { ...prev, newNodeProposals: getChildProposal(userDailyStats) };
         console.log("res:setSemesterStats", res);
         return res;
-      });
-
-      setTrendStats({
-        childProposals: makeTrendData(userDailyStats, "newNodes"),
-        editProposals: makeTrendData(userDailyStats, "editProposals"),
-        links: makeTrendData(userDailyStats, "links"),
-        nodes: makeTrendData(userDailyStats, "proposals"),
-        votes: makeTrendData(userDailyStats, "votes"),
-        questions: makeTrendData(userDailyStats, "questions"),
       });
     };
     getUserDailyStat();
