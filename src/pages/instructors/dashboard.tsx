@@ -555,14 +555,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             }}
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>
                 <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
               </Box>
               <BoxChart
                 theme={settings.theme}
                 data={boxPlotData}
-                width={isMovil ? 300 : 450}
+                // width={isMovil ? 300 : 450}
+                width={trendPlotWith}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
                 offsetX={150}
