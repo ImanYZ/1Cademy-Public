@@ -2,7 +2,18 @@ import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
-import { Button, Container, Divider, Drawer, IconButton, Modal, Paper, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Container,
+  Divider,
+  Drawer,
+  IconButton,
+  Modal,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
 // import axios from "axios";
 import {
@@ -4026,6 +4037,18 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
+          {isQueueWorking && (
+            <CircularProgress
+              size={46}
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
+                position: "fixed",
+                top: "7px",
+                right: "7px",
+                zIndex: "1300",
+              }}
+            />
+          )}
           {nodeBookState.selectedNode && (
             <div className={openSidebar ? "trackNcodeBtn" : ""}>
               <Tooltip
