@@ -61,7 +61,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
   const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
-  const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
@@ -100,7 +99,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-
+    console.log("currentSemester.tagId", currentSemester.tagId);
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -118,7 +117,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-
+      setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -200,9 +199,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       );
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
-      setStudentsCounter(semesterDoc.data().students.length);
       setStudents(semesterDoc.data().students);
-      setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -352,7 +349,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  maxAxisY={maxStackedBarAxisY}
+                  maxAxisY={studentsCounter}
                   studentLocation={studentLocation}
                   theme={settings.theme}
                 />
