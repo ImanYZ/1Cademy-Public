@@ -50,7 +50,7 @@ export const useWorkerQueue = ({
       let oldEdges = { ...edgesToRecalculate };
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
-
+      console.log("worker:oldNodes", oldNodes);
       worker.postMessage({
         oldMapWidth,
         oldMapHeight,

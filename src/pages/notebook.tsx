@@ -1136,8 +1136,10 @@ const Dashboard = ({}: DashboardProps) => {
   }, []);
 
   const getMapGraph = useCallback(
-    async (mapURL: string, postData: any = false) => {
-      reloadPermanentGraph();
+    async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
+      if (resetGraph) {
+        reloadPermanentGraph();
+      }
 
       try {
         await postWithToken(mapURL, postData);
@@ -2915,7 +2917,7 @@ const Dashboard = ({}: DashboardProps) => {
           onFail();
           window.alert("You've not changed anything yet!");
         } else {
-          setIsSubmitting(true);
+          // setIsSubmitting(true);
           const postData: any = {
             ...newNode,
             id: nodeBookState.selectedNode,
@@ -2947,14 +2949,14 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.left;
           delete postData.top;
           delete postData.height;
-          getMapGraph("/proposeNodeImprovement", postData);
-          scrollToNode(nodeBookState.selectedNode);
 
-          // console.log("add task", 1);
-          // setTimeout(() => {
-          //   console.log("add task", 2);
-          //   addTask(null);
-          // }, 4000);
+          if (newNode?.locked) return;
+          const willBeApproved = 1 - 0 > (newNode.corrects - newNode.wrongs) / 2;
+          console.log("willBeApproved", willBeApproved, 1 - 0, (newNode.corrects - newNode.wrongs) / 2);
+
+          setNodeParts(nodeBookState.selectedNode, node => ({ ...node, editable: false }));
+          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
+          scrollToNode(nodeBookState.selectedNode);
         }
       }
     },
