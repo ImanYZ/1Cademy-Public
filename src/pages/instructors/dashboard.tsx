@@ -523,6 +523,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
+                role={user.role}
               />
             </>
           )}
