@@ -53,6 +53,7 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
 };
 export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [{ user, settings }] = useAuth();
+  console.log("InstructorsLayout", { user });
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [instructor, setInstructor] = useState<Instructor | null>(null);
@@ -78,7 +79,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       const role = user?.role;
       if (!role) return router.push(ROUTES.dashboard);
       if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
-      if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboard) return router.push(ROUTES.dashboard);
+      if (role === "STUDENT") return router.push(ROUTES.dashboard);
       // in this case is instructor he can see all
     };
     allowAccessByRole();

@@ -58,6 +58,8 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
   let theme: UserTheme = "Dark";
   let view: UserView = "Graph";
   let background: UserBackground = "Color";
+  let showClusterOptions = false;
+  let showClusters = false;
   const db = getFirestore();
 
   const nodesRef = collection(db, "users");
@@ -107,6 +109,8 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
     theme = userData.theme;
     view = "view" in userData ? userData.view : "Graph";
     background = "background" in userData ? userData.background : "Image";
+    showClusterOptions = "showClusterOptions" in userData ? userData.showClusterOptions : false;
+    showClusters = "showClusters" in userData ? userData.showClusters : false;
 
     const reputationRef = collection(db, "reputations");
     const reputationQuery = query(
@@ -128,5 +132,13 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
     }
   }
 
-  return { user, reputation: reputationsData, theme, background, view };
+  return {
+    user,
+    reputation: reputationsData,
+    theme,
+    background,
+    view,
+    showClusterOptions,
+    showClusters,
+  };
 };

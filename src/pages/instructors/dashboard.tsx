@@ -1,3 +1,5 @@
+import PlaceIcon from "@mui/icons-material/Place";
+import SquareIcon from "@mui/icons-material/Square";
 import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
@@ -18,6 +20,7 @@ import {
 import {
   ISemester,
   ISemesterStudent /* ISemesterStudentStatDay */,
+  ISemesterStudentStat,
   ISemesterStudentStatChapter,
 } from "src/types/ICourse";
 
@@ -25,6 +28,7 @@ import {
 import { BubbleChart } from "@/components/chats/BubbleChart";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
+import { BoxChart } from "../../components/chats/BoxChart";
 import { Legend } from "../../components/chats/Legend";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../components/chats/TrendPlot";
@@ -147,20 +151,20 @@ export type TrendStats = {
 //   maxQuestionsPoints: number;
 // };
 
-// const BoxLegend = () => {
-//   return (
-//     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
-//       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-//         <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
-//         <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
-//       </Box>
-//       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-//         <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
-//         <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
-//       </Box>
-//     </Box>
-//   );
-// };
+const BoxLegend = () => {
+  return (
+    <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
+      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+        <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
+      </Box>
+      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
+        <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+      </Box>
+    </Box>
+  );
+};
 
 const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
@@ -187,6 +191,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   // Bubble Plot States
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
+
+  /// bloc plot
+  const [boxPlotData, setBoxPlotData] = useState<{
+    [x: string]: number[];
+  }>({});
+
+  const [minMaxProposalBoxPlot, setMinMaxProposalBoxPlot] = useState({ min: 0, max: 300 });
 
   //TrendStats
   const [trendStats, setTrendStats] = useState<TrendStats>({
@@ -239,6 +250,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      console.log("semester");
       setSemesterStudentVoteState(semester);
 
       setSemesterStats(getSemStat(semester));
@@ -315,6 +327,16 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+
+      const res = getBoxPlotData(userDailyStats);
+
+      const rr = mapBloxPlotDataToProposals(res, 1, 1);
+      setBoxPlotData(rr);
+
+      const { min, max } = getMaxMinVoxPlotData(rr);
+      console.log("getBoxPlotData:rr", rr, min, max);
+
+      setMinMaxProposalBoxPlot({ min, max });
 
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
@@ -447,8 +469,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={proposalsStudents}
-                  questionsStudents={questionsStudents}
+                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
+                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
                   maxAxisY={maxStackedBarAxisY}
                   theme={settings.theme}
                 />
@@ -458,13 +480,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         </Paper>
         <Paper
           // ref={bubbleRef}
-          className="test"
+          // className="test"
           sx={{
             px: "32px",
             py: "40px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
-          component="div"
         >
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
@@ -474,12 +495,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  marginBottom: "16px",
+                  marginBottom: "6px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderboard Points</Typography>
                 <Legend
-                  title={"Leaderboard"}
+                  title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -495,12 +516,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 width={
                   isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
                 }
-                margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
+                margin={{ top: 20, right: 0, bottom: 40, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
+                role={user.role}
               />
             </>
           )}
@@ -514,7 +536,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           gap: "16px",
         }}
       >
-        {/* <Paper
+        <Paper
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -534,23 +556,26 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             }}
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                <Typography sx={{ fontSize: "16px" }}>Chapters </Typography>
                 <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
               </Box>
               <BoxChart
-                theme={"Dark"}
-                data={data["Proposal Points"]}
-                width={isMovil ? 300 : 450}
+                theme={settings.theme}
+                data={boxPlotData}
+                // width={isMovil ? 300 : 450}
+                width={trendPlotWith}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
                 offsetX={150}
                 offsetY={18}
                 identifier="boxplot1"
+                maxX={minMaxProposalBoxPlot.max}
+                minX={minMaxProposalBoxPlot.min}
               />
               {isMovil && <BoxLegend />}
             </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {/* <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                 {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
                 <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
@@ -585,10 +610,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 identifier="boxplot1"
               />
               {isMovil && <BoxLegend />}
-            </Box>
+            </Box> */}
           </Box>
           {!isMovil && <BoxLegend />}
-        </Paper> */}
+        </Paper>
         {/* <Paper
           sx={{
             p: isMovil ? "10px" : isTablet ? "20px" : "40px",
@@ -775,4 +800,72 @@ export const makeTrendData = (data: SemesterStudentStat[], key: string): Trends[
       num: dailyStudentsStat[cur],
     };
   }) as Trends[];
+};
+
+const getBoxPlotData = (userDailyStats: ISemesterStudentStat[]) => {
+  // days -> chapters -> data
+  //
+  // proposal=> chapters => [1,2,34,54]
+
+  const res = userDailyStats.map(cur => {
+    // [{c1:1,c2:3},{c1:1,c2:3}]
+    const groupedDays = cur.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
+      const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
+        const dd = { data: curChapter.proposals, title: curChapter.title };
+        return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + dd.data };
+      }, {});
+
+      return Object.keys(groupedChapters).reduce(
+        (prev, key) => {
+          return { ...prev, [key]: (prev[key] ?? 0) + groupedChapters[key] };
+        },
+        { ...acuDayPerStudent }
+      );
+    }, {});
+
+    return groupedDays;
+  });
+
+  const res2 = res.reduce((acu: { [key: string]: number[] }, cur) => {
+    // const prevData: number[] = acu[key] ?? [];
+    const merged = Object.keys(cur).reduce(
+      (prev: { [key: string]: number[] }, key) => {
+        const prevData: number[] = prev[key] ?? [];
+        return { ...prev, [key]: [...prevData, cur[key]] };
+      },
+      { ...acu }
+    );
+
+    return merged;
+    // {c1:[1,2,23],c2:[1,23,4]}
+  }, {});
+
+  console.log("getBoxPlotData", res2);
+
+  return res2;
+};
+
+const mapData = (data: number[], numPoints: number, numProposalPerDay: number) => {
+  return data.map(cur => (cur * numPoints) / numProposalPerDay);
+};
+
+const mapBloxPlotDataToProposals = (data: { [x: string]: number[] }, numPoints: number, numProposalPerDay: number) => {
+  // proposals * (numPoints / numProposalPerDay)
+  return Object.keys(data).reduce((acu: { [x: string]: number[] }, cur) => {
+    const prev = acu[cur] ?? [];
+    return { ...acu, [cur]: [...prev, ...mapData(data[cur], numPoints, numProposalPerDay)] };
+  }, {});
+};
+
+const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
+  return Object.keys(boxPlotData).reduce(
+    (acu, cur) => {
+      const minArray = Math.min(...boxPlotData[cur]);
+      const newMin = acu.min > minArray ? minArray : acu.min;
+      const maxArray = Math.max(...boxPlotData[cur]);
+      const newMax = acu.max < maxArray ? maxArray : acu.max;
+      return { min: newMin, max: newMax };
+    },
+    { min: 10000, max: 0 }
+  );
 };

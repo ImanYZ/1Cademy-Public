@@ -350,8 +350,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={proposalsStudents}
-                  questionsStudents={questionsStudents}
+                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
+                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
                   maxAxisY={maxStackedBarAxisY}
                   studentLocation={studentLocation}
                   theme={settings.theme}
@@ -382,9 +382,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   marginBottom: "12px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderbaord Points</Typography>
                 <Legend
-                  title={"Leaderboard"}
+                  title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -400,13 +400,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 width={
                   isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
                 }
-                margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
+                margin={{ top: 10, right: 0, bottom: 60, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
                 student={studentVoteStat}
+                role={user.role}
               />
               <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
                 <PlaceIcon sx={{ fill: "#EF5350", fontSize: "24px" }} />

@@ -9,7 +9,7 @@ const ROUTES = {
   instructorsDashboard: "/instructors/dashboard",
   instructorsSettings: "/instructors/settings",
   instructorsStudents: "/instructors/students",
-  instructorsDashboardStudents: "/instructors/dashboard/[id]",
+  instructorsDashboardStudents: "/instructors/dashboard/[uname]",
 };
 
 export default ROUTES;
