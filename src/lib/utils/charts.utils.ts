@@ -20,7 +20,7 @@ export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
     childProposals += stat.newNodes;
     editProposals += stat.improvements;
     links += stat.links;
-    nodes += stat.improvements + stat.newNodes;
+    nodes += stat.newNodes;
     votes += stat.votes;
     questions += stat.questions;
   });

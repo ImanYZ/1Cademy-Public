@@ -350,8 +350,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={proposalsStudents}
-                  questionsStudents={questionsStudents}
+                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
+                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
                   maxAxisY={maxStackedBarAxisY}
                   studentLocation={studentLocation}
                   theme={settings.theme}
@@ -407,6 +407,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
                 student={studentVoteStat}
+                role={user.role}
               />
               <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
                 <PlaceIcon sx={{ fill: "#EF5350", fontSize: "24px" }} />

@@ -556,7 +556,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>
+                <Typography sx={{ fontSize: "16px" }}>Chapters </Typography>
                 <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
               </Box>
               <BoxChart
