@@ -144,7 +144,7 @@ const Dashboard = ({}: DashboardProps) => {
   // node that user is currently selected (node will be highlighted)
   // const [sNode, setSNode] = useState<string | null>(null); //<--- this was with recoil
   // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
-  const [choosingNode] = useState(null); //<--- this was with recoil
+  // const [choosingNode] = useState(null); //<--- this was with recoil
   // // node that is in focus (highlighted)
   // const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
@@ -2030,7 +2030,7 @@ const Dashboard = ({}: DashboardProps) => {
   );
   const openAllChildren = useMemoizedCallback(
     async (nodeId: string) => {
-      if (!choosingNode && user) {
+      if (!nodeBookState.choosingNode && user) {
         // setIsSubmitting(true);
         let linkedNode = null;
         let linkedNodeId = null;
@@ -2174,7 +2174,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [choosingNode, graph]
+    [nodeBookState.choosingNode, graph]
   );
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
@@ -2244,7 +2244,7 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
       // console.log({ partType, openPart });
       lastNodeOperation.current = partType;
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (partType === "PendingProposals") {
           // TODO: refactor to use only one state to open node options
           return; // HERE we are breakin the code, for now this part is manage by setOpenEditButton, change after refactor
@@ -2438,19 +2438,19 @@ const Dashboard = ({}: DashboardProps) => {
   const correctNode = useCallback(
     (event: any, nodeId: string) => {
       devLog("CORRECT NODE", { nodeId });
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         getMapGraph(`/correctNode/${nodeId}`);
         setNodeParts(nodeId, node => {
           const correct = node.correct;
           const point = correct ? -1 : 1;
           const corrects = node.corrects + point;
-          return { ...node, correct: !correct, corrects };
+          return { ...node, correct: !correct, wrong: false, corrects };
         });
       }
       event.currentTarget.blur();
     },
-    [choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
   );
 
   const wrongNode = useCallback(
@@ -2465,24 +2465,33 @@ const Dashboard = ({}: DashboardProps) => {
     ) => {
       if (!nodeBookState.choosingNode) {
         let deleteOK = true;
-        // setSelectedNode(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        // setSelectedNodeType(nodeType);
-        if ((!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1)) {
+        const willRemoveNode = (!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1);
+        if (willRemoveNode) {
           deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
         }
         if (deleteOK) {
-          setIsSubmitting(true);
+          // setIsSubmitting(true);
           await idToken();
           getMapGraph(`/wrongNode/${nodeId}`);
+
+          setNodeParts(nodeId, node => {
+            const wrong = node.wrong;
+            const point = wrong ? -1 : 1;
+            const wrongs = node.wrongs + point;
+            return { ...node, wrong: !wrong, correct: false, wrongs };
+          });
+          if (willRemoveNode) {
+            setGraph(({ nodes, edges }) => {
+              const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
+              const tmpNodes = removeDagNode(g.current, nodeId, nodes);
+              return { nodes: tmpNodes, edges: tmpEdges };
+            });
+          }
         }
       }
-
-      // event.currentTarget.blur(); // CHECK: I comment this, the current target is null
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
   );
 
   /////////////////////////////////////////////////////
@@ -3461,7 +3470,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const deleteProposal = useCallback(
     async (event: any, proposals: any, setProposals: any, proposalId: string, proposalIdx: number) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (!nodeBookState.selectedNode) return;
         reloadPermanentGraph();
         const postData = {
@@ -3487,7 +3496,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // event.currentTarget.blur();
     },
-    [choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
+    [nodeBookState.choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
   );
   const mapContentMouseOver = useCallback((event: any) => {
     if (
@@ -3534,7 +3543,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("UPLOAD NODE IMAGES", { nodeId, isUploading, setIsUploading, setPercentageUploaded });
       // console.log("[UPLOAD NODE IMAGES]");
       const storage = getStorage();
-      if (!isUploading && !choosingNode) {
+      if (!isUploading && !nodeBookState.choosingNode) {
         try {
           event.preventDefault();
           const image = event.target.files[0];
@@ -3616,7 +3625,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, choosingNode, setNodeParts]
+    [user, nodeBookState.choosingNode, setNodeParts]
   );
 
   const rateProposal = useCallback(
@@ -3634,7 +3643,7 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log("[RATE PROPOSAL]");
       if (!user) return;
 
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         // reloadPermanentGraph();
         const proposalsTemp = [...proposals];
         if (correct) {
@@ -3710,7 +3719,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, choosingNode, selectedNodeType, reloadPermanentGraph]
+    [user, nodeBookState.choosingNode, selectedNodeType, reloadPermanentGraph]
   );
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
