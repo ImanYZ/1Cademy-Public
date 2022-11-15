@@ -79,7 +79,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       const role = user?.role;
       if (!role) return router.push(ROUTES.dashboard);
       if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
-      if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboard) return router.push(ROUTES.dashboard);
+      if (role === "STUDENT") return router.push(ROUTES.dashboard);
       // in this case is instructor he can see all
     };
     allowAccessByRole();
