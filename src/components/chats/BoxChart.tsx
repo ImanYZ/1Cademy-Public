@@ -21,7 +21,9 @@ function drawChart(
   offsetX: number,
   offsetY: number,
   drawYAxis: boolean,
-  theme: UserTheme
+  theme: UserTheme,
+  maxX: number,
+  minX: number
 ) {
   const svg = d3.select(svgRef);
 
@@ -51,7 +53,7 @@ function drawChart(
   // redraw svg
   const x = d3
     .scaleLinear()
-    .domain([0, 80])
+    .domain([minX, maxX])
     .range([0, widthProcessed - offsetX]);
   svg
     .append("g")
@@ -213,6 +215,8 @@ type BoxChartProps = {
   offsetY: number;
   drawYAxis?: boolean;
   theme: UserTheme;
+  maxX: number;
+  minX: number;
 };
 
 export const BoxChart = ({
@@ -225,12 +229,14 @@ export const BoxChart = ({
   offsetY,
   drawYAxis = true,
   theme,
+  maxX,
+  minX,
 }: BoxChartProps) => {
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme);
+      drawChart(svgRef, identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme, maxX, minX);
     },
-    [identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme]
+    [identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme, maxX, minX]
   );
 
   return (
