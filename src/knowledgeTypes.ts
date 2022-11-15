@@ -396,6 +396,8 @@ export type UserSettings = {
   background: UserBackground;
   theme: UserTheme;
   view: UserView;
+  showClusterOptions: boolean;
+  showClusters: boolean;
 };
 
 export type Reputation = {
@@ -467,7 +469,15 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
-  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground; view: UserView };
+  payload: {
+    user: User;
+    reputation: Reputation;
+    theme: UserTheme;
+    background: UserBackground;
+    view: UserView;
+    showClusterOptions: boolean;
+    showClusters: boolean;
+  };
 };
 
 export type SetThemeAction = {
@@ -478,6 +488,14 @@ export type SetThemeAction = {
 export type SetBackgroundAction = {
   type: "setBackground";
   payload: UserBackground;
+};
+export type SetShowClusterOptionsAction = {
+  type: "setShowClusterOptions";
+  payload: boolean;
+};
+export type SetShowClustersAction = {
+  type: "setShowClusters";
+  payload: boolean;
 };
 export type SetAuthUserAction = {
   type: "setAuthUser";
@@ -497,6 +515,8 @@ export type DispatchAuthActions =
   | AuthLoginSuccessAction
   | SetThemeAction
   | SetBackgroundAction
+  | SetShowClusterOptionsAction
+  | SetShowClustersAction
   | SetAuthUserAction
   | SetViewAction
   | SetReputationAction;

@@ -16,7 +16,7 @@ import {
 } from "firebase/firestore";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { OpenSidebar } from "@/pages/dashboard";
+import { OpenSidebar } from "@/pages/notebook";
 
 import bookmarksDarkTheme from "../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../public/bookmarks-light-theme.jpg";

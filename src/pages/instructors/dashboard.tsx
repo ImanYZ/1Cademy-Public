@@ -9,12 +9,17 @@ import {
   BubbleStats,
   MaxPoints,
   SemesterStats,
+  SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
   Trends,
 } from "src/instructorsTypes";
-import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "src/types/ICourse";
+import {
+  ISemester,
+  ISemesterStudent /* ISemesterStudentStatDay */,
+  ISemesterStudentStatChapter,
+} from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -130,7 +135,7 @@ type BubbleStatsData = {
 };
 
 export type TrendStats = {
-  newNodeProposals: Trends[];
+  childProposals: Trends[];
   editProposals: Trends[];
   links: Trends[];
   nodes: Trends[];
@@ -185,7 +190,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   //TrendStats
   const [trendStats, setTrendStats] = useState<TrendStats>({
-    newNodeProposals: [],
+    childProposals: [],
     editProposals: [],
     links: [],
     nodes: [],
@@ -217,7 +222,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-
+    console.log("currentSemester.tagId", currentSemester.tagId);
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -287,7 +292,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
       );
-      console.log("maxProposalsPoints", { maxProposalsPoints, maxQuestionsPoints });
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudentsCounter(semesterDoc.data().students.length);
@@ -306,25 +310,20 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ newNodeProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
-      // const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      // const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
-      // const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
-      // const links = getTrendsData(userDailyStats, "links");
-      // const nodes = getTrendsData(userDailyStats, "proposals");
-      // const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
-      // const questions = getTrendsData(userDailyStats, "questions");
-      // setTrendStats({
-      //   newNodeProposals,
-      //   editProposals,
-      //   links,
-      //   nodes,
-      //   votes,
-      //   questions,
-      // });
+      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+
+      setTrendStats({
+        childProposals: makeTrendData(userDailyStats, "newNodes"),
+        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        links: makeTrendData(userDailyStats, "links"),
+        nodes: makeTrendData(userDailyStats, "proposals"),
+        votes: makeTrendData(userDailyStats, "votes"),
+        questions: makeTrendData(userDailyStats, "questions"),
+      });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -368,8 +367,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     return <NoDataMessage />;
   }
   if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
-
-  console.log("dx", { isMovil, isTablet });
 
   return (
     <Box
@@ -743,4 +740,39 @@ export const getBubbleStats = (
 const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
   const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
   return index;
+};
+export const makeTrendData = (data: SemesterStudentStat[], key: string): Trends[] => {
+  const dailyStudentsStat = data
+    .reduce((acu: { field: { num: number; day: string } }[], cur) => {
+      const userTrendData = cur.days.map(day => {
+        const num = day.chapters.reduce((_carry, chapter) => {
+          if (key in chapter) {
+            return _carry + (chapter[key as keyof ISemesterStudentStatChapter] as number);
+          } else if (key === "votes") {
+            return _carry + chapter.agreementsWithInst + chapter.disagreementsWithInst;
+          } else if (key === "editProposals") {
+            return _carry + chapter["proposals"] - chapter["newNodes"];
+          } else {
+            return _carry;
+          }
+        }, 0);
+
+        return { field: { num, day: day.day } };
+      });
+
+      return [...acu, ...userTrendData];
+    }, [])
+    .reduce((acu: { [key: string]: number }, cur) => {
+      return {
+        ...acu,
+        [cur.field.day]: (acu[cur.field.day] ?? 0) + cur.field.num,
+      };
+    }, {});
+
+  return Object.keys(dailyStudentsStat).map(cur => {
+    return {
+      date: new Date(cur),
+      num: dailyStudentsStat[cur],
+    };
+  }) as Trends[];
 };
