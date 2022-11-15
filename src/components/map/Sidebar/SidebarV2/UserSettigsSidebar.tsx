@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
-import React, { Suspense, useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
@@ -1038,9 +1038,15 @@ export const UserSettigsSidebar = ({
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
+
+  const contentSignalState = useMemo(() => {
+    return { updates: true };
+  }, [tabsItems, value]);
+
   return (
     <SidebarWrapper
       title=""
+      contentSignalState={contentSignalState}
       open={open}
       onClose={onClose}
       width={430}

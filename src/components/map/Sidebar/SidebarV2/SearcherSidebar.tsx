@@ -421,6 +421,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
           </div>
         </Box>
       }
+      contentSignalState={searchResults}
       SidebarContent={
         <Box sx={{ p: "10px" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>

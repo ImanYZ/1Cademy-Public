@@ -51,7 +51,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 // import { SearcherSidebar } from "../components/map/Sidebar/SidebarV2/SearcherSidebar";
-import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
+import { MemorizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -3240,7 +3240,7 @@ const Dashboard = ({}: DashboardProps) => {
               delete userVersion.updatedAt;
               delete userVersion.createdAt;
               delete userVersion.user;
-              if(userVersion.hasOwnProperty("id")) {
+              if (userVersion.hasOwnProperty("id")) {
                 delete userVersion.id;
               }
               versions[versionId] = {
@@ -3871,7 +3871,7 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode={scrollToNode}
           /> */}
           {user && reputation && (
-            <ToolbarSidebar
+            <MemorizedToolbarSidebar
               // theme={settings.theme}
               // openLinkedNode={openLinkedNode}
               // username={user.uname}
