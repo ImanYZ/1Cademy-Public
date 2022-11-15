@@ -503,7 +503,14 @@ MainSidebarProps) => {
                 </Box>
               </MemoizedMetaButton>
               {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-                <MemoizedMetaButton onClick={() => router.push("/instructors/dashboard")}>
+                <MemoizedMetaButton
+                  onClick={() => {
+                    if (user.role === "INSTRUCTOR") return router.push("/instructors/dashboard");
+                    if (user.role === "STUDENT") return router.push(`/instructors/dashboard/${user.uname}`);
+
+                    // router.push((role = "/instructors/dashboard"));
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",

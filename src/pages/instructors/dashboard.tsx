@@ -250,6 +250,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      console.log("semester");
       setSemesterStudentVoteState(semester);
 
       setSemesterStats(getSemStat(semester));
@@ -522,6 +523,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
+                role={user.role}
               />
             </>
           )}
