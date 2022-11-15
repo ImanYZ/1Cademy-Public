@@ -1,11 +1,9 @@
 import { Timestamp } from "firebase-admin/firestore";
-
 export type ISemesterSyllabusItem = {
   title: string;
   node?: string;
   children?: ISemesterSyllabusItem[];
 };
-
 export type ISemesterStudent = {
   uname: string;
   chooseUname: boolean;
@@ -14,7 +12,6 @@ export type ISemesterStudent = {
   lName: string;
   email: string;
 };
-
 // document id should be semester id as well
 export type ISemester = {
   documentId?: string;
@@ -59,7 +56,6 @@ export type ISemester = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
-
 export type ICourseTag = {
   pTagId: string; // program tag id
   pTitle: string;
@@ -70,7 +66,6 @@ export type ICourseTag = {
   tagId: string; // Semester Tag Id
   title: string;
 };
-
 export type IInstructor = {
   documentId?: string;
   uname: string;
@@ -78,7 +73,6 @@ export type IInstructor = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
-
 export type ICourse = {
   documentId?: string;
   title: string;
@@ -92,26 +86,22 @@ export type ICourse = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
-
+export type ISemesterStudentStatChapter = {
+  node: string; // chapter node id
+  title: string; // chapter title
+  proposals: number; // all pending/accepted proposals
+  questions: number; // all accepted questions
+  nodes: number; // pending/accepted proposals of new nodes
+  questionProposals: number; // all question proposals
+  newNodes: number;
+  links: number; // improvements on children and parent links
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
+};
 export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022
-  chapters: {
-    node: string; // chapter node id
-    title: string; // chapter title
-
-    proposals: number; // all pending/accepted proposals
-    questions: number; // all accepted questions
-    nodes: number; // pending/accepted proposals of new nodes
-    questionProposals: number; // all question proposals
-
-    newNodes: number;
-    links: number; // improvements on children and parent links
-
-    agreementsWithInst: number;
-    disagreementsWithInst: number;
-  }[];
+  chapters: ISemesterStudentStatChapter[];
 };
-
 export type ISemesterStudentStat = {
   documentId?: string;
   tagId: string; // tagId of semester
@@ -121,7 +111,6 @@ export type ISemesterStudentStat = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
-
 // semesterStudentVoteStats
 export type ISemesterStudentVoteStat = {
   documentId?: string;
@@ -133,7 +122,6 @@ export type ISemesterStudentVoteStat = {
   agreementsWithInst: number;
   disagreementsWithInst: number;
   lastActivity: Timestamp;
-
   totalPoints: number;
   newNodes: number;
   improvements: number;
@@ -142,7 +130,6 @@ export type ISemesterStudentVoteStat = {
   questionPoints: number;
   votes: number;
   votePoints: number;
-
   deleted: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
