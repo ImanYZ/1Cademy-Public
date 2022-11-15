@@ -53,6 +53,7 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
 };
 export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [{ user, settings }] = useAuth();
+  console.log("InstructorsLayout", { user });
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [instructor, setInstructor] = useState<Instructor | null>(null);

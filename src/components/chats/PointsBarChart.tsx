@@ -213,10 +213,10 @@ function drawChart(
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
       let html = "";
-      if (d.data.index === 0) {
+      if (d.data.index === 0 && studentProposalsRate) {
         // @ts-ignore
         html = htmlTooltip(studentProposalsRate[subgroupName]);
-      } else {
+      } else if (studentQuestionsRate) {
         // @ts-ignore
         html = htmlTooltip(studentQuestionsRate[subgroupName]);
       }
