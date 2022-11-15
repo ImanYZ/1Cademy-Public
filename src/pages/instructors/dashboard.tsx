@@ -241,6 +241,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
+        console.log("1:setSemesterStats");
         setSemesterStats(null);
         setIsLoading(false);
         setThereIsData(false);
@@ -252,12 +253,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
 
+      console.log("2:setSemesterStats");
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
+  }, [currentSemester, db, user]);
 
   useEffect(() => {
     // update data in buble
@@ -329,6 +331,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       const res = getBoxPlotData(userDailyStats);
 
+      setSemesterStats(prev => {
+        if (!prev) return null;
+        const res = { ...prev, newNodeProposals: getChildProposal(userDailyStats) };
+        console.log("res:setSemesterStats", res);
+        return res;
+      });
+
       const rr = mapBloxPlotDataToProposals(res, 1, 1);
       setBoxPlotData(rr);
 
@@ -347,7 +356,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db]);
+  }, [currentSemester, db]);
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
     return {
@@ -867,4 +876,14 @@ const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
     },
     { min: 10000, max: 0 }
   );
+};
+
+const getChildProposal = (userDailyStats: ISemesterStudentStat[]) => {
+  let nodes = 0;
+  for (const semesterStudentStat of userDailyStats) {
+    nodes += semesterStudentStat.days.reduce((carry, day) => {
+      return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.nodes, 0);
+    }, 0);
+  }
+  return nodes;
 };
