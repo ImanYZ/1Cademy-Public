@@ -61,9 +61,36 @@ function drawChart(
     .attr("transform", `translate(${offsetX},${heightProcessed})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
-  const y = d3.scaleBand().domain(Object.keys(data)).range([heightProcessed, 0]).padding(0.2);
+  const y = d3
+    .scaleBand()
+    .domain(Object.keys(data).map(str => str.slice(0, 15) + (str.length > 15 ? "..." : "")))
+    .range([heightProcessed, 0])
+    .padding(0.2);
+
+  const findLabel = (str: string) => {
+    return Object.keys(data).find(x => x.includes(str.replace("...", "")));
+  };
+
   if (drawYAxis) {
-    svg.append("g").attr("id", `axis-y`).attr("transform", `translate(${offsetX},0)`).call(d3.axisLeft(y));
+    const tooltip = d3.select(`#boxplot-label-tooltip-${identifier}`);
+    svg
+      .append("g")
+      .attr("id", `axis-y`)
+      .attr("transform", `translate(${offsetX},0)`)
+      .call(d3.axisLeft(y))
+      .on("mouseover", function (e) {
+        const _this = this as any;
+        d3.select(_this).style("cursor", "pointer");
+        console.log("event", e);
+        tooltip
+          .html(`${findLabel(e.target.innerHTML)}`)
+          .style("opacity", 1)
+          .style("top", `${e.offsetY}px`)
+          .style("left", `${offsetX}px`);
+      })
+      .on("mouseout", function () {
+        tooltip.style("opacity", 0);
+      });
   }
 
   const keys = Object.keys(data); /* .map(cur=>data[cur]) */
@@ -99,7 +126,7 @@ function drawChart(
       const result = statistic(obj);
       if (!result) return null;
 
-      const boxCenter = y(key);
+      const boxCenter = y(key.slice(0, 15) + (key.length > 15 ? "..." : ""));
       if (!boxCenter) return null;
 
       return {
@@ -206,7 +233,7 @@ function drawChart(
     .attr("y1", d => d.boxCenter)
     .attr("y2", d => d.boxCenter)
     .attr("stroke", theme === "Dark" ? "rgba(224, 224, 224, .1)" : "rgba(0, 0, 0, .25)")
-    .attr("stroke-width", "1px")
+    .attr("stroke-width", "1")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 }
 
@@ -261,8 +288,9 @@ export const BoxChart = ({
   );
 
   return (
-    <svg ref={svg}>
-      {/* <text
+    <div style={{ position: "relative" }}>
+      <svg ref={svg}>
+        {/* <text
         style={{ fontSize: "16px", paddingBottom: "10px" }}
         fill={theme === "Dark" ? "white" : "black"}
         x={40}
@@ -270,14 +298,19 @@ export const BoxChart = ({
       >
         Chapters{" "}
       </text> */}
-      {/* <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography> */}
-      <g id="mesh"></g>
-      <g id="totos"></g>
-      <g id="lines"></g>
-      <g id="boxes"></g>
-      <g id="median"></g>
-      <g id="locations"></g>
-    </svg>
+        {/* <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography> */}
+        <g id="mesh"></g>
+        <g id="totos"></g>
+        <g id="lines"></g>
+        <g id="boxes"></g>
+        <g id="median"></g>
+        <g id="locations"></g>
+      </svg>
+      <div
+        id={`boxplot-label-tooltip-${identifier}`}
+        className={`tooltip-plot axis-y-label ${theme === "Light" ? "lightMode" : "darkMode"}`}
+      ></div>
+    </div>
   );
 };
 // const data: BoxData = {

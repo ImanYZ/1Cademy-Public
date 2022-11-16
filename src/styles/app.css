@@ -762,3 +762,12 @@ p {
   background: rgba(113, 113, 113, 0.663);
   border-radius: 10px;
 }
+.tooltip-plot.axis-y-label {
+  font-size: 12px;
+  padding: 4px;
+  background-color: #6c6c6c;
+  color: white;
+  max-width: 200px;
+  text-align: center;
+  box-shadow: none;
+}

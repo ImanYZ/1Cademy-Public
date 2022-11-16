@@ -195,8 +195,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
-  const isUpTablet = useMediaQuery(theme.breakpoints.up("md"));
-  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
@@ -432,7 +432,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
-  const boxPlotWidth = isDesktop ? 500 : isUpTablet ? 450 : 200;
+  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 240;
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
@@ -604,7 +604,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isDesktop ? 3 : isTablet ? 2 : 1} />}
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -622,9 +622,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                     // width={trendPlotWith}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                    offsetX={isMovil ? 125 : 200}
+                    offsetX={isMovil ? 100 : 100}
                     offsetY={18}
-                    identifier="boxplot1"
+                    identifier="plot-1"
                     maxX={boxStats.proposalsPoints.max}
                     minX={boxStats.proposalsPoints.min}
                   />
@@ -642,13 +642,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   <BoxChart
                     theme={settings.theme}
                     data={boxStats.questionsPoints.data}
-                    drawYAxis={isMovil || isTablet}
+                    drawYAxis={isMovil}
                     width={boxPlotWidth}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetX={isMovil ? 100 : 2}
                     offsetY={18}
-                    identifier="boxplot1"
+                    identifier="plot-2"
                     maxX={boxStats.questionsPoints.max}
                     minX={boxStats.questionsPoints.min}
                   />
@@ -666,13 +666,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   <BoxChart
                     theme={settings.theme}
                     data={boxStats.votesPoints.data}
-                    drawYAxis={isMovil || isTablet}
+                    drawYAxis={isMovil}
                     width={boxPlotWidth}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetX={isMovil ? 100 : 2}
                     offsetY={18}
-                    identifier="boxplot1"
+                    identifier="plot-3"
                     minX={boxStats.votesPoints.min}
                     maxX={boxStats.votesPoints.max}
                   />
