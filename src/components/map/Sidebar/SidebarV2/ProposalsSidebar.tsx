@@ -1,4 +1,5 @@
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import { Firestore } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
@@ -21,6 +22,7 @@ type ProposalsSidebarProps = {
   proposeNewChild: any;
   openProposal: any;
   selectedNode: string | null;
+  db: Firestore;
 };
 // type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 
@@ -44,6 +46,7 @@ const ProposalsSidebar = ({
   proposeNewChild,
   openProposal,
   selectedNode,
+  db,
 }: ProposalsSidebarProps) => {
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -102,6 +105,7 @@ const ProposalsSidebar = ({
             proposeNewChild={proposeNewChild}
             openProposal={openProposal}
             isAdmin={isAdmin}
+            db={db}
           />
         </Box>
       ) : (
@@ -130,6 +134,7 @@ const ProposalsSidebar = ({
             proposeNewChild={proposeNewChild}
             openProposal={openProposal}
             isAdmin={isAdmin}
+            db={db}
           />
         </Box>
       ) : (
