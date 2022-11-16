@@ -4,10 +4,9 @@ import React from "react";
 
 type BoxPlotSkeletonProps = {
   width: number;
-  mobile?: boolean;
+  boxes: number;
 };
-export const BoxPlotStatsSkeleton = ({ width, mobile }: BoxPlotSkeletonProps) => {
-  const boxes = mobile ? 1 : 3;
+export const BoxPlotStatsSkeleton = ({ width, boxes }: BoxPlotSkeletonProps) => {
   return (
     <Box sx={{ display: "flex", gap: "8px" }}>
       <Box
@@ -29,7 +28,7 @@ export const BoxPlotStatsSkeleton = ({ width, mobile }: BoxPlotSkeletonProps) =>
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: `repeat(${boxes},1fr)`,
           justifyContent: "center",
           alignItems: "end",
           gap: "20px",

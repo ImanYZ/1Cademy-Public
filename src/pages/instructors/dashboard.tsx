@@ -603,7 +603,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} mobile={isTablet || isMovil} />}
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isDesktop ? 3 : isTablet ? 2 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -680,7 +680,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               </>
             )}
           </Box>
-          {!isMovil && <BoxLegend />}
+          {!isMovil && !isLoading && <BoxLegend />}
         </Paper>
         {/* <Paper
           sx={{

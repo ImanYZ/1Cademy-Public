@@ -199,7 +199,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     setQuestionsStudents(studentStackedBarQuestionsStats);
   }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, semesterStudentsVoteState.length, students]);
 
-  // find student subgroup location in bar s
+  // find student subgroup location in bars
   useEffect(() => {
     if (!semesterStudentsVoteState || !studentVoteStat) return;
 
@@ -330,6 +330,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       });
     };
     getUserDailyStat();
+    setIsLoading(false);
   }, [currentSemester, db, semesterConfig]);
   // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
   //   const trends: Trends[] = [];
@@ -554,7 +555,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} mobile={isTablet || isMovil} />}
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isDesktop ? 3 : isTablet ? 2 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -634,7 +635,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               </>
             )}
           </Box>
-          {!isMovil && <BoxLegend />}
+          {!isMovil && !isLoading && <BoxLegend />}
         </Paper>
       </Box>
       <Box
