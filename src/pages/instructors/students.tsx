@@ -180,7 +180,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               id: student.uname,
               username: student.uname,
               avatar: student.imageUrl,
-              online: userStat?.state,
+              online: userStat?.state === "online",
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
