@@ -543,6 +543,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             justifyContent: "center",
             alignItems: "center",
             p: isMovil ? "10px 10px" : "40px 20px",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <Box
@@ -592,7 +593,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
                   </Box>
                   <BoxChart
-                    theme={"Dark"}
+                    theme={settings.theme}
                     data={boxStats.questionsPoints.data}
                     drawYAxis={isMovil || isTablet}
                     width={boxPlotWidth}
@@ -617,7 +618,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
                   </Box>
                   <BoxChart
-                    theme={"Dark"}
+                    theme={settings.theme}
                     data={boxStats.votesPoints.data}
                     drawYAxis={isMovil || isTablet}
                     width={boxPlotWidth}

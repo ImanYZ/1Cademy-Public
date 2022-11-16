@@ -205,7 +205,7 @@ function drawChart(
     .attr("x2", widthProcessed - offsetX)
     .attr("y1", d => d.boxCenter)
     .attr("y2", d => d.boxCenter)
-    .attr("stroke", "rgba(224, 224, 224, .1)")
+    .attr("stroke", theme === "Dark" ? "rgba(224, 224, 224, .1)" : "rgba(0, 0, 0, .25)")
     .attr("stroke-width", "1px")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 }
