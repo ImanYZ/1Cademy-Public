@@ -1216,6 +1216,7 @@ export const createUpdateUserVersion = async ({
 };
 
 export const versionCreateUpdate = async ({
+  versionNodeId,
   batch,
   nodeId,
   nodeData,
@@ -1561,7 +1562,10 @@ export const versionCreateUpdate = async ({
           });
           //  just accepted a proposal for a new child node (not an improvement)
         } else {
-          const childNodeRef = db.collection("nodes").doc();
+          let childNodeRef = db.collection("nodes").doc();
+          if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
+            childNodeRef = db.collection("nodes").doc(versionNodeId);
+          }
           let childNode: any = {
             children,
             content,
