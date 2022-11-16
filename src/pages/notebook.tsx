@@ -3755,26 +3755,22 @@ const Dashboard = ({}: DashboardProps) => {
           award,
           uname: user.uname,
         };
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         // let responseObj;
         try {
           await Post("/rateVersion", postData);
         } catch (error) {
           console.error(error);
-          setIsSubmitting(false);
+          // setIsSubmitting(false);
         }
-        // try {
-        //   await idToken();
-        //   /*responseObj = */ await axios.post("/rateVersion", postData);
-        // } catch (err) {
-        //   console.error(err);
-        //   // window.location.reload();
-        // }
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (
-            proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
-            (oldNodes[nodeBookState.selectedNode].corrects - oldNodes[nodeBookState.selectedNode].wrongs) / 2
+            isVersionApproved({
+              corrects: proposalsTemp[proposalIdx].corrects,
+              wrongs: proposalsTemp[proposalIdx].wrongs,
+              nodeData: oldNodes[nodeBookState.selectedNode],
+            })
           ) {
             proposalsTemp[proposalIdx].accepted = true;
             if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
@@ -3784,22 +3780,8 @@ const Dashboard = ({}: DashboardProps) => {
           setProposals(proposalsTemp);
           return { nodes: oldNodes, edges };
         });
-        // setNodes(oldNodes => {
-        //   if (
-        //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
-        //     (oldNodes[sNode.id].corrects - oldNodes[sNode].wrongs) / 2
-        //   ) {
-        //     proposalsTemp[proposalIdx].accepted = true;
-        //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx childType !== "") {
-        //       reloadPermanentGraph();
-        //     }
-        //   }
-        //   setProposals(proposalsTemp);
-        //   return oldNodes;
-        // });
 
-        setIsSubmitting(false);
-        // scrollToNode(sNode);
+        // setIsSubmitting(false);
       }
       // event.currentTarget.blur();
     },
