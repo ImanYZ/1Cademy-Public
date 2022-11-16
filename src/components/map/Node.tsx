@@ -121,6 +121,7 @@ type NodeProps = {
   proposeNewChild: any;
   scrollToNode: any;
   openSidebar: OpenSidebar;
+  locked: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -212,6 +213,7 @@ const Node = ({
   cleanEditorLink,
   scrollToNode,
   openSidebar,
+  locked,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -396,8 +398,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
-    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
+    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked),
+    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum, locked]
   );
 
   const uploadNodeImageHandler = useCallback(

@@ -105,6 +105,7 @@ import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
+import { doNeedToDeleteNode, isVersionApproved } from "../utils/helpers";
 
 type DashboardProps = {};
 
@@ -2509,12 +2510,24 @@ const Dashboard = ({}: DashboardProps) => {
       wrong: any,
       correct: any,
       wrongs: number,
-      corrects: number
+      corrects: number,
+      locked: boolean
     ) => {
       if (!nodeBookState.choosingNode) {
         let deleteOK = true;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        const willRemoveNode = (!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1);
+
+        // const correct = node.correct;
+        // const wrong = node.wrong;
+        // const point = wrong ? -1 : 1;
+
+        const correctChange = !wrong && correct ? -1 : 0;
+        const wrongChange = wrong ? -1 : 1;
+        const _corrects = corrects + correctChange;
+        const _wrongs = wrongs + wrongChange;
+
+        // const willRemoveNode = (!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1);
+        const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
         if (willRemoveNode) {
           deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
         }
@@ -2524,15 +2537,6 @@ const Dashboard = ({}: DashboardProps) => {
           getMapGraph(`/wrongNode/${nodeId}`);
 
           setNodeParts(nodeId, node => {
-            const correct = node.correct;
-            const wrong = node.wrong;
-            // const point = wrong ? -1 : 1;
-
-            const correctChange = !wrong && correct ? -1 : 0;
-            const wrongChange = wrong ? -1 : 1;
-            const corrects = node.corrects + correctChange;
-            const wrongs = node.wrongs + wrongChange;
-
             return { ...node, wrong: !wrong, correct: false, wrongs, corrects };
           });
           const nNode = graph.nodes[nodeId];
@@ -3002,9 +3006,7 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.top;
           delete postData.height;
 
-          if (newNode?.locked) return;
-          const willBeApproved = 1 - 0 > (newNode.corrects - newNode.wrongs) / 2;
-          console.log("willBeApproved", willBeApproved, 1 - 0, (newNode.corrects - newNode.wrongs) / 2);
+          const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
 
           setNodeParts(nodeBookState.selectedNode, node => ({ ...node, editable: false }));
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
