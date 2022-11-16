@@ -24,7 +24,6 @@ export const detach = async (callback: DetachCallback) => {
 export const doNeedToDeleteNode = (corrects: number, wrongs: number, locked: boolean = false) => {
   return corrects < wrongs && !locked;
 };
-
 export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
   try {
     if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
