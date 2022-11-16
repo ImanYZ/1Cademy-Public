@@ -1655,6 +1655,45 @@ export const versionCreateUpdate = async ({
             tWriteOperations,
           });
 
+          // userNode for voter
+          const newUserNodeObj: any = {
+            correct: correct === 1,
+            createdAt: currentTimestamp,
+            updatedAt: currentTimestamp,
+            deleted: false,
+            isStudied: true,
+            bookmarked: false,
+            changed: false,
+            node: nodeRef.id,
+            open: true,
+            user: voter,
+            visible: true,
+            wrong: wrong === 1,
+          };
+          const userNodeRef = db.collection("userNodes").doc();
+          if (t) {
+            tWriteOperations.push({
+              objRef: userNodeRef,
+              data: newUserNodeObj,
+              operationType: "set",
+            });
+          } else {
+            batch.set(userNodeRef, { ...newUserNodeObj });
+            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+          }
+          const userNodeLogRef = db.collection("userNodesLog").doc();
+          delete newUserNodeObj.updatedAt;
+          if (t) {
+            tWriteOperations.push({
+              objRef: userNodeLogRef,
+              data: newUserNodeObj,
+              operationType: "set",
+            });
+          } else {
+            batch.set(userNodeLogRef, newUserNodeObj);
+            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+          }
+
           //  Delete the old version on the parent.
           const { versionsCommentsColl }: any = getTypedCollections({ nodeType });
 
