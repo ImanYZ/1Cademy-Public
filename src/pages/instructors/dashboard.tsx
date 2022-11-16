@@ -198,8 +198,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [boxPlotQuestions, setBoxPlotQuestions] = useState<{
     [x: string]: number[];
   }>({});
+  const [boxPlotVotes, setBoxPlotVotes] = useState<{
+    [x: string]: number[];
+  }>({});
   const [minMaxProposalBoxPlot, setMinMaxProposalBoxPlot] = useState({ min: 0, max: 300 });
   const [minMaxQuestionBoxPlot, setMinMaxQuestionBoxPlot] = useState({ min: 0, max: 0 });
+  const [minMaxVotesBoxPlot, setMinMaxVotesBoxPlot] = useState({ min: 0, max: 0 });
+
   //TrendStats
   const [trendStats, setTrendStats] = useState<TrendStats>({
     childProposals: [],
@@ -328,18 +333,20 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
 
-      const proposals = getBoxPlotData(userDailyStats, "proposals");
-
-      const porposalsPoints = mapBloxPlotDataToProposals(proposals, 1, 1);
+      const porposalsPoints = getBoxPlotData(userDailyStats, "proposals");
       setBoxPlotData(porposalsPoints);
-      const questions = getBoxPlotData(userDailyStats, "questions");
-      const questionsPoints = mapBloxPlotDataToProposals(questions, 1, 1);
+      const questionsPoints = getBoxPlotData(userDailyStats, "questions");
       setBoxPlotQuestions(questionsPoints);
+      const votesPoints = getBoxPlotData(userDailyStats, "votes");
+      setBoxPlotVotes(votesPoints);
+
       const { min, max } = getMaxMinVoxPlotData(porposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
+      const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
 
       setMinMaxProposalBoxPlot({ min, max });
       setMinMaxQuestionBoxPlot({ min: minQ, max: maxQ });
+      setMinMaxVotesBoxPlot({ min: minV, max: maxV });
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
         editProposals: makeTrendData(userDailyStats, "editProposals"),
@@ -597,24 +604,26 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               />
               {isMovil && <BoxLegend />}
             </Box>
-            {/* <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                 {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
                 <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
               </Box>
               <BoxChart
                 theme={"Dark"}
-                data={data["Vote Points"]}
-                drawYAxis={isMovil}
-                width={isMovil ? 300 : 300}
+                data={boxPlotVotes}
+                drawYAxis={true}
+                width={trendPlotWith}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                offsetX={isMovil ? 150 : 2}
+                offsetX={150}
                 offsetY={18}
                 identifier="boxplot1"
+                minX={minMaxVotesBoxPlot.min}
+                maxX={minMaxVotesBoxPlot.max}
               />
               {isMovil && <BoxLegend />}
-            </Box> */}
+            </Box>
           </Box>
           {!isMovil && <BoxLegend />}
         </Paper>
@@ -806,7 +815,14 @@ export const makeTrendData = (data: SemesterStudentStat[], key: string): Trends[
   }) as Trends[];
 };
 
-const getBoxPlotData = (userDailyStats: ISemesterStudentStat[], type: keyof ISemesterStudentStatChapter) => {
+const getBoxPlotData = (
+  userDailyStats: ISemesterStudentStat[],
+  type: string,
+  numPoints = 1,
+  numTypePerDay = 1,
+  agreementPoints = 1,
+  disagreementPoints = 1
+) => {
   // days -> chapters -> data
   //
   // proposal=> chapters => [1,2,34,54]
@@ -815,8 +831,19 @@ const getBoxPlotData = (userDailyStats: ISemesterStudentStat[], type: keyof ISem
     // [{c1:1,c2:3},{c1:1,c2:3}]
     const groupedDays = cur.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
       const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
-        const dd = { data: curChapter[type] as number, title: curChapter.title };
-        return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + dd.data };
+        if (type in curChapter) {
+          const dd = { data: curChapter[type as keyof ISemesterStudentStatChapter] as number, title: curChapter.title };
+          return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + (dd.data * numPoints) / numTypePerDay };
+        } else if (type === "votes") {
+          const dd = {
+            data:
+              curChapter["agreementsWithInst"] * agreementPoints +
+              curChapter["disagreementsWithInst"] * disagreementPoints,
+            title: curChapter.title,
+          };
+          return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + dd.data };
+        }
+        return { ...acuChapter };
       }, {});
       return Object.keys(groupedChapters).reduce(
         (prev, key) => {
@@ -844,17 +871,17 @@ const getBoxPlotData = (userDailyStats: ISemesterStudentStat[], type: keyof ISem
   return res2;
 };
 
-const mapData = (data: number[], numPoints: number, numProposalPerDay: number) => {
-  return data.map(cur => (cur * numPoints) / numProposalPerDay);
-};
+// const mapData = (data: number[], numPoints: number, numProposalPerDay: number) => {
+//   return data.map(cur => (cur * numPoints) / numProposalPerDay);
+// };
 
-const mapBloxPlotDataToProposals = (data: { [x: string]: number[] }, numPoints: number, numProposalPerDay: number) => {
-  // proposals * (numPoints / numProposalPerDay)
-  return Object.keys(data).reduce((acu: { [x: string]: number[] }, cur) => {
-    const prev = acu[cur] ?? [];
-    return { ...acu, [cur]: [...prev, ...mapData(data[cur], numPoints, numProposalPerDay)] };
-  }, {});
-};
+// const mapBloxPlotDataToProposals = (data: { [x: string]: number[] }, numPoints: number, numProposalPerDay: number) => {
+//   // proposals * (numPoints / numProposalPerDay)
+//   return Object.keys(data).reduce((acu: { [x: string]: number[] }, cur) => {
+//     const prev = acu[cur] ?? [];
+//     return { ...acu, [cur]: [...prev, ...mapData(data[cur], numPoints, numProposalPerDay)] };
+//   }, {});
+// };
 
 const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
   return Object.keys(boxPlotData).reduce(
