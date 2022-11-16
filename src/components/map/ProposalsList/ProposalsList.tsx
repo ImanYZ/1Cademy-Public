@@ -96,7 +96,6 @@ const ProposalsList = (props: ProposalsListProps) => {
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
                   gap: "5px",
                 }}
               >
@@ -167,7 +166,10 @@ const ProposalsList = (props: ProposalsListProps) => {
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
                 <div className="title Time" style={{ fontSize: "12px" }}>
-                  <div className="title Username">{proposal.proposer}</div>
+                  {/* <div className="title Username">{proposal.proposer}</div> */}
+                  <div className="ProposalTitle" style={{ fontSize: "16px", fontWeight: "400" }}>
+                    {proposal.title}
+                  </div>
                 </div>
                 <div className="ProposalTitle">
                   {proposalSummaries.length > 0 ? (

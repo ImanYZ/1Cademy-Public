@@ -36,7 +36,7 @@ export const GeneralPlotStats = ({
       >
         <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>{courseTitle} </Typography>
         <Typography>{semesterTitle}</Typography>
-        <Typography> {!studentsCounter ? `Students: ${studentsCounter}` : ""}</Typography>
+        <Typography> {studentsCounter ? `Students: ${studentsCounter}` : ""}</Typography>
       </Box>
       <Typography>{programTitle}</Typography>
       <Divider />

@@ -20,3 +20,21 @@ export type DetachCallback = () => Promise<void>;
 export const detach = async (callback: DetachCallback) => {
   setImmediate(callback);
 };
+
+export const doNeedToDeleteNode = (corrects: number, wrongs: number, locked: boolean = false) => {
+  return corrects < wrongs && !locked;
+};
+export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
+  try {
+    if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
+    const nodeRating = nodeData.corrects - nodeData.wrongs;
+    const versionRating = corrects - wrongs;
+    if (versionRating >= nodeRating / 2) {
+      return nodeData;
+    }
+    return false;
+  } catch (err) {
+    console.error(err);
+    return err;
+  }
+};

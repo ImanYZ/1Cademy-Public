@@ -43,6 +43,9 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
           />
           &nbsp;in total.
         </Typography>
+        <Typography mt={3} color="error" sx={{ display: errorState.days ? "block" : "none" }}>
+          * {errorState.errorText}
+        </Typography>
       </Box>
       <Box sx={{ marginTop: "50px" }}>
         <Typography variant="h3">Node Proposals</Typography>
@@ -168,6 +171,15 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               error={errorState.nodeProposalDay}
             />
             &nbsp; of the course.
+          </Typography>
+          <Typography
+            mt={3}
+            color="error"
+            sx={{
+              display: errorState.nodeProposalDay || errorState.nodeProposalDate ? "block" : "none",
+            }}
+          >
+            * {errorState.errorText}
           </Typography>
         </Box>
       </Box>
@@ -296,6 +308,13 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               error={errorState.questionProposalDay}
             />
             &nbsp; of the course.
+          </Typography>
+          <Typography
+            mt={3}
+            color="error"
+            sx={{ display: errorState.questionProposalDay || errorState.questionProposalDate ? "block" : "none" }}
+          >
+            * {errorState.errorText}
           </Typography>
         </Box>
       </Box>

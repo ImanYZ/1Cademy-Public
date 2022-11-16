@@ -185,7 +185,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
-  const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   // Bubble Plot States
@@ -250,9 +249,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      console.log("semester");
+      console.log("semestersemester", semester);
       setSemesterStudentVoteState(semester);
-
+      setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -287,6 +286,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       maxProposalsPoints,
       maxQuestionsPoints
     );
+    console.log("stackedBarStats", stackedBarStats);
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
@@ -306,9 +306,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       );
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
-      setStudentsCounter(semesterDoc.data().students.length);
       setStudents(semesterDoc.data().students);
-      setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -471,7 +469,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  maxAxisY={maxStackedBarAxisY}
+                  maxAxisY={studentsCounter}
                   theme={settings.theme}
                 />
               </Box>
@@ -480,13 +478,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         </Paper>
         <Paper
           // ref={bubbleRef}
-          className="test"
+          // className="test"
           sx={{
             px: "32px",
             py: "40px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
-          component="div"
         >
           {isLoading && <BubblePlotStatsSkeleton />}
           {!isLoading && (
@@ -496,12 +493,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  marginBottom: "16px",
+                  marginBottom: "6px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderboard Points</Typography>
                 <Legend
-                  title={"Leaderboard"}
+                  title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -517,7 +514,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 width={
                   isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
                 }
-                margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
+                margin={{ top: 20, right: 0, bottom: 40, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
                 maxAxisY={bubbleAxis.maxAxisY}

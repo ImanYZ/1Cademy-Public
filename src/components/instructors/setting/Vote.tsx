@@ -163,7 +163,6 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                     "aria-label": "days",
                     min: 1,
                   }}
-                  autoFocus={true}
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",

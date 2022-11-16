@@ -53,6 +53,7 @@ import {
 
 export type IRateVersionPayload = {
   nodeId: string;
+  versionNodeId?: string;
   versionId: string;
   nodeType: INodeType;
   uname?: string; // its removed from req as its coming from auth now
@@ -169,6 +170,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
+        versionNodeId: req.body.versionNodeId,
         nodeId: req.body.nodeId,
         nodeData,
         nodeRef,

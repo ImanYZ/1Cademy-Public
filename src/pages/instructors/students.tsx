@@ -119,6 +119,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [states, setStates] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [usersStatus, setUsersStatus] = useState([]);
+  const [newStudents, setNewStudents] = useState([]);
   const open = Boolean(anchorEl);
   const db = getFirestore();
 
@@ -179,7 +180,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               id: student.uname,
               username: student.uname,
               avatar: student.imageUrl,
-              online: userStat?.state,
+              online: userStat?.state === "online",
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
@@ -313,12 +314,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const saveTableChanges = async () => {
-    const _tableRow: any = tableRows.slice();
+    let _tableRow: any = tableRows.slice();
     let students = [];
 
     for (let row of _tableRow) {
       if (!row.firstName || !row.lastName || !row.email) {
-        _tableRow.splice(_tableRow.indexOf(row), 1);
+        _tableRow = _tableRow.filter((elm: any) => !(elm === row));
       }
     }
     setTableRows(_tableRow);
@@ -353,6 +354,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     event.preventDefault();
     let _tableRows: any = tableRows.slice();
     _tableRows[index][column] = event.target.value;
+    const _savedTableState: any = new Set(savedTableState);
+    const _newStudents = _tableRows.filter((row: any) => {
+      return !_savedTableState.has(row);
+    });
+    setNewStudents(_newStudents);
     setTableRows([..._tableRows]);
   };
 
@@ -428,7 +434,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     const _tableRow: any = tableRows.slice();
     _tableRow.push({
       id: Math.floor(Math.random() * 100),
-      username: "Harry Potter",
+      username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
       lastName: "",
@@ -455,7 +461,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }
     _tableRow.push({
       id: Math.floor(Math.random() * 100),
-      username: "Harry Potter",
+      username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
       lastName: "",
@@ -780,7 +786,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         align="left"
                       >
                         {editMode &&
-                        !savedTableState.find((elm: any) => elm.email === row.email) &&
+                        !savedTableState.find((elm: any) => elm.username === row.username) &&
                         ["firstName", "lastName", "email"].includes(colmn) ? (
                           <TextField
                             style={{ width: colmn === "email" ? "150px" : "90px" }}
@@ -790,6 +796,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                             size="small"
                             id="outlined-basic"
                             variant="outlined"
+                            helperText={
+                              savedTableState.find((elm: any) => elm.email === row["email"].trim()) && colmn === "email"
+                                ? "This Email already exist in this course"
+                                : ""
+                            }
+                            error={savedTableState.find((elm: any) => elm.email === row["email"].trim())}
                             label={{ firstName: "First Name", lastName: "Last Name", email: "Email" }[colmn]}
                           />
                         ) : (
@@ -906,6 +918,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </Button>
               <Button
                 variant="contained"
+                disabled={savedTableState.some((elment: any) =>
+                  newStudents.some((elmen: any) => elment.email.trim() === elmen.email.trim())
+                )}
                 sx={{
                   color: theme => theme.palette.common.white,
                   background: theme => theme.palette.common.orange,
