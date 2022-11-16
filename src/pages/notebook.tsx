@@ -2537,7 +2537,7 @@ const Dashboard = ({}: DashboardProps) => {
           getMapGraph(`/wrongNode/${nodeId}`);
 
           setNodeParts(nodeId, node => {
-            return { ...node, wrong: !wrong, correct: false, wrongs, corrects };
+            return { ...node, wrong: !wrong, correct: false, wrongs: _wrongs, corrects: _corrects };
           });
           const nNode = graph.nodes[nodeId];
           if (nNode?.locked) return;
@@ -3150,6 +3150,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const saveProposedChildNode = useMemoizedCallback(
     (newNodeId, summary, reason, onComplete) => {
+      devLog("save Proposed Child Node", { newNodeId, summary, reason });
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
@@ -3206,8 +3207,10 @@ const Dashboard = ({}: DashboardProps) => {
             delete postData.height;
             // setIsSubmitting(true);
 
-            const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-            setNodeParts(newNodeId, node => ({ ...node, editable: false }));
+            const parentNode = graph.nodes[newNode.parents[0].node];
+            const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
+            console.log("willBeApproved", graph.nodes[newNodeId]);
+            setNodeParts(newNodeId, node => ({ ...node, editable: false, unaccepted: true }));
 
             getMapGraph("/proposeChildNode", postData, !willBeApproved);
             scrollToNode(newNodeId); // previously was to his parent
@@ -3731,7 +3734,7 @@ const Dashboard = ({}: DashboardProps) => {
       award: any,
       newNodeId: string
     ) => {
-      devLog("RATE PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award });
+      devLog("RATE PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
       // console.log("[RATE PROPOSAL]");
       if (!user) return;
 
@@ -3784,9 +3787,13 @@ const Dashboard = ({}: DashboardProps) => {
             })
           ) {
             proposalsTemp[proposalIdx].accepted = true;
-            // if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
-            //   reloadPermanentGraph();
-            // }
+            if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
+              // reloadPermanentGraph();
+              console.log("Child will be changed:", oldNodes[newNodeId]);
+              oldNodes[newNodeId] = { ...oldNodes[newNodeId], unaccepted: false };
+              // const nodes[newNodeId];
+              // unaccepted: true;
+            }
           }
           setProposals(proposalsTemp);
           return { nodes: oldNodes, edges };
@@ -3841,10 +3848,6 @@ const Dashboard = ({}: DashboardProps) => {
     if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
     setOpenSidebar(null);
   };
-
-  const nodeRef = collection(db, "nodes");
-  const newID = nodeRef.id;
-  console.log("id", newID);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>

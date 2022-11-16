@@ -6,7 +6,6 @@ import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Firestore } from "firebase/firestore";
 import React, { useCallback } from "react";
 
 // import { VictoryBar } from "victory";
@@ -14,7 +13,6 @@ import { Editor } from "@/components/Editor";
 
 // import { useRecoilValue } from "recoil";
 import { useAuth } from "../../../context/AuthContext";
-import { newId } from "../../../lib/utils/newid";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../MetaButton";
@@ -46,18 +44,19 @@ type ProposalsListProps = {
   proposeNewChild: any;
   openProposal: any;
   isAdmin: any;
-  db: Firestore;
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
+  console.log("ProposalsList:proposals", props.proposals);
   // console.log("ProposalsList", { props });
   const [user] = useAuth();
 
   const username = user.user?.uname;
 
   const rateProposalClick = useCallback(
-    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
-      props.rateProposal(
+    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) => {
+      console.log("proposal", proposal);
+      return props.rateProposal(
         event,
         props.proposals,
         props.setProposals,
@@ -67,10 +66,9 @@ const ProposalsList = (props: ProposalsListProps) => {
         wrong,
         award,
         proposal.newNodeId
-      ),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.rateProposal, props.proposals]
+      );
+    },
+    [props]
   );
 
   const deleteProposalClick = useCallback(
@@ -84,9 +82,7 @@ const ProposalsList = (props: ProposalsListProps) => {
   // console.log("-> proposals", props.proposals);
   // console.log("props.openProposal ", props.proposals);
 
-  const proposalsWithId = props.proposals.map((cur: any) => ({ ...cur, newNodeId: newId(props.db) }));
-
-  return proposalsWithId.map((proposal: any, proposalIdx: number) => {
+  return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
 
     if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {

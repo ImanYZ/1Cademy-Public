@@ -832,6 +832,7 @@ const Node = ({
                 user={user}
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
+                locked={locked}
               />
               {/* <NodeFooter
                 open={true}
@@ -1004,6 +1005,7 @@ const Node = ({
                 user={user}
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
+                locked={locked}
               />
               {/* <NodeFooter
                 open={false}
