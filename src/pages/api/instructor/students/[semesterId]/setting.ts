@@ -10,7 +10,7 @@ import moment from "moment";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeVersion } from "src/types/INodeVersion";
 import { detach } from "src/utils/helpers";
-import { getAllUserNodes, signalAllUserNodesChanges } from "src/utils";
+import { retrieveAndsignalAllUserNodesChanges } from "src/utils";
 import { deleteNode } from "src/utils/instructor";
 
 export type InstructorSemesterSettingPayload = {
@@ -108,6 +108,26 @@ const createVersion = async (
 
   const anythingChanged =
     titleChanged || contentChanged || addedParents || addedChildren || removedParents || removedChildren;
+
+  if (!isNew && anythingChanged) {
+    // TODO: move these to queue
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      // In both cases of accepting an improvement proposal and a child proposal,
+      // we need to signal all the users that it's changed.
+      await retrieveAndsignalAllUserNodesChanges({
+        batch,
+        linkedId: nodeRef.id,
+        nodeChanges,
+        major: true,
+        currentTimestamp: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        writeCounts,
+      });
+      await commitBatch(batch);
+    });
+  }
   if (anythingChanged || isNew) {
     let versionData = {
       content: nodeChanges.content || nodeData?.content,
@@ -264,12 +284,13 @@ const processNodeIdsFromSyllabusItem = async ({
       children.push({
         node: childRef.id,
         title: `Ch.${chapter}.${subChapter} ${child.title} - ${semesterTitle}`,
-        nodeType: "Relation",
+        type: "Relation",
       });
       subChapter++;
     }
   }
 
+  subChapter = 1;
   if (item.children && item.children.length) {
     for (const child of item.children) {
       const childRef = childRefs[child.title];
@@ -301,7 +322,7 @@ const processNodeIdsFromSyllabusItem = async ({
           {
             node: parentId,
             title: parentTitle,
-            nodeType: "Relation",
+            type: "Relation",
           },
         ],
         children,
@@ -387,7 +408,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       semesterData.pTagId,
       semesterData.cTagId,
       semesterData.tagId,
-    ];
+    ].filter(tagId => typeof tagId !== "undefined");
     const tagNodes = await db.collection("nodes").where("__name__", "in", _tagIds).get();
     const tagIds: string[] = [];
     const tags: string[] = [];
@@ -451,9 +472,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     for (const syllabusItem of payload.syllabus) {
       const nodeData = (await db.collection("nodes").doc(String(syllabusItem.node)).get()).data() as INode;
       semesterChildren.push({
-        node: String(nodeData.documentId),
+        node: String(syllabusItem.node),
         title: nodeData.title,
-        nodeType: "Relation",
+        type: "Relation",
       });
     }
 
