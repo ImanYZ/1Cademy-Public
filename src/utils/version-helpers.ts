@@ -432,8 +432,6 @@ export const changeNodeTitle = async ({
         major: false,
         currentTimestamp,
         writeCounts,
-        t,
-        tWriteOperations,
       });
       await commitBatch(batch);
     });
