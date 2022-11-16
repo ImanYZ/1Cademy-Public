@@ -61,7 +61,7 @@ export const CitationsSidebar = ({ identifier, openLinkedNode, open, onClose }: 
       onClose={onClose}
       width={430}
       // anchor="right"
-
+      contentSignalState={citationList}
       SidebarContent={
         <Box component={"ul"} sx={{ px: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
           {citationList.map(cur => (
