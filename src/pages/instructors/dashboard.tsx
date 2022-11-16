@@ -185,7 +185,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   // Stacked Bar Plot States
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
-  const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   // Bubble Plot States
@@ -250,9 +249,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      console.log("semester");
+      console.log("semestersemester", semester);
       setSemesterStudentVoteState(semester);
-
+      setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -287,6 +286,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       maxProposalsPoints,
       maxQuestionsPoints
     );
+    console.log("stackedBarStats", stackedBarStats);
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
@@ -306,9 +306,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       );
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
-      setStudentsCounter(semesterDoc.data().students.length);
       setStudents(semesterDoc.data().students);
-      setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -471,7 +469,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  maxAxisY={maxStackedBarAxisY}
+                  maxAxisY={studentsCounter}
                   theme={settings.theme}
                 />
               </Box>
