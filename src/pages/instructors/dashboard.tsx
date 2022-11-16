@@ -50,7 +50,12 @@ export type BoxData = {
   "Question Points": Chapter;
   "Vote Points": Chapter;
 };
-
+// data={data["Question Points"]}
+// drawYAxis={isMovil}
+// width={isMovil ? 300 : 300}
+// boxHeight={25}
+// margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+// offsetX={isMovil ? 150 : 2}
 // const data: BoxData = {
 //   "Proposal Points": {
 //     "The way of the program": [20, 23, 24, 24, 24, 25, 30],
@@ -174,11 +179,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
+  const isUpTablet = useMediaQuery(theme.breakpoints.up("md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  console.log("isUpTablet", isUpTablet);
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
-  //
 
+  //smester configs
+  const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
   const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
   // const [rateCondition, setRateCondition] = useState<RateCondition | null>(null);
@@ -311,6 +320,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
       );
+      setSemesterConfig(semesterDoc.data() as ISemester);
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudents(semesterDoc.data().students);
@@ -319,7 +329,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   }, [currentSemester, currentSemester?.tagId, db]);
 
   useEffect(() => {
-    if (!currentSemester || !currentSemester.tagId) return;
+    if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
     setIsLoading(true);
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
@@ -333,11 +343,28 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
 
-      const porposalsPoints = getBoxPlotData(userDailyStats, "proposals");
+      const porposalsPoints = getBoxPlotData(
+        userDailyStats,
+        "proposals",
+        semesterConfig?.nodeProposals.numPoints,
+        semesterConfig?.nodeProposals.numProposalPerDay
+      );
       setBoxPlotData(porposalsPoints);
-      const questionsPoints = getBoxPlotData(userDailyStats, "questions");
+      const questionsPoints = getBoxPlotData(
+        userDailyStats,
+        "questions",
+        semesterConfig?.questionProposals.numPoints,
+        semesterConfig?.questionProposals.numQuestionsPerDay
+      );
       setBoxPlotQuestions(questionsPoints);
-      const votesPoints = getBoxPlotData(userDailyStats, "votes");
+      const votesPoints = getBoxPlotData(
+        userDailyStats,
+        "votes",
+        0,
+        0,
+        semesterConfig?.votes.pointIncrementOnAgreement,
+        semesterConfig?.votes.pointDecrementOnAgreement
+      );
       setBoxPlotVotes(votesPoints);
 
       const { min, max } = getMaxMinVoxPlotData(porposalsPoints);
@@ -357,7 +384,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db]);
+  }, [currentSemester, currentSemester?.tagId, db, semesterConfig]);
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
     return {
@@ -393,7 +420,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
-
+  const boxPlotWidth = isDesktop ? 500 : isUpTablet ? 450 : 200;
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
@@ -566,17 +593,19 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                <Typography sx={{ fontSize: "16px" }}>Chapters </Typography>
+                <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                  Chapters{" "}
+                </Typography>
                 <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
               </Box>
               <BoxChart
                 theme={settings.theme}
                 data={boxPlotData}
-                // width={isMovil ? 300 : 450}
-                width={trendPlotWith}
+                width={boxPlotWidth}
+                // width={trendPlotWith}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                offsetX={150}
+                offsetX={isMovil ? 125 : 200}
                 offsetY={18}
                 identifier="boxplot1"
                 maxX={minMaxProposalBoxPlot.max}
@@ -586,17 +615,21 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             </Box>
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
+                {isMovil && (
+                  <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                    Chapters{" "}
+                  </Typography>
+                )}
                 <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
               </Box>
               <BoxChart
                 theme={"Dark"}
                 data={boxPlotQuestions}
-                drawYAxis={true}
-                width={trendPlotWith}
+                drawYAxis={isMovil || isTablet}
+                width={boxPlotWidth}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                offsetX={150}
+                offsetX={isTablet ? 200 : isMovil ? 125 : 2}
                 offsetY={18}
                 identifier="boxplot1"
                 maxX={minMaxQuestionBoxPlot.max}
@@ -606,17 +639,21 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             </Box>
             <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                {isMovil && <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>}
+                {isMovil && (
+                  <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                    Chapters{" "}
+                  </Typography>
+                )}
                 <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
               </Box>
               <BoxChart
                 theme={"Dark"}
                 data={boxPlotVotes}
-                drawYAxis={true}
-                width={trendPlotWith}
+                drawYAxis={isMovil || isTablet}
+                width={boxPlotWidth}
                 boxHeight={25}
                 margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                offsetX={150}
+                offsetX={isTablet ? 200 : isMovil ? 125 : 2}
                 offsetY={18}
                 identifier="boxplot1"
                 minX={minMaxVotesBoxPlot.min}

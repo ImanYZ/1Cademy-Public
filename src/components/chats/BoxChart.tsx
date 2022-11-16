@@ -33,12 +33,12 @@ function drawChart(
   // const offsetY = 18;
   // width = width + OFFSET_X;
   const height = 50 * Object.keys(data).length; // Height with padding and margin
-  const widthProcessed = width - margin.left - margin.right;
+  const widthProcessed = width - margin.left - margin.right + (drawYAxis ? offsetX : 0);
   const heightProcessed = height - margin.top - margin.bottom;
 
   // configure SVG's size and position
   svg
-    .attr("width", width)
+    .attr("width", drawYAxis ? width + offsetX : width)
     .attr("height", height)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -53,7 +53,7 @@ function drawChart(
   // redraw svg
   const x = d3
     .scaleLinear()
-    .domain([minX, maxX])
+    .domain([minX, maxX + 5])
     .range([0, widthProcessed - offsetX]);
   svg
     .append("g")
