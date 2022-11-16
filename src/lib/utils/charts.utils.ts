@@ -17,10 +17,10 @@ export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
   let questions = 0;
 
   data.map(stat => {
-    childProposals += stat.newNodes;
+    childProposals += stat.nodes;
     editProposals += stat.improvements;
     links += stat.links;
-    nodes += stat.improvements + stat.newNodes;
+    nodes += stat.newNodes;
     votes += stat.votes;
     questions += stat.questions;
   });

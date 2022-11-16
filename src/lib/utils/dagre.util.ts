@@ -1,5 +1,10 @@
 import dagre from "dagre";
 
+type GraphParent = {
+  parent: string;
+  node: string;
+};
+
 export type GraphObject = {
   nodes: {
     id: string;
@@ -23,14 +28,16 @@ export type GraphObject = {
     to: string;
     data: dagre.GraphEdge;
   }[];
+  parents: GraphParent[];
 };
 
 export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
 export const COLUMN_GAP = 190; // The minimum gap between the node columns.
 
-const createGraph = () => {
+export const createGraph = () => {
   // let dag1: dagre.graphlib.Graph[] = [];
   // Using dagre for calculating location of nodes and arrows on map
+  // compound: true: to cluster nodes
   const g = new dagre.graphlib.Graph({ compound: true, directed: true })
     .setGraph({
       // directed: true,
@@ -62,13 +69,20 @@ const mapGraphToObject = (g: dagre.graphlib.Graph<{}>): GraphObject => {
   return {
     nodes: g.nodes().map((v: string) => ({ id: v, data: g.node(v) })),
     edges: g.edges().map(e => ({ from: e.v, to: e.w, data: g.edge(e) })),
+    parents: g.nodes().reduce((acu: GraphParent[], cur: string): GraphParent[] => {
+      const parent = g.parent(cur);
+      if (!parent) return [...acu];
+
+      return [...acu, { parent, node: cur }];
+    }, []),
   };
 };
 
-const mapObjectToGraph = ({ nodes, edges }: GraphObject): dagre.graphlib.Graph<{}> => {
+const mapObjectToGraph = ({ nodes, edges, parents }: GraphObject): dagre.graphlib.Graph<{}> => {
   const g = createGraph();
   nodes.forEach(node => g.setNode(node.id, node.data));
   edges.forEach(edge => g.setEdge(edge.from, edge.to, edge.data));
+  parents.forEach(parent => g.setParent(parent.node, parent.parent));
   return g;
 };
 

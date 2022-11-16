@@ -8,7 +8,7 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Autocomplete, FormControlLabel, FormGroup, LinearProgress, Switch, Tab, Tabs, TextField } from "@mui/material";
+import { Autocomplete, FormControlLabel, FormGroup, Switch, Tab, Tabs, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
@@ -87,7 +87,7 @@ export const UserSettigsSidebar = ({
 
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const [value, setValue] = React.useState(0);
 
@@ -329,36 +329,25 @@ export const UserSettigsSidebar = ({
 
   useEffect(() => {
     const setDefaultTag = async () => {
-      // if (choosingNode && chosenNode && choosingNode === "tag") {
       if (nodeBookState.choosingNode?.id === "tag" && nodeBookState.chosenNode) {
-        // setIsSubmitting(true); // TODO: enable submitting global state
         try {
-          // await firebase.idToken();
-          // console.log("CALLING API", nodeBookState.chosenNode.id);
-          setIsLoading(true);
-          await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
-          let { reputation } = await retrieveAuthenticatedUser(user.userId, null);
-
-          setIsLoading(false);
-          // await axios.post(`/changeDefaultTag/${chosenNode}`);
-          // setTag({ node: chosenNode, title: chosenNodeTitle });
           dispatch({
             type: "setAuthUser",
             payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
           });
 
-          if (reputation) {
-            dispatch({ type: "setReputation", payload: reputation });
-          }
+          await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+
+          if (!reputation) throw Error("Cant find Reputation");
+          if (!userUpdated) throw Error("Cant find User");
+
+          dispatch({ type: "setReputation", payload: reputation });
+          dispatch({ type: "setAuthUser", payload: userUpdated });
         } catch (err) {
-          setIsLoading(false);
           console.error(err);
           // window.location.reload();
         }
-        // setChoosingNode(false);
-        // setChosenNode(null);
-        // setChosenNodeTitle(null);
-        // setIsSubmitting(false);
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
       }
@@ -399,6 +388,8 @@ export const UserSettigsSidebar = ({
           | "foundFrom"
           | "birthDate"
           | "view"
+          | "showClusterOptions"
+          | "showClusters"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -463,9 +454,17 @@ export const UserSettigsSidebar = ({
           case "view":
             userLogCollection = "userViewLog";
             break;
+          case "showClusterOptions":
+            userLogCollection = "userShowClusterOptionsLog";
+            break;
+          case "showClusters":
+            userLogCollection = "userShowClustersLog";
+            break;
           default:
           // code block
         }
+
+        if (!userLogCollection) return console.error("!invalid user log collection");
 
         const userLogRef = doc(collection(db, userLogCollection));
         await setDoc(userLogRef, {
@@ -533,6 +532,27 @@ export const UserSettigsSidebar = ({
     },
     [changeAttr, dispatch]
   );
+
+  const handleShowClusterOptionsSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newShowClusterOption = !settings.showClusterOptions;
+      changeAttr("showClusterOptions")(newShowClusterOption);
+      dispatch({ type: "setShowClusterOptions", payload: newShowClusterOption });
+    },
+    [changeAttr, dispatch, settings.showClusterOptions]
+  );
+
+  const handleShowClustersSwitch = useCallback(
+    (event: any) => {
+      event.preventDefault();
+      const newShowCluster = !settings.showClusters;
+      changeAttr("showClusters")(newShowCluster);
+      dispatch({ type: "setShowClusters", payload: newShowCluster });
+    },
+    [changeAttr, dispatch, settings.showClusters]
+  );
+
   const closeTagSelector = useCallback(() => {
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
@@ -723,6 +743,35 @@ export const UserSettigsSidebar = ({
               label={`Display name: ${getDisplayNameValue(user)}`}
             />
           </FormGroup>
+
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  // checked={!values.chooseUname}
+                  checked={settings.showClusterOptions}
+                  onChange={e => handleShowClusterOptionsSwitch(e)}
+                />
+              }
+              label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
+            />
+          </FormGroup>
+
+          {settings.showClusterOptions && (
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    // checked={!values.chooseUname}
+                    checked={settings.showClusters}
+                    onChange={e => handleShowClustersSwitch(e)}
+                  />
+                }
+                label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
+              />
+            </FormGroup>
+          )}
+
           {/* {props.showHideClusters && (
 
             )}
@@ -1073,7 +1122,7 @@ export const UserSettigsSidebar = ({
                     />
                     {user.tag}
 
-                    {isLoading && <LinearProgress />}
+                    {/* {isLoading && <LinearProgress />} */}
                   </div>
                 </MemoizedMetaButton>
                 {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
