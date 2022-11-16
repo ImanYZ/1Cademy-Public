@@ -2486,9 +2486,14 @@ const Dashboard = ({}: DashboardProps) => {
         getMapGraph(`/correctNode/${nodeId}`);
         setNodeParts(nodeId, node => {
           const correct = node.correct;
-          const point = correct ? -1 : 1;
-          const corrects = node.corrects + point;
-          return { ...node, correct: !correct, wrong: false, corrects };
+          const wrong = node.wrong;
+
+          const correctChange = correct ? -1 : 1;
+          const wrongChange = !correct && wrong ? -1 : 0;
+          const corrects = node.corrects + correctChange;
+          const wrongs = node.wrongs + wrongChange;
+
+          return { ...node, correct: !correct, wrong: false, corrects, wrongs };
         });
       }
       event.currentTarget.blur();
@@ -2519,10 +2524,16 @@ const Dashboard = ({}: DashboardProps) => {
           getMapGraph(`/wrongNode/${nodeId}`);
 
           setNodeParts(nodeId, node => {
+            const correct = node.correct;
             const wrong = node.wrong;
-            const point = wrong ? -1 : 1;
-            const wrongs = node.wrongs + point;
-            return { ...node, wrong: !wrong, correct: false, wrongs };
+            // const point = wrong ? -1 : 1;
+
+            const correctChange = !wrong && correct ? -1 : 0;
+            const wrongChange = wrong ? -1 : 1;
+            const corrects = node.corrects + correctChange;
+            const wrongs = node.wrongs + wrongChange;
+
+            return { ...node, wrong: !wrong, correct: false, wrongs, corrects };
           });
           const nNode = graph.nodes[nodeId];
           if (nNode?.locked) return;
