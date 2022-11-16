@@ -273,8 +273,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
+      console.log("semester students", semester);
       setSemesterStudentVoteState(semester);
-      setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
       setThereIsData(true);
     };
@@ -326,6 +326,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         semesterDoc.data() as ISemester
       );
       setSemesterConfig(semesterDoc.data() as ISemester);
+      setStudentsCounter((semesterDoc.data() as ISemester).students.length);
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudents(semesterDoc.data().students);

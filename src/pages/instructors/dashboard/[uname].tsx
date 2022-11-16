@@ -52,9 +52,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
-  const isUpTablet = useMediaQuery(theme.breakpoints.up("md"));
-  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
-  const boxPlotWidth = isDesktop ? 500 : isUpTablet ? 450 : 200;
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
@@ -143,7 +143,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-      setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -224,12 +223,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         semesterDoc.data() as ISemester
       );
       setSemesterConfig(semesterDoc.data() as ISemester);
+      setStudentsCounter((semesterDoc.data() as ISemester).students.length);
+
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudents(semesterDoc.data().students);
     };
     getSemesterStudents();
-  }, [currentSemester, currentSemester?.tagId, db]);
+  }, [currentSemester, db]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !queryUname || !semesterConfig) return;
@@ -558,7 +559,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isDesktop ? 3 : isTablet ? 2 : 1} />}
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -576,9 +577,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     // width={trendPlotWith}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                    offsetX={isMovil ? 125 : 200}
+                    offsetX={isMovil ? 100 : 100}
                     offsetY={18}
-                    identifier="boxplot1"
+                    identifier="boxplot-student-1"
                     maxX={boxStats.proposalsPoints.max}
                     minX={boxStats.proposalsPoints.min}
                     studentStats={studentBoxStat.proposalsPoints}
@@ -601,9 +602,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     width={boxPlotWidth}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isTablet ? 200 : isMovil ? 125 : 7}
+                    offsetX={isMovil ? 100 : 7}
                     offsetY={18}
-                    identifier="boxplot1"
+                    identifier="boxplot-student-2"
                     maxX={boxStats.questionsPoints.max}
                     minX={boxStats.questionsPoints.min}
                     studentStats={studentBoxStat.questionsPoints}
@@ -626,9 +627,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     width={boxPlotWidth}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isTablet ? 200 : isMovil ? 125 : 7}
+                    offsetX={isMovil ? 100 : 7}
                     offsetY={18}
-                    identifier="boxplot1"
+                    identifier="boxplot-student-3"
                     minX={boxStats.votesPoints.min}
                     maxX={boxStats.votesPoints.max}
                     studentStats={studentBoxStat.votesPoints}

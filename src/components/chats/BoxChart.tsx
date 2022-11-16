@@ -81,7 +81,6 @@ function drawChart(
       .on("mouseover", function (e) {
         const _this = this as any;
         d3.select(_this).style("cursor", "pointer");
-        console.log("event", e);
         tooltip
           .html(`${findLabel(e.target.innerHTML)}`)
           .style("opacity", 1)
