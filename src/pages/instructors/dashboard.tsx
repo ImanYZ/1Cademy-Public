@@ -26,6 +26,7 @@ import {
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
+import { BoxPlotStatsSkeleton } from "@/components/instructors/skeletons/BoxPlotStatsSkeleton";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { BoxChart } from "../../components/chats/BoxChart";
@@ -338,6 +339,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setBoxPlotData({});
+        setBoxPlotQuestions({});
+        setBoxPlotVotes({});
+
         return;
       }
 
@@ -591,76 +596,82 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               flexWrap: "wrap",
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                  Chapters{" "}
-                </Typography>
-                <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
-              </Box>
-              <BoxChart
-                theme={settings.theme}
-                data={boxPlotData}
-                width={boxPlotWidth}
-                // width={trendPlotWith}
-                boxHeight={25}
-                margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                offsetX={isMovil ? 125 : 200}
-                offsetY={18}
-                identifier="boxplot1"
-                maxX={minMaxProposalBoxPlot.max}
-                minX={minMaxProposalBoxPlot.min}
-              />
-              {isMovil && <BoxLegend />}
-            </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                {isMovil && (
-                  <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                    Chapters{" "}
-                  </Typography>
-                )}
-                <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
-              </Box>
-              <BoxChart
-                theme={"Dark"}
-                data={boxPlotQuestions}
-                drawYAxis={isMovil || isTablet}
-                width={boxPlotWidth}
-                boxHeight={25}
-                margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                offsetX={isTablet ? 200 : isMovil ? 125 : 2}
-                offsetY={18}
-                identifier="boxplot1"
-                maxX={minMaxQuestionBoxPlot.max}
-                minX={minMaxQuestionBoxPlot.min}
-              />
-              {isMovil && <BoxLegend />}
-            </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                {isMovil && (
-                  <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                    Chapters{" "}
-                  </Typography>
-                )}
-                <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
-              </Box>
-              <BoxChart
-                theme={"Dark"}
-                data={boxPlotVotes}
-                drawYAxis={isMovil || isTablet}
-                width={boxPlotWidth}
-                boxHeight={25}
-                margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                offsetX={isTablet ? 200 : isMovil ? 125 : 2}
-                offsetY={18}
-                identifier="boxplot1"
-                minX={minMaxVotesBoxPlot.min}
-                maxX={minMaxVotesBoxPlot.max}
-              />
-              {isMovil && <BoxLegend />}
-            </Box>
+            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} mobile={isTablet || isMovil} />}
+            {!isLoading && (
+              <>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                      Chapters{" "}
+                    </Typography>
+                    <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                  </Box>
+
+                  <BoxChart
+                    theme={settings.theme}
+                    data={boxPlotData}
+                    width={boxPlotWidth}
+                    // width={trendPlotWith}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
+                    offsetX={isMovil ? 125 : 200}
+                    offsetY={18}
+                    identifier="boxplot1"
+                    maxX={minMaxProposalBoxPlot.max}
+                    minX={minMaxProposalBoxPlot.min}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    {isMovil && (
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                    )}
+                    <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                  </Box>
+                  <BoxChart
+                    theme={"Dark"}
+                    data={boxPlotQuestions}
+                    drawYAxis={isMovil || isTablet}
+                    width={boxPlotWidth}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetY={18}
+                    identifier="boxplot1"
+                    maxX={minMaxQuestionBoxPlot.max}
+                    minX={minMaxQuestionBoxPlot.min}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    {isMovil && (
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                    )}
+                    <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                  </Box>
+                  <BoxChart
+                    theme={"Dark"}
+                    data={boxPlotVotes}
+                    drawYAxis={isMovil || isTablet}
+                    width={boxPlotWidth}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetY={18}
+                    identifier="boxplot1"
+                    minX={minMaxVotesBoxPlot.min}
+                    maxX={minMaxVotesBoxPlot.max}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+              </>
+            )}
           </Box>
           {!isMovil && <BoxLegend />}
         </Paper>
