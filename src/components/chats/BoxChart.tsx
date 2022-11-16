@@ -30,7 +30,6 @@ function drawChart(
 
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 40 };
-  console.log({ offsetX });
   // const offsetY = 18;
   // width = width + OFFSET_X;
   const height = 50 * Object.keys(data).length; // Height with padding and margin
@@ -97,7 +96,6 @@ function drawChart(
   const statistics = keys
     .map(key => {
       const obj = data[key];
-      console.log("OBj", obj);
       const result = statistic(obj);
       if (!result) return null;
 
@@ -193,10 +191,7 @@ function drawChart(
       .data(statistics)
       .join("path")
       .attr("d", locationIconPath)
-      .attr("transform", d => {
-        console.log("ddddd", d);
-        return `translate(${offsetX + x(studentStats[d.key] ?? 0) - 7},${d.boxCenter})`;
-      })
+      .attr("transform", d => `translate(${offsetX + x(studentStats[d.key] ?? 0) - 7},${d.boxCenter})`)
       .attr("fill", "#EF5350");
   }
 
@@ -244,7 +239,6 @@ export const BoxChart = ({
   minX,
   studentStats,
 }: BoxChartProps) => {
-  console.log("datadatadata", data);
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(

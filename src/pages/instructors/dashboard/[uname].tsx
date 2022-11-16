@@ -125,7 +125,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-    console.log("currentSemester.tagId", currentSemester.tagId);
+
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -268,7 +268,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         semesterConfig?.votes.pointIncrementOnAgreement,
         semesterConfig?.votes.pointDecrementOnAgreement
       );
-      console.log("studentttt", { proposalsPoints, questionsPoints, votesPoints });
       setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
@@ -323,6 +322,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+
       setBoxStats({
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },

@@ -197,7 +197,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const isUpTablet = useMediaQuery(theme.breakpoints.up("md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
-  console.log("isUpTablet", isUpTablet);
+
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
@@ -257,7 +257,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-    console.log("currentSemester.tagId", currentSemester.tagId);
+
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -274,7 +274,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      console.log("semestersemester", semester);
       setSemesterStudentVoteState(semester);
       setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
@@ -311,7 +310,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       maxProposalsPoints,
       maxQuestionsPoints
     );
-    console.log("stackedBarStats", stackedBarStats);
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
@@ -381,6 +379,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+
       setBoxStats({
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
@@ -916,7 +915,6 @@ export const getBoxPlotData = (
   // days -> chapters -> data
   //
   // proposal=> chapters => [1,2,34,54]
-  console.log("userDailyStats", userDailyStats);
   const res = userDailyStats.map(cur => {
     // [{c1:1,c2:3},{c1:1,c2:3}]
     const groupedDays = groupStudentPointsDayChapter(
@@ -931,7 +929,6 @@ export const getBoxPlotData = (
     return groupedDays;
   });
 
-  console.log("groupedDays", res);
   const res2 = res.reduce((acu: { [key: string]: number[] }, cur) => {
     // const prevData: number[] = acu[key] ?? [];
     const merged = Object.keys(cur).reduce(
