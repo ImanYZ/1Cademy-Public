@@ -1664,7 +1664,7 @@ export const versionCreateUpdate = async ({
             isStudied: true,
             bookmarked: false,
             changed: false,
-            node: nodeRef.id,
+            node: childNodeRef.id,
             open: true,
             user: voter,
             visible: true,
