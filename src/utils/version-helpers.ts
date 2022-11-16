@@ -4,6 +4,7 @@ import {
   getNode,
   getTypedCollections,
   initializeNewReputationData,
+  isVersionApproved,
   retrieveAndsignalAllUserNodesChanges,
   tagsAndCommPoints,
   updateReputation,
@@ -1065,21 +1066,6 @@ export const getUserVersion = async ({ versionId, nodeType, uname, t = false }: 
     userVersionRef = userVersionsColl.doc();
   }
   return { userVersionData, userVersionRef };
-};
-
-export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
-  try {
-    if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
-    const nodeRating = nodeData.corrects - nodeData.wrongs;
-    const versionRating = corrects - wrongs;
-    if (versionRating >= nodeRating / 2) {
-      return nodeData;
-    }
-    return false;
-  } catch (err) {
-    console.error(err);
-    return err;
-  }
 };
 
 export const updateProposersReputationsOnNode = ({

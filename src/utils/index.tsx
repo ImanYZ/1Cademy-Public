@@ -1,6 +1,6 @@
 export { getNode } from "./getNode";
 export { getUserNode } from "./getUserNode";
-export { firstWeekMonthDays } from "./helpers";
+export { firstWeekMonthDays, isVersionApproved } from "./helpers";
 export { UpDownVoteNode } from "./upDownVoteNode";
 export { getAllUserNodes } from "./getAllUserNodes";
 export { replaceUsername } from "./replaceUsername";
@@ -37,7 +37,6 @@ export {
   compareFlatLinks,
   schoolPointTypes,
   generateTagsData,
-  isVersionApproved,
   generateTagsOfTags,
   versionCreateUpdate,
   proposalNotification,
