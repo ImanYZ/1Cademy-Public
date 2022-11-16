@@ -432,7 +432,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
-  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 240;
+  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
