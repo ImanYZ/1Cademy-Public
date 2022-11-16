@@ -1,8 +1,11 @@
 import PlaceIcon from "@mui/icons-material/Place";
+import SquareIcon from "@mui/icons-material/Square";
 import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 
+import { BoxChart } from "@/components/chats/BoxChart";
+import { BoxPlotStatsSkeleton } from "@/components/instructors/skeletons/BoxPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "@/components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
@@ -31,7 +34,10 @@ import {
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
 import {
+  BoxStats,
+  getBoxPlotData,
   getBubbleStats,
+  getMaxMinVoxPlotData,
   makeTrendData,
   StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
@@ -44,6 +50,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
+  const isUpTablet = useMediaQuery(theme.breakpoints.up("md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const boxPlotWidth = isDesktop ? 500 : isUpTablet ? 450 : 200;
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
@@ -95,6 +105,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     },
     [windowWidth]
   );
+  /// Box plot States
+  const [boxStats, setBoxStats] = useState<BoxStats>({
+    proposalsPoints: { data: {}, min: 0, max: 1000 },
+    questionsPoints: { data: {}, min: 0, max: 1000 },
+    votesPoints: { data: {}, min: 0, max: 1000 },
+  });
+  //smester configs
+  const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -197,6 +215,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
       );
+      setSemesterConfig(semesterDoc.data() as ISemester);
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudents(semesterDoc.data().students);
@@ -230,7 +249,56 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db, queryUname]);
+  useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
+    setIsLoading(true);
+    const getUserDailyStat = async () => {
+      const userDailyStatRef = collection(db, "semesterStudentStats");
+      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
+      const userDailyStatDoc = await getDocs(q);
 
+      if (!userDailyStatDoc.docs.length) {
+        setBoxStats({
+          proposalsPoints: { data: {}, min: 0, max: 1000 },
+          questionsPoints: { data: {}, min: 0, max: 1000 },
+          votesPoints: { data: {}, min: 0, max: 1000 },
+        });
+        return;
+      }
+
+      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+
+      const proposalsPoints = getBoxPlotData(
+        userDailyStats,
+        "proposals",
+        semesterConfig?.nodeProposals.numPoints,
+        semesterConfig?.nodeProposals.numProposalPerDay
+      );
+      const questionsPoints = getBoxPlotData(
+        userDailyStats,
+        "questions",
+        semesterConfig?.questionProposals.numPoints,
+        semesterConfig?.questionProposals.numQuestionsPerDay
+      );
+      const votesPoints = getBoxPlotData(
+        userDailyStats,
+        "votes",
+        0,
+        0,
+        semesterConfig?.votes.pointIncrementOnAgreement,
+        semesterConfig?.votes.pointDecrementOnAgreement
+      );
+      const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
+      const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
+      const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+      setBoxStats({
+        proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
+        questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
+        votesPoints: { data: votesPoints, min: minV, max: maxV },
+      });
+    };
+    getUserDailyStat();
+  }, [currentSemester, currentSemester?.tagId, db, semesterConfig]);
   // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
   //   const trends: Trends[] = [];
   //   data.map(dailyStat => {
@@ -266,7 +334,20 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     return <NoDataMessage />;
   }
   if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
-
+  const BoxLegend = () => {
+    return (
+      <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
+        <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+          <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
+          <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+        </Box>
+      </Box>
+    );
+  };
   return (
     <Box
       sx={{
@@ -412,6 +493,113 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               </Box>
             </>
           )}
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "16px",
+        }}
+      >
+        <Paper
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: isMovil ? "10px 10px" : "40px 20px",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { sm: "column", md: "row" },
+              justifyContent: "center",
+              alignItems: "center",
+              gap: isMovil ? "24px" : "0px",
+              flexWrap: "wrap",
+            }}
+          >
+            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} mobile={isTablet || isMovil} />}
+            {!isLoading && (
+              <>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                      Chapters{" "}
+                    </Typography>
+                    <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                  </Box>
+
+                  <BoxChart
+                    theme={settings.theme}
+                    data={boxStats.proposalsPoints.data}
+                    width={boxPlotWidth}
+                    // width={trendPlotWith}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
+                    offsetX={isMovil ? 125 : 200}
+                    offsetY={18}
+                    identifier="boxplot1"
+                    maxX={boxStats.proposalsPoints.max}
+                    minX={boxStats.proposalsPoints.min}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    {isMovil && (
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                    )}
+                    <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                  </Box>
+                  <BoxChart
+                    theme={"Dark"}
+                    data={boxStats.questionsPoints.data}
+                    drawYAxis={isMovil || isTablet}
+                    width={boxPlotWidth}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetY={18}
+                    identifier="boxplot1"
+                    maxX={boxStats.questionsPoints.max}
+                    minX={boxStats.questionsPoints.min}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    {isMovil && (
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                    )}
+                    <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                  </Box>
+                  <BoxChart
+                    theme={"Dark"}
+                    data={boxStats.votesPoints.data}
+                    drawYAxis={isMovil || isTablet}
+                    width={boxPlotWidth}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetY={18}
+                    identifier="boxplot1"
+                    minX={boxStats.votesPoints.min}
+                    maxX={boxStats.votesPoints.max}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+              </>
+            )}
+          </Box>
+          {!isMovil && <BoxLegend />}
         </Paper>
       </Box>
       <Box

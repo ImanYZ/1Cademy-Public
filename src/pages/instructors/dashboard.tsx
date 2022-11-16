@@ -1,4 +1,3 @@
-import PlaceIcon from "@mui/icons-material/Place";
 import SquareIcon from "@mui/icons-material/Square";
 import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 // import { useTheme } from "@mui/material/styles";
@@ -156,6 +155,20 @@ export type TrendStats = {
 //   maxProposalsPoints: number;
 //   maxQuestionsPoints: number;
 // };
+export type BoxChapterStat = {
+  [key: string]: number[];
+};
+
+export type BoxTypeStat = {
+  data: BoxChapterStat;
+  min: number;
+  max: number;
+};
+export type BoxStats = {
+  proposalsPoints: BoxTypeStat;
+  questionsPoints: BoxTypeStat;
+  votesPoints: BoxTypeStat;
+};
 
 const BoxLegend = () => {
   return (
@@ -163,10 +176,6 @@ const BoxLegend = () => {
       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
         <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
         <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
-      </Box>
-      <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
-        <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
       </Box>
     </Box>
   );
@@ -201,19 +210,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
-  /// bloc plot
-  const [boxPlotData, setBoxPlotData] = useState<{
-    [x: string]: number[];
-  }>({});
-  const [boxPlotQuestions, setBoxPlotQuestions] = useState<{
-    [x: string]: number[];
-  }>({});
-  const [boxPlotVotes, setBoxPlotVotes] = useState<{
-    [x: string]: number[];
-  }>({});
-  const [minMaxProposalBoxPlot, setMinMaxProposalBoxPlot] = useState({ min: 0, max: 300 });
-  const [minMaxQuestionBoxPlot, setMinMaxQuestionBoxPlot] = useState({ min: 0, max: 0 });
-  const [minMaxVotesBoxPlot, setMinMaxVotesBoxPlot] = useState({ min: 0, max: 0 });
+  /// Box plot States
+  const [boxStats, setBoxStats] = useState<BoxStats>({
+    proposalsPoints: { data: {}, min: 0, max: 1000 },
+    questionsPoints: { data: {}, min: 0, max: 1000 },
+    votesPoints: { data: {}, min: 0, max: 1000 },
+  });
 
   //TrendStats
   const [trendStats, setTrendStats] = useState<TrendStats>({
@@ -339,29 +341,29 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
-        setBoxPlotData({});
-        setBoxPlotQuestions({});
-        setBoxPlotVotes({});
 
+        setBoxStats({
+          proposalsPoints: { data: {}, min: 0, max: 1000 },
+          questionsPoints: { data: {}, min: 0, max: 1000 },
+          votesPoints: { data: {}, min: 0, max: 1000 },
+        });
         return;
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
 
-      const porposalsPoints = getBoxPlotData(
+      const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
         semesterConfig?.nodeProposals.numPoints,
         semesterConfig?.nodeProposals.numProposalPerDay
       );
-      setBoxPlotData(porposalsPoints);
       const questionsPoints = getBoxPlotData(
         userDailyStats,
         "questions",
         semesterConfig?.questionProposals.numPoints,
         semesterConfig?.questionProposals.numQuestionsPerDay
       );
-      setBoxPlotQuestions(questionsPoints);
       const votesPoints = getBoxPlotData(
         userDailyStats,
         "votes",
@@ -370,15 +372,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         semesterConfig?.votes.pointIncrementOnAgreement,
         semesterConfig?.votes.pointDecrementOnAgreement
       );
-      setBoxPlotVotes(votesPoints);
-
-      const { min, max } = getMaxMinVoxPlotData(porposalsPoints);
+      const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+      setBoxStats({
+        proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
+        questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
+        votesPoints: { data: votesPoints, min: minV, max: maxV },
+      });
 
-      setMinMaxProposalBoxPlot({ min, max });
-      setMinMaxQuestionBoxPlot({ min: minQ, max: maxQ });
-      setMinMaxVotesBoxPlot({ min: minV, max: maxV });
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
         editProposals: makeTrendData(userDailyStats, "editProposals"),
@@ -609,7 +611,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
                   <BoxChart
                     theme={settings.theme}
-                    data={boxPlotData}
+                    data={boxStats.proposalsPoints.data}
                     width={boxPlotWidth}
                     // width={trendPlotWith}
                     boxHeight={25}
@@ -617,8 +619,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                     offsetX={isMovil ? 125 : 200}
                     offsetY={18}
                     identifier="boxplot1"
-                    maxX={minMaxProposalBoxPlot.max}
-                    minX={minMaxProposalBoxPlot.min}
+                    maxX={boxStats.proposalsPoints.max}
+                    minX={boxStats.proposalsPoints.min}
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
@@ -633,7 +635,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   </Box>
                   <BoxChart
                     theme={"Dark"}
-                    data={boxPlotQuestions}
+                    data={boxStats.questionsPoints.data}
                     drawYAxis={isMovil || isTablet}
                     width={boxPlotWidth}
                     boxHeight={25}
@@ -641,8 +643,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                     offsetX={isTablet ? 200 : isMovil ? 125 : 2}
                     offsetY={18}
                     identifier="boxplot1"
-                    maxX={minMaxQuestionBoxPlot.max}
-                    minX={minMaxQuestionBoxPlot.min}
+                    maxX={boxStats.questionsPoints.max}
+                    minX={boxStats.questionsPoints.min}
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
@@ -657,7 +659,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   </Box>
                   <BoxChart
                     theme={"Dark"}
-                    data={boxPlotVotes}
+                    data={boxStats.votesPoints.data}
                     drawYAxis={isMovil || isTablet}
                     width={boxPlotWidth}
                     boxHeight={25}
@@ -665,8 +667,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                     offsetX={isTablet ? 200 : isMovil ? 125 : 2}
                     offsetY={18}
                     identifier="boxplot1"
-                    minX={minMaxVotesBoxPlot.min}
-                    maxX={minMaxVotesBoxPlot.max}
+                    minX={boxStats.votesPoints.min}
+                    maxX={boxStats.votesPoints.max}
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
@@ -863,7 +865,7 @@ export const makeTrendData = (data: SemesterStudentStat[], key: string): Trends[
   }) as Trends[];
 };
 
-const getBoxPlotData = (
+export const getBoxPlotData = (
   userDailyStats: ISemesterStudentStat[],
   type: string,
   numPoints = 1,
@@ -931,7 +933,7 @@ const getBoxPlotData = (
 //   }, {});
 // };
 
-const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
+export const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
   return Object.keys(boxPlotData).reduce(
     (acu, cur) => {
       const minArray = Math.min(...boxPlotData[cur]);
