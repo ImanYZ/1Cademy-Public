@@ -16,7 +16,7 @@ import {
   signalAllUserNodesChanges,
   updateReputation,
 } from ".";
-import { detach } from "./helpers";
+import { detach, doNeedToDeleteNode } from "./helpers";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -104,7 +104,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   }
   //  if the new change yields node with more downvotes than upvotes, DELETE
   // node should not be deleted if its a locked node
-  if (nodeData.corrects + correctChange < nodeData.wrongs + wrongChange && !nodeData?.locked) {
+  if (doNeedToDeleteNode(nodeData.corrects + correctChange, nodeData.wrongs + wrongChange, !!nodeData?.locked)) {
     deleteNode = true;
     // TODO: move these to queue
     await detach(async () => {
