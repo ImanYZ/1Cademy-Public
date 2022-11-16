@@ -46,9 +46,9 @@ export const TrendPlot = ({
 
   useEffect(() => {
     if (trendData.length !== 0) {
-      console.log({ trendData });
+      // console.log({ trendData });
       let oneThirdIndex = Math.floor(trendData.length / 3);
-      console.log(trendData[oneThirdIndex], trendData[oneThirdIndex][x]);
+      // console.log(trendData[oneThirdIndex], trendData[oneThirdIndex][x]);
       let oneThirdValue = trendData[oneThirdIndex][x];
       let twoThirdIndex = Math.floor((trendData.length * 2) / 3);
       let twoThirdValue = trendData[twoThirdIndex][x];
@@ -56,7 +56,7 @@ export const TrendPlot = ({
         // console.log({ oneThirdValue, twoThirdValue });
         oneThirdValue = new Date(oneThirdValue);
         twoThirdValue = new Date(twoThirdValue);
-        console.log(1, { oneThirdValue, twoThirdValue });
+        // console.log(1, { oneThirdValue, twoThirdValue });
       }
       if (oneThirdValue >= twoThirdValue) {
         setZoomDomain({
@@ -71,9 +71,9 @@ export const TrendPlot = ({
     }
   }, [trendData, x]);
 
-  console.log({ heightBottom, heightTop });
+  // console.log({ heightBottom, heightTop });
   return (
-    <Box sx={{ width /* border: "solid 2px pink" */ }}>
+    <Box sx={{ width /* borderkj: "solid 2px pink" */ }}>
       <div>{title}</div>
 
       <Box sx={{ width, height: heightTop /* border: "solid 2px royalblue" */ }}>

@@ -23,13 +23,20 @@ import {
   MaxPoints,
   SemesterStats,
   SemesterStudentStat,
+  /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
-  Trends,
+  /*  Trends, */
 } from "../../../instructorsTypes";
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
-import { ISemester, ISemesterStudent, ISemesterStudentStatDay } from "../../../types/ICourse";
-import { getBubbleStats, StudenBarsSubgroupLocation, StudentStackedBarStatsObject, TrendStats } from "../dashboard";
+import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
+import {
+  getBubbleStats,
+  makeTrendData,
+  StudenBarsSubgroupLocation,
+  StudentStackedBarStatsObject,
+  TrendStats,
+} from "../dashboard";
 
 const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, settings, queryUname }) => {
   const db = getFirestore();
@@ -54,14 +61,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
   const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
-  const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
 
   //Trend Plots
   const [trendStats, setTrendStats] = useState<TrendStats>({
-    newNodeProposals: [],
+    childProposals: [],
     editProposals: [],
     links: [],
     nodes: [],
@@ -93,7 +99,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-
+    console.log("currentSemester.tagId", currentSemester.tagId);
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -111,7 +117,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-
+      setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -193,9 +199,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       );
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
-      setStudentsCounter(semesterDoc.data().students.length);
       setStudents(semesterDoc.data().students);
-      setMaxStackedBarAxisY(semesterDoc.data().students.length);
     };
     getSemesterStudents();
   }, [currentSemester, currentSemester?.tagId, db]);
@@ -210,50 +214,44 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ newNodeProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         return;
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      const newNodeProposals = getTrendsData(userDailyStats, "newNodes");
-      const editProposals = getTrendsData(userDailyStats, "newNodes", "editProposals");
-      const links = getTrendsData(userDailyStats, "links");
-      const nodes = getTrendsData(userDailyStats, "proposals");
-      const votes = getTrendsData(userDailyStats, "agreementsWithInst", "Votes");
-      const questions = getTrendsData(userDailyStats, "questions");
       setTrendStats({
-        newNodeProposals,
-        editProposals,
-        links,
-        nodes,
-        votes,
-        questions,
+        childProposals: makeTrendData(userDailyStats, "newNodes"),
+        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        links: makeTrendData(userDailyStats, "links"),
+        nodes: makeTrendData(userDailyStats, "proposals"),
+        votes: makeTrendData(userDailyStats, "votes"),
+        questions: makeTrendData(userDailyStats, "questions"),
       });
     };
     getUserDailyStat();
   }, [currentSemester, currentSemester?.tagId, db, queryUname]);
 
-  const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
-    const trends: Trends[] = [];
-    data.map(dailyStat => {
-      dailyStat.days.map(dayStat => {
-        if (type && type === "Votes") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
-          });
-        } else if (type && type === "editProposals") {
-          trends.push({
-            date: new Date(dayStat.day),
-            num: dayStat["proposals"] - dayStat["newNodes"],
-          });
-        } else if (key) {
-          trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
-        }
-      });
-    });
-    return trends;
-  };
+  // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
+  //   const trends: Trends[] = [];
+  //   data.map(dailyStat => {
+  //     dailyStat.days.map(dayStat => {
+  //       if (type && type === "Votes") {
+  //         trends.push({
+  //           date: new Date(dayStat.day),
+  //           num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
+  //         });
+  //       } else if (type && type === "editProposals") {
+  //         trends.push({
+  //           date: new Date(dayStat.day),
+  //           num: dayStat["proposals"] - dayStat["newNodes"],
+  //         });
+  //       } else if (key) {
+  //         trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
+  //       }
+  //     });
+  //   });
+  //   return trends;
+  // };
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
     return {
@@ -349,9 +347,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={proposalsStudents}
-                  questionsStudents={questionsStudents}
-                  maxAxisY={maxStackedBarAxisY}
+                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
+                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
+                  maxAxisY={studentsCounter}
                   studentLocation={studentLocation}
                   theme={settings.theme}
                 />
@@ -381,9 +379,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   marginBottom: "12px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderbaord Points</Typography>
                 <Legend
-                  title={"Leaderboard"}
+                  title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
                     { title: ">10%", color: "#F9E2D0" },
@@ -399,13 +397,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 width={
                   isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
                 }
-                margin={{ top: 10, right: 0, bottom: 35, left: 50 }}
+                margin={{ top: 10, right: 0, bottom: 60, left: 50 }}
                 theme={settings.theme}
                 maxAxisX={bubbleAxis.maxAxisX}
                 maxAxisY={bubbleAxis.maxAxisY}
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
                 student={studentVoteStat}
+                role={user.role}
               />
               <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
                 <PlaceIcon sx={{ fill: "#EF5350", fontSize: "24px" }} />

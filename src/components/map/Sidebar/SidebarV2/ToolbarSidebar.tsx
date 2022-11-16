@@ -9,7 +9,7 @@ import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import { Reputation, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus } from "../../../../nodeBookTypes";
-import { OpenSidebar } from "../../../../pages/dashboard";
+import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
 // import MultipleChoiceBtn from "../MultipleChoiceBtn";
@@ -503,7 +503,14 @@ MainSidebarProps) => {
                 </Box>
               </MemoizedMetaButton>
               {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-                <MemoizedMetaButton onClick={() => router.push("/instructors/dashboard")}>
+                <MemoizedMetaButton
+                  onClick={() => {
+                    if (user.role === "INSTRUCTOR") return router.push("/instructors/dashboard");
+                    if (user.role === "STUDENT") return router.push(`/instructors/dashboard/${user.uname}`);
+
+                    // router.push((role = "/instructors/dashboard"));
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",

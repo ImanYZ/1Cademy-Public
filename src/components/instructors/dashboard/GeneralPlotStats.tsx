@@ -36,7 +36,7 @@ export const GeneralPlotStats = ({
       >
         <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>{courseTitle} </Typography>
         <Typography>{semesterTitle}</Typography>
-        <Typography> {!studentsCounter ? `Students: ${studentsCounter}` : ""}</Typography>
+        <Typography> {studentsCounter ? `Students: ${studentsCounter}` : ""}</Typography>
       </Box>
       <Typography>{programTitle}</Typography>
       <Divider />
@@ -65,7 +65,7 @@ export const GeneralPlotStats = ({
           rowGap: "24px",
         }}
       >
-        <span style={{ textAlign: "left" }}>New Node Proposals</span>
+        <span style={{ textAlign: "left" }}>Child Proposals</span>
         <span>
           {student ? `${formatNumber(student.newNodes)} / ` : ""}
           {formatNumber(semesterStats?.newNodeProposals)}

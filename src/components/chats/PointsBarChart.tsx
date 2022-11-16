@@ -123,6 +123,7 @@ function drawChart(
   // .style("padding", "10px");
 
   const htmlTooltip = (users: ISemesterStudent[]) => {
+    console.log("STUDENTS", users);
     const html = users.map(user => {
       return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
@@ -212,10 +213,10 @@ function drawChart(
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
       let html = "";
-      if (d.data.index === 0) {
+      if (d.data.index === 0 && studentProposalsRate) {
         // @ts-ignore
         html = htmlTooltip(studentProposalsRate[subgroupName]);
-      } else {
+      } else if (studentQuestionsRate) {
         // @ts-ignore
         html = htmlTooltip(studentQuestionsRate[subgroupName]);
       }

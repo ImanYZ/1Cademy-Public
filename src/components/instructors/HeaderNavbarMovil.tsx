@@ -1,9 +1,24 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { AppBar, Box, Button, IconButton, Link, Toolbar, Tooltip } from "@mui/material";
+import {
+  AppBar,
+  Box,
+  Button,
+  FormGroup,
+  IconButton,
+  Link,
+  styled,
+  Switch,
+  Toolbar,
+  Tooltip,
+  useTheme,
+} from "@mui/material";
 import Image from "next/image";
 import LinkNext from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+
+import useThemeChange from "@/hooks/useThemeChange";
+import ROUTES from "@/lib/utils/routes";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
@@ -11,6 +26,8 @@ import { Option } from "../layouts/InstructorsLayout";
 
 type HeaderNavbarMovilProps = { options: Option[]; user: User };
 const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
+  const [handleThemeSwitch] = useThemeChange();
+  const theme = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
 
@@ -114,6 +131,13 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                   </Link>
                 </LinkNext>
               ))}
+            <FormGroup>
+              <MaterialUISwitch
+                sx={{ m: 1 }}
+                onClick={e => handleThemeSwitch(e)}
+                checked={theme.palette.mode === "dark"}
+              />
+            </FormGroup>
             <Button
               variant="outlined"
               // color="secondary"
@@ -126,7 +150,7 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                 color: theme => theme.palette.common.white,
                 borderColor: theme => theme.palette.common.white,
               }}
-              onClick={() => router.push("/dashboard")}
+              onClick={() => window.open(ROUTES.dashboard, "_blank", "noopener,noreferrer")}
             >
               GO TO NOTEBOOK
             </Button>
@@ -137,4 +161,54 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
   );
 };
 
+const MaterialUISwitch = styled(Switch)(() => ({
+  padding: 8,
+  width: 65,
+  height: 41,
+  "& .Mui-checked": {
+    color: "#fff",
+    transform: "translateX(22px)",
+    "& + .MuiSwitch-track": {
+      opacity: 1,
+      backgroundColor: "#4D4D4D",
+    },
+    "& .MuiSwitch-thumb": {
+      marginLeft: 3,
+    },
+  },
+  "& .MuiSwitch-track": {
+    backgroundColor: "#4D4D4D!important",
+    opacity: "1!important",
+    borderRadius: 22 / 2,
+    "&:before, &:after": {
+      content: '""',
+      position: "absolute",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: 20,
+      height: 16,
+    },
+    "&:before": {
+      content: '"🌜"',
+      left: 11,
+      display: "flex",
+      alignItems: "center",
+      fontSize: 16,
+    },
+    "&:after": {
+      content: '"🌞"',
+      right: 10,
+      display: "flex",
+      alignItems: "center",
+      fontSize: 16,
+    },
+  },
+  "& .MuiSwitch-thumb": {
+    backgroundColor: "#fff",
+    boxShadow: "none",
+    width: 21,
+    height: 21,
+    margin: 1,
+  },
+}));
 export default HeaderNavbarMovil;
