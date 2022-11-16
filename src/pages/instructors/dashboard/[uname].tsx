@@ -294,6 +294,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           questionsPoints: { data: {}, min: 0, max: 1000 },
           votesPoints: { data: {}, min: 0, max: 1000 },
         });
+        setIsLoading(false);
+
         return;
       }
 
@@ -328,9 +330,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
         votesPoints: { data: votesPoints, min: minV, max: maxV },
       });
+      setIsLoading(false);
     };
     getUserDailyStat();
-    setIsLoading(false);
   }, [currentSemester, db, semesterConfig]);
   // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
   //   const trends: Trends[] = [];

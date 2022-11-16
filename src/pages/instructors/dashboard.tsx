@@ -257,7 +257,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
-
+    setIsLoading(true);
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
@@ -266,7 +266,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         setBubble([]);
         setStackedBar([]);
         setSemesterStats(null);
-        setIsLoading(false);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
         return;
@@ -277,7 +276,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       setSemesterStudentVoteState(semester);
       setStudentsCounter(semester.length);
       setSemesterStats(getSemStat(semester));
-      setIsLoading(false);
       setThereIsData(true);
     };
     getSemesterData();
@@ -345,12 +343,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
-
         setBoxStats({
           proposalsPoints: { data: {}, min: 0, max: 1000 },
           questionsPoints: { data: {}, min: 0, max: 1000 },
           votesPoints: { data: {}, min: 0, max: 1000 },
         });
+        setIsLoading(false);
+
         return;
       }
 
@@ -394,6 +393,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         votes: makeTrendData(userDailyStats, "votes"),
         questions: makeTrendData(userDailyStats, "questions"),
       });
+      setIsLoading(false);
     };
     getUserDailyStat();
   }, [currentSemester, db, semesterConfig]);
@@ -591,6 +591,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             justifyContent: "center",
             alignItems: "center",
             p: isMovil ? "10px 10px" : "40px 20px",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
           <Box
@@ -639,7 +640,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                     <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
                   </Box>
                   <BoxChart
-                    theme={"Dark"}
+                    theme={settings.theme}
                     data={boxStats.questionsPoints.data}
                     drawYAxis={isMovil || isTablet}
                     width={boxPlotWidth}
@@ -663,7 +664,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                     <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
                   </Box>
                   <BoxChart
-                    theme={"Dark"}
+                    theme={settings.theme}
                     data={boxStats.votesPoints.data}
                     drawYAxis={isMovil || isTablet}
                     width={boxPlotWidth}
