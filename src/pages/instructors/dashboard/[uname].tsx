@@ -34,10 +34,12 @@ import {
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
 import {
-  BoxStats,
+  BoxStudentsStats,
+  BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
   getMaxMinVoxPlotData,
+  groupStudentPointsDayChapter,
   makeTrendData,
   StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
@@ -106,11 +108,17 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     [windowWidth]
   );
   /// Box plot States
-  const [boxStats, setBoxStats] = useState<BoxStats>({
+  const [boxStats, setBoxStats] = useState<BoxStudentsStats>({
     proposalsPoints: { data: {}, min: 0, max: 1000 },
     questionsPoints: { data: {}, min: 0, max: 1000 },
     votesPoints: { data: {}, min: 0, max: 1000 },
   });
+  const [studentBoxStat, setStudentBoxStat] = useState<BoxStudentStats>({
+    proposalsPoints: {},
+    questionsPoints: {},
+    votesPoints: {},
+  });
+
   //smester configs
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
 
@@ -224,7 +232,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   }, [currentSemester, currentSemester?.tagId, db]);
 
   useEffect(() => {
-    if (!currentSemester || !currentSemester.tagId || !queryUname) return;
+    if (!currentSemester || !currentSemester.tagId || !queryUname || !semesterConfig) return;
 
     setIsLoading(true);
     const getUserDailyStat = async () => {
@@ -237,7 +245,31 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      const userDailyStats = userDailyStatDoc.docs
+        .map(dailyStat => dailyStat.data() as SemesterStudentStat)
+        .slice(0, 1);
+      const proposalsPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "proposals",
+        semesterConfig?.nodeProposals.numPoints,
+        semesterConfig?.nodeProposals.numProposalPerDay
+      );
+      const questionsPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "questions",
+        semesterConfig?.questionProposals.numPoints,
+        semesterConfig?.questionProposals.numQuestionsPerDay
+      );
+      const votesPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "votes",
+        0,
+        0,
+        semesterConfig?.votes.pointIncrementOnAgreement,
+        semesterConfig?.votes.pointDecrementOnAgreement
+      );
+      console.log("studentttt", { proposalsPoints, questionsPoints, votesPoints });
+      setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
         editProposals: makeTrendData(userDailyStats, "editProposals"),
@@ -248,7 +280,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db, queryUname]);
+  }, [currentSemester, db, queryUname, semesterConfig]);
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
     setIsLoading(true);
@@ -298,7 +330,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db, semesterConfig]);
+  }, [currentSemester, db, semesterConfig]);
   // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
   //   const trends: Trends[] = [];
   //   data.map(dailyStat => {
@@ -545,6 +577,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     identifier="boxplot1"
                     maxX={boxStats.proposalsPoints.max}
                     minX={boxStats.proposalsPoints.min}
+                    studentStats={studentBoxStat.proposalsPoints}
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
@@ -564,11 +597,12 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     width={boxPlotWidth}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetX={isTablet ? 200 : isMovil ? 125 : 7}
                     offsetY={18}
                     identifier="boxplot1"
                     maxX={boxStats.questionsPoints.max}
                     minX={boxStats.questionsPoints.min}
+                    studentStats={studentBoxStat.questionsPoints}
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
@@ -588,11 +622,12 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                     width={boxPlotWidth}
                     boxHeight={25}
                     margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isTablet ? 200 : isMovil ? 125 : 2}
+                    offsetX={isTablet ? 200 : isMovil ? 125 : 7}
                     offsetY={18}
                     identifier="boxplot1"
                     minX={boxStats.votesPoints.min}
                     maxX={boxStats.votesPoints.max}
+                    studentStats={studentBoxStat.votesPoints}
                   />
                   {isMovil && <BoxLegend />}
                 </Box>

@@ -155,21 +155,27 @@ export type TrendStats = {
 //   maxProposalsPoints: number;
 //   maxQuestionsPoints: number;
 // };
-export type BoxChapterStat = {
+export type BoxChapterStats = {
   [key: string]: number[];
 };
-
+export type BoxChapterStat = {
+  [key: string]: number;
+};
 export type BoxTypeStat = {
-  data: BoxChapterStat;
+  data: BoxChapterStats;
   min: number;
   max: number;
 };
-export type BoxStats = {
+export type BoxStudentsStats = {
   proposalsPoints: BoxTypeStat;
   questionsPoints: BoxTypeStat;
   votesPoints: BoxTypeStat;
 };
-
+export type BoxStudentStats = {
+  proposalsPoints: BoxChapterStat;
+  questionsPoints: BoxChapterStat;
+  votesPoints: BoxChapterStat;
+};
 const BoxLegend = () => {
   return (
     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
@@ -211,7 +217,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
 
   /// Box plot States
-  const [boxStats, setBoxStats] = useState<BoxStats>({
+  const [boxStats, setBoxStats] = useState<BoxStudentsStats>({
     proposalsPoints: { data: {}, min: 0, max: 1000 },
     questionsPoints: { data: {}, min: 0, max: 1000 },
     votesPoints: { data: {}, min: 0, max: 1000 },
@@ -391,7 +397,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       });
     };
     getUserDailyStat();
-  }, [currentSemester, currentSemester?.tagId, db, semesterConfig]);
+  }, [currentSemester, db, semesterConfig]);
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
     return {
@@ -865,6 +871,40 @@ export const makeTrendData = (data: SemesterStudentStat[], key: string): Trends[
   }) as Trends[];
 };
 
+export const groupStudentPointsDayChapter = (
+  userDailyStat: ISemesterStudentStat,
+  type: string,
+  numPoints = 1,
+  numTypePerDay = 1,
+  agreementPoints = 1,
+  disagreementPoints = 1
+) => {
+  const groupedDays = userDailyStat.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
+    const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
+      if (type in curChapter) {
+        const dd = { data: curChapter[type as keyof ISemesterStudentStatChapter] as number, title: curChapter.title };
+        return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + (dd.data * numPoints) / numTypePerDay };
+      } else if (type === "votes") {
+        const dd = {
+          data:
+            curChapter["agreementsWithInst"] * agreementPoints +
+            curChapter["disagreementsWithInst"] * disagreementPoints,
+          title: curChapter.title,
+        };
+        return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + dd.data };
+      }
+      return { ...acuChapter };
+    }, {});
+    return Object.keys(groupedChapters).reduce(
+      (prev, key) => {
+        return { ...prev, [key]: (prev[key] ?? 0) + groupedChapters[key] };
+      },
+      { ...acuDayPerStudent }
+    );
+  }, {});
+
+  return groupedDays;
+};
 export const getBoxPlotData = (
   userDailyStats: ISemesterStudentStat[],
   type: string,
@@ -879,32 +919,19 @@ export const getBoxPlotData = (
   console.log("userDailyStats", userDailyStats);
   const res = userDailyStats.map(cur => {
     // [{c1:1,c2:3},{c1:1,c2:3}]
-    const groupedDays = cur.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
-      const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
-        if (type in curChapter) {
-          const dd = { data: curChapter[type as keyof ISemesterStudentStatChapter] as number, title: curChapter.title };
-          return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + (dd.data * numPoints) / numTypePerDay };
-        } else if (type === "votes") {
-          const dd = {
-            data:
-              curChapter["agreementsWithInst"] * agreementPoints +
-              curChapter["disagreementsWithInst"] * disagreementPoints,
-            title: curChapter.title,
-          };
-          return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + dd.data };
-        }
-        return { ...acuChapter };
-      }, {});
-      return Object.keys(groupedChapters).reduce(
-        (prev, key) => {
-          return { ...prev, [key]: (prev[key] ?? 0) + groupedChapters[key] };
-        },
-        { ...acuDayPerStudent }
-      );
-    }, {});
+    const groupedDays = groupStudentPointsDayChapter(
+      cur,
+      type,
+      numPoints,
+      numTypePerDay,
+      agreementPoints,
+      disagreementPoints
+    );
 
     return groupedDays;
   });
+
+  console.log("groupedDays", res);
   const res2 = res.reduce((acu: { [key: string]: number[] }, cur) => {
     // const prevData: number[] = acu[key] ?? [];
     const merged = Object.keys(cur).reduce(
