@@ -626,9 +626,10 @@ export const changeNodeTitle = async ({
         data: notificationUpdates,
         operationType: "updates",
       });
+    } else {
+      newBatch.update(notificationRef, notificationUpdates);
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
-    newBatch.update(notificationRef, notificationUpdates);
-    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
   return [newBatch, writeCounts];
 };
