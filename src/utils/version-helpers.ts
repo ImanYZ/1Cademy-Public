@@ -4,6 +4,7 @@ import {
   getNode,
   getTypedCollections,
   initializeNewReputationData,
+  isVersionApproved,
   retrieveAndsignalAllUserNodesChanges,
   tagsAndCommPoints,
   updateReputation,
@@ -431,8 +432,6 @@ export const changeNodeTitle = async ({
         major: false,
         currentTimestamp,
         writeCounts,
-        t,
-        tWriteOperations,
       });
       await commitBatch(batch);
     });
@@ -468,8 +467,6 @@ export const changeNodeTitle = async ({
         major: false,
         currentTimestamp,
         writeCounts,
-        t,
-        tWriteOperations,
       });
       await commitBatch(batch);
     });
@@ -629,9 +626,10 @@ export const changeNodeTitle = async ({
         data: notificationUpdates,
         operationType: "updates",
       });
+    } else {
+      newBatch.update(notificationRef, notificationUpdates);
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
-    newBatch.update(notificationRef, notificationUpdates);
-    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
   return [newBatch, writeCounts];
 };
@@ -1067,21 +1065,6 @@ export const getUserVersion = async ({ versionId, nodeType, uname, t = false }: 
   return { userVersionData, userVersionRef };
 };
 
-export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
-  try {
-    if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
-    const nodeRating = nodeData.corrects - nodeData.wrongs;
-    const versionRating = corrects - wrongs;
-    if (versionRating >= nodeRating / 2) {
-      return nodeData;
-    }
-    return false;
-  } catch (err) {
-    console.error(err);
-    return err;
-  }
-};
-
 export const updateProposersReputationsOnNode = ({
   proposersReputationsOnNode,
   versionData,
@@ -1233,6 +1216,7 @@ export const createUpdateUserVersion = async ({
 };
 
 export const versionCreateUpdate = async ({
+  versionNodeId,
   batch,
   nodeId,
   nodeData,
@@ -1578,7 +1562,10 @@ export const versionCreateUpdate = async ({
           });
           //  just accepted a proposal for a new child node (not an improvement)
         } else {
-          const childNodeRef = db.collection("nodes").doc();
+          let childNodeRef = db.collection("nodes").doc();
+          if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
+            childNodeRef = db.collection("nodes").doc(versionNodeId);
+          }
           let childNode: any = {
             children,
             content,
@@ -1667,6 +1654,45 @@ export const versionCreateUpdate = async ({
             t,
             tWriteOperations,
           });
+
+          // userNode for voter
+          const newUserNodeObj: any = {
+            correct: correct === 1,
+            createdAt: currentTimestamp,
+            updatedAt: currentTimestamp,
+            deleted: false,
+            isStudied: true,
+            bookmarked: false,
+            changed: false,
+            node: childNodeRef.id,
+            open: true,
+            user: voter,
+            visible: true,
+            wrong: wrong === 1,
+          };
+          const userNodeRef = db.collection("userNodes").doc();
+          if (t) {
+            tWriteOperations.push({
+              objRef: userNodeRef,
+              data: newUserNodeObj,
+              operationType: "set",
+            });
+          } else {
+            batch.set(userNodeRef, { ...newUserNodeObj });
+            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+          }
+          const userNodeLogRef = db.collection("userNodesLog").doc();
+          delete newUserNodeObj.updatedAt;
+          if (t) {
+            tWriteOperations.push({
+              objRef: userNodeLogRef,
+              data: newUserNodeObj,
+              operationType: "set",
+            });
+          } else {
+            batch.set(userNodeLogRef, newUserNodeObj);
+            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+          }
 
           //  Delete the old version on the parent.
           const { versionsCommentsColl }: any = getTypedCollections({ nodeType });
