@@ -20,3 +20,7 @@ export type DetachCallback = () => Promise<void>;
 export const detach = async (callback: DetachCallback) => {
   setImmediate(callback);
 };
+
+export const doNeedToDeleteNode = (corrects: number, wrongs: number, locked: boolean = false) => {
+  return corrects < wrongs && !locked;
+};
