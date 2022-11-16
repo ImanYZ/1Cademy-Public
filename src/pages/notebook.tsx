@@ -4041,7 +4041,6 @@ const Dashboard = ({}: DashboardProps) => {
             <CircularProgress
               size={46}
               sx={{
-                color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
                 position: "fixed",
                 top: "7px",
                 right: "7px",
