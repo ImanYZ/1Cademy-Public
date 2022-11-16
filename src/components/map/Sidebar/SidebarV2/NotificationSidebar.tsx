@@ -12,7 +12,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import notificationsDarkTheme from "../../../../../public/notifications-dark-theme.jpg";
@@ -210,6 +210,11 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
+
+  const contentSignalState = useMemo(() => {
+    return [...uncheckedNotifications];
+  }, [checkedNotifications, uncheckedNotifications, value]);
+
   return (
     <SidebarWrapper
       open={open}
@@ -233,6 +238,7 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
           </Tabs>
         </Box>
       }
+      contentSignalState={contentSignalState}
       SidebarContent={
         <Box sx={{ display: "flex", flexDirection: "column", p: "10px" }}>
           {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (

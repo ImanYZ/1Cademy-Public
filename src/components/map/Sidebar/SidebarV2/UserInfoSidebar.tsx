@@ -280,7 +280,13 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
           },
         ];
   }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme, username]);
+
+  const contentSignalState = useMemo(() => {
+    return { updated: true };
+  }, [isRetrieving, tabsItems, value]);
+
   if (!nodeBookState.selectedUser) return null;
+
   return (
     <SidebarWrapper
       title=""
@@ -394,6 +400,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
           )}
         </Box>
       }
+      contentSignalState={contentSignalState}
       SidebarContent={
         <Box>
           <Box sx={{ px: "10px", paddingTop: "10px" }}>

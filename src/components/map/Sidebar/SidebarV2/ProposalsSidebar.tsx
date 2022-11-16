@@ -154,6 +154,7 @@ const ProposalsSidebar = ({
       onClose={onClose}
       width={430}
       anchor="left"
+      contentSignalState={tabsItems}
       SidebarOptions={
         <Box>
           <Box>

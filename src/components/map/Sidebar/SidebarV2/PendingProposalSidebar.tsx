@@ -139,6 +139,7 @@ const PendingProposalSidebar = ({
       onClose={onClose}
       width={430}
       // anchor="right"
+      contentSignalState={proposals}
       SidebarContent={
         <Box sx={{ paddingX: "10px", paddingTop: "10px" }}>
           <PendingProposalList proposals={proposals} openLinkedNode={openLinkedNode} />
