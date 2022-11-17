@@ -293,15 +293,19 @@ const Dashboard = ({}: DashboardProps) => {
   }, []);
 
   const onCompleteWorker = useCallback(() => {
+    devLog("on Complete Worker");
     if (!nodeBookState.selectedNode) return;
     if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     // console.log("onCompleteWorker", 1);
-    if (["LinkingWords", "References", "Tags", "PendingProposals", "ToggleNode"].includes(lastNodeOperation.current)) {
-      // when open options from node is not required to scrollToNode
+    // if (["LinkingWords", "References", "Tags", "PendingProposals", "ToggleNode"].includes(lastNodeOperation.current)) {
+    //   // when open options from node is not required to scrollToNode
+    //   return (lastNodeOperation.current = "");
+    // }
+    if (lastNodeOperation.current === "openNode") {
+      scrollToNode(nodeBookState.selectedNode);
       return (lastNodeOperation.current = "");
     }
     // console.log("onCompleteWorker", 2);
-    scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
   const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
@@ -488,6 +492,11 @@ const Dashboard = ({}: DashboardProps) => {
           // const id = userNodeLogRef.id
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+
+          // setTimeout(() => {
+          //   scrollToNode(nodeId);
+          //   lastNodeOperation.current = "openNode";
+          // }, 1500);
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         } catch (err) {
@@ -2286,7 +2295,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
-      // console.log({ partType, openPart });
+      devLog("open Node Part", { partType, openPart });
       lastNodeOperation.current = partType;
       if (!nodeBookState.choosingNode) {
         if (partType === "PendingProposals") {
