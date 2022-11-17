@@ -122,6 +122,7 @@ type NodeProps = {
   scrollToNode: any;
   openSidebar: OpenSidebar;
   locked: boolean;
+  setOperation: (operation: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -214,6 +215,7 @@ const Node = ({
   scrollToNode,
   openSidebar,
   locked,
+  setOperation,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -907,6 +909,7 @@ const Node = ({
               ableToPropose={ableToPropose}
               isLoading={isLoading}
               onResetButton={newValue => setAbleToPropose(newValue)}
+              setOperation={setOperation}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component
