@@ -187,7 +187,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               totalPoints: stats?.totalPoints || 0,
               newProposals: stats?.newNodes || 0,
               editNodeProposals: stats?.improvements || 0,
-              proposalsPoints: stats?.improvements * (numPoints / numProposalPerDay) || 0, //TO-DO
+              proposalsPoints: stats?.improvements * (numPoints / numProposalPerDay) || 0,
               corrects: stats?.upVotes || 0,
               wrongs: stats?.downVotes || 0,
               awards: stats?.instVotes || 0,
@@ -241,7 +241,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     setFilters(updateFilters);
   };
 
-  //TO-DO
   const updateTableRows = () => {
     let addNewRow = true;
     let _tableRows: any = tableRows.slice();
@@ -253,11 +252,23 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     if (addNewRow) {
       _tableRows.push({
         id: Math.floor(Math.random() * 100),
-        username: "Harry Potter",
+        username: "",
         avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
         firstName: "",
         lastName: "",
         email: "",
+        online: false,
+        totalPoints: 0,
+        newProposals: 0,
+        editNodeProposals: 0,
+        proposalsPoints: 0,
+        corrects: 0,
+        wrongs: 0,
+        awards: 0,
+        questions: 0,
+        questionPoints: 0,
+        vote: 0,
+        votePoints: 0,
       });
     }
     setTableRows(_tableRows);
@@ -345,7 +356,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const discardTableChanges = () => {
-    window.scrollTo(0, 0);
     const _savedTableState = savedTableState.slice();
     setTableRows(_savedTableState);
     setSavedTableState([]);
@@ -441,6 +451,18 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       firstName: "",
       lastName: "",
       email: "",
+      online: false,
+      totalPoints: 0,
+      newProposals: 0,
+      editNodeProposals: 0,
+      proposalsPoints: 0,
+      corrects: 0,
+      wrongs: 0,
+      awards: 0,
+      questions: 0,
+      questionPoints: 0,
+      vote: 0,
+      votePoints: 0,
     });
     setTableRows(_tableRow);
   };
@@ -468,6 +490,18 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       firstName: "",
       lastName: "",
       email: "",
+      online: false,
+      totalPoints: 0,
+      newProposals: 0,
+      editNodeProposals: 0,
+      proposalsPoints: 0,
+      corrects: 0,
+      wrongs: 0,
+      awards: 0,
+      questions: 0,
+      questionPoints: 0,
+      vote: 0,
+      votePoints: 0,
     });
     setTableRows(_tableRow);
     setEditMode(!editMode);
@@ -476,9 +510,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const addNewData = (dataFromCSV: any) => {
     const _tableRow: any = tableRows.slice();
     const CSVData = dataFromCSV;
-    const email = CSVData.columns.find((elm: any) => elm?.includes("Email"));
-    const fName = CSVData.columns.find((elm: any) => elm?.includes("First Name"));
-    const lName = CSVData.columns.find((elm: any) => elm?.includes("Last Name"));
+    const fName = CSVData.columns[0];
+    const lName = CSVData.columns[1];
+    const email = CSVData.columns[2];
     for (let row of CSVData.rows) {
       const newObject: any = {
         username: "username",
@@ -491,7 +525,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }
     setTableRows(_tableRow);
   };
-  //TO-DO
+
   if (!currentSemester) return <Typography>You don't have semester</Typography>;
   // if (!tableRows.length) return <Typography>you don't a user </Typography>;
   return (
@@ -527,7 +561,15 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           px: "10px",
         }}
       >
-        <Box>
+        <Box
+          sx={{
+            position: "sticky",
+            top: "75px",
+            zIndex: 200,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white,
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -646,16 +688,18 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </Stack>
             )}
           </Box>
+          <Divider />
         </Box>
-        <Divider />
+
         <Box
           sx={{
             py: "10px",
             borderRightWidth: 0,
             borderLeftWidth: 0,
+            overflowX: "hidden",
           }}
         >
-          <TableContainer sx={{ height: 500 }} component={Paper}>
+          <TableContainer sx={{ overflowY: "hidden" }} component={Paper}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>

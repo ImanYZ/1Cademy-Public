@@ -75,6 +75,7 @@ type NodeFooterProps = {
   user: User;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
+  locked: boolean;
 };
 
 const NodeFooter = ({
@@ -122,6 +123,7 @@ const NodeFooter = ({
   uploadNodeImage,
   user,
   setOpenSideBar,
+  locked,
 }: NodeFooterProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -252,7 +254,8 @@ const NodeFooter = ({
           style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
-          <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+          {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+          {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
           {/* <span
             className={"TooltipText " + (open ? "Top" : "Bottom")}
             onClick={preventEventPropagation}

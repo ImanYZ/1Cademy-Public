@@ -47,17 +47,28 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
+  console.log("ProposalsList:proposals", props.proposals);
   // console.log("ProposalsList", { props });
   const [user] = useAuth();
 
   const username = user.user?.uname;
 
   const rateProposalClick = useCallback(
-    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
-      props.rateProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx, correct, wrong, award),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.rateProposal, props.proposals]
+    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) => {
+      console.log("proposal", proposal);
+      return props.rateProposal(
+        event,
+        props.proposals,
+        props.setProposals,
+        proposal.id,
+        proposalIdx,
+        correct,
+        wrong,
+        award,
+        proposal.newNodeId
+      );
+    },
+    [props]
   );
 
   const deleteProposalClick = useCallback(
@@ -99,6 +110,7 @@ const ProposalsList = (props: ProposalsListProps) => {
                   gap: "5px",
                 }}
               >
+                <h5>ProposalID:{proposal.id}</h5>
                 <div className="title Time" style={{ fontSize: "12px" }}>
                   {dayjs(proposal.createdAt).fromNow()}
                 </div>

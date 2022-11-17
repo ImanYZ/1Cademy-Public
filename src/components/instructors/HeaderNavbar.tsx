@@ -183,7 +183,7 @@ const MaterialUISwitch = styled(Switch)(() => ({
     },
     "&:after": {
       content: '"🌞"',
-      right: 10,
+      right: 11,
       display: "flex",
       alignItems: "center",
       fontSize: 16,

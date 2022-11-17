@@ -30,7 +30,6 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
   const theme = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
-
   return (
     <>
       <AppBar data-testid="app-nav-bar" position="sticky">
@@ -95,7 +94,8 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
               alignItems: "center",
               justifyContent: "center",
               gap: "40px",
-              background: theme => theme.palette.common.darkGrayBackground,
+              background: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white,
               zIndex: 10,
             }}
           >
@@ -121,7 +121,10 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                       fontSize: "18px",
                       fontWeight: 400,
                       textDecoration: "none",
-                      color: theme => theme.palette.common.white,
+                      color:
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.white
+                          : theme.palette.common.darkGrayBackground,
                       cursor: "pointer",
                       borderBottom: theme =>
                         router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
@@ -146,9 +149,12 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
                 width: "233px",
                 p: "16px 24px",
                 fontSize: "15px",
-                background: theme => theme.palette.common.darkGrayBackground,
-                color: theme => theme.palette.common.white,
-                borderColor: theme => theme.palette.common.white,
+                background:
+                  theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white,
+                color:
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.darkGrayBackground,
+                borderColor:
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.darkGrayBackground,
               }}
               onClick={() => window.open(ROUTES.dashboard, "_blank", "noopener,noreferrer")}
             >
@@ -197,7 +203,7 @@ const MaterialUISwitch = styled(Switch)(() => ({
     },
     "&:after": {
       content: '"🌞"',
-      right: 10,
+      right: 11,
       display: "flex",
       alignItems: "center",
       fontSize: 16,
