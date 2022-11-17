@@ -3426,6 +3426,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
+      devLog("SELECT PROPOSAL", { proposal });
       if (!user?.uname) return;
       // const selectedNode = nodeBookState.selectedNode;
       event.preventDefault();

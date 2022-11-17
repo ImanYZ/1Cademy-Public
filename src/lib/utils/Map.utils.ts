@@ -1067,6 +1067,7 @@ export const compareNodes = (nodes1: any, nodes2: any) => {
     return false;
   }
   for (let nId of Object.keys(nodes1)) {
+    if (!nodes1[nId] || !nodes2[nId]) return false;
     if (!compare2Nodes(nodes1[nId], nodes2[nId])) {
       return false;
     }
