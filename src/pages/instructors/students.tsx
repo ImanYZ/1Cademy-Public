@@ -565,7 +565,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           sx={{
             position: "sticky",
             top: "75px",
-            zIndex: 100,
+            zIndex: 200,
             backgroundColor: theme =>
               theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white,
           }}
