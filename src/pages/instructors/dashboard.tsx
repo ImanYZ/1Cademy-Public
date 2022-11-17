@@ -189,7 +189,6 @@ const BoxLegend = () => {
 
 const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) => {
   // const pointsChartRef = useRef<(HTMLElement & SVGElement) | null>(null);
-
   const theme = useTheme();
   const db = getFirestore();
 
@@ -268,12 +267,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         setSemesterStats(null);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
+
         return;
       }
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      console.log("semester students", semester);
       setSemesterStudentVoteState(semester);
       setSemesterStats(getSemStat(semester));
       setThereIsData(true);
@@ -311,7 +310,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, semesterStudentVoteState.length, students]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, students]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -320,7 +319,16 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     const getSemesterStudents = async () => {
       const semesterRef = doc(db, "semesters", currentSemester.tagId);
       const semesterDoc = await getDoc(semesterRef);
-      if (!semesterDoc.exists()) return;
+      if (!semesterDoc.exists()) {
+        setSemesterConfig(null);
+        setStudentsCounter(0);
+        setStudents(null);
+        setMaxProposalsPoints(0);
+        setMaxQuestionsPoints(0);
+        setThereIsData(false);
+
+        return;
+      }
 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
@@ -330,12 +338,16 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudents(semesterDoc.data().students);
+      setThereIsData(true);
     };
     getSemesterStudents();
-  }, [currentSemester, currentSemester?.tagId, db]);
+  }, [currentSemester, db]);
 
   useEffect(() => {
+    console.log("three", semesterConfig?.tagId);
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
+    console.log("running", currentSemester, currentSemester.tagId, semesterConfig);
+
     setIsLoading(true);
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
@@ -350,6 +362,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           votesPoints: { data: {}, min: 0, max: 1000 },
         });
         setIsLoading(false);
+        setThereIsData(false);
 
         return;
       }
@@ -394,6 +407,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         votes: makeTrendData(userDailyStats, "votes"),
         questions: makeTrendData(userDailyStats, "questions"),
       });
+      setThereIsData(true);
+
       setIsLoading(false);
     };
     getUserDailyStat();
