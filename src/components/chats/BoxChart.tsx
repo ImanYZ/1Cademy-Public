@@ -26,6 +26,7 @@ function drawChart(
   minX: number,
   studentStats?: BoxChapterStat
 ) {
+  console.log("box data", Object.keys(data).reverse());
   const svg = d3.select(svgRef);
 
   // set the dimensions and margins of the graph
@@ -63,7 +64,11 @@ function drawChart(
 
   const y = d3
     .scaleBand()
-    .domain(Object.keys(data).map(str => str.slice(0, 15) + (str.length > 15 ? "..." : "")))
+    .domain(
+      Object.keys(data)
+        .map(str => str.slice(0, 15) + (str.length > 15 ? "..." : ""))
+        .reverse()
+    )
     .range([heightProcessed, 0])
     .padding(0.2);
 
