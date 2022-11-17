@@ -510,7 +510,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   marginBottom: "12px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderbaord Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderboard Points</Typography>
                 <Legend
                   title={""}
                   options={[
