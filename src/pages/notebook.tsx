@@ -272,15 +272,18 @@ const Dashboard = ({}: DashboardProps) => {
             if (windowSize < 400) {
               defaultScale = 0.45;
             } else if (windowSize < 600) {
-              defaultScale = 0.55;
+              defaultScale = 0.575;
+            } else if (windowSize < 1260) {
+              defaultScale = 0.8;
             } else {
-              defaultScale = 0.94;
+              defaultScale = 0.92;
             }
 
             return {
               scale: defaultScale,
               translation: {
-                x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                // x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
                 y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
               },
             };
