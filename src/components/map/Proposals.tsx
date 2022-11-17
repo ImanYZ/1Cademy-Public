@@ -18,7 +18,7 @@ import { useNodeBook } from "../../context/NodeBookContext";
 // import NewChildProposal from "../NewChildProposal/NewChildProposal";
 // import ProposalsList from "../ProposalsList/ProposalsList";
 //import NewChildProposal from "./NewChildProposal";
-import ProposalsList from "./ProposalsList/ProposalsList";
+// import ProposalsList from "./ProposalsList/ProposalsList";
 import { MemoizedSidebarTabs } from "./SidebarTabs/SidebarTabs";
 
 //type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
@@ -48,9 +48,9 @@ const Proposals = (props: ProposalsProps) => {
   // const [selectionType] = useState();
   // const [openProposal, setOpenProposal] = useState(false);
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [, /* isAdmin */ setIsAdmin] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(false);
-  const [proposals, setProposals] = useState<any[]>([]);
+  const [, /* proposals */ setProposals] = useState<any[]>([]);
 
   useEffect(() => {
     props.fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
@@ -86,7 +86,7 @@ const Proposals = (props: ProposalsProps) => {
           className="collection"
           sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}
         >
-          <ProposalsList
+          {/* <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
             proposeNodeImprovement={props.proposeNodeImprovement}
@@ -98,7 +98,7 @@ const Proposals = (props: ProposalsProps) => {
             proposeNewChild={props.proposeNewChild}
             openProposal={props.openProposal}
             isAdmin={isAdmin}
-          />
+          /> */}
         </Box>
       ) : (
         <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
@@ -114,7 +114,7 @@ const Proposals = (props: ProposalsProps) => {
           className="collection"
           sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}
         >
-          <ProposalsList
+          {/* <ProposalsList
             proposals={proposals}
             setProposals={setProposals}
             proposeNodeImprovement={props.proposeNodeImprovement}
@@ -126,7 +126,7 @@ const Proposals = (props: ProposalsProps) => {
             proposeNewChild={props.proposeNewChild}
             openProposal={props.openProposal}
             isAdmin={isAdmin}
-          />
+          /> */}
         </Box>
       ) : (
         <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>

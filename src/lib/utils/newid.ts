@@ -1,5 +1,6 @@
-import { v4 as uuidv4 } from "uuid";
+import { collection, doc, Firestore } from "firebase/firestore";
 
-export const newId = () => {
-  return uuidv4();
+export const newId = (db: Firestore) => {
+  const nodeRef = doc(collection(db, "nodes"));
+  return nodeRef.id;
 };
