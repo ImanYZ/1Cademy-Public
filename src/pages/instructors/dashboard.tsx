@@ -563,7 +563,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   marginBottom: "6px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Leaderboard Points</Typography>
+                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Leaderboard</Typography>
                 <Legend
                   title={""}
                   options={[
