@@ -27,6 +27,7 @@ export type SelectedUser = {
 
 export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | "UserInfo" | null;
 
+export type LastOperation = "CancelProposals" | "ProposeProposals";
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
  * - isSubmitting: flag set to true when sending request to server
@@ -54,6 +55,7 @@ export interface NodeBookState {
   readonly nodeTitleBlured: boolean;
   readonly openEditButton: boolean;
   readonly nodeId: any;
+  readonly lastOperation: LastOperation;
 }
 
 export type SetSNodeAction = {
@@ -120,7 +122,10 @@ export type SetOpenEditButtonAction = {
   type: "setOpenEditButton";
   payload: any;
 };
-
+export type SetLastOperation = {
+  type: "setLastOperation";
+  payload: LastOperation;
+};
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -134,7 +139,8 @@ export type DispatchNodeBookActions =
   | SetSearchQueryAction
   | SetNodeTitleBluredAction
   | SetSearchByTitleOnly
-  | SetOpenEditButtonAction;
+  | SetOpenEditButtonAction
+  | SetLastOperation;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;

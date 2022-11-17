@@ -122,6 +122,7 @@ type NodeProps = {
   scrollToNode: any;
   openSidebar: OpenSidebar;
   locked: boolean;
+  setOperation: (operation: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -214,6 +215,7 @@ const Node = ({
   scrollToNode,
   openSidebar,
   locked,
+  setOperation,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -270,16 +272,15 @@ const Node = ({
       }
     });
 
-    if (!nodeRef.current) return;
+    if (nodeRef.current) {
+      observer.current.observe(nodeRef.current);
+    }
 
-    observer.current.observe(nodeRef.current);
-
-    // observer.current.unobserve();
     return () => {
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [title, content, tags, editable]);
+  }, [identifier]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
@@ -907,6 +908,7 @@ const Node = ({
               ableToPropose={ableToPropose}
               isLoading={isLoading}
               onResetButton={newValue => setAbleToPropose(newValue)}
+              setOperation={setOperation}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component

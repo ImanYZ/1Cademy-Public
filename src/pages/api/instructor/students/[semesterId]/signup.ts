@@ -119,7 +119,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           student: true,
         });
 
-        const userRef = db.collection("users").doc();
+        const userRef = db.collection("users").doc(uname);
         batch.set(userRef, {
           fName: addedStudent.fName,
           lName: addedStudent.lName,
@@ -165,6 +165,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           updatedAt: Timestamp.now(),
         } as IUser);
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+        // usernode for sNode
+        const userNodeRef = db.collection("userNodes").doc();
+        batch.set(userNodeRef, {
+          visible: true,
+          open: false,
+          bookmarked: false,
+          changed: false,
+          correct: false,
+          createdAt: new Date(),
+          deleted: false,
+          isStudied: false,
+          node: semesterData.tagId,
+          updatedAt: new Date(),
+          user: uname,
+          wrong: false,
+        });
 
         const reputationRef = db.collection("reputations").doc();
         let reputationData = initializeNewReputationData({
