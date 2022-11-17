@@ -356,7 +356,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const discardTableChanges = () => {
-    window.scrollTo(0, 0);
     const _savedTableState = savedTableState.slice();
     setTableRows(_savedTableState);
     setSavedTableState([]);
