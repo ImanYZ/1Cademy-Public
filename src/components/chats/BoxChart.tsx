@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
-import { Chapter } from "../../pages/instructors/dashboard";
+import { BoxChapterStat, Chapter } from "../../pages/instructors/dashboard";
 
 type boxPlotMargin = {
   top: number;
@@ -23,22 +23,22 @@ function drawChart(
   drawYAxis: boolean,
   theme: UserTheme,
   maxX: number,
-  minX: number
+  minX: number,
+  studentStats?: BoxChapterStat
 ) {
   const svg = d3.select(svgRef);
 
   // set the dimensions and margins of the graph
   // const margin = { top: 10, right: 0, bottom: 20, left: 40 };
-  console.log({ offsetX });
   // const offsetY = 18;
   // width = width + OFFSET_X;
   const height = 50 * Object.keys(data).length; // Height with padding and margin
-  const widthProcessed = width - margin.left - margin.right;
+  const widthProcessed = width - margin.left - margin.right + (drawYAxis ? offsetX : 0);
   const heightProcessed = height - margin.top - margin.bottom;
 
   // configure SVG's size and position
   svg
-    .attr("width", width)
+    .attr("width", drawYAxis ? width + offsetX : width)
     .attr("height", height)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -53,7 +53,7 @@ function drawChart(
   // redraw svg
   const x = d3
     .scaleLinear()
-    .domain([minX, maxX])
+    .domain([minX, maxX + 5])
     .range([0, widthProcessed - offsetX]);
   svg
     .append("g")
@@ -61,9 +61,39 @@ function drawChart(
     .attr("transform", `translate(${offsetX},${heightProcessed})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
-  const y = d3.scaleBand().domain(Object.keys(data)).range([heightProcessed, 0]).padding(0.2);
+  const y = d3
+    .scaleBand()
+    .domain(
+      Object.keys(data)
+        .map(str => str.slice(0, 15) + (str.length > 15 ? "..." : ""))
+        .reverse()
+    )
+    .range([heightProcessed, 0])
+    .padding(0.2);
+
+  const findLabel = (str: string) => {
+    return Object.keys(data).find(x => x.includes(str.replace("...", "")));
+  };
+
   if (drawYAxis) {
-    svg.append("g").attr("id", `axis-y`).attr("transform", `translate(${offsetX},0)`).call(d3.axisLeft(y));
+    const tooltip = d3.select(`#boxplot-label-tooltip-${identifier}`);
+    svg
+      .append("g")
+      .attr("id", `axis-y`)
+      .attr("transform", `translate(${offsetX},0)`)
+      .call(d3.axisLeft(y))
+      .on("mouseover", function (e) {
+        const _this = this as any;
+        d3.select(_this).style("cursor", "pointer");
+        tooltip
+          .html(`${findLabel(e.target.innerHTML)}`)
+          .style("opacity", 1)
+          .style("top", `${e.offsetY}px`)
+          .style("left", `${offsetX}px`);
+      })
+      .on("mouseout", function () {
+        tooltip.style("opacity", 0);
+      });
   }
 
   const keys = Object.keys(data); /* .map(cur=>data[cur]) */
@@ -99,7 +129,7 @@ function drawChart(
       const result = statistic(obj);
       if (!result) return null;
 
-      const boxCenter = y(key);
+      const boxCenter = y(key.slice(0, 15) + (key.length > 15 ? "..." : ""));
       if (!boxCenter) return null;
 
       return {
@@ -111,6 +141,7 @@ function drawChart(
         q3: x(result.q3),
         boxCenter: boxCenter,
         median: result.median,
+        key,
       };
     })
     .flatMap(c => c || []);
@@ -178,18 +209,21 @@ function drawChart(
     .attr("transform", `translate(${offsetX},${offsetY})`);
 
   // Location Icons Path
-  // const locationIconPath =
-  //   "M7 9.5C6.33696 9.5 5.70107 9.23661 5.23223 8.76777C4.76339 8.29893 4.5 7.66304 4.5 7C4.5 6.33696 4.76339 5.70107 5.23223 5.23223C5.70107 4.76339 6.33696 4.5 7 4.5C7.66304 4.5 8.29893 4.76339 8.76777 5.23223C9.23661 5.70107 9.5 6.33696 9.5 7C9.5 7.3283 9.43534 7.65339 9.3097 7.95671C9.18406 8.26002 8.99991 8.53562 8.76777 8.76777C8.53562 8.99991 8.26002 9.18406 7.95671 9.3097C7.65339 9.43534 7.3283 9.5 7 9.5ZM7 0C5.14348 0 3.36301 0.737498 2.05025 2.05025C0.737498 3.36301 0 5.14348 0 7C0 12.25 7 20 7 20C7 20 14 12.25 14 7C14 5.14348 13.2625 3.36301 11.9497 2.05025C10.637 0.737498 8.85652 0 7 0Z";
 
   // Locations Icons Drawing
-  // svg
-  //   .select("#locations")
-  //   .selectAll("path")
-  //   .data(statistics)
-  //   .join("path")
-  //   .attr("d", locationIconPath)
-  //   .attr("transform", d => `translate(${offsetX + Math.random() * (x(d.max) - x(d.min)) + x(d.min)},${d.boxCenter})`)
-  //   .attr("fill", "#EF5350");
+  if (studentStats) {
+    const locationIconPath =
+      "M7 9.5C6.33696 9.5 5.70107 9.23661 5.23223 8.76777C4.76339 8.29893 4.5 7.66304 4.5 7C4.5 6.33696 4.76339 5.70107 5.23223 5.23223C5.70107 4.76339 6.33696 4.5 7 4.5C7.66304 4.5 8.29893 4.76339 8.76777 5.23223C9.23661 5.70107 9.5 6.33696 9.5 7C9.5 7.3283 9.43534 7.65339 9.3097 7.95671C9.18406 8.26002 8.99991 8.53562 8.76777 8.76777C8.53562 8.99991 8.26002 9.18406 7.95671 9.3097C7.65339 9.43534 7.3283 9.5 7 9.5ZM7 0C5.14348 0 3.36301 0.737498 2.05025 2.05025C0.737498 3.36301 0 5.14348 0 7C0 12.25 7 20 7 20C7 20 14 12.25 14 7C14 5.14348 13.2625 3.36301 11.9497 2.05025C10.637 0.737498 8.85652 0 7 0Z";
+
+    svg
+      .select("#locations")
+      .selectAll("path")
+      .data(statistics)
+      .join("path")
+      .attr("d", locationIconPath)
+      .attr("transform", d => `translate(${offsetX + x(studentStats[d.key] ?? 0) - 7},${d.boxCenter})`)
+      .attr("fill", "#EF5350");
+  }
 
   //mesh
   svg
@@ -201,8 +235,8 @@ function drawChart(
     .attr("x2", widthProcessed - offsetX)
     .attr("y1", d => d.boxCenter)
     .attr("y2", d => d.boxCenter)
-    .attr("stroke", "rgba(224, 224, 224, .1)")
-    .attr("stroke-width", "1px")
+    .attr("stroke", theme === "Dark" ? "rgba(224, 224, 224, .1)" : "rgba(0, 0, 0, .25)")
+    .attr("stroke-width", "1")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 }
 
@@ -218,6 +252,7 @@ type BoxChartProps = {
   theme: UserTheme;
   maxX: number;
   minX: number;
+  studentStats?: BoxChapterStat;
 };
 
 export const BoxChart = ({
@@ -232,17 +267,33 @@ export const BoxChart = ({
   theme,
   maxX,
   minX,
+  studentStats,
 }: BoxChartProps) => {
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme, maxX, minX);
+      drawChart(
+        svgRef,
+        identifier,
+        data,
+        width,
+        boxHeight,
+        margin,
+        offsetX,
+        offsetY,
+        drawYAxis,
+        theme,
+        maxX,
+        minX,
+        studentStats
+      );
     },
-    [identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme, maxX, minX]
+    [identifier, data, width, boxHeight, margin, offsetX, offsetY, drawYAxis, theme, maxX, minX, studentStats]
   );
 
   return (
-    <svg ref={svg}>
-      {/* <text
+    <div style={{ position: "relative" }}>
+      <svg ref={svg}>
+        {/* <text
         style={{ fontSize: "16px", paddingBottom: "10px" }}
         fill={theme === "Dark" ? "white" : "black"}
         x={40}
@@ -250,14 +301,19 @@ export const BoxChart = ({
       >
         Chapters{" "}
       </text> */}
-      {/* <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography> */}
-      <g id="mesh"></g>
-      <g id="totos"></g>
-      <g id="lines"></g>
-      <g id="boxes"></g>
-      <g id="median"></g>
-      <g id="locations"></g>
-    </svg>
+        {/* <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography> */}
+        <g id="mesh"></g>
+        <g id="totos"></g>
+        <g id="lines"></g>
+        <g id="boxes"></g>
+        <g id="median"></g>
+        <g id="locations"></g>
+      </svg>
+      <div
+        id={`boxplot-label-tooltip-${identifier}`}
+        className={`tooltip-plot axis-y-label ${theme === "Light" ? "lightMode" : "darkMode"}`}
+      ></div>
+    </div>
   );
 };
 // const data: BoxData = {

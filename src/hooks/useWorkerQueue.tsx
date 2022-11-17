@@ -109,7 +109,7 @@ export const useWorkerQueue = ({
               top: resultNode.top,
               x: resultNode.x,
               y: resultNode.y,
-              height: resultNode.height,
+              height: resultNode.height ? resultNode.height : nodesCopy[nodeId].height,
             };
             nodesCopy[nodeId] = overrideNode;
           });
