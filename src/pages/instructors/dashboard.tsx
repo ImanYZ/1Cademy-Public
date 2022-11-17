@@ -64,12 +64,6 @@ export type BoxData = {
 //     "Case study: interface design": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
 //     "Conditionals and recursion": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
 //     "Fruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "Fruitfuwwel functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Fruiwwtful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Fruwitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Frwuitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1wFruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
-//     // "1Fwruitful functions": [20, 23, 24, 24, 24, 25, 29, 31, 31, 33, 34, 36, 36, 37, 39, 39, 40, 40, 41, 45],
 //   },
 //   "Question Points": {
 //     // "The way of the program": [12, 19, 11, 13, 12, 22, 13, 4, 15, 16, 18, 19, 0, 12, 11, 19],
@@ -278,7 +272,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
+  }, [currentSemester, db, user]);
 
   useEffect(() => {
     // update data in buble
@@ -344,9 +338,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   }, [currentSemester, db]);
 
   useEffect(() => {
-    console.log("three", semesterConfig?.tagId);
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
-    console.log("running", currentSemester, currentSemester.tagId, semesterConfig);
 
     setIsLoading(true);
     const getUserDailyStat = async () => {
@@ -392,7 +384,15 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
-
+      setSemesterStats(prev => {
+        if (!prev) return null;
+        const res = {
+          ...prev,
+          newNodeProposals: getChildProposal(userDailyStats),
+          improvements: getEditProposals(userDailyStats),
+        };
+        return res;
+      });
       setBoxStats({
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
@@ -986,4 +986,27 @@ export const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => 
     },
     { min: 10000, max: 0 }
   );
+};
+
+export const getChildProposal = (userDailyStats: ISemesterStudentStat[]) => {
+  let nodes = 0;
+  for (const semesterStudentStat of userDailyStats) {
+    nodes += semesterStudentStat.days.reduce((carry, day) => {
+      return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.nodes, 0);
+    }, 0);
+  }
+  return nodes;
+};
+export const getEditProposals = (userDailyStats: ISemesterStudentStat[]) => {
+  let nodes = 0;
+  let proposals = 0;
+  for (const semesterStudentStat of userDailyStats) {
+    nodes += semesterStudentStat.days.reduce((carry, day) => {
+      return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.nodes, 0);
+    }, 0);
+    proposals += semesterStudentStat.days.reduce((carry, day) => {
+      return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.proposals, 0);
+    }, 0);
+  }
+  return proposals - nodes;
 };
