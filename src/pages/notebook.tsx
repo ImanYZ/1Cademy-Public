@@ -274,15 +274,18 @@ const Dashboard = ({}: DashboardProps) => {
             if (windowSize < 400) {
               defaultScale = 0.45;
             } else if (windowSize < 600) {
-              defaultScale = 0.55;
+              defaultScale = 0.575;
+            } else if (windowSize < 1260) {
+              defaultScale = 0.8;
             } else {
-              defaultScale = 0.94;
+              defaultScale = 0.92;
             }
 
             return {
               scale: defaultScale,
               translation: {
-                x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                // x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
                 y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
               },
             };
@@ -298,13 +301,29 @@ const Dashboard = ({}: DashboardProps) => {
     if (!nodeBookState.selectedNode) return;
     if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     // console.log("onCompleteWorker", 1);
-    if (["LinkingWords", "References", "Tags", "PendingProposals", "ToggleNode"].includes(lastNodeOperation.current)) {
+    if (
+      [
+        "LinkingWords",
+        "References",
+        "Tags",
+        "PendingProposals",
+        "ToggleNode",
+        "CancelProposals",
+        "ProposeProposals",
+      ].includes(lastNodeOperation.current) ||
+      !lastNodeOperation.current
+    ) {
       // when open options from node is not required to scrollToNode
+
       return (lastNodeOperation.current = "");
     }
     // console.log("onCompleteWorker", 2);
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
+
+  const setOperation = useCallback((operation: string) => {
+    lastNodeOperation.current = operation;
+  }, []);
 
   const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
     g,
@@ -1657,7 +1676,7 @@ const Dashboard = ({}: DashboardProps) => {
         // setTimeout(() => {
         //   scrollToNode(nodeId);
         // }, 1500);
-        scrollToNode(nodeId);
+        // scrollToNode(nodeId);
         oldNodes[nodeId] = thisNode;
         return { nodes: oldNodes, edges: newEdges };
       });
@@ -1955,6 +1974,7 @@ const Dashboard = ({}: DashboardProps) => {
         } else {
           openNodeHandler(linkedNodeID);
         }
+        lastNodeOperation.current = "OpenChild";
       }
     },
     // TODO: CHECK dependencies
@@ -2231,6 +2251,7 @@ const Dashboard = ({}: DashboardProps) => {
           console.error(err);
         }
       }
+      lastNodeOperation.current = "OpenAllChildren";
     },
     [nodeBookState.choosingNode, graph]
   );
@@ -2752,9 +2773,12 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenTrends(false);
     setOpenMedia(false);
     setOpenProposal("");
+    console.log("lastOperation", nodeBookState.lastOperation);
     if (
       nodeBookState.selectedNode &&
       nodeBookState.selectedNode !== "" &&
+      lastNodeOperation.current !== "CancelProposals" &&
+      lastNodeOperation.current !== "ProposeProposals" &&
       g.current.hasNode(nodeBookState.selectedNode)
     ) {
       scrollToNode(nodeBookState.selectedNode);
@@ -4250,6 +4274,7 @@ const Dashboard = ({}: DashboardProps) => {
                   proposeNewChild={proposeNewChild}
                   scrollToNode={scrollToNode}
                   openSidebar={openSidebar}
+                  setOperation={setOperation}
                 />
               </MapInteractionCSS>
               <Suspense fallback={<div></div>}>
