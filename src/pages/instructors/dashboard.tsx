@@ -23,7 +23,6 @@ import {
   ISemesterStudentStat,
   ISemesterStudentStatChapter,
 } from "src/types/ICourse";
-import { generalStats } from "testUtils/mockData/students.stats.data";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
@@ -322,8 +321,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      const mock = generalStats as SemesterStudentStat[];
-      console.log("userDailyStats", mock);
 
       const res = getBoxPlotData(userDailyStats);
 
@@ -331,8 +328,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         if (!prev) return null;
         const res = {
           ...prev,
-          newNodeProposals: getChildProposal(mock),
-          improvements: getEditProposals(mock),
+          newNodeProposals: getChildProposal(userDailyStats),
+          improvements: getEditProposals(userDailyStats),
         };
         console.log("res:setSemesterStats", res);
         return res;
