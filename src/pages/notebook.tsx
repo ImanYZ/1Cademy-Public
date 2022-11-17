@@ -4150,23 +4150,23 @@ const Dashboard = ({}: DashboardProps) => {
                   <MyLocationIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip
-                title="Redraw graph"
-                placement="left"
-                sx={{
-                  position: "fixed",
-                  top: "60px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                <IconButton color="secondary" onClick={onRedrawGraph}>
-                  <AutoFixHighIcon />
-                </IconButton>
-              </Tooltip>
             </div>
           )}
+          <Tooltip
+            title="Redraw graph"
+            placement="left"
+            sx={{
+              position: "fixed",
+              top: "60px",
+              right: "10px",
+              zIndex: "1300",
+              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+            }}
+          >
+            <IconButton color="secondary" onClick={onRedrawGraph}>
+              <AutoFixHighIcon />
+            </IconButton>
+          </Tooltip>
           {process.env.NODE_ENV === "development" && (
             <div className={openSidebar ? "trackNcodeBtn" : ""}>
               <Tooltip
