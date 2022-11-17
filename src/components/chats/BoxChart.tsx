@@ -26,7 +26,6 @@ function drawChart(
   minX: number,
   studentStats?: BoxChapterStat
 ) {
-  console.log("box data", Object.keys(data).reverse());
   const svg = d3.select(svgRef);
 
   // set the dimensions and margins of the graph
