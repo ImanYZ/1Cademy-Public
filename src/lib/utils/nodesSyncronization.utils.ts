@@ -29,7 +29,12 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
   return nodeDocs.map(nodeDoc => {
     if (!nodeDoc.exists()) return null;
 
-    const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+    // if (result.height !== undefined) {
+    //   delete result?.height;
+    // }
+    const tmpData = nodeDoc.data();
+    delete tmpData?.height;
+    const nData: NodeFireStore = tmpData as NodeFireStore;
     // if (nData.deleted) return null;
     if (nData.deleted) {
       return {

@@ -109,7 +109,7 @@ export const useWorkerQueue = ({
               top: resultNode.top,
               x: resultNode.x,
               y: resultNode.y,
-              height: resultNode.height,
+              height: resultNode.height ? resultNode.height : nodesCopy[nodeId].height,
             };
             nodesCopy[nodeId] = overrideNode;
           });
@@ -143,6 +143,9 @@ export const useWorkerQueue = ({
     const individualNodeChanges: FullNodeData[] = queue
       .map(cur => {
         if (!cur) return null;
+        if (cur.height === 0) {
+          console.log("found zero", { cur });
+        }
         return { ...graph.nodes[cur.id], height: cur.height };
       })
       .flatMap(cur => cur || []);
@@ -153,6 +156,9 @@ export const useWorkerQueue = ({
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
   const addTask = (newTask: Task) => {
+    if (newTask && newTask.height === 0) {
+      console.log("found zero: add task", { newTask });
+    }
     setQueue(queue => [...queue, newTask]);
   };
 

@@ -804,11 +804,17 @@ const Dashboard = ({}: DashboardProps) => {
 
               const leftParent = nodeParent?.left ?? 0;
 
-              return {
+              const result = {
                 ...cur,
                 left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
                 top: tmpNode?.top ?? topParent,
               };
+
+              // if (result.height !== undefined) {
+              //   delete result?.height;
+              // }
+
+              return result;
             });
 
             // const fixPositionByParentFullNodes = visibleFullNodesMerged.map(cur=>{
