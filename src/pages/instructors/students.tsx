@@ -267,7 +267,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     const _oldFilters = [...filters];
     _oldFilters.splice(index, 1);
     setFilters(_oldFilters);
-    handleFilterBy(_oldFilters, fromDash);
+    if (fromDash) {
+      handleFilterBy(_oldFilters, fromDash);
+    }
   };
 
   const handleChangeOperation = (index: number, event: any) => {
@@ -521,7 +523,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           height: "100%",
           maxWidth: "100%",
           pt: "10px",
-          pb: !isMovil ? "200px" : "",
           m: "auto",
           px: "10px",
         }}
@@ -635,7 +636,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       <Chip
                         key={index}
                         label={filter.title + " " + filter.operation + " " + filter.value}
-                        onDelete={() => deleteFilter(index, false)}
+                        onDelete={() => deleteFilter(index, true)}
                         sx={{ fontSize: isMovil ? "10px" : "20px" }}
                       />
                       {filters.length - 1 !== index && <Chip key={index} label={"AND"} />}
@@ -654,7 +655,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             borderLeftWidth: 0,
           }}
         >
-          <TableContainer component={Paper}>
+          <TableContainer sx={{ height: 500 }} component={Paper}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -666,13 +667,14 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       sx={
                         ["First Name", "Last Name"].includes(key) && isMovil
                           ? {
+                              zIndex: 100,
                               position: "sticky",
-                              left: key === "Last Name" ? 60 : 0,
+                              left: key === "Last Name" ? 80 : 0,
                               backgroundColor: theme =>
                                 theme.palette.mode === "dark"
                                   ? theme.palette.common.darkGrayBackground
                                   : theme.palette.common.white,
-                              fontWeight: "10px",
+                              // fontWeight: "10px",
                               fontSize: "14px",
                             }
                           : isMovil
@@ -684,7 +686,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                       <Box sx={{ display: "flex", flexDirection: "row" }}>
                         <>
                           <div>{key}</div>
-                          {!isMovil && (
+                          {!isMovil && key !== "Last Activity" && (
                             <IconButton
                               id={id}
                               onClick={event => handleClick(key, event)}
@@ -848,98 +850,98 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </TableBody>
             </Table>
           </TableContainer>
+          {editMode && (
+            <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
+              <Box>
+                <CSVBtn
+                  variant="text"
+                  addNewData={addNewData}
+                  buttonStyles={{
+                    ":hover": {
+                      backgroundColor: "#bdbdbd",
+                    },
+                    backgroundColor: "#EDEDED",
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    mt: { xs: "15px", md: "auto" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                  BtnText={"Add students from a csv file"}
+                />
+                <Button
+                  variant="text"
+                  sx={{
+                    ":hover": {
+                      backgroundColor: "#bdbdbd",
+                    },
+                    color: theme => theme.palette.common.black,
+                    backgroundColor: "#EDEDED",
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    mt: { xs: "15px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                  onClick={addNewStudent}
+                >
+                  <AddIcon /> Add a new student
+                </Button>
+              </Box>
+              <Box>
+                <Button
+                  variant="text"
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.black,
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    marginRight: "40px",
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                  onClick={() => discardTableChanges()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  disabled={savedTableState.some((elment: any) =>
+                    newStudents.some((elmen: any) => elment.email.trim() === elmen.email.trim())
+                  )}
+                  sx={{
+                    color: theme => theme.palette.common.white,
+                    background: theme => theme.palette.common.orange,
+                    fontSize: 16,
+                    fontWeight: "700",
+                    my: { xs: "0px", md: "auto" },
+                    marginLeft: { xs: "0px", md: "32px" },
+                    paddingX: "30px",
+                    borderRadius: 1,
+                    textAlign: "center",
+                    alignSelf: "center",
+                  }}
+                  onClick={() => saveTableChanges()}
+                >
+                  Save Changes
+                </Button>
+              </Box>
+            </Box>
+          )}
         </Box>
-        {editMode && (
-          <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
-            <Box>
-              <CSVBtn
-                variant="text"
-                addNewData={addNewData}
-                buttonStyles={{
-                  ":hover": {
-                    backgroundColor: "#bdbdbd",
-                  },
-                  backgroundColor: "#EDEDED",
-                  fontSize: 16,
-                  fontWeight: "700",
-                  my: { xs: "0px", md: "auto" },
-                  mt: { xs: "15px", md: "auto" },
-                  marginRight: "40px",
-                  paddingX: "30px",
-                  borderRadius: 1,
-                  textAlign: "center",
-                  alignSelf: "center",
-                }}
-                BtnText={"Add students from a csv file"}
-              />
-              <Button
-                variant="text"
-                sx={{
-                  ":hover": {
-                    backgroundColor: "#bdbdbd",
-                  },
-                  color: theme => theme.palette.common.black,
-                  backgroundColor: "#EDEDED",
-                  fontSize: 16,
-                  fontWeight: "700",
-                  my: { xs: "0px", md: "auto" },
-                  mt: { xs: "15px", md: "auto" },
-                  marginLeft: { xs: "0px", md: "32px" },
-                  marginRight: "40px",
-                  paddingX: "30px",
-                  borderRadius: 1,
-                  textAlign: "center",
-                  alignSelf: "center",
-                }}
-                onClick={addNewStudent}
-              >
-                <AddIcon /> Add a new student
-              </Button>
-            </Box>
-            <Box>
-              <Button
-                variant="text"
-                sx={{
-                  color: theme => theme.palette.common.white,
-                  background: theme => theme.palette.common.black,
-                  fontSize: 16,
-                  fontWeight: "700",
-                  my: { xs: "0px", md: "auto" },
-                  marginLeft: { xs: "0px", md: "32px" },
-                  marginRight: "40px",
-                  paddingX: "30px",
-                  borderRadius: 1,
-                  textAlign: "center",
-                  alignSelf: "center",
-                }}
-                onClick={() => discardTableChanges()}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                disabled={savedTableState.some((elment: any) =>
-                  newStudents.some((elmen: any) => elment.email.trim() === elmen.email.trim())
-                )}
-                sx={{
-                  color: theme => theme.palette.common.white,
-                  background: theme => theme.palette.common.orange,
-                  fontSize: 16,
-                  fontWeight: "700",
-                  my: { xs: "0px", md: "auto" },
-                  marginLeft: { xs: "0px", md: "32px" },
-                  paddingX: "30px",
-                  borderRadius: 1,
-                  textAlign: "center",
-                  alignSelf: "center",
-                }}
-                onClick={() => saveTableChanges()}
-              >
-                Save Changes
-              </Button>
-            </Box>
-          </Box>
-        )}
       </Box>
     </>
   );
