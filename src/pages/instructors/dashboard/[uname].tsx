@@ -144,7 +144,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      console.log("semestersss", semester);
       setSemesterStudentVoteState(semester);
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
@@ -268,7 +267,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           newNodes: getChildProposal(userDailyStats),
           improvements: getEditProposals(userDailyStats),
         };
-        console.log("res:setSemesterStats", res);
         return res;
       });
       const proposalsPoints = groupStudentPointsDayChapter(

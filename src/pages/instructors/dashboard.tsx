@@ -258,7 +258,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
-        console.log("1:setSemesterStats");
         setSemesterStats(null);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
@@ -339,9 +338,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   }, [currentSemester, db]);
 
   useEffect(() => {
-    console.log("three", semesterConfig?.tagId);
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
-    console.log("running", currentSemester, currentSemester.tagId, semesterConfig);
 
     setIsLoading(true);
     const getUserDailyStat = async () => {
@@ -394,7 +391,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           newNodeProposals: getChildProposal(userDailyStats),
           improvements: getEditProposals(userDailyStats),
         };
-        console.log("res:setSemesterStats", res);
         return res;
       });
       setBoxStats({
