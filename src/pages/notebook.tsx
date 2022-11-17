@@ -1,3 +1,4 @@
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
@@ -384,6 +385,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
   const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
+  const [notebookChanged, setNotebookChanges] = useState({ updated: true });
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -872,10 +874,14 @@ const Dashboard = ({}: DashboardProps) => {
       const killSnapshot = snapshot(q);
       return () => {
         //   // TODO: here we need to remove nodes cause will come node again
+        setGraph(() => {
+          return { nodes: {}, edges: {} };
+        });
+        g.current = createGraph();
         killSnapshot();
       };
     },
-    [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions]
+    [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]
     // [allTags, allTagsLoaded, db, user?.uname]
   );
   useEffect(
@@ -3869,6 +3875,10 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenSidebar(null);
   };
 
+  const onRedrawGraph = () => {
+    setNotebookChanges({ updated: true });
+  };
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -4116,6 +4126,21 @@ const Dashboard = ({}: DashboardProps) => {
                   <MyLocationIcon />
                 </IconButton>
               </Tooltip>
+              <Tooltip
+                title="Redraw graph"
+                placement="left"
+                sx={{
+                  position: "fixed",
+                  top: "60px",
+                  right: "10px",
+                  zIndex: "1300",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                }}
+              >
+                <IconButton color="secondary" onClick={onRedrawGraph}>
+                  <AutoFixHighIcon />
+                </IconButton>
+              </Tooltip>
             </div>
           )}
           {process.env.NODE_ENV === "development" && (
@@ -4124,7 +4149,7 @@ const Dashboard = ({}: DashboardProps) => {
                 title={"Watch geek data"}
                 sx={{
                   position: "fixed",
-                  top: "60px",
+                  top: "110px",
                   right: "10px",
                   zIndex: "1300",
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
