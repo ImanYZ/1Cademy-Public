@@ -268,7 +268,8 @@ const Dashboard = ({}: DashboardProps) => {
           }, 1300);
 
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          setMapInteractionValue(() => {
+          console.log("setMapInteractionValue");
+          setMapInteractionValue(({ translation }) => {
             const windowSize = window.innerWidth;
             let defaultScale;
             if (windowSize < 400) {
@@ -281,13 +282,24 @@ const Dashboard = ({}: DashboardProps) => {
               defaultScale = 0.92;
             }
 
+            const { x, y } = translation;
+            const newX = (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale;
+            const newY = (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale;
+
+            const d = Math.sqrt(Math.pow(newY - y, 2) + Math.pow(newX - x, 2));
+
+            console.log("---> d:", { d, windowSize });
+            if (d > windowSize - 300) {
+              console.log("> d:", "yes");
+              return {
+                scale: defaultScale,
+                translation: { x: newX, y: newY },
+              };
+            }
+            console.log("> d:", "no");
             return {
               scale: defaultScale,
-              translation: {
-                // x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
-                x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
-                y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
-              },
+              translation: { x, y },
             };
           });
         } else {
@@ -1688,6 +1700,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const nodeClicked = useCallback(
     (event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
+      devLog("node Clicked");
       if (nodeBookState.selectionType !== "AcceptedProposals" && nodeBookState.selectionType !== "Proposals") {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         // nodeBookDispatch({type:'setSelectedNode',payload:nodeId)
@@ -4208,7 +4221,10 @@ const Dashboard = ({}: DashboardProps) => {
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 }}
               >
-                <h6>openProposal:{openProposal}</h6>
+                <h6>
+                  Scale: {mapInteractionValue.scale.toFixed(2)}, X: {mapInteractionValue.translation.x.toFixed(2)}, Y:{" "}
+                  {mapInteractionValue.translation.y.toFixed(2)}
+                </h6>
               </Box>
             </div>
           )}
