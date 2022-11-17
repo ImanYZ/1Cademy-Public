@@ -152,7 +152,8 @@ const ProposalsSidebar = ({
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
-      width={430}
+      width={window.innerWidth > 899 ? 430 : window.innerWidth}
+      height={window.innerWidth > 899 ? 100 : 35}
       anchor="left"
       contentSignalState={tabsItems}
       SidebarOptions={

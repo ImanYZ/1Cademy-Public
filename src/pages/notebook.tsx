@@ -4050,43 +4050,43 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {nodeBookState.selectedNode && (
-            <div className={openSidebar ? "trackNcodeBtn" : ""}>
-              <Tooltip
-                title="Scroll to last Selected Node"
-                placement="left"
-                sx={{
-                  position: "fixed",
-                  top: "10px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                <IconButton color="secondary" onClick={onScrollToLastNode}>
-                  <MyLocationIcon />
-                </IconButton>
-              </Tooltip>
-            </div>
+            <Tooltip
+              title="Scroll to last Selected Node"
+              placement="left"
+              sx={{
+                position: "fixed",
+                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 10}px` : `10px`, md: "10px" },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                transition: "all 1s ease",
+              }}
+            >
+              <IconButton color="secondary" onClick={onScrollToLastNode}>
+                <MyLocationIcon />
+              </IconButton>
+            </Tooltip>
           )}
           {process.env.NODE_ENV === "development" && (
-            <div className={openSidebar ? "trackNcodeBtn" : ""}>
-              <Tooltip
-                title={"Watch geek data"}
-                sx={{
-                  position: "fixed",
-                  top: "60px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                {/* DEVTOOLS */}
-                <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                  <CodeIcon />
-                </IconButton>
-              </Tooltip>
+            <Tooltip
+              title={"Watch geek data"}
+              sx={{
+                position: "fixed",
+                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 60}px` : `60px`, md: "60px" },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                transition: "all 1s ease",
+              }}
+            >
+              {/* DEVTOOLS */}
+              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
-              {/* <Tooltip
+          {/* <Tooltip
                 title={"worker"}
                 sx={{
                   position: "fixed",
@@ -4100,7 +4100,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip> */}
-              {/* <Box
+          {/* <Box
                 sx={{
                   position: "fixed",
                   bottom: "60px",
@@ -4113,8 +4113,6 @@ const Dashboard = ({}: DashboardProps) => {
                   <h6 key={idx}>{cur}</h6>
                 ))}
               </Box> */}
-            </div>
-          )}
 
           {/* end Data from map */}
           {settings.view === "Graph" && (

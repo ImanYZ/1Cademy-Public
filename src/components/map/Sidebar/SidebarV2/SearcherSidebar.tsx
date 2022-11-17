@@ -238,7 +238,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
       headerImage={searcherHeaderImage}
       open={open}
       onClose={onClose}
-      width={430}
+      width={window.innerWidth > 899 ? 430 : window.innerWidth}
+      height={window.innerWidth > 899 ? 100 : window.innerWidth > 375 ? 40 : 50}
       // anchor="right"
       SidebarOptions={
         <Box
@@ -266,6 +267,43 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
               </Modal>
             </div>
           )}
+
+          <Box sx={{ marginTop: { xs: "10px", sm: "8px" }, marginBottom: { xs: "13px", sm: "8px" } }}>
+            <label className="Tooltip">
+              {/* <input
+              name="OnlyTagsNodes"
+              type="checkbox"
+              checked={onlyTags}
+              onChange={setOnlyTagsClick}
+            /> */}
+              <span className="tagText">Tags: </span>
+              {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (
+                <span className="tagText">All</span>
+              ) : (
+                getTagsSelected().map(tag => {
+                  return (
+                    <Chip
+                      key={"tag" + tag.nodeId}
+                      // name={tag.title}
+                      className="chip"
+                      variant="outlined"
+                      label={tag.title}
+                      onDelete={() => deleteChip(tag.nodeId)}
+                    />
+                  );
+                })
+              )}
+            </label>
+            <ControlPointIcon id="AddTagIcon" onClick={setShowTagSelectorClick} />
+            {onlyTags ? (
+              ""
+            ) : (
+              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
+                Recover Default Tag(s)
+              </span>
+            )}
+          </Box>
+
           <div id="SearchQueryContainer">
             <ValidatedInput
               identification="SearchQuery"
@@ -340,41 +378,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
               }}
             />
           </div>
-          <Box sx={{ marginTop: { xs: "13px", sm: "8px" } }}>
-            <label className="Tooltip">
-              {/* <input
-              name="OnlyTagsNodes"
-              type="checkbox"
-              checked={onlyTags}
-              onChange={setOnlyTagsClick}
-            /> */}
-              <span className="tagText">Tags: </span>
-              {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (
-                <span className="tagText">All</span>
-              ) : (
-                getTagsSelected().map(tag => {
-                  return (
-                    <Chip
-                      key={"tag" + tag.nodeId}
-                      // name={tag.title}
-                      className="chip"
-                      variant="outlined"
-                      label={tag.title}
-                      onDelete={() => deleteChip(tag.nodeId)}
-                    />
-                  );
-                })
-              )}
-            </label>
-            <ControlPointIcon id="AddTagIcon" onClick={setShowTagSelectorClick} />
-            {onlyTags ? (
-              ""
-            ) : (
-              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
-                Recover Default Tag(s)
-              </span>
-            )}
-          </Box>
+
           <div
             id="nodesUpdatedSinceContainer"
             style={{

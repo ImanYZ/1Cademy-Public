@@ -19,12 +19,6 @@
   font-size: 21px;
 }
 
-@media screen and (max-width: 480px) and (min-width: 10px) {
-  .trackNcodeBtn {
-    display: none;
-  }
-}
-
 @media screen and (max-width: 600px) and (min-width: 10px) {
   .home-search-input::placeholder {
     font-size: 16px;
@@ -1306,13 +1300,14 @@ button.MuiTab-textColorInherit:focus {
   width: 100% !important;
 }
 
-@media screen and (max-width: 600px) and (min-width: 10px) {
+@media screen and (max-width: 415px) and (min-width: 10px) {
   .MiniUserProfileHeaderMobile {
-    grid-template-columns: 100% !important;
     padding-left: 0 !important;
-    justify-items: center !important;
-    gap: 16px;
+    gap: 0px !important;
   }
+}
+
+@media screen and (max-width: 600px) and (min-width: 10px) {
   .MiniUserPrifileIdentityMobile {
     padding: 0px 20px;
     gap: 16px;
@@ -1617,6 +1612,12 @@ button.MuiTab-textColorInherit:focus {
 
 #ProposalButtonsCollection:hover {
   background: none;
+}
+
+@media screen and (max-width: 900px) {
+  #ProposalButtonsCollection {
+    padding: 0px;
+  }
 }
 
 #ProposalButtonsRow {
@@ -2704,6 +2705,19 @@ button.MuiTab-textColorInherit:focus {
 .toolbar:hover .toolbarBadge {
   margin-left: 20px;
 }
+
+.toolbar:focus .SearchBarIconToolbar,
+.toolbar:hover .SearchBarIconToolbar {
+  margin-left: -18px;
+}
+
+@media screen and (min-width: 900px) {
+  .toolbar:focus .SearchBarIconToolbar,
+  .toolbar:hover .SearchBarIconToolbar {
+    margin-left: unset;
+  }
+}
+
 /* .toolbar:focus .toolbarButtonDescription{
 
 } */

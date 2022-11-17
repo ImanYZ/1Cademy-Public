@@ -54,6 +54,7 @@ export interface NodeBookState {
   readonly nodeTitleBlured: boolean;
   readonly openEditButton: boolean;
   readonly nodeId: any;
+  readonly isMenuOpen: boolean;
 }
 
 export type SetSNodeAction = {
@@ -121,6 +122,11 @@ export type SetOpenEditButtonAction = {
   payload: any;
 };
 
+export type SetIsMenuOpen = {
+  type: "setIsMenuOpen";
+  payload: any;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -134,7 +140,8 @@ export type DispatchNodeBookActions =
   | SetSearchQueryAction
   | SetNodeTitleBluredAction
   | SetSearchByTitleOnly
-  | SetOpenEditButtonAction;
+  | SetOpenEditButtonAction
+  | SetIsMenuOpen;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;

@@ -220,7 +220,8 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
       open={open}
       title="Notifications"
       headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
-      width={430}
+      width={window.innerWidth > 899 ? 430 : window.innerWidth}
+      height={window.innerWidth > 899 ? 100 : 35}
       // anchor="right"
       onClose={onClose}
       SidebarOptions={
