@@ -63,7 +63,11 @@ function drawChart(
 
   const y = d3
     .scaleBand()
-    .domain(Object.keys(data).map(str => str.slice(0, 15) + (str.length > 15 ? "..." : "")))
+    .domain(
+      Object.keys(data)
+        .map(str => str.slice(0, 15) + (str.length > 15 ? "..." : ""))
+        .reverse()
+    )
     .range([heightProcessed, 0])
     .padding(0.2);
 
