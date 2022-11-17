@@ -428,7 +428,7 @@ export const setDagNodes = (
 };
 
 // removes a node from the map
-export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any) => {
+export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: FullNodesData) => {
   // removes nodeId from dagre object
   g.removeNode(nodeId);
   // removes nodeId from oldNodes
@@ -465,7 +465,7 @@ export const removeDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: str
 };
 
 // hides all edges for the node with nodeId
-export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, edges: any) => {
+export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, edges: EdgesData) => {
   const oldEdges = { ...edges };
   // debugger
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
@@ -1067,6 +1067,7 @@ export const compareNodes = (nodes1: any, nodes2: any) => {
     return false;
   }
   for (let nId of Object.keys(nodes1)) {
+    if (!nodes1[nId] || !nodes2[nId]) return false;
     if (!compare2Nodes(nodes1[nId], nodes2[nId])) {
       return false;
     }

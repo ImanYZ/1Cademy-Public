@@ -20,6 +20,7 @@ import {
 
 export type IProposeChildNodePayload = {
   data: {
+    versionNodeId?: string;
     parentId: string;
     parentType: INodeType;
     nodeType: INodeType;
@@ -74,6 +75,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   let writeCounts = 0;
   let batch = db.batch();
   try {
+    const { versionNodeId } = req?.body?.data;
     ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.parentId }));
     ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: req.body.data.parentId }));
     const newVersion: any = {
@@ -168,6 +170,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         writeCounts,
       });
       nodeRef = db.collection("nodes").doc();
+      if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
+        nodeRef = db.collection("nodes").doc(versionNodeId);
+      }
       newVersion.node = nodeRef.id;
       newVersion.accepted = true;
       const newNode: any = {

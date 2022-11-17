@@ -29,7 +29,9 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
   return nodeDocs.map(nodeDoc => {
     if (!nodeDoc.exists()) return null;
 
-    const nData: NodeFireStore = nodeDoc.data() as NodeFireStore;
+    const tmpData = nodeDoc.data();
+    delete tmpData?.height; // IMPORTANT: we are removing height to not spoil height in dagre // DON'T remove this
+    const nData: NodeFireStore = tmpData as NodeFireStore;
     // if (nData.deleted) return null;
     if (nData.deleted) {
       return {

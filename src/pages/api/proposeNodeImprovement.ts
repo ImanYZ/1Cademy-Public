@@ -103,7 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       createdAt: currentTimestamp,
       updatedAt: currentTimestamp,
       viewers: 1,
-      corrects: 1,
+      corrects: 0,
       wrongs: 0,
       awards: 0,
       deleted: false,
@@ -133,6 +133,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       currentTimestamp,
       writeCounts,
     });
+
+    versionData.corrects = 1;
+
     // From here on, we specify the type of the changes that the user is proposing on this node
     // using some boolean fields to be added to the version.
     if (nodeType === "Question") {

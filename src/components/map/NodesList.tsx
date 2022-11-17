@@ -50,6 +50,7 @@ type NodeListProps = {
   proposeNewChild: any;
   scrollToNode: any;
   openSidebar: OpenSidebar;
+  setOperation: (operation: string) => void;
 };
 
 const NodesList = ({
@@ -92,6 +93,7 @@ const NodesList = ({
   proposeNewChild,
   scrollToNode,
   openSidebar,
+  setOperation,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -221,6 +223,8 @@ const NodesList = ({
             proposeNewChild={proposeNewChild}
             scrollToNode={scrollToNode}
             openSidebar={openSidebar}
+            locked={nodes[nId].locked}
+            setOperation={setOperation}
           />
         );
       })}

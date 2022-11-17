@@ -121,6 +121,8 @@ type NodeProps = {
   proposeNewChild: any;
   scrollToNode: any;
   openSidebar: OpenSidebar;
+  locked: boolean;
+  setOperation: (operation: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -212,6 +214,8 @@ const Node = ({
   cleanEditorLink,
   scrollToNode,
   openSidebar,
+  locked,
+  setOperation,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -268,16 +272,15 @@ const Node = ({
       }
     });
 
-    if (!nodeRef.current) return;
+    if (nodeRef.current) {
+      observer.current.observe(nodeRef.current);
+    }
 
-    observer.current.observe(nodeRef.current);
-
-    // observer.current.unobserve();
     return () => {
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [title, content, tags, editable]);
+  }, [identifier]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
@@ -396,8 +399,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
-    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
+    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked),
+    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum, locked]
   );
 
   const uploadNodeImageHandler = useCallback(
@@ -830,6 +833,7 @@ const Node = ({
                 user={user}
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
+                locked={locked}
               />
               {/* <NodeFooter
                 open={true}
@@ -905,6 +909,7 @@ const Node = ({
               ableToPropose={ableToPropose}
               isLoading={isLoading}
               onResetButton={newValue => setAbleToPropose(newValue)}
+              setOperation={setOperation}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component
@@ -1002,6 +1007,7 @@ const Node = ({
                 user={user}
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
+                locked={locked}
               />
               {/* <NodeFooter
                 open={false}

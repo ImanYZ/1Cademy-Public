@@ -19,7 +19,7 @@ import { NodeType } from "../knowledgeTypes";
 
 type Props = {
   tooltipPlacement?: TooltipProps["placement"];
-  nodeType?: NodeType | NodeTypes;
+  nodeType?: NodeType | NodeTypes | "locked";
 } & SvgIconProps;
 
 const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "top", color = "primary", ...rest }) => {

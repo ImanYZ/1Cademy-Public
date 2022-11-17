@@ -16,6 +16,7 @@ export const INITIAL_STATE: NodeBookState = {
   openEditButton: false,
   nodeId: null,
   isMenuOpen: false,
+  lastOperation: "CancelProposals",
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {

@@ -55,7 +55,7 @@ const StudentFilters = ({
                 <>
                   <Paper key={index} elevation={6} sx={{ mb: "13px", width: !isMovil ? "80%" : "100%" }}>
                     <Box sx={{ textAlign: "right" }}>
-                      <IconButton onClick={() => deleteFilter(index, true)}>
+                      <IconButton onClick={() => deleteFilter(index, false)}>
                         <DeleteForeverIcon />
                       </IconButton>
                     </Box>
