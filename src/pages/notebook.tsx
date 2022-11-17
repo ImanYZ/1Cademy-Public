@@ -4200,19 +4200,17 @@ const Dashboard = ({}: DashboardProps) => {
                 </IconButton>
               </Tooltip> */}
 
-              <Box
-                sx={{
-                  position: "fixed",
-                  bottom: "60px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                <h6>openProposal:{openProposal}</h6>
-              </Box>
-            </div>
-          )}
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: "60px",
+              right: "10px",
+              zIndex: "1300",
+              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+            }}
+          >
+            <h6>openProposal:{openProposal}</h6>
+          </Box>
 
           {/* end Data from map */}
           {settings.view === "Graph" && (
