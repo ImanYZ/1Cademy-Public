@@ -221,6 +221,7 @@ const NodesList = ({
             proposeNewChild={proposeNewChild}
             scrollToNode={scrollToNode}
             openSidebar={openSidebar}
+            locked={nodes[nId].locked}
           />
         );
       })}

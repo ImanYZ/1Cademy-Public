@@ -91,6 +91,10 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
     };
   };
 
+  const contentSignalState = useMemo(() => {
+    return { updates: true };
+  }, [bookmarkedUserNodes, value]);
+
   return (
     <SidebarWrapper
       title="Bookmarks"
@@ -114,6 +118,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
           </Tabs>
         </Box>
       }
+      contentSignalState={contentSignalState}
       SidebarContent={
         <Box sx={{ p: "10px" }}>
           {value === 0 && (

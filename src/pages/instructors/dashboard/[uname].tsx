@@ -1,8 +1,11 @@
 import PlaceIcon from "@mui/icons-material/Place";
+import SquareIcon from "@mui/icons-material/Square";
 import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 
+import { BoxChart } from "@/components/chats/BoxChart";
+import { BoxPlotStatsSkeleton } from "@/components/instructors/skeletons/BoxPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "@/components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
@@ -31,9 +34,14 @@ import {
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
 import {
+  BoxStudentsStats,
+  BoxStudentStats,
+  getBoxPlotData,
   getBubbleStats,
   getChildProposal,
   getEditProposals,
+  getMaxMinVoxPlotData,
+  groupStudentPointsDayChapter,
   makeTrendData,
   StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
@@ -46,6 +54,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
@@ -63,7 +75,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
   const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
-  const [maxStackedBarAxisY, setMaxStackedBarAxisY] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
@@ -98,6 +109,20 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     },
     [windowWidth]
   );
+  /// Box plot States
+  const [boxStats, setBoxStats] = useState<BoxStudentsStats>({
+    proposalsPoints: { data: {}, min: 0, max: 1000 },
+    questionsPoints: { data: {}, min: 0, max: 1000 },
+    votesPoints: { data: {}, min: 0, max: 1000 },
+  });
+  const [studentBoxStat, setStudentBoxStat] = useState<BoxStudentStats>({
+    proposalsPoints: {},
+    questionsPoints: {},
+    votesPoints: {},
+  });
+
+  //smester configs
+  const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -121,7 +146,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       console.log("semestersss", semester);
       setSemesterStudentVoteState(semester);
-
       setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
@@ -137,9 +161,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
       const semesterStudentVoteStatDoc = await getDocs(q);
-      if (!semesterStudentVoteStatDoc.docs.length) return;
+      if (!semesterStudentVoteStatDoc.docs.length) {
+        setThereIsData(false);
+        return;
+      }
 
       setStudentVoteStat(semesterStudentVoteStatDoc.docs[0].data() as SemesterStudentVoteStat);
+      setThereIsData(true);
     };
     getStudentVoteStats();
   }, [currentSemester?.tagId, db, queryUname]);
@@ -177,7 +205,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     setQuestionsStudents(studentStackedBarQuestionsStats);
   }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, students]);
 
-  // find student subgroup location in bar s
+  // find student subgroup location in bars
   useEffect(() => {
     if (!semesterStudentsVoteState || !studentVoteStat) return;
 
@@ -196,22 +224,27 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const getSemesterStudents = async () => {
       const semesterRef = doc(db, "semesters", currentSemester.tagId);
       const semesterDoc = await getDoc(semesterRef);
-      if (!semesterDoc.exists()) return;
+      if (!semesterDoc.exists()) {
+        setThereIsData(false);
+        return;
+      }
 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
       );
+      setSemesterConfig(semesterDoc.data() as ISemester);
+      setStudentsCounter((semesterDoc.data() as ISemester).students.length);
+
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
-      setStudentsCounter(semesterDoc.data().students.length);
       setStudents(semesterDoc.data().students);
-      setMaxStackedBarAxisY(semesterDoc.data().students.length);
+      setThereIsData(true);
     };
     getSemesterStudents();
   }, [currentSemester, db]);
 
   useEffect(() => {
-    if (!currentSemester || !currentSemester.tagId || !queryUname) return;
+    if (!currentSemester || !currentSemester.tagId || !queryUname || !semesterConfig) return;
 
     setIsLoading(true);
     const getUserDailyStat = async () => {
@@ -221,13 +254,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setThereIsData(false);
+        return;
       }
-      console.log("userDailyStats LEN", userDailyStatDoc.docs.length);
 
       const userDailyStats = userDailyStatDoc.docs
         .map(dailyStat => dailyStat.data() as SemesterStudentStat)
         .slice(0, 1);
-
       setStudentVoteStat(prev => {
         if (!prev) return null;
         const res = {
@@ -238,6 +271,27 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         console.log("res:setSemesterStats", res);
         return res;
       });
+      const proposalsPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "proposals",
+        semesterConfig?.nodeProposals.numPoints,
+        semesterConfig?.nodeProposals.numProposalPerDay
+      );
+      const questionsPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "questions",
+        semesterConfig?.questionProposals.numPoints,
+        semesterConfig?.questionProposals.numQuestionsPerDay
+      );
+      const votesPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "votes",
+        0,
+        0,
+        semesterConfig?.votes.pointIncrementOnAgreement,
+        semesterConfig?.votes.pointDecrementOnAgreement
+      );
+      setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
         editProposals: makeTrendData(userDailyStats, "editProposals"),
@@ -246,22 +300,30 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         votes: makeTrendData(userDailyStats, "votes"),
         questions: makeTrendData(userDailyStats, "questions"),
       });
+      setThereIsData(true);
     };
     getUserDailyStat();
-  }, [currentSemester, db, queryUname]);
-
+  }, [currentSemester, db, queryUname, semesterConfig]);
   useEffect(() => {
-    if (!currentSemester || !currentSemester.tagId || !queryUname) return;
-
+    if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
     setIsLoading(true);
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
-      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId));
+      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setBoxStats({
+          proposalsPoints: { data: {}, min: 0, max: 1000 },
+          questionsPoints: { data: {}, min: 0, max: 1000 },
+          votesPoints: { data: {}, min: 0, max: 1000 },
+        });
+        setIsLoading(false);
+        setThereIsData(false);
+
+        return;
       }
+
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
       setSemesterStats(prev => {
         if (!prev) return null;
@@ -272,10 +334,40 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         };
         return res;
       });
+      const proposalsPoints = getBoxPlotData(
+        userDailyStats,
+        "proposals",
+        semesterConfig?.nodeProposals.numPoints,
+        semesterConfig?.nodeProposals.numProposalPerDay
+      );
+      const questionsPoints = getBoxPlotData(
+        userDailyStats,
+        "questions",
+        semesterConfig?.questionProposals.numPoints,
+        semesterConfig?.questionProposals.numQuestionsPerDay
+      );
+      const votesPoints = getBoxPlotData(
+        userDailyStats,
+        "votes",
+        0,
+        0,
+        semesterConfig?.votes.pointIncrementOnAgreement,
+        semesterConfig?.votes.pointDecrementOnAgreement
+      );
+      const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
+      const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
+      const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+
+      setBoxStats({
+        proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
+        questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
+        votesPoints: { data: votesPoints, min: minV, max: maxV },
+      });
+      setIsLoading(false);
+      setThereIsData(true);
     };
     getUserDailyStat();
-  }, [currentSemester, db, queryUname]);
-
+  }, [currentSemester, db, semesterConfig]);
   // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
   //   const trends: Trends[] = [];
   //   data.map(dailyStat => {
@@ -311,7 +403,20 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     return <NoDataMessage />;
   }
   if (!currentSemester) return <NoDataMessage message="No data in this semester" />;
-
+  const BoxLegend = () => {
+    return (
+      <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
+        <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+          <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          <PlaceIcon sx={{ fill: "#EF5350", fontSize: "16px" }} />
+          <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+        </Box>
+      </Box>
+    );
+  };
   return (
     <Box
       sx={{
@@ -394,9 +499,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  maxAxisY={maxStackedBarAxisY}
+                  maxAxisY={studentsCounter}
                   studentLocation={studentLocation}
                   theme={settings.theme}
+                  mobile={isMovil}
                 />
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
@@ -457,6 +563,117 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               </Box>
             </>
           )}
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "16px",
+        }}
+      >
+        <Paper
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: isMovil ? "10px 10px" : "40px 20px",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { sm: "column", md: "row" },
+              justifyContent: "center",
+              alignItems: "center",
+              gap: isMovil ? "24px" : "0px",
+              flexWrap: "wrap",
+            }}
+          >
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
+            {!isLoading && (
+              <>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                      Chapters{" "}
+                    </Typography>
+                    <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                  </Box>
+
+                  <BoxChart
+                    theme={settings.theme}
+                    data={boxStats.proposalsPoints.data}
+                    width={boxPlotWidth}
+                    // width={trendPlotWith}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
+                    offsetX={isMovil ? 100 : 100}
+                    offsetY={18}
+                    identifier="boxplot-student-1"
+                    maxX={boxStats.proposalsPoints.max}
+                    minX={boxStats.proposalsPoints.min}
+                    studentStats={studentBoxStat.proposalsPoints}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    {isMovil && (
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                    )}
+                    <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                  </Box>
+                  <BoxChart
+                    theme={settings.theme}
+                    data={boxStats.questionsPoints.data}
+                    drawYAxis={isMovil || isTablet}
+                    width={boxPlotWidth}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                    offsetX={isMovil ? 100 : 7}
+                    offsetY={18}
+                    identifier="boxplot-student-2"
+                    maxX={boxStats.questionsPoints.max}
+                    minX={boxStats.questionsPoints.min}
+                    studentStats={studentBoxStat.questionsPoints}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    {isMovil && (
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                    )}
+                    <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                  </Box>
+                  <BoxChart
+                    theme={settings.theme}
+                    data={boxStats.votesPoints.data}
+                    drawYAxis={isMovil || isTablet}
+                    width={boxPlotWidth}
+                    boxHeight={25}
+                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                    offsetX={isMovil ? 100 : 7}
+                    offsetY={18}
+                    identifier="boxplot-student-3"
+                    minX={boxStats.votesPoints.min}
+                    maxX={boxStats.votesPoints.max}
+                    studentStats={studentBoxStat.votesPoints}
+                  />
+                  {isMovil && <BoxLegend />}
+                </Box>
+              </>
+            )}
+          </Box>
+          {!isMovil && !isLoading && <BoxLegend />}
         </Paper>
       </Box>
       <Box

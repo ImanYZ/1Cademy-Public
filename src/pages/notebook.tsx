@@ -105,6 +105,7 @@ import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 // import { ClusterNodes, FullNodeData } from "../noteBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
+import { doNeedToDeleteNode, isVersionApproved } from "../utils/helpers";
 
 type DashboardProps = {};
 
@@ -156,7 +157,7 @@ const Dashboard = ({}: DashboardProps) => {
   // node that user is currently selected (node will be highlighted)
   // const [sNode, setSNode] = useState<string | null>(null); //<--- this was with recoil
   // id of node that will be modified by improvement proposal when entering state of selecting specific node (for tags, references, child and parent links)
-  const [choosingNode] = useState(null); //<--- this was with recoil
+  // const [choosingNode] = useState(null); //<--- this was with recoil
   // // node that is in focus (highlighted)
   // const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
@@ -1177,8 +1178,10 @@ const Dashboard = ({}: DashboardProps) => {
   }, []);
 
   const getMapGraph = useCallback(
-    async (mapURL: string, postData: any = false) => {
-      reloadPermanentGraph();
+    async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
+      if (resetGraph) {
+        reloadPermanentGraph();
+      }
 
       try {
         await postWithToken(mapURL, postData);
@@ -2071,7 +2074,7 @@ const Dashboard = ({}: DashboardProps) => {
   );
   const openAllChildren = useMemoizedCallback(
     async (nodeId: string) => {
-      if (!choosingNode && user) {
+      if (!nodeBookState.choosingNode && user) {
         // setIsSubmitting(true);
         let linkedNode = null;
         let linkedNodeId = null;
@@ -2215,7 +2218,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [choosingNode, graph]
+    [nodeBookState.choosingNode, graph]
   );
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
@@ -2285,7 +2288,7 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
       // console.log({ partType, openPart });
       lastNodeOperation.current = partType;
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (partType === "PendingProposals") {
           // TODO: refactor to use only one state to open node options
           return; // HERE we are breakin the code, for now this part is manage by setOpenEditButton, change after refactor
@@ -2478,18 +2481,25 @@ const Dashboard = ({}: DashboardProps) => {
 
   const correctNode = useCallback(
     (event: any, nodeId: string) => {
-      if (!choosingNode) {
-        // setSelectedNode(nodeId);
+      devLog("CORRECT NODE", { nodeId });
+      if (!nodeBookState.choosingNode) {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        // setSelectedNodeType(nodeType);
-        setIsSubmitting(true);
         getMapGraph(`/correctNode/${nodeId}`);
+        setNodeParts(nodeId, node => {
+          const correct = node.correct;
+          const wrong = node.wrong;
+
+          const correctChange = correct ? -1 : 1;
+          const wrongChange = !correct && wrong ? -1 : 0;
+          const corrects = node.corrects + correctChange;
+          const wrongs = node.wrongs + wrongChange;
+
+          return { ...node, correct: !correct, wrong: false, corrects, wrongs };
+        });
       }
       event.currentTarget.blur();
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
   );
 
   const wrongNode = useCallback(
@@ -2500,28 +2510,49 @@ const Dashboard = ({}: DashboardProps) => {
       wrong: any,
       correct: any,
       wrongs: number,
-      corrects: number
+      corrects: number,
+      locked: boolean
     ) => {
       if (!nodeBookState.choosingNode) {
         let deleteOK = true;
-        // setSelectedNode(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        // setSelectedNodeType(nodeType);
-        if ((!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1)) {
+
+        // const correct = node.correct;
+        // const wrong = node.wrong;
+        // const point = wrong ? -1 : 1;
+
+        const correctChange = !wrong && correct ? -1 : 0;
+        const wrongChange = wrong ? -1 : 1;
+        const _corrects = corrects + correctChange;
+        const _wrongs = wrongs + wrongChange;
+
+        // const willRemoveNode = (!wrong && wrongs >= corrects) || (correct && wrongs === corrects - 1);
+        const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        if (willRemoveNode) {
           deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
         }
         if (deleteOK) {
-          setIsSubmitting(true);
+          // setIsSubmitting(true);
           await idToken();
           getMapGraph(`/wrongNode/${nodeId}`);
+
+          setNodeParts(nodeId, node => {
+            return { ...node, wrong: !wrong, correct: false, wrongs, corrects };
+          });
+          const nNode = graph.nodes[nodeId];
+          if (nNode?.locked) return;
+
+          if (willRemoveNode) {
+            setGraph(({ nodes, edges }) => {
+              const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
+              const tmpNodes = removeDagNode(g.current, nodeId, nodes);
+              return { nodes: tmpNodes, edges: tmpEdges };
+            });
+          }
         }
       }
-
-      // event.currentTarget.blur(); // CHECK: I comment this, the current target is null
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, getMapGraph]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts, graph.nodes]
   );
 
   /////////////////////////////////////////////////////
@@ -2942,7 +2973,7 @@ const Dashboard = ({}: DashboardProps) => {
           onFail();
           window.alert("You've not changed anything yet!");
         } else {
-          setIsSubmitting(true);
+          // setIsSubmitting(true);
           const postData: any = {
             ...newNode,
             id: nodeBookState.selectedNode,
@@ -2974,14 +3005,12 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.left;
           delete postData.top;
           delete postData.height;
-          getMapGraph("/proposeNodeImprovement", postData);
-          scrollToNode(nodeBookState.selectedNode);
 
-          // console.log("add task", 1);
-          // setTimeout(() => {
-          //   console.log("add task", 2);
-          //   addTask(null);
-          // }, 4000);
+          const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+
+          setNodeParts(nodeBookState.selectedNode, node => ({ ...node, editable: false }));
+          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
+          scrollToNode(nodeBookState.selectedNode);
         }
       }
     },
@@ -3527,7 +3556,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const deleteProposal = useCallback(
     async (event: any, proposals: any, setProposals: any, proposalId: string, proposalIdx: number) => {
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         if (!nodeBookState.selectedNode) return;
         reloadPermanentGraph();
         const postData = {
@@ -3553,7 +3582,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // event.currentTarget.blur();
     },
-    [choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
+    [nodeBookState.choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
   );
   const mapContentMouseOver = useCallback((event: any) => {
     if (
@@ -3600,7 +3629,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("UPLOAD NODE IMAGES", { nodeId, isUploading, setIsUploading, setPercentageUploaded });
       // console.log("[UPLOAD NODE IMAGES]");
       const storage = getStorage();
-      if (!isUploading && !choosingNode) {
+      if (!isUploading && !nodeBookState.choosingNode) {
         try {
           event.preventDefault();
           const image = event.target.files[0];
@@ -3682,7 +3711,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, choosingNode, setNodeParts]
+    [user, nodeBookState.choosingNode, setNodeParts]
   );
 
   const rateProposal = useCallback(
@@ -3700,7 +3729,7 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log("[RATE PROPOSAL]");
       if (!user) return;
 
-      if (!choosingNode) {
+      if (!nodeBookState.choosingNode) {
         // reloadPermanentGraph();
         const proposalsTemp = [...proposals];
         if (correct) {
@@ -3726,26 +3755,22 @@ const Dashboard = ({}: DashboardProps) => {
           award,
           uname: user.uname,
         };
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         // let responseObj;
         try {
           await Post("/rateVersion", postData);
         } catch (error) {
           console.error(error);
-          setIsSubmitting(false);
+          // setIsSubmitting(false);
         }
-        // try {
-        //   await idToken();
-        //   /*responseObj = */ await axios.post("/rateVersion", postData);
-        // } catch (err) {
-        //   console.error(err);
-        //   // window.location.reload();
-        // }
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (
-            proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
-            (oldNodes[nodeBookState.selectedNode].corrects - oldNodes[nodeBookState.selectedNode].wrongs) / 2
+            isVersionApproved({
+              corrects: proposalsTemp[proposalIdx].corrects,
+              wrongs: proposalsTemp[proposalIdx].wrongs,
+              nodeData: oldNodes[nodeBookState.selectedNode],
+            })
           ) {
             proposalsTemp[proposalIdx].accepted = true;
             if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
@@ -3755,28 +3780,14 @@ const Dashboard = ({}: DashboardProps) => {
           setProposals(proposalsTemp);
           return { nodes: oldNodes, edges };
         });
-        // setNodes(oldNodes => {
-        //   if (
-        //     proposalsTemp[proposalIdx].corrects - proposalsTemp[proposalIdx].wrongs >=
-        //     (oldNodes[sNode.id].corrects - oldNodes[sNode].wrongs) / 2
-        //   ) {
-        //     proposalsTemp[proposalIdx].accepted = true;
-        //     if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx childType !== "") {
-        //       reloadPermanentGraph();
-        //     }
-        //   }
-        //   setProposals(proposalsTemp);
-        //   return oldNodes;
-        // });
 
-        setIsSubmitting(false);
-        // scrollToNode(sNode);
+        // setIsSubmitting(false);
       }
       // event.currentTarget.blur();
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, choosingNode, selectedNodeType, reloadPermanentGraph]
+    [user, nodeBookState.choosingNode, selectedNodeType, reloadPermanentGraph]
   );
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
@@ -4041,7 +4052,6 @@ const Dashboard = ({}: DashboardProps) => {
             <CircularProgress
               size={46}
               sx={{
-                color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
                 position: "fixed",
                 top: "7px",
                 right: "7px",
