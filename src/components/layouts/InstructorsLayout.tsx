@@ -83,7 +83,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       // in this case is instructor he can see all
     };
     allowAccessByRole();
-  }, [router, user, user?.role]);
+  }, [router, user]);
 
   // router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
   // useEffect(() => {
@@ -122,8 +122,6 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
     // window.document.body.classList.remove("Image");
-    console.log("user", user);
-
     const instructorsRef = collection(db, "instructors");
     const q = query(instructorsRef, where("uname", "==", user.uname));
 
@@ -211,14 +209,12 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
   useEffect(() => {
     if (!selectedSemester) return setCourses([]);
-
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
     setSelectedCourse(newCourses[0]);
   }, [allCourses, selectedSemester]);
 
   useEffect(() => {
-    // console.log("effect runs");
     if (!instructor) return;
     if (!selectedCourse) return;
     // console.log("selectedCourseee", selectedCourse);
@@ -250,7 +246,6 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     );
 
   if (!user) return <Typography>No user</Typography>;
-
   return (
     <Box
       sx={{

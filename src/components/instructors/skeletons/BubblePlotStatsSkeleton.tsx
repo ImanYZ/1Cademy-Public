@@ -4,7 +4,7 @@ import React from "react";
 
 export const BubblePlotStatsSkeleton = () => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "56px", justifyContent: "space-between" }}>
       <Box
         sx={{
           display: "flex",
@@ -26,14 +26,13 @@ export const BubblePlotStatsSkeleton = () => {
           gridTemplateColumns: "1fr",
           justifyContent: "center",
           alignItems: "end",
-          gap: "20px",
         }}
       >
         <Skeleton
           variant="rectangular"
           sx={{
             width: "100%",
-            height: "400px",
+            height: "350px",
             borderRadius: "5px",
             marginY: "16px",
             justifySelf: "end",
