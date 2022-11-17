@@ -158,9 +158,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
       const semesterStudentVoteStatDoc = await getDocs(q);
-      if (!semesterStudentVoteStatDoc.docs.length) return;
+      if (!semesterStudentVoteStatDoc.docs.length) {
+        setThereIsData(false);
+        return;
+      }
 
       setStudentVoteStat(semesterStudentVoteStatDoc.docs[0].data() as SemesterStudentVoteStat);
+      setThereIsData(true);
     };
     getStudentVoteStats();
   }, [currentSemester, db, queryUname]);
@@ -217,7 +221,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const getSemesterStudents = async () => {
       const semesterRef = doc(db, "semesters", currentSemester.tagId);
       const semesterDoc = await getDoc(semesterRef);
-      if (!semesterDoc.exists()) return;
+      if (!semesterDoc.exists()) {
+        setThereIsData(false);
+        return;
+      }
 
       const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
         semesterDoc.data() as ISemester
@@ -228,6 +235,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setMaxProposalsPoints(maxProposalsPoints);
       setMaxQuestionsPoints(maxQuestionsPoints);
       setStudents(semesterDoc.data().students);
+      setThereIsData(true);
     };
     getSemesterStudents();
   }, [currentSemester, db]);
@@ -243,6 +251,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setThereIsData(false);
+
         return;
       }
 
@@ -278,6 +288,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         votes: makeTrendData(userDailyStats, "votes"),
         questions: makeTrendData(userDailyStats, "questions"),
       });
+      setThereIsData(true);
     };
     getUserDailyStat();
   }, [currentSemester, db, queryUname, semesterConfig]);
@@ -296,6 +307,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           votesPoints: { data: {}, min: 0, max: 1000 },
         });
         setIsLoading(false);
+        setThereIsData(false);
 
         return;
       }
@@ -332,6 +344,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         votesPoints: { data: votesPoints, min: minV, max: maxV },
       });
       setIsLoading(false);
+      setThereIsData(true);
     };
     getUserDailyStat();
   }, [currentSemester, db, semesterConfig]);
