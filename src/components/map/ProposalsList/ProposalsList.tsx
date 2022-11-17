@@ -110,7 +110,7 @@ const ProposalsList = (props: ProposalsListProps) => {
                   gap: "5px",
                 }}
               >
-                <h5>ProposalID:{proposal.id}</h5>
+                {/* <h5>ProposalID:{proposal.id}</h5> */}
                 <div className="title Time" style={{ fontSize: "12px" }}>
                   {dayjs(proposal.createdAt).fromNow()}
                 </div>
