@@ -846,6 +846,12 @@ const Dashboard = ({}: DashboardProps) => {
     [allTags, db, settings.showClusterOptions]
   );
 
+  useEffect(() => {
+    if (openSidebar !== "PROPOSALS") {
+      setOpenProposal("");
+    }
+  }, [openSidebar]);
+
   useEffect(
     () => {
       if (!db) return;
@@ -1127,6 +1133,7 @@ const Dashboard = ({}: DashboardProps) => {
   const reloadPermanentGraph = useMemoizedCallback(() => {
     devLog("RELOAD PERMANENT GRAPH");
     // debugger;
+
     let oldNodes = graph.nodes;
     let oldEdges = graph.edges;
     if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
@@ -4130,7 +4137,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip> */}
-              {/* <Box
+              <Box
                 sx={{
                   position: "fixed",
                   bottom: "60px",
@@ -4139,10 +4146,8 @@ const Dashboard = ({}: DashboardProps) => {
                   background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 }}
               >
-                {Object.keys(graph.edges).map((cur, idx) => (
-                  <h6 key={idx}>{cur}</h6>
-                ))}
-              </Box> */}
+                <h6>openProposal:{openProposal}</h6>
+              </Box>
             </div>
           )}
 
