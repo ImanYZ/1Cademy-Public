@@ -259,6 +259,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     updatedAt: Date;
     width?: number;
     height?: number;
+    unaccepted?: boolean;
     // left: number;
     // top: number;
     x?: number;

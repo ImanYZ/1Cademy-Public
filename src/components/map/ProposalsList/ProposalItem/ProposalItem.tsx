@@ -25,7 +25,7 @@ const ProposalItem = (props: any) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
-        props.selectProposal(event, proposal);
+        props.selectProposal(event, proposal, proposal.newNodeId);
       } else {
         props.openLinkedNode(proposal.node);
       }
@@ -50,6 +50,7 @@ const ProposalItem = (props: any) => {
       onClick={openLinkedNodeClick(props.proposal)}
       style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
     >
+      <h6>{props.proposal.newNodeId}</h6>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time" style={{ fontSize: "12px" }}>
           {dayjs(props.proposal.createdAt).fromNow()}
