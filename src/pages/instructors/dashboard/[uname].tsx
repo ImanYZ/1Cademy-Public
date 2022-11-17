@@ -38,6 +38,8 @@ import {
   BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
+  getChildProposal,
+  getEditProposals,
   getMaxMinVoxPlotData,
   groupStudentPointsDayChapter,
   makeTrendData,
@@ -148,7 +150,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, currentSemester?.tagId, db, maxProposalsPoints, maxQuestionsPoints, user]);
+  }, [currentSemester, db, user]);
 
   useEffect(() => {
     if (!queryUname) return;
@@ -167,7 +169,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setThereIsData(true);
     };
     getStudentVoteStats();
-  }, [currentSemester, db, queryUname]);
+  }, [currentSemester?.tagId, db, queryUname]);
 
   useEffect(() => {
     // update data in buble
@@ -200,7 +202,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, semesterStudentsVoteState.length, students]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, students]);
 
   // find student subgroup location in bars
   useEffect(() => {
@@ -212,7 +214,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
 
     setStudentLocation({ proposals: proposals, questions: questions });
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, studentVoteStat]);
+  }, [semesterStudentsVoteState, studentVoteStat]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
@@ -252,13 +254,21 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       if (!userDailyStatDoc.docs.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         setThereIsData(false);
-
         return;
       }
 
       const userDailyStats = userDailyStatDoc.docs
         .map(dailyStat => dailyStat.data() as SemesterStudentStat)
         .slice(0, 1);
+      setStudentVoteStat(prev => {
+        if (!prev) return null;
+        const res = {
+          ...prev,
+          newNodes: getChildProposal(userDailyStats),
+          improvements: getEditProposals(userDailyStats),
+        };
+        return res;
+      });
       const proposalsPoints = groupStudentPointsDayChapter(
         userDailyStats[0],
         "proposals",
@@ -313,7 +323,15 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-
+      setSemesterStats(prev => {
+        if (!prev) return null;
+        const res = {
+          ...prev,
+          newNodeProposals: getChildProposal(userDailyStats),
+          improvements: getEditProposals(userDailyStats),
+        };
+        return res;
+      });
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
