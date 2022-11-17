@@ -238,6 +238,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
   const lastNodeOperation = useRef<string>("");
+  const proposalTimer = useRef<any>(null);
 
   const scrollToNode = useCallback((nodeId: string, tries = 0) => {
     devLog("scroll To Node", { nodeId, tries });
@@ -3426,146 +3427,157 @@ const Dashboard = ({}: DashboardProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
-      devLog("SELECT PROPOSAL", { proposal });
-      if (!user?.uname) return;
-      // const selectedNode = nodeBookState.selectedNode;
-      event.preventDefault();
-      setOpenProposal(proposal.id);
-      reloadPermanentGraph();
-      // console.log("----------->> beafore graph");
-      // const newNodeId = newId(db);
-      setGraph(({ nodes: oldNodes, edges }) => {
-        // console.log("----------->> after graph");
-        if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
-        if (!(nodeBookState.selectedNode in changedNodes)) {
-          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
-        }
-        const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
-        // console.log("proposal", proposal);
-        if ("childType" in proposal && proposal.childType !== "") {
-          //here builds de child proposal and draws it
-          tempNodes.add(newNodeId);
-          const newChildNode: any = {
-            unaccepted: true,
-            isStudied: false,
-            bookmarked: false,
-            // id: newNodeId,
-            correct: false,
-            updatedAt: proposal.createdAt,
-            open: true,
-            user: user.uname,
-            admin: proposal.proposer,
-            aImgUrl: proposal.imageUrl,
-            aChooseUname: proposal.chooseUname,
-            aFullname: proposal.fullname,
-            visible: true,
-            deleted: false,
-            wrong: false,
-            createdAt: proposal.createdAt,
-            firstVisit: proposal.createdAt,
-            lastVisit: proposal.createdAt,
-            versions: 1,
-            viewers: 1,
-            children: proposal.children,
-            nodeType: proposal.childType,
-            parents: proposal.parents,
-            comments: 0,
-            tagIds: proposal.tagIds,
-            tags: proposal.tags,
-            referenceIds: proposal.referenceIds,
-            referenceLabels: proposal.referenceLabels,
-            references: proposal.references,
-            title: proposal.title,
-            wrongs: 0,
-            corrects: 1,
-            content: proposal.content,
-            nodeImage: proposal.nodeImage,
-            studied: 1,
-            choices: [],
-            // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
-            editable: false,
-            width: NODE_WIDTH,
-            node: newNodeId,
-          };
-          if (proposal.childType === "Question") {
-            newChildNode.choices = proposal.choices;
+      if (proposalTimer.current) {
+        clearTimeout(proposalTimer.current);
+      }
+      proposalTimer.current = setTimeout(() => {
+        devLog("SELECT PROPOSAL", { proposal });
+        if (!user?.uname) return;
+        // const selectedNode = nodeBookState.selectedNode;
+        event.preventDefault();
+        setOpenProposal(proposal.id);
+        reloadPermanentGraph();
+        // console.log("----------->> beafore graph");
+        // const newNodeId = newId(db);
+        setGraph(({ nodes: oldNodes, edges }) => {
+          // console.log("----------->> after graph");
+          if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
+          if (!(nodeBookState.selectedNode in changedNodes)) {
+            changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
           }
-          // console.log("typechild", 2, newChildNode);
-          let newNodes = { ...oldNodes };
-          let newEdges: any = { ...edges };
-          const nodeN = g.current.node(newNodeId);
-          // ------------------- this is required to simulate pure function
-          if (!nodeN) {
-            // console.log("set dag Node", nodeN);
-            newNodes = setDagNode(
+          const thisNode = copyNode(oldNodes[nodeBookState.selectedNode]);
+          // console.log("proposal", proposal);
+          if ("childType" in proposal && proposal.childType !== "") {
+            //here builds de child proposal and draws it
+            tempNodes.add(newNodeId);
+            const newChildNode: any = {
+              unaccepted: true,
+              isStudied: false,
+              bookmarked: false,
+              // id: newNodeId,
+              correct: false,
+              updatedAt: proposal.createdAt,
+              open: true,
+              user: user.uname,
+              admin: proposal.proposer,
+              aImgUrl: proposal.imageUrl,
+              aChooseUname: proposal.chooseUname,
+              aFullname: proposal.fullname,
+              visible: true,
+              deleted: false,
+              wrong: false,
+              createdAt: proposal.createdAt,
+              firstVisit: proposal.createdAt,
+              lastVisit: proposal.createdAt,
+              versions: 1,
+              viewers: 1,
+              children: proposal.children,
+              nodeType: proposal.childType,
+              parents: proposal.parents,
+              comments: 0,
+              tagIds: proposal.tagIds,
+              tags: proposal.tags,
+              referenceIds: proposal.referenceIds,
+              referenceLabels: proposal.referenceLabels,
+              references: proposal.references,
+              title: proposal.title,
+              wrongs: 0,
+              corrects: 1,
+              content: proposal.content,
+              nodeImage: proposal.nodeImage,
+              studied: 1,
+              choices: [],
+              // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
+              editable: false,
+              width: NODE_WIDTH,
+              node: newNodeId,
+            };
+            if (proposal.childType === "Question") {
+              newChildNode.choices = proposal.choices;
+            }
+            // console.log("typechild", 2, newChildNode);
+            let newNodes = { ...oldNodes };
+            let newEdges: any = { ...edges };
+            const nodeN = g.current.node(newNodeId);
+            // ------------------- this is required to simulate pure function
+            if (!nodeN) {
+              // console.log("set dag Node", nodeN);
+              newNodes = setDagNode(
+                g.current,
+                newNodeId,
+                newChildNode,
+                newNodes,
+                allTags,
+                settings.showClusterOptions,
+                null
+              );
+              newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...newEdges });
+            } else {
+              // add node
+              const newNode = copyNode(newChildNode);
+              newNodes[newNodeId] = newNode;
+
+              // add edge
+              const from = nodeBookState.selectedNode;
+              const to = newNodeId;
+              if (g.current.hasNode(from) && g.current.hasNode(to)) {
+                const edgeId = from + "-" + to;
+                newEdges[edgeId] = { label: "" };
+              }
+            }
+            // << ----------------
+            setTimeout(() => {
+              scrollToNode(newNodeId);
+            }, 1500);
+            // console.log("typechild", 3, { newNodes, newEdges });
+            return { nodes: newNodes, edges: newEdges };
+            // return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
+            //   setEdges(oldEdges => {
+            //     return setDagEdge(selectedNode, newNodeId, { label: "" }, { ...oldEdges });
+            //   });
+            //   setMapChanged(true);
+            // });
+          } else {
+            // improvments
+            //here builds the proposal
+            const oldEdges = compareAndUpdateNodeLinks(
               g.current,
-              newNodeId,
-              newChildNode,
-              newNodes,
+              thisNode,
+              nodeBookState.selectedNode,
+              proposal,
+              edges
+            );
+            // setEdges(oldEdges => {
+            //   return compareAndUpdateNodeLinks(thisNode, selectedNode, proposal, {
+            //     ...oldEdges,
+            //   });
+            // });
+            thisNode.title = proposal.title;
+            thisNode.content = proposal.content;
+            thisNode.nodeImage = proposal.nodeImage;
+            thisNode.references = proposal.references;
+            thisNode.children = proposal.children;
+            thisNode.parents = proposal.parents;
+            thisNode.tags = proposal.tags;
+            if (proposal.nodeType === "Question") {
+              thisNode.choices = proposal.choices;
+            }
+            // setMapChanged(true);
+            const newNodes = setDagNode(
+              g.current,
+              nodeBookState.selectedNode,
+              thisNode,
+              oldNodes,
               allTags,
               settings.showClusterOptions,
               null
             );
-            newEdges = setDagEdge(g.current, nodeBookState.selectedNode, newNodeId, { label: "" }, { ...newEdges });
-          } else {
-            // add node
-            const newNode = copyNode(newChildNode);
-            newNodes[newNodeId] = newNode;
-
-            // add edge
-            const from = nodeBookState.selectedNode;
-            const to = newNodeId;
-            if (g.current.hasNode(from) && g.current.hasNode(to)) {
-              const edgeId = from + "-" + to;
-              newEdges[edgeId] = { label: "" };
-            }
+            // return setDagNode(selectedNode, thisNode, { ...oldNodes }, null);
+            return { nodes: newNodes, edges: oldEdges };
           }
-          // << ----------------
-          setTimeout(() => {
-            scrollToNode(newNodeId);
-          }, 1500);
-          // console.log("typechild", 3, { newNodes, newEdges });
-          return { nodes: newNodes, edges: newEdges };
-          // return setDagNode(newNodeId, newChildNode, { ...oldNodes }, () => {
-          //   setEdges(oldEdges => {
-          //     return setDagEdge(selectedNode, newNodeId, { label: "" }, { ...oldEdges });
-          //   });
-          //   setMapChanged(true);
-          // });
-        } else {
-          // improvments
-          //here builds the proposal
-          const oldEdges = compareAndUpdateNodeLinks(g.current, thisNode, nodeBookState.selectedNode, proposal, edges);
-          // setEdges(oldEdges => {
-          //   return compareAndUpdateNodeLinks(thisNode, selectedNode, proposal, {
-          //     ...oldEdges,
-          //   });
-          // });
-          thisNode.title = proposal.title;
-          thisNode.content = proposal.content;
-          thisNode.nodeImage = proposal.nodeImage;
-          thisNode.references = proposal.references;
-          thisNode.children = proposal.children;
-          thisNode.parents = proposal.parents;
-          thisNode.tags = proposal.tags;
-          if (proposal.nodeType === "Question") {
-            thisNode.choices = proposal.choices;
-          }
-          // setMapChanged(true);
-          const newNodes = setDagNode(
-            g.current,
-            nodeBookState.selectedNode,
-            thisNode,
-            oldNodes,
-            allTags,
-            settings.showClusterOptions,
-            null
-          );
-          // return setDagNode(selectedNode, thisNode, { ...oldNodes }, null);
-          return { nodes: newNodes, edges: oldEdges };
-        }
-      });
-      if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+        });
+        if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
+      }, 1000);
     },
     [user?.uname, nodeBookState.selectedNode, allTags, reloadPermanentGraph, settings.showClusterOptions]
   );
