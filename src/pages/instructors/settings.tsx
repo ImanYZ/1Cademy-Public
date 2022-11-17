@@ -9,7 +9,6 @@ import { Box } from "@mui/system";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
-import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { Institution } from "src/knowledgeTypes";
 
@@ -28,11 +27,11 @@ const initialErrorsState = {
   nodeProposalDate: false,
   questionProposalDay: false,
   questionProposalDate: false,
+  errorText: "",
 };
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
   const db = getFirestore();
   const [open, setOpen] = React.useState(false);
-  const { enqueueSnackbar } = useSnackbar();
   const [loaded, setLoaded] = useState(false);
   const [errorState, setErrorState] = useState(initialErrorsState);
   const [requestLoader, setRequestLoader] = useState(false);
@@ -124,16 +123,6 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     setOpen(false);
   };
 
-  const showErrorPop = (error: string) => {
-    return enqueueSnackbar(error, {
-      variant: "error",
-      anchorOrigin: {
-        horizontal: "right",
-        vertical: "top",
-      },
-    });
-  };
-
   const inputsHandler = (e: any, type: any, field: any = null) => {
     if (type === "nodeProposals") {
       if (field == "startDate" || field == "endDate") {
@@ -218,35 +207,64 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
 
       let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
       let questionProposalEndDate = moment(semester.questionProposals.endDate);
+      let nodeProposalDateDiff = nodeProposalEndDate.diff(semester.nodeProposals.startDate, "days") + 1;
+      let questionProposalDateDiff = questionProposalEndDate.diff(semester.questionProposals.startDate, "days") + 1;
       if (semester.days <= 0) {
-        setErrorState({ ...initialErrorsState, days: true });
-        showErrorPop(`Total days should be greater than 0.`);
+        setErrorState({ ...initialErrorsState, days: true, errorText: `Total days should be greater than 0.` });
         setRequestLoader(false);
         return;
-      } else if (nodeProposalEndDate.diff(semester.nodeProposals.startDate, "days") !== semester.days) {
-        setErrorState({ ...initialErrorsState, nodeProposalDate: true });
-        showErrorPop(`Date range should be ${semester.days} days in node proposal.`);
+      } else if (nodeProposalDateDiff > semester.days) {
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalDate: true,
+          errorText: `Node proposal date range should not exceed ${semester.days} days.`,
+        });
         setRequestLoader(false);
         return;
-      } else if (questionProposalEndDate.diff(semester.questionProposals.startDate, "days") !== semester.days) {
-        setErrorState({ ...initialErrorsState, questionProposalDate: true });
-        showErrorPop(`Date range should be ${semester.days} days in question proposal.`);
+      } else if (nodeProposalDateDiff <= 0) {
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalDate: true,
+          errorText: `Ending date should not be less than starting date in node proposal.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (questionProposalDateDiff > semester.days) {
+        setErrorState({
+          ...initialErrorsState,
+          questionProposalDate: true,
+          errorText: `Question proposal date range should not exceed ${semester.days} days.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (questionProposalDateDiff <= 0) {
+        setErrorState({
+          ...initialErrorsState,
+          questionProposalDate: true,
+          errorText: `Ending date should not be less than starting date in question proposal.`,
+        });
         setRequestLoader(false);
         return;
       } else if (
         semester.nodeProposals.totalDaysOfCourse > semester.days ||
         semester.nodeProposals.totalDaysOfCourse <= 0
       ) {
-        setErrorState({ ...initialErrorsState, nodeProposalDay: true });
-        showErrorPop(`Days should be between 1 to ${semester.days} in node proposal.`);
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalDay: true,
+          errorText: `Days should be between 1 to ${semester.days} in node proposal.`,
+        });
         setRequestLoader(false);
         return;
       } else if (
         semester.questionProposals.totalDaysOfCourse > semester.days ||
         semester.questionProposals.totalDaysOfCourse <= 0
       ) {
-        setErrorState({ ...initialErrorsState, questionProposalDay: true });
-        showErrorPop(`Days should be between 1 to ${semester.days} in question proposal.`);
+        setErrorState({
+          ...initialErrorsState,
+          questionProposalDay: true,
+          errorText: `Days should be between 1 to ${semester.days} in question proposal.`,
+        });
         setRequestLoader(false);
         return;
       } else {

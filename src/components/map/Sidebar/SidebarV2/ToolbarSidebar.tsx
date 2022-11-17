@@ -749,8 +749,8 @@ MainSidebarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const contentSignalState = useMemo(() => {
-    return { ...user };
-  }, [user, selectedUser]);
+    return { updated: true };
+  }, [user, selectedUser, isMenuOpen]);
 
   return (
     <>

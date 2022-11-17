@@ -36,23 +36,23 @@ export const StackedBarPlotStatsSkeleton = () => {
         <Skeleton
           variant="rectangular"
           sx={{
-            width: "70px",
-            height: "370px",
+            width: "90px",
+            height: "350px",
             borderRadius: "2px",
             marginY: "16px",
             justifySelf: "end",
-            marginBottom: "2px",
+            alignSelf: "start",
           }}
         />
         <Skeleton
           variant="rectangular"
           sx={{
-            width: "70px",
-            height: "370px",
+            width: "90px",
+            height: "350px",
             borderRadius: "2px",
             marginY: "16px",
             justifySelf: "start",
-            marginBottom: "2px",
+            alignSelf: "start",
           }}
         />
       </Box>

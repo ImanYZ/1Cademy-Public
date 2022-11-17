@@ -270,16 +270,15 @@ const Node = ({
       }
     });
 
-    if (!nodeRef.current) return;
+    if (nodeRef.current) {
+      observer.current.observe(nodeRef.current);
+    }
 
-    observer.current.observe(nodeRef.current);
-
-    // observer.current.unobserve();
     return () => {
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [title, content, tags, editable]);
+  }, [identifier]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
