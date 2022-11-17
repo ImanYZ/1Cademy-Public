@@ -40,7 +40,8 @@ function drawChart(
   studentProposalsRate: StudentStackedBarStatsObject | null,
   studentQuestionsRate: StudentStackedBarStatsObject | null,
   theme: UserTheme,
-  studentLocation?: StudenBarsSubgroupLocation
+  studentLocation?: StudenBarsSubgroupLocation,
+  mobile?: boolean
 ) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
@@ -229,7 +230,10 @@ function drawChart(
         .style("pointer-events", "auto")
         .style("opacity", 1)
         .style("top", `${middle}px`)
-        .style("left", `${d.data.index === 0 ? 1.6 * x.bandwidth() : 3.25 * x.bandwidth()}px`);
+        .style(
+          "left",
+          `${d.data.index === 0 ? 1.6 * x.bandwidth() : mobile ? -x.bandwidth() / 2.5 : 3.25 * x.bandwidth()}px`
+        );
       retrieveEvent(e, subgroupName);
     })
     .on("mouseout", function (e) {
@@ -283,6 +287,7 @@ type StackedBarProps = {
   questionsStudents: StudentStackedBarStatsObject | null;
   maxAxisY: number;
   theme: UserTheme;
+  mobile?: boolean;
   studentLocation?: StudenBarsSubgroupLocation;
 };
 export const PointsBarChart = ({
@@ -292,12 +297,13 @@ export const PointsBarChart = ({
   maxAxisY,
   theme,
   studentLocation,
+  mobile,
 }: StackedBarProps) => {
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data, maxAxisY, proposalsStudents, questionsStudents, theme, studentLocation);
+      drawChart(svgRef, data, maxAxisY, proposalsStudents, questionsStudents, theme, studentLocation, mobile);
     },
-    [data, maxAxisY, proposalsStudents, questionsStudents, studentLocation, theme]
+    [data, maxAxisY, mobile, proposalsStudents, questionsStudents, studentLocation, theme]
   );
 
   return (

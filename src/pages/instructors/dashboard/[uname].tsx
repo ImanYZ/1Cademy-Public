@@ -469,6 +469,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   maxAxisY={studentsCounter}
                   studentLocation={studentLocation}
                   theme={settings.theme}
+                  mobile={isMovil}
                 />
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>

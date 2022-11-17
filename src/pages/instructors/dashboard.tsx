@@ -537,6 +537,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
                   maxAxisY={studentsCounter}
                   theme={settings.theme}
+                  mobile={isMovil}
                 />
               </Box>
             </>
