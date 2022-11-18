@@ -68,6 +68,7 @@ import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSideb
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
+import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
@@ -241,6 +242,12 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
+  const { width: windowWith, height: windowHeight } = useWindowSize();
+  const windowInnerTop = 100;
+  const windowInnerLeft = 200;
+  const windowInnerRight = 200;
+  const windowInnerBottom = 100;
+
   const scrollToNode = useCallback((nodeId: string, tries = 0) => {
     devLog("scroll To Node", { nodeId, tries });
     if (tries === 10) return;
@@ -254,19 +261,64 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
         var bounding = originalNode.getBoundingClientRect();
+
+        //
+        const nodeLeft = bounding.left;
+        const nodeRight = bounding.right;
+        const nodeBottom = bounding.bottom;
+        const nodeTop = bounding.top;
+
+        // const topLeft =
+        //   nodeTop >= windowInnerTop &&
+        //   nodeLeft >= windowInnerLeft &&
+        //   nodeTop >= windowInnerBottom &&
+        //   nodeLeft >= windowInnerRight;
+        // const topRight =
+        //   nodeTop >= windowInnerTop &&
+        //   nodeRight >= windowInnerRight &&
+        //   nodeTop >= windowInnerBottom &&
+        //   nodeRight >= windowInnerLeft;
+
+        const BL =
+          nodeLeft >= windowInnerLeft &&
+          nodeLeft <= windowWith - windowInnerRight &&
+          nodeBottom >= windowInnerTop &&
+          nodeBottom <= windowHeight - windowInnerBottom;
+        const BR =
+          nodeRight >= windowInnerLeft &&
+          nodeRight <= windowWith - windowInnerRight &&
+          nodeBottom >= windowInnerTop &&
+          nodeBottom <= windowHeight - windowInnerBottom;
+        const TL =
+          nodeLeft >= windowInnerLeft &&
+          nodeLeft <= windowWith - windowInnerRight &&
+          nodeTop >= windowInnerTop &&
+          nodeTop <= windowHeight - windowInnerBottom;
+        const TR =
+          nodeRight >= windowInnerLeft &&
+          nodeRight <= windowWith - windowInnerRight &&
+          nodeTop >= windowInnerTop &&
+          nodeTop <= windowHeight - windowInnerBottom;
+
+        // const bottomRight = nodeBottom >= windowInnerBottom && nodeRight >= windowInnerRight;
+        // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
+        const isInViewport = BL || BR || TL || TR;
+
         console.log("bounding", {
           top: bounding.top,
           left: bounding.left,
-          bottom: window.innerHeight - bounding.bottom,
-          right: window.innerWidth - bounding.right,
-          windowInnerWidth: window.innerWidth - 200,
-          widowInnterHeight: window.innerHeight - 100,
+          bottom: nodeBottom,
+          right: nodeRight,
+          windowInnerTop,
+          windowInnerLeft,
+          windowInnerRight,
+          windowInnerBottom,
+          isInViewport,
+          BL,
+          BR,
+          TL,
+          TR,
         });
-        const isInViewport =
-          bounding.top >= 100 &&
-          bounding.left >= 200 &&
-          bounding.right <= window.innerWidth - 200 &&
-          bounding.bottom <= window.innerHeight - 100;
         if (isInViewport) return;
 
         if (
@@ -4316,10 +4368,10 @@ const Dashboard = ({}: DashboardProps) => {
                   position: "absolute",
                   // width: `${300}px`,
                   // height: `${300}px`,
-                  top: "100px",
-                  bottom: "100px",
-                  left: "200px",
-                  right: "200px",
+                  top: windowInnerTop,
+                  bottom: windowInnerBottom,
+                  left: windowInnerLeft,
+                  right: windowInnerRight,
                   background: "white",
                   opacity: 0.25,
                   pointerEvents: "none",
