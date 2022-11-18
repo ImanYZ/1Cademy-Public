@@ -250,6 +250,17 @@ const Dashboard = ({}: DashboardProps) => {
         // const currentNode = graph.nodes[nodeId];
         // if(currentNode.height===NODE_HEIGHT)
         const originalNode = document.getElementById(nodeId);
+        if (!originalNode) {
+          return;
+        }
+        var bounding = originalNode.getBoundingClientRect();
+
+        const isInViewport =
+          bounding.top >= 0 &&
+          bounding.left >= 0 &&
+          bounding.right <= window.innerWidth &&
+          bounding.bottom <= window.innerHeight;
+        if (isInViewport) return;
 
         if (
           originalNode &&
