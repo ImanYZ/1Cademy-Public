@@ -41,6 +41,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
@@ -1034,27 +1035,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (!db) return;
       if (!user?.uname) return;
       if (!allTagsLoaded) return;
-      const userNodesRef = collection(db, "notifications");
-      const q = query(userNodesRef, where("proposer", "==", user.uname));
+      const notificationNumsCol = collection(db, "notificationNums");
+      const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
-        // console.log("on snapshot");
-
-        const docChanges = snapshot.docChanges();
-        for (let change of docChanges) {
-          const { checked } = change.doc.data();
-          if (change.type === "removed") {
-            setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
-          }
-          if (change.type === "added" || change.type === "modified") {
-            if (checked) {
-              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
-            } else {
-              // will add in uncheckedNotificationsDict
-              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum + 1);
-            }
-          }
-        }
+        const notificationNum = snapshot.docs[0].data() as INotificationNum;
+        setUncheckedNotificationsNum(notificationNum.nNum);
       });
       return () => {
         notificationsSnapshot();
