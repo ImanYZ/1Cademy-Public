@@ -3026,7 +3026,9 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.height;
 
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-
+          if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
+            delete changedNodes[nodeBookState.selectedNode];
+          }
           setNodeParts(nodeBookState.selectedNode, node => ({ ...node, editable: false }));
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
           scrollToNode(nodeBookState.selectedNode);
