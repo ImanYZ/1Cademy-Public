@@ -1039,8 +1039,16 @@ const Dashboard = ({}: DashboardProps) => {
       const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
-        const notificationNum = snapshot.docs[0].data() as INotificationNum;
-        setUncheckedNotificationsNum(notificationNum.nNum);
+        if(!snapshot.docs.length) {
+          const notificationNumRef = doc(db, "notificationNums");
+          setDoc(notificationNumRef, {
+            uname: user.uname,
+            nNum: 0,
+          } as INotificationNum);
+        } else {
+          const notificationNum = snapshot.docs[0].data() as INotificationNum;
+          setUncheckedNotificationsNum(notificationNum.nNum);
+        }
       });
       return () => {
         notificationsSnapshot();
