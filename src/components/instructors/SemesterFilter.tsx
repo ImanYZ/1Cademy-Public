@@ -1,4 +1,5 @@
 import {
+  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -6,17 +7,25 @@ import {
   SelectChangeEvent,
   ToggleButton,
   ToggleButtonGroup,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
+import { useRouter } from "next/router";
 import React from "react";
+
+import { UserRole } from "../../knowledgeTypes";
+import ROUTES from "../../lib/utils/routes";
 
 type SemesterFilterProps = {
   semesters: string[];
-  selectedSemester: string | undefined;
+  selectedSemester: string | null;
   setSelectedSemester: any;
   courses: string[];
-  selectedCourse: string | undefined;
+  selectedCourse: string | null;
   setSelectedCourse: any;
+  isMovil: boolean;
+  role: UserRole;
 };
 
 export const SemesterFilter = ({
@@ -26,42 +35,115 @@ export const SemesterFilter = ({
   courses,
   selectedCourse,
   setSelectedCourse,
+  isMovil,
+  role,
 }: SemesterFilterProps) => {
+  console.log("selectedSemester", selectedSemester);
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
+  const router = useRouter();
+
   const onChangeSemester = (event: SelectChangeEvent) => {
     setSelectedSemester(event.target.value as string);
   };
 
+  const onChangeCourse2 = (event: SelectChangeEvent) => {
+    setSelectedCourse(event.target.value as string);
+  };
+
   const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
-    setSelectedCourse(newAlignment);
+    if (newAlignment) {
+      setSelectedCourse(newAlignment);
+    }
+  };
+
+  const onNewCourse = () => {
+    setSelectedCourse(null);
+    if (router.route === ROUTES.instructorsSettings) return;
+    router.push(ROUTES.instructorsSettings);
   };
 
   return (
-    <Box sx={{ display: "flex", gap: "16px" }}>
-      <FormControl>
-        <InputLabel id="semester-filter-label">Semester</InputLabel>
-        <Select
-          labelId="semester-filter-label"
-          id="semester-filter"
-          value={selectedSemester}
-          label="Semester"
-          onChange={onChangeSemester}
-          sx={{ width: "140px" }}
-        >
-          {semesters.map((cur, idx) => (
-            <MenuItem key={idx} value={cur}>
-              {cur}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
+        gap: { xs: "6px", md: "20px" },
+        justifyContent: { xs: "center", sm: "space-between" },
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: { xs: "space-between", sm: "flex-start" },
+          gap: { xs: "16px", md: "16px" },
+        }}
+      >
+        <FormControl size={matches ? "small" : "medium"}>
+          <InputLabel id="semester-filter-label">Semester</InputLabel>
+          <Select
+            labelId="semester-filter-label"
+            id="semester-filter"
+            value={selectedSemester ?? ""}
+            label="Semester"
+            onChange={onChangeSemester}
+            sx={{ width: "140px" }}
+          >
+            {semesters.map((cur, idx) => (
+              <MenuItem key={idx} value={cur}>
+                {cur}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      <ToggleButtonGroup value={selectedCourse} exclusive onChange={onChangeCourse} aria-label="text alignment">
-        {courses.map((cur, idx) => (
-          <ToggleButton key={idx} value={cur} aria-label="left aligned">
-            {cur}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+        {!isMovil && (
+          <ToggleButtonGroup
+            value={selectedCourse}
+            exclusive
+            onChange={onChangeCourse}
+            aria-label="text alignment"
+            sx={{ width: { sm: "500px", lg: "700px", xl: "1000px" }, overflowY: "auto" }}
+            className="scroll-styled"
+          >
+            {courses.map((cur, idx) => (
+              <ToggleButton
+                key={idx}
+                value={cur}
+                aria-label="left aligned"
+                sx={{ border: "solid 1px rgb(185 185 185)", whiteSpace: " nowrap" }}
+              >
+                {cur}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        )}
+        {isMovil && (
+          <FormControl size={matches ? "small" : "medium"}>
+            <InputLabel id="course-filter-label">Courses</InputLabel>
+            <Select
+              labelId="course-filter-label"
+              id="course-filter"
+              value={selectedCourse ?? ""}
+              label="Course"
+              onChange={onChangeCourse2}
+              sx={{ width: "140px" }}
+            >
+              {courses.map((cur, idx) => (
+                <MenuItem key={idx} value={cur}>
+                  {cur}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      </Box>
+
+      {role === "INSTRUCTOR" && (
+        <Button onClick={() => onNewCourse()} variant={"contained"} size={matches ? "small" : "medium"}>
+          New Course
+        </Button>
+      )}
     </Box>
   );
 };

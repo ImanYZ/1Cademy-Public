@@ -3,7 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
-import React, { ReactNode, useCallback, useRef } from "react";
+import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 type SidebarWrapperProps = {
   title: string;
   open: boolean;
@@ -17,6 +17,7 @@ type SidebarWrapperProps = {
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
+  contentSignalState: any;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -34,6 +35,7 @@ export const SidebarWrapper = ({
   showScrollUpButton = true,
   hoverWidth,
   isMenuOpen,
+  contentSignalState,
 }: SidebarWrapperProps) => {
   // const contentHight=useMemo(() => {
   //   if(headerImage && sidbe)
@@ -47,6 +49,10 @@ export const SidebarWrapper = ({
 
     sidebarContentRef.current.scrollTop = 0;
   }, [sidebarContentRef]);
+
+  const sidebarContent = useMemo(() => {
+    return <>{SidebarContent}</>;
+  }, [contentSignalState]);
 
   return (
     <Drawer
@@ -64,7 +70,7 @@ export const SidebarWrapper = ({
                 width: { sm: hoverWidth },
               }
             : undefined,
-          // border: "solid 2px yellow",
+          borderRight: theme => (theme.palette.mode === "dark" ? "1px solid #000000" : "1px solid #eeeeee)"),
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
         },
@@ -108,7 +114,7 @@ export const SidebarWrapper = ({
           "::-webkit-scrollbar ": { width: "4px", height: "4px" },
         }}
       >
-        {SidebarContent}
+        {sidebarContent}
       </Box>
 
       {showCloseButton && (

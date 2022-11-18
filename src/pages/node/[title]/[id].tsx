@@ -17,6 +17,7 @@ import PagesNavbar from "@/components/PagesNavbar";
 import { ReferencesList } from "@/components/ReferencesList";
 import { TagsList } from "@/components/TagsList";
 import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServer/nodes";
+import ROUTES from "@/lib/utils/routes";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
 
 import { KnowledgeNode } from "../../../knowledgeTypes";
@@ -76,9 +77,8 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
     const auth = getAuth();
     const userAuthObj = auth?.currentUser;
     if (userAuthObj !== null && node?.title && node?.id) {
-      console.log({ userAuthObj, node });
       router.push({
-        pathname: "/dashboard",
+        pathname: ROUTES.dashboard,
         query: { nodeId: node?.id },
       });
       return;

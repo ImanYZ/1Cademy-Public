@@ -47,17 +47,28 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
+  console.log("ProposalsList:proposals", props.proposals);
   // console.log("ProposalsList", { props });
   const [user] = useAuth();
 
   const username = user.user?.uname;
 
   const rateProposalClick = useCallback(
-    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) =>
-      props.rateProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx, correct, wrong, award),
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.rateProposal, props.proposals]
+    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) => {
+      console.log("proposal", proposal);
+      return props.rateProposal(
+        event,
+        props.proposals,
+        props.setProposals,
+        proposal.id,
+        proposalIdx,
+        correct,
+        wrong,
+        award,
+        proposal.newNodeId
+      );
+    },
+    [props]
   );
 
   const deleteProposalClick = useCallback(
@@ -96,10 +107,10 @@ const ProposalsList = (props: ProposalsListProps) => {
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
                   gap: "5px",
                 }}
               >
+                <h5>ProposalID:{proposal.id}</h5>
                 <div className="title Time" style={{ fontSize: "12px" }}>
                   {dayjs(proposal.createdAt).fromNow()}
                 </div>
@@ -167,15 +178,26 @@ const ProposalsList = (props: ProposalsListProps) => {
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
                 <div className="title Time" style={{ fontSize: "12px" }}>
-                  <div className="title Username">{proposal.proposer}</div>
+                  {/* <div className="title Username">{proposal.proposer}</div> */}
+                  <div className="ProposalTitle" style={{ fontSize: "16px", fontWeight: "400" }}>
+                    {proposal.title}
+                  </div>
                 </div>
                 <div className="ProposalTitle">
                   {proposalSummaries.length > 0 ? (
                     proposalSummaries.map((prSummary: any, sIdx: number) => {
                       return (
-                        <p style={{ margin: "0" }} key={"Summary" + proposal.id + sIdx}>
+                        <Box
+                          component="p"
+                          sx={{
+                            margin: "0",
+                            color: theme =>
+                              theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
+                          }}
+                          key={"Summary" + proposal.id + sIdx}
+                        >
                           {prSummary}
-                        </p>
+                        </Box>
                       );
                     })
                   ) : (

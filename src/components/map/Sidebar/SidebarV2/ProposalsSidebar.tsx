@@ -1,9 +1,11 @@
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Firestore } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import referencesDarkTheme from "../../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../../public/references-light-theme.jpg";
+import { newId } from "../../../../lib/utils/newid";
 // import EditProposal from "../../EditProposal";
 // import NewChildProposal from "../../NewChildProposal";
 import ProposalsList from "../../ProposalsList/ProposalsList";
@@ -21,6 +23,7 @@ type ProposalsSidebarProps = {
   proposeNewChild: any;
   openProposal: any;
   selectedNode: string | null;
+  db: Firestore;
 };
 // type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 
@@ -44,6 +47,7 @@ const ProposalsSidebar = ({
   proposeNewChild,
   openProposal,
   selectedNode,
+  db,
 }: ProposalsSidebarProps) => {
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -81,6 +85,10 @@ const ProposalsSidebar = ({
   //   setOpenProposalItem(false);
   // }, [selectionType]);
 
+  const proposalsWithId = useMemo(() => {
+    return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));
+  }, [db, proposals]);
+
   const tabsItems = [
     {
       title: "Pending Proposals",
@@ -91,7 +99,7 @@ const ProposalsSidebar = ({
           sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
         >
           <ProposalsList
-            proposals={proposals}
+            proposals={proposalsWithId}
             setProposals={setProposals}
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -119,7 +127,7 @@ const ProposalsSidebar = ({
           sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
         >
           <ProposalsList
-            proposals={proposals}
+            proposals={proposalsWithId}
             setProposals={setProposals}
             proposeNodeImprovement={proposeNodeImprovement}
             fetchProposals={fetchProposals}
@@ -154,6 +162,7 @@ const ProposalsSidebar = ({
       onClose={onClose}
       width={430}
       anchor="left"
+      contentSignalState={tabsItems}
       SidebarOptions={
         <Box>
           <Box>
@@ -186,7 +195,13 @@ const ProposalsSidebar = ({
               </div> */}
             </div>
           </Box>
-          <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
+          <Box
+            sx={{
+              borderBottom: 1,
+              borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+              width: "100%",
+            }}
+          >
             <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
               {tabsItems.map((tabItem: any, idx: number) => (
                 <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />

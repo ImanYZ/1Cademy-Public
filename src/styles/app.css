@@ -667,3 +667,107 @@ select:-webkit-autofill:focus {
   align-items: center;
   /* margin: 10px 0px !important; */
 }
+
+.MuiCollapse-container {
+  transition-duration: 0s !important;
+}
+
+.remove-arrow-buttons input[type="number"]::-webkit-inner-spin-button,
+.remove-arrow-buttons input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.remove-arrow-buttons input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.light-calender ::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.dark-calender ::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
+.unselect-date-placeholder ::-webkit-datetime-edit-year-field:not([aria-valuenow]),
+.unselect-date-placeholder ::-webkit-datetime-edit-month-field:not([aria-valuenow]),
+.unselect-date-placeholder ::-webkit-datetime-edit-day-field:not([aria-valuenow]) {
+  color: transparent;
+}
+/* .instructor-settings-main h2,
+h3,
+h4,
+p {
+  color: black !important;
+} */
+
+.tooltip-plot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #f8f8f8;
+  box-shadow: 0 2px 8px 1px gray;
+  border-radius: 4px;
+  opacity: 0;
+  z-index: 999;
+  max-height: 350px;
+  overflow-y: auto;
+}
+.tooltip-plot.darkMode {
+  background: #303134;
+  box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.5);
+}
+
+.students-tooltip {
+  overflow-y: auto;
+  width: 180px;
+  padding: 2px;
+  font-size: 12px;
+}
+.students-tooltip .students-tooltip-body {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 6px;
+  color: black;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+.students-tooltip .students-tooltip-body:last-child {
+  border-bottom: none;
+}
+.students-tooltip .tooltip-student-image {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.students-tooltip .students-tooltip-body.darkMode {
+  color: white;
+}
+
+.students-tooltip span {
+  text-overflow: ellipsis;
+}
+
+.tooltip-plot::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 6px;
+  height: 8px;
+}
+
+.tooltip-plot::-webkit-scrollbar-thumb {
+  background: rgba(113, 113, 113, 0.663);
+  border-radius: 10px;
+}
+.tooltip-plot.axis-y-label {
+  font-size: 12px;
+  padding: 4px;
+  background-color: rgba(108, 108, 108, 0.95);
+  color: white;
+  max-width: 200px;
+  text-align: center;
+  box-shadow: none;
+}

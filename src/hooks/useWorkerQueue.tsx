@@ -26,6 +26,8 @@ type UseWorkerQueueProps = {
   mapHeight: number;
   allTags: AllTagsTreeView;
   onComplete: () => void;
+  setClusterNodes: any;
+  withClusters: boolean;
 };
 export const useWorkerQueue = ({
   g,
@@ -37,6 +39,8 @@ export const useWorkerQueue = ({
   mapHeight,
   allTags,
   onComplete,
+  setClusterNodes,
+  withClusters,
 }: UseWorkerQueueProps) => {
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
@@ -50,7 +54,7 @@ export const useWorkerQueue = ({
       let oldEdges = { ...edgesToRecalculate };
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
-
+      console.log("worker:oldNodes", oldNodes);
       worker.postMessage({
         oldMapWidth,
         oldMapHeight,
@@ -58,6 +62,7 @@ export const useWorkerQueue = ({
         oldEdges,
         allTags,
         graph: dagreUtils.mapGraphToObject(g.current),
+        withClusters,
       });
       worker.onerror = err => {
         console.error("[WORKER]error:", err);
@@ -65,7 +70,7 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
-        const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph } = e.data;
+        const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -88,7 +93,7 @@ export const useWorkerQueue = ({
         g.current = gg;
         setMapWidth(oldMapWidth);
         setMapHeight(oldMapHeight);
-        // setClusterNodes(oldClusterNodes);
+        setClusterNodes(oldClusterNodes);
 
         setDidWork(true);
         setGraph(({ nodes, edges }) => {
@@ -104,7 +109,7 @@ export const useWorkerQueue = ({
               top: resultNode.top,
               x: resultNode.x,
               y: resultNode.y,
-              height: resultNode.height,
+              height: resultNode.height ? resultNode.height : nodesCopy[nodeId].height,
             };
             nodesCopy[nodeId] = overrideNode;
           });
@@ -125,7 +130,7 @@ export const useWorkerQueue = ({
         }, 1000);
       };
     },
-    [allTags, g, mapHeight, mapWidth, onComplete, setGraph, setMapHeight, setMapWidth]
+    [allTags, g, mapHeight, mapWidth, onComplete, setClusterNodes, setGraph, setMapHeight, setMapWidth, withClusters]
   );
 
   useEffect(() => {
@@ -141,11 +146,11 @@ export const useWorkerQueue = ({
         return { ...graph.nodes[cur.id], height: cur.height };
       })
       .flatMap(cur => cur || []);
-    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags);
+    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
-  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker /* tasksToWait */]);
+  }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
   const addTask = (newTask: Task) => {
     setQueue(queue => [...queue, newTask]);

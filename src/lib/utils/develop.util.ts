@@ -7,7 +7,7 @@
 const disableLogsTemporally = false;
 export const devLog = (logInUpperCase: string, otherData = {}) => {
   if (disableLogsTemporally) return;
-  // if (process.env.NODE_ENV !== "development") return;
+  if (process.env.NODE_ENV !== "development") return;
 
   console.log(`[${logInUpperCase.toUpperCase()}]`, otherData);
 };

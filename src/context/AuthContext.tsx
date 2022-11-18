@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useSnackbar } from "notistack";
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useReducer } from "react";
-import { AuthActions, AuthState, ErrorOptions } from "src/knowledgeTypes";
+import { AuthActions, AuthState, ErrorOptions, UserRole } from "src/knowledgeTypes";
 
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import authReducer, { INITIAL_STATE } from "@/lib/reducers/auth";
@@ -18,27 +18,57 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   const [state, dispatch] = useReducer(authReducer, store || INITIAL_STATE);
   const { enqueueSnackbar } = useSnackbar();
 
-  const loadUser = useCallback(async (userId: string) => {
-    try {
-      const { user, reputation, theme, background, view } = await retrieveAuthenticatedUser(userId);
+  const handleError = useCallback(
+    ({ error, errorMessage, showErrorToast = true }: ErrorOptions) => {
+      //TODO: setup error reporting in google cloud
+      if (showErrorToast) {
+        const errorString = typeof error === "string" ? error : "";
+        enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {
+          variant: "error",
+          autoHideDuration: 10000,
+        });
+      }
+    },
+    [enqueueSnackbar]
+  );
 
-      if (user && reputation) {
-        dispatch({ type: "loginSuccess", payload: { user, reputation, theme, background, view } });
-      } else {
+  const loadUser = useCallback(
+    async (userId: string, role: UserRole) => {
+      try {
+        const { user, reputation, theme, background, view, showClusterOptions, showClusters } =
+          await retrieveAuthenticatedUser(userId, role);
+        if (!user) {
+          handleError({ error: "Cant find user" });
+          return;
+        }
+        if (!reputation) {
+          handleError({ error: "Cant find user" });
+          return;
+        }
+        if (user && reputation) {
+          dispatch({
+            type: "loginSuccess",
+            payload: { user, reputation, theme, background, view, showClusterOptions, showClusters },
+          });
+        } else {
+          dispatch({ type: "logoutSuccess" });
+        }
+      } catch (error) {
         dispatch({ type: "logoutSuccess" });
       }
-    } catch (error) {
-      dispatch({ type: "logoutSuccess" });
-    }
-  }, []);
+    },
+    [handleError]
+  );
 
   useEffect(() => {
     const auth = getAuth();
 
-    const unsubscriber = onAuthStateChanged(auth, user => {
+    const unsubscriber = onAuthStateChanged(auth, async user => {
       if (user) {
+        const res = await user.getIdTokenResult(true);
+        const role: UserRole = res.claims["instructor"] ? "INSTRUCTOR" : res.claims["student"] ? "STUDENT" : null;
         //sign in
-        loadUser(user.uid);
+        loadUser(user.uid, role);
       } else {
         //sign out
         dispatch({ type: "logoutSuccess" });
@@ -46,18 +76,6 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
     });
     return () => unsubscriber();
   }, [loadUser]);
-
-  const handleError = ({ error, errorMessage, showErrorToast = true }: ErrorOptions) => {
-    //TODO: setup error reporting in google cloud
-    console.log("TODO: setup error reporting in google cloud", error, errorMessage, showErrorToast);
-    if (showErrorToast) {
-      const errorString = typeof error === "string" ? error : "";
-      enqueueSnackbar(errorMessage && errorMessage.length > 0 ? errorMessage : errorString, {
-        variant: "error",
-        autoHideDuration: 10000,
-      });
-    }
-  };
 
   const dispatchActions = { dispatch, handleError };
 

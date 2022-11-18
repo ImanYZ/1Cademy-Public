@@ -4,13 +4,13 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import React, { useCallback, useDeferredValue, useEffect, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff } from "@/lib/utils/utils";
-import { OpenSidebar } from "@/pages/dashboard";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -120,6 +120,8 @@ type NodeProps = {
   proposeNodeImprovement: any;
   proposeNewChild: any;
   scrollToNode: any;
+  openSidebar: OpenSidebar;
+  locked: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -210,6 +212,8 @@ const Node = ({
   proposeNewChild,
   cleanEditorLink,
   scrollToNode,
+  openSidebar,
+  locked,
 }: NodeProps) => {
   // const choosingNode = useRecoilValue(choosingNodeState);
   // const choosingType = useRecoilValue(choosingTypeState);
@@ -248,39 +252,33 @@ const Node = ({
     setTitleCopy(title);
     setContentCopy(content);
   }, [title, content]);
+
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        console.log("->", { blockSize, previousHeight: previousHeightRef.current });
+        // console.log("->", { blockSize, previousHeight: previousHeightRef.current });
         const isSimilar = blockSize === previousHeightRef.current;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
         if (isSimilar) return;
 
-        console.log({
-          entries: entries[0],
-          currentHeight: new Number(blockSize.toString()),
-          previousHeight: new Number(previousHeightRef.current.toString()),
-          isSimilar,
-        });
         changeNodeHight(identifier, blockSize);
       } catch (err) {
         console.warn("invalid entry", err);
       }
     });
 
-    if (!nodeRef.current) return;
+    if (nodeRef.current) {
+      observer.current.observe(nodeRef.current);
+    }
 
-    observer.current.observe(nodeRef.current);
-
-    // observer.current.unobserve();
     return () => {
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [title, content, tags, editable]);
+  }, [identifier]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
@@ -321,10 +319,10 @@ const Node = ({
       setAbleToPropose(false);
     }
     setTitleUpdated(true);
-    startTransition(() => {
-      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
-    });
+    // startTransition(() => {
+    //   // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+    //   setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+    // });
   };
   const onSetContent = (newContent: string) => {
     setContentCopy(newContent);
@@ -335,10 +333,10 @@ const Node = ({
         setAbleToPropose(false);
       }
     }
-    startTransition(() => {
-      // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
-    });
+    // startTransition(() => {
+    //   // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
+    //   setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
+    // });
   };
   const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
 
@@ -399,8 +397,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum),
-    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum]
+    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked),
+    [wrongNode, identifier, nodeType, markedWrong, wrongNum, correctNum, locked]
   );
 
   const uploadNodeImageHandler = useCallback(
@@ -511,8 +509,14 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
+  const onBlurContent = useCallback((newContent: string) => {
+    setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
+  }, []);
+
   const onBlurNodeTitle = useCallback(
     async (newTitle: string) => {
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+
       if (titleUpdated && newTitle.trim().length > 0) {
         nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
         let nodes: any = await getSearchAutocomplete(newTitle);
@@ -692,7 +696,7 @@ const Node = ({
                 label="Please edit the node content below:"
                 value={contentCopy}
                 setValue={onSetContent}
-                // onBlurCallback={value => setNodeParts(identifier, thisNode => ({ ...thisNode, content: value }))}
+                onBlurCallback={value => onBlurContent(value)}
                 // setValue={setContentCopy}
                 readOnly={!editable}
                 sxPreview={{ marginTop: "13px" }}
@@ -827,6 +831,7 @@ const Node = ({
                 user={user}
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
+                locked={locked}
               />
               {/* <NodeFooter
                 open={true}
@@ -901,6 +906,7 @@ const Node = ({
               setAbleToPropose={setAbleToPropose}
               ableToPropose={ableToPropose}
               isLoading={isLoading}
+              onResetButton={newValue => setAbleToPropose(newValue)}
             />
             // <div style={{ border: 'dashed 2px royalBlue', padding: '20px' }}>
             //   LinkingWords component
@@ -998,6 +1004,7 @@ const Node = ({
                 user={user}
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
+                locked={locked}
               />
               {/* <NodeFooter
                 open={false}
@@ -1043,7 +1050,7 @@ const Node = ({
           </div>
         </div>
       )}
-      {nodeBookState.openEditButton && nodeBookState.nodeId == identifier ? (
+      {openSidebar === "PROPOSALS" && nodeBookState.selectedNode == identifier ? (
         <>
           <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
           <Box sx={{ p: "13px 10px" }}>
@@ -1164,6 +1171,7 @@ export const MemoizedNode = React.memo(Node);
 //     prevProps.studied === nextProps.studied &&
 //     prevProps.isStudied === nextProps.isStudied &&
 //     prevProps.changed === nextProps.changed &&
+
 //     prevProps.changedAt === nextProps.changedAt &&
 //     prevProps.lastVisit.getTime() === nextProps.lastVisit.getTime() &&
 //     prevProps.bookmarked === nextProps.bookmarked &&

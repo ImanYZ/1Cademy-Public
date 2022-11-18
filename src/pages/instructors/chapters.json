@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "title": "Ch. 1 The way of the program",
+    "subChapters": [
+      {
+        "id": 2,
+        "title": "What are variables"
+      },
+      {
+        "id": 3,
+        "title": "Expressions"
+      },
+      {
+        "id": 4,
+        "title": "Statements"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Ch. 2 Loops",
+    "subChapters": [
+      {
+        "id": 6,
+        "title": "For Loop"
+      },
+      {
+        "id": 7,
+        "title": "While Loop"
+      },
+      {
+        "id": 8,
+        "title": "Do While Loop"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Ch. 3 Conditions",
+    "subChapters": [
+      {
+        "id": 10,
+        "title": "If Condition"
+      },
+      {
+        "id": 11,
+        "title": "Else Condition"
+      },
+      {
+        "id": 12,
+        "title": "Else If Condition"
+      }
+    ]
+  }
+]

@@ -42,6 +42,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
       let twoThirdIndex = Math.floor((props.trendData.length * 2) / 3);
       let twoThirdValue = props.trendData[twoThirdIndex][props.x];
       if (props.x === "date") {
+        console.log({ oneThirdValue, twoThirdValue });
         oneThirdValue = new Date(oneThirdValue);
         twoThirdValue = new Date(twoThirdValue);
       }
@@ -77,6 +78,9 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
               fontSize: 13,
               fill: props.theme === "Dark" ? "white" : "#454545",
             },
+            axisLabel: {
+              fill: props.theme === "Dark" ? "white" : "#454545",
+            },
           }}
         />
         <VictoryAxis
@@ -88,6 +92,9 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
           style={{
             tickLabels: {
               fontSize: 13,
+              fill: props.theme === "Dark" ? "white" : "#454545",
+            },
+            axisLabel: {
               fill: props.theme === "Dark" ? "white" : "#454545",
             },
           }}

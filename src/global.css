@@ -833,9 +833,9 @@
   margin-left: 10px;
 }
 
-.TrendPlotRow {
+/* .TrendPlotRow {
   border-bottom: 1px solid white;
-}
+} */
 
 #NodesStatistics {
   padding: 7px 13px 4px 13px;
@@ -1487,7 +1487,7 @@ button.MuiTab-textColorInherit:focus {
   color: rgba(0, 0, 0, 0.6) !important;
 }
 .LightMode .MetaButton:hover {
-  color: rgba(0, 0, 0, 0.9) !important;
+  color: rgb(0, 0, 0, 0.9) !important;
 }
 /* .MetaButton.Clickable:hover,
 .MetaButton.Clickable:focus {
@@ -2748,6 +2748,31 @@ button.MuiTab-textColorInherit:focus {
   align-items: flex-start;
   margin-left: 10px;
 }
+
+/* table edit component css */
+
+.student-dashboard-table .editable-cell {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  opacity: 0.6;
+}
+
+.student-dashboard-table .not-editable-cell {
+  pointer-events: none;
+}
+
+/* table edit component css */
+
+.student-dashboard-table .editable-cell {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  opacity: 0.6;
+}
+
 @media (max-width: 600px) {
   .scroll-styled {
     display: flex;
@@ -2759,12 +2784,23 @@ button.MuiTab-textColorInherit:focus {
   }
 }
 
-.tab-button-node-footer {
-  background: #484848;
+.select-tab-button-node-footer {
   height: 40px;
+  margin-bottom: -3px;
+  margin-right: 2px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
+  border: solid 1px #585858;
+}
+
+.tab-button-node-footer {
+  margin-bottom: 8px;
+  height: 33px;
+  border-radius: 10px;
+  display: flex;
+  margin-right: 2px;
+  border: solid 1px #585858;
 }
 
 .tab-button-node-footer:hover,

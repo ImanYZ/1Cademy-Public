@@ -9,7 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import { Reputation, User, UserBackground, UserTheme, UserView } from "src/knowledgeTypes";
+import { Reputation, User, UserBackground, UserRole, UserTheme, UserView } from "src/knowledgeTypes";
 
 export const signUp = async (name: string, email: string, password: string) => {
   const newUser = await createUserWithEmailAndPassword(getAuth(), email, password);
@@ -52,12 +52,14 @@ export const getIdToken = async (): Promise<string | undefined> => {
   // axios.defaults.headers.common["Authorization"] = userToken;
 };
 
-export const retrieveAuthenticatedUser = async (userId: string) => {
+export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) => {
   let user: User | null = null;
   let reputationsData: Reputation | null = null;
   let theme: UserTheme = "Dark";
   let view: UserView = "Graph";
   let background: UserBackground = "Color";
+  let showClusterOptions = false;
+  let showClusters = false;
   const db = getFirestore();
 
   const nodesRef = collection(db, "users");
@@ -101,11 +103,14 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
       foundFrom: userData.foundFrom,
       occupation: userData.occupation,
       fieldOfInterest: userData.fieldOfInterest ?? "",
+      role,
     };
 
     theme = userData.theme;
     view = "view" in userData ? userData.view : "Graph";
     background = "background" in userData ? userData.background : "Image";
+    showClusterOptions = "showClusterOptions" in userData ? userData.showClusterOptions : false;
+    showClusters = "showClusters" in userData ? userData.showClusters : false;
 
     const reputationRef = collection(db, "reputations");
     const reputationQuery = query(
@@ -127,5 +132,13 @@ export const retrieveAuthenticatedUser = async (userId: string) => {
     }
   }
 
-  return { user, reputation: reputationsData, theme, background, view };
+  return {
+    user,
+    reputation: reputationsData,
+    theme,
+    background,
+    view,
+    showClusterOptions,
+    showClusters,
+  };
 };

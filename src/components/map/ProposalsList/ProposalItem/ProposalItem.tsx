@@ -2,7 +2,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -25,7 +25,7 @@ const ProposalItem = (props: any) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
-        props.selectProposal(event, proposal);
+        props.selectProposal(event, proposal, proposal.newNodeId);
       } else {
         props.openLinkedNode(proposal.node);
       }
@@ -50,6 +50,7 @@ const ProposalItem = (props: any) => {
       onClick={openLinkedNodeClick(props.proposal)}
       style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
     >
+      <h6>{props.proposal.newNodeId}</h6>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time" style={{ fontSize: "12px" }}>
           {dayjs(props.proposal.createdAt).fromNow()}
@@ -91,9 +92,17 @@ const ProposalItem = (props: any) => {
           {proposalSummaries.length > 0
             ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
                 return (
-                  <p style={{ margin: "0px" }} key={"Summary" + props.proposal.id + prSummaryIdx}>
+                  <Box
+                    component="p"
+                    sx={{
+                      margin: "0px",
+                      color: theme =>
+                        theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
+                    }}
+                    key={"Summary" + props.proposal.id + prSummaryIdx}
+                  >
                     {prSummary}
-                  </p>
+                  </Box>
                 );
               })
             : props.proposal.summary && (

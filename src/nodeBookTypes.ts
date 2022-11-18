@@ -4,7 +4,7 @@ import { Dispatch } from "react";
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
 
-export type OpenPart = "LinkingWords" | "Tags" | "References" | "Citations" | null;
+export type OpenPart = "LinkingWords" | "Tags" | "References" | "Citations" | "Proposals" | null;
 
 export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
 
@@ -230,6 +230,7 @@ export type NodeFireStore = {
   versions?: number;
   viewers: number;
   wrongs: number;
+  locked?: boolean;
 };
 
 export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserNodesData };
@@ -252,6 +253,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     updatedAt: Date;
     width?: number;
     height?: number;
+    unaccepted?: boolean;
     // left: number;
     // top: number;
     x?: number;

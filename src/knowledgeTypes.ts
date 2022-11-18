@@ -345,6 +345,8 @@ export type UserView = "Graph" | "Masonry";
 
 export type UserBackground = "Color" | "Image";
 
+export type UserRole = "INSTRUCTOR" | "STUDENT" | null;
+
 export type User = {
   blocked?: boolean;
   chooseUname?: boolean;
@@ -387,12 +389,15 @@ export type User = {
   // major?: string; //CHECK: I commented this because we have deMajor
   // instit?: string; //CHECK: I commented this because we have deInstit
   fieldOfInterest: string;
+  role: UserRole;
 };
 
-export type userSettings = {
+export type UserSettings = {
   background: UserBackground;
   theme: UserTheme;
   view: UserView;
+  showClusterOptions: boolean;
+  showClusters: boolean;
 };
 
 export type Reputation = {
@@ -444,7 +449,7 @@ export interface AuthState {
   readonly isAuthInitialized: boolean;
   readonly user: User | null;
   readonly reputation: Reputation | null;
-  readonly settings: userSettings;
+  readonly settings: UserSettings;
 }
 
 export type AuthActions = {
@@ -464,7 +469,15 @@ export type AuthLogoutSuccessAction = {
 
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
-  payload: { user: User; reputation: Reputation; theme: UserTheme; background: UserBackground; view: UserView };
+  payload: {
+    user: User;
+    reputation: Reputation;
+    theme: UserTheme;
+    background: UserBackground;
+    view: UserView;
+    showClusterOptions: boolean;
+    showClusters: boolean;
+  };
 };
 
 export type SetThemeAction = {
@@ -475,6 +488,14 @@ export type SetThemeAction = {
 export type SetBackgroundAction = {
   type: "setBackground";
   payload: UserBackground;
+};
+export type SetShowClusterOptionsAction = {
+  type: "setShowClusterOptions";
+  payload: boolean;
+};
+export type SetShowClustersAction = {
+  type: "setShowClusters";
+  payload: boolean;
 };
 export type SetAuthUserAction = {
   type: "setAuthUser";
@@ -494,6 +515,8 @@ export type DispatchAuthActions =
   | AuthLoginSuccessAction
   | SetThemeAction
   | SetBackgroundAction
+  | SetShowClusterOptionsAction
+  | SetShowClustersAction
   | SetAuthUserAction
   | SetViewAction
   | SetReputationAction;
@@ -546,7 +569,7 @@ export interface SignUpFormValues {
   clickedCP: boolean;
 }
 
-export interface SignUpData extends Omit<User, "userId"> {
+export interface SignUpData extends Omit<User, "userId" | "role"> {
   password: string;
   background: UserBackground;
   theme: UserTheme;

@@ -1,3 +1,4 @@
+import { Divider } from "@mui/material";
 import React from "react";
 
 import TrendsPlotRow from "./TrendsPlotRow";
@@ -10,6 +11,7 @@ type UseInfoTrendsProps = {
 };
 
 const UseInfoTrends = (props: UseInfoTrendsProps) => {
+  console.log("------>> props.proposalsPerDay", props.proposalsPerDay);
   return (
     <>
       <TrendsPlotRow
@@ -27,6 +29,7 @@ const UseInfoTrends = (props: UseInfoTrendsProps) => {
       >
         # of Proposals per day
       </TrendsPlotRow>
+      <Divider />
       {/* <TrendsPlotRow
 trendData={proposalsTaggedPerDay}
 x="date"

@@ -232,7 +232,6 @@ export const setTypeVisibilityOfChildInsideParent = (oldNodes: any, nodeId: stri
 
 // for every node downloaded from the database
 export const addReference = (nodeId: string, nodeData: NodeFireStore) => {
-  console.log("addReference");
   if (nodeData.nodeType === "Reference") {
     if (!(nodeId in citations)) {
       citations[nodeId] = new Set();
@@ -272,6 +271,7 @@ export const setDagNode = (
   node: any,
   oldNodes: any,
   allTags: any,
+  withClusters: boolean,
   callback?: any
 ) => {
   let newNode: any = {};
@@ -308,13 +308,12 @@ export const setDagNode = (
   //   g.setParent(nodeId, "Tag" + node.tagIds[0]);
   // }
 
-  // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
-  if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
-    // console.log("----sP---->>", { node, nodeTag: node.tagIds[0] }, [...g.nodes()]);
-    // setParent sets a cluster for the node with node Id
-    // node.tags[0].node: node Id of the first tag from the node data
-    g.setParent(nodeId, "Tag" + node.tagIds[0]);
-    // console.log("nodes", [...g.nodes()]);
+  if (withClusters) {
+    // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
+    if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
+      // setParents: set nodes into clusters (parents)
+      g.setParent(nodeId, "Tag" + node.tagIds[0]);
+    }
   }
 
   if (callback) {
@@ -347,7 +346,8 @@ export const setDagNodes = (
   g: dagre.graphlib.Graph<{}>,
   individualNodeChanges: FullNodeData[],
   oldNodes: FullNodesData,
-  allTags: any
+  allTags: any,
+  withClusters: boolean
 ) => {
   const graphNodes: { id: string; data: GraphNode }[] = individualNodeChanges.map(cur => ({
     id: cur.node,
@@ -391,11 +391,15 @@ export const setDagNodes = (
   // if the node has at least one tag, check if the nodeId of the tag is in allTags
   // (clusters are based on nodes' first tags)
 
-  individualNodeChanges.forEach(cur => {
-    if (!cur?.tagIds?.length) return;
-    if (!(cur.tagIds[0] in allTags)) return;
-    g.setParent(cur.node, "Tag" + cur.tagIds[0]);
-  });
+  if (withClusters) {
+    individualNodeChanges.forEach(cur => {
+      if (!cur?.tagIds?.length) return;
+      if (!(cur.tagIds[0] in allTags)) return;
+      console.log("setParent", cur.node, "Tag" + cur.tagIds[0]);
+      g.setParent(cur.node, "Tag" + cur.tagIds[0]);
+    });
+    console.log("setDagNodes", g);
+  }
 
   // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
   //   // setParent sets a cluster for the node with node Id
@@ -424,7 +428,7 @@ export const setDagNodes = (
 };
 
 // removes a node from the map
-export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any) => {
+export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: FullNodesData) => {
   // removes nodeId from dagre object
   g.removeNode(nodeId);
   // removes nodeId from oldNodes
@@ -461,7 +465,7 @@ export const removeDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: str
 };
 
 // hides all edges for the node with nodeId
-export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, edges: any) => {
+export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, edges: EdgesData) => {
   const oldEdges = { ...edges };
   // debugger
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
@@ -679,7 +683,8 @@ export const createOrUpdateNode = (
   nodeId: string,
   oldNodes: any,
   oldEdges: EdgesData,
-  allTags: any
+  allTags: any,
+  withClusters: boolean
 ) => {
   // CHECK: object.children was node by I changed with newNode
   for (let childIdx = 0; childIdx < newNode.children.length; childIdx++) {
@@ -720,7 +725,7 @@ export const createOrUpdateNode = (
     };
     // adds newNode to dagre object and to oldNodes
     // null: no callback
-    oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
+    oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, withClusters, null);
 
     for (let child of newNode.children) {
       oldEdges = setDagEdge(
@@ -785,7 +790,7 @@ export const createOrUpdateNode = (
       // if ("height" in newNode && newNode.height) {
       //   newNodeData.openHeight = newNode.height;
       // }
-      oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, null);
+      oldNodes = setDagNode(g, nodeId, newNodeData, oldNodes, allTags, withClusters, null);
     }
   }
 
@@ -1062,6 +1067,7 @@ export const compareNodes = (nodes1: any, nodes2: any) => {
     return false;
   }
   for (let nId of Object.keys(nodes1)) {
+    if (!nodes1[nId] || !nodes2[nId]) return false;
     if (!compare2Nodes(nodes1[nId], nodes2[nId])) {
       return false;
     }

@@ -65,6 +65,7 @@ type LinkingWordsProps = {
   ableToPropose?: boolean;
   setAbleToPropose: (value: boolean) => void;
   isLoading: boolean;
+  onResetButton: (newState: boolean) => void;
 };
 
 const LinkingWords = (props: LinkingWordsProps) => {
@@ -154,16 +155,20 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   const proposalSubmit = useCallback(
     () => {
-      const firstParentId = props.parents[0];
+      // here disable button
+      props.onResetButton(false);
+      setTimeout(() => {
+        const firstParentId = props.parents[0];
 
-      if (props.isNew) {
-        props.saveProposedChildNode(props.identifier, "", props.reason);
-        if (!firstParentId) return;
-        nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
-        return;
-      }
-      props.saveProposedImprovement("", props.reason);
-      nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
+        if (props.isNew) {
+          props.saveProposedChildNode(props.identifier, "", props.reason, () => props.onResetButton(true));
+          if (!firstParentId) return;
+          nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
+          return;
+        }
+        props.saveProposedImprovement("", props.reason, () => props.onResetButton(true));
+        nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
+      }, 500);
     },
 
     // TODO: check dependencies to remove eslint-disable-next-line
