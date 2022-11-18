@@ -24,7 +24,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
             id="filled-adornment-weight"
             endAdornment={
               <Box style={{ marginBottom: "-18px" }}>
-                <InputAdornment position="end">days</InputAdornment>
+                <InputAdornment position="end">{semester.days > 1 ? "days" : "day"}</InputAdornment>
               </Box>
             }
             aria-describedby="filled-weight-helper-text"
