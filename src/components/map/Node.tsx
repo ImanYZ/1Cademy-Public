@@ -81,6 +81,7 @@ type NodeProps = {
   isStudied: boolean;
   changed: any; //
   changedAt: string;
+  simulated?: boolean;
   bookmarked: boolean;
   bookmarks: any; //
   bookmark: any; //
@@ -174,6 +175,7 @@ const Node = ({
   isStudied,
   changed,
   changedAt,
+  simulated,
   bookmarked,
   bookmarks,
   bookmark,
@@ -820,6 +822,7 @@ const Node = ({
                 isStudied={isStudied}
                 changed={changed} // x
                 changedAt={changedAt}
+                simulated={simulated}
                 bookmarked={bookmarked}
                 bookmarks={bookmarks}
                 reloadPermanentGrpah={reloadPermanentGrpah}

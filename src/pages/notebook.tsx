@@ -816,6 +816,9 @@ const Dashboard = ({}: DashboardProps) => {
             // Here we are merging with previous nodes left and top
             const visibleFullNodesMerged = visibleFullNodes.map(cur => {
               const tmpNode = nodes[cur.node];
+              if (tmpNode && tmpNode.hasOwnProperty("simulated")) {
+                delete tmpNode["simulated"];
+              }
 
               const hasParent = cur.parents.length;
               // IMPROVE: we need to pass the parent which open the node
@@ -1034,7 +1037,7 @@ const Dashboard = ({}: DashboardProps) => {
       const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
-        if(!snapshot.docs.length) {
+        if (!snapshot.docs.length) {
           const notificationNumRef = doc(db, "notificationNums");
           setDoc(notificationNumRef, {
             uname: user.uname,
@@ -3239,7 +3242,24 @@ const Dashboard = ({}: DashboardProps) => {
             const parentNode = graph.nodes[newNode.parents[0].node];
             const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
             console.log("willBeApproved", graph.nodes[newNodeId]);
-            setNodeParts(newNodeId, node => ({ ...node, editable: false, unaccepted: true }));
+            const nodePartChanges = {
+              editable: false,
+              unaccepted: true,
+              simulated: false,
+            };
+            // if version is approved from simulation then remove it from changedNodes and tempNodes
+            if (willBeApproved) {
+              if (tempNodes.has(newNodeId)) {
+                tempNodes.delete(newNodeId);
+              }
+              if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
+                delete changedNodes[newNode.parents[0].node];
+              }
+              nodePartChanges.unaccepted = false;
+              nodePartChanges.simulated = true;
+            }
+            console.log(nodePartChanges, "nodePartChanges");
+            setNodeParts(newNodeId, node => ({ ...node, changedAt: new Date(), ...nodePartChanges }));
 
             getMapGraph("/proposeChildNode", postData, !willBeApproved);
             scrollToNode(newNodeId); // previously was to his parent
@@ -3828,10 +3848,15 @@ const Dashboard = ({}: DashboardProps) => {
             })
           ) {
             proposalsTemp[proposalIdx].accepted = true;
+            if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
+              delete changedNodes[nodeBookState.selectedNode];
+            }
             if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
               // reloadPermanentGraph();
-              console.log("Child will be changed:", oldNodes[newNodeId]);
-              oldNodes[newNodeId] = { ...oldNodes[newNodeId], unaccepted: false };
+              oldNodes[newNodeId] = { ...oldNodes[newNodeId], unaccepted: false, simulated: true };
+              if (tempNodes.has(newNodeId)) {
+                tempNodes.delete(newNodeId);
+              }
               // const nodes[newNodeId];
               // unaccepted: true;
             }
