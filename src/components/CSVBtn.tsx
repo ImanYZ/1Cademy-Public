@@ -7,7 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
 import React, { useEffect, useState } from "react";
 
-export const CSVBtn = ({ BtnText, addNewData, buttonStyles }: any) => {
+export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => {
   const fileReader = new FileReader();
   const [CSVData, setCSVData] = useState<any>({
     columns: [],
@@ -84,6 +84,7 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles }: any) => {
       </Dialog>
       <Button
         variant="text"
+        disabled={disabled}
         sx={{
           color: theme => theme.palette.common.black,
           ...buttonStyles,

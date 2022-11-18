@@ -41,6 +41,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
@@ -892,11 +893,6 @@ const Dashboard = ({}: DashboardProps) => {
       );
       const killSnapshot = snapshot(q);
       return () => {
-        //   // TODO: here we need to remove nodes cause will come node again
-        setGraph(() => {
-          return { nodes: {}, edges: {} };
-        });
-        g.current = createGraph();
         killSnapshot();
       };
     },
@@ -1034,27 +1030,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (!db) return;
       if (!user?.uname) return;
       if (!allTagsLoaded) return;
-      const userNodesRef = collection(db, "notifications");
-      const q = query(userNodesRef, where("proposer", "==", user.uname));
+      const notificationNumsCol = collection(db, "notificationNums");
+      const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
-        // console.log("on snapshot");
-
-        const docChanges = snapshot.docChanges();
-        for (let change of docChanges) {
-          const { checked } = change.doc.data();
-          if (change.type === "removed") {
-            setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
-          }
-          if (change.type === "added" || change.type === "modified") {
-            if (checked) {
-              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum - 1);
-            } else {
-              // will add in uncheckedNotificationsDict
-              setUncheckedNotificationsNum(oldUncheckedNotificationsNum => oldUncheckedNotificationsNum + 1);
-            }
-          }
-        }
+        const notificationNum = snapshot.docs[0].data() as INotificationNum;
+        setUncheckedNotificationsNum(notificationNum.nNum);
       });
       return () => {
         notificationsSnapshot();
@@ -4134,28 +4115,28 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {nodeBookState.selectedNode && (
-            <div className={openSidebar ? "trackNcodeBtn" : ""}>
-              <Tooltip
-                title="Scroll to last Selected Node"
-                placement="left"
-                sx={{
-                  position: "fixed",
-                  top: "10px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                <IconButton color="secondary" onClick={onScrollToLastNode}>
-                  <MyLocationIcon />
-                </IconButton>
-              </Tooltip>
-            </div>
+            <Tooltip
+              title="Scroll to last Selected Node"
+              placement="left"
+              sx={{
+                position: "fixed",
+                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 10}px` : `10px`, md: "10px" },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                transition: "all 1s ease",
+              }}
+            >
+              <IconButton color="secondary" onClick={onScrollToLastNode}>
+                <MyLocationIcon />
+              </IconButton>
+            </Tooltip>
           )}
           <Tooltip
             title="Redraw graph"
             placement="left"
             sx={{
+              display: "none",
               position: "fixed",
               top: "60px",
               right: "10px",
@@ -4168,24 +4149,25 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
           {process.env.NODE_ENV === "development" && (
-            <div className={openSidebar ? "trackNcodeBtn" : ""}>
-              <Tooltip
-                title={"Watch geek data"}
-                sx={{
-                  position: "fixed",
-                  top: "110px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                {/* DEVTOOLS */}
-                <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                  <CodeIcon />
-                </IconButton>
-              </Tooltip>
+            <Tooltip
+              title={"Watch geek data"}
+              sx={{
+                position: "fixed",
+                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 60}px` : `60px`, md: "60px" },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                transition: "all 1s ease",
+              }}
+            >
+              {/* DEVTOOLS */}
+              <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
-              {/* <Tooltip
+          {/* <Tooltip
                 title={"worker"}
                 sx={{
                   position: "fixed",
@@ -4199,19 +4181,18 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip> */}
-              <Box
-                sx={{
-                  position: "fixed",
-                  bottom: "60px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                <h6>openProposal:{openProposal}</h6>
-              </Box>
-            </div>
-          )}
+
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: "60px",
+              right: "10px",
+              zIndex: "1300",
+              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+            }}
+          >
+            <h6>openProposal:{openProposal}</h6>
+          </Box>
 
           {/* end Data from map */}
           {settings.view === "Graph" && (

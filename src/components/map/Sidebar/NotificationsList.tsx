@@ -11,7 +11,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Box, IconButton, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { doc, getFirestore, increment, writeBatch } from "firebase/firestore";
+import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
@@ -82,16 +82,24 @@ const NotificationsList = (props: NotificationsListProps) => {
       // await firebase.batchUpdate(notificationRef, { checked: value });
 
       // // update notificationNums
-      const notificationNumsRef = doc(db, "notificationNums", user.uname);
+      const notificationNumsQuery = query(
+        collection(db, "notificationNums"),
+        where("uname", "==", user?.uname),
+        limit(1)
+      );
+      const notificationNumsDocs = await getDocs(notificationNumsQuery);
+      if (notificationNumsDocs.docs.length) {
+        const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
+        // const nNum = value ? increment(1) : increment(-1);
+        const incrementValue = value ? -1 : 1;
+        // // let nNum = firestore.FieldValue.increment(1);
+        // // if (!value) {
+        // //   nNum = firebase.firestore.FieldValue.increment(-1);
+        // // }
+        batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
+      }
       // // const notificationNumsRef = firebase.db.collection("notificationNums").doc(username);
 
-      // const nNum = value ? increment(1) : increment(-1);
-      const incrementValue = value ? -1 : 1;
-      // // let nNum = firestore.FieldValue.increment(1);
-      // // if (!value) {
-      // //   nNum = firebase.firestore.FieldValue.increment(-1);
-      // // }
-      batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
       // // await firebase.batchUpdate(notificationNumsRef, { nNum });
       // // await firebase.commitBatch();
 
