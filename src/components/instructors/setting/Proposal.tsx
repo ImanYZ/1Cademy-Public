@@ -13,7 +13,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
 
   return (
     <Paper className="remove-arrow-buttons unselect-date-placeholder" sx={{ padding: "40px 40px" }} elevation={2}>
-      <Typography variant="h3">Proposals & Practice</Typography>
+      <Typography variant="h3">Course Contributions</Typography>
       <Box>
         <Typography mt={3} variant="h4">
           This class has&nbsp;
