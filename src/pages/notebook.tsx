@@ -3881,7 +3881,13 @@ const Dashboard = ({}: DashboardProps) => {
   };
 
   const onRedrawGraph = () => {
-    setNotebookChanges({ updated: true });
+    setGraph(() => {
+      return { nodes: {}, edges: {} };
+    });
+    g.current = createGraph();
+    setTimeout(() => {
+      setNotebookChanges({ updated: true });
+    }, 200);
   };
 
   return (
@@ -4136,7 +4142,6 @@ const Dashboard = ({}: DashboardProps) => {
             title="Redraw graph"
             placement="left"
             sx={{
-              display: "none",
               position: "fixed",
               top: "60px",
               right: "10px",
@@ -4153,7 +4158,7 @@ const Dashboard = ({}: DashboardProps) => {
               title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 60}px` : `60px`, md: "60px" },
+                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 120}px` : `110px`, md: "110px" },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
