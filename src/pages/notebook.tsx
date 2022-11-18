@@ -893,11 +893,6 @@ const Dashboard = ({}: DashboardProps) => {
       );
       const killSnapshot = snapshot(q);
       return () => {
-        //   // TODO: here we need to remove nodes cause will come node again
-        setGraph(() => {
-          return { nodes: {}, edges: {} };
-        });
-        g.current = createGraph();
         killSnapshot();
       };
     },
@@ -4141,6 +4136,7 @@ const Dashboard = ({}: DashboardProps) => {
             title="Redraw graph"
             placement="left"
             sx={{
+              display: "none",
               position: "fixed",
               top: "60px",
               right: "10px",
