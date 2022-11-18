@@ -254,12 +254,19 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
         var bounding = originalNode.getBoundingClientRect();
-
+        console.log("bounding", {
+          top: bounding.top,
+          left: bounding.left,
+          bottom: window.innerHeight - bounding.bottom,
+          right: window.innerWidth - bounding.right,
+          windowInnerWidth: window.innerWidth - 200,
+          widowInnterHeight: window.innerHeight - 100,
+        });
         const isInViewport =
-          bounding.top >= 0 &&
-          bounding.left >= 0 &&
-          bounding.right <= window.innerWidth &&
-          bounding.bottom <= window.innerHeight;
+          bounding.top >= 100 &&
+          bounding.left >= 200 &&
+          bounding.right <= window.innerWidth - 200 &&
+          bounding.bottom <= window.innerHeight - 100;
         if (isInViewport) return;
 
         if (
@@ -4304,6 +4311,21 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                 />
               </MapInteractionCSS>
+              <Box
+                sx={{
+                  position: "absolute",
+                  // width: `${300}px`,
+                  // height: `${300}px`,
+                  top: "100px",
+                  bottom: "100px",
+                  left: "200px",
+                  right: "200px",
+                  background: "white",
+                  opacity: 0.25,
+                  pointerEvents: "none",
+                  border: "dashed 8px royalblue",
+                }}
+              ></Box>
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
