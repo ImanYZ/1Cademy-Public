@@ -242,142 +242,139 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
+  ///Scroll to node configs
+
   const { width: windowWith, height: windowHeight } = useWindowSize();
-  const windowInnerTop = 100;
-  const windowInnerLeft = 200;
-  const windowInnerRight = 200;
-  const windowInnerBottom = 100;
+  const windowInnerTop = 50;
+  const windowInnerLeft = 250;
+  const windowInnerRight = 250;
+  const windowInnerBottom = 50;
 
-  const scrollToNode = useCallback((nodeId: string, tries = 0) => {
-    devLog("scroll To Node", { nodeId, tries });
-    if (tries === 10) return;
+  const scrollToNode = useCallback(
+    (nodeId: string, tries = 0) => {
+      devLog("scroll To Node", { nodeId, tries });
+      if (tries === 10) return;
 
-    if (!scrollToNodeInitialized.current) {
-      setTimeout(() => {
-        // const currentNode = graph.nodes[nodeId];
-        // if(currentNode.height===NODE_HEIGHT)
-        const originalNode = document.getElementById(nodeId);
-        if (!originalNode) {
-          return;
-        }
-        var bounding = originalNode.getBoundingClientRect();
+      if (!scrollToNodeInitialized.current) {
+        setTimeout(() => {
+          // const currentNode = graph.nodes[nodeId];
+          // if(currentNode.height===NODE_HEIGHT)
+          const originalNode = document.getElementById(nodeId);
+          if (!originalNode) {
+            return;
+          }
+          var bounding = originalNode.getBoundingClientRect();
 
-        //
-        const nodeLeft = bounding.left;
-        const nodeRight = bounding.right;
-        const nodeBottom = bounding.bottom;
-        const nodeTop = bounding.top;
+          //
+          const nodeLeft = bounding.left;
+          const nodeRight = bounding.right;
+          const nodeBottom = bounding.bottom;
+          const nodeTop = bounding.top;
+          const nodeCenterX = bounding.left + bounding.width / 2;
+          const nodeCenterY = bounding.top + bounding.height / 2;
 
-        // const topLeft =
-        //   nodeTop >= windowInnerTop &&
-        //   nodeLeft >= windowInnerLeft &&
-        //   nodeTop >= windowInnerBottom &&
-        //   nodeLeft >= windowInnerRight;
-        // const topRight =
-        //   nodeTop >= windowInnerTop &&
-        //   nodeRight >= windowInnerRight &&
-        //   nodeTop >= windowInnerBottom &&
-        //   nodeRight >= windowInnerLeft;
+          const BL =
+            nodeLeft >= windowInnerLeft &&
+            nodeLeft <= windowWith - windowInnerRight &&
+            nodeBottom >= windowInnerTop &&
+            nodeBottom <= windowHeight - windowInnerBottom;
+          const BR =
+            nodeRight >= windowInnerLeft &&
+            nodeRight <= windowWith - windowInnerRight &&
+            nodeBottom >= windowInnerTop &&
+            nodeBottom <= windowHeight - windowInnerBottom;
+          const TL =
+            nodeLeft >= windowInnerLeft &&
+            nodeLeft <= windowWith - windowInnerRight &&
+            nodeTop >= windowInnerTop &&
+            nodeTop <= windowHeight - windowInnerBottom;
+          const TR =
+            nodeRight >= windowInnerLeft &&
+            nodeRight <= windowWith - windowInnerRight &&
+            nodeTop >= windowInnerTop &&
+            nodeTop <= windowHeight - windowInnerBottom;
+          const Inside =
+            nodeCenterX >= windowInnerLeft &&
+            nodeCenterX <= windowWith - windowInnerRight &&
+            nodeCenterY >= windowInnerTop &&
+            nodeCenterY <= windowHeight - windowInnerBottom;
+          // const bottomRight = nodeBottom >= windowInnerBottom && nodeRight >= windowInnerRight;
+          // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
+          const isInViewport = BL || BR || TL || TR || Inside;
 
-        const BL =
-          nodeLeft >= windowInnerLeft &&
-          nodeLeft <= windowWith - windowInnerRight &&
-          nodeBottom >= windowInnerTop &&
-          nodeBottom <= windowHeight - windowInnerBottom;
-        const BR =
-          nodeRight >= windowInnerLeft &&
-          nodeRight <= windowWith - windowInnerRight &&
-          nodeBottom >= windowInnerTop &&
-          nodeBottom <= windowHeight - windowInnerBottom;
-        const TL =
-          nodeLeft >= windowInnerLeft &&
-          nodeLeft <= windowWith - windowInnerRight &&
-          nodeTop >= windowInnerTop &&
-          nodeTop <= windowHeight - windowInnerBottom;
-        const TR =
-          nodeRight >= windowInnerLeft &&
-          nodeRight <= windowWith - windowInnerRight &&
-          nodeTop >= windowInnerTop &&
-          nodeTop <= windowHeight - windowInnerBottom;
+          console.log("bounding", {
+            top: nodeTop,
+            left: nodeLeft,
+            bottom: nodeBottom,
+            right: nodeRight,
+            windowInnerTop,
+            windowInnerLeft,
+            windowInnerRight: windowWith - windowInnerRight,
+            windowInnerBottom: windowHeight - windowInnerBottom,
+            isInViewport,
+            BL,
+            BR,
+            TL,
+            TR,
+            Inside,
+          });
+          if (isInViewport) return;
 
-        // const bottomRight = nodeBottom >= windowInnerBottom && nodeRight >= windowInnerRight;
-        // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
-        const isInViewport = BL || BR || TL || TR;
+          console.log(
+            "bounding done",
+            "offsetLeft" in originalNode,
+            originalNode.offsetLeft,
+            "offsetLeft" in originalNode,
+            originalNode.offsetTop
+          );
+          if (
+            originalNode &&
+            "offsetLeft" in originalNode &&
+            originalNode.offsetLeft !== 0 &&
+            "offsetTop" in originalNode &&
+            originalNode.offsetTop !== 0
+            // currentNode?.height !== NODE_HEIGHT &&
+            // queueFinished
+          ) {
+            // setScrollToNodeInitialized(true);
+            scrollToNodeInitialized.current = true;
+            setTimeout(() => {
+              scrollToNodeInitialized.current = false;
+              // setScrollToNodeInitialized(false);
+            }, 1300);
 
-        console.log("bounding", {
-          top: bounding.top,
-          left: bounding.left,
-          bottom: nodeBottom,
-          right: nodeRight,
-          windowInnerTop,
-          windowInnerLeft,
-          windowInnerRight,
-          windowInnerBottom,
-          isInViewport,
-          BL,
-          BR,
-          TL,
-          TR,
-        });
-        if (isInViewport) return;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            console.log("setMapInteractionValue");
+            setMapInteractionValue(() => {
+              const windowSize = window.innerWidth;
+              let defaultScale;
+              if (windowSize < 400) {
+                defaultScale = 0.45;
+              } else if (windowSize < 600) {
+                defaultScale = 0.575;
+              } else if (windowSize < 1260) {
+                defaultScale = 0.8;
+              } else {
+                defaultScale = 0.92;
+              }
 
-        if (
-          originalNode &&
-          "offsetLeft" in originalNode &&
-          originalNode.offsetLeft !== 0 &&
-          "offsetTop" in originalNode &&
-          originalNode.offsetTop !== 0
-          // currentNode?.height !== NODE_HEIGHT &&
-          // queueFinished
-        ) {
-          // setScrollToNodeInitialized(true);
-          scrollToNodeInitialized.current = true;
-          setTimeout(() => {
-            scrollToNodeInitialized.current = false;
-            // setScrollToNodeInitialized(false);
-          }, 1300);
-
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          console.log("setMapInteractionValue");
-          setMapInteractionValue(({ translation }) => {
-            const windowSize = window.innerWidth;
-            let defaultScale;
-            if (windowSize < 400) {
-              defaultScale = 0.45;
-            } else if (windowSize < 600) {
-              defaultScale = 0.575;
-            } else if (windowSize < 1260) {
-              defaultScale = 0.8;
-            } else {
-              defaultScale = 0.92;
-            }
-
-            const { x, y } = translation;
-            const newX = (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale;
-            const newY = (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale;
-
-            const d = Math.sqrt(Math.pow(newY - y, 2) + Math.pow(newX - x, 2));
-
-            console.log("---> d:", { d, windowSize });
-            if (d > windowSize - 300) {
-              console.log("> d:", "yes");
               return {
                 scale: defaultScale,
-                translation: { x: newX, y: newY },
+                translation: {
+                  // x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                  x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
+                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
+                },
               };
-            }
-            console.log("> d:", "no");
-            return {
-              scale: defaultScale,
-              translation: { x, y },
-            };
-          });
-        } else {
-          scrollToNode(nodeId, tries + 1);
-        }
-      }, 400);
-    }
-  }, []);
+            });
+          } else {
+            scrollToNode(nodeId, tries + 1);
+          }
+        }, 400);
+      }
+    },
+    [windowHeight, windowWith]
+  );
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
