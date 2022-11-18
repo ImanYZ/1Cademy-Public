@@ -24,7 +24,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
             id="filled-adornment-weight"
             endAdornment={
               <Box style={{ marginBottom: "-18px" }}>
-                <InputAdornment position="end">days</InputAdornment>
+                <InputAdornment position="end">{semester.days > 1 ? "days" : "day"}</InputAdornment>
               </Box>
             }
             aria-describedby="filled-weight-helper-text"
@@ -48,7 +48,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
         </Typography>
       </Box>
       <Box sx={{ marginTop: "50px" }}>
-        <Typography variant="h3">Node Proposals</Typography>
+        <Typography variant="h3">Child Proposals</Typography>
         <hr style={{ color: "#A5A5A5" }} />
         <Box>
           <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
@@ -109,7 +109,9 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               onChange={event => inputsHandler(event, "nodeProposals", "numPoints")}
               endAdornment={
                 <Box style={{ marginBottom: "-18px" }}>
-                  <InputAdornment position="end">points</InputAdornment>
+                  <InputAdornment position="end">
+                    {semester.nodeProposals.numPoints > 1 ? "points" : "point"}
+                  </InputAdornment>
                 </Box>
               }
               aria-describedby="filled-weight-helper-text"
@@ -132,13 +134,15 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               onChange={event => inputsHandler(event, "nodeProposals", "numProposalPerDay")}
               endAdornment={
                 <Box style={{ marginBottom: "-18px" }}>
-                  <InputAdornment position="end">propose/day</InputAdornment>
+                  <InputAdornment position="end">
+                    {semester.nodeProposals.numProposalPerDay > 1 ? "proposals/day" : "proposal/day"}
+                  </InputAdornment>
                 </Box>
               }
               aria-describedby="filled-weight-helper-text"
               inputProps={{
                 "aria-label": "days",
-                pattern: "[0-9]*",
+                min: 1,
               }}
               sx={{
                 paddingBottom: "10px",
@@ -155,12 +159,15 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               onChange={event => inputsHandler(event, "nodeProposals", "totalDaysOfCourse")}
               endAdornment={
                 <Box style={{ marginBottom: "-18px" }}>
-                  <InputAdornment position="end">days</InputAdornment>
+                  <InputAdornment position="end">
+                    {semester.nodeProposals.totalDaysOfCourse > 1 ? "days" : "day"}
+                  </InputAdornment>
                 </Box>
               }
               aria-describedby="filled-weight-helper-text"
               inputProps={{
                 "aria-label": "days",
+                min: 1,
               }}
               sx={{
                 paddingBottom: "10px",
@@ -245,7 +252,9 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               onChange={event => inputsHandler(event, "questionProposals", "numPoints")}
               endAdornment={
                 <Box style={{ marginBottom: "-18px" }}>
-                  <InputAdornment position="end">points</InputAdornment>
+                  <InputAdornment position="end">
+                    {semester.questionProposals.numPoints > 1 ? "points" : "point"}
+                  </InputAdornment>
                 </Box>
               }
               aria-describedby="filled-weight-helper-text"
@@ -268,7 +277,9 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               onChange={event => inputsHandler(event, "questionProposals", "numQuestionsPerDay")}
               endAdornment={
                 <Box style={{ marginBottom: "-18px" }}>
-                  <InputAdornment position="end">question/day</InputAdornment>
+                  <InputAdornment position="end">
+                    {semester.questionProposals.numQuestionsPerDay > 1 ? "questions/day" : "question/day"}
+                  </InputAdornment>
                 </Box>
               }
               aria-describedby="filled-weight-helper-text"
@@ -291,7 +302,9 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
               onChange={event => inputsHandler(event, "questionProposals", "totalDaysOfCourse")}
               endAdornment={
                 <Box style={{ marginBottom: "-18px" }}>
-                  <InputAdornment position="end">days</InputAdornment>
+                  <InputAdornment position="end">
+                    {semester.questionProposals.totalDaysOfCourse > 1 ? "days" : "day"}
+                  </InputAdornment>
                 </Box>
               }
               aria-describedby="filled-weight-helper-text"
