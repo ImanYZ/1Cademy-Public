@@ -3,6 +3,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Box, Divider, Link, TableContainer, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
@@ -20,6 +21,7 @@ import Typography from "@mui/material/Typography";
 import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
@@ -120,6 +122,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [usersStatus, setUsersStatus] = useState([]);
   const [newStudents, setNewStudents] = useState([]);
+  const [disableEdit, setDisableEdit] = useState(false);
   const open = Boolean(anchorEl);
   const db = getFirestore();
 
@@ -177,7 +180,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             const stats: any = states.filter((elm: any) => elm.uname === student.uname)[0];
             const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
             _rows.push({
-              id: student.uname,
+              id: uuidv4(),
               username: student.uname,
               avatar: student.imageUrl,
               online: userStat?.state === "online",
@@ -251,7 +254,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }
     if (addNewRow) {
       _tableRows.push({
-        id: Math.floor(Math.random() * 100),
+        id: uuidv4(),
         username: "",
         avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
         firstName: "",
@@ -327,11 +330,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const saveTableChanges = async () => {
+    setDisableEdit(true);
     let _tableRow: any = tableRows.slice();
     let students = [];
 
     for (let row of _tableRow) {
-      if (!row.firstName || !row.lastName || !row.email) {
+      if (row.firstName === "" || row.lastName === "" || row.email === "") {
         _tableRow = _tableRow.filter((elm: any) => !(elm === row));
       }
     }
@@ -349,6 +353,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     const mapUrl = "/instructor/students/" + currentSemester.tagId + "/signup";
     try {
       await postWithToken(mapUrl, payloadAPI);
+      setDisableEdit(false);
+      setNewStudents([]);
     } catch (error) {
       console.log(error);
     }
@@ -445,7 +451,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const addNewStudent = () => {
     const _tableRow: any = tableRows.slice();
     _tableRow.push({
-      id: Math.floor(Math.random() * 100),
+      id: uuidv4(),
       username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
@@ -465,6 +471,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       votePoints: 0,
     });
     setTableRows(_tableRow);
+    setTimeout(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    }, 10);
   };
   const handleNewSearh = (event: any) => {
     setSearchValue(event.target.value);
@@ -484,7 +493,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       updateTableRows();
     }
     _tableRow.push({
-      id: Math.floor(Math.random() * 100),
+      id: uuidv4(),
       username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
@@ -528,6 +537,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   if (!currentSemester) return <Typography>You don't have semester</Typography>;
   // if (!tableRows.length) return <Typography>you don't a user </Typography>;
+
+  console.log("::: :::  ::: savedTableState ::: ::: ", savedTableState);
+  console.log(":::: ::: ::: newStudents ::: ::: ", newStudents);
   return (
     <>
       {/* Drawers */}
@@ -631,7 +643,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 <>
                   <Button
                     variant="contained"
-                    disabled={editMode}
+                    disabled={editMode || disableEdit}
                     onClick={handleOpenCloseFilter}
                     sx={{
                       color: theme => theme.palette.common.white,
@@ -642,7 +654,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   </Button>
                   <Button
                     variant="contained"
-                    disabled={editMode}
+                    disabled={editMode || disableEdit}
                     onClick={handleEditAndAdd}
                     sx={{
                       color: theme => theme.palette.common.white,
@@ -894,12 +906,13 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </TableBody>
             </Table>
           </TableContainer>
-          {editMode && (
+          {(editMode || disableEdit) && (
             <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
               <Box>
                 <CSVBtn
                   variant="text"
                   addNewData={addNewData}
+                  disabled={disableEdit}
                   buttonStyles={{
                     ":hover": {
                       backgroundColor: "#bdbdbd",
@@ -907,10 +920,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     backgroundColor: "#EDEDED",
                     fontSize: 16,
                     fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    marginRight: "40px",
-                    paddingX: "30px",
                     borderRadius: 1,
                     textAlign: "center",
                     alignSelf: "center",
@@ -919,6 +928,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 />
                 <Button
                   variant="text"
+                  disabled={disableEdit}
                   sx={{
                     ":hover": {
                       backgroundColor: "#bdbdbd",
@@ -944,6 +954,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               <Box>
                 <Button
                   variant="text"
+                  disabled={disableEdit}
                   sx={{
                     color: theme => theme.palette.common.white,
                     background: theme => theme.palette.common.black,
@@ -961,8 +972,10 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
+                  loading={disableEdit}
                   variant="contained"
+                  loadingPosition="start"
                   disabled={savedTableState.some((elment: any) =>
                     newStudents.some((elmen: any) => elment.email.trim() === elmen.email.trim())
                   )}
@@ -980,8 +993,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   }}
                   onClick={() => saveTableChanges()}
                 >
-                  Save Changes
-                </Button>
+                  {disableEdit ? " Saving..." : "Save Changes"}
+                </LoadingButton>
               </Box>
             </Box>
           )}
