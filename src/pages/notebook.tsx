@@ -297,22 +297,22 @@ const Dashboard = ({}: DashboardProps) => {
       // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
       const isInViewport = BL || BR || TL || TR || Inside;
 
-      console.log("bounding", {
-        top: nodeTop,
-        left: nodeLeft,
-        bottom: nodeBottom,
-        right: nodeRight,
-        windowInnerTop,
-        windowInnerLeft,
-        windowInnerRight: windowWith - windowInnerRight,
-        windowInnerBottom: windowHeight - windowInnerBottom,
-        isInViewport,
-        BL,
-        BR,
-        TL,
-        TR,
-        Inside,
-      });
+      // console.log("bounding", {
+      //   top: nodeTop,
+      //   left: nodeLeft,
+      //   bottom: nodeBottom,
+      //   right: nodeRight,
+      //   windowInnerTop,
+      //   windowInnerLeft,
+      //   windowInnerRight: windowWith - windowInnerRight,
+      //   windowInnerBottom: windowHeight - windowInnerBottom,
+      //   isInViewport,
+      //   BL,
+      //   BR,
+      //   TL,
+      //   TR,
+      //   Inside,
+      // });
       return isInViewport;
     },
     [windowHeight, windowInnerLeft, windowInnerRight, windowWith]
@@ -333,13 +333,6 @@ const Dashboard = ({}: DashboardProps) => {
 
           if (onNodeInViewport(nodeId)) return;
 
-          console.log(
-            "bounding done",
-            "offsetLeft" in originalNode,
-            originalNode.offsetLeft,
-            "offsetLeft" in originalNode,
-            originalNode.offsetTop
-          );
           if (
             originalNode &&
             "offsetLeft" in originalNode &&
@@ -356,7 +349,6 @@ const Dashboard = ({}: DashboardProps) => {
             }, 1300);
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            console.log("setMapInteractionValue");
             setMapInteractionValue(() => {
               const windowSize = window.innerWidth;
               let defaultScale;
@@ -2867,12 +2859,9 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenTrends(false);
     setOpenMedia(false);
     setOpenProposal("");
-    console.log("lastOperation", nodeBookState.lastOperation);
     if (
       nodeBookState.selectedNode &&
       nodeBookState.selectedNode !== "" &&
-      lastNodeOperation.current !== "CancelProposals" &&
-      lastNodeOperation.current !== "ProposeProposals" &&
       g.current.hasNode(nodeBookState.selectedNode)
     ) {
       scrollToNode(nodeBookState.selectedNode);
@@ -4293,20 +4282,6 @@ const Dashboard = ({}: DashboardProps) => {
                   <CodeIcon />
                 </IconButton>
               </Tooltip> */}
-              <Box
-                sx={{
-                  position: "fixed",
-                  bottom: "60px",
-                  right: "10px",
-                  zIndex: "1300",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                }}
-              >
-                <h6>
-                  Scale: {mapInteractionValue.scale.toFixed(2)}, X: {mapInteractionValue.translation.x.toFixed(2)}, Y:{" "}
-                  {mapInteractionValue.translation.y.toFixed(2)}
-                </h6>
-              </Box>
             </div>
           )}
 
@@ -4374,7 +4349,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                 />
               </MapInteractionCSS>
-              <Box
+              {/* <Box
                 sx={{
                   position: "absolute",
                   // width: `${300}px`,
@@ -4388,7 +4363,7 @@ const Dashboard = ({}: DashboardProps) => {
                   pointerEvents: "none",
                   border: "dashed 8px royalblue",
                 }}
-              ></Box>
+              ></Box> */}
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
