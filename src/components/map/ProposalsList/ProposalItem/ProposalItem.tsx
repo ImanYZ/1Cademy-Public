@@ -1,16 +1,16 @@
 // import "./ProposalItem.css";
-import CloseIcon from "@mui/icons-material/Close";
-import DoneIcon from "@mui/icons-material/Done";
-import GradeIcon from "@mui/icons-material/Grade";
+// import CloseIcon from "@mui/icons-material/Close";
+// import DoneIcon from "@mui/icons-material/Done";
+// import GradeIcon from "@mui/icons-material/Grade";
 import { Box, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
-import shortenNumber from "../../../../lib/utils/shortenNumber";
+// import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { Editor } from "../../../Editor";
-import { MemoizedMetaButton } from "../../MetaButton";
+// import { MemoizedMetaButton } from "../../MetaButton";
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
@@ -51,7 +51,7 @@ const ProposalItem = (props: any) => {
       style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
     >
       {/* <h6>{props.proposal.newNodeId}</h6> */}
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      {/* <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="title Time" style={{ fontSize: "12px" }}>
           {dayjs(props.proposal.createdAt).fromNow()}
         </div>
@@ -84,7 +84,7 @@ const ProposalItem = (props: any) => {
             </div>
           </MemoizedMetaButton>
         </div>
-      </div>
+      </div> */}
       <div>
         <div className="ProposalTitle">
           {props.showTitle && <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />}
