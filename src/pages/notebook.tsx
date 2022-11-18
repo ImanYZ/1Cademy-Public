@@ -252,6 +252,71 @@ const Dashboard = ({}: DashboardProps) => {
   const windowInnerRight = (windowWith * 15) / 100;
   const windowInnerBottom = 50;
 
+  const onNodeInViewport = useCallback(
+    (nodeId: string) => {
+      const originalNode = document.getElementById(nodeId);
+      if (!originalNode) {
+        return false;
+      }
+      var bounding = originalNode.getBoundingClientRect();
+
+      //
+      const nodeLeft = bounding.left;
+      const nodeRight = bounding.right;
+      const nodeBottom = bounding.bottom;
+      const nodeTop = bounding.top;
+      const nodeCenterX = bounding.left + bounding.width / 2;
+      const nodeCenterY = bounding.top + bounding.height / 2;
+
+      const BL =
+        nodeLeft >= windowInnerLeft &&
+        nodeLeft <= windowWith - windowInnerRight &&
+        nodeBottom >= windowInnerTop &&
+        nodeBottom <= windowHeight - windowInnerBottom;
+      const BR =
+        nodeRight >= windowInnerLeft &&
+        nodeRight <= windowWith - windowInnerRight &&
+        nodeBottom >= windowInnerTop &&
+        nodeBottom <= windowHeight - windowInnerBottom;
+      const TL =
+        nodeLeft >= windowInnerLeft &&
+        nodeLeft <= windowWith - windowInnerRight &&
+        nodeTop >= windowInnerTop &&
+        nodeTop <= windowHeight - windowInnerBottom;
+      const TR =
+        nodeRight >= windowInnerLeft &&
+        nodeRight <= windowWith - windowInnerRight &&
+        nodeTop >= windowInnerTop &&
+        nodeTop <= windowHeight - windowInnerBottom;
+      const Inside =
+        nodeCenterX >= windowInnerLeft &&
+        nodeCenterX <= windowWith - windowInnerRight &&
+        nodeCenterY >= windowInnerTop &&
+        nodeCenterY <= windowHeight - windowInnerBottom;
+      // const bottomRight = nodeBottom >= windowInnerBottom && nodeRight >= windowInnerRight;
+      // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
+      const isInViewport = BL || BR || TL || TR || Inside;
+
+      console.log("bounding", {
+        top: nodeTop,
+        left: nodeLeft,
+        bottom: nodeBottom,
+        right: nodeRight,
+        windowInnerTop,
+        windowInnerLeft,
+        windowInnerRight: windowWith - windowInnerRight,
+        windowInnerBottom: windowHeight - windowInnerBottom,
+        isInViewport,
+        BL,
+        BR,
+        TL,
+        TR,
+        Inside,
+      });
+      return isInViewport;
+    },
+    [windowHeight, windowInnerLeft, windowInnerRight, windowWith]
+  );
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
       devLog("scroll To Node", { nodeId, tries });
@@ -265,62 +330,8 @@ const Dashboard = ({}: DashboardProps) => {
           if (!originalNode) {
             return;
           }
-          var bounding = originalNode.getBoundingClientRect();
 
-          //
-          const nodeLeft = bounding.left;
-          const nodeRight = bounding.right;
-          const nodeBottom = bounding.bottom;
-          const nodeTop = bounding.top;
-          const nodeCenterX = bounding.left + bounding.width / 2;
-          const nodeCenterY = bounding.top + bounding.height / 2;
-
-          const BL =
-            nodeLeft >= windowInnerLeft &&
-            nodeLeft <= windowWith - windowInnerRight &&
-            nodeBottom >= windowInnerTop &&
-            nodeBottom <= windowHeight - windowInnerBottom;
-          const BR =
-            nodeRight >= windowInnerLeft &&
-            nodeRight <= windowWith - windowInnerRight &&
-            nodeBottom >= windowInnerTop &&
-            nodeBottom <= windowHeight - windowInnerBottom;
-          const TL =
-            nodeLeft >= windowInnerLeft &&
-            nodeLeft <= windowWith - windowInnerRight &&
-            nodeTop >= windowInnerTop &&
-            nodeTop <= windowHeight - windowInnerBottom;
-          const TR =
-            nodeRight >= windowInnerLeft &&
-            nodeRight <= windowWith - windowInnerRight &&
-            nodeTop >= windowInnerTop &&
-            nodeTop <= windowHeight - windowInnerBottom;
-          const Inside =
-            nodeCenterX >= windowInnerLeft &&
-            nodeCenterX <= windowWith - windowInnerRight &&
-            nodeCenterY >= windowInnerTop &&
-            nodeCenterY <= windowHeight - windowInnerBottom;
-          // const bottomRight = nodeBottom >= windowInnerBottom && nodeRight >= windowInnerRight;
-          // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
-          const isInViewport = BL || BR || TL || TR || Inside;
-
-          console.log("bounding", {
-            top: nodeTop,
-            left: nodeLeft,
-            bottom: nodeBottom,
-            right: nodeRight,
-            windowInnerTop,
-            windowInnerLeft,
-            windowInnerRight: windowWith - windowInnerRight,
-            windowInnerBottom: windowHeight - windowInnerBottom,
-            isInViewport,
-            BL,
-            BR,
-            TL,
-            TR,
-            Inside,
-          });
-          if (isInViewport) return;
+          if (onNodeInViewport(nodeId)) return;
 
           console.log(
             "bounding done",
@@ -374,12 +385,11 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [windowHeight, windowInnerLeft, windowInnerRight, windowWith]
+    [onNodeInViewport]
   );
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-    // if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     // console.log("onCompleteWorker", 1);
     // if (
     //   [
@@ -600,6 +610,7 @@ const Dashboard = ({}: DashboardProps) => {
     // CHECK: I commented allNode, I did'nt found where is defined
     [user /*allNodes*/, , allTags /*allUserNodes*/]
   );
+
   //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
     const queryString = window.location.search;
