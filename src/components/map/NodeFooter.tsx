@@ -62,6 +62,7 @@ type NodeFooterProps = {
   isStudied: any;
   changed: any;
   changedAt: any;
+  simulated?: boolean;
   bookmarked: any;
   bookmarks: any;
   reloadPermanentGrpah: any;
@@ -111,6 +112,7 @@ const NodeFooter = ({
   isStudied,
   // changed,
   changedAt,
+  simulated,
   bookmarked,
   bookmarks,
   reloadPermanentGrpah,
@@ -272,7 +274,7 @@ const NodeFooter = ({
           </span> */}
         </div>
       </Box>
-      <Box className="NodeFooter Right" sx={{ display: "flex", alignItems: "center" }}>
+      <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
         {open ? (
           // REF: Node.css ln 122
           <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
