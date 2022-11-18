@@ -249,8 +249,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const { width: windowWith, height: windowHeight } = useWindowSize();
   const windowInnerTop = 50;
-  const windowInnerLeft = (windowWith * 15) / 100;
-  const windowInnerRight = (windowWith * 15) / 100;
+  const windowInnerLeft = (windowWith * 10) / 100;
+  const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
   const [showRegion, setShowRegion] = useState<boolean>(true);
 
@@ -4352,7 +4352,7 @@ const Dashboard = ({}: DashboardProps) => {
                     background: "rgba(255,255,255,.125)",
                     pointerEvents: "none",
                     borderRadius: "4px",
-                    border: "dashed 4px royalblue",
+                    border: "dashed 4px #f09816",
                   }}
                 ></Box>
               )}
