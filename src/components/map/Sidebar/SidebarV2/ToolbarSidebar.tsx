@@ -2,7 +2,6 @@ import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -117,7 +116,6 @@ const Toolbar = ({
     setAnchorEl(null);
   };
 
-  const router = useRouter();
   const themeMaterial = useTheme();
 
   const gapUsersBtwOptions = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 50 : 0;
@@ -402,7 +400,12 @@ const Toolbar = ({
           </Box>
         </MemoizedMetaButton>
         {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-          <MemoizedMetaButton onClick={() => router.push("/instructors/dashboard")}>
+          <MemoizedMetaButton
+            onClick={() => {
+              if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
+              if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
