@@ -23,7 +23,7 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useState, useTransition } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
@@ -92,6 +92,12 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         // async (page: number = 1) => {
         // console.log("[onSearch]");
         setIsRetrieving(true);
+        setSearchResults({
+          data: [],
+          lastPageLoaded: 0,
+          totalPage: 0,
+          totalResults: 0,
+        });
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q,
           nodeTypes,
@@ -126,7 +132,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         setIsRetrieving(false);
       }
     },
-    [getTagsSelected, nodesUpdatedSince, searchResults.data]
+    [getTagsSelected, setIsRetrieving, setSearchResults, nodesUpdatedSince, searchResults.data]
   );
 
   useEffect(() => {
@@ -231,6 +237,10 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
     setNodeTypes(newNodeTypes);
     onSearch(1, search, sortOption, sortDirection, newNodeTypes);
   };
+
+  const contentSignalState = useMemo(() => {
+    return { updated: true };
+  }, [isRetrieving, searchResults]);
 
   return (
     <SidebarWrapper
@@ -425,7 +435,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
           </div>
         </Box>
       }
-      contentSignalState={searchResults}
+      contentSignalState={contentSignalState}
       SidebarContent={
         <Box sx={{ p: "10px" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
