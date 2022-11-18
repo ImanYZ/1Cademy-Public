@@ -353,11 +353,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     const mapUrl = "/instructor/students/" + currentSemester.tagId + "/signup";
     try {
       await postWithToken(mapUrl, payloadAPI);
-      setDisableEdit(false);
       setNewStudents([]);
     } catch (error) {
       console.log(error);
     }
+    setDisableEdit(false);
     return;
   };
 
@@ -537,9 +537,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   if (!currentSemester) return <Typography>You don't have semester</Typography>;
   // if (!tableRows.length) return <Typography>you don't a user </Typography>;
-
-  console.log("::: :::  ::: savedTableState ::: ::: ", savedTableState);
-  console.log(":::: ::: ::: newStudents ::: ::: ", newStudents);
   return (
     <>
       {/* Drawers */}
@@ -908,70 +905,74 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           </TableContainer>
           {(editMode || disableEdit) && (
             <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
-              <Box>
-                <CSVBtn
-                  variant="text"
-                  addNewData={addNewData}
-                  disabled={disableEdit}
-                  buttonStyles={{
-                    ":hover": {
-                      backgroundColor: "#bdbdbd",
-                    },
-                    backgroundColor: "#EDEDED",
-                    fontSize: 16,
-                    fontWeight: "700",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  BtnText={"Add students from a csv file"}
-                />
-                <Button
-                  variant="text"
-                  disabled={disableEdit}
-                  sx={{
-                    ":hover": {
-                      backgroundColor: "#bdbdbd",
-                    },
-                    color: theme => theme.palette.common.black,
-                    backgroundColor: "#EDEDED",
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  onClick={addNewStudent}
-                >
-                  <AddIcon /> Add a new student
-                </Button>
-              </Box>
-              <Box>
-                <Button
-                  variant="text"
-                  disabled={disableEdit}
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.black,
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  onClick={() => discardTableChanges()}
-                >
-                  Cancel
-                </Button>
+              {!disableEdit && (
+                <Box>
+                  <CSVBtn
+                    variant="text"
+                    addNewData={addNewData}
+                    disabled={disableEdit}
+                    buttonStyles={{
+                      ":hover": {
+                        backgroundColor: "#bdbdbd",
+                      },
+                      backgroundColor: "#EDEDED",
+                      fontSize: 16,
+                      fontWeight: "700",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                    BtnText={"Add students from a csv file"}
+                  />
+                  <Button
+                    variant="text"
+                    disabled={disableEdit}
+                    sx={{
+                      ":hover": {
+                        backgroundColor: "#bdbdbd",
+                      },
+                      color: theme => theme.palette.common.black,
+                      backgroundColor: "#EDEDED",
+                      fontSize: 16,
+                      fontWeight: "700",
+                      my: { xs: "0px", md: "auto" },
+                      mt: { xs: "15px", md: "auto" },
+                      marginLeft: { xs: "0px", md: "32px" },
+                      marginRight: "40px",
+                      paddingX: "30px",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                    onClick={addNewStudent}
+                  >
+                    <AddIcon /> Add a new student
+                  </Button>
+                </Box>
+              )}
+              <Box sx={disableEdit ? { position: "relative", left: `${document.body.offsetWidth - 200}px` } : {}}>
+                {!disableEdit && (
+                  <Button
+                    variant="text"
+                    disabled={disableEdit}
+                    sx={{
+                      color: theme => theme.palette.common.white,
+                      background: theme => theme.palette.common.black,
+                      fontSize: 16,
+                      fontWeight: "700",
+                      my: { xs: "0px", md: "auto" },
+                      marginLeft: { xs: "0px", md: "32px" },
+                      marginRight: "40px",
+                      paddingX: "30px",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                    onClick={() => discardTableChanges()}
+                  >
+                    Cancel
+                  </Button>
+                )}
                 <LoadingButton
                   loading={disableEdit}
                   variant="contained"
@@ -988,8 +989,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     marginLeft: { xs: "0px", md: "32px" },
                     paddingX: "30px",
                     borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
                   }}
                   onClick={() => saveTableChanges()}
                 >
