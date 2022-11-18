@@ -1038,8 +1038,8 @@ const Dashboard = ({}: DashboardProps) => {
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
         if (!snapshot.docs.length) {
-          const notificationNumRef = doc(db, "notificationNums");
-          setDoc(notificationNumRef, {
+          const notificationNumRef = collection(db, "notificationNums");
+          setDoc(doc(notificationNumRef), {
             uname: user.uname,
             nNum: 0,
           } as INotificationNum);
