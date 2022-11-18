@@ -5,6 +5,8 @@ import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "fireba
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
 
+import { useNodeBook } from "@/context/NodeBookContext";
+
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import { Reputation, User, UserTheme } from "../../../../knowledgeTypes";
@@ -198,6 +200,7 @@ const Toolbar = ({
 
         {/* Searcher button */}
         <Button
+          className="SearchBarIconToolbar"
           onClick={() => {
             onOpenSidebar("SEARCHER_SIDEBAR", "Search");
             setIsMenuOpen(false);
@@ -212,7 +215,7 @@ const Toolbar = ({
             textAlign: "left",
             alignSelf: "flex-start",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "space-evenly",
             gap: isMenuOpen ? "6px" : "6px",
             padding: "6px 0px",
             paddingLeft: isMovil ? "18px" : "0px",
@@ -746,11 +749,16 @@ MainSidebarProps) => {
   //   onOpenSidebarLog("PendingProposals");
   // }, [onOpenSideBar, onOpenSidebarLog]);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const isMenuOpen = nodeBookState.isMenuOpen;
+  const setIsMenuOpen = (value: boolean) => {
+    nodeBookDispatch({ type: "setIsMenuOpen", payload: value });
+  };
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [user, selectedUser, isMenuOpen]);
+  }, [user, selectedUser, isMenuOpen, bookmarkUpdatesNum, uncheckedNotificationsNum, pendingProposalsNum, reputation]);
 
   return (
     <>
@@ -761,7 +769,7 @@ MainSidebarProps) => {
           display: { xs: "block", sm: "none" },
           position: "fixed",
           top: "10px",
-          left: isMenuOpen ? "100px" : "10px",
+          left: isMenuOpen ? "10px" : "10px",
           zIndex: isMenuOpen ? "1300" : "1200",
           background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
           height: "40px",

@@ -6,6 +6,7 @@ import {
   DocumentData,
   getDocs,
   getFirestore,
+  limit,
   onSnapshot,
   Query,
   query,
@@ -182,8 +183,12 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
 
     // update notifications nums
 
-    const notificationNumsRef = doc(db, "notificationNums", username);
-    batch.update(notificationNumsRef, { nNum: 0 });
+    const notificationNumsQuery = query(collection(db, "notificationNums"), where("uname", "==", username), limit(1));
+    const notificationNumsDocs = await getDocs(notificationNumsQuery);
+    if (notificationNumsDocs.docs.length) {
+      const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
+      batch.update(notificationNumsRef, { nNum: 0 });
+    }
     await batch.commit();
 
     // TODO: Important set notificationNums to 0
@@ -220,7 +225,8 @@ const NotificationSidebar = ({ open, onClose, theme, openLinkedNode, username }:
       open={open}
       title="Notifications"
       headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
-      width={430}
+      width={window.innerWidth > 899 ? 430 : window.innerWidth}
+      height={window.innerWidth > 899 ? 100 : 35}
       // anchor="right"
       onClose={onClose}
       SidebarOptions={

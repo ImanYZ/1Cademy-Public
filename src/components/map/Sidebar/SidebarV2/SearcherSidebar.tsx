@@ -23,7 +23,7 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useState, useTransition } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
@@ -92,6 +92,12 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         // async (page: number = 1) => {
         // console.log("[onSearch]");
         setIsRetrieving(true);
+        setSearchResults({
+          data: [],
+          lastPageLoaded: 0,
+          totalPage: 0,
+          totalResults: 0,
+        });
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q,
           nodeTypes,
@@ -126,7 +132,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
         setIsRetrieving(false);
       }
     },
-    [getTagsSelected, nodesUpdatedSince, searchResults.data]
+    [getTagsSelected, setIsRetrieving, setSearchResults, nodesUpdatedSince, searchResults.data]
   );
 
   useEffect(() => {
@@ -232,13 +238,18 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
     onSearch(1, search, sortOption, sortDirection, newNodeTypes);
   };
 
+  const contentSignalState = useMemo(() => {
+    return { updated: true };
+  }, [isRetrieving, searchResults]);
+
   return (
     <SidebarWrapper
       title="Search Nodes"
       headerImage={searcherHeaderImage}
       open={open}
       onClose={onClose}
-      width={430}
+      width={window.innerWidth > 899 ? 430 : window.innerWidth}
+      height={window.innerWidth > 899 ? 100 : window.innerWidth > 375 ? 40 : 50}
       // anchor="right"
       SidebarOptions={
         <Box
@@ -266,6 +277,43 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
               </Modal>
             </div>
           )}
+
+          <Box sx={{ marginTop: { xs: "10px", sm: "8px" }, marginBottom: { xs: "13px", sm: "8px" } }}>
+            <label className="Tooltip">
+              {/* <input
+              name="OnlyTagsNodes"
+              type="checkbox"
+              checked={onlyTags}
+              onChange={setOnlyTagsClick}
+            /> */}
+              <span className="tagText">Tags: </span>
+              {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (
+                <span className="tagText">All</span>
+              ) : (
+                getTagsSelected().map(tag => {
+                  return (
+                    <Chip
+                      key={"tag" + tag.nodeId}
+                      // name={tag.title}
+                      className="chip"
+                      variant="outlined"
+                      label={tag.title}
+                      onDelete={() => deleteChip(tag.nodeId)}
+                    />
+                  );
+                })
+              )}
+            </label>
+            <ControlPointIcon id="AddTagIcon" onClick={setShowTagSelectorClick} />
+            {onlyTags ? (
+              ""
+            ) : (
+              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
+                Recover Default Tag(s)
+              </span>
+            )}
+          </Box>
+
           <div id="SearchQueryContainer">
             <ValidatedInput
               identification="SearchQuery"
@@ -340,41 +388,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
               }}
             />
           </div>
-          <Box sx={{ marginTop: { xs: "13px", sm: "8px" } }}>
-            <label className="Tooltip">
-              {/* <input
-              name="OnlyTagsNodes"
-              type="checkbox"
-              checked={onlyTags}
-              onChange={setOnlyTagsClick}
-            /> */}
-              <span className="tagText">Tags: </span>
-              {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (
-                <span className="tagText">All</span>
-              ) : (
-                getTagsSelected().map(tag => {
-                  return (
-                    <Chip
-                      key={"tag" + tag.nodeId}
-                      // name={tag.title}
-                      className="chip"
-                      variant="outlined"
-                      label={tag.title}
-                      onDelete={() => deleteChip(tag.nodeId)}
-                    />
-                  );
-                })
-              )}
-            </label>
-            <ControlPointIcon id="AddTagIcon" onClick={setShowTagSelectorClick} />
-            {onlyTags ? (
-              ""
-            ) : (
-              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
-                Recover Default Tag(s)
-              </span>
-            )}
-          </Box>
+
           <div
             id="nodesUpdatedSinceContainer"
             style={{
@@ -421,7 +435,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
           </div>
         </Box>
       }
-      contentSignalState={searchResults}
+      contentSignalState={contentSignalState}
       SidebarContent={
         <Box sx={{ p: "10px" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
