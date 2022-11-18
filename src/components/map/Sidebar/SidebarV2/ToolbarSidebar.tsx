@@ -758,7 +758,7 @@ MainSidebarProps) => {
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [user, selectedUser, isMenuOpen]);
+  }, [user, selectedUser, isMenuOpen, bookmarkUpdatesNum, uncheckedNotificationsNum, pendingProposalsNum, reputation]);
 
   return (
     <>
