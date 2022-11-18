@@ -400,7 +400,12 @@ const Toolbar = ({
           </Box>
         </MemoizedMetaButton>
         {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-          <MemoizedMetaButton onClick={() => window.open("/instructors/dashboard", "_blank")}>
+          <MemoizedMetaButton
+            onClick={() => {
+              if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
+              if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
