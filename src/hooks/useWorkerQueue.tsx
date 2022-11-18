@@ -127,7 +127,7 @@ export const useWorkerQueue = ({
         setIsWorking(false);
         setTimeout(() => {
           onComplete();
-        }, 1000);
+        }, 1500);
       };
     },
     [allTags, g, mapHeight, mapWidth, onComplete, setClusterNodes, setGraph, setMapHeight, setMapWidth, withClusters]

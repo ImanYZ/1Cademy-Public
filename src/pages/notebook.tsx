@@ -243,11 +243,13 @@ const Dashboard = ({}: DashboardProps) => {
   const proposalTimer = useRef<any>(null);
 
   ///Scroll to node configs
+  // const theme = useThemee();
+  // const isMovil = useMediaQuery(theme.breakpoints.down("md"));
 
   const { width: windowWith, height: windowHeight } = useWindowSize();
   const windowInnerTop = 50;
-  const windowInnerLeft = 250;
-  const windowInnerRight = 250;
+  const windowInnerLeft = (windowWith * 15) / 100;
+  const windowInnerRight = (windowWith * 15) / 100;
   const windowInnerBottom = 50;
 
   const scrollToNode = useCallback(
@@ -334,7 +336,6 @@ const Dashboard = ({}: DashboardProps) => {
             "offsetTop" in originalNode &&
             originalNode.offsetTop !== 0
             // currentNode?.height !== NODE_HEIGHT &&
-            // queueFinished
           ) {
             // setScrollToNodeInitialized(true);
             scrollToNodeInitialized.current = true;
@@ -373,29 +374,29 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [windowHeight, windowWith]
+    [windowHeight, windowInnerLeft, windowInnerRight, windowWith]
   );
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-    if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
+    // if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
     // console.log("onCompleteWorker", 1);
-    if (
-      [
-        "LinkingWords",
-        "References",
-        "Tags",
-        "PendingProposals",
-        "ToggleNode",
-        "CancelProposals",
-        "ProposeProposals",
-      ].includes(lastNodeOperation.current) ||
-      !lastNodeOperation.current
-    ) {
-      // when open options from node is not required to scrollToNode
+    // if (
+    //   [
+    //     "LinkingWords",
+    //     "References",
+    //     "Tags",
+    //     "PendingProposals",
+    //     "ToggleNode",
+    //     "CancelProposals",
+    //     "ProposeProposals",
+    //   ].includes(lastNodeOperation.current) ||
+    //   !lastNodeOperation.current
+    // ) {
+    //   // when open options from node is not required to scrollToNode
 
-      return (lastNodeOperation.current = "");
-    }
+    //   return (lastNodeOperation.current = "");
+    // }
     // console.log("onCompleteWorker", 2);
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
@@ -2050,7 +2051,9 @@ const Dashboard = ({}: DashboardProps) => {
         let linkedNode = document.getElementById(linkedNodeID);
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-          scrollToNode(linkedNodeID);
+          setTimeout(() => {
+            scrollToNode(linkedNodeID);
+          }, 1500);
         } else {
           openNodeHandler(linkedNodeID);
         }
