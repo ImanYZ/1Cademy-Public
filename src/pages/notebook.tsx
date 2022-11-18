@@ -1040,7 +1040,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
         const notificationNum = snapshot.docs[0].data() as INotificationNum;
-        console.log(notificationNum.nNum, "notificationNum.nNum");
         setUncheckedNotificationsNum(notificationNum.nNum);
       });
       return () => {
