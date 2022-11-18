@@ -4136,6 +4136,7 @@ const Dashboard = ({}: DashboardProps) => {
             title="Redraw graph"
             placement="left"
             sx={{
+              display: "none",
               position: "fixed",
               top: "60px",
               right: "10px",
