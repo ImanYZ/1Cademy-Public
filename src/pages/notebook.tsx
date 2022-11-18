@@ -252,6 +252,7 @@ const Dashboard = ({}: DashboardProps) => {
   const windowInnerLeft = (windowWith * 15) / 100;
   const windowInnerRight = (windowWith * 15) / 100;
   const windowInnerBottom = 50;
+  const [showRegion, setShowRegion] = useState<boolean>(true);
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -4048,6 +4049,7 @@ const Dashboard = ({}: DashboardProps) => {
                   Open Proposal
                 </Button>
                 <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+                <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
               </Box>
             </Drawer>
           }
@@ -4337,21 +4339,24 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                 />
               </MapInteractionCSS>
-              {/* <Box
-                sx={{
-                  position: "absolute",
-                  // width: `${300}px`,
-                  // height: `${300}px`,
-                  top: windowInnerTop,
-                  bottom: windowInnerBottom,
-                  left: windowInnerLeft,
-                  right: windowInnerRight,
-                  background: "white",
-                  opacity: 0.25,
-                  pointerEvents: "none",
-                  border: "dashed 8px royalblue",
-                }}
-              ></Box> */}
+              {showRegion && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    // width: `${300}px`,
+                    // height: `${300}px`,
+                    top: windowInnerTop,
+                    bottom: windowInnerBottom,
+                    left: windowInnerLeft,
+                    right: windowInnerRight,
+                    background: "rgba(255,255,255,.125)",
+                    pointerEvents: "none",
+                    borderRadius: "4px",
+                    border: "dashed 4px royalblue",
+                  }}
+                ></Box>
+              )}
+
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
