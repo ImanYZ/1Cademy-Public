@@ -6,8 +6,6 @@ import { UserTheme } from "src/knowledgeTypes";
 import referencesDarkTheme from "../../../../../public/references-dark-theme.jpg";
 import referencesLightTheme from "../../../../../public/references-light-theme.jpg";
 import { newId } from "../../../../lib/utils/newid";
-// import EditProposal from "../../EditProposal";
-// import NewChildProposal from "../../NewChildProposal";
 import ProposalsList from "../../ProposalsList/ProposalsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -25,16 +23,7 @@ type ProposalsSidebarProps = {
   selectedNode: string | null;
   db: Firestore;
 };
-// type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 
-// const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
-//   Concept: "local_library",
-//   Relation: "share",
-//   Question: "help_outline",
-//   Code: "code",
-//   Reference: "menu_book",
-//   Idea: "emoji_objects",
-// };
 const ProposalsSidebar = ({
   open,
   onClose,
@@ -52,9 +41,7 @@ const ProposalsSidebar = ({
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
-  // const [openProposalItem, setOpenProposalItem] = useState(false);
   const [value, setValue] = React.useState(0);
-  // const [selectionType] = useState();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -80,10 +67,6 @@ const ProposalsSidebar = ({
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNode]);
-
-  // useEffect(() => {
-  //   setOpenProposalItem(false);
-  // }, [selectionType]);
 
   const proposalsWithId = useMemo(() => {
     return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));
@@ -222,11 +205,5 @@ export const MemoizedProposalsSidebar = React.memo(ProposalsSidebar, (prev, next
     prev.open === next.open &&
     prev.fetchProposals === next.fetchProposals &&
     prev.openProposal === next.openProposal
-    // prev.selectProposal === next.selectProposal &&
-    // prev.proposeNodeImprovement === next.proposeNodeImprovement &&
-    // prev.rateProposal === next.rateProposal &&
-    // prev.deleteProposal === next.deleteProposal &&
-    // prev.proposeNewChild === next.proposeNewChild &&
-    // prev.openProposal === next.openProposal
   );
 });
