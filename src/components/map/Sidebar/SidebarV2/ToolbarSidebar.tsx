@@ -1,8 +1,7 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip, useMediaQuery, useTheme } from "@mui/material";
+import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -117,15 +116,11 @@ const Toolbar = ({
     setAnchorEl(null);
   };
 
-  const router = useRouter();
-  const themeMaterial = useTheme();
-
   const gapUsersBtwOptions = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 50 : 0;
 
   const safariOffset = 400 + gapUsersBtwOptions;
   const chromeOffset = 375 + gapUsersBtwOptions;
 
-  const isMovil = useMediaQuery(themeMaterial.breakpoints.down("md"));
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
 
   const changeLeaderboard = useCallback(
@@ -215,11 +210,9 @@ const Toolbar = ({
             textAlign: "left",
             alignSelf: "flex-start",
             display: "flex",
-            justifyContent: "space-evenly",
             gap: isMenuOpen ? "6px" : "6px",
             padding: "6px 0px",
-            paddingLeft: isMovil ? "18px" : "0px",
-            // border: "solid 2px blue",
+            paddingLeft: isMenuOpen ? "20px" : "0px",
             ":hover": {
               backgroundColor: "rgba(255, 152, 0, 1)",
             },
@@ -402,7 +395,12 @@ const Toolbar = ({
           </Box>
         </MemoizedMetaButton>
         {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-          <MemoizedMetaButton onClick={() => router.push("/instructors/dashboard")}>
+          <MemoizedMetaButton
+            onClick={() => {
+              if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
+              if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+            }}
+          >
             <Box
               sx={{
                 display: "flex",

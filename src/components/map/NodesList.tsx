@@ -184,6 +184,7 @@ const NodesList = ({
             isStudied={nodes[nId].isStudied}
             changed={nodes[nId].changed}
             changedAt={nodes[nId].changedAt}
+            simulated={nodes[nId]?.simulated}
             bookmarked={bookmarked}
             bookmarks={bookmarks}
             bookmark={bookmark}

@@ -816,6 +816,9 @@ const Dashboard = ({}: DashboardProps) => {
             // Here we are merging with previous nodes left and top
             const visibleFullNodesMerged = visibleFullNodes.map(cur => {
               const tmpNode = nodes[cur.node];
+              if (tmpNode && tmpNode.hasOwnProperty("simulated")) {
+                delete tmpNode["simulated"];
+              }
 
               const hasParent = cur.parents.length;
               // IMPROVE: we need to pass the parent which open the node
@@ -1034,9 +1037,9 @@ const Dashboard = ({}: DashboardProps) => {
       const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
       const notificationsSnapshot = onSnapshot(q, async snapshot => {
-        if(!snapshot.docs.length) {
-          const notificationNumRef = doc(db, "notificationNums");
-          setDoc(notificationNumRef, {
+        if (!snapshot.docs.length) {
+          const notificationNumRef = collection(db, "notificationNums");
+          setDoc(doc(notificationNumRef), {
             uname: user.uname,
             nNum: 0,
           } as INotificationNum);
@@ -3034,7 +3037,9 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.height;
 
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-
+          if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
+            delete changedNodes[nodeBookState.selectedNode];
+          }
           setNodeParts(nodeBookState.selectedNode, node => ({ ...node, editable: false }));
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
           scrollToNode(nodeBookState.selectedNode);
@@ -3237,7 +3242,24 @@ const Dashboard = ({}: DashboardProps) => {
             const parentNode = graph.nodes[newNode.parents[0].node];
             const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
             console.log("willBeApproved", graph.nodes[newNodeId]);
-            setNodeParts(newNodeId, node => ({ ...node, editable: false, unaccepted: true }));
+            const nodePartChanges = {
+              editable: false,
+              unaccepted: true,
+              simulated: false,
+            };
+            // if version is approved from simulation then remove it from changedNodes and tempNodes
+            if (willBeApproved) {
+              if (tempNodes.has(newNodeId)) {
+                tempNodes.delete(newNodeId);
+              }
+              if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
+                delete changedNodes[newNode.parents[0].node];
+              }
+              nodePartChanges.unaccepted = false;
+              nodePartChanges.simulated = true;
+            }
+            console.log(nodePartChanges, "nodePartChanges");
+            setNodeParts(newNodeId, node => ({ ...node, changedAt: new Date(), ...nodePartChanges }));
 
             getMapGraph("/proposeChildNode", postData, !willBeApproved);
             scrollToNode(newNodeId); // previously was to his parent
@@ -3826,10 +3848,15 @@ const Dashboard = ({}: DashboardProps) => {
             })
           ) {
             proposalsTemp[proposalIdx].accepted = true;
+            if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
+              delete changedNodes[nodeBookState.selectedNode];
+            }
             if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
               // reloadPermanentGraph();
-              console.log("Child will be changed:", oldNodes[newNodeId]);
-              oldNodes[newNodeId] = { ...oldNodes[newNodeId], unaccepted: false };
+              oldNodes[newNodeId] = { ...oldNodes[newNodeId], unaccepted: false, simulated: true };
+              if (tempNodes.has(newNodeId)) {
+                tempNodes.delete(newNodeId);
+              }
               // const nodes[newNodeId];
               // unaccepted: true;
             }
@@ -3889,7 +3916,13 @@ const Dashboard = ({}: DashboardProps) => {
   };
 
   const onRedrawGraph = () => {
-    setNotebookChanges({ updated: true });
+    setGraph(() => {
+      return { nodes: {}, edges: {} };
+    });
+    g.current = createGraph();
+    setTimeout(() => {
+      setNotebookChanges({ updated: true });
+    }, 200);
   };
 
   return (
@@ -4144,7 +4177,6 @@ const Dashboard = ({}: DashboardProps) => {
             title="Redraw graph"
             placement="left"
             sx={{
-              display: "none",
               position: "fixed",
               top: "60px",
               right: "10px",
@@ -4161,7 +4193,7 @@ const Dashboard = ({}: DashboardProps) => {
               title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 60}px` : `60px`, md: "60px" },
+                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 120}px` : `110px`, md: "110px" },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
