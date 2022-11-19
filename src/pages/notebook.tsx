@@ -244,12 +244,12 @@ const Dashboard = ({}: DashboardProps) => {
   const proposalTimer = useRef<any>(null);
 
   ///Scroll to node configs
-  // const theme = useThemee();
-  // const isMovil = useMediaQuery(theme.breakpoints.down("md"));
+  // const theme = useTheme();
+  // const isMovil = useMediaQuery(theme.breakpoints.down("sm"));
 
   const { width: windowWith, height: windowHeight } = useWindowSize();
-  const windowInnerTop = 50;
-  const windowInnerLeft = (windowWith * 10) / 100;
+  const windowInnerTop = windowWith < 899 ? 360 : 50;
+  const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
   const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
   const [showRegion, setShowRegion] = useState<boolean>(true);
@@ -332,8 +332,11 @@ const Dashboard = ({}: DashboardProps) => {
           if (!originalNode) {
             return;
           }
-
-          if (onNodeInViewport(nodeId)) return;
+          const isSearcher = ["Searcher"].includes(lastNodeOperation.current);
+          if (isSearcher) {
+            lastNodeOperation.current = "";
+          }
+          if (onNodeInViewport(nodeId) && !isSearcher) return;
 
           if (
             originalNode &&
@@ -384,24 +387,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-    // console.log("onCompleteWorker", 1);
-    // if (
-    //   [
-    //     "LinkingWords",
-    //     "References",
-    //     "Tags",
-    //     "PendingProposals",
-    //     "ToggleNode",
-    //     "CancelProposals",
-    //     "ProposeProposals",
-    //   ].includes(lastNodeOperation.current) ||
-    //   !lastNodeOperation.current
-    // ) {
-    //   // when open options from node is not required to scrollToNode
 
-    //   return (lastNodeOperation.current = "");
-    // }
-    // console.log("onCompleteWorker", 2);
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -510,7 +496,7 @@ const Dashboard = ({}: DashboardProps) => {
    * update selectedNode
    */
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string) => {
+    async (nodeId: string, operationType?: string) => {
       devLog("open_Node_Handler", nodeId);
       // setFlag(!flag)
       let linkedNodeRef;
@@ -596,6 +582,7 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          if (operationType) lastNodeOperation.current = operationType;
         } catch (err) {
           console.error(err);
         }
@@ -2045,12 +2032,12 @@ const Dashboard = ({}: DashboardProps) => {
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           setTimeout(() => {
+            lastNodeOperation.current = "Searcher";
             scrollToNode(linkedNodeID);
           }, 1500);
         } else {
-          openNodeHandler(linkedNodeID);
+          openNodeHandler(linkedNodeID, "Searcher");
         }
-        lastNodeOperation.current = "OpenChild";
       }
     },
     // TODO: CHECK dependencies
