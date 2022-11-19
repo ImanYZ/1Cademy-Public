@@ -226,6 +226,12 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
   //   useSemesterFilter();
 
+  const onNewCourse = () => {
+    setSelectedCourse(null);
+    if (router.route === ROUTES.instructorsSettings) return;
+    router.push(ROUTES.instructorsSettings);
+  };
+
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
   if (isLoading)
@@ -253,8 +259,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
-      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
+      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
+      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
       {/* <HeaderNavbar /> */}
       <Box sx={{ width: "100%", py: "10px", m: "auto", px: { xs: "10px", md: "20px" } }}>
         <SemesterFilter
@@ -266,6 +272,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
           setSelectedCourse={setSelectedCourse}
           isMovil={isMovil}
           role={user.role}
+          currentSemester={currentSemester}
         />
       </Box>
 

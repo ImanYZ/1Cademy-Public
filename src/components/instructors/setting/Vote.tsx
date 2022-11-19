@@ -56,7 +56,9 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   onChange={event => inputsHandler(event, "votes", "pointIncrementOnAgreement")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">points/vote</InputAdornment>
+                      <InputAdornment position="end">
+                        {semester.votes.pointIncrementOnAgreement > 1 ? "points/vote" : "point/vote"}
+                      </InputAdornment>
                     </Box>
                   }
                   aria-describedby="filled-weight-helper-text"
@@ -90,7 +92,9 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   onChange={event => inputsHandler(event, "votes", "pointDecrementOnAgreement")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">points/vote</InputAdornment>
+                      <InputAdornment position="end">
+                        {semester.votes.pointDecrementOnAgreement > 1 ? "points/vote" : "point/vote"}
+                      </InputAdornment>
                     </Box>
                   }
                   aria-describedby="filled-weight-helper-text"
@@ -155,7 +159,9 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   onChange={event => inputsHandler(event, "votes", "onReceiveVote")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">points/vote</InputAdornment>
+                      <InputAdornment position="end">
+                        {semester.votes.onReceiveVote > 1 ? "points/vote" : "point/vote"}
+                      </InputAdornment>
                     </Box>
                   }
                   aria-describedby="filled-weight-helper-text"
@@ -200,7 +206,9 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   onChange={event => inputsHandler(event, "votes", "onReceiveDownVote")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">points/vote</InputAdornment>
+                      <InputAdornment position="end">
+                        {semester.votes.onReceiveDownVote > 1 ? "points/vote" : "point/vote"}
+                      </InputAdornment>
                     </Box>
                   }
                   aria-describedby="filled-weight-helper-text"
@@ -244,7 +252,9 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   onChange={event => inputsHandler(event, "votes", "onReceiveStar")}
                   endAdornment={
                     <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">points/vote</InputAdornment>
+                      <InputAdornment position="end">
+                        {semester.votes.onReceiveStar > 1 ? "points/vote" : "point/vote"}
+                      </InputAdornment>
                     </Box>
                   }
                   aria-describedby="filled-weight-helper-text"
