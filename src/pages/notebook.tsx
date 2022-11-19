@@ -252,7 +252,7 @@ const Dashboard = ({}: DashboardProps) => {
   const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
   const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
-  const [showRegion, setShowRegion] = useState<boolean>(true);
+  const [showRegion, setShowRegion] = useState<boolean>(false);
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -317,7 +317,7 @@ const Dashboard = ({}: DashboardProps) => {
       // });
       return isInViewport;
     },
-    [windowHeight, windowInnerLeft, windowInnerRight, windowWith]
+    [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
