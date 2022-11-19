@@ -69,6 +69,7 @@ import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSideb
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
+import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
@@ -242,83 +243,151 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  const scrollToNode = useCallback((nodeId: string, tries = 0) => {
-    devLog("scroll To Node", { nodeId, tries });
-    if (tries === 10) return;
+  ///Scroll to node configs
+  // const theme = useTheme();
+  // const isMovil = useMediaQuery(theme.breakpoints.down("sm"));
 
-    if (!scrollToNodeInitialized.current) {
-      setTimeout(() => {
-        // const currentNode = graph.nodes[nodeId];
-        // if(currentNode.height===NODE_HEIGHT)
-        const originalNode = document.getElementById(nodeId);
+  const { width: windowWith, height: windowHeight } = useWindowSize();
+  const windowInnerTop = windowWith < 899 ? 360 : 50;
+  const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
+  const windowInnerRight = (windowWith * 10) / 100;
+  const windowInnerBottom = 50;
+  const [showRegion, setShowRegion] = useState<boolean>(false);
 
-        if (
-          originalNode &&
-          "offsetLeft" in originalNode &&
-          originalNode.offsetLeft !== 0 &&
-          "offsetTop" in originalNode &&
-          originalNode.offsetTop !== 0
-          // currentNode?.height !== NODE_HEIGHT &&
-          // queueFinished
-        ) {
-          // setScrollToNodeInitialized(true);
-          scrollToNodeInitialized.current = true;
-          setTimeout(() => {
-            scrollToNodeInitialized.current = false;
-            // setScrollToNodeInitialized(false);
-          }, 1300);
+  const onNodeInViewport = useCallback(
+    (nodeId: string) => {
+      const originalNode = document.getElementById(nodeId);
+      if (!originalNode) {
+        return false;
+      }
+      var bounding = originalNode.getBoundingClientRect();
 
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          setMapInteractionValue(() => {
-            const windowSize = window.innerWidth;
-            let defaultScale;
-            if (windowSize < 400) {
-              defaultScale = 0.45;
-            } else if (windowSize < 600) {
-              defaultScale = 0.575;
-            } else if (windowSize < 1260) {
-              defaultScale = 0.8;
-            } else {
-              defaultScale = 0.92;
-            }
+      //
+      const nodeLeft = bounding.left;
+      const nodeRight = bounding.right;
+      const nodeBottom = bounding.bottom;
+      const nodeTop = bounding.top;
+      const nodeCenterX = bounding.left + bounding.width / 2;
+      const nodeCenterY = bounding.top + bounding.height / 2;
 
-            return {
-              scale: defaultScale,
-              translation: {
-                // x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
-                x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
-                y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
-              },
-            };
-          });
-        } else {
-          scrollToNode(nodeId, tries + 1);
-        }
-      }, 400);
-    }
-  }, []);
+      const BL =
+        nodeLeft >= windowInnerLeft &&
+        nodeLeft <= windowWith - windowInnerRight &&
+        nodeBottom >= windowInnerTop &&
+        nodeBottom <= windowHeight - windowInnerBottom;
+      const BR =
+        nodeRight >= windowInnerLeft &&
+        nodeRight <= windowWith - windowInnerRight &&
+        nodeBottom >= windowInnerTop &&
+        nodeBottom <= windowHeight - windowInnerBottom;
+      const TL =
+        nodeLeft >= windowInnerLeft &&
+        nodeLeft <= windowWith - windowInnerRight &&
+        nodeTop >= windowInnerTop &&
+        nodeTop <= windowHeight - windowInnerBottom;
+      const TR =
+        nodeRight >= windowInnerLeft &&
+        nodeRight <= windowWith - windowInnerRight &&
+        nodeTop >= windowInnerTop &&
+        nodeTop <= windowHeight - windowInnerBottom;
+      const Inside =
+        nodeCenterX >= windowInnerLeft &&
+        nodeCenterX <= windowWith - windowInnerRight &&
+        nodeCenterY >= windowInnerTop &&
+        nodeCenterY <= windowHeight - windowInnerBottom;
+      // const bottomRight = nodeBottom >= windowInnerBottom && nodeRight >= windowInnerRight;
+      // const bottomLeft = nodeBottom >= windowInnerBottom && bounding.left >= windowInnerLeft;
+      const isInViewport = BL || BR || TL || TR || Inside;
+
+      // console.log("bounding", {
+      //   top: nodeTop,
+      //   left: nodeLeft,
+      //   bottom: nodeBottom,
+      //   right: nodeRight,
+      //   windowInnerTop,
+      //   windowInnerLeft,
+      //   windowInnerRight: windowWith - windowInnerRight,
+      //   windowInnerBottom: windowHeight - windowInnerBottom,
+      //   isInViewport,
+      //   BL,
+      //   BR,
+      //   TL,
+      //   TR,
+      //   Inside,
+      // });
+      return isInViewport;
+    },
+    [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
+  );
+  const scrollToNode = useCallback(
+    (nodeId: string, tries = 0) => {
+      devLog("scroll To Node", { nodeId, tries });
+      if (tries === 10) return;
+
+      if (!scrollToNodeInitialized.current) {
+        setTimeout(() => {
+          // const currentNode = graph.nodes[nodeId];
+          // if(currentNode.height===NODE_HEIGHT)
+          const originalNode = document.getElementById(nodeId);
+          if (!originalNode) {
+            return;
+          }
+          const isSearcher = ["Searcher"].includes(lastNodeOperation.current);
+          if (isSearcher) {
+            lastNodeOperation.current = "";
+          }
+          if (onNodeInViewport(nodeId) && !isSearcher) return;
+
+          if (
+            originalNode &&
+            "offsetLeft" in originalNode &&
+            originalNode.offsetLeft !== 0 &&
+            "offsetTop" in originalNode &&
+            originalNode.offsetTop !== 0
+            // currentNode?.height !== NODE_HEIGHT &&
+          ) {
+            // setScrollToNodeInitialized(true);
+            scrollToNodeInitialized.current = true;
+            setTimeout(() => {
+              scrollToNodeInitialized.current = false;
+              // setScrollToNodeInitialized(false);
+            }, 1300);
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            setMapInteractionValue(() => {
+              const windowSize = window.innerWidth;
+              let defaultScale;
+              if (windowSize < 400) {
+                defaultScale = 0.45;
+              } else if (windowSize < 600) {
+                defaultScale = 0.575;
+              } else if (windowSize < 1260) {
+                defaultScale = 0.8;
+              } else {
+                defaultScale = 0.92;
+              }
+
+              return {
+                scale: defaultScale,
+                translation: {
+                  // x: (window.innerWidth / 3.4 - originalNode.offsetLeft) * defaultScale,
+                  x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
+                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
+                },
+              };
+            });
+          } else {
+            scrollToNode(nodeId, tries + 1);
+          }
+        }, 400);
+      }
+    },
+    [onNodeInViewport]
+  );
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-    if (tempNodes.has(nodeBookState.selectedNode) || nodeBookState.selectedNode in changedNodes) return;
-    // console.log("onCompleteWorker", 1);
-    if (
-      [
-        "LinkingWords",
-        "References",
-        "Tags",
-        "PendingProposals",
-        "ToggleNode",
-        "CancelProposals",
-        "ProposeProposals",
-      ].includes(lastNodeOperation.current) ||
-      !lastNodeOperation.current
-    ) {
-      // when open options from node is not required to scrollToNode
 
-      return (lastNodeOperation.current = "");
-    }
-    // console.log("onCompleteWorker", 2);
     scrollToNode(nodeBookState.selectedNode);
   }, [nodeBookState.selectedNode, scrollToNode]);
 
@@ -429,7 +498,7 @@ const Dashboard = ({}: DashboardProps) => {
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
       devLog("open_Node_Handler", nodeId);
-      // setFlag(!flag)
+      // setFlag(!flag)// operationType
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodesData | null = null;
@@ -513,6 +582,7 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          // if (operationType) lastNodeOperation.current = operationType;
         } catch (err) {
           console.error(err);
         }
@@ -521,6 +591,7 @@ const Dashboard = ({}: DashboardProps) => {
     // CHECK: I commented allNode, I did'nt found where is defined
     [user /*allNodes*/, , allTags /*allUserNodes*/]
   );
+
   //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
     const queryString = window.location.search;
@@ -1680,6 +1751,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const nodeClicked = useCallback(
     (event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
+      devLog("node Clicked");
       if (nodeBookState.selectionType !== "AcceptedProposals" && nodeBookState.selectionType !== "Proposals") {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         // nodeBookDispatch({type:'setSelectedNode',payload:nodeId)
@@ -1956,17 +2028,21 @@ const Dashboard = ({}: DashboardProps) => {
   // );
 
   const openLinkedNode = useCallback(
-    (linkedNodeID: string) => {
+    (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID });
       if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID);
+        if (typeOperation) {
+          lastNodeOperation.current = "Searcher";
+        }
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-          scrollToNode(linkedNodeID);
+          setTimeout(() => {
+            scrollToNode(linkedNodeID);
+          }, 1500);
         } else {
-          openNodeHandler(linkedNodeID);
+          openNodeHandler(linkedNodeID, "Searcher");
         }
-        lastNodeOperation.current = "OpenChild";
       }
     },
     // TODO: CHECK dependencies
@@ -2765,12 +2841,9 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenTrends(false);
     setOpenMedia(false);
     setOpenProposal("");
-    console.log("lastOperation", nodeBookState.lastOperation);
     if (
       nodeBookState.selectedNode &&
       nodeBookState.selectedNode !== "" &&
-      lastNodeOperation.current !== "CancelProposals" &&
-      lastNodeOperation.current !== "ProposeProposals" &&
       g.current.hasNode(nodeBookState.selectedNode)
     ) {
       scrollToNode(nodeBookState.selectedNode);
@@ -3998,6 +4071,7 @@ const Dashboard = ({}: DashboardProps) => {
                   Open Proposal
                 </Button>
                 <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+                <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
               </Box>
             </Drawer>
           }
@@ -4286,6 +4360,24 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                 />
               </MapInteractionCSS>
+              {showRegion && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    // width: `${300}px`,
+                    // height: `${300}px`,
+                    top: windowInnerTop,
+                    bottom: windowInnerBottom,
+                    left: windowInnerLeft,
+                    right: windowInnerRight,
+                    background: "rgba(255,255,255,.125)",
+                    pointerEvents: "none",
+                    borderRadius: "4px",
+                    border: "dashed 4px #f09816",
+                  }}
+                ></Box>
+              )}
+
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
