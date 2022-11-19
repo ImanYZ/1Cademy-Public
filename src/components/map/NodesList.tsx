@@ -5,13 +5,10 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
 import { OpenSidebar } from "@/pages/notebook";
 
-// import { FullNodeData } from "../../noteBookTypes";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
   nodes: { [key: string]: any };
-  // selectionType: any,
-  // NODE_WIDTH: number,
   bookmark: any;
   markStudied: any;
   chosenNodeChanged: any;
@@ -97,7 +94,6 @@ const NodesList = ({
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
-  // console.log(1, nodes);
   return (
     <>
       {Object.keys(nodes).map(nId => {
@@ -169,7 +165,7 @@ const NodesList = ({
             tags={nodes[nId].tags.map((cur: string, idx: number) => ({
               node: nodes[nId].tagIds[idx],
               title: cur,
-            }))} // CHECK: I added this because we need id and title
+            }))}
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
             choices={nodes[nId].choices}
@@ -232,16 +228,12 @@ const NodesList = ({
     </>
   );
 };
-// export default NodesList;
-// export const MemoizedNodeList = NodesList;
+
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
   return (
     compareNodes(prev.nodes, next.nodes) &&
-    // prev.selectionType === next.selectionType &&
-    // prev.NODE_WIDTH === next.NODE_WIDTH &&
     prev.bookmark === next.bookmark &&
     prev.markStudied === next.markStudied &&
-    // prev.nodeChanged === next.nodeChanged &&
     prev.chosenNodeChanged === next.chosenNodeChanged &&
     prev.referenceLabelChange === next.referenceLabelChange &&
     prev.deleteLink === next.deleteLink &&
@@ -269,49 +261,3 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.openSidebar === prev.openSidebar
   );
 });
-
-// export default React.memo(NodesList);
-// // export default React.memo(NodesList, (prevProps, nextProps) => {
-// //   {
-// //     console.log(
-// //       "compareNodes(prevProps.nodes, nextProps.nodes):",
-// //       compareNodes(prevProps.nodes, nextProps.nodes)
-// //     );
-// //     if (compareNodes(prevProps.nodes, nextProps.nodes)) {
-// //       console.log(prevProps.nodes);
-// //       console.log(nextProps.nodes);
-// //     }
-// //   }
-// //   return (
-// //     compareNodes(prevProps.nodes, nextProps.nodes) &&
-// //     prevProps.selectionType === nextProps.selectionType &&
-// //     prevProps.NODE_WIDTH === nextProps.NODE_WIDTH &&
-// //     prevProps.bookmark === nextProps.bookmark &&
-// //     prevProps.markStudied === nextProps.markStudied &&
-// //     prevProps.nodeChanged === nextProps.nodeChanged &&
-// //     prevProps.chosenNodeChanged === nextProps.chosenNodeChanged &&
-// //     prevProps.referenceLabelChange === nextProps.referenceLabelChange &&
-// //     prevProps.deleteLink === nextProps.deleteLink &&
-// //     prevProps.openLinkedNode === nextProps.openLinkedNode &&
-// //     prevProps.openAllChildren === nextProps.openAllChildren &&
-// //     prevProps.hideNodeHandler === nextProps.hideNodeHandler &&
-// //     prevProps.hideOffsprings === nextProps.hideOffsprings &&
-// //     prevProps.toggleNode === nextProps.toggleNode &&
-// //     prevProps.openNodePart === nextProps.openNodePart &&
-// //     prevProps.selectNode === nextProps.selectNode &&
-// //     prevProps.nodeClicked === nextProps.nodeClicked &&
-// //     prevProps.correctNode === nextProps.correctNode &&
-// //     prevProps.wrongNode === nextProps.wrongNode &&
-// //     prevProps.uploadNodeImage === nextProps.uploadNodeImage &&
-// //     prevProps.removeImage === nextProps.removeImage &&
-// //     prevProps.changeChoice === nextProps.changeChoice &&
-// //     prevProps.changeFeedback === nextProps.changeFeedback &&
-// //     prevProps.switchChoice === nextProps.switchChoice &&
-// //     prevProps.deleteChoice === nextProps.deleteChoice &&
-// //     prevProps.addChoice === nextProps.addChoice &&
-// //     prevProps.saveProposedChildNode === nextProps.saveProposedChildNode &&
-// //     prevProps.saveProposedImprovement === nextProps.saveProposedImprovement &&
-// //     prevProps.closeSideBar === nextProps.closeSideBar &&
-// //     prevProps.reloadPermanentGrpah === nextProps.reloadPermanentGrpah
-// //   );
-// // });
