@@ -449,7 +449,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
                   // key={`resNode${resNode.id}`}
                   key={`resNode${idx}`}
                   // onClick={() => console.log("openLinkedNodeClick(resNode.id)")}
-                  onClick={() => openLinkedNode(resNode.id)}
+                  onClick={() => openLinkedNode(resNode.id, "Searcher")}
                   sx={{
                     listStyle: "none",
                     padding: "10px",

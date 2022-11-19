@@ -496,9 +496,9 @@ const Dashboard = ({}: DashboardProps) => {
    * update selectedNode
    */
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string, operationType?: string) => {
+    async (nodeId: string) => {
       devLog("open_Node_Handler", nodeId);
-      // setFlag(!flag)
+      // setFlag(!flag)// operationType
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodesData | null = null;
@@ -582,7 +582,7 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-          if (operationType) lastNodeOperation.current = operationType;
+          // if (operationType) lastNodeOperation.current = operationType;
         } catch (err) {
           console.error(err);
         }
@@ -2025,14 +2025,16 @@ const Dashboard = ({}: DashboardProps) => {
   // );
 
   const openLinkedNode = useCallback(
-    (linkedNodeID: string) => {
+    (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID });
       if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID);
+        if (typeOperation) {
+          lastNodeOperation.current = "Searcher";
+        }
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           setTimeout(() => {
-            lastNodeOperation.current = "Searcher";
             scrollToNode(linkedNodeID);
           }, 1500);
         } else {
