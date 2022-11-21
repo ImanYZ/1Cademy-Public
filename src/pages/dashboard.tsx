@@ -9,7 +9,7 @@ const NodeBook = () => {
 
   useEffect(() => {
     router.push(ROUTES.dashboard);
-  }, []);
+  }, [router]);
 
   return <div></div>;
 };

@@ -199,6 +199,12 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     }
   }, [allSemesters, queryUname, selectedCourse, user]);
 
+  const onNewCourse = () => {
+    setSelectedCourse(null);
+    if (router.route === ROUTES.instructorsSettings) return;
+    router.push(ROUTES.instructorsSettings);
+  };
+
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
   if (!user || !queryUname)
@@ -222,8 +228,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
-      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
+      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
+      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
       {/* <HeaderNavbar /> */}
       <Box
         sx={{
@@ -240,8 +246,10 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
           courses={courses}
           selectedCourse={selectedCourse}
           setSelectedCourse={setSelectedCourse}
+          currentSemester={currentSemester}
           isMovil={isMovil}
           role={user.role}
+          uname={queryUname}
         />
       </Box>
 
