@@ -4,7 +4,6 @@ import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "fi
 import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
-// import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import { User, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
@@ -13,11 +12,9 @@ import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import { useAuth } from "../../context/AuthContext";
 import { Semester, SemesterStudentVoteStat } from "../../instructorsTypes";
 import ROUTES from "../../lib/utils/routes";
-// import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
-// import { useSemesterFilter } from "../instructors/useSemesterFilter";
 
 export type Option = {
   id: string;
@@ -54,11 +51,9 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
 };
 export const StudentsLayout: FC<Props> = ({ children }) => {
   const [{ user, settings }] = useAuth();
-  // console.log("StudentsLayout", { user });
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
 
-  // const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
@@ -68,14 +63,12 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
   const [queryUname, setQueryUname] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
-  // TODO: create useEffect to load semesters
 
   const db = getFirestore();
   const router = useRouter();
 
   useEffect(() => {
     const uname = router.query["uname"] as string;
-    // console.log("uname", uname);
     setQueryUname(uname);
   }, [router.query]);
 
@@ -84,20 +77,13 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     const allowAccessByRole = async () => {
       if (!user) return;
 
-      // console.log("--->> router", { ...router });
       const role = user?.role;
-      // console.log(1);
       if (!role) return router.push(ROUTES.dashboard);
-      // console.log(2);
       if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
-      // console.log(3, router.route, ROUTES.instructorsDashboardStudents);
       if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboardStudents)
         return router.push(ROUTES.dashboard);
 
       if (role === "STUDENT" && queryUname && user.uname !== queryUname) return router.push(ROUTES.dashboard);
-      // TODO Improve this
-
-      // in this case is instructor he can see all
     };
     allowAccessByRole();
   }, [queryUname, router, user, user?.role]);
@@ -106,11 +92,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     if (!queryUname) return;
     if (!user) return console.warn("Not user found, wait please");
     if (user.role === "STUDENT" && queryUname !== user.uname) return;
-    // window.document.body.classList.remove("Image");
 
-    // console.log("get Semesters", user);
     const getSemesters = async () => {
-      // console.log("will get semester", 1);
       const semestersRef = collection(db, "semesterStudentVoteStats");
       const q = query(semestersRef, where("uname", "==", queryUname));
       const semesterStudentDocs = await getDocs(q);
@@ -119,8 +102,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         return;
       }
 
-      // console.log("will get semester", 2);
-      // will map data
       const semestersStudent = semesterStudentDocs.docs.map(change => {
         const semesterData: SemesterStudentVoteStat = change.data() as SemesterStudentVoteStat;
         return {
@@ -131,7 +112,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
 
       console.log("semestersStudent", semestersStudent);
 
-      // console.log("will get semester", 3);
       // will get ids
       const semestersIds = semestersStudent.map(cur => cur.data.tagId);
       // will get courses
@@ -146,7 +126,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
 
       console.log("allSemesters", allSemesters);
 
-      // console.log("will get semester", 5);
       const coursesResult = allSemesters.reduce((acu: CoursesResult, cur: Semester) => {
         const tmpValues = acu[cur.title] ?? [];
         return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
@@ -154,14 +133,12 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
 
       const semester = allSemesters.map(cur => cur.title);
 
-      // console.log("will get semester", 6);
       if (!semester.length) {
         router.push(ROUTES.instructorsSettings);
       }
 
-      // console.log("will get semester", 7);
       console.log({ semester, allSemesters, coursesResult, semester0: semester[0] });
-      // setSemesters(semester);
+
       setAllSemesters(allSemesters);
       setAllCourses(coursesResult);
       setSelectedSemester(semester[0]);
@@ -174,7 +151,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     if (!queryUname) return;
     if (!selectedSemester) return setCourses([]);
 
-    // console.log("selected semester: will set courses and selected course");
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
     setSelectedCourse(newCourses[0]);
@@ -185,7 +161,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     if (!user) return;
     if (!selectedCourse) return;
 
-    // console.log("selected course: will select current semester");
     const semesterFound = allSemesters.find(course => `${course.cTitle} ${course.pTitle}` === selectedCourse);
     if (!semesterFound) {
       setCurrentSemester(null);
@@ -236,7 +211,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
       {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
-      {/* <HeaderNavbar /> */}
       <Box
         sx={{
           width: "100%",
