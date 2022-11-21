@@ -161,13 +161,13 @@ const NotificationsList = (props: NotificationsListProps) => {
             <div className="NotificationBody">
               <Box
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  display: "grid",
+                  gridTemplateColumns: "20px 1fr 72px",
+                  gap: "8px",
                   marginTop: "8px",
                 }}
               >
-                <span className="NotificationAction" style={{ fontSize: "20px" }}>
+                <Box component="span" className="NotificationAction" style={{ fontSize: "20px", width: "20px" }}>
                   {notification.oType === "Propo" ? (
                     <EditIcon className="amber-text" fontSize="inherit" />
                   ) : notification.oType === "PropoAccept" ? (
@@ -189,8 +189,8 @@ const NotificationsList = (props: NotificationsListProps) => {
                   ) : (
                     notification.aType === "Delete" && <DeleteForeverIcon className="red-text" />
                   )}
-                </span>
-                <span className="NotificationObject" style={{ justifySelf: "start" }}>
+                </Box>
+                <span style={{ lineHeight: "20px" }}>
                   {notification.oType === "Proposal"
                     ? " Your pending proposal "
                     : notification.oType === "AccProposal"
@@ -207,7 +207,8 @@ const NotificationsList = (props: NotificationsListProps) => {
                               <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
                             }))}
                 </span>
-                <Box className="title Time" sx={{ fontSize: "12px" }}>
+
+                <Box className="title Time" sx={{ fontSize: "12px", justifySelf: "right" }}>
                   {dayjs(notification.createdAt).fromNow()}
                 </Box>
               </Box>
