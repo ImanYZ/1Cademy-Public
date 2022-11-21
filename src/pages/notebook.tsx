@@ -3868,6 +3868,10 @@ const Dashboard = ({}: DashboardProps) => {
     reloadPermanentGraph();
     if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
     setOpenSidebar(null);
+    nodeBookDispatch({
+      type: "setOpenEditSection",
+      payload: { status: false, nodeId: null },
+    });
   };
 
   return (

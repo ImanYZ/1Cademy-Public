@@ -254,13 +254,6 @@ const Node = ({
   }, [title, content]);
 
   useEffect(() => {
-    if (!openSidebar) {
-      setOpenPart(null);
-      nodeBookDispatch({ type: "setSelectedNode", payload: null });
-    }
-  }, [openSidebar]);
-
-  useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
@@ -839,7 +832,9 @@ const Node = ({
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
+                openSidebar={openSidebar}
               />
+
               {/* <NodeFooter
                 open={true}
                 identifier={identifier}
@@ -1012,6 +1007,7 @@ const Node = ({
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
+                openSidebar={openSidebar}
               />
               {/* <NodeFooter
                 open={false}

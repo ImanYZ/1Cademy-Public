@@ -2786,16 +2786,15 @@ button.MuiTab-textColorInherit:focus {
 
 .select-tab-button-node-footer {
   height: 40px;
-  margin-bottom: -3px;
   margin-right: 2px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
   border: solid 1px #585858;
+  border-bottom: none;
 }
 
 .tab-button-node-footer {
-  margin-bottom: 8px;
   padding: 5px;
   border-radius: 52px;
   display: flex;
@@ -2803,8 +2802,13 @@ button.MuiTab-textColorInherit:focus {
   border: solid 1px #585858;
 }
 
+.tab-button-node-footer button:hover {
+  box-shadow: none !important;
+}
+
 .tab-button-node-footer:hover,
 .tab-button-node-footer:active {
+  padding: 5px;
   border-radius: 52px !important;
 }
 .vote-area {
@@ -2822,5 +2826,6 @@ button.MuiTab-textColorInherit:focus {
 
 .vertical-row {
   width: 1px; /* edit this if you want */
-  background-color: #fff;
+  background-color: rgb(220, 220, 220);
+  height: 13px;
 }

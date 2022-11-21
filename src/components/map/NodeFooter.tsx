@@ -26,6 +26,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { useNodeBook } from "@/context/NodeBookContext";
 import { OpenSidebar } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
@@ -85,6 +86,7 @@ type NodeFooterProps = {
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   locked: boolean;
+  openSidebar: any;
 };
 
 const NodeFooter = ({
@@ -136,6 +138,7 @@ const NodeFooter = ({
   locked,
 }: NodeFooterProps) => {
   const router = useRouter();
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
@@ -151,6 +154,7 @@ const NodeFooter = ({
     const URL = window.location.href;
     setUrl(URL);
   }, [router]);
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -200,7 +204,17 @@ const NodeFooter = ({
       //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
       //   });
       // }
-      openNodePart(event, "Proposals");
+      if (nodeBookState.editAbleNodeId != identifier) {
+        nodeBookDispatch({
+          type: "setOpenEditSection",
+          payload: { status: true, nodeId: identifier },
+        });
+      } else {
+        nodeBookDispatch({
+          type: "setOpenEditSection",
+          payload: { status: !nodeBookState.openEditSection, nodeId: identifier },
+        });
+      }
       selectNode(event, "Proposals"); // Pass correct data
     },
     [selectNode]
@@ -300,20 +314,22 @@ const NodeFooter = ({
           {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
 
           {open && (
-            <>
+            <Box sx={{ display: "flex", alignItems: "center", marginLeft: "3px" }}>
               <Box
-                className={openPart === "Proposals" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
+                className={
+                  nodeBookState.openEditSection && nodeBookState.editAbleNodeId === identifier
+                    ? "select-tab-button-node-footer"
+                    : "tab-button-node-footer"
+                }
                 sx={{
-                  marginLeft: "5px",
-                  marginRight: "5px",
                   background: theme =>
                     theme.palette.mode === "dark"
-                      ? openPart === "Proposals"
+                      ? nodeBookState.openEditSection && nodeBookState.editAbleNodeId === identifier
                         ? "#414141"
-                        : "#1F1F1F"
-                      : openPart === "Proposals"
+                        : "transparent"
+                      : nodeBookState.openEditSection && nodeBookState.editAbleNodeId === identifier
                       ? "#DCDCDC"
-                      : "white",
+                      : "transparent",
                 }}
               >
                 <MemoizedMetaButton
@@ -329,8 +345,7 @@ const NodeFooter = ({
                   // }
                   tooltipPosition="top"
                   style={{
-                    borderTopRightRadius: "8px",
-                    borderTopLeftRadius: "8px",
+                    fontSize: "14px",
                   }}
                 >
                   <>
@@ -342,21 +357,24 @@ const NodeFooter = ({
               <Box
                 className="tab-button-node-footer"
                 sx={{
-                  background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "white"),
+                  background: "transparent",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
                 <MemoizedMetaButton onClick={wrongNode} tooltip="Vote to delete node." tooltipPosition="top">
                   <Box
-                    className="delete-vote"
                     sx={{
                       display: "flex",
+                      fontSize: "14px",
+                      alignItems: "center",
                     }}
                   >
                     <span>{shortenNumber(wrongNum, 2, false)}</span>
-                    <CloseIcon sx={{ fontSize: "18px", color: markedWrong ? "red" : "inherit", marginLeft: "1px" }} />
+                    <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit", marginLeft: "1px" }} />
                   </Box>
                 </MemoizedMetaButton>
-                <Box className="vertical-row" style={{ color: "white" }}></Box>
+                <Box className="vertical-row"></Box>
                 <MemoizedMetaButton
                   onClick={correctNode}
                   tooltip="Vote to prevent further changes."
@@ -365,16 +383,18 @@ const NodeFooter = ({
                   <Box
                     sx={{
                       display: "flex",
+                      fontSize: "14px",
+                      alignItems: "center",
                     }}
                   >
                     <span>{shortenNumber(correctNum, 2, false)}</span>
                     <DoneIcon
-                      sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
+                      sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
                     />
                   </Box>
                 </MemoizedMetaButton>
               </Box>
-            </>
+            </Box>
           )}
           {/* <span
             className={"TooltipText " + (open ? "Top" : "Bottom")}
@@ -429,33 +449,44 @@ const NodeFooter = ({
               </>
             ) : (
               // new Node or unaccepted proposal
-              <>
+              <Box
+                className={"tab-button-node-footer"}
+                sx={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
                 <MemoizedMetaButton
                   onClick={uploadImageClicked}
                   tooltip="Upload an image for this node."
                   tooltipPosition="top"
-                  style={{
-                    marginRight: "5px",
-                  }}
                 >
                   <>
-                    <ImageIcon sx={{ fontSize: "16px" }} />
-                    {isUploading && (
-                      <>
-                        <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
-                          <div className="spinner-layer spinner-yellow-only">
-                            <div className="circle-clipper left">
-                              <div className="circle"></div>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="ImageUploadPercentage">{percentageUploaded + "%"}</span>
-                      </>
+                    {isUploading ? (
+                      // <>
+                      //   <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
+                      //     <div className="spinner-layer spinner-yellow-only">
+                      //       <div className="circle-clipper left">
+                      //         <div className="circle"></div>
+                      //       </div>
+                      //     </div>
+                      //   </div>
+
+                      // </>
+                      <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
+                        {percentageUploaded + "%"}
+                      </span>
+                    ) : (
+                      <ImageIcon sx={{ fontSize: "16px" }} />
                     )}
                   </>
                 </MemoizedMetaButton>
-              </>
+              </Box>
             )}
             {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
@@ -466,10 +497,10 @@ const NodeFooter = ({
                       theme.palette.mode === "dark"
                         ? openPart === "Citations"
                           ? "#414141"
-                          : "#1F1F1F"
+                          : "transparent"
                         : openPart === "Citations"
                         ? "#DCDCDC"
-                        : "white",
+                        : "transparent",
                   }}
                 >
                   <MemoizedMetaButton
@@ -504,10 +535,10 @@ const NodeFooter = ({
                       theme.palette.mode === "dark"
                         ? openPart === "Tags"
                           ? "#414141"
-                          : "#1F1F1F"
+                          : "transparent"
                         : openPart === "Tags"
                         ? "#DCDCDC"
-                        : "white",
+                        : "transparent",
                   }}
                 >
                   <MemoizedMetaButton
@@ -538,10 +569,10 @@ const NodeFooter = ({
                     theme.palette.mode === "dark"
                       ? openPart === "References"
                         ? "#414141"
-                        : "#1F1F1F"
+                        : "transparent"
                       : openPart === "References"
                       ? "#DCDCDC"
-                      : "white",
+                      : "transparent",
                 }}
               >
                 <MemoizedMetaButton
@@ -549,26 +580,46 @@ const NodeFooter = ({
                   tooltip="View tags and citations used in this node."
                   tooltipPosition="top"
                   style={{
-                    borderTopRightRadius: "8px",
-                    borderTopLeftRadius: "8px",
+                    borderRadius: "8px",
                   }}
                 >
-                  <>
-                    <MenuBookIcon
-                      // className={openPart === "References" ? "orange-text" : "grey-text"}
-                      color={openPart === "References" ? "primary" : "inherit"}
-                      sx={{ fontSize: "16px" }}
-                    />
-                    <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
-                    <Box component={"span"}> | </Box>
-                    <LocalOfferIcon
-                      // className={openPart === "References" ? "orange-text" : "grey-text"}
-                      className={openPart === "Tags" ? "orange-text" : "grey-text"}
-                      color={openPart === "Tags" || openPart === "References" ? "primary" : "inherit"}
-                      sx={{ fontSize: "16px" }}
-                    />
-                    <span>{shortenNumber(tags.length, 2, false)}</span>
-                  </>
+                  <Box
+                    sx={{
+                      display: "flex",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <MenuBookIcon
+                        // className={openPart === "References" ? "orange-text" : "grey-text"}
+                        color={openPart === "References" ? "primary" : "inherit"}
+                        sx={{ fontSize: "16px", marginRight: "2px" }}
+                      />
+
+                      <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
+                    </Box>
+                    <Box component={"span"} sx={{ marginInline: "5px" }}>
+                      |
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <LocalOfferIcon
+                        // className={openPart === "References" ? "orange-text" : "grey-text"}
+                        className={openPart === "Tags" ? "orange-text" : "grey-text"}
+                        color={openPart === "Tags" || openPart === "References" ? "primary" : "inherit"}
+                        sx={{ fontSize: "16px", marginRight: "2px" }}
+                      />
+                      <span>{shortenNumber(tags.length, 2, false)}</span>
+                    </Box>
+                  </Box>
                 </MemoizedMetaButton>
               </Box>
             )}
@@ -669,10 +720,10 @@ const NodeFooter = ({
                   theme.palette.mode === "dark"
                     ? openPart === "LinkingWords"
                       ? "#414141"
-                      : "#1F1F1F"
+                      : "transparent"
                     : openPart === "LinkingWords"
                     ? "#DCDCDC"
-                    : "white",
+                    : "transparent",
               }}
             >
               <MemoizedMetaButton
@@ -705,6 +756,21 @@ const NodeFooter = ({
                 </>
               </MemoizedMetaButton>
             </Box>
+            <IconButton
+              aria-label="more"
+              id="long-button"
+              aria-controls={openMenu ? "long-menu" : undefined}
+              aria-expanded={openMenu ? "true" : undefined}
+              aria-haspopup="true"
+              onClick={handleClick}
+              sx={{
+                border: "solid 1px #585858",
+                margin: 0,
+                padding: "3px",
+              }}
+            >
+              <MoreHorizIcon />
+            </IconButton>
           </Box>
         ) : (
           <Box
@@ -796,16 +862,6 @@ const NodeFooter = ({
         )}
         {open && (
           <>
-            <IconButton
-              aria-label="more"
-              id="long-button"
-              aria-controls={openMenu ? "long-menu" : undefined}
-              aria-expanded={openMenu ? "true" : undefined}
-              aria-haspopup="true"
-              onClick={handleClick}
-            >
-              <MoreHorizIcon />
-            </IconButton>
             <Menu
               id="long-menu"
               MenuListProps={{
