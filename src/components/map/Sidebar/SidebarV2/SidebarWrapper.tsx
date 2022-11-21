@@ -93,11 +93,11 @@ export const SidebarWrapper = ({
                     : "-1px 0px 10px 4px #3b3b3b"
               : "",
           // left: open ? "0" : `${-width - 20}px`,
-          // transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
           ":hover": {
             maxWidth: { xs: width, sm: "50vw" },
             width: hoverWidth ? hoverWidth : undefined,
           },
+          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1) ",
         },
       }}
     >

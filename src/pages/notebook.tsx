@@ -3062,6 +3062,7 @@ const Dashboard = ({}: DashboardProps) => {
                 pendingProposalsNum={pendingProposalsNum}
                 openSidebar={openSidebar}
               />
+
               <MemoizedBookmarksSidebar
                 theme={settings.theme}
                 openLinkedNode={openLinkedNode}
