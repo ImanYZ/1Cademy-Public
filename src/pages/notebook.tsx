@@ -3059,6 +3059,7 @@ const Dashboard = ({}: DashboardProps) => {
               uncheckedNotificationsNum={uncheckedNotificationsNum}
               bookmarkUpdatesNum={bookmarkUpdatesNum}
               pendingProposalsNum={pendingProposalsNum}
+              openSidebar={openSidebar}
             />
           )}
           {user?.uname && (

@@ -1,9 +1,11 @@
+import { useTheme } from "@emotion/react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
-import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
+import { Drawer, DrawerProps, IconButton, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+import { OpenSidebar } from "src/pages/notebook";
 
 type SidebarWrapperProps = {
   title: string;
@@ -19,7 +21,7 @@ type SidebarWrapperProps = {
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
-  contentSignalState: any;
+  openSidebar?: OpenSidebar;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -38,10 +40,11 @@ export const SidebarWrapper = ({
   showScrollUpButton = true,
   hoverWidth,
   isMenuOpen,
-  contentSignalState,
+  openSidebar,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const scrollToTop = useCallback(() => {
     if (!sidebarContentRef.current) return;
 
@@ -50,7 +53,7 @@ export const SidebarWrapper = ({
 
   const sidebarContent = useMemo(() => {
     return <>{SidebarContent}</>;
-  }, [contentSignalState]);
+  }, [SidebarContent]);
 
   return (
     <Drawer
@@ -65,13 +68,34 @@ export const SidebarWrapper = ({
           width: { xs: isMenuOpen ? "100%" : "auto", md: width },
           maxWidth: { xs: width, sm: "80px" },
           height: `${height}%`,
-          borderRight: theme => (theme.palette.mode === "dark" ? "1px solid #000000" : "1px solid #eeeeee)"),
+          borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
           ":hover": {
             maxWidth: { xs: width, sm: "50vw" },
             width: hoverWidth ? hoverWidth : undefined,
           },
+          boxShadow:
+            !isMobile || isMenuOpen || openSidebar !== null
+              ? theme =>
+                  theme.palette.mode === "dark"
+                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
+                    : "-1px 0px 10px 4px #3b3b3b"
+              : "",
+          ":-webkit-box-shadow":
+            isMenuOpen || openSidebar !== null
+              ? theme =>
+                  theme.palette.mode === "dark"
+                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
+                    : "-1px 0px 10px 4px #3b3b3b"
+              : "",
+          ":-moz-box-shadow":
+            isMenuOpen || openSidebar !== null
+              ? theme =>
+                  theme.palette.mode === "dark"
+                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
+                    : "-1px 0px 10px 4px #3b3b3b"
+              : "",
         },
       }}
     >

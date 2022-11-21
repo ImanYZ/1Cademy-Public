@@ -31,6 +31,7 @@ type MainSidebarProps = {
   uncheckedNotificationsNum: number;
   bookmarkUpdatesNum: number;
   pendingProposalsNum: number;
+  openSidebar?: OpenSidebar;
 };
 
 // TODO:
@@ -145,7 +146,13 @@ const Toolbar = ({
   }, [changeLeaderboard, user]);
 
   return (
-    <Box className="toolbar" sx={{ overflow: "hidden", display: { xs: isMenuOpen ? "block" : "none", sm: "block" } }}>
+    <Box
+      className="toolbar"
+      sx={{
+        overflow: "hidden",
+        display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
+      }}
+    >
       {/* IMPORTANT : if you modify the height you must modify the Box below  */}
 
       <Box
@@ -563,17 +570,13 @@ export const ToolbarSidebar = ({
   uncheckedNotificationsNum,
   bookmarkUpdatesNum,
   pendingProposalsNum,
+  openSidebar,
 }: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const isMenuOpen = nodeBookState.isMenuOpen;
   const setIsMenuOpen = (value: boolean) => {
     nodeBookDispatch({ type: "setIsMenuOpen", payload: value });
   };
-
-  const contentSignalState = useMemo(() => {
-    return { updated: true };
-  }, [user, selectedUser, isMenuOpen, bookmarkUpdatesNum, uncheckedNotificationsNum, pendingProposalsNum, reputation]);
-
   return (
     <>
       <Tooltip
@@ -608,7 +611,7 @@ export const ToolbarSidebar = ({
         showCloseButton={false}
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}
-        contentSignalState={contentSignalState}
+        openSidebar={openSidebar}
         SidebarContent={
           <ToolbarMemo
             isMenuOpen={isMenuOpen}
