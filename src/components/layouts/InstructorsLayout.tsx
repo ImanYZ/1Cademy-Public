@@ -50,7 +50,6 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
 };
 export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [{ user, settings }] = useAuth();
-  console.log("InstructorsLayout", { user });
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [instructor, setInstructor] = useState<Instructor | null>(null);
@@ -92,35 +91,26 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
         setIsLoading(false);
         if (!docChanges.length) {
-          console.log("no instructor");
           return null;
         }
 
         const intructor = docChanges[0].doc.data() as Instructor;
-        console.log("snapshot:instructor:", intructor);
         setInstructor(intructor);
         const newAllCourses = getCoursesByInstructor(intructor);
-        console.log("snapshot:courses:", newAllCourses);
         const newSemesters = Object.keys(newAllCourses);
-        console.log("snapshot:semester:", newSemesters);
 
         if (!newSemesters.length) {
           router.push(ROUTES.instructorsSettings);
         }
 
         const lastSemester = newSemesters.slice(-1)[0];
-        console.log("snapshot:lastSemester", lastSemester);
 
         setSemesters(prevSemester => {
           setSelectedSemester(selectedSemester => {
             if (!selectedSemester) {
-              console.log("snapshot:setSelected first semester", newSemesters[0]);
-
               return newSemesters[0];
             }
             if (!prevSemester.includes(lastSemester)) {
-              console.log("snapshot:setSelected last semester", lastSemester);
-
               return lastSemester;
             }
 

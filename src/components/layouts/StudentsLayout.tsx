@@ -110,8 +110,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         };
       });
 
-      console.log("semestersStudent", semestersStudent);
-
       // will get ids
       const semestersIds = semestersStudent.map(cur => cur.data.tagId);
       // will get courses
@@ -119,12 +117,9 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         const nodeRef = doc(db, "semesters", semesterId);
         return getDoc(nodeRef);
       });
-      // console.log("will get semester", 4);
       const semesterDocs = await Promise.all(semestersDocsPromises);
 
       const allSemesters = semesterDocs.map(cur => cur.data()).flatMap(c => (c as Semester) || []);
-
-      console.log("allSemesters", allSemesters);
 
       const coursesResult = allSemesters.reduce((acu: CoursesResult, cur: Semester) => {
         const tmpValues = acu[cur.title] ?? [];
@@ -136,8 +131,6 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       if (!semester.length) {
         router.push(ROUTES.instructorsSettings);
       }
-
-      console.log({ semester, allSemesters, coursesResult, semester0: semester[0] });
 
       setAllSemesters(allSemesters);
       setAllCourses(coursesResult);
