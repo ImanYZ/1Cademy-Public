@@ -254,6 +254,13 @@ const Node = ({
   }, [title, content]);
 
   useEffect(() => {
+    if (!openSidebar) {
+      setOpenPart(null);
+      nodeBookDispatch({ type: "setSelectedNode", payload: null });
+    }
+  }, [openSidebar]);
+
+  useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
         const { blockSize } = entries[0].borderBoxSize[0];

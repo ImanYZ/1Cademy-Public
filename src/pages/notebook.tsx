@@ -2840,6 +2840,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const selectNode = useCallback(
     (event: any, nodeId: string, chosenType: any, nodeType: any) => {
+      console.log("haroon");
       devLog("SELECT_NODE", { choosingNode: nodeBookState.choosingNode, nodeId, chosenType, nodeType, openSidebar });
       if (!nodeBookState.choosingNode) {
         if (nodeBookState.selectionType === "AcceptedProposals" || nodeBookState.selectionType === "Proposals") {

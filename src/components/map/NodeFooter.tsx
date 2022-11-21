@@ -160,9 +160,14 @@ const NodeFooter = ({
   };
 
   const onShareByLink = () => {
-    let { protocol, hostname } = new URL(window.location.href);
-    let url: any = protocol + "//" + hostname + "/n/" + identifier;
+    let { protocol, hostname, port } = new URL(window.location.href);
+    let hostName = hostname;
+    if (port) {
+      hostName = hostName + ":" + port;
+    }
+    let url: any = protocol + "//" + hostName + "/n/" + identifier;
     navigator.clipboard.writeText(url);
+    setAnchorEl(null);
   };
 
   const selectReferences = useCallback(
@@ -304,8 +309,8 @@ const NodeFooter = ({
                   background: theme =>
                     theme.palette.mode === "dark"
                       ? openPart === "Proposals"
-                        ? "#303030"
-                        : "#414141"
+                        ? "#414141"
+                        : "#1F1F1F"
                       : openPart === "Proposals"
                       ? "#DCDCDC"
                       : "white",
@@ -335,9 +340,9 @@ const NodeFooter = ({
                 </MemoizedMetaButton>
               </Box>
               <Box
-                className="vote-area"
+                className="tab-button-node-footer"
                 sx={{
-                  background: theme => (theme.palette.mode === "dark" ? "#414141" : "white"),
+                  background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "white"),
                 }}
               >
                 <MemoizedMetaButton onClick={wrongNode} tooltip="Vote to delete node." tooltipPosition="top">
@@ -348,10 +353,10 @@ const NodeFooter = ({
                     }}
                   >
                     <span>{shortenNumber(wrongNum, 2, false)}</span>
-                    <CloseIcon sx={{ fontSize: "18px", color: markedWrong ? "red" : "inherit", marginLeft: "10px" }} />
+                    <CloseIcon sx={{ fontSize: "18px", color: markedWrong ? "red" : "inherit", marginLeft: "1px" }} />
                   </Box>
                 </MemoizedMetaButton>
-                <Box className="vertical-row"></Box>
+                <Box className="vertical-row" style={{ color: "white" }}></Box>
                 <MemoizedMetaButton
                   onClick={correctNode}
                   tooltip="Vote to prevent further changes."
@@ -364,7 +369,7 @@ const NodeFooter = ({
                   >
                     <span>{shortenNumber(correctNum, 2, false)}</span>
                     <DoneIcon
-                      sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "10px" }}
+                      sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
                     />
                   </Box>
                 </MemoizedMetaButton>
@@ -460,8 +465,8 @@ const NodeFooter = ({
                     background: theme =>
                       theme.palette.mode === "dark"
                         ? openPart === "Citations"
-                          ? "#303030"
-                          : "#414141"
+                          ? "#414141"
+                          : "#1F1F1F"
                         : openPart === "Citations"
                         ? "#DCDCDC"
                         : "white",
@@ -498,8 +503,8 @@ const NodeFooter = ({
                     background: theme =>
                       theme.palette.mode === "dark"
                         ? openPart === "Tags"
-                          ? "#303030"
-                          : "#414141"
+                          ? "#414141"
+                          : "#1F1F1F"
                         : openPart === "Tags"
                         ? "#DCDCDC"
                         : "white",
@@ -532,8 +537,8 @@ const NodeFooter = ({
                   background: theme =>
                     theme.palette.mode === "dark"
                       ? openPart === "References"
-                        ? "#303030"
-                        : "#414141"
+                        ? "#414141"
+                        : "#1F1F1F"
                       : openPart === "References"
                       ? "#DCDCDC"
                       : "white",
@@ -663,8 +668,8 @@ const NodeFooter = ({
                 background: theme =>
                   theme.palette.mode === "dark"
                     ? openPart === "LinkingWords"
-                      ? "#303030"
-                      : "#414141"
+                      ? "#414141"
+                      : "#1F1F1F"
                     : openPart === "LinkingWords"
                     ? "#DCDCDC"
                     : "white",
@@ -938,7 +943,12 @@ const NodeFooter = ({
                       }}
                       aria-label="Share on url"
                     >
-                      <LinkIcon sx={{ fontSize: "16px" }} />
+                      <LinkIcon
+                        sx={{
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      />
                     </IconButton>
                     <Box component="span" sx={{ marginLeft: "10px" }}>
                       Copy Link
@@ -954,27 +964,67 @@ const NodeFooter = ({
                       sx={{
                         color: "#BDBDBD",
                         padding: "0",
+                        ":hover": {
+                          background: "none",
+                        },
                       }}
                       target="_blank"
                       rel="noopener"
                       aria-label="Share on Twitter"
                     >
-                      <TwitterIcon sx={{ fontSize: "16px" }} />
+                      <TwitterIcon
+                        sx={{
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      />
+                      <Box
+                        component="span"
+                        sx={{
+                          marginLeft: "10px",
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      >
+                        Twitter
+                      </Box>
                     </IconButton>
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Twitter
-                    </Box>
                   </Box>
                 </MemoizedMetaButton>
               </MenuItem>
-
               <MenuItem>
                 <MemoizedMetaButton>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <RedditIcon sx={{ fontSize: "16px" }} />
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Reddit
-                    </Box>
+                    <IconButton
+                      href={`http://www.reddit.com/submit?url=${url}`}
+                      sx={{
+                        color: "#BDBDBD",
+                        padding: "0",
+                        ":hover": {
+                          background: "none",
+                        },
+                      }}
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Share on Facebook"
+                    >
+                      <RedditIcon
+                        sx={{
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      />
+                      <Box
+                        component="span"
+                        sx={{
+                          marginLeft: "10px",
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      >
+                        Reddit
+                      </Box>
+                    </IconButton>
                   </Box>
                 </MemoizedMetaButton>
               </MenuItem>
@@ -987,16 +1037,31 @@ const NodeFooter = ({
                       sx={{
                         color: "#BDBDBD",
                         padding: "0",
+                        ":hover": {
+                          background: "none",
+                        },
                       }}
                       target="_blank"
                       rel="noopener"
                       aria-label="Share on Facebook"
                     >
-                      <FacebookRoundedIcon sx={{ fontSize: "16px" }} />
+                      <FacebookRoundedIcon
+                        sx={{
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      />
+                      <Box
+                        component="span"
+                        sx={{
+                          marginLeft: "10px",
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      >
+                        Facebook
+                      </Box>
                     </IconButton>
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Facebook
-                    </Box>
                   </Box>
                 </MemoizedMetaButton>
               </MenuItem>
@@ -1008,16 +1073,31 @@ const NodeFooter = ({
                       sx={{
                         color: "#BDBDBD",
                         padding: "0",
+                        ":hover": {
+                          background: "none",
+                        },
                       }}
                       target="_blank"
                       rel="noopener"
                       aria-label="Share on Linkedin"
                     >
-                      <LinkedInIcon sx={{ fontSize: "16px" }} />
+                      <LinkedInIcon
+                        sx={{
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      />
+                      <Box
+                        component="span"
+                        sx={{
+                          marginLeft: "10px",
+                          fontSize: "16px",
+                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
+                        }}
+                      >
+                        Linkdein
+                      </Box>
                     </IconButton>
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Linkdein
-                    </Box>
                   </Box>
                 </MemoizedMetaButton>
               </MenuItem>
