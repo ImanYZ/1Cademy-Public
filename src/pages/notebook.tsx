@@ -3178,10 +3178,11 @@ const Dashboard = ({}: DashboardProps) => {
             placement="left"
             sx={{
               position: "fixed",
-              top: "60px",
+              top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 65}px` : `60px`, md: "60px" },
               right: "10px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+              transition: "all 1s ease",
             }}
           >
             <IconButton color="secondary" onClick={onRedrawGraph}>
