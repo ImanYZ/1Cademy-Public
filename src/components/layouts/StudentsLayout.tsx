@@ -5,7 +5,7 @@ import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
-import React, { FC, ReactNode, useEffect, useState } from "react";
+import React, { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import { User, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
 
@@ -58,7 +58,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [semesters, setSemesters] = useState<string[]>([]);
+  // const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
@@ -129,6 +129,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
         };
       });
 
+      console.log("semestersStudent", semestersStudent);
+
       // console.log("will get semester", 3);
       // will get ids
       const semestersIds = semestersStudent.map(cur => cur.data.tagId);
@@ -141,6 +143,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       const semesterDocs = await Promise.all(semestersDocsPromises);
 
       const allSemesters = semesterDocs.map(cur => cur.data()).flatMap(c => (c as Semester) || []);
+
+      console.log("allSemesters", allSemesters);
 
       // console.log("will get semester", 5);
       const coursesResult = allSemesters.reduce((acu: CoursesResult, cur: Semester) => {
@@ -156,8 +160,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       }
 
       // console.log("will get semester", 7);
-      // console.log({ semester, allSemesters, coursesResult, semester0: semester[0] });
-      setSemesters(semester);
+      console.log({ semester, allSemesters, coursesResult, semester0: semester[0] });
+      // setSemesters(semester);
       setAllSemesters(allSemesters);
       setAllCourses(coursesResult);
       setSelectedSemester(semester[0]);
@@ -198,6 +202,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       });
     }
   }, [allSemesters, queryUname, selectedCourse, user]);
+
+  const semesters = useMemo(() => Object.keys(allCourses), [allCourses]);
 
   const onNewCourse = () => {
     setSelectedCourse(null);
