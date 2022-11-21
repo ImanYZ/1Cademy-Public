@@ -359,7 +359,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      console.log("userDailyStatsIncomplete");
+      const userDailyStatsIncomplete = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
+        const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
+        return { ...cur, days: daysFixed };
+      });
+
+      console.log("userDailyStatsIncomplete", { userDailyStatsIncomplete, userDailyStats });
 
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -990,6 +997,7 @@ export const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => 
 
 export const getChildProposal = (userDailyStats: ISemesterStudentStat[]) => {
   let nodes = 0;
+  console.log("userDailyStats", userDailyStats);
   for (const semesterStudentStat of userDailyStats) {
     nodes += semesterStudentStat.days.reduce((carry, day) => {
       return carry + day.chapters.reduce((_carry, chapter) => _carry + chapter.nodes, 0);
