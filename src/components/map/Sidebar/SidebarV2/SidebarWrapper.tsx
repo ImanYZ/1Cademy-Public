@@ -5,6 +5,8 @@ import { Box } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 
+import { useWindowSize } from "../../../../hooks/useWindowSize";
+
 type SidebarWrapperProps = {
   title: string;
   open: boolean;
@@ -41,6 +43,8 @@ export const SidebarWrapper = ({
   contentSignalState,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
+  const { height: windowHeight } = useWindowSize();
+  // const [innerHeight, setInnerHeight] = useState<number>(500);
 
   const scrollToTop = useCallback(() => {
     if (!sidebarContentRef.current) return;
@@ -52,6 +56,9 @@ export const SidebarWrapper = ({
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
+  // useEffect(() => {
+  //   setInnerHeight(window.innerHeight);
+  // }, []);
   return (
     <Drawer
       id="sidebarDrawer"
@@ -64,7 +71,7 @@ export const SidebarWrapper = ({
           minWidth: { xs: "0px", sm: width },
           width: { xs: isMenuOpen ? "100%" : "auto", md: width },
           maxWidth: { xs: width, sm: "80px" },
-          height: `${height}%`,
+          height: `calc(${windowHeight}-$})`,
           borderRight: theme => (theme.palette.mode === "dark" ? "1px solid #000000" : "1px solid #eeeeee)"),
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",

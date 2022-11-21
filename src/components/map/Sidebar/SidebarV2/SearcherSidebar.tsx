@@ -239,7 +239,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
             </div>
           )}
 
-          <Box sx={{ marginTop: { xs: "10px", sm: "8px" }, marginBottom: { xs: "13px", sm: "8px" } }}>
+          <Box sx={{ marginTop: { xs: "8px", sm: "0px" }, marginBottom: { xs: "13px", sm: "8px" } }}>
             <label className="Tooltip">
               <span className="tagText">Tags: </span>
               {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (

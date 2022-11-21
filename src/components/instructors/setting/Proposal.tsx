@@ -48,7 +48,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
         </Typography>
       </Box>
       <Box sx={{ marginTop: "50px" }}>
-        <Typography variant="h3">Child Proposals</Typography>
+        <Typography variant="h3">Proposals</Typography>
         <hr style={{ color: "#A5A5A5" }} />
         <Box>
           <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
