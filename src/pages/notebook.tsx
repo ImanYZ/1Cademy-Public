@@ -229,6 +229,7 @@ const Dashboard = ({}: DashboardProps) => {
   const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
   const [showRegion, setShowRegion] = useState<boolean>(false);
+  const [innerHeight, setInnerHeight] = useState<number>(0);
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -277,6 +278,11 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
+
+  useEffect(() => {
+    setInnerHeight(window.innerHeight);
+  }, []);
+
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
       devLog("scroll To Node", { nodeId, tries });
@@ -3149,7 +3155,8 @@ const Dashboard = ({}: DashboardProps) => {
               size={46}
               sx={{
                 position: "fixed",
-                top: "7px",
+                top: { xs: openSidebar ? `${innerHeight * 0.5 + 7}px` : `7px`, md: "7px" },
+
                 right: "7px",
                 zIndex: "1300",
               }}
@@ -3161,7 +3168,7 @@ const Dashboard = ({}: DashboardProps) => {
               placement="left"
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 10}px` : `10px`, md: "10px" },
+                top: { xs: openSidebar ? `${innerHeight * 0.5 + 10}px` : `10px`, md: "10px" },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3178,7 +3185,7 @@ const Dashboard = ({}: DashboardProps) => {
             placement="left"
             sx={{
               position: "fixed",
-              top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 65}px` : `60px`, md: "60px" },
+              top: { xs: openSidebar ? `${innerHeight * 0.5 + 65}px` : `60px`, md: "60px" },
               right: "10px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3194,7 +3201,7 @@ const Dashboard = ({}: DashboardProps) => {
               title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${window.innerHeight * 0.5 + 120}px` : `110px`, md: "110px" },
+                top: { xs: openSidebar ? `${innerHeight * 0.5 + 120}px` : `110px`, md: "110px" },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
