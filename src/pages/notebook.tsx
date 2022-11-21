@@ -2253,8 +2253,26 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.height;
 
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-          if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
-            delete changedNodes[nodeBookState.selectedNode];
+
+          if (willBeApproved) {
+            const newParentIds = newNode.parents.map(parent => parent.node);
+            const newChildIds = newNode.children.map(child => child.node);
+            const oldParentIds = oldNode.parents.map(parent => parent.node);
+            const oldChildIds = oldNode.children.map(child => child.node);
+            const idsToBeRemoved = Array.from(
+              new Set<string>([
+                ...newParentIds,
+                ...newChildIds,
+                nodeBookState.selectedNode,
+                ...oldParentIds,
+                ...oldChildIds,
+              ])
+            );
+            idsToBeRemoved.forEach(idToBeRemoved => {
+              if (changedNodes.hasOwnProperty(idToBeRemoved)) {
+                delete changedNodes[idToBeRemoved];
+              }
+            });
           }
           setNodeParts(nodeBookState.selectedNode, node => ({ ...node, editable: false }));
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
@@ -3019,7 +3037,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
               <Box>
                 <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-                <Button onClick={() => console.log(changedNodes)}>changedNodes</Button>
+                <Button onClick={() => console.log({ ...changedNodes })}>changedNodes</Button>
               </Box>
 
               <Divider />
