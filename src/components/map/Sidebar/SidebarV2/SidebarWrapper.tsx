@@ -1,7 +1,6 @@
-import { useTheme } from "@emotion/react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
-import { Drawer, DrawerProps, IconButton, Tooltip, Typography, useMediaQuery } from "@mui/material";
+import { Drawer, DrawerProps, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
@@ -21,6 +20,7 @@ type SidebarWrapperProps = {
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
+  contentSignalState: any;
   openSidebar?: OpenSidebar;
 };
 /**
@@ -40,6 +40,7 @@ export const SidebarWrapper = ({
   showScrollUpButton = true,
   hoverWidth,
   isMenuOpen,
+  contentSignalState,
   openSidebar,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
@@ -53,7 +54,7 @@ export const SidebarWrapper = ({
 
   const sidebarContent = useMemo(() => {
     return <>{SidebarContent}</>;
-  }, [SidebarContent]);
+  }, [contentSignalState]);
 
   return (
     <Drawer
@@ -70,11 +71,6 @@ export const SidebarWrapper = ({
           height: `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
-          transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
-          ":hover": {
-            maxWidth: { xs: width, sm: "50vw" },
-            width: hoverWidth ? hoverWidth : undefined,
-          },
           boxShadow:
             !isMobile || isMenuOpen || openSidebar !== null
               ? theme =>
@@ -96,6 +92,12 @@ export const SidebarWrapper = ({
                     ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
                     : "-1px 0px 10px 4px #3b3b3b"
               : "",
+          // left: open ? "0" : `${-width - 20}px`,
+          // transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
+          ":hover": {
+            maxWidth: { xs: width, sm: "50vw" },
+            width: hoverWidth ? hoverWidth : undefined,
+          },
         },
       }}
     >

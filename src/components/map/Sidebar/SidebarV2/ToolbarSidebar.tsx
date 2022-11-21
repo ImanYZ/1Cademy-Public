@@ -577,6 +577,10 @@ export const ToolbarSidebar = ({
   const setIsMenuOpen = (value: boolean) => {
     nodeBookDispatch({ type: "setIsMenuOpen", payload: value });
   };
+  const contentSignalState = useMemo(() => {
+    return { updated: true };
+  }, [user, selectedUser, isMenuOpen, bookmarkUpdatesNum, uncheckedNotificationsNum, pendingProposalsNum, reputation]);
+
   return (
     <>
       <Tooltip
@@ -612,6 +616,7 @@ export const ToolbarSidebar = ({
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}
         openSidebar={openSidebar}
+        contentSignalState={contentSignalState}
         SidebarContent={
           <ToolbarMemo
             isMenuOpen={isMenuOpen}
@@ -633,4 +638,4 @@ export const ToolbarSidebar = ({
   );
 };
 
-export const MemorizedToolbarSidebar = React.memo(ToolbarSidebar);
+export const MemoizedToolbarSidebar = React.memo(ToolbarSidebar);
