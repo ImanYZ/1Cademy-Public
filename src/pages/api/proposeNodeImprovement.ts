@@ -49,11 +49,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       proposal,
       summary,
       choices,
-      addedParents,
-      addedChildren,
-      removedParents,
-      removedChildren,
     } = data || {};
+
+    let { addedParents, addedChildren, removedParents, removedChildren } = data || {};
+
+    // remove ambiguous removedParents (if they exist in addedParents)
+    if (Array.isArray(addedParents) && Array.isArray(removedParents)) {
+      const addedParentIds = addedParents.filter((nodeLink: INodeLink) => String(nodeLink.node));
+      const removedParentIds = removedParents.filter((nodeLink: INodeLink) => String(nodeLink.node));
+      addedParents = addedParents.filter((addedParent: INodeLink) => removedParentIds.indexOf(addedParent.node) === -1);
+      removedParents = removedParents.filter(
+        (removedParent: INodeLink) => addedParentIds.indexOf(removedParent.node) === -1
+      );
+    }
+
+    // remove ambiguous removedChildren (if they exist in addedChildren)
+    if (Array.isArray(addedChildren) && Array.isArray(removedChildren)) {
+      const addedChildIds = addedChildren.filter((nodeLink: INodeLink) => String(nodeLink.node));
+      const removedChildIds = removedChildren.filter((nodeLink: INodeLink) => String(nodeLink.node));
+      addedChildren = addedChildren.filter((addedChild: INodeLink) => removedChildIds.indexOf(addedChild.node) === -1);
+      removedChildren = removedChildren.filter(
+        (removedChild: INodeLink) => addedChildIds.indexOf(removedChild.node) === -1
+      );
+    }
 
     const { userData } = user || {};
     let batch = db.batch();
@@ -77,6 +95,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     const { nodeData, nodeRef } = await getNode({ nodeId: id });
+
+    // remove ambiguous addedParents (if they exist in nodeData)
+    if (Array.isArray(addedParents)) {
+      const currentParentIds: string[] = nodeData.parents.filter((parent: any) => parent?.node);
+      addedParents = addedParents.filter((nodeLink: INodeLink) => currentParentIds.indexOf(nodeLink.node) === -1);
+    }
+
+    // remove ambiguous addedChildren (if they exist in nodeData)
+    if (Array.isArray(addedChildren)) {
+      const currentChildIds: string[] = nodeData.children.filter((children: any) => children?.node);
+      addedChildren = addedChildren.filter((nodeLink: INodeLink) => currentChildIds.indexOf(nodeLink.node) === -1);
+    }
+
     const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
     const versionRef = versionsColl.doc();
     const versionData: any = {
