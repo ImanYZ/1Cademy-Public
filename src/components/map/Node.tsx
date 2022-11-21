@@ -275,7 +275,7 @@ const Node = ({
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
-      if (event.target.type === "textarea") {
+      if (event.target.type === "textarea" || event.target.type === "text") {
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
     },
