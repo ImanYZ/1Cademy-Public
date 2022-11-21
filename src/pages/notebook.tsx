@@ -281,6 +281,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
+    nodeBookDispatch({ type: "setClientFixedViewHeight", payload: window.innerHeight });
   }, []);
 
   const scrollToNode = useCallback(

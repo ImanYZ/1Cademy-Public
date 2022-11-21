@@ -17,6 +17,7 @@ export const INITIAL_STATE: NodeBookState = {
   nodeId: null,
   isMenuOpen: false,
   lastOperation: "CancelProposals",
+  clientFixedViewHeight: 0,
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {
@@ -49,6 +50,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, openEditButton: action.payload.status, nodeId: action.payload.nodeId };
     case "setIsMenuOpen":
       return { ...state, isMenuOpen: action.payload };
+    case "setClientFixedViewHeight":
+      return { ...state, clientFixedViewHeight: action.payload };
     default:
       return { ...state };
   }
