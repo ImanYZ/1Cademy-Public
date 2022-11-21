@@ -1128,7 +1128,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         const validLink =
           (nodeBookState.choosingNode.type === "Reference" &&
-            thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&
+            /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
             nodeBookState.chosenNode.id !== nodeId &&
             chosenNodeObj.nodeType === nodeBookState.choosingNode.type) ||
           (nodeBookState.choosingNode.type === "Tag" &&
@@ -1407,7 +1407,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
-      devLog("open Linked Node", { linkedNodeID });
+      devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
