@@ -42,7 +42,10 @@ export function SankeyChart(props: ISankeyChart) {
 
     let path = sankey.link();
 
-    const formatNodeName = (name: string) => String(name).replace(/\$$/, "");
+    const formatNodeName = (name: string, removePipe: boolean = true) =>
+      String(name)
+        .replace(/\$$/, "")
+        .replace("|", removePipe ? " " : "|");
 
     let data: any[] = JSON.parse(JSON.stringify(props.sankeyData));
 
@@ -154,18 +157,38 @@ export function SankeyChart(props: ISankeyChart) {
       .attr("y", function (d) {
         return d.dy / 2;
       })
-      .attr("dy", ".35em")
+      .attr("dy", "-.1em")
       .attr("text-anchor", "end")
       .attr("class", "sankey-node-title")
       .attr("transform", null)
       .text(function (d) {
-        return formatNodeName(d.name);
+        return formatNodeName(d.name, false).split("|")[0];
       })
       .filter(function (d) {
         return d.x < width / 2;
       })
       .attr("x", 6 + sankey.nodeWidth())
       .attr("text-anchor", "start");
+
+    // last name
+    node
+      .append("svg:text")
+      .attr("class", "sankey-node-title")
+      .text(d => formatNodeName(d.name, false).split("|")[1])
+      .attr("transform", null)
+      .attr("text-anchor", "end")
+      .attr("x", -6)
+      .attr("y", function (d) {
+        return d.dy / 2 + 15;
+      })
+      .filter(function (d) {
+        return d.x < width / 2;
+      })
+      .attr("text-anchor", "start")
+      .attr("x", 6 + sankey.nodeWidth())
+      .attr("y", function (d) {
+        return d.dy / 2 + 15;
+      });
   }, [props.labelCounts, props.sankeyData]);
 
   return (
