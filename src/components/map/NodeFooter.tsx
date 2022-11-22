@@ -482,14 +482,14 @@ const NodeFooter = ({
             {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
                 <Box
-                  className={openPart === "Citations" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
+                  className={openSidebar === "CITATIONS" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
                   sx={{
                     background: theme =>
                       theme.palette.mode === "dark"
-                        ? openPart === "Citations"
+                        ? openSidebar === "CITATIONS"
                           ? "#414141"
                           : "transparent"
-                        : openPart === "Citations"
+                        : openSidebar === "CITATIONS"
                         ? "#DCDCDC"
                         : "transparent",
                   }}

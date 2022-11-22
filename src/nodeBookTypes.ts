@@ -4,7 +4,7 @@ import { Dispatch } from "react";
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
 
-export type OpenPart = "LinkingWords" | "Tags" | "References" | "Citations" | "Proposals" | null;
+export type OpenPart = "LinkingWords" | "Tags" | "References" | null;
 
 export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
 
