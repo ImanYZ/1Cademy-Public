@@ -57,7 +57,6 @@ export interface NodeBookState {
   readonly nodeId: any;
   readonly isMenuOpen: boolean;
   readonly lastOperation: LastOperation;
-  readonly clientFixedViewHeight: number;
 }
 
 export type SetSNodeAction = {
@@ -133,11 +132,6 @@ export type SetLastOperation = {
   payload: LastOperation;
 };
 
-export type SetClientFixedViewHeight = {
-  type: "setClientFixedViewHeight";
-  payload: any;
-};
-
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -153,8 +147,7 @@ export type DispatchNodeBookActions =
   | SetSearchByTitleOnly
   | SetOpenEditButtonAction
   | SetIsMenuOpen
-  | SetLastOperation
-  | SetClientFixedViewHeight;
+  | SetLastOperation;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
