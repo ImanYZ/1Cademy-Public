@@ -16,6 +16,7 @@ type SearcherSidebarProps = {
   theme: UserTheme;
   openLinkedNode: any;
   username: string;
+  innerHeight?: number;
 };
 
 export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNode }: SearcherSidebarProps) => {
@@ -97,6 +98,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       onClose={onClose}
       width={window.innerWidth > 899 ? 430 : window.innerWidth}
       height={window.innerWidth > 899 ? 100 : 35}
+      innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={
         <Box
