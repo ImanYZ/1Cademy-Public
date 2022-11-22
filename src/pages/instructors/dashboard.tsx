@@ -254,6 +254,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
+    if (!students || !students.length) return;
+    const studentNameByUname: {
+      [uname: string]: string;
+    } = {};
+    for (const student of students) {
+      studentNameByUname[student.uname] = `${student.fName}|${student.lName}`;
+    }
     (async () => {
       const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
       const q = query(
@@ -268,8 +275,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           const _semesterStudentSankey = semesterStudentSankey.data();
           for (const intraction of _semesterStudentSankey.intractions) {
             _sankeyData.push({
-              source: _semesterStudentSankey.uname,
-              target: intraction.uname,
+              source: studentNameByUname[_semesterStudentSankey.uname],
+              target: studentNameByUname[intraction.uname],
               upVotes: intraction.upVotes,
               downVotes: intraction.downVotes,
               value: intraction.upVotes + intraction.downVotes,
@@ -281,7 +288,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         setSankeyData([]);
       }
     })();
-  }, [currentSemester, db, user]);
+  }, [currentSemester, db, user, students]);
 
   useEffect(() => {
     if (!user) return;
