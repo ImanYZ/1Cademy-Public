@@ -25,6 +25,7 @@ import {
 
 // import { BoxChart } from "@/components/chats/BoxChart";
 import { BubbleChart } from "@/components/chats/BubbleChart";
+import { SankeyChart } from "@/components/chats/SankeyChart";
 import { BoxPlotStatsSkeleton } from "@/components/instructors/skeletons/BoxPlotStatsSkeleton";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
@@ -195,6 +196,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
 
+  const [sankeyData, setSankeyData] = useState<any[]>([]);
+
   //smester configs
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
@@ -246,6 +249,38 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     if (!element) return;
     setstackBarWidth(element.clientWidth);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!currentSemester || !currentSemester.tagId) return;
+    (async () => {
+      const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
+      const q = query(
+        semesterStudentSankeyCol,
+        where("tagId", "==", currentSemester.tagId),
+        where("deleted", "==", false)
+      );
+      const semesterStudentSankeys = await getDocs(q);
+      if (semesterStudentSankeys.docs.length) {
+        let _sankeyData: any[] = [];
+        for (const semesterStudentSankey of semesterStudentSankeys.docs) {
+          const _semesterStudentSankey = semesterStudentSankey.data();
+          for (const intraction of _semesterStudentSankey.intractions) {
+            _sankeyData.push({
+              source: _semesterStudentSankey.uname,
+              target: intraction.uname,
+              upVotes: intraction.upVotes,
+              downVotes: intraction.downVotes,
+              value: intraction.upVotes + intraction.downVotes,
+            });
+          }
+        }
+        setSankeyData(_sankeyData);
+      } else {
+        setSankeyData([]);
+      }
+    })();
+  }, [currentSemester, db, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -726,6 +761,33 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             trendData={TRENDS_DATA}
           />
         </Paper> */}
+
+        {/* Sankey Chart */}
+        <Paper
+          sx={{
+            display: sankeyData.length ? "flex" : "none",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+          }}
+        >
+          {!isLoading && (
+            <>
+              <Box
+                sx={{
+                  paddingLeft: "10px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                {"Collaborations"}
+              </Box>
+              <SankeyChart labelCounts={parseInt(String(students?.length))} sankeyData={sankeyData} />
+            </>
+          )}
+        </Paper>
 
         {isLoading && (
           <Paper
