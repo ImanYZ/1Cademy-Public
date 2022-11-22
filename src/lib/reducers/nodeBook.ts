@@ -17,6 +17,8 @@ export const INITIAL_STATE: NodeBookState = {
   openEditSection: false,
   nodeId: null,
   editAbleNodeId: null,
+  isMenuOpen: false,
+  lastOperation: "CancelProposals",
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {
@@ -49,6 +51,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, openEditButton: action.payload.status, nodeId: action.payload.nodeId };
     case "setOpenEditSection":
       return { ...state, openEditSection: action.payload.status, editAbleNodeId: action.payload.nodeId };
+    case "setIsMenuOpen":
+      return { ...state, isMenuOpen: action.payload };
     default:
       return { ...state };
   }

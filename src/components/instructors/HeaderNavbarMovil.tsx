@@ -24,12 +24,13 @@ import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarMovilProps = { options: Option[]; user: User };
-const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
+type HeaderNavbarMovilProps = { options: Option[]; user: User; onNewCourse?: () => void };
+const HeaderNavbarMovil = ({ options, user, onNewCourse }: HeaderNavbarMovilProps) => {
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
+
   return (
     <>
       <AppBar data-testid="app-nav-bar" position="sticky">
@@ -99,41 +100,55 @@ const HeaderNavbarMovil = ({ options, user }: HeaderNavbarMovilProps) => {
               zIndex: 10,
             }}
           >
-            {user.role === "INSTRUCTOR" &&
-              options.map((page, idx) => (
-                <LinkNext
-                  key={idx}
-                  onClick={event => {
-                    event.preventDefault();
-                    router.push(page.route);
-                  }}
-                  color="inherit"
-                  style={{
-                    fontFamily: "Work Sans,sans-serif",
-                    fontSize: "18px",
-                    fontWeight: 400,
-                  }}
-                  href={page.route}
-                >
-                  <Link
-                    sx={{
+            {user.role === "INSTRUCTOR" && (
+              <>
+                {options.map((page, idx) => (
+                  <LinkNext
+                    key={idx}
+                    onClick={event => {
+                      event.preventDefault();
+                      router.push(page.route);
+                    }}
+                    color="inherit"
+                    style={{
                       fontFamily: "Work Sans,sans-serif",
                       fontSize: "18px",
                       fontWeight: 400,
-                      textDecoration: "none",
-                      color:
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.white
-                          : theme.palette.common.darkGrayBackground,
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
+                    href={page.route}
                   >
-                    {page.label}
-                  </Link>
-                </LinkNext>
-              ))}
+                    <Link
+                      sx={{
+                        fontFamily: "Work Sans,sans-serif",
+                        fontSize: "18px",
+                        fontWeight: 400,
+                        textDecoration: "none",
+                        color:
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.white
+                            : theme.palette.common.darkGrayBackground,
+                        cursor: "pointer",
+                        borderBottom: theme =>
+                          router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                      }}
+                    >
+                      {page.label}
+                    </Link>
+                  </LinkNext>
+                ))}
+                {onNewCourse && (
+                  <Button
+                    onClick={() => onNewCourse()}
+                    variant={"contained"}
+                    size={"medium"}
+                    sx={{ fontFamily: "Work Sans,sans-serif", fontSize: "18px", letterSpacing: "-1px" }}
+                  >
+                    NEW COURSE
+                  </Button>
+                )}
+              </>
+            )}
+
             <FormGroup>
               <MaterialUISwitch
                 sx={{ m: 1 }}

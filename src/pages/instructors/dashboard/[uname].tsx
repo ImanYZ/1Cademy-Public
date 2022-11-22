@@ -32,7 +32,11 @@ import {
   /*  Trends, */
 } from "../../../instructorsTypes";
 import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
-import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
+import {
+  ISemester,
+  ISemesterStudent /* ISemesterStudentStatDay */,
+  ISemesterStudentStat,
+} from "../../../types/ICourse";
 import {
   BoxStudentsStats,
   BoxStudentStats,
@@ -257,9 +261,17 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs
+      const userDailyStatsIncomplete = userDailyStatDoc.docs
         .map(dailyStat => dailyStat.data() as SemesterStudentStat)
         .slice(0, 1);
+
+      const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
+        const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
+        return { ...cur, days: daysFixed };
+      });
+
+      console.log("userDailyStatsIncomplete", { userDailyStatsIncomplete, userDailyStats });
+
       setStudentVoteStat(prev => {
         if (!prev) return null;
         const res = {

@@ -299,10 +299,7 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                       startAdornment: (
                         <Typography
                           sx={{
-                            width: {
-                              xs: "130px",
-                              md: "110px",
-                            },
+                            width: "110px",
                           }}
                         >
                           Ch. {index + 1}
@@ -311,9 +308,16 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                     }}
                     sx={{
                       fontWeight: 400,
+                      fontSize: {
+                        xs: "14px",
+                        md: "16px",
+                      },
                       marginBottom: "5px",
                       marginLeft: "20px",
-                      width: "50%",
+                      width: {
+                        xs: "100%",
+                        md: "50%",
+                      },
                       display: "block",
                     }}
                   />
@@ -337,7 +341,15 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                         flexDirection: "row-reverse",
                       }}
                     >
-                      <Typography sx={{ marginLeft: "10px" }}>
+                      <Typography
+                        sx={{
+                          marginLeft: "10px",
+                          fontSize: {
+                            xs: "14px",
+                            md: "16px",
+                          },
+                        }}
+                      >
                         Ch. {index + 1}&nbsp;
                         {chapter.title}
                       </Typography>
@@ -415,10 +427,11 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                                         startAdornment: (
                                           <Typography
                                             sx={{
-                                              width: {
-                                                xs: "130px",
-                                                md: "110px",
+                                              fontSize: {
+                                                xs: "14px",
+                                                md: "16px",
                                               },
+                                              width: "110px",
                                             }}
                                           >
                                             Ch. {index + 1}.{subIndex + 1}
@@ -427,6 +440,10 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                                       }}
                                       sx={{
                                         fontWeight: 400,
+                                        fontSize: {
+                                          xs: "14px",
+                                          md: "16px",
+                                        },
                                         marginBottom: "5px",
                                         width: {
                                           xs: "100%",
@@ -443,7 +460,15 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                                   key={subChapter.node}
                                   style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}
                                 >
-                                  <Typography sx={{ width: "auto" }}>
+                                  <Typography
+                                    sx={{
+                                      width: "auto",
+                                      fontSize: {
+                                        xs: "14px",
+                                        md: "16px",
+                                      },
+                                    }}
+                                  >
                                     Ch. {index + 1}.{subIndex + 1} {subChapter.title}
                                   </Typography>
                                   <CreateIcon
@@ -512,10 +537,11 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                               startAdornment: (
                                 <Typography
                                   sx={{
-                                    width: {
-                                      xs: "130px",
-                                      md: "110px",
+                                    fontSize: {
+                                      xs: "14px",
+                                      md: "16px",
                                     },
+                                    width: "110px",
                                   }}
                                 >
                                   Ch. {index + 1}.{chapter.children ? chapter.children.length + 1 : 1}
@@ -524,9 +550,16 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                             }}
                             sx={{
                               fontWeight: 400,
+                              fontSize: {
+                                xs: "14px",
+                                md: "16px",
+                              },
                               marginBottom: "10px",
                               marginLeft: "10px",
-                              width: "50%",
+                              width: {
+                                xs: "100%",
+                                md: "50%",
+                              },
                               display: "block",
                             }}
                           />
@@ -583,10 +616,11 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
               startAdornment: (
                 <Typography
                   sx={{
-                    width: {
-                      xs: "130px",
-                      md: "110px",
+                    fontSize: {
+                      xs: "14px",
+                      md: "16px",
                     },
+                    width: "110px",
                   }}
                 >
                   Ch. {chapters.length + 1}
@@ -595,9 +629,16 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
             }}
             sx={{
               fontWeight: 400,
+              fontSize: {
+                xs: "14px",
+                md: "16px",
+              },
               marginTop: "10px",
               marginBottom: "10px",
-              width: "50%",
+              width: {
+                xs: "100%",
+                md: "50%",
+              },
               display: "block",
             }}
           />

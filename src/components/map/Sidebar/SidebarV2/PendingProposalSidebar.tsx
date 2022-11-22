@@ -36,7 +36,6 @@ const PendingProposalSidebar = ({
     if (!username) return;
     if (!tagId) return;
 
-    // if (firebase) {
     const versionsSnapshots: any[] = [];
     const versions: { [key: string]: any } = {};
     for (let nodeType of NODE_TYPES_ARRAY) {
@@ -53,7 +52,6 @@ const PendingProposalSidebar = ({
       const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
         const docChanges = snapshot.docChanges();
         if (docChanges.length > 0) {
-          // const temporalProposals:any[] = []
           for (let change of docChanges) {
             const versionId = change.doc.id;
             const versionData = change.doc.data();
@@ -81,12 +79,6 @@ const PendingProposalSidebar = ({
 
               const userVersionsDocs = await getDocs(q);
 
-              // const userVersionsDocs = await userVersionsColl
-              //   .where("version", "==", versionId)
-              //   .where("user", "==", user.uname)
-              //   .limit(1)
-              //   .get();
-
               for (let userVersionsDoc of userVersionsDocs.docs) {
                 const userVersion = userVersionsDoc.data();
                 delete userVersion.version;
@@ -100,13 +92,6 @@ const PendingProposalSidebar = ({
               }
             }
           }
-          // let unevaluatedPendingProposalsNum = 0;
-          // for (let pendingP of Object.values(versions)) {
-          //   if (!pendingP.correct && !pendingP.wrong) {
-          //     unevaluatedPendingProposalsNum++;
-          //   }
-          // }
-          // setPendingProposalsNum(unevaluatedPendingProposalsNum);
 
           const pendingProposals = { ...versions };
           const proposalsTemp = Object.values(pendingProposals);
@@ -114,21 +99,16 @@ const PendingProposalSidebar = ({
             (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
           );
           setProposals(orderredProposals);
-          // setProposals(orderredProposals.slice(0, lastIndex));
-          // setPendingProposals({ ...versions });
-          // temporalProposals.push(temporalProposals)
         }
-        // props.setPendingProposalsLoaded(true);
       });
       versionsSnapshots.push(versionsSnapshot);
     }
-    ``;
+
     return () => {
       for (let vSnapshot of versionsSnapshots) {
         vSnapshot();
       }
     };
-    // }
   }, [db, username, tagId]);
 
   return (
@@ -137,8 +117,8 @@ const PendingProposalSidebar = ({
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
-      width={430}
-      // anchor="right"
+      width={window.innerWidth > 899 ? 430 : window.innerWidth}
+      height={window.innerWidth > 899 ? 100 : 35}
       contentSignalState={proposals}
       SidebarContent={
         <Box sx={{ paddingX: "10px", paddingTop: "10px" }}>

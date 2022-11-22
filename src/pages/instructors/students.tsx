@@ -3,6 +3,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Box, Divider, Link, TableContainer, useMediaQuery, useTheme } from "@mui/material";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
@@ -20,6 +21,7 @@ import Typography from "@mui/material/Typography";
 import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
 
@@ -34,9 +36,9 @@ const filterChoices: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newProposals",
-  "Edit Node Proposals": "editNodeProposals",
-  "Proposals Points": "proposalsPoints",
+  "Child Proposals": "newProposals",
+  "Edit  Proposals": "editNodeProposals",
+  "Proposal Points": "proposalsPoints",
   Questions: "questions",
   "Question Points": "questionPoints",
   Vote: "vote",
@@ -69,9 +71,9 @@ const keys = [
   "Wrongs",
   "Corrects",
   "Awards",
-  "New Proposals",
-  "Edit Node Proposals",
-  "Proposals Points",
+  "Child Proposals",
+  "Edit  Proposals",
+  "Proposal Points",
   "Questions",
   "Question Points",
   "Vote",
@@ -87,9 +89,9 @@ const keysColumns: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newProposals",
-  "Edit Node Proposals": "editNodeProposals",
-  "Proposals Points": "proposalsPoints",
+  "Child Proposals": "newProposals",
+  "Edit  Proposals": "editNodeProposals",
+  "Proposal Points": "proposalsPoints",
   Questions: "questions",
   "Question Points": "questionPoints",
   Vote: "vote",
@@ -120,6 +122,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [usersStatus, setUsersStatus] = useState([]);
   const [newStudents, setNewStudents] = useState([]);
+  const [disableEdit, setDisableEdit] = useState(false);
   const open = Boolean(anchorEl);
   const db = getFirestore();
 
@@ -177,7 +180,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             const stats: any = states.filter((elm: any) => elm.uname === student.uname)[0];
             const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
             _rows.push({
-              id: student.uname,
+              id: uuidv4(),
               username: student.uname,
               avatar: student.imageUrl,
               online: userStat?.state === "online",
@@ -251,7 +254,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }
     if (addNewRow) {
       _tableRows.push({
-        id: Math.floor(Math.random() * 100),
+        id: uuidv4(),
         username: "",
         avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
         firstName: "",
@@ -327,11 +330,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   const saveTableChanges = async () => {
+    setDisableEdit(true);
     let _tableRow: any = tableRows.slice();
     let students = [];
 
     for (let row of _tableRow) {
-      if (!row.firstName || !row.lastName || !row.email) {
+      if (row.firstName === "" || row.lastName === "" || row.email === "") {
         _tableRow = _tableRow.filter((elm: any) => !(elm === row));
       }
     }
@@ -349,9 +353,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     const mapUrl = "/instructor/students/" + currentSemester.tagId + "/signup";
     try {
       await postWithToken(mapUrl, payloadAPI);
+      setNewStudents([]);
     } catch (error) {
       console.log(error);
     }
+    setDisableEdit(false);
     return;
   };
 
@@ -445,7 +451,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const addNewStudent = () => {
     const _tableRow: any = tableRows.slice();
     _tableRow.push({
-      id: Math.floor(Math.random() * 100),
+      id: uuidv4(),
       username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
@@ -465,6 +471,9 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       votePoints: 0,
     });
     setTableRows(_tableRow);
+    setTimeout(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    }, 10);
   };
   const handleNewSearh = (event: any) => {
     setSearchValue(event.target.value);
@@ -484,7 +493,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       updateTableRows();
     }
     _tableRow.push({
-      id: Math.floor(Math.random() * 100),
+      id: uuidv4(),
       username: "",
       avatar: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
       firstName: "",
@@ -631,7 +640,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                 <>
                   <Button
                     variant="contained"
-                    disabled={editMode}
+                    disabled={editMode || disableEdit}
                     onClick={handleOpenCloseFilter}
                     sx={{
                       color: theme => theme.palette.common.white,
@@ -642,7 +651,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                   </Button>
                   <Button
                     variant="contained"
-                    disabled={editMode}
+                    disabled={editMode || disableEdit}
                     onClick={handleEditAndAdd}
                     sx={{
                       color: theme => theme.palette.common.white,
@@ -853,11 +862,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
-                                <Link onClick={() => openThisProfile(row)}>
-                                  {" "}
-                                  <>{row[colmn]}</>
-                                </Link>
+                              <LinkNext passHref href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
+                                <Link onClick={() => openThisProfile(row)}>{row[colmn]}</Link>
                               </LinkNext>
                             ) : (
                               <>{row[colmn]}</>
@@ -894,75 +900,80 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </TableBody>
             </Table>
           </TableContainer>
-          {editMode && (
+          {(editMode || disableEdit) && (
             <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
-              <Box>
-                <CSVBtn
-                  variant="text"
-                  addNewData={addNewData}
-                  buttonStyles={{
-                    ":hover": {
-                      backgroundColor: "#bdbdbd",
-                    },
-                    backgroundColor: "#EDEDED",
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  BtnText={"Add students from a csv file"}
-                />
-                <Button
-                  variant="text"
-                  sx={{
-                    ":hover": {
-                      backgroundColor: "#bdbdbd",
-                    },
-                    color: theme => theme.palette.common.black,
-                    backgroundColor: "#EDEDED",
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    mt: { xs: "15px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  onClick={addNewStudent}
-                >
-                  <AddIcon /> Add a new student
-                </Button>
-              </Box>
-              <Box>
-                <Button
-                  variant="text"
-                  sx={{
-                    color: theme => theme.palette.common.white,
-                    background: theme => theme.palette.common.black,
-                    fontSize: 16,
-                    fontWeight: "700",
-                    my: { xs: "0px", md: "auto" },
-                    marginLeft: { xs: "0px", md: "32px" },
-                    marginRight: "40px",
-                    paddingX: "30px",
-                    borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
-                  }}
-                  onClick={() => discardTableChanges()}
-                >
-                  Cancel
-                </Button>
-                <Button
+              {!disableEdit && (
+                <Box>
+                  <CSVBtn
+                    variant="text"
+                    addNewData={addNewData}
+                    disabled={disableEdit}
+                    buttonStyles={{
+                      ":hover": {
+                        backgroundColor: "#bdbdbd",
+                      },
+                      backgroundColor: "#EDEDED",
+                      fontSize: 16,
+                      fontWeight: "700",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                    BtnText={"Add students from a csv file"}
+                  />
+                  <Button
+                    variant="text"
+                    disabled={disableEdit}
+                    sx={{
+                      ":hover": {
+                        backgroundColor: "#bdbdbd",
+                      },
+                      color: theme => theme.palette.common.black,
+                      backgroundColor: "#EDEDED",
+                      fontSize: 16,
+                      fontWeight: "700",
+                      my: { xs: "0px", md: "auto" },
+                      mt: { xs: "15px", md: "auto" },
+                      marginLeft: { xs: "0px", md: "32px" },
+                      marginRight: "40px",
+                      paddingX: "30px",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                    onClick={addNewStudent}
+                  >
+                    <AddIcon /> Add a new student
+                  </Button>
+                </Box>
+              )}
+              <Box sx={disableEdit ? { position: "relative", left: `${document.body.offsetWidth - 200}px` } : {}}>
+                {!disableEdit && (
+                  <Button
+                    variant="text"
+                    disabled={disableEdit}
+                    sx={{
+                      color: theme => theme.palette.common.white,
+                      background: theme => theme.palette.common.black,
+                      fontSize: 16,
+                      fontWeight: "700",
+                      my: { xs: "0px", md: "auto" },
+                      marginLeft: { xs: "0px", md: "32px" },
+                      marginRight: "40px",
+                      paddingX: "30px",
+                      borderRadius: 1,
+                      textAlign: "center",
+                      alignSelf: "center",
+                    }}
+                    onClick={() => discardTableChanges()}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <LoadingButton
+                  loading={disableEdit}
                   variant="contained"
+                  loadingPosition="start"
                   disabled={savedTableState.some((elment: any) =>
                     newStudents.some((elmen: any) => elment.email.trim() === elmen.email.trim())
                   )}
@@ -975,13 +986,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     marginLeft: { xs: "0px", md: "32px" },
                     paddingX: "30px",
                     borderRadius: 1,
-                    textAlign: "center",
-                    alignSelf: "center",
                   }}
                   onClick={() => saveTableChanges()}
                 >
-                  Save Changes
-                </Button>
+                  {disableEdit ? " Saving..." : "Save Changes"}
+                </LoadingButton>
               </Box>
             </Box>
           )}

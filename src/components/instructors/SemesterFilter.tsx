@@ -1,5 +1,4 @@
 import {
-  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -7,15 +6,19 @@ import {
   SelectChangeEvent,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useRouter } from "next/router";
-import React from "react";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import { ICourseTag, ISemester, ISemesterStudent } from "src/types/ICourse";
 
 import { UserRole } from "../../knowledgeTypes";
-import ROUTES from "../../lib/utils/routes";
+import { UserProfileSkeleton } from "./skeletons/UserProfileSkeleton";
 
 type SemesterFilterProps = {
   semesters: string[];
@@ -24,8 +27,10 @@ type SemesterFilterProps = {
   courses: string[];
   selectedCourse: string | null;
   setSelectedCourse: any;
+  currentSemester: ICourseTag | null;
   isMovil: boolean;
   role: UserRole;
+  uname?: string;
 };
 
 export const SemesterFilter = ({
@@ -35,14 +40,19 @@ export const SemesterFilter = ({
   courses,
   selectedCourse,
   setSelectedCourse,
+  currentSemester,
   isMovil,
   role,
+  uname,
 }: SemesterFilterProps) => {
-  console.log("selectedSemester", selectedSemester);
+  console.log("selectedSemester", selectedSemester, currentSemester);
+  const db = getFirestore();
+
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));
-  const router = useRouter();
 
+  const [student, setStudent] = useState<ISemesterStudent | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const onChangeSemester = (event: SelectChangeEvent) => {
     setSelectedSemester(event.target.value as string);
   };
@@ -57,11 +67,27 @@ export const SemesterFilter = ({
     }
   };
 
-  const onNewCourse = () => {
-    setSelectedCourse(null);
-    if (router.route === ROUTES.instructorsSettings) return;
-    router.push(ROUTES.instructorsSettings);
-  };
+  useEffect(() => {
+    if (!currentSemester || !uname) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    const getStudenData = async () => {
+      const semesterRef = doc(db, "semesters", currentSemester.tagId);
+      const semesterDoc = await getDoc(semesterRef);
+      if (!semesterDoc.exists()) {
+        setIsLoading(false);
+        return;
+      }
+
+      const student = (semesterDoc.data() as ISemester).students.find(student => student.uname === uname);
+      setStudent(student);
+      setIsLoading(false);
+      // setStudent(studentDoc.docs.)
+    };
+    getStudenData();
+  }, [currentSemester, db, uname]);
 
   return (
     <Box
@@ -140,9 +166,41 @@ export const SemesterFilter = ({
       </Box>
 
       {role === "INSTRUCTOR" && (
-        <Button onClick={() => onNewCourse()} variant={"contained"} size={matches ? "small" : "medium"}>
-          New Course
-        </Button>
+        <>
+          {isLoading && <UserProfileSkeleton mobile={matches} />}
+          {!isLoading && student && (
+            <Box
+              sx={{
+                position: "relative",
+                display: "flex",
+                flexDirection: matches ? "column-reverse" : "row",
+                alignItems: "center",
+                gap: matches ? "8px" : "32px",
+                marginTop: matches ? "8px" : "0",
+                color: theme => theme.palette.common.gray,
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: "700", fontSize: "16px" }}
+              >{`${student.fName} ${student.lName}`}</Typography>
+              <Tooltip title={`${student.fName} ${student.lName}`}>
+                <Box>
+                  <Image
+                    src={student.imageUrl ?? ""}
+                    alt={"name"}
+                    width="55px"
+                    height="55px"
+                    quality={40}
+                    objectFit="cover"
+                    style={{
+                      borderRadius: "50%",
+                    }}
+                  />
+                </Box>
+              </Tooltip>
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

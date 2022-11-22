@@ -66,6 +66,7 @@ type LinkingWordsProps = {
   setAbleToPropose: (value: boolean) => void;
   isLoading: boolean;
   onResetButton: (newState: boolean) => void;
+  setOperation: (operation: string) => void;
 };
 
 const LinkingWords = (props: LinkingWordsProps) => {
@@ -134,6 +135,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
       // setChosenNode(null);
       // setChosenNodeTitle(null);
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });
+      nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
       // setChoosingNode(props.identifier);
       // }
@@ -168,6 +170,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
         }
         props.saveProposedImprovement("", props.reason, () => props.onResetButton(true));
         nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
+        props.setOperation("ProposeProposals");
       }, 500);
     },
 
@@ -186,6 +189,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
       type: "setOpenEditSection",
       payload: { status: false, nodeId: null },
     });
+    props.setOperation("CancelProposals");
     props.closeSideBar();
   };
 

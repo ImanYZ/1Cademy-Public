@@ -19,12 +19,6 @@
   font-size: 21px;
 }
 
-@media screen and (max-width: 480px) and (min-width: 10px) {
-  .trackNcodeBtn {
-    display: none;
-  }
-}
-
 @media screen and (max-width: 600px) and (min-width: 10px) {
   .home-search-input::placeholder {
     font-size: 16px;
@@ -1306,13 +1300,14 @@ button.MuiTab-textColorInherit:focus {
   width: 100% !important;
 }
 
-@media screen and (max-width: 600px) and (min-width: 10px) {
+@media screen and (max-width: 415px) and (min-width: 10px) {
   .MiniUserProfileHeaderMobile {
-    grid-template-columns: 100% !important;
     padding-left: 0 !important;
-    justify-items: center !important;
-    gap: 16px;
+    gap: 0px !important;
   }
+}
+
+@media screen and (max-width: 600px) and (min-width: 10px) {
   .MiniUserPrifileIdentityMobile {
     padding: 0px 20px;
     gap: 16px;
@@ -1617,6 +1612,12 @@ button.MuiTab-textColorInherit:focus {
 
 #ProposalButtonsCollection:hover {
   background: none;
+}
+
+@media screen and (max-width: 900px) {
+  #ProposalButtonsCollection {
+    padding: 0px;
+  }
 }
 
 #ProposalButtonsRow {
@@ -2684,6 +2685,8 @@ button.MuiTab-textColorInherit:focus {
 }
 
 /* Toolbar styles */
+
+/* margin-left: -18px; */
 .toolbar:focus .toolbarDescription,
 .toolbar:hover .toolbarDescription {
   width: 100px;
@@ -2700,24 +2703,15 @@ button.MuiTab-textColorInherit:focus {
   -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
 }
 
-.toolbar:focus .toolbarBadge,
-.toolbar:hover .toolbarBadge {
-  margin-left: 20px;
-}
-/* .toolbar:focus .toolbarButtonDescription{
-
-} */
 .toolbar:focus .toolbarButtonDescription,
 .toolbar:hover .toolbarButtonDescription {
   width: 100px;
   display: flex;
-  /* align-items: center; */
   justify-content: center;
   align-items: flex-start;
   visibility: visible;
   line-height: 16px;
   height: 41px;
-  /* height: auto; */
   transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
   -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
   -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */

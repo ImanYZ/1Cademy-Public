@@ -46,7 +46,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   const { nodeBookState } = useNodeBook();
 
   useEffect(() => {
-    // get institutions and update instLogo from setSUserObj
     if (!db || !sUserObj) return;
 
     if ("deInstit" in sUserObj && !("instLogo" in sUserObj)) {
@@ -56,11 +55,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
         const institutionsDocs = await getDocs(institutionsQuery);
 
-        // const institutionsDocs = await firebase
-        //   .firestore()
-        //   .collection("institutions")
-        //   .where("name", "==", sUserObj.deInstit)
-        //   .get();
         for (let institutionDoc of institutionsDocs.docs) {
           const institutionData = institutionDoc.data();
           setSUserObj((oldSUserObj: any) => {
@@ -78,7 +72,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
     setIsRetrieving(true);
     const versions: { [key: string]: any } = {};
-    // const versionsTagged = {};
     for (let nodeType of NODE_TYPE_ARRAY) {
       const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
 
@@ -90,8 +83,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         where("deleted", "==", false)
       );
 
-      // const versionsQuery = versionsColl.where("proposer", "==", selectedUser).where("deleted", "==", false);
-      // const versionsData = await versionsQuery.get();
       const versionsData = await getDocs(versionCollectionRef);
       let versionId;
       const userVersionsRefs: any[] = [];
@@ -190,12 +181,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
           limit(1)
         );
         const userReputationDoc = await getDocs(reputationQuery);
-        // const userReputationDoc = await firebase.db
-        //   .collection("reputations")
-        //   .where("uname", "==", selectedUser)
-        //   .where("tagId", "==", userData.tag.node)
-        //   .limit(1)
-        //   .get();
         if (userReputationDoc.docs.length > 0) {
           userReputationData = userReputationDoc.docs[0].data();
           delete userReputationData.uname;
@@ -204,10 +189,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         if ("deInstit" in userData && !("instLogo" in userData)) {
           const institutionsQuery = query(collection(db, "institutions"), where("name", "==", userData.deInstit));
           const institutionsDocs = await getDocs(institutionsQuery);
-          // const institutionsDocs = await firebase.db
-          //   .collection("institutions")
-          //   .where("name", "==", userData.deInstit)
-          //   .get();
           if (institutionsDocs.docs.length > 0) {
             const institutionData = institutionsDocs.docs[0].data();
             userData.instLogo = institutionData.logoURL;
@@ -220,7 +201,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   }, [db, nodeBookState.selectedUser]);
 
   const loadOlderProposalsClick = useCallback(() => {
-    // console.log("load");
     if (lastIndex >= proposals.length) return;
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
   }, [lastIndex, proposals.length]);
@@ -242,7 +222,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             title: "Nodes",
             content: (
               <>
-                {/* <div className="ChartTitle">Nodes Contributed</div> */}
                 <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme || ""} />
               </>
             ),
@@ -259,14 +238,9 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                     )
                   );
                 })}
-                {/* pagination */}
                 {proposals.length > lastIndex && (
                   <div id="ContinueButton" style={{ padding: "10px 0px" }}>
-                    <MemoizedMetaButton
-                      onClick={loadOlderProposalsClick}
-                      // tooltip={"Load older " + (props.updates ? "updated" : "studied") + " bookmarks."}
-                      // tooltipPosition="Right"
-                    >
+                    <MemoizedMetaButton onClick={loadOlderProposalsClick}>
                       <>
                         <ExpandMoreIcon className="material-icons grey-text" />
                         Older Proposals
@@ -304,8 +278,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
           }}
         >
           <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-            {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
-        <div id="MiniUserPrifileFullProfileLink"></div> */}
             <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
 
             <div id="MiniUserPrifileIdentityUSettingSidebar" className="MiniUserPrifileIdentityMobile">
@@ -321,7 +293,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                     <span>{sUserObj.tag}</span>
                   </Box>
                   <Box sx={{ display: "flex", gap: "8px" }}>
-                    {/* <img src={sUserObj.instLogo} alt={sUserObj.deInstit + " logo"} width="25px" /> */}
                     <OptimizedAvatar
                       imageUrl={sUserObj.instLogo}
                       name={sUserObj.deInstit + " logo"}
@@ -346,42 +317,36 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             {sUserObj && (
               <>
                 <div className="MiniUserProfilePoints">
-                  {/* <i className="material-icons amber-text">local_library</i> */}
                   <LocalLibraryIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
                     {shortenNumber(sUserObj.cnCorrects || 0 - sUserObj.cnWrongs || 0, 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
-                  {/* <i className="material-icons amber-text">share</i> */}
                   <ShareIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
                     {shortenNumber(sUserObj.mCorrects || 0 - sUserObj.mWrongs || 0, 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
-                  {/* <i className="material-icons amber-text">help_outline</i> */}
                   <HelpOutlineIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
                     {shortenNumber(sUserObj.qCorrects || 0 - sUserObj.qWrongs || 0, 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
-                  {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
                   <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
                   <span className="ToolbarValue">
                     {shortenNumber(sUserObj.iCorrects || 0 - sUserObj.iWrongs || 0, 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
-                  {/* <i className="material-icons amber-text">code</i> */}
                   <CodeIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
                     {shortenNumber(sUserObj.cdCorrects || 0 - sUserObj.cdWrongs || 0, 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
-                  {/* <i className="material-icons amber-text">menu_book</i> */}
                   <MenuBookIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
                     {shortenNumber(sUserObj.rfCorrects || 0 - sUserObj.rfWrongs || 0, 2, false)}

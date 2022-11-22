@@ -6,7 +6,7 @@ body.Image {
   background-image: url(../../public/darkModeLibraryBackground.jpg);
   background-size: cover;
   background-position: center;
-  background-repeat: none;
+  background-repeat: no-repeat;
 }
 body.LightMode {
   background-image: none;
@@ -16,7 +16,7 @@ body.Image.LightMode {
   background-image: url(../../public/lightModeLibraryBackground.jpg);
   background-size: cover;
   background-position: center;
-  background-repeat: none;
+  background-repeat: no-repeat;
 }
 
 #AppContainer {

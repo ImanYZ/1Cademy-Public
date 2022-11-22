@@ -1,9 +1,10 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip, useMediaQuery, useTheme } from "@mui/material";
+import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
+
+import { useNodeBook } from "@/context/NodeBookContext";
 
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
@@ -12,7 +13,6 @@ import { UsersStatus } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
-// import MultipleChoiceBtn from "../MultipleChoiceBtn";
 import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -115,36 +115,23 @@ const Toolbar = ({
     setAnchorEl(null);
   };
 
-  const router = useRouter();
-  const themeMaterial = useTheme();
-
   const gapUsersBtwOptions = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 50 : 0;
 
   const safariOffset = 400 + gapUsersBtwOptions;
   const chromeOffset = 375 + gapUsersBtwOptions;
 
-  const isMovil = useMediaQuery(themeMaterial.breakpoints.down("md"));
   const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
 
   const changeLeaderboard = useCallback(
     async (lBType: any, username: string) => {
-      // console.log("==>> changeLeaderboard", lBType, username);
       setLeaderboardType(lBType);
       setAnchorEl(null);
-      // setLeaderboardTypeOpen(false);
 
       await addDoc(collection(db, "userLeaderboardLog"), {
         uname: username,
         type: lBType,
         createdAt: Timestamp.fromDate(new Date()),
       });
-
-      // const userLeaderboardLogRef = firebase.db.collection("userLeaderboardLog").doc();
-      // userLeaderboardLogRef.set({
-      //   uname: username,
-      //   type: lBType,
-      //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      // });
     },
     [db]
   );
@@ -162,7 +149,6 @@ const Toolbar = ({
       {/* IMPORTANT : if you modify the height you must modify the Box below  */}
 
       <Box
-        // className="toolbar-options"
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -172,11 +158,7 @@ const Toolbar = ({
         }}
       >
         <Box sx={{ marginTop: "20px" }}>
-          <MemoizedMetaButton
-          // onClick={openSideBarClick("Trends")} // CHECK: I commented this, the sidebar trends was commented
-          // tooltip="Click to open the trends in proposals."
-          // tooltipPosition="Right"
-          >
+          <MemoizedMetaButton>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <Box sx={{ display: "grid", placeItems: "center" }}>
               <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
@@ -198,6 +180,7 @@ const Toolbar = ({
 
         {/* Searcher button */}
         <Button
+          className="SearchBarIconToolbar"
           onClick={() => {
             onOpenSidebar("SEARCHER_SIDEBAR", "Search");
             setIsMenuOpen(false);
@@ -212,11 +195,9 @@ const Toolbar = ({
             textAlign: "left",
             alignSelf: "flex-start",
             display: "flex",
-            justifyContent: "center",
             gap: isMenuOpen ? "6px" : "6px",
             padding: "6px 0px",
-            paddingLeft: isMovil ? "18px" : "0px",
-            // border: "solid 2px blue",
+            paddingLeft: isMenuOpen ? "20px" : "0px",
             ":hover": {
               backgroundColor: "rgba(255, 152, 0, 1)",
             },
@@ -284,7 +265,6 @@ const Toolbar = ({
                 color: "ButtonHighlight",
               }}
             >
-              {/* {uncheckedNotificationsNum > 0 ? <NotificationsActiveIcon /> : <NotificationsNoneIcon />} */}
               🔔
             </Badge>
             <Box
@@ -329,7 +309,6 @@ const Toolbar = ({
                 color: "ButtonHighlight",
               }}
             >
-              {/* <BookmarkBorderIcon className="material-icons" /> */}
               🔖
             </Badge>
             <Box
@@ -374,7 +353,6 @@ const Toolbar = ({
                 color: "ButtonHighlight",
               }}
             >
-              {/* <FormatListBulletedIcon /> */}
               ✏️
             </Badge>
             <Box
@@ -399,7 +377,12 @@ const Toolbar = ({
           </Box>
         </MemoizedMetaButton>
         {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-          <MemoizedMetaButton onClick={() => router.push("/instructors/dashboard")}>
+          <MemoizedMetaButton
+            onClick={() => {
+              if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
+              if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
@@ -456,19 +439,9 @@ const Toolbar = ({
             </Box>
           </MemoizedMetaButton>
         )}
-        {/* leaderboard options */}
         {user?.tag && (
           <>
-            <MemoizedMetaButton
-              // onClick={leaderboardTypesToggle}
-              onClick={(e: any) => onOpenLeaderboardOptions(e)}
-              // tooltip={
-              //   "Click to " +
-              //   (props.usersStatus ? "hide" : "show") +
-              //   " the user contribution trends."
-              // }
-              // tooltipPosition="Right"
-            >
+            <MemoizedMetaButton onClick={(e: any) => onOpenLeaderboardOptions(e)}>
               <Box
                 sx={{
                   display: "flex",
@@ -491,31 +464,6 @@ const Toolbar = ({
                   🏆
                 </Box>
 
-                {/* CHECK: I commeted this beacuse reputationsLoaded state only exist in userStatusList component */}
-                {/* {!props.reputationsLoaded && (
-                <div className="preloader-wrapper small active">
-                  <div className="spinner-layer spinner-yellow-only">
-                    <div className="circle-clipper left">
-                      <div className="circle"></div>
-                    </div>
-                    <div className="gap-patch">
-                      <div className="circle"></div>
-                    </div>
-                    <div className="circle-clipper right">
-                      <div className="circle"></div>
-                    </div>
-                  </div>
-                </div>
-              )} */}
-
-                {/* <div id="LeaderboardChanger" className="SidebarDescription">
-              <div id="LeaderboardTag" style={{ textOverflow: "ellipsis", width: "90px" }}>
-                {user.tag}
-              </div>
-              <div id="LeaderboardType" style={{ fontSize: "12px" }}>
-                {leaderboardType ? leaderboardType : "Leaderboard"}
-              </div>
-            </div> */}
                 <Box
                   component="span"
                   className="toolbarButtonDescription"
@@ -559,53 +507,6 @@ const Toolbar = ({
                     {leaderboardType ? leaderboardType : "Leaderboard"}
                   </div>
                 </Box>
-                {/* <Box>
-              <Box
-                component="span"
-                className="toolbarButtonDescription"
-                sx={{
-                  fontSize: "15px",
-                  lineHeight: "0",
-                  whiteSpace: "nowrap",
-                  height: "0",
-                  overflow: "hidden",
-                  visibility: "hidden",
-                  // transition: "visibility 0s, line-height 0s, height 0s",
-                  textOverflow: "ellipsis",
-                  width: "90px",
-                }}
-              >
-                {user.tag}
-              </Box>{" "}
-              <Box
-                component="span"
-                className="toolbarButtonDescription"
-                sx={{
-                  fontSize: "15px",
-                  lineHeight: "0",
-                  height: "0",
-                  overflow: "hidden",
-                  visibility: "hidden",
-                  // transition: "visibility 0s, line-height 0s, height 0s",
-                }}
-              >
-                {leaderboardType ? leaderboardType : "Leaderboard"}
-              </Box>
-              <Box
-                component="span"
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  lineHeight: "0",
-                  height: "0",
-                  overflow: "hidden",
-                  visibility: "hidden",
-                  transition: "visibility 0s, line-height 0s, height 0s",
-                }}
-              >
-                Pending List
-              </Box>
-            </Box> */}
               </Box>
             </MemoizedMetaButton>
             {
@@ -617,12 +518,7 @@ const Toolbar = ({
                 MenuListProps={{
                   "aria-labelledby": "basic-button",
                 }}
-                // anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               >
-                {/* <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={handleClose}>My account</MenuItem>
-          <MenuItem onClick={handleClose}>Logout</MenuItem> */}
-
                 {choices.map(choice => {
                   return (
                     <MenuItem key={choice.label} onClick={choice.choose}>
@@ -631,11 +527,6 @@ const Toolbar = ({
                   );
                 })}
               </Menu>
-              // <MultipleChoiceBtn
-              //   choices={choices}
-              //   onClose={onCloseLeaderBoardOptions}
-              //   anchorEl={anchorEl} /* onClose={leaderboardTypesToggle} */
-              // />
             }
           </>
         )}
@@ -643,10 +534,6 @@ const Toolbar = ({
       <Box sx={{ height: `calc(100vh - ${isSafari ? safariOffset : chromeOffset}px)`, paddingBottom: "20px" }}>
         {user?.tag && leaderboardType && (
           <UsersStatusList
-            // reputationsLoaded={props.reputationsLoaded}
-            // reputationsWeeklyLoaded={props.reputationsWeeklyLoaded}
-            // reputationsMonthlyLoaded={props.reputationsMonthlyLoaded}
-            // reloadPermanentGrpah={props.reloadPermanentGrpah}
             usersStatus={leaderboardType}
             reloadPermanentGraph={reloadPermanentGrpah}
             setOpenSideBar={setOpenSideBar}
@@ -676,81 +563,16 @@ export const ToolbarSidebar = ({
   uncheckedNotificationsNum,
   bookmarkUpdatesNum,
   pendingProposalsNum,
-}: //   mapRendered = true,
-MainSidebarProps) => {
-  // const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState(false);
-
-  //   useEffect(() => {
-  //     if (!mapRendered) return;
-
-  //     const notificationNumbersQuery = doc(db, "notificationNums", user.uname);
-
-  //     const killSnapshot = onSnapshot(notificationNumbersQuery, async snapshot => {
-  //       if (!snapshot.exists()) return;
-
-  //       setUncheckedNotificationsNum(snapshot.data().nNum);
-  //     });
-  //     return () => killSnapshot();
-  //   }, [db, mapRendered, user]);
-
-  // const leaderboardTypesToggle = useCallback(() => {
-  //   setLeaderboardTypeOpen(oldCLT => !oldCLT);
-  // }, []);
-
-  // const onOpenUserInfoSidebar = useCallback(() => {
-  //   const userUserInfoCollection = collection(db, "userUserInfoLog");
-  //   nodeBookDispatch({
-  //     type: "setSelectedUser",
-  //     payload: {
-  //       username: user.uname,
-  //       imageUrl: user.imageUrl,
-  //       fullName: user.fName,
-  //       chooseUname: user.chooseUname,
-  //     },
-  //   });
-  //   setOpenSideBar("USER_SETTINGS");
-  //   reloadPermanentGrpah();
-  //   addDoc(userUserInfoCollection, {
-  //     uname: user.uname,
-  //     uInfo: user.uname,
-  //     createdAt: Timestamp.fromDate(new Date()),
-  //   });
-  //   // onOpenSidebarLog("Search");
-  // }, [
-  //   db,
-  //   nodeBookDispatch,
-  //   reloadPermanentGrpah,
-  //   setOpenSideBar,
-  //   user.chooseUname,
-  //   user.fName,
-  //   user.imageUrl,
-  //   user.uname,
-  // ]);
-  // const onOpenSearcherSidebar = useCallback(() => {
-  //   onOpenSideBar("SEARCHER_SIDEBAR");
-  //   onOpenSidebarLog("Search");
-  // }, [onOpenSideBar, onOpenSidebarLog]);
-
-  // const onOpenNotificationSidebar = useCallback(() => {
-  //   onOpenSideBar("NOTIFICATION_SIDEBAR");
-  //   onOpenSidebarLog("Notifications");
-  // }, [onOpenSideBar, onOpenSidebarLog]);
-
-  // const onOpenBookmarksSidebar = useCallback(() => {
-  //   onOpenSideBar("NOTIFICATION_SIDEBAR");
-  //   onOpenSidebarLog("Bookmarks");
-  // }, [onOpenSideBar, onOpenSidebarLog]);
-
-  // const onOpenPendingProposalsSidebar = useCallback(() => {
-  //   onOpenSideBar("PENDING_PROPOSALS");
-  //   onOpenSidebarLog("PendingProposals");
-  // }, [onOpenSideBar, onOpenSidebarLog]);
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+}: MainSidebarProps) => {
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const isMenuOpen = nodeBookState.isMenuOpen;
+  const setIsMenuOpen = (value: boolean) => {
+    nodeBookDispatch({ type: "setIsMenuOpen", payload: value });
+  };
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [user, selectedUser, isMenuOpen]);
+  }, [user, selectedUser, isMenuOpen, bookmarkUpdatesNum, uncheckedNotificationsNum, pendingProposalsNum, reputation]);
 
   return (
     <>
@@ -761,7 +583,7 @@ MainSidebarProps) => {
           display: { xs: "block", sm: "none" },
           position: "fixed",
           top: "10px",
-          left: isMenuOpen ? "100px" : "10px",
+          left: isMenuOpen ? "10px" : "10px",
           zIndex: isMenuOpen ? "1300" : "1200",
           background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
           height: "40px",
@@ -779,24 +601,13 @@ MainSidebarProps) => {
 
       <SidebarWrapper
         title=""
-        //   headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
         open={open}
         onClose={onClose}
         width={isMenuOpen ? 150 : 80}
         hoverWidth={150}
-        // anchor="right"
         showCloseButton={false}
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}
-        //   SidebarOptions={
-        //     <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
-        //       <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
-        //         {[{ title: "Updated" }, { title: "Studied" }].map((tabItem: any, idx: number) => (
-        //           <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
-        //         ))}
-        //       </Tabs>
-        //     </Box>
-        //   }
         contentSignalState={contentSignalState}
         SidebarContent={
           <ToolbarMemo

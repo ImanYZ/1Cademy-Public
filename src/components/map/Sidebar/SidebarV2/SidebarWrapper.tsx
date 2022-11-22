@@ -4,12 +4,16 @@ import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/mater
 import { Box } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+
+import { useWindowSize } from "../../../../hooks/useWindowSize";
+
 type SidebarWrapperProps = {
   title: string;
   open: boolean;
   onClose: () => void;
   SidebarContent: ReactNode;
   width: number;
+  height?: number;
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
@@ -28,6 +32,7 @@ export const SidebarWrapper = ({
   onClose,
   anchor = "left",
   width,
+  height = 100,
   headerImage,
   SidebarOptions = null,
   SidebarContent,
@@ -37,14 +42,11 @@ export const SidebarWrapper = ({
   isMenuOpen,
   contentSignalState,
 }: SidebarWrapperProps) => {
-  // const contentHight=useMemo(() => {
-  //   if(headerImage && sidbe)
-  // }, [second])
-
   const sidebarContentRef = useRef<any>(null);
+  const { height: windowHeight } = useWindowSize();
+  // const [innerHeight, setInnerHeight] = useState<number>(500);
 
   const scrollToTop = useCallback(() => {
-    // console.log(sidebarRef.current);
     if (!sidebarContentRef.current) return;
 
     sidebarContentRef.current.scrollTop = 0;
@@ -54,8 +56,12 @@ export const SidebarWrapper = ({
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
+  // useEffect(() => {
+  //   setInnerHeight(window.innerHeight);
+  // }, []);
   return (
     <Drawer
+      id="sidebarDrawer"
       variant="persistent"
       anchor={anchor}
       open={open}
@@ -63,47 +69,70 @@ export const SidebarWrapper = ({
       PaperProps={{
         sx: {
           minWidth: { xs: "0px", sm: width },
-          width: { xs: isMenuOpen ? width : "auto", sm: width },
-          maxWidth: { xs: "100%", sm: "50vw" },
-          ":hover": hoverWidth
-            ? {
-                width: { sm: hoverWidth },
-              }
-            : undefined,
+          width: { xs: isMenuOpen ? "100%" : "auto", md: width },
+          maxWidth: { xs: width, sm: "80px" },
+          height: `calc(${windowHeight}-$})`,
           borderRight: theme => (theme.palette.mode === "dark" ? "1px solid #000000" : "1px solid #eeeeee)"),
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
+          ":hover": {
+            maxWidth: { xs: width, sm: "50vw" },
+            width: hoverWidth ? hoverWidth : undefined,
+          },
         },
       }}
     >
       {headerImage && (
-        <Box sx={{ position: "relative", height: "127px" }}>
-          <Image src={headerImage} alt="header image" width={width} height={127} />
-          <Typography
-            component={"h2"}
-            sx={{
-              width: "100%",
-              position: "absolute",
-              bottom: 0,
-              paddingLeft: "13px",
-              // left: 13,
-              fontSize: { xs: "32px", sm: "40px" },
-              // backgroundColor: "red",
-              background: theme =>
-                theme.palette.mode === "dark"
-                  ? "linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%)"
-                  : "linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%)",
-            }}
-          >
-            {title}
-          </Typography>
+        <Box sx={{ width }}>
+          <Box>
+            {height > 50 ? (
+              <Box sx={{ position: "relative", height: "127px", width }}>
+                <Image src={headerImage} alt="header image" width={width} height={127} />
+                <Typography
+                  component={"h2"}
+                  sx={{
+                    width: "100%",
+                    position: "absolute",
+                    bottom: 0,
+                    paddingLeft: "13px",
+                    fontSize: { xs: "24px", sm: "40px" },
+                    background: theme =>
+                      theme.palette.mode === "dark"
+                        ? "linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%)"
+                        : "linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%)",
+                  }}
+                >
+                  {title}
+                </Typography>
+              </Box>
+            ) : (
+              <>
+                {title != "Proposals" && title != "Search Nodes" && (
+                  <Typography
+                    component={"h2"}
+                    sx={{
+                      width: "100%",
+                      marginTop: "10px",
+                      paddingLeft: "13px",
+                      fontSize: { xs: "24px", sm: "40px" },
+                      background: theme =>
+                        theme.palette.mode === "dark"
+                          ? "linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%)"
+                          : "linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%)",
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                )}
+              </>
+            )}
+          </Box>
         </Box>
       )}
       <Box>{SidebarOptions}</Box>
       <Box
         ref={sidebarContentRef}
         sx={{
-          // border: "solid 2px blue",
           height: "100%",
           overflowY: "auto",
           scrollBehavior: "smooth",
@@ -163,4 +192,3 @@ export const SidebarWrapper = ({
     </Drawer>
   );
 };
-// export default React.memo(SidebarWrapper);

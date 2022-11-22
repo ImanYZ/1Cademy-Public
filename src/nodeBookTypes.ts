@@ -27,6 +27,7 @@ export type SelectedUser = {
 
 export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | "UserInfo" | null;
 
+export type LastOperation = "CancelProposals" | "ProposeProposals";
 /**
  * - sNode: node that user is currently selected (node will be highlighted)
  * - isSubmitting: flag set to true when sending request to server
@@ -56,6 +57,8 @@ export interface NodeBookState {
   readonly openEditSection: boolean;
   readonly nodeId: any;
   readonly editAbleNodeId: any;
+  readonly isMenuOpen: boolean;
+  readonly lastOperation: LastOperation;
 }
 
 export type SetSNodeAction = {
@@ -128,6 +131,14 @@ export type SetOpenEditSection = {
   payload: any;
 };
 
+export type SetIsMenuOpen = {
+  type: "setIsMenuOpen";
+  payload: any;
+};
+export type SetLastOperation = {
+  type: "setLastOperation";
+  payload: LastOperation;
+};
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -142,7 +153,9 @@ export type DispatchNodeBookActions =
   | SetNodeTitleBluredAction
   | SetSearchByTitleOnly
   | SetOpenEditButtonAction
-  | SetOpenEditSection;
+  | SetOpenEditSection
+  | SetIsMenuOpen
+  | SetLastOperation;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
@@ -261,6 +274,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     updatedAt: Date;
     width?: number;
     height?: number;
+    simulated?: boolean;
     unaccepted?: boolean;
     // left: number;
     // top: number;
