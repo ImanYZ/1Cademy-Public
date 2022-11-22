@@ -25,15 +25,6 @@ export type Trends = {
   num: number;
 };
 
-export type SemesterStats = {
-  newNodeProposals: number;
-  editProposals: number;
-  links: number;
-  nodes: number;
-  votes: number;
-  questions: number;
-};
-
 export type StackedBarStats = {
   index: number;
   alessEqualTen: number;
@@ -59,4 +50,18 @@ export type BubbleAxis = {
   maxAxisY: number;
   minAxisX: number;
   minAxisY: number;
+};
+
+export type GeneralSemesterStudentsStats = {
+  childProposals: number;
+  editProposals: number;
+  links: number;
+  nodes: number;
+  votes: number;
+  questions: number;
+};
+
+export type MappedData = {
+  date: string;
+  value: GeneralSemesterStudentsStats;
 };

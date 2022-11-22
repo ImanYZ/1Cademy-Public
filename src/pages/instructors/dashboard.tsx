@@ -8,8 +8,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   BubbleAxis,
   BubbleStats,
+  GeneralSemesterStudentsStats,
   MaxPoints,
-  SemesterStats,
   SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
@@ -41,7 +41,7 @@ import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skelet
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 import { useWindowSize } from "../../hooks/useWindowSize";
-import { getSemStat, getStackedBarStat } from "../../lib/utils/charts.utils";
+import { getGeneralStats, getStackedBarStat, mapStudentsStatsToDataByDates } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
 };
@@ -191,7 +191,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
-  const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
+  const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
 
@@ -268,7 +268,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-      setSemesterStats(getSemStat(semester));
+      // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
     };
     getSemesterData();
@@ -359,7 +359,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as ISemesterStudentStat);
+
+      console.log("res");
+      const res = mapStudentsStatsToDataByDates(userDailyStats);
+      console.log("res");
+      const gg = getGeneralStats(res);
+      console.log("res", res, gg);
 
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -384,15 +390,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
-      setSemesterStats(prev => {
-        if (!prev) return null;
-        const res = {
-          ...prev,
-          newNodeProposals: getChildProposal(userDailyStats),
-          improvements: getEditProposals(userDailyStats),
-        };
-        return res;
-      });
+
+      setSemesterStats(gg);
+
+      // setSemesterStats(prev => {
+      //   if (!prev) return null;
+      //   const res = {
+      //     ...prev,
+      //     newNodeProposals: getChildProposal(userDailyStats),
+      //     improvements: getEditProposals(userDailyStats),
+      //   };
+      //   return res;
+      // });
       setBoxStats({
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },

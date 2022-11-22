@@ -1,7 +1,7 @@
 import { Divider, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
-import { SemesterStudentVoteStat } from "src/instructorsTypes";
+import { GeneralSemesterStudentsStats, SemesterStudentVoteStat } from "src/instructorsTypes";
 
 import { formatNumber } from "../../../lib/utils/number.utils";
 
@@ -10,7 +10,7 @@ type GeneralPlotStatsProps = {
   semesterTitle: string;
   programTitle: string;
   studentsCounter: number;
-  semesterStats: any;
+  semesterStats: GeneralSemesterStudentsStats;
   student?: SemesterStudentVoteStat | null;
 };
 
@@ -68,7 +68,7 @@ export const GeneralPlotStats = ({
         <span style={{ textAlign: "left" }}>Child Proposals</span>
         <span>
           {student ? `${formatNumber(student.newNodes)} / ` : ""}
-          {formatNumber(semesterStats?.newNodeProposals)}
+          {formatNumber(semesterStats?.childProposals)}
         </span>
         <span style={{ textAlign: "left" }}>Edit Proposals</span>
         <span>
