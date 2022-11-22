@@ -131,6 +131,7 @@ export type SetLastOperation = {
   type: "setLastOperation";
   payload: LastOperation;
 };
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction

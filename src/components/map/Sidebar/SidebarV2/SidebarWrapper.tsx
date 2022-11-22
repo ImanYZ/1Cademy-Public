@@ -22,6 +22,7 @@ type SidebarWrapperProps = {
   isMenuOpen?: boolean;
   contentSignalState: any;
   openSidebar?: OpenSidebar;
+  innerHeight?: number;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -41,17 +42,18 @@ export const SidebarWrapper = ({
   hoverWidth,
   isMenuOpen,
   contentSignalState,
+  innerHeight,
   openSidebar,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
   const theme = useTheme();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const scrollToTop = useCallback(() => {
     if (!sidebarContentRef.current) return;
-
     sidebarContentRef.current.scrollTop = 0;
   }, [sidebarContentRef]);
-
   const sidebarContent = useMemo(() => {
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
@@ -68,7 +70,7 @@ export const SidebarWrapper = ({
           minWidth: { xs: "0px", sm: width },
           width: { xs: isMenuOpen ? "100%" : "auto", md: width },
           maxWidth: { xs: width, sm: "80px" },
-          height: `${height}%`,
+          height: innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           boxShadow:

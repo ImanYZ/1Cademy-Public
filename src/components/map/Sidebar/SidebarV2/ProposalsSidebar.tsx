@@ -22,6 +22,7 @@ type ProposalsSidebarProps = {
   openProposal: any;
   selectedNode: string | null;
   db: Firestore;
+  innerHeight?: number;
 };
 
 const ProposalsSidebar = ({
@@ -37,6 +38,7 @@ const ProposalsSidebar = ({
   openProposal,
   selectedNode,
   db,
+  innerHeight,
 }: ProposalsSidebarProps) => {
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -145,6 +147,7 @@ const ProposalsSidebar = ({
       onClose={onClose}
       width={window.innerWidth > 899 ? 430 : window.innerWidth}
       height={window.innerWidth > 899 ? 100 : 35}
+      innerHeight={innerHeight}
       anchor="left"
       contentSignalState={tabsItems}
       SidebarOptions={
