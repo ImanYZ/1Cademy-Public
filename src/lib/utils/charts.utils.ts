@@ -3,7 +3,6 @@ import { ISemesterStudent, ISemesterStudentStat, ISemesterStudentStatChapter } f
 import {
   GeneralSemesterStudentsStats,
   MappedData,
-  SemesterStats,
   SemesterStudentVoteStat,
   StackedBarStats,
 } from "../../instructorsTypes";
@@ -12,33 +11,6 @@ import {
   StudentStackedBarStats,
   StudentStackedBarStatsObject,
 } from "../../pages/instructors/dashboard";
-
-// TODO: Test
-export const getSemStat = (data: SemesterStudentVoteStat[]): SemesterStats => {
-  let childProposals = 0;
-  let editProposals = 0;
-  let links = 0;
-  let nodes = 0;
-  let votes = 0;
-  let questions = 0;
-
-  data.map(stat => {
-    childProposals += stat.nodes;
-    editProposals += stat.improvements;
-    links += stat.links;
-    nodes += stat.newNodes;
-    votes += stat.votes;
-    questions += stat.questions;
-  });
-  return {
-    newNodeProposals: childProposals,
-    editProposals,
-    links,
-    nodes,
-    questions,
-    votes,
-  };
-};
 
 // TODO: test
 export const getStackedBarStat = (
@@ -150,7 +122,8 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
   // resByStudents: [{d1,d2},{d1,d3}]
   const resByStudents = data.map(student => {
     return student.days.reduce((acu: { [key: string]: GeneralSemesterStudentsStats }, cur) => {
-      const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumChapterPerDay(cur.chapters) };
+      console.log("curcur", cur);
+      const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumChapterPerDay(cur.chapters ?? []) };
 
       const prevDay = acu[cur.day] ?? getInitialSumChapterPerDay();
       const sum: GeneralSemesterStudentsStats = {

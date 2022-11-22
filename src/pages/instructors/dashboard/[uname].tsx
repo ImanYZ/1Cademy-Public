@@ -23,23 +23,21 @@ import { useWindowSize } from "../../../hooks/useWindowSize";
 import {
   BubbleAxis,
   BubbleStats,
+  GeneralSemesterStudentsStats,
   MaxPoints,
-  SemesterStats,
   SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
   /*  Trends, */
 } from "../../../instructorsTypes";
-import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
+import { getGeneralStats, getStackedBarStat, mapStudentsStatsToDataByDates } from "../../../lib/utils/charts.utils";
 import { ISemester, ISemesterStudent /* ISemesterStudentStatDay */ } from "../../../types/ICourse";
 import {
   BoxStudentsStats,
   BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
-  getChildProposal,
-  getEditProposals,
   getMaxMinVoxPlotData,
   groupStudentPointsDayChapter,
   makeTrendData,
@@ -62,7 +60,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
   //General
-  const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
+  const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
+  const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
+
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
   const [semesterStudentsVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
@@ -135,7 +135,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
-        setSemesterStats(null);
         setIsLoading(false);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
@@ -145,7 +144,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-      setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
     };
@@ -260,15 +258,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStats = userDailyStatDoc.docs
         .map(dailyStat => dailyStat.data() as SemesterStudentStat)
         .slice(0, 1);
-      setStudentVoteStat(prev => {
-        if (!prev) return null;
-        const res = {
-          ...prev,
-          newNodes: getChildProposal(userDailyStats),
-          improvements: getEditProposals(userDailyStats),
-        };
-        return res;
-      });
+      const res = mapStudentsStatsToDataByDates(userDailyStats);
+      const gg = getGeneralStats(res);
+      setSemesterStudentStats(gg);
+
       const proposalsPoints = groupStudentPointsDayChapter(
         userDailyStats[0],
         "proposals",
@@ -323,15 +316,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      setSemesterStats(prev => {
-        if (!prev) return null;
-        const res = {
-          ...prev,
-          newNodeProposals: getChildProposal(userDailyStats),
-          improvements: getEditProposals(userDailyStats),
-        };
-        return res;
-      });
+      const res = mapStudentsStatsToDataByDates(userDailyStats);
+      const gg = getGeneralStats(res);
+
+      setSemesterStats(gg);
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
@@ -451,7 +439,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               semesterStats={semesterStats}
               semesterTitle={currentSemester.title}
               studentsCounter={studentsCounter}
-              student={studentVoteStat}
+              student={semesterStudentStats}
             />
           )}
         </Paper>

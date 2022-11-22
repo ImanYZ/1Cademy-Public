@@ -258,7 +258,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
-        setSemesterStats(null);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
 
