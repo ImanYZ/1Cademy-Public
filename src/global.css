@@ -2685,6 +2685,8 @@ button.MuiTab-textColorInherit:focus {
 }
 
 /* Toolbar styles */
+
+/* margin-left: -18px; */
 .toolbar:focus .toolbarDescription,
 .toolbar:hover .toolbarDescription {
   width: 100px;
@@ -2701,37 +2703,15 @@ button.MuiTab-textColorInherit:focus {
   -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
 }
 
-.toolbar:focus .toolbarBadge,
-.toolbar:hover .toolbarBadge {
-  margin-left: 20px;
-}
-
-.toolbar:focus .SearchBarIconToolbar,
-.toolbar:hover .SearchBarIconToolbar {
-  margin-left: -18px;
-}
-
-@media screen and (min-width: 900px) {
-  .toolbar:focus .SearchBarIconToolbar,
-  .toolbar:hover .SearchBarIconToolbar {
-    margin-left: unset;
-  }
-}
-
-/* .toolbar:focus .toolbarButtonDescription{
-
-} */
 .toolbar:focus .toolbarButtonDescription,
 .toolbar:hover .toolbarButtonDescription {
   width: 100px;
   display: flex;
-  /* align-items: center; */
   justify-content: center;
   align-items: flex-start;
   visibility: visible;
   line-height: 16px;
   height: 41px;
-  /* height: auto; */
   transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
   -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
   -ms-transition: visibility 1s, line-height 1s, height 1s; /* IE 10 */
@@ -2796,4 +2776,50 @@ button.MuiTab-textColorInherit:focus {
   .fromSideBar {
     display: flex !important;
   }
+}
+
+.select-tab-button-node-footer {
+  height: 40px;
+  margin-right: 2px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  border: solid 1px #585858;
+  border-bottom: none;
+}
+
+.tab-button-node-footer {
+  padding: 5px;
+  border-radius: 52px;
+  display: flex;
+  margin-right: 4px;
+  border: solid 1px #585858;
+}
+
+.tab-button-node-footer button:hover {
+  box-shadow: none !important;
+}
+
+.tab-button-node-footer:hover,
+.tab-button-node-footer:active {
+  padding: 5px;
+  border-radius: 52px !important;
+}
+.vote-area {
+  margin-left: 5px;
+  display: flex;
+  border: solid 1px #585858;
+  border-radius: 10px;
+  padding: 0 5px;
+  justify-content: center;
+  height: 33px;
+  align-items: center;
+  background: #414141;
+  margin-bottom: 7px;
+}
+
+.vertical-row {
+  width: 1px; /* edit this if you want */
+  background-color: rgb(220, 220, 220);
+  height: 13px;
 }

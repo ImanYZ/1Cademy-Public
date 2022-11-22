@@ -25,8 +25,8 @@ import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarProps = { options: Option[]; user: User };
-const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
+type HeaderNavbarProps = { options: Option[]; user: User; onNewCourse?: () => void };
+const HeaderNavbar = ({ options, user, onNewCourse }: HeaderNavbarProps) => {
   const [handleThemeSwitch] = useThemeChange();
   const router = useRouter();
   const theme = useTheme();
@@ -92,6 +92,16 @@ const HeaderNavbar = ({ options, user }: HeaderNavbarProps) => {
                 />
               </LightTooltip>
             ))}
+            {onNewCourse && (
+              <Button
+                onClick={() => onNewCourse()}
+                variant={"contained"}
+                size={"small"}
+                sx={{ fontFamily: "Work Sans,sans-serif", fontSize: "15px", letterSpacing: "-1px", marginLeft: "16px" }}
+              >
+                NEW COURSE
+              </Button>
+            )}
           </Tabs>
         )}
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "24px" }}>

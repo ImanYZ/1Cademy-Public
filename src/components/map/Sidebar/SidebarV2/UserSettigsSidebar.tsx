@@ -53,19 +53,7 @@ type UserSettingsSidebarProps = {
   scrollToNode: (nodeId: string) => void;
 };
 
-export const NODE_TYPE_OPTIONS: NodeType[] = [
-  // NodeType.Advertisement,
-  "Code",
-  "Concept",
-  "Idea",
-  // NodeType.News,
-  // NodeType.Private,
-  // NodeType.Profile,
-  "Question",
-  "Reference",
-  "Relation",
-  // NodeType.Sequel,
-];
+export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
 
 export const UserSettigsSidebar = ({
   open,
@@ -87,7 +75,6 @@ export const UserSettigsSidebar = ({
 
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
-  // const [isLoading, setIsLoading] = useState(false);
 
   const [value, setValue] = React.useState(0);
 
@@ -101,9 +88,6 @@ export const UserSettigsSidebar = ({
     if (!user?.ethnicity) return "";
     const otherEthnicity = user.ethnicity.find(ethnicityItem => !isInEthnicityValues(ethnicityItem));
     return otherEthnicity ? otherEthnicity : "";
-    // if(user.ethnicity.some(ethnicityItem=>!isInEthnicityValues(ethnicityItem))) return user.ethnicity.filter(cur=>cur!==ETHNICITY_VALUES[6])
-    //     if (user.ethnicity.includes("") === GENDER_VALUES[2] || !GENDER_VALUES.includes(user.gender)) return user.gender;
-    //     return "";
   };
   const [genderOtherValue, setGenderOtherValue] = useState(
     getOtherValue(GENDER_VALUES, GENDER_VALUES[2], user?.gender)
@@ -120,13 +104,9 @@ export const UserSettigsSidebar = ({
   };
   const updateStatesByCountry = useCallback(
     async (currentCountry: string | null) => {
-      // console.log("updateStatesByCountry", 1, currentCountry);
       if (!currentCountry) return setStates([]);
-      // console.log("updateStatesByCountry", 2, countries);
       const countryObject = countries.find(cur => cur.name === currentCountry);
       if (!countryObject) return setStates([]);
-      // console.log("updateStatesByCountry", 3);
-      // console.log("countryObject", countryObject);
       const defaultState: IState = { name: "Prefer not to say", countryCode: "", isoCode: "" };
       const { State } = await import("country-state-city");
       setStates([...State.getStatesOfCountry(countryObject.isoCode), defaultState]);
@@ -135,11 +115,8 @@ export const UserSettigsSidebar = ({
   );
   const updateCitiesByState = useCallback(
     async (currentState: string | null) => {
-      // console.log("updateCitiesByState", 2);
-      // if (!user?.country) return [];
       if (!currentState) return setCities([]);
 
-      // console.log("updateCitiesByState", 3);
       const currentCountry = countries.find(cur => cur.name === user.country);
       if (!currentCountry) {
         setStates([]);
@@ -147,7 +124,6 @@ export const UserSettigsSidebar = ({
         return;
       }
 
-      // console.log("updateCitiesByState", 4);
       const stateObject = states.find(cur => cur.name === currentState);
       if (!stateObject) return setCities([]);
 
@@ -218,11 +194,9 @@ export const UserSettigsSidebar = ({
         const userRef = doc(db, "users", user.uname);
         await updateDoc(userRef, { country: country_name, state: state_prov, city: city });
 
-        // console.log("wiil call set Timeout");
-
         dispatch({ type: "setAuthUser", payload: { ...user, country: country_name, state: state_prov, city: city } });
       } catch (err) {
-        // console.log("cant autocomplete country state city");
+        console.warn("cant autocomplete country state city");
       }
     };
     getCSCByGeolocation();
@@ -305,11 +279,6 @@ export const UserSettigsSidebar = ({
 
         const institutionsDocs = await getDocs(institutionsQuery);
 
-        // const institutionsDocs = await firebase
-        //   .firestore()
-        //   .collection("institutions")
-        //   .where("name", "==", sUserObj.deInstit)
-        //   .get();
         for (let institutionDoc of institutionsDocs.docs) {
           const institutionData = institutionDoc.data();
           setInstlogoURL(institutionData.logoURL);
@@ -322,8 +291,6 @@ export const UserSettigsSidebar = ({
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
       nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
-      // setChosenNodeTitle(allTags[chosenTags[0]].title);
-      // setChosenNode(chosenTags[0]);
     }
   }, [allTags, chosenTags, nodeBookDispatch]);
 
@@ -396,15 +363,6 @@ export const UserSettigsSidebar = ({
 
         const userRef = doc(db, "users", user.uname);
 
-        // // Set the "capital" field of the city 'DC'
-        // await updateDoc(washingtonRef, {
-        //   capital: true,
-        // });
-
-        // const userRef = firebase.db.collection("users").doc(username);
-
-        // await userRef.update({ [attrName]: newValue });
-
         await updateDoc(userRef, { [attrName]: newValue });
 
         let userLogCollection = "";
@@ -472,13 +430,6 @@ export const UserSettigsSidebar = ({
           [attrName]: newValue,
           createdAt: Timestamp.fromDate(new Date()),
         });
-
-        // const userLogRef = firebase.db.collection(userLogCollection).doc();
-        // await userLogRef.set({
-        //   uname: username,
-        //   [attrName]: newValue,
-        //   createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-        // });
       },
     [db, user]
   );
@@ -488,7 +439,6 @@ export const UserSettigsSidebar = ({
       event.preventDefault();
       const newTheme = settings.theme === "Dark" ? "Light" : "Dark";
       changeAttr("theme")(newTheme);
-      // setTheme(newTheme);
       dispatch({ type: "setTheme", payload: newTheme });
     },
     [changeAttr, dispatch, settings.theme]
@@ -499,7 +449,6 @@ export const UserSettigsSidebar = ({
       event.preventDefault();
       const newView = settings.view === "Graph" ? "Masonry" : "Graph";
       changeAttr("view")(newView);
-      // setTheme(newTheme);
       dispatch({ type: "setView", payload: newView });
 
       if (newView === "Graph") {
@@ -516,7 +465,6 @@ export const UserSettigsSidebar = ({
       event.preventDefault();
       const newBackground = settings.background === "Image" ? "Color" : "Image";
       changeAttr("background")(newBackground);
-      // setBackground(newBackground);
       dispatch({ type: "setBackground", payload: newBackground });
     },
     [changeAttr, dispatch, settings.background]
@@ -527,7 +475,6 @@ export const UserSettigsSidebar = ({
       event.preventDefault();
       const newChooseUname = !user.chooseUname;
       changeAttr("chooseUname")(newChooseUname);
-      // setChooseUname(newChooseUname);
       dispatch({ type: "setAuthUser", payload: { ...user, chooseUname: newChooseUname } });
     },
     [changeAttr, dispatch]
@@ -556,12 +503,6 @@ export const UserSettigsSidebar = ({
   const closeTagSelector = useCallback(() => {
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
-    // setChoosingNode(false);
-    // setChosenNode(null);
-    // setChosenNodeTitle(null);
-    // setChosenTags([]);
-    // setAllTags({});
-    // setIsSubmitting(false); //Check i comented this
   }, [nodeBookDispatch]);
 
   const handleChange = useCallback(
@@ -594,7 +535,6 @@ export const UserSettigsSidebar = ({
           changeAttr("country")("");
           changeAttr("state")("");
           changeAttr("city")("");
-          // updateStatesByCountry(null);
         } else {
           const country = event.target.value.split(";")[0];
 
@@ -678,68 +618,25 @@ export const UserSettigsSidebar = ({
         >
           <FormGroup>
             <FormControlLabel
-              control={
-                <Switch
-                  // checked={values.theme === "Dark"}
-                  checked={settings.theme === "Dark"}
-                  onChange={handleThemeSwitch}
-                  // onChange={() => {
-                  //   // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
-                  //   // setThemeMode(settings.theme === "light" ? "dark" : "light");
-                  //   // dispatch({ type: "setTheme", payload: settings.theme === "Light" ? "Dark" : "Light" });
-                  //   handleThemeSwitch();
-                  // }}
-                />
-              }
+              control={<Switch checked={settings.theme === "Dark"} onChange={handleThemeSwitch} />}
               label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
             />
           </FormGroup>
           <FormGroup>
             <FormControlLabel
-              control={
-                <Switch
-                  // checked={values.background === "Image"}
-                  checked={settings.background === "Image"}
-                  // onChange={() => {
-                  //   // setFieldValue("background", values.background === "Color" ? "Image" : "Color");
-                  //   // setBackground(user.background === "Color" ? "Image" : "Color");
-
-                  //   // setBackground(user.background === "Color" ? "Image" : "Color");
-
-                  // }}
-                  onChange={handleBackgroundSwitch}
-                />
-              }
+              control={<Switch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />}
               label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
             />
           </FormGroup>
           <FormGroup>
             <FormControlLabel
-              control={
-                <Switch
-                  // checked={values.theme === "Dark"}
-                  checked={settings.view === "Graph"}
-                  onChange={handleViewSwitch}
-                  // onChange={() => {
-                  //   // setFieldValue("theme", values.theme === "Light" ? "Dark" : "Light");
-                  //   // setThemeMode(settings.theme === "light" ? "dark" : "light");
-                  //   // dispatch({ type: "setTheme", payload: settings.theme === "Light" ? "Dark" : "Light" });
-                  //   handleThemeSwitch();
-                  // }}
-                />
-              }
+              control={<Switch checked={settings.view === "Graph"} onChange={handleViewSwitch} />}
               label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
             />
           </FormGroup>
           <FormGroup>
             <FormControlLabel
-              control={
-                <Switch
-                  // checked={!values.chooseUname}
-                  checked={!user.chooseUname}
-                  onChange={e => handlesChooseUnameSwitch(e, user)}
-                />
-              }
+              control={<Switch checked={!user.chooseUname} onChange={e => handlesChooseUnameSwitch(e, user)} />}
               label={`Display name: ${getDisplayNameValue(user)}`}
             />
           </FormGroup>
@@ -747,11 +644,7 @@ export const UserSettigsSidebar = ({
           <FormGroup>
             <FormControlLabel
               control={
-                <Switch
-                  // checked={!values.chooseUname}
-                  checked={settings.showClusterOptions}
-                  onChange={e => handleShowClusterOptionsSwitch(e)}
-                />
+                <Switch checked={settings.showClusterOptions} onChange={e => handleShowClusterOptionsSwitch(e)} />
               }
               label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
             />
@@ -760,39 +653,12 @@ export const UserSettigsSidebar = ({
           {settings.showClusterOptions && (
             <FormGroup>
               <FormControlLabel
-                control={
-                  <Switch
-                    // checked={!values.chooseUname}
-                    checked={settings.showClusters}
-                    onChange={e => handleShowClustersSwitch(e)}
-                  />
-                }
+                control={<Switch checked={settings.showClusters} onChange={e => handleShowClustersSwitch(e)} />}
                 label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
               />
             </FormGroup>
           )}
 
-          {/* {props.showHideClusters && (
-
-            )}
-            <FormGroup row>
-              <FormControl className="select RowSwitch">
-                <Switch checked={props.showClusters} onClick={props.showHideClusters} name="chooseUname" />
-                <div className="RowSwitchItem">Clusters:</div>
-                <div className="RowSwitchItem">{props.showClusters ? "Shown" : "Hidden"}</div>
-              </FormControl>
-              <FormControlLabel
-                control={
-                  <Switch
-                    // checked={!values.chooseUname}
-                    checked={showClusters}
-                    // onChange={e => console.log("handlesChooseUnameSwitch(e, user)")}
-                    onChange={showHideClusters}
-                  />
-                }
-                label={`Clusters: ${showClusters ? "Shown" : "Hidden"}`}
-              />
-            </FormGroup> */}
           <MemoizedInputSave
             identification="fNameInput"
             initialValue={user.fName || ""} //TODO: important fill empty user field
@@ -800,20 +666,7 @@ export const UserSettigsSidebar = ({
             setState={(fName: string) => dispatch({ type: "setAuthUser", payload: { ...user, fName } })}
             label="Change your first name"
           />
-          {/* <TextField
-              id="firstName"
-              name="firstName"
-              label="First Name"
-              value={user.fName}
-              onChange={e => dispatch({ type: "setAuthUser", payload: { ...user, fName: e.target.value } })}
-              //onChange={handleChange}
-              // onBlur={handleBlur}
-              variant="outlined"
-              // error={Boolean(errors.firstName) && Boolean(touched.firstName)}
-              // helperText={touched.firstName && errors.firstName}
-              fullWidth
-              sx={{ mb: "16px" }}
-            /> */}
+
           <MemoizedInputSave
             identification="lNameInput"
             initialValue={user.lName || ""} //TODO: important fill empty user field
@@ -821,21 +674,7 @@ export const UserSettigsSidebar = ({
             setState={(lName: string) => dispatch({ type: "setAuthUser", payload: { ...user, lName } })}
             label="Change your last name"
           />
-          {/* <InputSave
-                identification="lNameInput"
-                initialValue={lName}
-                onSubmit={changeAttr("lName")}
-                setState={setLName}
-                label="Change your last name"
-              /> */}
-          {/* CHECKL I comented this */}
-          {/* <InputSave
-              identification="UsernameInput"
-              initialValue={username}
-              onSubmit={changeUsername}
-              setState={setUsername}
-              label="DANGEROUS ACTION: Change your username!"
-            /> */}
+
           <div className="AccountSettingsButtons">
             <MemoizedMetaButton onClick={logoutClick}>
               <div className="AccountSettingsButton">
@@ -846,16 +685,6 @@ export const UserSettigsSidebar = ({
               </div>
             </MemoizedMetaButton>
           </div>
-          {/* <div className="AccountSettingsButtons">
-              <MetaButton onClick={logoutClick}>
-                <div className="AccountSettingsButton">
-                  <span id="LogoutButtonContent">
-                    <ExitToAppIcon />
-                    <span id="LogoutButtonText">Logout</span>
-                  </span>
-                </div>
-              </MetaButton>
-            </div> */}
         </div>
       ),
     },
@@ -866,18 +695,9 @@ export const UserSettigsSidebar = ({
           <Autocomplete
             id="language"
             value={user.lang}
-            // onChange={(_, value) => setFieldValue("language", value)}
             onChange={(_, value) => handleChange({ target: { value, name: "language" } })}
-            // onBlur={() => setTouched({ ...touched, language: true })}
             options={languages}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Language"
-                // error={Boolean(errors.language) && Boolean(touched.language)}
-                // helperText={touched.language && errors.language}
-              />
-            )}
+            renderInput={params => <TextField {...params} label="Language" />}
             fullWidth
             sx={{ mb: "16px" }}
           />
@@ -887,41 +707,15 @@ export const UserSettigsSidebar = ({
               <DatePicker
                 value={user.birthDate}
                 onChange={value => handleChange({ target: { value, name: "birthDate" } })}
-                renderInput={params => (
-                  <TextField
-                    {...params}
-                    id="birthDate"
-                    label="Birth Date"
-                    name="birthDate"
-                    // onBlur={() => setTouched({ ...touched, birthDate: true })}
-                    // error={Boolean(errors.birthDate) && Boolean(touched.birthDate)}
-                    // helperText={
-                    //   touched.birthDate &&
-                    //   errors.birthDate &&
-                    //   (errors.birthDate ===
-                    //   "birthDate must be a `date` type, but the final value was: `Invalid Date` (cast from the value `Invalid Date`)."
-                    //     ? "Invalid Date"
-                    //     : errors.birthDate)
-                    // }
-                  />
-                )}
+                renderInput={params => <TextField {...params} id="birthDate" label="Birth Date" name="birthDate" />}
               />
             </LocalizationProvider>
             <Autocomplete
               id="gender"
               value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
-              // onChange={(_, value) => setFieldValue("gender", value)}
               onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
-              // onBlur={() => setTouched({ ...touched, gender: true })}
               options={GENDER_VALUES}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label="Gender"
-                  // error={Boolean(errors.gender) && Boolean(touched.gender)}
-                  // helperText={touched.gender && errors.gender}
-                />
-              )}
+              renderInput={params => <TextField {...params} label="Gender" />}
               fullWidth
               sx={{ mb: "16px" }}
             />
@@ -941,17 +735,9 @@ export const UserSettigsSidebar = ({
             id="ethnicity"
             value={getSelectedOptionsByValue(user.ethnicity, isInEthnicityValues, ETHNICITY_VALUES[6])}
             onChange={(_, value) => handleChange({ target: { value, name: "ethnicity" } })}
-            // onBlur={() => setTouched({ ...touched, ethnicity: true })}
             // structure based from https://blog.hubspot.com/service/survey-demographic-questions
             options={ETHNICITY_VALUES}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Ethnicity"
-                // error={Boolean(errors.ethnicity) && Boolean(touched.ethnicity)}
-                // helperText={touched.ethnicity && errors.ethnicity}
-              />
-            )}
+            renderInput={params => <TextField {...params} label="Ethnicity" />}
             fullWidth
             multiple
             sx={{ mb: "16px" }}
@@ -969,16 +755,8 @@ export const UserSettigsSidebar = ({
             id="country"
             value={user.country}
             onChange={(_, value) => handleChange({ target: { value, name: "country" } })}
-            // onBlur={() => setTouched({ ...touched, country: true })}
             options={countries.map(cur => cur.name)}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Country"
-                // error={Boolean(errors.country) && Boolean(touched.country)}
-                // helperText={touched.country && errors.country}
-              />
-            )}
+            renderInput={params => <TextField {...params} label="Country" />}
             fullWidth
             sx={{ mb: "16px" }}
           />
@@ -987,16 +765,8 @@ export const UserSettigsSidebar = ({
               id="state"
               value={user.state}
               onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
-              // onBlur={() => setTouched({ ...touched, state: true })}
               options={states.map(cur => cur.name)}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label="State"
-                  // error={Boolean(errors.state) && Boolean(touched.state)}
-                  // helperText={touched.state && errors.state}
-                />
-              )}
+              renderInput={params => <TextField {...params} label="State" />}
               fullWidth
               sx={{ mb: "16px" }}
             />
@@ -1004,16 +774,8 @@ export const UserSettigsSidebar = ({
               id="city"
               value={user.city}
               onChange={(_, value) => handleChange({ target: { value, name: "city" } })}
-              // onBlur={() => setTouched({ ...touched, city: true })}
               options={cities.map(cur => cur.name)}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label="City"
-                  // error={Boolean(errors.city) && Boolean(touched.city)}
-                  // helperText={touched.city && errors.city}
-                />
-              )}
+              renderInput={params => <TextField {...params} label="City" />}
               fullWidth
               sx={{ mb: "16px" }}
             />
@@ -1029,38 +791,16 @@ export const UserSettigsSidebar = ({
             id="foundFrom"
             value={getValidValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[5], user.foundFrom)}
             onChange={(_, value) => handleChange({ target: { value, name: "foundFrom" } })}
-            // onBlur={() => setTouched({ ...touched, foundFrom: true })}
             options={FOUND_FROM_VALUES}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="How did you hear about us?"
-                // error={Boolean(errors.foundFrom) && Boolean(touched.foundFrom)}
-                // helperText={touched.foundFrom && errors.foundFrom}
-              />
-            )}
+            renderInput={params => <TextField {...params} label="How did you hear about us?" />}
             fullWidth
             sx={{ mb: "16px" }}
           />
           {(user.foundFrom === "Not listed (Please specify)" || !FOUND_FROM_VALUES.includes(user.foundFrom || "")) && (
-            // <TextField
-            //   id="foundFromOtherValue"
-            //   name="foundFromOtherValue"
-            //   label="Please specify, How did you hear about us?"
-            //   value={user.foundFromOtherValue}
-            //   onChange={handleChange}
-            //   onBlur={handleBlur}
-            //   variant="outlined"
-            //   error={Boolean(errors.foundFromOtherValue) && Boolean(touched.foundFromOtherValue)}
-            //   helperText={touched.foundFromOtherValue && errors.foundFromOtherValue}
-            //   fullWidth
-            //   sx={{ mb: "16px" }}
-            // />
             <MemoizedInputSave
               identification="foundFromOtherValue"
               initialValue={foundFromOtherValue} //TODO: important fill empty user field
               onSubmit={(value: any) => changeAttr("foundFrom")(value)}
-              // setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
               setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
               label="Please specify, How did you hear about us."
             />
@@ -1099,9 +839,6 @@ export const UserSettigsSidebar = ({
       open={open}
       onClose={onClose}
       width={430}
-      // width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      // height={window.innerWidth > 899 ? 100 : 35}
-      // anchor="right"gggggg
       SidebarOptions={
         <Box
           sx={{
@@ -1112,15 +849,11 @@ export const UserSettigsSidebar = ({
           }}
         >
           <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-            {/* <div id="MiniUserPrifileAboveProfilePicture"></div>
-        <div id="MiniUserPrifileFullProfileLink"></div> */}
             <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
 
             <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
-              {/* <div id="MiniUserPrifileName">{chooseUname ? username : fName + " " + lName}</div> */}
               <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
               <div id="MiniUserPrifileTag">
-                {/* <i className="material-icons grey-text">local_offer</i> */}
                 <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
                   <div className="AccountSettingsButton">
                     <LocalOfferIcon
@@ -1129,11 +862,8 @@ export const UserSettigsSidebar = ({
                       className="material-icons deep-orange-text"
                     />
                     {user.tag}
-
-                    {/* {isLoading && <LinearProgress />} */}
                   </div>
                 </MemoizedMetaButton>
-                {/* CHECK I change  choosingNode to {nodeBookState.choosingNode?.id */}
                 {nodeBookState?.choosingNode?.id === "tag" && (
                   <Suspense fallback={<div></div>}>
                     <div id="tagModal">
@@ -1143,7 +873,6 @@ export const UserSettigsSidebar = ({
                         returnLeft={true}
                         noBackground={true}
                       >
-                        {/* <TagSearch chosenTags={chosenTags} setChosenTags={setChosenTags} onlyOne={true} /> */}
                         <MemoizedTagsSearcher
                           setChosenTags={setChosenTags}
                           chosenTags={chosenTags}
@@ -1167,11 +896,9 @@ export const UserSettigsSidebar = ({
                   }}
                   renderAsAvatar={false}
                 />
-                {/* <img src={instlogoURL} alt={user.deInstit + " logo"} width="25px" /> */}
                 <span>{user.deInstit}</span>
               </div>
               <div id="MiniUserPrifileTotalPoints">
-                {/* <i className="material-icons DoneIcon green-text">done</i> */}
                 <DoneIcon className="material-icons DoneIcon green-text" />
                 <span>{shortenNumber(totalPoints, 2, false)}</span>
               </div>
@@ -1179,42 +906,36 @@ export const UserSettigsSidebar = ({
           </div>
           <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
             <div className="MiniUserProfilePoints">
-              {/* <i className="material-icons amber-text">local_library</i> */}
               <LocalLibraryIcon className="material-icons amber-text" />
               <span className="ToolbarValue">
                 {shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false)}
               </span>
             </div>
             <div className="MiniUserProfilePoints">
-              {/* <i className="material-icons amber-text">share</i> */}
               <ShareIcon className="material-icons amber-text" />
               <span className="ToolbarValue">
                 {shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false)}
               </span>
             </div>
             <div className="MiniUserProfilePoints">
-              {/* <i className="material-icons amber-text">help_outline</i> */}
               <HelpOutlineIcon className="material-icons amber-text" />
               <span className="ToolbarValue">
                 {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
               </span>
             </div>
             <div className="MiniUserProfilePoints">
-              {/* <i className="material-icons material-icons--outlined amber-text">emoji_objects</i> */}
               <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
               <span className="ToolbarValue">
                 {shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false)}
               </span>
             </div>
             <div className="MiniUserProfilePoints">
-              {/* <i className="material-icons amber-text">code</i> */}
               <CodeIcon className="material-icons amber-text" />
               <span className="ToolbarValue">
                 {shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false)}
               </span>
             </div>
             <div className="MiniUserProfilePoints">
-              {/* <i className="material-icons amber-text">menu_book</i> */}
               <MenuBookIcon className="material-icons amber-text" />
               <span className="ToolbarValue">
                 {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}

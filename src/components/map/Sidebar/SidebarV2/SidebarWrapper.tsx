@@ -20,6 +20,7 @@ type SidebarWrapperProps = {
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
   contentSignalState: any;
+  innerHeight?: number;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -39,20 +40,13 @@ export const SidebarWrapper = ({
   hoverWidth,
   isMenuOpen,
   contentSignalState,
+  innerHeight,
 }: SidebarWrapperProps) => {
-  // const contentHight=useMemo(() => {
-  //   if(headerImage && sidbe)
-  // }, [second])
-
   const sidebarContentRef = useRef<any>(null);
-
   const scrollToTop = useCallback(() => {
-    // console.log(sidebarRef.current);
     if (!sidebarContentRef.current) return;
-
     sidebarContentRef.current.scrollTop = 0;
   }, [sidebarContentRef]);
-
   const sidebarContent = useMemo(() => {
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
@@ -69,8 +63,7 @@ export const SidebarWrapper = ({
           minWidth: { xs: "0px", sm: width },
           width: { xs: isMenuOpen ? "100%" : "auto", md: width },
           maxWidth: { xs: width, sm: "80px" },
-          // maxWidth: { xs: isMenuOpen ? "100%" : width, sm: "50vw" },
-          height: `${height}%`,
+          height: innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: theme => (theme.palette.mode === "dark" ? "1px solid #000000" : "1px solid #eeeeee)"),
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -94,9 +87,7 @@ export const SidebarWrapper = ({
                     position: "absolute",
                     bottom: 0,
                     paddingLeft: "13px",
-                    // left: 13,
                     fontSize: { xs: "24px", sm: "40px" },
-                    // backgroundColor: "red",
                     background: theme =>
                       theme.palette.mode === "dark"
                         ? "linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%)"
@@ -134,7 +125,6 @@ export const SidebarWrapper = ({
       <Box
         ref={sidebarContentRef}
         sx={{
-          // border: "solid 2px blue",
           height: "100%",
           overflowY: "auto",
           scrollBehavior: "smooth",
@@ -194,4 +184,3 @@ export const SidebarWrapper = ({
     </Drawer>
   );
 };
-// export default React.memo(SidebarWrapper);

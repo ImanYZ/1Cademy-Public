@@ -4,7 +4,6 @@ import { collection, getFirestore, onSnapshot, query, where } from "firebase/fir
 import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
-// import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { User, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
@@ -13,11 +12,9 @@ import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import { useAuth } from "../../context/AuthContext";
 import { Instructor } from "../../instructorsTypes";
 import ROUTES from "../../lib/utils/routes";
-// import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
-// import { useSemesterFilter } from "../instructors/useSemesterFilter";
 
 export type Option = {
   id: string;
@@ -53,7 +50,6 @@ export type InstructorLayoutPage<P = InstructorsLayoutPageProps, IP = P> = NextP
 };
 export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [{ user, settings }] = useAuth();
-  console.log("InstructorsLayout", { user });
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [instructor, setInstructor] = useState<Instructor | null>(null);
@@ -65,12 +61,9 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  // TODO: create useEffect to load semesters
 
   const db = getFirestore();
   const router = useRouter();
-
-  // let role = "instructor";
 
   useEffect(() => {
     const allowAccessByRole = async () => {
@@ -85,89 +78,39 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     allowAccessByRole();
   }, [router, user]);
 
-  // router.route === page.route ? `solid 2px ${theme.palette.common.orange}` : undefined,
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.replace(ROUTES.signIn);
-  //   }
-  // }, [isAuthenticated, router]);
-
-  // useEffect(() => {
-  //   if (!user) return console.warn("Not user found, wait please");
-  //   // window.document.body.classList.remove("Image");
-  //   console.log("user", user);
-  //   const getInstructor = async () => {
-  //     const instructorsRef = collection(db, "instructors");
-  //     const q = query(instructorsRef, where("uname", "==", user.uname));
-  //     const userNodeDoc = await getDocs(q);
-  //     if (!userNodeDoc.docs.length) return;
-
-  //     const intructor = userNodeDoc.docs[0].data() as Instructor;
-  //     setInstructor(intructor);
-  //     const courses = getCoursesByInstructor(intructor);
-  //     const semester = Object.keys(courses);
-
-  //     if (!semester.length) {
-  //       router.push(ROUTES.instructorsSettings);
-  //     }
-
-  //     setSemesters(semester);
-  //     setAllCourses(courses);
-  //     setSelectedSemester(semester[0]);
-  //   };
-
-  //   getInstructor();
-  // }, [db, router, user]);
-
   useEffect(() => {
     if (!user) return console.warn("Not user found, wait please");
-    // window.document.body.classList.remove("Image");
+
     const instructorsRef = collection(db, "instructors");
     const q = query(instructorsRef, where("uname", "==", user.uname));
 
-    const unsub = onSnapshot(
+    const killSnapshot = onSnapshot(
       q,
       async snapshot => {
         const docChanges = snapshot.docChanges();
 
         setIsLoading(false);
-        // devLog("1:userNodes Snapshot:changes", docChanges);
         if (!docChanges.length) {
-          // setIsSubmitting(false);
-          // setFirstLoading(false);
-          // setNoNodesFoundMessage(true);
-          console.log("no instructor");
           return null;
         }
 
-        // docChanges[0].doc.data()
-        // const intructor = userNodeDoc.docs[0].data() as Instructor;
         const intructor = docChanges[0].doc.data() as Instructor;
-        console.log("snapshot:instructor:", intructor);
         setInstructor(intructor);
         const newAllCourses = getCoursesByInstructor(intructor);
-        console.log("snapshot:courses:", newAllCourses);
         const newSemesters = Object.keys(newAllCourses);
-        console.log("snapshot:semester:", newSemesters);
 
         if (!newSemesters.length) {
           router.push(ROUTES.instructorsSettings);
         }
 
         const lastSemester = newSemesters.slice(-1)[0];
-        console.log("snapshot:lastSemester", lastSemester);
 
         setSemesters(prevSemester => {
           setSelectedSemester(selectedSemester => {
             if (!selectedSemester) {
-              console.log("snapshot:setSelected first semester", newSemesters[0]);
-              // setSelectedSemester(newSemesters[0]);
               return newSemesters[0];
             }
             if (!prevSemester.includes(lastSemester)) {
-              // only if a semester is added we need to auto select
-              console.log("snapshot:setSelected last semester", lastSemester);
-              // setSelectedSemester(lastSemester);
               return lastSemester;
             }
 
@@ -183,28 +126,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       }
     );
 
-    return () => unsub();
-    // const getInstructor = async () => {
-    //   const instructorsRef = collection(db, "instructors");
-    //   const q = query(instructorsRef, where("uname", "==", user.uname));
-    //   const userNodeDoc = await getDocs(q);
-    //   if (!userNodeDoc.docs.length) return;
-
-    //   const intructor = userNodeDoc.docs[0].data() as Instructor;
-    //   setInstructor(intructor);
-    //   const courses = getCoursesByInstructor(intructor);
-    //   const semester = Object.keys(courses);
-
-    //   if (!semester.length) {
-    //     router.push(ROUTES.instructorsSettings);
-    //   }
-
-    //   setSemesters(semester);
-    //   setAllCourses(courses);
-    //   setSelectedSemester(semester[0]);
-    // };
-
-    // getInstructor();
+    return () => killSnapshot();
   }, [db, router, user]);
 
   useEffect(() => {
@@ -217,14 +139,16 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
   useEffect(() => {
     if (!instructor) return;
     if (!selectedCourse) return;
-    // console.log("selectedCourseee", selectedCourse);
     const current = selectCourse(selectedCourse, instructor);
 
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
-  // const { semesters, selectedSemester, setSelectedSemester, courses, selectedCourse, setSelectedCourse } =
-  //   useSemesterFilter();
+  const onNewCourse = () => {
+    setSelectedCourse(null);
+    if (router.route === ROUTES.instructorsSettings) return;
+    router.push(ROUTES.instructorsSettings);
+  };
 
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
 
@@ -253,9 +177,9 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
         minHeight: "100vh",
       }}
     >
-      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} />}
-      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} />}
-      {/* <HeaderNavbar /> */}
+      {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
+      {isMovil && <HeaderNavbarMovil options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
+
       <Box sx={{ width: "100%", py: "10px", m: "auto", px: { xs: "10px", md: "20px" } }}>
         <SemesterFilter
           semesters={semesters}
@@ -266,6 +190,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
           setSelectedCourse={setSelectedCourse}
           isMovil={isMovil}
           role={user.role}
+          currentSemester={currentSemester}
         />
       </Box>
 
@@ -286,11 +211,6 @@ const getCourseBySemester = (semester: string | undefined, courses: { [key: stri
   if (!semester) return [];
   return courses[semester] ?? [];
 };
-
-// const getFirstCourse = (semester: string | undefined, courses: { [key: string]: string[] }): string | undefined => {
-//   const coursesBySemester = getCourseBySemester(semester, courses);
-//   return coursesBySemester[0] ?? undefined;
-// };
 
 type CoursesResult = {
   [key: string]: string[];

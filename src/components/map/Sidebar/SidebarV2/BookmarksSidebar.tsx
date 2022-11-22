@@ -7,7 +7,6 @@ import bookmarksDarkTheme from "../../../../../public/bookmarks-dark-mode.jpg";
 import bookmarksLightTheme from "../../../../../public/bookmarks-light-theme.jpg";
 import { buildFullNodes, getNodes } from "../../../../lib/utils/nodesSyncronization.utils";
 import { FullNodeData, FullNodesData, UserNodeChanges, UserNodesData } from "../../../../nodeBookTypes";
-// import { MemoizedSidebarTabs } from "../../SidebarTabs/SidebarTabs";
 import { BookmarksList } from "../BookmarksList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -17,14 +16,12 @@ type SearcherSidebarProps = {
   theme: UserTheme;
   openLinkedNode: any;
   username: string;
+  innerHeight?: number;
 };
-
-// type BookmarkTabOption = "Updated" | "Studied";
 
 export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNode }: SearcherSidebarProps) => {
   const db = getFirestore();
   const [bookmarks, setBookmarks] = useState<FullNodesData>({});
-  // const [optionSelected, setOptionSelected] = useState<BookmarkTabOption>("Updated");
   const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -57,7 +54,6 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
     );
 
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
-      // console.log("on snapshot");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return null;
 
@@ -80,7 +76,6 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
   }, [db, username]);
 
   const bookmarkedUserNodes = useMemo(() => {
-    // console.log("bookmarkedUserNodes");
     return Object.keys(bookmarks).map(key => bookmarks[key]);
   }, [bookmarks]);
 
@@ -103,6 +98,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       onClose={onClose}
       width={window.innerWidth > 899 ? 430 : window.innerWidth}
       height={window.innerWidth > 899 ? 100 : 35}
+      innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={
         <Box
