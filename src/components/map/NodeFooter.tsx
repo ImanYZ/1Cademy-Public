@@ -94,7 +94,6 @@ const NodeFooter = ({
   open,
   identifier,
   // activeNode,
-  citationsSelected,
   // proposalsSelected,
   // acceptedProposalsSelected,
   // commentsSelected,
@@ -503,7 +502,7 @@ const NodeFooter = ({
                     }}
                   >
                     <>
-                      {citationsSelected ? (
+                      {openSidebar === "CITATIONS" ? (
                         <>
                           <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
                           <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
@@ -543,7 +542,7 @@ const NodeFooter = ({
                     <>
                       <LocalOfferIcon
                         // className={openPart === "Tags" ? "orange-text" : "grey-text"}
-                        color={openPart === "Tags" ? "primary" : "secondary"}
+
                         sx={{ fontSize: "16px" }}
                       />
                       <span>{shortenNumber(tags.length, 2, false)}</span>
