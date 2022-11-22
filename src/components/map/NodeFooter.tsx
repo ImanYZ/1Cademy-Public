@@ -308,17 +308,17 @@ const NodeFooter = ({
             <Box sx={{ display: "flex", alignItems: "center", marginLeft: "3px" }}>
               <Box
                 className={
-                  (openSidebar === "PROPOSALS" || editable) && nodeBookState.selectedNode === identifier
+                  (openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier) || editable
                     ? "select-tab-button-node-footer"
                     : "tab-button-node-footer"
                 }
                 sx={{
                   background: theme =>
                     theme.palette.mode === "dark"
-                      ? (openSidebar === "PROPOSALS" || editable) && nodeBookState.selectedNode === identifier
+                      ? (openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier) || editable
                         ? "#414141"
                         : "transparent"
-                      : (openSidebar === "PROPOSALS" || editable) && nodeBookState.selectedNode === identifier
+                      : (openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier) || editable
                       ? "#DCDCDC"
                       : "transparent",
                 }}
