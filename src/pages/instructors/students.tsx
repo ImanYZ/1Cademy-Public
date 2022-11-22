@@ -36,9 +36,9 @@ const filterChoices: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newProposals",
-  "Edit Node Proposals": "editNodeProposals",
-  "Proposals Points": "proposalsPoints",
+  "Child Proposals": "newProposals",
+  "Edit  Proposals": "editNodeProposals",
+  "Proposal Points": "proposalsPoints",
   Questions: "questions",
   "Question Points": "questionPoints",
   Vote: "vote",
@@ -71,9 +71,9 @@ const keys = [
   "Wrongs",
   "Corrects",
   "Awards",
-  "New Proposals",
-  "Edit Node Proposals",
-  "Proposals Points",
+  "Child Proposals",
+  "Edit  Proposals",
+  "Proposal Points",
   "Questions",
   "Question Points",
   "Vote",
@@ -89,9 +89,9 @@ const keysColumns: any = {
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
-  "New Proposals": "newProposals",
-  "Edit Node Proposals": "editNodeProposals",
-  "Proposals Points": "proposalsPoints",
+  "Child Proposals": "newProposals",
+  "Edit  Proposals": "editNodeProposals",
+  "Proposal Points": "proposalsPoints",
   Questions: "questions",
   "Question Points": "questionPoints",
   Vote: "vote",
@@ -862,11 +862,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
-                                <Link onClick={() => openThisProfile(row)}>
-                                  {" "}
-                                  <>{row[colmn]}</>
-                                </Link>
+                              <LinkNext passHref href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
+                                <Link onClick={() => openThisProfile(row)}>{row[colmn]}</Link>
                               </LinkNext>
                             ) : (
                               <>{row[colmn]}</>
