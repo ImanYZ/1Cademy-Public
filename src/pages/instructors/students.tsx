@@ -862,11 +862,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
-                                <Link onClick={() => openThisProfile(row)}>
-                                  {" "}
-                                  <>{row[colmn]}</>
-                                </Link>
+                              <LinkNext passHref href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
+                                <Link onClick={() => openThisProfile(row)}>{row[colmn]}</Link>
                               </LinkNext>
                             ) : (
                               <>{row[colmn]}</>
