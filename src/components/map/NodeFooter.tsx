@@ -240,7 +240,6 @@ const NodeFooter = ({
 
   const selectCitations = useCallback(
     (event: any) => {
-      openNodePart(event, "Citations");
       selectNode(event, "Citations");
     },
     [selectNode]
