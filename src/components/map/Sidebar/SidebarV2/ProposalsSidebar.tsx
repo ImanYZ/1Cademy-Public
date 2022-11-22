@@ -36,7 +36,6 @@ const ProposalsSidebar = ({
   deleteProposal,
   proposeNewChild,
   openProposal,
-  selectedNode,
   db,
   innerHeight,
 }: ProposalsSidebarProps) => {
@@ -50,25 +49,16 @@ const ProposalsSidebar = ({
   };
 
   useEffect(() => {
-    fetchProposals(setIsAdmin, setIsRetrieving, setProposals, "Primero");
-    // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
-    // Try to solve adding await
-    // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    console.log("versions", 1);
+    fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
+  }, [fetchProposals]);
 
-  useEffect(() => {
-    //setOpenProposalItem(false);
-    if (selectedNode) {
-      fetchProposals(setIsAdmin, setIsRetrieving, setProposals, "Segundo");
-    }
-    // CHECK: a warning in happening here in fetchProposals (is trying to update the state while is rendering)
-    // Try to solve adding await
-    // next-dev.js?3515:24 Warning: Cannot update a component (`Proposals`) while rendering a different component (`Dashboard`)
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNode]);
+  // useEffect(() => {
+  //   console.log("versions", 2);
+  //   if (selectedNode) {
+  //     fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
+  //   }
+  // }, [fetchProposals, selectedNode]);
 
   const proposalsWithId = useMemo(() => {
     return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));

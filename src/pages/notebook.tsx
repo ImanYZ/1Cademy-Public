@@ -2515,6 +2515,7 @@ const Dashboard = ({}: DashboardProps) => {
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
 
+      // iterate version and push userVersion and versionComments
       versionsData.forEach(versionDoc => {
         versionIds.push(versionDoc.id);
         const versionData = versionDoc.data();
@@ -2545,6 +2546,7 @@ const Dashboard = ({}: DashboardProps) => {
         versionsCommentsRefs.push(versionsCommentsQuery);
       });
 
+      // merge version and userVersion: version[id] = {...version[id],userVersion}
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async userVersionsRef => {
@@ -2568,6 +2570,7 @@ const Dashboard = ({}: DashboardProps) => {
         );
       }
 
+      // build version comments {}
       if (versionsCommentsRefs.length > 0) {
         await Promise.all(
           versionsCommentsRefs.map(async versionsCommentsRef => {
@@ -2591,6 +2594,9 @@ const Dashboard = ({}: DashboardProps) => {
           })
         );
 
+        console.log("versions merge versionComments", { ...versions });
+
+        // merge comments and userVersionComment
         if (userVersionsCommentsRefs.length > 0) {
           await Promise.all(
             userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
@@ -2611,11 +2617,17 @@ const Dashboard = ({}: DashboardProps) => {
           );
         }
       }
+      console.log("versions merge UserVersionComments", { ...versions });
+
+      // merge comments into versions
       Object.values(comments).forEach((comment: any) => {
         versionId = comment.version;
         delete comment.version;
         versions[versionId].comments.push(comment);
       });
+
+      console.log("versions", { ...versions });
+
       const proposalsTemp = Object.values(versions);
       const orderedProposals = proposalsTemp.sort(
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
@@ -2768,13 +2780,13 @@ const Dashboard = ({}: DashboardProps) => {
           nodeType: selectedNodeType,
           nodeId: nodeBookState.selectedNode,
         };
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         await postWithToken("/deleteVersion", postData);
 
         let proposalsTemp = [...proposals];
         proposalsTemp.splice(proposalIdx, 1);
         setProposals(proposalsTemp);
-        setIsSubmitting(false);
+        // setIsSubmitting(false);
         scrollToNode(nodeBookState.selectedNode);
       }
     },
