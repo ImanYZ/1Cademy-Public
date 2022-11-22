@@ -367,6 +367,31 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const gg = getGeneralStats(res);
       console.log("res", res, gg);
 
+      // [{d1}{d2}]
+      // {c:[d1,d2]}
+      const ts = res.reduce(
+        (a: TrendStats, c): TrendStats => {
+          return {
+            childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
+            editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
+            links: [...a.links, { date: new Date(c.date), num: c.value.links }],
+            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+            questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
+            votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
+          };
+        },
+        {
+          childProposals: [],
+          editProposals: [],
+          links: [],
+          nodes: [],
+          questions: [],
+          votes: [],
+        }
+      );
+      console.log("res:ts", ts);
+      setTrendStats(ts);
+
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
