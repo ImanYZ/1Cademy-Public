@@ -657,6 +657,7 @@ const Node = ({
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
+                openSidebar={openSidebar}
               />
             </div>
           </div>
@@ -758,6 +759,7 @@ const Node = ({
                 citations={citations}
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
+                openSidebar={openSidebar}
               />
             </div>
           </div>
