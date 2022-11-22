@@ -14,9 +14,7 @@ export const INITIAL_STATE: NodeBookState = {
   searchByTitleOnly: false,
   nodeTitleBlured: false,
   openEditButton: false,
-  openEditSection: false,
   nodeId: null,
-  editAbleNodeId: null,
   isMenuOpen: false,
   lastOperation: "CancelProposals",
 };
@@ -49,8 +47,6 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, searchByTitleOnly: action.payload };
     case "setOpenEditButton":
       return { ...state, openEditButton: action.payload.status, nodeId: action.payload.nodeId };
-    case "setOpenEditSection":
-      return { ...state, openEditSection: action.payload.status, editAbleNodeId: action.payload.nodeId };
     case "setIsMenuOpen":
       return { ...state, isMenuOpen: action.payload };
     default:

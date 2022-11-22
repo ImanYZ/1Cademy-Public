@@ -185,10 +185,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
     if (!scrollTo) return;
     props.setAbleToPropose(false);
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
-    nodeBookDispatch({
-      type: "setOpenEditSection",
-      payload: { status: false, nodeId: null },
-    });
     props.setOperation("CancelProposals");
     props.closeSideBar();
   };

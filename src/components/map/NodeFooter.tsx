@@ -138,9 +138,10 @@ const NodeFooter = ({
   user,
   setOpenSideBar,
   locked,
+  openSidebar,
 }: NodeFooterProps) => {
   const router = useRouter();
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const { nodeBookState } = useNodeBook();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
@@ -206,17 +207,6 @@ const NodeFooter = ({
       //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
       //   });
       // }
-      if (nodeBookState.editAbleNodeId != identifier) {
-        nodeBookDispatch({
-          type: "setOpenEditSection",
-          payload: { status: true, nodeId: identifier },
-        });
-      } else {
-        nodeBookDispatch({
-          type: "setOpenEditSection",
-          payload: { status: !nodeBookState.openEditSection, nodeId: identifier },
-        });
-      }
       selectNode(event, "Proposals"); // Pass correct data
     },
     [selectNode]
@@ -231,7 +221,7 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-
+  console.log(openSidebar, "openSidebar");
   const narrateNode = useCallback(() => {
     if (!window.speechSynthesis.speaking) {
       const msg = new SpeechSynthesisUtterance("Node title: " + title + " \n " + "Node content: " + content);
@@ -319,17 +309,17 @@ const NodeFooter = ({
             <Box sx={{ display: "flex", alignItems: "center", marginLeft: "3px" }}>
               <Box
                 className={
-                  nodeBookState.openEditSection && nodeBookState.editAbleNodeId === identifier
+                  (openSidebar === "PROPOSALS" || editable) && nodeBookState.selectedNode === identifier
                     ? "select-tab-button-node-footer"
                     : "tab-button-node-footer"
                 }
                 sx={{
                   background: theme =>
                     theme.palette.mode === "dark"
-                      ? nodeBookState.openEditSection && nodeBookState.editAbleNodeId === identifier
+                      ? (openSidebar === "PROPOSALS" || editable) && nodeBookState.selectedNode === identifier
                         ? "#414141"
                         : "transparent"
-                      : nodeBookState.openEditSection && nodeBookState.editAbleNodeId === identifier
+                      : (openSidebar === "PROPOSALS" || editable) && nodeBookState.selectedNode === identifier
                       ? "#DCDCDC"
                       : "transparent",
                 }}
