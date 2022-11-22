@@ -46,7 +46,7 @@ const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
-type SearcherSidebarProps = { openLinkedNode: any; open: boolean; onClose: () => void };
+type SearcherSidebarProps = { openLinkedNode: any; open: boolean; onClose: () => void; innerHeight?: number };
 
 type Pagination = {
   data: any[];
@@ -57,7 +57,7 @@ type Pagination = {
 
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
-const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps) => {
+const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
 
@@ -214,6 +214,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose }: SearcherSidebarProps
       onClose={onClose}
       width={window.innerWidth > 899 ? 430 : window.innerWidth}
       height={window.innerWidth > 899 ? 100 : window.innerWidth > 375 ? 40 : 50}
+      innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={
         <Box

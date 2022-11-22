@@ -3092,6 +3092,7 @@ const Dashboard = ({}: DashboardProps) => {
               username={user.uname}
               open={openSidebar === "BOOKMARKS_SIDEBAR"}
               onClose={() => setOpenSidebar(null)}
+              innerHeight={innerHeight}
             />
           )}
           {user?.uname && (
@@ -3099,6 +3100,7 @@ const Dashboard = ({}: DashboardProps) => {
               openLinkedNode={openLinkedNode}
               open={openSidebar === "SEARCHER_SIDEBAR"}
               onClose={() => setOpenSidebar(null)}
+              innerHeight={innerHeight}
             />
           )}
           {user?.uname && (
@@ -3108,6 +3110,7 @@ const Dashboard = ({}: DashboardProps) => {
               username={user.uname}
               open={openSidebar === "NOTIFICATION_SIDEBAR"}
               onClose={() => setOpenSidebar(null)}
+              innerHeight={innerHeight}
             />
           )}
           {user?.uname && (
@@ -3118,6 +3121,7 @@ const Dashboard = ({}: DashboardProps) => {
               tagId={user.tagId}
               open={openSidebar === "PENDING_PROPOSALS"}
               onClose={() => onCloseSidebar()}
+              innerHeight={innerHeight}
             />
           )}
           {user?.uname && (
@@ -3143,6 +3147,7 @@ const Dashboard = ({}: DashboardProps) => {
               proposeNewChild={proposeNewChild}
               openProposal={openProposal}
               db={db}
+              innerHeight={innerHeight}
             />
           )}
           {user && reputation && openSidebar === "USER_SETTINGS" && (
@@ -3165,6 +3170,7 @@ const Dashboard = ({}: DashboardProps) => {
               onClose={() => setOpenSidebar(null)}
               openLinkedNode={openLinkedNode}
               identifier={nodeBookState.selectedNode}
+              innerHeight={innerHeight}
             />
           )}
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
