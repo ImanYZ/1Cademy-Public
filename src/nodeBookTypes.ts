@@ -123,6 +123,7 @@ export type SetOpenEditButtonAction = {
   type: "setOpenEditButton";
   payload: any;
 };
+
 export type SetIsMenuOpen = {
   type: "setIsMenuOpen";
   payload: any;
