@@ -46,8 +46,6 @@ export function SankeyChart(props: ISankeyChart) {
 
     let data: any[] = JSON.parse(JSON.stringify(props.sankeyData));
 
-    console.log(data);
-
     // load the data
     data = data.map((row: any) => {
       row.target = `${row.target}$`;
@@ -189,8 +187,8 @@ export function SankeyChart(props: ISankeyChart) {
           "stroke-opacity": ".9",
         },
         "& .sankey-node-title": {
-          fill: "#FFFFFF",
-          // "fill": theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined)
+          // fill: "#FFFFFF",
+          fill: theme => (theme.palette.mode !== "light" ? "#FFFFFF" : undefined),
         },
       }}
     >
