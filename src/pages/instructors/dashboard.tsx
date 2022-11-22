@@ -190,6 +190,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
 
   const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
@@ -484,7 +485,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
-  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
+
+  const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 320 : isDesktop ? 230 : 220;
+
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
@@ -657,7 +660,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
+            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>

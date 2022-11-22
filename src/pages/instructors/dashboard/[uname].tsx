@@ -58,7 +58,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
-  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
+  const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
+
+  const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 320 : isDesktop ? 230 : 220;
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
@@ -587,7 +589,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isXlDesktop ? 3 : isTablet ? 2 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
