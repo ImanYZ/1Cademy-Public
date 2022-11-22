@@ -109,7 +109,7 @@ const sumChapterPerDay = (chapters: ISemesterStudentStatChapter[]) => {
       childProposals: a.childProposals + c.nodes,
       editProposals: a.editProposals + c.nodes + c.proposals,
       links: a.links + c.links,
-      nodes: a.nodes + c.nodes, // TODO: check this
+      nodes: a.nodes + c.newNodes, // TODO: check this
       questions: a.questions + c.questions,
       votes: a.votes + c.agreementsWithInst + c.disagreementsWithInst,
     }),
