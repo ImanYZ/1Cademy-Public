@@ -221,7 +221,6 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-  console.log(openSidebar, "openSidebar");
   const narrateNode = useCallback(() => {
     if (!window.speechSynthesis.speaking) {
       const msg = new SpeechSynthesisUtterance("Node title: " + title + " \n " + "Node content: " + content);
