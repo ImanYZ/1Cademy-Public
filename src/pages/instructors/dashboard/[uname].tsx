@@ -23,15 +23,15 @@ import { useWindowSize } from "../../../hooks/useWindowSize";
 import {
   BubbleAxis,
   BubbleStats,
+  GeneralSemesterStudentsStats,
   MaxPoints,
-  SemesterStats,
   SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
   StackedBarStats,
   /*  Trends, */
 } from "../../../instructorsTypes";
-import { getSemStat, getStackedBarStat } from "../../../lib/utils/charts.utils";
+import { getGeneralStats, getStackedBarStat, mapStudentsStatsToDataByDates } from "../../../lib/utils/charts.utils";
 import {
   ISemester,
   ISemesterStudent /* ISemesterStudentStatDay */,
@@ -42,8 +42,6 @@ import {
   BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
-  getChildProposal,
-  getEditProposals,
   getMaxMinVoxPlotData,
   groupStudentPointsDayChapter,
   makeTrendData,
@@ -60,13 +58,17 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
-  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
+  const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
+
+  const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 320 : isDesktop ? 230 : 220;
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
 
   //General
-  const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
+  const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
+  const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
+
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
   const [semesterStudentsVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
@@ -139,7 +141,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
-        setSemesterStats(null);
         setIsLoading(false);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
@@ -149,7 +150,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-      setSemesterStats(getSemStat(semester));
       setIsLoading(false);
       setThereIsData(true);
     };
@@ -264,23 +264,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStatsIncomplete = userDailyStatDoc.docs
         .map(dailyStat => dailyStat.data() as SemesterStudentStat)
         .slice(0, 1);
-
       const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
+      const res = mapStudentsStatsToDataByDates(userDailyStats);
+      const gg = getGeneralStats(res);
+      setSemesterStudentStats(gg);
 
-      console.log("userDailyStatsIncomplete", { userDailyStatsIncomplete, userDailyStats });
-
-      setStudentVoteStat(prev => {
-        if (!prev) return null;
-        const res = {
-          ...prev,
-          newNodes: getChildProposal(userDailyStats),
-          improvements: getEditProposals(userDailyStats),
-        };
-        return res;
-      });
       const proposalsPoints = groupStudentPointsDayChapter(
         userDailyStats[0],
         "proposals",
@@ -335,15 +326,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      setSemesterStats(prev => {
-        if (!prev) return null;
-        const res = {
-          ...prev,
-          newNodeProposals: getChildProposal(userDailyStats),
-          improvements: getEditProposals(userDailyStats),
-        };
-        return res;
-      });
+      const res = mapStudentsStatsToDataByDates(userDailyStats);
+      const gg = getGeneralStats(res);
+
+      setSemesterStats(gg);
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
@@ -463,7 +449,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               semesterStats={semesterStats}
               semesterTitle={currentSemester.title}
               studentsCounter={studentsCounter}
-              student={studentVoteStat}
+              student={semesterStudentStats}
             />
           )}
         </Paper>
@@ -603,7 +589,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
+            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isXlDesktop ? 3 : isTablet ? 2 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>

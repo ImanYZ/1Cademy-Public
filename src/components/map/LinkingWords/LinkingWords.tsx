@@ -191,7 +191,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
     <>
-      <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
+      <Box sx={{ mx: "10px", borderTop: "solid 1px #484848" }} />
       <div className="LinkingWordsContainer card-action">
         <Box className="LearnBefore" sx={{ borderRight: "solid 1px" }}>
           {props.openPart === "LinkingWords" && (

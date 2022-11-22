@@ -55,7 +55,7 @@ type UserSettingsSidebarProps = {
 
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
 
-export const UserSettigsSidebar = ({
+const UserSettigsSidebar = ({
   open,
   onClose,
   user,
@@ -581,13 +581,13 @@ export const UserSettigsSidebar = ({
     return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
   };
 
-  const canShowOtherEthnicityInput = (ethnicity: string[]) => {
+  const canShowOtherEthnicityInput = useCallback((ethnicity: string[]) => {
     if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
     if (ethnicity.some((ethnicityItem: string) => !isInEthnicityValues(ethnicityItem))) return true;
     return false;
-  };
+  }, []);
 
-  const mergeEthnicityOtherValueWithUserEthnicity = (user: User, otherEthnicity: string) => {
+  const mergeEthnicityOtherValueWithUserEthnicity = useCallback((user: User, otherEthnicity: string) => {
     const toRemoveOtherValues = !user.ethnicity.includes(ETHNICITY_VALUES[6]);
     const processedUserEthnicity = toRemoveOtherValues
       ? user.ethnicity.filter(eth => isInEthnicityValues(eth))
@@ -595,7 +595,7 @@ export const UserSettigsSidebar = ({
 
     const filteredEthnicities = processedUserEthnicity.filter(cur => cur !== ETHNICITY_VALUES[6]);
     return [...filteredEthnicities, otherEthnicity];
-  };
+  }, []);
 
   const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return null;
@@ -608,215 +608,247 @@ export const UserSettigsSidebar = ({
     const filteredValues = userValues.filter(item => isInValues(item));
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
-  const tabsItems = [
-    {
-      title: "Account",
-      content: (
-        <div
-          id="AccountSettings"
-          style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
-        >
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={settings.theme === "Dark"} onChange={handleThemeSwitch} />}
-              label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
-            />
-          </FormGroup>
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />}
-              label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
-            />
-          </FormGroup>
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={settings.view === "Graph"} onChange={handleViewSwitch} />}
-              label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
-            />
-          </FormGroup>
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={!user.chooseUname} onChange={e => handlesChooseUnameSwitch(e, user)} />}
-              label={`Display name: ${getDisplayNameValue(user)}`}
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch checked={settings.showClusterOptions} onChange={e => handleShowClusterOptionsSwitch(e)} />
-              }
-              label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
-            />
-          </FormGroup>
-
-          {settings.showClusterOptions && (
+  const tabsItems = useMemo(() => {
+    return [
+      {
+        title: "Account",
+        content: (
+          <div
+            id="AccountSettings"
+            style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
+          >
             <FormGroup>
               <FormControlLabel
-                control={<Switch checked={settings.showClusters} onChange={e => handleShowClustersSwitch(e)} />}
-                label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
+                control={<Switch checked={settings.theme === "Dark"} onChange={handleThemeSwitch} />}
+                label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
               />
             </FormGroup>
-          )}
-
-          <MemoizedInputSave
-            identification="fNameInput"
-            initialValue={user.fName || ""} //TODO: important fill empty user field
-            onSubmit={changeAttr("fName")}
-            setState={(fName: string) => dispatch({ type: "setAuthUser", payload: { ...user, fName } })}
-            label="Change your first name"
-          />
-
-          <MemoizedInputSave
-            identification="lNameInput"
-            initialValue={user.lName || ""} //TODO: important fill empty user field
-            onSubmit={changeAttr("lName")}
-            setState={(lName: string) => dispatch({ type: "setAuthUser", payload: { ...user, lName } })}
-            label="Change your last name"
-          />
-
-          <div className="AccountSettingsButtons">
-            <MemoizedMetaButton onClick={logoutClick}>
-              <div className="AccountSettingsButton">
-                <span id="LogoutButtonContent">
-                  <ExitToAppIcon />
-                  <span id="LogoutButtonText">Logout</span>
-                </span>
-              </div>
-            </MemoizedMetaButton>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Personal",
-      content: (
-        <div id="PersonalSettings">
-          <Autocomplete
-            id="language"
-            value={user.lang}
-            onChange={(_, value) => handleChange({ target: { value, name: "language" } })}
-            options={languages}
-            renderInput={params => <TextField {...params} label="Language" />}
-            fullWidth
-            sx={{ mb: "16px" }}
-          />
-
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <LocalizationProvider dateAdapter={AdapterDaysJs}>
-              <DatePicker
-                value={user.birthDate}
-                onChange={value => handleChange({ target: { value, name: "birthDate" } })}
-                renderInput={params => <TextField {...params} id="birthDate" label="Birth Date" name="birthDate" />}
+            <FormGroup>
+              <FormControlLabel
+                control={<Switch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />}
+                label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
               />
-            </LocalizationProvider>
-            <Autocomplete
-              id="gender"
-              value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
-              onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
-              options={GENDER_VALUES}
-              renderInput={params => <TextField {...params} label="Gender" />}
-              fullWidth
-              sx={{ mb: "16px" }}
-            />
-          </Box>
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={<Switch checked={settings.view === "Graph"} onChange={handleViewSwitch} />}
+                label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={<Switch checked={!user.chooseUname} onChange={e => handlesChooseUnameSwitch(e, user)} />}
+                label={`Display name: ${getDisplayNameValue(user)}`}
+              />
+            </FormGroup>
 
-          {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
-            <MemoizedInputSave
-              identification="genderOtherValue"
-              initialValue={genderOtherValue} //TODO: important fill empty user field
-              onSubmit={(value: any) => changeAttr("gender")(value)}
-              setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })}
-              label="Please specify your gender."
-            />
-          )}
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch checked={settings.showClusterOptions} onChange={e => handleShowClusterOptionsSwitch(e)} />
+                }
+                label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
+              />
+            </FormGroup>
 
-          <Autocomplete
-            id="ethnicity"
-            value={getSelectedOptionsByValue(user.ethnicity, isInEthnicityValues, ETHNICITY_VALUES[6])}
-            onChange={(_, value) => handleChange({ target: { value, name: "ethnicity" } })}
-            // structure based from https://blog.hubspot.com/service/survey-demographic-questions
-            options={ETHNICITY_VALUES}
-            renderInput={params => <TextField {...params} label="Ethnicity" />}
-            fullWidth
-            multiple
-            sx={{ mb: "16px" }}
-          />
-          {canShowOtherEthnicityInput(user.ethnicity || []) && (
+            {settings.showClusterOptions && (
+              <FormGroup>
+                <FormControlLabel
+                  control={<Switch checked={settings.showClusters} onChange={e => handleShowClustersSwitch(e)} />}
+                  label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
+                />
+              </FormGroup>
+            )}
+
             <MemoizedInputSave
-              identification="ethnicityOtherValue"
-              initialValue={ethnicityOtherValue} //TODO: important fill empty user field
-              onSubmit={(value: any) => changeAttr("ethnicity")(mergeEthnicityOtherValueWithUserEthnicity(user, value))}
-              setState={setEthnicityOtherValue}
-              label="Please specify your ethnicity."
+              identification="fNameInput"
+              initialValue={user.fName || ""} //TODO: important fill empty user field
+              onSubmit={changeAttr("fName")}
+              setState={(fName: string) => dispatch({ type: "setAuthUser", payload: { ...user, fName } })}
+              label="Change your first name"
             />
-          )}
-          <Autocomplete
-            id="country"
-            value={user.country}
-            onChange={(_, value) => handleChange({ target: { value, name: "country" } })}
-            options={countries.map(cur => cur.name)}
-            renderInput={params => <TextField {...params} label="Country" />}
-            fullWidth
-            sx={{ mb: "16px" }}
-          />
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+
+            <MemoizedInputSave
+              identification="lNameInput"
+              initialValue={user.lName || ""} //TODO: important fill empty user field
+              onSubmit={changeAttr("lName")}
+              setState={(lName: string) => dispatch({ type: "setAuthUser", payload: { ...user, lName } })}
+              label="Change your last name"
+            />
+
+            <div className="AccountSettingsButtons">
+              <MemoizedMetaButton onClick={logoutClick}>
+                <div className="AccountSettingsButton">
+                  <span id="LogoutButtonContent">
+                    <ExitToAppIcon />
+                    <span id="LogoutButtonText">Logout</span>
+                  </span>
+                </div>
+              </MemoizedMetaButton>
+            </div>
+          </div>
+        ),
+      },
+      {
+        title: "Personal",
+        content: (
+          <div id="PersonalSettings">
             <Autocomplete
-              id="state"
-              value={user.state}
-              onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
-              options={states.map(cur => cur.name)}
-              renderInput={params => <TextField {...params} label="State" />}
+              id="language"
+              value={user.lang}
+              onChange={(_, value) => handleChange({ target: { value, name: "language" } })}
+              options={languages}
+              renderInput={params => <TextField {...params} label="Language" />}
               fullWidth
               sx={{ mb: "16px" }}
             />
+
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <LocalizationProvider dateAdapter={AdapterDaysJs}>
+                <DatePicker
+                  value={user.birthDate}
+                  onChange={value => handleChange({ target: { value, name: "birthDate" } })}
+                  renderInput={params => <TextField {...params} id="birthDate" label="Birth Date" name="birthDate" />}
+                />
+              </LocalizationProvider>
+              <Autocomplete
+                id="gender"
+                value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
+                onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                options={GENDER_VALUES}
+                renderInput={params => <TextField {...params} label="Gender" />}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+            </Box>
+
+            {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
+              <MemoizedInputSave
+                identification="genderOtherValue"
+                initialValue={genderOtherValue} //TODO: important fill empty user field
+                onSubmit={(value: any) => changeAttr("gender")(value)}
+                setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })}
+                label="Please specify your gender."
+              />
+            )}
+
             <Autocomplete
-              id="city"
-              value={user.city}
-              onChange={(_, value) => handleChange({ target: { value, name: "city" } })}
-              options={cities.map(cur => cur.name)}
-              renderInput={params => <TextField {...params} label="City" />}
+              id="ethnicity"
+              value={getSelectedOptionsByValue(user.ethnicity, isInEthnicityValues, ETHNICITY_VALUES[6])}
+              onChange={(_, value) => handleChange({ target: { value, name: "ethnicity" } })}
+              // structure based from https://blog.hubspot.com/service/survey-demographic-questions
+              options={ETHNICITY_VALUES}
+              renderInput={params => <TextField {...params} label="Ethnicity" />}
+              fullWidth
+              multiple
+              sx={{ mb: "16px" }}
+            />
+            {canShowOtherEthnicityInput(user.ethnicity || []) && (
+              <MemoizedInputSave
+                identification="ethnicityOtherValue"
+                initialValue={ethnicityOtherValue} //TODO: important fill empty user field
+                onSubmit={(value: any) =>
+                  changeAttr("ethnicity")(mergeEthnicityOtherValueWithUserEthnicity(user, value))
+                }
+                setState={setEthnicityOtherValue}
+                label="Please specify your ethnicity."
+              />
+            )}
+            <Autocomplete
+              id="country"
+              value={user.country}
+              onChange={(_, value) => handleChange({ target: { value, name: "country" } })}
+              options={countries.map(cur => cur.name)}
+              renderInput={params => <TextField {...params} label="Country" />}
               fullWidth
               sx={{ mb: "16px" }}
             />
-          </Box>
-          <MemoizedInputSave
-            identification="reason"
-            initialValue={reason} //TODO: important fill empty user field
-            onSubmit={(value: any) => changeAttr("reason")(value)}
-            setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, reason: value } })}
-            label="Reason for Joining."
-          />
-          <Autocomplete
-            id="foundFrom"
-            value={getValidValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[5], user.foundFrom)}
-            onChange={(_, value) => handleChange({ target: { value, name: "foundFrom" } })}
-            options={FOUND_FROM_VALUES}
-            renderInput={params => <TextField {...params} label="How did you hear about us?" />}
-            fullWidth
-            sx={{ mb: "16px" }}
-          />
-          {(user.foundFrom === "Not listed (Please specify)" || !FOUND_FROM_VALUES.includes(user.foundFrom || "")) && (
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <Autocomplete
+                id="state"
+                value={user.state}
+                onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
+                options={states.map(cur => cur.name)}
+                renderInput={params => <TextField {...params} label="State" />}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+              <Autocomplete
+                id="city"
+                value={user.city}
+                onChange={(_, value) => handleChange({ target: { value, name: "city" } })}
+                options={cities.map(cur => cur.name)}
+                renderInput={params => <TextField {...params} label="City" />}
+                fullWidth
+                sx={{ mb: "16px" }}
+              />
+            </Box>
             <MemoizedInputSave
-              identification="foundFromOtherValue"
-              initialValue={foundFromOtherValue} //TODO: important fill empty user field
-              onSubmit={(value: any) => changeAttr("foundFrom")(value)}
-              setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
-              label="Please specify, How did you hear about us."
+              identification="reason"
+              initialValue={reason} //TODO: important fill empty user field
+              onSubmit={(value: any) => changeAttr("reason")(value)}
+              setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, reason: value } })}
+              label="Reason for Joining."
             />
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Professional",
-      content: (
-        <div id="PersonalSettings">
-          <UserSettingsProfessionalInfo user={user} />
-        </div>
-      ),
-    },
-  ];
+            <Autocomplete
+              id="foundFrom"
+              value={getValidValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[5], user.foundFrom)}
+              onChange={(_, value) => handleChange({ target: { value, name: "foundFrom" } })}
+              options={FOUND_FROM_VALUES}
+              renderInput={params => <TextField {...params} label="How did you hear about us?" />}
+              fullWidth
+              sx={{ mb: "16px" }}
+            />
+            {(user.foundFrom === "Not listed (Please specify)" ||
+              !FOUND_FROM_VALUES.includes(user.foundFrom || "")) && (
+              <MemoizedInputSave
+                identification="foundFromOtherValue"
+                initialValue={foundFromOtherValue} //TODO: important fill empty user field
+                onSubmit={(value: any) => changeAttr("foundFrom")(value)}
+                setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })}
+                label="Please specify, How did you hear about us."
+              />
+            )}
+          </div>
+        ),
+      },
+      {
+        title: "Professional",
+        content: (
+          <div id="PersonalSettings">
+            <UserSettingsProfessionalInfo user={user} />
+          </div>
+        ),
+      },
+    ];
+  }, [
+    canShowOtherEthnicityInput,
+    changeAttr,
+    cities,
+    countries,
+    dispatch,
+    ethnicityOtherValue,
+    foundFromOtherValue,
+    genderOtherValue,
+    handleBackgroundSwitch,
+    handleChange,
+    handleShowClusterOptionsSwitch,
+    handleShowClustersSwitch,
+    handleThemeSwitch,
+    handleViewSwitch,
+    handlesChooseUnameSwitch,
+    languages,
+    logoutClick,
+    mergeEthnicityOtherValueWithUserEthnicity,
+    reason,
+    settings.background,
+    settings.showClusterOptions,
+    settings.showClusters,
+    settings.theme,
+    settings.view,
+    states,
+    user,
+  ]);
   const setUserImage = (newImage: string) => {
     dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
   };
@@ -953,3 +985,6 @@ export const UserSettigsSidebar = ({
     />
   );
 };
+export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar, (prev, next) => {
+  return prev.open === next.open && prev.user === next.user;
+});

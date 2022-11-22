@@ -52,7 +52,7 @@ import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/Sidebar
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
-import { UserSettigsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
+import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -61,7 +61,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
-import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
+import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -3070,103 +3070,102 @@ const Dashboard = ({}: DashboardProps) => {
             </Drawer>
           }
           {user && reputation && (
-            <ToolbarSidebar
-              open={!openSidebar}
-              onClose={() => setOpenSidebar(null)}
-              reloadPermanentGrpah={reloadPermanentGraph}
-              user={user}
-              reputation={reputation}
-              theme={settings.theme}
-              setOpenSideBar={onOpenSideBar}
-              mapRendered={true}
-              selectedUser={selectedUser}
-              uncheckedNotificationsNum={uncheckedNotificationsNum}
-              bookmarkUpdatesNum={bookmarkUpdatesNum}
-              pendingProposalsNum={pendingProposalsNum}
-            />
+            <Box>
+              <MemoizedToolbarSidebar
+                open={!openSidebar}
+                onClose={() => setOpenSidebar(null)}
+                reloadPermanentGrpah={reloadPermanentGraph}
+                user={user}
+                reputation={reputation}
+                theme={settings.theme}
+                setOpenSideBar={onOpenSideBar}
+                mapRendered={true}
+                selectedUser={selectedUser}
+                uncheckedNotificationsNum={uncheckedNotificationsNum}
+                bookmarkUpdatesNum={bookmarkUpdatesNum}
+                pendingProposalsNum={pendingProposalsNum}
+                openSidebar={openSidebar}
+              />
+
+              <MemoizedBookmarksSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "BOOKMARKS_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                innerHeight={innerHeight}
+              />
+              <MemoizedSearcherSidebar
+                openLinkedNode={openLinkedNode}
+                open={openSidebar === "SEARCHER_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                innerHeight={innerHeight}
+              />
+              <MemoizedNotificationSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "NOTIFICATION_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                innerHeight={innerHeight}
+              />
+              <MemoizedPendingProposalSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                tagId={user.tagId}
+                open={openSidebar === "PENDING_PROPOSALS"}
+                onClose={() => onCloseSidebar()}
+                innerHeight={innerHeight}
+              />
+              <MemoizedUserInfoSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "USER_INFO"}
+                onClose={() => setOpenSidebar(null)}
+              />
+
+              <MemoizedProposalsSidebar
+                theme={settings.theme}
+                open={openSidebar === "PROPOSALS"}
+                onClose={() => onCloseSidebar()}
+                proposeNodeImprovement={proposeNodeImprovement}
+                fetchProposals={fetchProposals}
+                selectedNode={nodeBookState.selectedNode}
+                rateProposal={rateProposal}
+                selectProposal={selectProposal}
+                deleteProposal={deleteProposal}
+                proposeNewChild={proposeNewChild}
+                openProposal={openProposal}
+                db={db}
+                innerHeight={innerHeight}
+              />
+
+              <MemoizedUserSettingsSidebar
+                theme={settings.theme}
+                open={openSidebar === "USER_SETTINGS"}
+                onClose={() => setOpenSidebar(null)}
+                dispatch={dispatch}
+                nodeBookDispatch={nodeBookDispatch}
+                nodeBookState={nodeBookState}
+                userReputation={reputation}
+                user={user}
+                scrollToNode={scrollToNode}
+                settings={settings}
+              />
+              {nodeBookState.selectedNode && (
+                <CitationsSidebar
+                  open={openSidebar === "CITATIONS"}
+                  onClose={() => setOpenSidebar(null)}
+                  openLinkedNode={openLinkedNode}
+                  identifier={nodeBookState.selectedNode}
+                  innerHeight={innerHeight}
+                />
+              )}
+            </Box>
           )}
-          {user?.uname && (
-            <MemoizedBookmarksSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              open={openSidebar === "BOOKMARKS_SIDEBAR"}
-              onClose={() => setOpenSidebar(null)}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedSearcherSidebar
-              openLinkedNode={openLinkedNode}
-              open={openSidebar === "SEARCHER_SIDEBAR"}
-              onClose={() => setOpenSidebar(null)}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedNotificationSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              open={openSidebar === "NOTIFICATION_SIDEBAR"}
-              onClose={() => setOpenSidebar(null)}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedPendingProposalSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              tagId={user.tagId}
-              open={openSidebar === "PENDING_PROPOSALS"}
-              onClose={() => onCloseSidebar()}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedUserInfoSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              open={openSidebar === "USER_INFO"}
-              onClose={() => setOpenSidebar(null)}
-            />
-          )}
-          {user?.uname && openSidebar === "PROPOSALS" && (
-            <MemoizedProposalsSidebar
-              theme={settings.theme}
-              open={openSidebar === "PROPOSALS"}
-              onClose={() => onCloseSidebar()}
-              proposeNodeImprovement={proposeNodeImprovement}
-              fetchProposals={fetchProposals}
-              selectedNode={nodeBookState.selectedNode}
-              rateProposal={rateProposal}
-              selectProposal={selectProposal}
-              deleteProposal={deleteProposal}
-              proposeNewChild={proposeNewChild}
-              openProposal={openProposal}
-              db={db}
-            />
-          )}
-          {user && reputation && openSidebar === "USER_SETTINGS" && (
-            <UserSettigsSidebar
-              theme={settings.theme}
-              open={openSidebar === "USER_SETTINGS"}
-              onClose={() => setOpenSidebar(null)}
-              dispatch={dispatch}
-              nodeBookDispatch={nodeBookDispatch}
-              nodeBookState={nodeBookState}
-              userReputation={reputation}
-              user={user}
-              scrollToNode={scrollToNode}
-              settings={settings}
-            />
-          )}
-          {user && nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
-            <CitationsSidebar
-              open={openSidebar === "CITATIONS"}
-              onClose={() => setOpenSidebar(null)}
-              openLinkedNode={openLinkedNode}
-              identifier={nodeBookState.selectedNode}
-            />
-          )}
+
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {isQueueWorking && (
             <CircularProgress

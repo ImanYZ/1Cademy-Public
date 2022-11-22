@@ -123,6 +123,7 @@ export type SetOpenEditButtonAction = {
   type: "setOpenEditButton";
   payload: any;
 };
+
 export type SetIsMenuOpen = {
   type: "setIsMenuOpen";
   payload: any;
@@ -131,6 +132,7 @@ export type SetLastOperation = {
   type: "setLastOperation";
   payload: LastOperation;
 };
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction

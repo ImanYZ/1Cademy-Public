@@ -100,7 +100,8 @@ export const SemesterFilter = ({
     >
       <Box
         sx={{
-          display: "flex",
+          display: matches ? " grid" : "flex",
+          gridTemplateColumns: matches ? "repeat(2,1fr)" : "",
           justifyContent: { xs: "space-between", sm: "flex-start" },
           gap: { xs: "16px", md: "16px" },
         }}
@@ -113,7 +114,7 @@ export const SemesterFilter = ({
             value={selectedSemester ?? ""}
             label="Semester"
             onChange={onChangeSemester}
-            sx={{ width: "140px" }}
+            sx={{ width: matches ? "auto" : "140px" }}
           >
             {semesters.map((cur, idx) => (
               <MenuItem key={idx} value={cur}>
@@ -153,7 +154,7 @@ export const SemesterFilter = ({
               value={selectedCourse ?? ""}
               label="Course"
               onChange={onChangeCourse2}
-              sx={{ width: "140px" }}
+              sx={{ width: matches ? "auto" : "140px" }}
             >
               {courses.map((cur, idx) => (
                 <MenuItem key={idx} value={cur}>
