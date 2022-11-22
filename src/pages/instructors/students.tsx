@@ -21,6 +21,7 @@ import Typography from "@mui/material/Typography";
 import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
+import { ISemesterStudentVoteStat } from "src/types/ICourse";
 import { v4 as uuidv4 } from "uuid";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
@@ -118,8 +119,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [selectedColumn, setSelectedColumn] = useState("");
   const [openedProfile, setOpenedProfile] = useState(tableRows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
-  const [states, setStates] = useState([]);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [states, setStates] = useState<ISemesterStudentVoteStat[]>([]);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [usersStatus, setUsersStatus] = useState([]);
   const [newStudents, setNewStudents] = useState([]);
   const [disableEdit, setDisableEdit] = useState(false);
@@ -142,11 +143,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       const statusDoc = await getDocs(qeStatus);
       const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
       const semestersStatsDoc = await getDocs(qe);
-      let statsData: any = [];
+      let statsData: ISemesterStudentVoteStat[] = [];
       let status: any = [];
       if (semestersStatsDoc.docs.length > 0) {
         for (let doc of semestersStatsDoc.docs) {
-          const data = doc.data();
+          const data = doc.data() as ISemesterStudentVoteStat;
           statsData.push(data);
         }
       }
@@ -175,10 +176,15 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
         if (change.type === "added" || change.type === "modified") {
           const _students = change.doc.data().students;
           const { numPoints, numProposalPerDay } = change.doc.data().nodeProposals;
+          console.log("configs", { numPoints, numProposalPerDay });
+          const { onReceiveStar } = change.doc.data().votes;
           const _rows: any = [];
           for (let student of _students) {
-            const stats: any = states.filter((elm: any) => elm.uname === student.uname)[0];
+            const stats: ISemesterStudentVoteStat | undefined = states.find(elm => elm.uname === student.uname);
+            if (!stats) continue;
+
             const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
+            const proposalsPoints = (stats.improvements + stats.newNodes) * (numPoints / numProposalPerDay) || 0;
             _rows.push({
               id: uuidv4(),
               username: student.uname,
@@ -187,10 +193,11 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
-              totalPoints: stats?.totalPoints || 0,
+              totalPoints:
+                proposalsPoints + stats.questionPoints + stats.votePoints + (stats?.instVotes || 0) * onReceiveStar,
               newProposals: stats?.newNodes || 0,
               editNodeProposals: stats?.improvements || 0,
-              proposalsPoints: stats?.improvements * (numPoints / numProposalPerDay) || 0,
+              proposalsPoints,
               corrects: stats?.upVotes || 0,
               wrongs: stats?.downVotes || 0,
               awards: stats?.instVotes || 0,

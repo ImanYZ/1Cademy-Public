@@ -8,8 +8,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   BubbleAxis,
   BubbleStats,
+  GeneralSemesterStudentsStats,
   MaxPoints,
-  SemesterStats,
   SemesterStudentStat,
   /* SemesterStudentStat, */
   SemesterStudentVoteStat,
@@ -41,7 +41,7 @@ import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skelet
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 import { useWindowSize } from "../../hooks/useWindowSize";
-import { getSemStat, getStackedBarStat } from "../../lib/utils/charts.utils";
+import { getGeneralStats, getStackedBarStat, mapStudentsStatsToDataByDates } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
 };
@@ -190,8 +190,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const isTablet = useMediaQuery(theme.breakpoints.only("md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
 
-  const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
+  const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
 
@@ -258,7 +259,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       if (!semesterDoc.docs.length) {
         setBubble([]);
         setStackedBar([]);
-        setSemesterStats(null);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
 
@@ -268,7 +268,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       // semesterStudentVoteState
       const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
       setSemesterStudentVoteState(semester);
-      setSemesterStats(getSemStat(semester));
+      // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
     };
     getSemesterData();
@@ -359,14 +359,41 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         return;
       }
 
-      console.log("userDailyStatsIncomplete");
       const userDailyStatsIncomplete = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
       const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
+      console.log("res");
+      const res = mapStudentsStatsToDataByDates(userDailyStats);
+      console.log("res");
+      const gg = getGeneralStats(res);
+      console.log("res", res, gg);
 
-      console.log("userDailyStatsIncomplete", { userDailyStatsIncomplete, userDailyStats });
+      // [{d1}{d2}]
+      // {c:[d1,d2]}
+      const ts = res.reduce(
+        (a: TrendStats, c): TrendStats => {
+          return {
+            childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
+            editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
+            links: [...a.links, { date: new Date(c.date), num: c.value.links }],
+            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+            questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
+            votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
+          };
+        },
+        {
+          childProposals: [],
+          editProposals: [],
+          links: [],
+          nodes: [],
+          questions: [],
+          votes: [],
+        }
+      );
+      console.log("res:ts", ts);
+      setTrendStats(ts);
 
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -391,15 +418,18 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
-      setSemesterStats(prev => {
-        if (!prev) return null;
-        const res = {
-          ...prev,
-          newNodeProposals: getChildProposal(userDailyStats),
-          improvements: getEditProposals(userDailyStats),
-        };
-        return res;
-      });
+
+      setSemesterStats(gg);
+
+      // setSemesterStats(prev => {
+      //   if (!prev) return null;
+      //   const res = {
+      //     ...prev,
+      //     newNodeProposals: getChildProposal(userDailyStats),
+      //     improvements: getEditProposals(userDailyStats),
+      //   };
+      //   return res;
+      // });
       setBoxStats({
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
@@ -455,7 +485,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
-  const boxPlotWidth = isLgDesktop ? 500 : isDesktop ? 270 : 220;
+
+  const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 320 : isDesktop ? 230 : 220;
+
   if (!thereIsData && !isLoading) {
     return <NoDataMessage />;
   }
@@ -628,7 +660,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               flexWrap: "wrap",
             }}
           >
-            {isLoading && <BoxPlotStatsSkeleton width={300} boxes={isLgDesktop ? 3 : isTablet ? 2 : 1} />}
+            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
             {!isLoading && (
               <>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
