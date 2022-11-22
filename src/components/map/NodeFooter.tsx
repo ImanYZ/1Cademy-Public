@@ -303,20 +303,20 @@ const NodeFooter = ({
           {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
 
           {open && (
-            <Box sx={{ display: "flex", alignItems: "center", marginLeft: "3px" }}>
+            <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "3px" }}>
               <Box
                 className={
-                  (openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier) || editable
+                  openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
                     ? "select-tab-button-node-footer"
                     : "tab-button-node-footer"
                 }
                 sx={{
                   background: theme =>
                     theme.palette.mode === "dark"
-                      ? (openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier) || editable
+                      ? openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
                         ? "#414141"
                         : "transparent"
-                      : (openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier) || editable
+                      : openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
                       ? "#DCDCDC"
                       : "transparent",
                 }}
