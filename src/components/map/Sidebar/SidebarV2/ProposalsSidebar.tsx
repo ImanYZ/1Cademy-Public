@@ -50,10 +50,10 @@ const ProposalsSidebar = ({
   };
 
   useEffect(() => {
-    if (selectedNode) {
+    if (selectedNode && open) {
       fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     }
-  }, [fetchProposals, selectedNode]);
+  }, [fetchProposals, selectedNode, open]);
 
   const proposalsWithId = useMemo(() => {
     return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));
