@@ -49,13 +49,7 @@ const ProposalsSidebar = ({
     setValue(newValue);
   };
 
-  // useEffect(() => {
-  //   console.log("versions", 1);
-  //   fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
-  // }, [fetchProposals]);
-
   useEffect(() => {
-    console.log("versions", 2);
     if (selectedNode) {
       fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     }
@@ -65,64 +59,6 @@ const ProposalsSidebar = ({
     return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));
   }, [db, proposals]);
 
-  // const tabsItems = [
-  //   {
-  //     title: "Pending Proposals",
-  //     content: !isRetrieving ? (
-  //       <Box
-  //         component="ul"
-  //         className="collection"
-  //         sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
-  //       >
-  //         <ProposalsList
-  //           proposals={proposalsWithId}
-  //           setProposals={setProposals}
-  //           proposeNodeImprovement={proposeNodeImprovement}
-  //           fetchProposals={fetchProposals}
-  //           rateProposal={rateProposal}
-  //           selectProposal={selectProposal}
-  //           deleteProposal={deleteProposal}
-  //           editHistory={false}
-  //           proposeNewChild={proposeNewChild}
-  //           openProposal={openProposal}
-  //           isAdmin={isAdmin}
-  //         />
-  //       </Box>
-  //     ) : (
-  //       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
-  //         <CircularProgress />
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     title: "Approved Proposals",
-  //     content: !isRetrieving ? (
-  //       <Box
-  //         component="ul"
-  //         className="collection"
-  //         sx={{ padding: "0px", margin: "0px", display: "flex", flexDirection: "column", gap: "4px" }}
-  //       >
-  //         <ProposalsList
-  //           proposals={proposalsWithId}
-  //           setProposals={setProposals}
-  //           proposeNodeImprovement={proposeNodeImprovement}
-  //           fetchProposals={fetchProposals}
-  //           rateProposal={rateProposal}
-  //           selectProposal={selectProposal}
-  //           deleteProposal={deleteProposal}
-  //           editHistory={true}
-  //           proposeNewChild={proposeNewChild}
-  //           openProposal={openProposal}
-  //           isAdmin={isAdmin}
-  //         />
-  //       </Box>
-  //     ) : (
-  //       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
-  //         <CircularProgress />
-  //       </div>
-  //     ),
-  //   },
-  // ];
   const a11yProps = (index: number) => {
     return {
       id: `simple-tab-${index}`,
@@ -148,34 +84,7 @@ const ProposalsSidebar = ({
       SidebarOptions={
         <Box>
           <Box>
-            <div id="ProposalButtonsCollection">
-              {/* <h6 style={{ margin: '0px' }}>Here Edit proposal component</h6> */}
-              {/* CHECK: I commented this */}
-              {/* <EditProposal
-                openProposal={openProposalItem}
-                proposeNodeImprovement={proposeNodeImprovement}
-                selectedNode={selectedNode}
-              />
-              <div
-                id="ProposalButtonsRow"
-                style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
-              >
-                {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                  (childNodeType: ProposedChildTypesIcons) => {
-                    return (
-                      <NewChildProposal
-                        key={childNodeType}
-                        childNodeType={childNodeType}
-                        icon={proposedChildTypesIcons[childNodeType]}
-                        openProposal={openProposalItem}
-                        setOpenProposal={setOpenProposalItem}
-                        proposeNewChild={proposeNewChild}
-                      />
-                    );
-                  }
-                )}
-              </div> */}
-            </div>
+            <div id="ProposalButtonsCollection">{/* TODO: check proposal options in 1cademy private repo */}</div>
           </Box>
           <Box
             sx={{

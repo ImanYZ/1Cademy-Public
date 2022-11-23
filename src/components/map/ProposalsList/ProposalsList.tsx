@@ -8,27 +8,13 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
-// import { VictoryBar } from "victory";
 import { Editor } from "@/components/Editor";
 
-// import { useRecoilValue } from "recoil";
 import { useAuth } from "../../../context/AuthContext";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
-// import UserHeader from "./UserHeader/UserHeader";
-// import { usernameState } from "../../../../../store/AuthAtoms";
-// import shortenNumber from "../../../../../utils/shortenNumber";
-// import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
-// import MetaButton from "../../../MetaButton/MetaButton";
-// import proposalSummariesGenerator from "../proposalSummariesGenerator";
-// import ProposalItem from "./ProposalItem/ProposalItem";
-// import UserHeader from "./UserHeader/UserHeader";
-
-// import "./ProposalsList.css";
-
-// const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
@@ -47,8 +33,6 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
-  console.log("ProposalsList:proposals", props.proposals);
-  // console.log("ProposalsList", { props });
   const [user] = useAuth();
 
   const username = user.user?.uname;
@@ -79,17 +63,6 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
-  // console.log("-> proposals", props.proposals);
-  // console.log("props.openProposal ", props.proposals);
-
-  // if (!props.proposals.lenght) {
-  //   return (
-  // <Box sx={{ minHeight: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-  //   <Typography sx={{ color: "rgba(120,120,120,0.8)", textAlign: "center" }}>There is not proposals yet</Typography>
-  // </Box>
-  //   );
-  // }
-
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
 
@@ -108,17 +81,14 @@ const ProposalsList = (props: ProposalsListProps) => {
         }
         return (
           <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
-            {/* <UserHeader imageUrl={proposal.imageUrl} /> */}
             <Paper elevation={3} sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
               <Box
-                // className="secondary-content"
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
                   gap: "5px",
                 }}
               >
-                {/* <h5>ProposalID:{proposal.id}</h5> */}
                 <div className="title Time" style={{ fontSize: "12px" }}>
                   {dayjs(proposal.createdAt).fromNow()}
                 </div>
@@ -146,13 +116,6 @@ const ProposalsList = (props: ProposalsListProps) => {
                     tooltipPosition="bottom-start"
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {/* <i
-                      className={
-                        proposal.correct ? "material-icons DoneIcon green-text" : "material-icons DoneIcon grey-text"
-                      }
-                    >
-                      done
-                    </i> */}
                       <DoneIcon className={proposal.correct ? "green-text" : "grey-text"} fontSize="inherit"></DoneIcon>
                       <span>{shortenNumber(proposal.corrects, 2, false)}</span>
                     </Box>
@@ -167,7 +130,6 @@ const ProposalsList = (props: ProposalsListProps) => {
                     tooltipPosition="bottom-start"
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {/* <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>grade</i> */}
                       <GradeIcon className={proposal.award ? "amber-text" : "grey-text"} fontSize="inherit"></GradeIcon>
                       <span>{shortenNumber(proposal.awards, 2, false)}</span>
                     </Box>
@@ -178,7 +140,6 @@ const ProposalsList = (props: ProposalsListProps) => {
                       tooltip="Delete your proposal."
                       tooltipPosition="bottom-start"
                     >
-                      {/* <i className="material-icons grey-text">delete_forever</i> */}
                       <DeleteForeverIcon className="grey-text" fontSize="inherit"></DeleteForeverIcon>
                     </MemoizedMetaButton>
                   )}
@@ -186,7 +147,6 @@ const ProposalsList = (props: ProposalsListProps) => {
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
                 <div className="title Time" style={{ fontSize: "12px" }}>
-                  {/* <div className="title Username">{proposal.proposer}</div> */}
                   <div className="ProposalTitle" style={{ fontSize: "16px", fontWeight: "400" }}>
                     {proposal.title}
                   </div>
@@ -209,21 +169,14 @@ const ProposalsList = (props: ProposalsListProps) => {
                       );
                     })
                   ) : (
-                    // <p>{proposal.summary}</p>
                     <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
-                    // CHECK: I commented this, uncomment when build the editor please
-                    // <HyperEditor readOnly={true} onChange={doNothing} content={proposal.summary} />
                   )}
                 </div>
                 <div className="ProposalBody">
-                  {/* <HyperEditor readOnly={true} onChange={doNothing} content={proposal.proposal} /> */}
-                  {/* <p>{proposal.proposal}</p> */}
                   <Editor label="" readOnly value={proposal.proposal} setValue={() => {}}></Editor>
                 </div>
               </Box>
             </Paper>
-
-            {/* <CommentsList proposal={proposal} /> */}
           </li>
         );
       } else {
@@ -237,7 +190,6 @@ const ProposalsList = (props: ProposalsListProps) => {
               proposalSummaries={proposalSummaries}
               shouldSelectProposal={true}
               showTitle={true}
-              // rateProposal={rateProposalClick(proposal, proposalIdx, true, false, false)}
             />
           </Box>
         );
