@@ -8,27 +8,13 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
-// import { VictoryBar } from "victory";
 import { Editor } from "@/components/Editor";
 
-// import { useRecoilValue } from "recoil";
 import { useAuth } from "../../../context/AuthContext";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 // import { MemoizedMetaButton } from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
-// import UserHeader from "./UserHeader/UserHeader";
-// import { usernameState } from "../../../../../store/AuthAtoms";
-// import shortenNumber from "../../../../../utils/shortenNumber";
-// import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
-// import MetaButton from "../../../MetaButton/MetaButton";
-// import proposalSummariesGenerator from "../proposalSummariesGenerator";
-// import ProposalItem from "./ProposalItem/ProposalItem";
-// import UserHeader from "./UserHeader/UserHeader";
-
-// import "./ProposalsList.css";
-
-// const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
@@ -47,8 +33,6 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = (props: ProposalsListProps) => {
-  console.log("ProposalsList:proposals", props.proposals);
-  // console.log("ProposalsList", { props });
   const [user] = useAuth();
   const theme = useTheme();
 
@@ -80,9 +64,6 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
-  // console.log("-> proposals", props.proposals);
-  // console.log("props.openProposal ", props.proposals);
-
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
 
@@ -101,17 +82,14 @@ const ProposalsList = (props: ProposalsListProps) => {
         }
         return (
           <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
-            {/* <UserHeader imageUrl={proposal.imageUrl} /> */}
             <Paper elevation={3} sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
               <Box
-                // className="secondary-content"
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
                   gap: "5px",
                 }}
               >
-                {/* <h5>ProposalID:{proposal.id}</h5> */}
                 <div className="title Time" style={{ fontSize: "12px" }}>
                   {dayjs(proposal.createdAt).fromNow()}
                 </div>
@@ -126,13 +104,15 @@ const ProposalsList = (props: ProposalsListProps) => {
                     <Button
                       onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
                       variant="contained"
+                      size="small"
                       sx={{
                         borderRadius: "52px",
-                        padding: "0px",
+                        // padding: "0px 8px",
                         minWidth: "50px",
-                        background: theme => theme.palette.common.darkGrayBackground,
-                        // border: "solid 1px #585858",
-                        color: "white",
+                        background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
+                        ":hover": {
+                          background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
+                        },
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -142,12 +122,18 @@ const ProposalsList = (props: ProposalsListProps) => {
                           className={proposal.wrong ? "red-text" : "grey-text"}
                           fontSize="inherit"
                           sx={{
-                            color: "white",
+                            color:
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.white
+                                : theme.palette.common.darkGrayBackground,
                           }}
                         ></CloseIcon>
                         <span
                           style={{
-                            color: "white",
+                            color:
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.white
+                                : theme.palette.common.darkGrayBackground,
                           }}
                           className="grey-text"
                         >
@@ -159,9 +145,18 @@ const ProposalsList = (props: ProposalsListProps) => {
 
                   <Tooltip title={"Click if you find this proposal helpful."} placement={"bottom-start"}>
                     <Button
+                      size="small"
                       onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
-                      variant="outlined"
-                      sx={{ borderRadius: "52px", padding: "0px", minWidth: "50px", border: "solid 1px #585858" }}
+                      variant="contained"
+                      sx={{
+                        borderRadius: "52px",
+                        //padding: "0px 8px",
+                        minWidth: "50px",
+                        background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
+                        ":hover": {
+                          background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
+                        },
+                      }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         {/* <i
@@ -174,8 +169,23 @@ const ProposalsList = (props: ProposalsListProps) => {
                         <DoneIcon
                           className={proposal.correct ? "green-text" : "grey-text"}
                           fontSize="inherit"
+                          sx={{
+                            color:
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.white
+                                : theme.palette.common.darkGrayBackground,
+                          }}
                         ></DoneIcon>
-                        <span className="grey-text">{shortenNumber(proposal.corrects, 2, false)}</span>
+                        <span
+                          style={{
+                            color:
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.white
+                                : theme.palette.common.darkGrayBackground,
+                          }}
+                        >
+                          {shortenNumber(proposal.corrects, 2, false)}
+                        </span>
                       </Box>
                     </Button>
                   </Tooltip>
@@ -189,7 +199,16 @@ const ProposalsList = (props: ProposalsListProps) => {
                       }}
                       disabled={!props.isAdmin || proposal.proposer === username}
                       variant="outlined"
-                      sx={{ borderRadius: "52px", padding: "0px", minWidth: "50px", border: "solid 1px #585858" }}
+                      size="small"
+                      sx={{
+                        borderRadius: "52px",
+                        // padding: "0px 8px",
+                        minWidth: "50px",
+                        background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
+                        ":hover": {
+                          background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
+                        },
+                      }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         {/* <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>grade</i> */}
@@ -242,7 +261,6 @@ const ProposalsList = (props: ProposalsListProps) => {
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
                 <div className="title Time" style={{ fontSize: "12px" }}>
-                  {/* <div className="title Username">{proposal.proposer}</div> */}
                   <div className="ProposalTitle" style={{ fontSize: "16px", fontWeight: "400" }}>
                     {proposal.title}
                   </div>
@@ -265,21 +283,14 @@ const ProposalsList = (props: ProposalsListProps) => {
                       );
                     })
                   ) : (
-                    // <p>{proposal.summary}</p>
                     <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
-                    // CHECK: I commented this, uncomment when build the editor please
-                    // <HyperEditor readOnly={true} onChange={doNothing} content={proposal.summary} />
                   )}
                 </div>
                 <div className="ProposalBody">
-                  {/* <HyperEditor readOnly={true} onChange={doNothing} content={proposal.proposal} /> */}
-                  {/* <p>{proposal.proposal}</p> */}
                   <Editor label="" readOnly value={proposal.proposal} setValue={() => {}}></Editor>
                 </div>
               </Box>
             </Paper>
-
-            {/* <CommentsList proposal={proposal} /> */}
           </li>
         );
       } else {
@@ -293,7 +304,6 @@ const ProposalsList = (props: ProposalsListProps) => {
               proposalSummaries={proposalSummaries}
               shouldSelectProposal={true}
               showTitle={true}
-              // rateProposal={rateProposalClick(proposal, proposalIdx, true, false, false)}
             />
           </Box>
         );

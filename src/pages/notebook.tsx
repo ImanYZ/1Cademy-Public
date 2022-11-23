@@ -52,7 +52,7 @@ import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/Sidebar
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
-import { UserSettigsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
+import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -61,7 +61,7 @@ import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
-import { ToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
+import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
@@ -2447,7 +2447,7 @@ const Dashboard = ({}: DashboardProps) => {
 
             const parentNode = graph.nodes[newNode.parents[0].node];
             const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-            console.log("willBeApproved", graph.nodes[newNodeId]);
+
             const nodePartChanges = {
               editable: false,
               unaccepted: true,
@@ -2464,7 +2464,7 @@ const Dashboard = ({}: DashboardProps) => {
               nodePartChanges.unaccepted = false;
               nodePartChanges.simulated = true;
             }
-            console.log(nodePartChanges, "nodePartChanges");
+
             setNodeParts(newNodeId, node => ({ ...node, changedAt: new Date(), ...nodePartChanges }));
 
             getMapGraph("/proposeChildNode", postData, !willBeApproved);
@@ -2515,6 +2515,7 @@ const Dashboard = ({}: DashboardProps) => {
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
 
+      // iterate version and push userVersion and versionComments
       versionsData.forEach(versionDoc => {
         versionIds.push(versionDoc.id);
         const versionData = versionDoc.data();
@@ -2545,6 +2546,7 @@ const Dashboard = ({}: DashboardProps) => {
         versionsCommentsRefs.push(versionsCommentsQuery);
       });
 
+      // merge version and userVersion: version[id] = {...version[id],userVersion}
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async userVersionsRef => {
@@ -2568,6 +2570,7 @@ const Dashboard = ({}: DashboardProps) => {
         );
       }
 
+      // build version comments {}
       if (versionsCommentsRefs.length > 0) {
         await Promise.all(
           versionsCommentsRefs.map(async versionsCommentsRef => {
@@ -2591,6 +2594,7 @@ const Dashboard = ({}: DashboardProps) => {
           })
         );
 
+        // merge comments and userVersionComment
         if (userVersionsCommentsRefs.length > 0) {
           await Promise.all(
             userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
@@ -2611,11 +2615,14 @@ const Dashboard = ({}: DashboardProps) => {
           );
         }
       }
+
+      // merge comments into versions
       Object.values(comments).forEach((comment: any) => {
         versionId = comment.version;
         delete comment.version;
         versions[versionId].comments.push(comment);
       });
+
       const proposalsTemp = Object.values(versions);
       const orderedProposals = proposalsTemp.sort(
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
@@ -2768,13 +2775,13 @@ const Dashboard = ({}: DashboardProps) => {
           nodeType: selectedNodeType,
           nodeId: nodeBookState.selectedNode,
         };
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         await postWithToken("/deleteVersion", postData);
 
         let proposalsTemp = [...proposals];
         proposalsTemp.splice(proposalIdx, 1);
         setProposals(proposalsTemp);
-        setIsSubmitting(false);
+        // setIsSubmitting(false);
         scrollToNode(nodeBookState.selectedNode);
       }
     },
@@ -3070,116 +3077,118 @@ const Dashboard = ({}: DashboardProps) => {
             </Drawer>
           }
           {user && reputation && (
-            <ToolbarSidebar
-              open={!openSidebar}
-              onClose={() => setOpenSidebar(null)}
-              reloadPermanentGrpah={reloadPermanentGraph}
-              user={user}
-              reputation={reputation}
-              theme={settings.theme}
-              setOpenSideBar={onOpenSideBar}
-              mapRendered={true}
-              selectedUser={selectedUser}
-              uncheckedNotificationsNum={uncheckedNotificationsNum}
-              bookmarkUpdatesNum={bookmarkUpdatesNum}
-              pendingProposalsNum={pendingProposalsNum}
-            />
+            <Box>
+              <MemoizedToolbarSidebar
+                open={!openSidebar}
+                onClose={() => setOpenSidebar(null)}
+                reloadPermanentGrpah={reloadPermanentGraph}
+                user={user}
+                reputation={reputation}
+                theme={settings.theme}
+                setOpenSideBar={onOpenSideBar}
+                mapRendered={true}
+                selectedUser={selectedUser}
+                uncheckedNotificationsNum={uncheckedNotificationsNum}
+                bookmarkUpdatesNum={bookmarkUpdatesNum}
+                pendingProposalsNum={pendingProposalsNum}
+                openSidebar={openSidebar}
+              />
+
+              <MemoizedBookmarksSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "BOOKMARKS_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                innerHeight={innerHeight}
+              />
+              <MemoizedSearcherSidebar
+                openLinkedNode={openLinkedNode}
+                open={openSidebar === "SEARCHER_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                innerHeight={innerHeight}
+              />
+              <MemoizedNotificationSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "NOTIFICATION_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                innerHeight={innerHeight}
+              />
+              <MemoizedPendingProposalSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                tagId={user.tagId}
+                open={openSidebar === "PENDING_PROPOSALS"}
+                onClose={() => onCloseSidebar()}
+                innerHeight={innerHeight}
+              />
+              <MemoizedUserInfoSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "USER_INFO"}
+                onClose={() => setOpenSidebar(null)}
+              />
+
+              <MemoizedProposalsSidebar
+                theme={settings.theme}
+                open={openSidebar === "PROPOSALS"}
+                onClose={() => onCloseSidebar()}
+                proposeNodeImprovement={proposeNodeImprovement}
+                fetchProposals={fetchProposals}
+                selectedNode={nodeBookState.selectedNode}
+                rateProposal={rateProposal}
+                selectProposal={selectProposal}
+                deleteProposal={deleteProposal}
+                proposeNewChild={proposeNewChild}
+                openProposal={openProposal}
+                db={db}
+                innerHeight={innerHeight}
+              />
+
+              <MemoizedUserSettingsSidebar
+                theme={settings.theme}
+                open={openSidebar === "USER_SETTINGS"}
+                onClose={() => setOpenSidebar(null)}
+                dispatch={dispatch}
+                nodeBookDispatch={nodeBookDispatch}
+                nodeBookState={nodeBookState}
+                userReputation={reputation}
+                user={user}
+                scrollToNode={scrollToNode}
+                settings={settings}
+              />
+              {nodeBookState.selectedNode && (
+                <CitationsSidebar
+                  open={openSidebar === "CITATIONS"}
+                  onClose={() => setOpenSidebar(null)}
+                  openLinkedNode={openLinkedNode}
+                  identifier={nodeBookState.selectedNode}
+                  innerHeight={innerHeight}
+                />
+              )}
+            </Box>
           )}
-          {user?.uname && (
-            <MemoizedBookmarksSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              open={openSidebar === "BOOKMARKS_SIDEBAR"}
-              onClose={() => setOpenSidebar(null)}
-              innerHeight={innerHeight}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedSearcherSidebar
-              openLinkedNode={openLinkedNode}
-              open={openSidebar === "SEARCHER_SIDEBAR"}
-              onClose={() => setOpenSidebar(null)}
-              innerHeight={innerHeight}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedNotificationSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              open={openSidebar === "NOTIFICATION_SIDEBAR"}
-              onClose={() => setOpenSidebar(null)}
-              innerHeight={innerHeight}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedPendingProposalSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              tagId={user.tagId}
-              open={openSidebar === "PENDING_PROPOSALS"}
-              onClose={() => onCloseSidebar()}
-              innerHeight={innerHeight}
-            />
-          )}
-          {user?.uname && (
-            <MemoizedUserInfoSidebar
-              theme={settings.theme}
-              openLinkedNode={openLinkedNode}
-              username={user.uname}
-              open={openSidebar === "USER_INFO"}
-              onClose={() => setOpenSidebar(null)}
-            />
-          )}
-          {user?.uname && openSidebar === "PROPOSALS" && (
-            <MemoizedProposalsSidebar
-              theme={settings.theme}
-              open={openSidebar === "PROPOSALS"}
-              onClose={() => onCloseSidebar()}
-              proposeNodeImprovement={proposeNodeImprovement}
-              fetchProposals={fetchProposals}
-              selectedNode={nodeBookState.selectedNode}
-              rateProposal={rateProposal}
-              selectProposal={selectProposal}
-              deleteProposal={deleteProposal}
-              proposeNewChild={proposeNewChild}
-              openProposal={openProposal}
-              db={db}
-              innerHeight={innerHeight}
-            />
-          )}
-          {user && reputation && openSidebar === "USER_SETTINGS" && (
-            <UserSettigsSidebar
-              theme={settings.theme}
-              open={openSidebar === "USER_SETTINGS"}
-              onClose={() => setOpenSidebar(null)}
-              dispatch={dispatch}
-              nodeBookDispatch={nodeBookDispatch}
-              nodeBookState={nodeBookState}
-              userReputation={reputation}
-              user={user}
-              scrollToNode={scrollToNode}
-              settings={settings}
-            />
-          )}
-          {user && nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
-            <CitationsSidebar
-              open={openSidebar === "CITATIONS"}
-              onClose={() => setOpenSidebar(null)}
-              openLinkedNode={openLinkedNode}
-              identifier={nodeBookState.selectedNode}
-              innerHeight={innerHeight}
-            />
-          )}
+
           <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
           {isQueueWorking && (
             <CircularProgress
               size={46}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${innerHeight * 0.5 + 7}px` : `7px`, md: "7px" },
+                top: {
+                  xs: !openSidebar
+                    ? "7px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 7}px`
+                    : window.innerWidth > 375
+                    ? `${innerHeight * 0.4 + 7}px`
+                    : `${innerHeight * 0.5 + 7}px`,
+                  md: "7px",
+                },
 
                 right: "7px",
                 zIndex: "1300",
@@ -3192,7 +3201,16 @@ const Dashboard = ({}: DashboardProps) => {
               placement="left"
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${innerHeight * 0.5 + 10}px` : `10px`, md: "10px" },
+                top: {
+                  xs: !openSidebar
+                    ? "10px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : window.innerWidth > 375
+                    ? `${innerHeight * 0.4 + 10}px`
+                    : `${innerHeight * 0.5 + 10}px`,
+                  md: "10px",
+                },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3209,7 +3227,16 @@ const Dashboard = ({}: DashboardProps) => {
             placement="left"
             sx={{
               position: "fixed",
-              top: { xs: openSidebar ? `${innerHeight * 0.5 + 65}px` : `60px`, md: "60px" },
+              top: {
+                xs: !openSidebar
+                  ? "60px"
+                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  ? `${innerHeight * 0.35 + 65}px`
+                  : window.innerWidth > 375
+                  ? `${innerHeight * 0.4 + 65}px`
+                  : `${innerHeight * 0.5 + 65}px`,
+                md: "60px",
+              },
               right: "10px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3225,7 +3252,16 @@ const Dashboard = ({}: DashboardProps) => {
               title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${innerHeight * 0.5 + 120}px` : `110px`, md: "110px" },
+                top: {
+                  xs: !openSidebar
+                    ? "110px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 120}px`
+                    : window.innerWidth > 375
+                    ? `${innerHeight * 0.4 + 120}px`
+                    : `${innerHeight * 0.5 + 120}px`,
+                  md: "110px",
+                },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3278,7 +3314,6 @@ const Dashboard = ({}: DashboardProps) => {
                   uploadNodeImage={uploadNodeImage}
                   removeImage={removeImage}
                   setOpenMedia={(imgUrl: string | boolean) => {
-                    console.log("first", imgUrl);
                     setOpenMedia(imgUrl);
                   }}
                   changeNodeHight={changeNodeHight}
