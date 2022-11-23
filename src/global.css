@@ -1464,6 +1464,7 @@ button.MuiTab-textColorInherit:focus {
   hyphens: auto;
   font-size: inherit;
 }
+
 .MetaButton:hover svg {
   color: #ff9100 !important;
 }
@@ -1476,6 +1477,11 @@ button.MuiTab-textColorInherit:focus {
 
 .MetaButton.Clickable {
   cursor: pointer;
+}
+
+.MetaButton.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .LightMode .MetaButton {
@@ -2792,7 +2798,7 @@ button.MuiTab-textColorInherit:focus {
   padding: 5px;
   border-radius: 52px;
   display: flex;
-  margin-right: 4px;
+  margin-right: 10px;
   border: solid 1px #585858;
 }
 

@@ -82,6 +82,7 @@ type NodeFooterProps = {
   selectNode: any;
   correctNode: any;
   wrongNode: any;
+  disableVotes: boolean;
   uploadNodeImage: any;
   user: User;
   citations: { [key: string]: Set<string> };
@@ -133,6 +134,7 @@ const NodeFooter = ({
   selectNode,
   correctNode,
   wrongNode,
+  disableVotes,
   uploadNodeImage,
   user,
   setOpenSideBar,
@@ -351,7 +353,12 @@ const NodeFooter = ({
                   alignItems: "center",
                 }}
               >
-                <MemoizedMetaButton onClick={wrongNode} tooltip="Vote to delete node." tooltipPosition="top">
+                <MemoizedMetaButton
+                  disabled={disableVotes}
+                  onClick={wrongNode}
+                  tooltip="Vote to delete node."
+                  tooltipPosition="top"
+                >
                   <Box
                     sx={{
                       display: "flex",
@@ -365,6 +372,7 @@ const NodeFooter = ({
                 </MemoizedMetaButton>
                 <Box className="vertical-row"></Box>
                 <MemoizedMetaButton
+                  disabled={disableVotes}
                   onClick={correctNode}
                   tooltip="Vote to prevent further changes."
                   tooltipPosition="top"
@@ -758,7 +766,11 @@ const NodeFooter = ({
                 padding: "3px",
               }}
             >
-              <MoreHorizIcon />
+              <MoreHorizIcon
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "grey"),
+                }}
+              />
             </IconButton>
           </Box>
         ) : (

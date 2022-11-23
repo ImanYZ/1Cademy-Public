@@ -268,6 +268,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     width?: number;
     height?: number;
     simulated?: boolean;
+    disableVotes?: boolean;
     unaccepted?: boolean;
     // left: number;
     // top: number;

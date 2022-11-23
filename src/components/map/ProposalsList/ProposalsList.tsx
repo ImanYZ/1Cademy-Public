@@ -8,27 +8,13 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
-// import { VictoryBar } from "victory";
 import { Editor } from "@/components/Editor";
 
-// import { useRecoilValue } from "recoil";
-import { useAuth } from "../../../context/AuthContext";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
-import { MemoizedMetaButton } from "../MetaButton";
+import { ContainedButton } from "../ContainedButton";
+// import { MemoizedMetaButton } from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
-// import UserHeader from "./UserHeader/UserHeader";
-// import { usernameState } from "../../../../../store/AuthAtoms";
-// import shortenNumber from "../../../../../utils/shortenNumber";
-// import HyperEditor from "../../../../Editor/HyperEditor/HyperEditorWrapper";
-// import MetaButton from "../../../MetaButton/MetaButton";
-// import proposalSummariesGenerator from "../proposalSummariesGenerator";
-// import ProposalItem from "./ProposalItem/ProposalItem";
-// import UserHeader from "./UserHeader/UserHeader";
-
-// import "./ProposalsList.css";
-
-// const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
@@ -44,17 +30,12 @@ type ProposalsListProps = {
   proposeNewChild: any;
   openProposal: any;
   isAdmin: any;
+  username: string;
 };
 
-const ProposalsList = (props: ProposalsListProps) => {
-  console.log("ProposalsList:proposals", props.proposals);
-  // console.log("ProposalsList", { props });
-  const [user] = useAuth();
-
-  const username = user.user?.uname;
-
+const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const rateProposalClick = useCallback(
-    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) => {
+    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       console.log("proposal", proposal);
       return props.rateProposal(
         event,
@@ -72,18 +53,25 @@ const ProposalsList = (props: ProposalsListProps) => {
   );
 
   const deleteProposalClick = useCallback(
-    (proposal: any, proposalIdx: any) => (event: any) =>
+    (proposal: any, proposalIdx: any) =>
       props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteProposal, props.proposals]
   );
 
-  // console.log("-> proposals", props.proposals);
-  // console.log("props.openProposal ", props.proposals);
+  const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
+    return !isAdmin || proposal.proposer === username;
+  };
+
+  // const getColorText = (isDisable: boolean, userTheme: UserTheme) => {
+  //   if (isDisable) return "undefined";
+  //   return userTheme === "Dark" ? "dimgrey" : "rgba(0, 0, 0, 0.26)";
+  // };
 
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
+    const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
 
     if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
       if (props.openProposal === proposal.id) {
@@ -100,17 +88,14 @@ const ProposalsList = (props: ProposalsListProps) => {
         }
         return (
           <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
-            {/* <UserHeader imageUrl={proposal.imageUrl} /> */}
             <Paper elevation={3} sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
               <Box
-                // className="secondary-content"
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
                   gap: "5px",
                 }}
               >
-                {/* <h5>ProposalID:{proposal.id}</h5> */}
                 <div className="title Time" style={{ fontSize: "12px" }}>
                   {dayjs(proposal.createdAt).fromNow()}
                 </div>
@@ -121,64 +106,55 @@ const ProposalsList = (props: ProposalsListProps) => {
                     gap: "5px",
                   }}
                 >
-                  <MemoizedMetaButton
-                    onClick={rateProposalClick(proposal, proposalIdx, false, true, false)}
-                    tooltip="Click if you find this proposal Unhelpful."
-                    tooltipPosition="bottom-start"
+                  <ContainedButton
+                    title="Click if you find this proposal Unhelpful."
+                    onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {/* <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>close</i> */}
-                      <CloseIcon className={proposal.wrong ? "red-text" : "grey-text"} fontSize="inherit"></CloseIcon>
-                      <span>{shortenNumber(proposal.wrongs, 2, false)}</span>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <CloseIcon fontSize="inherit" sx={{ fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.wrongs, 2, false)}</span>
                     </Box>
-                  </MemoizedMetaButton>
-                  <MemoizedMetaButton
-                    onClick={rateProposalClick(proposal, proposalIdx, true, false, false)}
-                    tooltip="Click if you find this proposal helpful."
-                    tooltipPosition="bottom-start"
+                  </ContainedButton>
+
+                  <ContainedButton
+                    title="Click if you find this proposal helpful."
+                    onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {/* <i
-                      className={
-                        proposal.correct ? "material-icons DoneIcon green-text" : "material-icons DoneIcon grey-text"
-                      }
-                    >
-                      done
-                    </i> */}
-                      <DoneIcon className={proposal.correct ? "green-text" : "grey-text"} fontSize="inherit"></DoneIcon>
-                      <span>{shortenNumber(proposal.corrects, 2, false)}</span>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <DoneIcon fontSize="inherit" sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.corrects, 2, false)}</span>
                     </Box>
-                  </MemoizedMetaButton>
-                  <MemoizedMetaButton
-                    onClick={
+                  </ContainedButton>
+
+                  <ContainedButton
+                    title={adminTooltip}
+                    onClick={() => {
                       !props.isAdmin || proposal.proposer === username
                         ? false
-                        : rateProposalClick(proposal, proposalIdx, false, false, true)
-                    }
-                    tooltip={adminTooltip}
-                    tooltipPosition="bottom-start"
+                        : rateProposalClick(proposal, proposalIdx, false, false, true);
+                    }}
+                    disabled={isDisabled}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {/* <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>grade</i> */}
-                      <GradeIcon className={proposal.award ? "amber-text" : "grey-text"} fontSize="inherit"></GradeIcon>
-                      <span>{shortenNumber(proposal.awards, 2, false)}</span>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <GradeIcon fontSize="inherit" sx={{ fill: proposal.award ? "rgb(255, 166, 0)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.awards, 2, false)}</span>
                     </Box>
-                  </MemoizedMetaButton>
+                  </ContainedButton>
+
                   {!proposal.accepted && proposal.proposer === username && (
-                    <MemoizedMetaButton
-                      onClick={deleteProposalClick(proposal, proposalIdx)}
-                      tooltip="Delete your proposal."
-                      tooltipPosition="bottom-start"
+                    <ContainedButton
+                      title={"Delete your proposal"}
+                      onClick={() => deleteProposalClick(proposal, proposalIdx)}
                     >
-                      {/* <i className="material-icons grey-text">delete_forever</i> */}
-                      <DeleteForeverIcon className="grey-text" fontSize="inherit"></DeleteForeverIcon>
-                    </MemoizedMetaButton>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", paddingY: "5px" }}>
+                        <DeleteForeverIcon fontSize="inherit" sx={{ fill: "inherit" }} />
+                      </Box>
+                    </ContainedButton>
                   )}
                 </Box>
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
                 <div className="title Time" style={{ fontSize: "12px" }}>
-                  {/* <div className="title Username">{proposal.proposer}</div> */}
                   <div className="ProposalTitle" style={{ fontSize: "16px", fontWeight: "400" }}>
                     {proposal.title}
                   </div>
@@ -201,21 +177,14 @@ const ProposalsList = (props: ProposalsListProps) => {
                       );
                     })
                   ) : (
-                    // <p>{proposal.summary}</p>
                     <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
-                    // CHECK: I commented this, uncomment when build the editor please
-                    // <HyperEditor readOnly={true} onChange={doNothing} content={proposal.summary} />
                   )}
                 </div>
                 <div className="ProposalBody">
-                  {/* <HyperEditor readOnly={true} onChange={doNothing} content={proposal.proposal} /> */}
-                  {/* <p>{proposal.proposal}</p> */}
                   <Editor label="" readOnly value={proposal.proposal} setValue={() => {}}></Editor>
                 </div>
               </Box>
             </Paper>
-
-            {/* <CommentsList proposal={proposal} /> */}
           </li>
         );
       } else {
@@ -229,7 +198,6 @@ const ProposalsList = (props: ProposalsListProps) => {
               proposalSummaries={proposalSummaries}
               shouldSelectProposal={true}
               showTitle={true}
-              // rateProposal={rateProposalClick(proposal, proposalIdx, true, false, false)}
             />
           </Box>
         );
