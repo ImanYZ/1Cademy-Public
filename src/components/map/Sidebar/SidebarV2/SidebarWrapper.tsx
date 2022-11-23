@@ -54,6 +54,7 @@ export const SidebarWrapper = ({
     if (!sidebarContentRef.current) return;
     sidebarContentRef.current.scrollTop = 0;
   }, [sidebarContentRef]);
+
   const sidebarContent = useMemo(() => {
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
