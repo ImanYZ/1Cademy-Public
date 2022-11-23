@@ -70,7 +70,6 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
 
@@ -80,6 +79,15 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     totalPage: 0,
     totalResults: 0,
   });
+
+  const onFocusSearcherInput = useCallback(
+    (inputTitle: HTMLElement) => {
+      if (!open) return;
+      if (!inputTitle) return;
+      inputTitle.focus();
+    },
+    [open]
+  );
 
   const getTagsSelected = useCallback<() => TagTreeView[]>(
     () => Object.values(allTags).filter(tag => tag.checked),
@@ -324,6 +332,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                     </IconButton>
                   </InputAdornment>
                 ),
+                inputRef: onFocusSearcherInput,
               }}
             />
           </div>
