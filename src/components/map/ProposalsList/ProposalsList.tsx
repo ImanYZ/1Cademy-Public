@@ -2,7 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Paper, Typography } from "@mui/material";
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -82,13 +82,13 @@ const ProposalsList = (props: ProposalsListProps) => {
   // console.log("-> proposals", props.proposals);
   // console.log("props.openProposal ", props.proposals);
 
-  if (!props.proposals.lenght) {
-    return (
-      <Box sx={{ minHeight: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Typography sx={{ color: "rgba(120,120,120,0.8)", textAlign: "center" }}>There is not proposals yet</Typography>
-      </Box>
-    );
-  }
+  // if (!props.proposals.lenght) {
+  //   return (
+  // <Box sx={{ minHeight: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+  //   <Typography sx={{ color: "rgba(120,120,120,0.8)", textAlign: "center" }}>There is not proposals yet</Typography>
+  // </Box>
+  //   );
+  // }
 
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
