@@ -78,12 +78,15 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       if (!user) return;
 
       const role = user?.role;
-      if (!role) return router.push(ROUTES.dashboard);
-      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
-      if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboardStudents)
-        return router.push(ROUTES.dashboard);
 
-      if (role === "STUDENT" && queryUname && user.uname !== queryUname) return router.push(ROUTES.dashboard);
+      if (!role) return router.push(ROUTES.dashboard);
+
+      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
+
+      if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboardStudents) return router.back();
+
+      if (role === "STUDENT" && queryUname && user.uname !== queryUname)
+        return router.push(`${ROUTES.instructorsDashboard}/${user.uname}`);
     };
     allowAccessByRole();
   }, [queryUname, router, user, user?.role]);
