@@ -3147,6 +3147,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openProposal={openProposal}
                 db={db}
                 innerHeight={innerHeight}
+                username={user.uname}
               />
 
               <MemoizedUserSettingsSidebar

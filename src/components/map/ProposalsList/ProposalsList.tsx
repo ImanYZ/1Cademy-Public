@@ -2,7 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Button, Paper, Tooltip, useTheme } from "@mui/material";
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -10,9 +10,9 @@ import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
 
-import { useAuth } from "../../../context/AuthContext";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
+import { ContainedButton } from "../ContainedButton";
 // import { MemoizedMetaButton } from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
 
@@ -30,14 +30,10 @@ type ProposalsListProps = {
   proposeNewChild: any;
   openProposal: any;
   isAdmin: any;
+  username: string;
 };
 
-const ProposalsList = (props: ProposalsListProps) => {
-  const [user] = useAuth();
-  const theme = useTheme();
-
-  const username = user.user?.uname;
-
+const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       console.log("proposal", proposal);
@@ -64,8 +60,18 @@ const ProposalsList = (props: ProposalsListProps) => {
     [props.deleteProposal, props.proposals]
   );
 
+  const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
+    return !isAdmin || proposal.proposer === username;
+  };
+
+  // const getColorText = (isDisable: boolean, userTheme: UserTheme) => {
+  //   if (isDisable) return "undefined";
+  //   return userTheme === "Dark" ? "dimgrey" : "rgba(0, 0, 0, 0.26)";
+  // };
+
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
+    const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
 
     if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
       if (props.openProposal === proposal.id) {
@@ -100,162 +106,50 @@ const ProposalsList = (props: ProposalsListProps) => {
                     gap: "5px",
                   }}
                 >
-                  <Tooltip title={"Click if you find this proposal Unhelpful."} placement={"bottom-start"}>
-                    <Button
-                      onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
-                      variant="contained"
-                      size="small"
-                      sx={{
-                        borderRadius: "52px",
-                        // padding: "0px 8px",
-                        minWidth: "50px",
-                        background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
-                        ":hover": {
-                          background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        {/* <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>close</i> */}
+                  <ContainedButton
+                    title="Click if you find this proposal Unhelpful."
+                    onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <CloseIcon fontSize="inherit" sx={{ fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.wrongs, 2, false)}</span>
+                    </Box>
+                  </ContainedButton>
 
-                        <CloseIcon
-                          className={proposal.wrong ? "red-text" : "grey-text"}
-                          fontSize="inherit"
-                          sx={{
-                            color:
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.white
-                                : theme.palette.common.darkGrayBackground,
-                          }}
-                        ></CloseIcon>
-                        <span
-                          style={{
-                            color:
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.white
-                                : theme.palette.common.darkGrayBackground,
-                          }}
-                          className="grey-text"
-                        >
-                          {shortenNumber(proposal.wrongs, 2, false)}
-                        </span>
-                      </Box>
-                    </Button>
-                  </Tooltip>
+                  <ContainedButton
+                    title="Click if you find this proposal helpful."
+                    onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <DoneIcon fontSize="inherit" sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.corrects, 2, false)}</span>
+                    </Box>
+                  </ContainedButton>
 
-                  <Tooltip title={"Click if you find this proposal helpful."} placement={"bottom-start"}>
-                    <Button
-                      size="small"
-                      onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
-                      variant="contained"
-                      sx={{
-                        borderRadius: "52px",
-                        //padding: "0px 8px",
-                        minWidth: "50px",
-                        background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
-                        ":hover": {
-                          background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        {/* <i
-                      className={
-                        proposal.correct ? "material-icons DoneIcon green-text" : "material-icons DoneIcon grey-text"
-                      }
-                    >
-                      done
-                    </i> */}
-                        <DoneIcon
-                          className={proposal.correct ? "green-text" : "grey-text"}
-                          fontSize="inherit"
-                          sx={{
-                            color:
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.white
-                                : theme.palette.common.darkGrayBackground,
-                          }}
-                        ></DoneIcon>
-                        <span
-                          style={{
-                            color:
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.white
-                                : theme.palette.common.darkGrayBackground,
-                          }}
-                        >
-                          {shortenNumber(proposal.corrects, 2, false)}
-                        </span>
-                      </Box>
-                    </Button>
-                  </Tooltip>
+                  <ContainedButton
+                    title={adminTooltip}
+                    onClick={() => {
+                      !props.isAdmin || proposal.proposer === username
+                        ? false
+                        : rateProposalClick(proposal, proposalIdx, false, false, true);
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <GradeIcon fontSize="inherit" sx={{ fill: proposal.award ? "rgb(255, 166, 0)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.awards, 2, false)}</span>
+                    </Box>
+                  </ContainedButton>
 
-                  <Tooltip title={adminTooltip} placement={"bottom-start"}>
-                    <Button
-                      onClick={() => {
-                        !props.isAdmin || proposal.proposer === username
-                          ? false
-                          : rateProposalClick(proposal, proposalIdx, false, false, true);
-                      }}
-                      disabled={!props.isAdmin || proposal.proposer === username}
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        borderRadius: "52px",
-                        // padding: "0px 8px",
-                        minWidth: "50px",
-                        background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
-                        ":hover": {
-                          background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        {/* <i className={"material-icons " + (proposal.award ? "amber-text" : "grey-text")}>grade</i> */}
-                        <GradeIcon
-                          className={proposal.award ? "amber-text" : "grey-text"}
-                          fontSize="inherit"
-                          sx={{
-                            color:
-                              theme.palette.mode === "dark"
-                                ? !props.isAdmin || proposal.proposer === username
-                                  ? "dimgrey"
-                                  : undefined
-                                : !props.isAdmin || proposal.proposer === username
-                                ? "rgba(0, 0, 0, 0.26)"
-                                : undefined,
-                          }}
-                        ></GradeIcon>
-                        <span
-                          className="grey-text"
-                          style={{
-                            color:
-                              theme.palette.mode === "dark"
-                                ? !props.isAdmin || proposal.proposer === username
-                                  ? "dimgrey"
-                                  : undefined
-                                : !props.isAdmin || proposal.proposer === username
-                                ? "rgba(0, 0, 0, 0.26)"
-                                : undefined,
-                          }}
-                        >
-                          {shortenNumber(proposal.awards, 2, false)}
-                        </span>
-                      </Box>
-                    </Button>
-                  </Tooltip>
                   {!proposal.accepted && proposal.proposer === username && (
-                    <Tooltip title={"Delete your proposal"} placement={"bottom-start"}>
-                      <Button
-                        onClick={() => deleteProposalClick(proposal, proposalIdx)}
-                        variant="outlined"
-                        sx={{ borderRadius: "52px", padding: "0px", minWidth: "50px", border: "solid 1px #585858" }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", paddingY: "5px" }}>
-                          <DeleteForeverIcon className="grey-text" fontSize="inherit" />
-                        </Box>
-                      </Button>
-                    </Tooltip>
+                    <ContainedButton
+                      title={"Delete your proposal"}
+                      onClick={() => deleteProposalClick(proposal, proposalIdx)}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", paddingY: "5px" }}>
+                        <DeleteForeverIcon fontSize="inherit" sx={{ fill: "inherit" }} />
+                      </Box>
+                    </ContainedButton>
                   )}
                 </Box>
               </Box>

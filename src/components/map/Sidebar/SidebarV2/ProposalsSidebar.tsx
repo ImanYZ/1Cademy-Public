@@ -23,6 +23,7 @@ type ProposalsSidebarProps = {
   selectedNode: string | null;
   db: Firestore;
   innerHeight?: number;
+  username: string;
 };
 
 const ProposalsSidebar = ({
@@ -39,6 +40,7 @@ const ProposalsSidebar = ({
   db,
   innerHeight,
   selectedNode,
+  username,
 }: ProposalsSidebarProps) => {
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -134,6 +136,7 @@ const ProposalsSidebar = ({
                 proposeNewChild={proposeNewChild}
                 openProposal={openProposal}
                 isAdmin={isAdmin}
+                username={username}
               />
             </Box>
           )}
@@ -155,6 +158,7 @@ const ProposalsSidebar = ({
                 proposeNewChild={proposeNewChild}
                 openProposal={openProposal}
                 isAdmin={isAdmin}
+                username={username}
               />
             </Box>
           )}
