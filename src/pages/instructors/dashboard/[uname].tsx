@@ -5,6 +5,7 @@ import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "fi
 import { useCallback, useEffect, useState } from "react";
 
 import { BoxChart } from "@/components/chats/BoxChart";
+import { HorizontalBarchartData, HorizontalBarsChart } from "@/components/chats/HorizontalBarsChart";
 import { BoxPlotStatsSkeleton } from "@/components/instructors/skeletons/BoxPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "@/components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
@@ -94,9 +95,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     votes: [],
     questions: [],
   });
+
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
   // const trendPlotWith = isMovil ? 300 : isTablet ? 600 : 1045;
+
+  // HorizontalBars
+  const [studentInteractions, setStudentInteractions] = useState<HorizontalBarchartData | null>(null);
 
   const [infoWidth, setInfoWidth] = useState(0);
   const [stackBarWidth, setstackBarWidth] = useState(0);
@@ -109,10 +114,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   }, []);
   const stackBarWrapperRef = useCallback(
     (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
       if (!element) return;
       setstackBarWidth(element.clientWidth);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [windowWidth]
   );
   /// Box plot States
@@ -364,27 +369,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     };
     getUserDailyStat();
   }, [currentSemester, db, semesterConfig]);
-  // const getTrendsData = (data: SemesterStudentStat[], key?: keyof ISemesterStudentStatDay, type?: string): Trends[] => {
-  //   const trends: Trends[] = [];
-  //   data.map(dailyStat => {
-  //     dailyStat.days.map(dayStat => {
-  //       if (type && type === "Votes") {
-  //         trends.push({
-  //           date: new Date(dayStat.day),
-  //           num: dayStat["agreementsWithInst"] + dayStat["disagreementsWithInst"],
-  //         });
-  //       } else if (type && type === "editProposals") {
-  //         trends.push({
-  //           date: new Date(dayStat.day),
-  //           num: dayStat["proposals"] - dayStat["newNodes"],
-  //         });
-  //       } else if (key) {
-  //         trends.push({ date: new Date(dayStat.day), num: dayStat[key] as number });
-  //       }
-  //     });
-  //   });
-  //   return trends;
-  // };
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
     return {
@@ -392,6 +376,38 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
     };
   };
+
+  useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId) return;
+    if (!students || !students.length) return;
+    const studentNameByUname: {
+      [uname: string]: string;
+    } = {};
+    for (const student of students) {
+      studentNameByUname[student.uname] = `${student.fName} ${student.lName}`;
+    }
+    (async () => {
+      const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
+      const q = query(
+        semesterStudentSankeyCol,
+        where("tagId", "==", currentSemester.tagId),
+        where("uname", "==", queryUname),
+        where("deleted", "==", false)
+      );
+      const semesterStudentSankeys = await getDocs(q);
+      if (!semesterStudentSankeys.docs.length) {
+        setStudentInteractions(null);
+        return;
+      }
+
+      const data = semesterStudentSankeys.docs.map(std => std.data())[0];
+      const chartData = data.intractions.map((cur: any) => ({
+        label: studentNameByUname[cur.uname],
+        amount: cur.upVotes + cur.downVotes,
+      }));
+      setStudentInteractions(chartData);
+    })();
+  }, [currentSemester, db, students, queryUname]);
 
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
 
@@ -672,6 +688,38 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           {!isMovil && !isLoading && <BoxLegend />}
         </Paper>
       </Box>
+      {/* Students' contribution Chart */}
+      {!isLoading && (
+        <Box
+          sx={{
+            width: "100%",
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "16px",
+          }}
+        >
+          <Paper
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              p: isMovil ? "10px 10px" : "40px 20px",
+              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            }}
+          >
+            <Typography sx={{ fontSize: "19px" }}>Vote Interactions</Typography>
+            <HorizontalBarsChart
+              data={studentInteractions ?? []}
+              width={trendPlotWith}
+              margin={{ left: 10, top: 10, right: 0, bottom: 10 }}
+              boxHeight={8}
+              offsetX={100}
+            />
+          </Paper>
+        </Box>
+      )}
+
       <Box
         sx={{
           width: "100%",

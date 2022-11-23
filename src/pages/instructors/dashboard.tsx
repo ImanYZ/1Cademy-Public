@@ -269,6 +269,10 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         where("deleted", "==", false)
       );
       const semesterStudentSankeys = await getDocs(q);
+      console.log(
+        "semesterStudentSankeys",
+        semesterStudentSankeys.docs.map(std => std.data())
+      );
       if (semesterStudentSankeys.docs.length) {
         let _sankeyData: any[] = [];
         for (const semesterStudentSankey of semesterStudentSankeys.docs) {
@@ -781,32 +785,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           </Box>
           {!isMovil && !isLoading && <BoxLegend />}
         </Paper>
-        {/* <Paper
-          sx={{
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <TrendPlot
-            title={"New Node Points"}
-            // heightTop={(354 * width) / 1045}
-            // heightBottom={(160 * width) / 1045}
-            heightTop={isMovil ? 150 : isTablet ? 250 : 354}
-            heightBottom={isMovil ? 80 : isTablet ? 120 : 160}
-            // width={WIDTH}
-            width={isMovil ? 300 : isTablet ? 600 : 1045}
-            scaleX={"time"}
-            labelX={"Day"}
-            scaleY={"linear"}
-            labelY={"# of Proposals"}
-            theme={"Dark"}
-            x="date"
-            y="num"
-            trendData={TRENDS_DATA}
-          />
-        </Paper> */}
 
         {/* Sankey Chart */}
         <Paper
