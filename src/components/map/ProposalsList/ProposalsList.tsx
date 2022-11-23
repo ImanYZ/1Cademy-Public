@@ -10,10 +10,10 @@ import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
 
-import { useAuth } from "../../../context/AuthContext";
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
-import { MemoizedMetaButton } from "../MetaButton";
+import { ContainedButton } from "../ContainedButton";
+// import { MemoizedMetaButton } from "../MetaButton";
 import ProposalItem from "./ProposalItem/ProposalItem";
 
 dayjs.extend(relativeTime);
@@ -30,15 +30,12 @@ type ProposalsListProps = {
   proposeNewChild: any;
   openProposal: any;
   isAdmin: any;
+  username: string;
 };
 
-const ProposalsList = (props: ProposalsListProps) => {
-  const [user] = useAuth();
-
-  const username = user.user?.uname;
-
+const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const rateProposalClick = useCallback(
-    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => (event: any) => {
+    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       console.log("proposal", proposal);
       return props.rateProposal(
         event,
@@ -56,15 +53,25 @@ const ProposalsList = (props: ProposalsListProps) => {
   );
 
   const deleteProposalClick = useCallback(
-    (proposal: any, proposalIdx: any) => (event: any) =>
+    (proposal: any, proposalIdx: any) =>
       props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteProposal, props.proposals]
   );
 
+  const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
+    return !isAdmin || proposal.proposer === username;
+  };
+
+  // const getColorText = (isDisable: boolean, userTheme: UserTheme) => {
+  //   if (isDisable) return "undefined";
+  //   return userTheme === "Dark" ? "dimgrey" : "rgba(0, 0, 0, 0.26)";
+  // };
+
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
+    const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
 
     if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
       if (props.openProposal === proposal.id) {
@@ -99,49 +106,50 @@ const ProposalsList = (props: ProposalsListProps) => {
                     gap: "5px",
                   }}
                 >
-                  <MemoizedMetaButton
-                    onClick={rateProposalClick(proposal, proposalIdx, false, true, false)}
-                    tooltip="Click if you find this proposal Unhelpful."
-                    tooltipPosition="bottom-start"
+                  <ContainedButton
+                    title="Click if you find this proposal Unhelpful."
+                    onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {/* <i className={"material-icons " + (proposal.wrong ? "red-text" : "grey-text")}>close</i> */}
-                      <CloseIcon className={proposal.wrong ? "red-text" : "grey-text"} fontSize="inherit"></CloseIcon>
-                      <span>{shortenNumber(proposal.wrongs, 2, false)}</span>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <CloseIcon fontSize="inherit" sx={{ fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.wrongs, 2, false)}</span>
                     </Box>
-                  </MemoizedMetaButton>
-                  <MemoizedMetaButton
-                    onClick={rateProposalClick(proposal, proposalIdx, true, false, false)}
-                    tooltip="Click if you find this proposal helpful."
-                    tooltipPosition="bottom-start"
+                  </ContainedButton>
+
+                  <ContainedButton
+                    title="Click if you find this proposal helpful."
+                    onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <DoneIcon className={proposal.correct ? "green-text" : "grey-text"} fontSize="inherit"></DoneIcon>
-                      <span>{shortenNumber(proposal.corrects, 2, false)}</span>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <DoneIcon fontSize="inherit" sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.corrects, 2, false)}</span>
                     </Box>
-                  </MemoizedMetaButton>
-                  <MemoizedMetaButton
-                    onClick={
+                  </ContainedButton>
+
+                  <ContainedButton
+                    title={adminTooltip}
+                    onClick={() => {
                       !props.isAdmin || proposal.proposer === username
                         ? false
-                        : rateProposalClick(proposal, proposalIdx, false, false, true)
-                    }
-                    tooltip={adminTooltip}
-                    tooltipPosition="bottom-start"
+                        : rateProposalClick(proposal, proposalIdx, false, false, true);
+                    }}
+                    disabled={isDisabled}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <GradeIcon className={proposal.award ? "amber-text" : "grey-text"} fontSize="inherit"></GradeIcon>
-                      <span>{shortenNumber(proposal.awards, 2, false)}</span>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <GradeIcon fontSize="inherit" sx={{ fill: proposal.award ? "rgb(255, 166, 0)" : "inherit" }} />
+                      <span style={{ color: "inherit" }}>{shortenNumber(proposal.awards, 2, false)}</span>
                     </Box>
-                  </MemoizedMetaButton>
+                  </ContainedButton>
+
                   {!proposal.accepted && proposal.proposer === username && (
-                    <MemoizedMetaButton
-                      onClick={deleteProposalClick(proposal, proposalIdx)}
-                      tooltip="Delete your proposal."
-                      tooltipPosition="bottom-start"
+                    <ContainedButton
+                      title={"Delete your proposal"}
+                      onClick={() => deleteProposalClick(proposal, proposalIdx)}
                     >
-                      <DeleteForeverIcon className="grey-text" fontSize="inherit"></DeleteForeverIcon>
-                    </MemoizedMetaButton>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", paddingY: "5px" }}>
+                        <DeleteForeverIcon fontSize="inherit" sx={{ fill: "inherit" }} />
+                      </Box>
+                    </ContainedButton>
                   )}
                 </Box>
               </Box>
