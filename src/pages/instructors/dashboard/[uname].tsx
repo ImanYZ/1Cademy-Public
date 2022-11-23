@@ -114,10 +114,10 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   }, []);
   const stackBarWrapperRef = useCallback(
     (element: HTMLDivElement) => {
-      console.log("ref:bubbleRef was called", windowWidth);
       if (!element) return;
       setstackBarWidth(element.clientWidth);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [windowWidth]
   );
   /// Box plot States
@@ -405,7 +405,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         label: studentNameByUname[cur.uname],
         amount: cur.upVotes + cur.downVotes,
       }));
-      console.log("newgraph", chartData);
       setStudentInteractions(chartData);
     })();
   }, [currentSemester, db, students, queryUname]);
