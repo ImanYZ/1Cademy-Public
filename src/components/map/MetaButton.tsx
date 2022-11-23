@@ -19,6 +19,7 @@ type MetaButtonProps = {
   tooltipPosition?: TooltipProps["placement"];
   tooltip?: string;
   onClick?: any;
+  disabled?: boolean;
   onDoubleClick?: any;
   round?: boolean;
   style?: any;
@@ -52,11 +53,12 @@ const MetaButton = (props: MetaButtonProps) => {
           className={
             // (isSubmitting
             //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
-            "MetaButton Clickable waves-effect waves-light grey-text hoverable" +
+            `MetaButton Clickable waves-effect waves-light grey-text hoverable ${props.disabled && "disabled"} ` +
             ("round" in props && props.round ? " Round" : "") +
             // )
             ("tooltip" in props && props.tooltip ? " Tooltip" : "")
           }
+          disabled={props.disabled}
           // style={{ disabled: isSubmitting }}
           // disabled={isSubmitting}
           onClick={metaButtonClick}

@@ -221,6 +221,7 @@ const NodesList = ({
             scrollToNode={scrollToNode}
             openSidebar={openSidebar}
             locked={nodes[nId].locked}
+            disableVotes={!!nodes[nId].disableVotes}
             setOperation={setOperation}
           />
         );
