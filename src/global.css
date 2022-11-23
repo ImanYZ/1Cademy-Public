@@ -2792,7 +2792,7 @@ button.MuiTab-textColorInherit:focus {
   padding: 5px;
   border-radius: 52px;
   display: flex;
-  margin-right: 4px;
+  margin-right: 10px;
   border: solid 1px #585858;
 }
 
