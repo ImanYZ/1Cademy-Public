@@ -758,7 +758,11 @@ const NodeFooter = ({
                 padding: "3px",
               }}
             >
-              <MoreHorizIcon />
+              <MoreHorizIcon
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "grey"),
+                }}
+              />
             </IconButton>
           </Box>
         ) : (
