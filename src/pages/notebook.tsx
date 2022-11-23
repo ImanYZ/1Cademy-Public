@@ -2447,7 +2447,7 @@ const Dashboard = ({}: DashboardProps) => {
 
             const parentNode = graph.nodes[newNode.parents[0].node];
             const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-            console.log("willBeApproved", graph.nodes[newNodeId]);
+
             const nodePartChanges = {
               editable: false,
               unaccepted: true,
@@ -2464,7 +2464,7 @@ const Dashboard = ({}: DashboardProps) => {
               nodePartChanges.unaccepted = false;
               nodePartChanges.simulated = true;
             }
-            console.log(nodePartChanges, "nodePartChanges");
+
             setNodeParts(newNodeId, node => ({ ...node, changedAt: new Date(), ...nodePartChanges }));
 
             getMapGraph("/proposeChildNode", postData, !willBeApproved);
@@ -2594,8 +2594,6 @@ const Dashboard = ({}: DashboardProps) => {
           })
         );
 
-        console.log("versions merge versionComments", { ...versions });
-
         // merge comments and userVersionComment
         if (userVersionsCommentsRefs.length > 0) {
           await Promise.all(
@@ -2617,7 +2615,6 @@ const Dashboard = ({}: DashboardProps) => {
           );
         }
       }
-      console.log("versions merge UserVersionComments", { ...versions });
 
       // merge comments into versions
       Object.values(comments).forEach((comment: any) => {
@@ -2625,8 +2622,6 @@ const Dashboard = ({}: DashboardProps) => {
         delete comment.version;
         versions[versionId].comments.push(comment);
       });
-
-      console.log("versions", { ...versions });
 
       const proposalsTemp = Object.values(versions);
       const orderedProposals = proposalsTemp.sort(
@@ -3283,7 +3278,6 @@ const Dashboard = ({}: DashboardProps) => {
                   uploadNodeImage={uploadNodeImage}
                   removeImage={removeImage}
                   setOpenMedia={(imgUrl: string | boolean) => {
-                    console.log("first", imgUrl);
                     setOpenMedia(imgUrl);
                   }}
                   changeNodeHight={changeNodeHight}

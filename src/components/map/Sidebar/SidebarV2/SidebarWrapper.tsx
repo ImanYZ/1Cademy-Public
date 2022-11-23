@@ -56,7 +56,6 @@ export const SidebarWrapper = ({
   }, [sidebarContentRef]);
 
   const sidebarContent = useMemo(() => {
-    console.log("is rerendered");
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
