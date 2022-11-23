@@ -511,6 +511,9 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          setTimeout(() => {
+            scrollToNode(nodeId);
+          }, 1000);
         } catch (err) {
           console.error(err);
         }
@@ -1830,8 +1833,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodeBookState.choosingNode) {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         getMapGraph(`/correctNode/${nodeId}`).then(() => {
-          setNodeParts(nodeId, (node) => {
-            return {...node, disableVotes: false};
+          setNodeParts(nodeId, node => {
+            return { ...node, disableVotes: false };
           });
         });
         setNodeParts(nodeId, node => {
@@ -1878,9 +1881,9 @@ const Dashboard = ({}: DashboardProps) => {
         if (deleteOK) {
           await idToken();
           getMapGraph(`/wrongNode/${nodeId}`).then(() => {
-            if(graph.nodes.hasOwnProperty(nodeId)) {
-              setNodeParts(nodeId, (node) => {
-                return {...node, disableVotes: false};
+            if (graph.nodes.hasOwnProperty(nodeId)) {
+              setNodeParts(nodeId, node => {
+                return { ...node, disableVotes: false };
               });
             }
           });
