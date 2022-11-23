@@ -511,6 +511,9 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          setTimeout(() => {
+            scrollToNode(nodeId);
+          }, 1000);
         } catch (err) {
           console.error(err);
         }
@@ -1829,7 +1832,11 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("CORRECT NODE", { nodeId });
       if (!nodeBookState.choosingNode) {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        getMapGraph(`/correctNode/${nodeId}`);
+        getMapGraph(`/correctNode/${nodeId}`).then(() => {
+          setNodeParts(nodeId, node => {
+            return { ...node, disableVotes: false };
+          });
+        });
         setNodeParts(nodeId, node => {
           const correct = node.correct;
           const wrong = node.wrong;
@@ -1839,7 +1846,7 @@ const Dashboard = ({}: DashboardProps) => {
           const corrects = node.corrects + correctChange;
           const wrongs = node.wrongs + wrongChange;
 
-          return { ...node, correct: !correct, wrong: false, corrects, wrongs };
+          return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
         });
       }
       event.currentTarget.blur();
@@ -1873,10 +1880,16 @@ const Dashboard = ({}: DashboardProps) => {
         }
         if (deleteOK) {
           await idToken();
-          getMapGraph(`/wrongNode/${nodeId}`);
+          getMapGraph(`/wrongNode/${nodeId}`).then(() => {
+            if (graph.nodes.hasOwnProperty(nodeId)) {
+              setNodeParts(nodeId, node => {
+                return { ...node, disableVotes: false };
+              });
+            }
+          });
 
           setNodeParts(nodeId, node => {
-            return { ...node, wrong: !wrong, correct: false, wrongs: _wrongs, corrects: _corrects };
+            return { ...node, wrong: !wrong, correct: false, wrongs: _wrongs, corrects: _corrects, disableVotes: true };
           });
           const nNode = graph.nodes[nodeId];
           if (nNode?.locked) return;
@@ -3147,6 +3160,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openProposal={openProposal}
                 db={db}
                 innerHeight={innerHeight}
+                username={user.uname}
               />
 
               <MemoizedUserSettingsSidebar
