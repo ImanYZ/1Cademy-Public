@@ -17,29 +17,34 @@ export const ContainedButton = ({ title, onClick, disabled = false, children }: 
     return userTheme === "Dark" ? theme.palette.common.white : theme.palette.common.darkGrayBackground;
   };
 
+  // const TooltipWrapper = disabled = ()
+
   return (
     <Tooltip title={title} placement={"bottom-start"}>
-      <Button
-        onClick={disabled ? undefined : onClick}
-        disabled={disabled}
-        variant="outlined"
-        size="small"
-        sx={{
-          borderWidth: "0px",
-          borderRadius: "52px",
-          minWidth: "50px",
-          background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
-          color: theme => getColorText(disabled, theme.palette.mode === "dark" ? "Dark" : "Light"),
-          fill: theme => getColorText(disabled, theme.palette.mode === "dark" ? "Dark" : "Light"),
-          cursor: disabled ? "none" : "cursor",
-          ":hover": {
+      {/* this span prevents Tooltip error when button is disable */}
+      <span>
+        <Button
+          onClick={disabled ? undefined : onClick}
+          disabled={disabled}
+          variant="outlined"
+          size="small"
+          sx={{
             borderWidth: "0px",
-            background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
-          },
-        }}
-      >
-        {children}
-      </Button>
+            borderRadius: "52px",
+            minWidth: "50px",
+            background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
+            color: theme => getColorText(disabled, theme.palette.mode === "dark" ? "Dark" : "Light"),
+            fill: theme => getColorText(disabled, theme.palette.mode === "dark" ? "Dark" : "Light"),
+            cursor: disabled ? "none" : "cursor",
+            ":hover": {
+              borderWidth: "0px",
+              background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
+            },
+          }}
+        >
+          {children}
+        </Button>
+      </span>
     </Tooltip>
   );
 };

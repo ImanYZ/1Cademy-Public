@@ -715,6 +715,7 @@ p {
   max-height: 350px;
   overflow-y: auto;
 }
+
 .tooltip-plot.darkMode {
   background: #303134;
   box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.5);
@@ -762,12 +763,29 @@ p {
   background: rgba(113, 113, 113, 0.663);
   border-radius: 10px;
 }
-.tooltip-plot.axis-y-label {
-  font-size: 12px;
+.label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 180px;
+  border-radius: 4px;
   padding: 4px;
-  background-color: rgba(108, 108, 108, 0.95);
-  color: white;
-  max-width: 200px;
+  font-size: 12px;
   text-align: center;
-  box-shadow: none;
+  color: white;
+  background-color: rgba(108, 108, 108, 0.95);
+  transition: opacity 300ms ease;
+  z-index: 999;
+  opacity: 0;
+}
+.label::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: -12px;
+  right: calc(50% - 6px);
+  border-top: 6px solid rgba(108, 108, 108, 0.95);
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
 }

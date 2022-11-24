@@ -1879,18 +1879,6 @@ const Dashboard = ({}: DashboardProps) => {
           deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
         }
         if (deleteOK) {
-          await idToken();
-          getMapGraph(`/wrongNode/${nodeId}`).then(() => {
-            if (graph.nodes.hasOwnProperty(nodeId)) {
-              setNodeParts(nodeId, node => {
-                return { ...node, disableVotes: false };
-              });
-            }
-          });
-
-          setNodeParts(nodeId, node => {
-            return { ...node, wrong: !wrong, correct: false, wrongs: _wrongs, corrects: _corrects, disableVotes: true };
-          });
           const nNode = graph.nodes[nodeId];
           if (nNode?.locked) return;
 
@@ -1899,6 +1887,27 @@ const Dashboard = ({}: DashboardProps) => {
               const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
               const tmpNodes = removeDagNode(g.current, nodeId, nodes);
               return { nodes: tmpNodes, edges: tmpEdges };
+            });
+            nodeBookDispatch({ type: "setSelectedNode", payload: nNode.parents[0]?.node ?? null });
+          } else {
+            setNodeParts(nodeId, node => {
+              return {
+                ...node,
+                wrong: !wrong,
+                correct: false,
+                wrongs: _wrongs,
+                corrects: _corrects,
+                disableVotes: true,
+              };
+            });
+          }
+
+          await idToken();
+          await getMapGraph(`/wrongNode/${nodeId}`);
+
+          if (!willRemoveNode) {
+            setNodeParts(nodeId, node => {
+              return { ...node, disableVotes: false };
             });
           }
         }

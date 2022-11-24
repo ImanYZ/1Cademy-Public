@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import React, { useCallback } from "react";
+import { UserTheme } from "src/knowledgeTypes";
 
 export type HorizontalBarchartData = {
   label: string;
@@ -14,6 +15,7 @@ type plotMargin = {
 
 type DrawChartInput = {
   svgRef: SVGGElement;
+  identifier: string;
   data: HorizontalBarchartData;
   width: number;
   boxHeight: number;
@@ -21,7 +23,7 @@ type DrawChartInput = {
   offsetX: number;
 };
 
-function drawChart({ svgRef, data, width, boxHeight, margin, offsetX }: DrawChartInput) {
+function drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX }: DrawChartInput) {
   const svg = d3.select(svgRef);
 
   const height = 4 * boxHeight * data.length; // Height with padding and margin
@@ -30,6 +32,10 @@ function drawChart({ svgRef, data, width, boxHeight, margin, offsetX }: DrawChar
   const max = data.reduce((max, value) => Math.max(max, value.amount), 0);
   const maxFieldLenght = data.reduce((max, value) => Math.max(max, value.label.length), 0);
   offsetX = maxFieldLenght * 6.5;
+  //functions
+  //catch tooltip
+  const tooltip = d3.select(`#horizontal-bars-tooltip-${identifier}`);
+
   // configure SVG's size and position
   svg
     .attr("width", width)
@@ -77,24 +83,41 @@ function drawChart({ svgRef, data, width, boxHeight, margin, offsetX }: DrawChar
         -${boxHeightProcessed},${boxHeightProcessed}
         h-${x(d.amount) - boxHeightProcessed} z`;
     })
-    .style("fill", "#f58a42")
+    .on("mouseover", function (e, d) {
+      const _this = this as any;
+      if (!_this || !_this.parentNode) return;
+      d3.select(this).transition().style("fill", "#ed3737");
+      tooltip
+        .html(`<div>${d.label} - ${d.amount}</div>`)
+        .style("pointer-events", "none")
+        .style("opacity", 1)
+        .style("top", `${(y(d.label) ?? 0) - 24}px`)
+        .style("left", `${e.offsetX - d.label.length * 4}px`);
+    })
+    .on("mouseout", function () {
+      d3.select(this).transition().style("fill", "#EF5350");
+      tooltip.style("pointer-events", "none").style("opacity", 0);
+    })
+    .style("fill", "#EF5350")
     .attr("transform", `translate(${offsetX},${boxHeight})`);
 }
 
 type BoxChartProps = {
+  identifier: string;
+  data: HorizontalBarchartData;
   width: number;
   boxHeight: number;
   margin: plotMargin;
   offsetX: number;
-  data: HorizontalBarchartData;
+  theme: UserTheme;
 };
 
-export const HorizontalBarsChart = ({ width, data, boxHeight, margin, offsetX }: BoxChartProps) => {
+export const HorizontalBarsChart = ({ identifier, width, data, boxHeight, margin, offsetX, theme }: BoxChartProps) => {
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart({ svgRef, data, width, boxHeight, margin, offsetX });
+      drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX });
     },
-    [data, width, boxHeight, margin, offsetX]
+    [identifier, data, width, boxHeight, margin, offsetX]
   );
 
   return (
@@ -103,6 +126,10 @@ export const HorizontalBarsChart = ({ width, data, boxHeight, margin, offsetX }:
         <g id="mesh"></g>
         <g id="boxes"></g>
       </svg>
+      <div
+        id={`horizontal-bars-tooltip-${identifier}`}
+        className={`label ${theme === "Light" ? "lightMode" : "darkMode"}`}
+      ></div>
     </div>
   );
 };
