@@ -224,7 +224,7 @@ const NotificationSidebar = ({
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ display: "flex", flexDirection: "column", p: "10px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
           {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
             <Box
               sx={{

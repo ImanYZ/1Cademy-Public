@@ -124,7 +124,7 @@ const PendingProposalSidebar = ({
       innerHeight={innerHeight}
       contentSignalState={proposals}
       SidebarContent={
-        <Box sx={{ paddingX: "10px", paddingTop: "10px" }}>
+        <Box sx={{ p: "2px 4px" }}>
           <PendingProposalList proposals={proposals} openLinkedNode={openLinkedNode} />
         </Box>
       }
