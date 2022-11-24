@@ -83,16 +83,31 @@ function drawChart(
       .attr("transform", `translate(${offsetX},0)`)
       .call(d3.axisLeft(y))
       .on("mouseover", function (e) {
+        console.log("daaata", e, e.offsetX);
         const _this = this as any;
         d3.select(_this).style("cursor", "pointer");
         tooltip
           .html(`${findLabel(e.target.innerHTML)}`)
           .style("opacity", 1)
-          .style("top", `${e.offsetY}px`)
-          .style("left", `${offsetX}px`);
+          .style("poiner-events", "none");
+
+        const tooltipHeight = (tooltip.node() as HTMLElement).offsetHeight;
+        const tooltipWidth = (tooltip.node() as HTMLElement).offsetWidth;
+
+        console.log(
+          "daaata",
+          (tooltip.node() as HTMLElement).offsetHeight,
+          (tooltip.node() as HTMLElement).offsetWidth,
+          e.offsetY - (tooltipHeight + 7),
+          tooltipWidth / 2
+        );
+
+        tooltip
+          .style("top", `${e.offsetY - (tooltipHeight + 14)}px`)
+          .style("left", `${e.offsetX - tooltipWidth / 2}px`);
       })
       .on("mouseout", function () {
-        tooltip.style("opacity", 0);
+        tooltip.style("pointer-events", "none").style("opacity", 0);
       });
   }
 
