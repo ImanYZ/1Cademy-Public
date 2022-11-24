@@ -2,11 +2,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Paper } from "@mui/material";
+import { CircularProgress, Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
 import { Editor } from "@/components/Editor";
 
@@ -34,6 +34,7 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       return props.rateProposal(
@@ -52,9 +53,12 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   );
 
   const deleteProposalClick = useCallback(
-    (proposal: any, proposalIdx: any) =>
-      props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx),
-    // TODO: check dependencies to remove eslint-disable-next-line
+    async (proposal: any, proposalIdx: any) => {
+      setIsDeleting(true);
+      await props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx);
+      setIsDeleting(false);
+    },
+    // TODO: >heck dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.deleteProposal, props.proposals]
   );
@@ -145,8 +149,14 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                           <span style={{ color: "inherit" }}>{shortenNumber(proposal.awards, 2, false)}</span>
                         </Box>
                       </ContainedButton>
-
-                      {!proposal.accepted && proposal.proposer === username && (
+                      {isDeleting && (
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", paddingY: "5px" }}
+                        >
+                          <CircularProgress size={24} />
+                        </Box>
+                      )}
+                      {!isDeleting && !proposal.accepted && proposal.proposer === username && (
                         <ContainedButton
                           title={"Delete your proposal"}
                           onClick={() => deleteProposalClick(proposal, proposalIdx)}
