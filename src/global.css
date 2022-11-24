@@ -2788,7 +2788,7 @@ button.MuiTab-textColorInherit:focus {
   position: relative;
   top: 4px;
   height: 36.5px;
-  margin-right: 2px;
+  margin-right: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
@@ -2800,7 +2800,7 @@ button.MuiTab-textColorInherit:focus {
   position: relative;
   top: 4px;
   height: 36.5px;
-  margin-right: 2px;
+  margin-right: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
@@ -2856,10 +2856,4 @@ button.MuiTab-textColorInherit:focus {
   align-items: center;
   background: #414141;
   margin-bottom: 7px;
-}
-
-.vertical-row {
-  width: 1px; /* edit this if you want */
-  background-color: rgb(220, 220, 220);
-  height: 13px;
 }
