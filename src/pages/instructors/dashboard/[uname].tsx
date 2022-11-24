@@ -710,11 +710,13 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           >
             <Typography sx={{ fontSize: "19px" }}>Vote Interactions</Typography>
             <HorizontalBarsChart
+              identifier="bars-1"
               data={studentInteractions ?? []}
               width={trendPlotWith}
               margin={{ left: 10, top: 10, right: 0, bottom: 10 }}
               boxHeight={8}
               offsetX={100}
+              theme={settings.theme}
             />
           </Paper>
         </Box>
