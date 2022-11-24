@@ -129,7 +129,7 @@ export const HorizontalBarsChart = ({ identifier, width, data, boxHeight, margin
       </svg>
       <div
         id={`horizontal-bars-tooltip-${identifier}`}
-        className={`tooltip-plot axis-y-label ${theme === "Light" ? "lightMode" : "darkMode"}`}
+        className={`label ${theme === "Light" ? "lightMode" : "darkMode"}`}
       ></div>
     </div>
   );

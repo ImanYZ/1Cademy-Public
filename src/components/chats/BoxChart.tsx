@@ -311,7 +311,7 @@ export const BoxChart = ({
       </svg>
       <div
         id={`boxplot-label-tooltip-${identifier}`}
-        className={`tooltip-plot axis-y-label ${theme === "Light" ? "lightMode" : "darkMode"}`}
+        className={` label ${theme === "Light" ? "lightMode" : "darkMode"}`}
       ></div>
     </div>
   );
