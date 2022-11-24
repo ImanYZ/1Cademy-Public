@@ -7,13 +7,14 @@ import Sankey from "src/lib/sankey";
 type ISankeyChart = {
   labelCounts: number;
   sankeyData: any[];
+  innerWidth: number;
 };
 
 export function SankeyChart(props: ISankeyChart) {
   const svgRef = useRef(null);
 
   useEffect(() => {
-    const innerWidth = Math.floor(window.innerWidth < 500 ? window.innerWidth * 0.89 : window.innerWidth * 0.94);
+    const innerWidth = Math.floor(props.innerWidth < 500 ? props.innerWidth * 0.89 : props.innerWidth * 0.84);
     // set the dimensions and margins of the graph
     let margin = { top: 10, right: 10, bottom: 10, left: 10 },
       width = innerWidth - margin.left - margin.right,
@@ -189,7 +190,7 @@ export function SankeyChart(props: ISankeyChart) {
       .attr("y", function (d) {
         return d.dy / 2 + 15;
       });
-  }, [props.labelCounts, props.sankeyData]);
+  }, [props.innerWidth, props.labelCounts, props.sankeyData]);
 
   return (
     <Box
