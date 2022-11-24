@@ -86,7 +86,7 @@ function drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX
     .on("mouseover", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
-      d3.select(this).transition().style("fill", "#EF5350");
+      d3.select(this).transition().style("fill", "#ed3737");
       tooltip
         .html(`<div>${d.label} - ${d.amount}</div>`)
         .style("pointer-events", "none")
