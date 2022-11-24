@@ -48,7 +48,6 @@ const ProposalsSidebar = ({
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("proposal:newValue", newValue);
     setValue(newValue);
   };
 

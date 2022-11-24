@@ -34,7 +34,6 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
-  console.log("proposal", props.proposals);
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       return props.rateProposal(
@@ -63,11 +62,6 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
     return !isAdmin || proposal.proposer === username;
   };
-
-  // const getColorText = (isDisable: boolean, userTheme: UserTheme) => {
-  //   if (isDisable) return "undefined";
-  //   return userTheme === "Dark" ? "dimgrey" : "rgba(0, 0, 0, 0.26)";
-  // };
 
   return props.proposals.map((proposal: any, proposalIdx: number) => {
     const proposalSummaries = proposalSummariesGenerator(proposal);
@@ -188,7 +182,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
           </li>
         );
       } else {
-        // THIS Show pending proposal and aproved proposals
+        // THIS Show pending proposal and approved proposals
         return (
           <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <ProposalItem
