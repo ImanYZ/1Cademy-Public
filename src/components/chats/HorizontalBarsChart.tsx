@@ -84,7 +84,6 @@ function drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX
         h-${x(d.amount) - boxHeightProcessed} z`;
     })
     .on("mouseover", function (e, d) {
-      console.log("dataaa", e);
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
       d3.select(this).transition().style("fill", "#EF5350");

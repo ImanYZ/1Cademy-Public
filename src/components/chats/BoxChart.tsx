@@ -83,7 +83,6 @@ function drawChart(
       .attr("transform", `translate(${offsetX},0)`)
       .call(d3.axisLeft(y))
       .on("mouseover", function (e) {
-        console.log("daaata", e, e.offsetX);
         const _this = this as any;
         d3.select(_this).style("cursor", "pointer");
         tooltip
@@ -93,14 +92,6 @@ function drawChart(
 
         const tooltipHeight = (tooltip.node() as HTMLElement).offsetHeight;
         const tooltipWidth = (tooltip.node() as HTMLElement).offsetWidth;
-
-        console.log(
-          "daaata",
-          (tooltip.node() as HTMLElement).offsetHeight,
-          (tooltip.node() as HTMLElement).offsetWidth,
-          e.offsetY - (tooltipHeight + 7),
-          tooltipWidth / 2
-        );
 
         tooltip
           .style("top", `${e.offsetY - (tooltipHeight + 14)}px`)
