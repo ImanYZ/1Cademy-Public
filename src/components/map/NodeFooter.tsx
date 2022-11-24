@@ -306,7 +306,7 @@ const NodeFooter = ({
           {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
 
           {open && (
-            <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "3px" }}>
+            <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
               <Box
                 className={
                   openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
@@ -373,7 +373,16 @@ const NodeFooter = ({
                     <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit", marginLeft: "1px" }} />
                   </Box>
                 </MemoizedMetaButton>
-                <Box className="vertical-row"></Box>
+                <Box
+                  sx={{
+                    width: "1px",
+                    background: theme =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.gray
+                        : theme.palette.common.darkGrayBackground,
+                    height: "13px",
+                  }}
+                ></Box>
                 <MemoizedMetaButton
                   disabled={disableVotes}
                   onClick={correctNode}
@@ -630,8 +639,6 @@ const NodeFooter = ({
                       }}
                     >
                       <LocalOfferIcon
-                        // className={openPart === "References" ? "orange-text" : "grey-text"}
-                        className={openPart === "Tags" ? "orange-text" : "grey-text"}
                         color={openPart === "Tags" || openPart === "References" ? "primary" : "inherit"}
                         sx={{ fontSize: "16px", marginRight: "2px" }}
                       />
