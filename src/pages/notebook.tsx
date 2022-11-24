@@ -511,6 +511,9 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          setTimeout(() => {
+            scrollToNode(nodeId);
+          }, 1000);
         } catch (err) {
           console.error(err);
         }
@@ -1829,7 +1832,11 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("CORRECT NODE", { nodeId });
       if (!nodeBookState.choosingNode) {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        getMapGraph(`/correctNode/${nodeId}`);
+        getMapGraph(`/correctNode/${nodeId}`).then(() => {
+          setNodeParts(nodeId, node => {
+            return { ...node, disableVotes: false };
+          });
+        });
         setNodeParts(nodeId, node => {
           const correct = node.correct;
           const wrong = node.wrong;
@@ -1839,7 +1846,7 @@ const Dashboard = ({}: DashboardProps) => {
           const corrects = node.corrects + correctChange;
           const wrongs = node.wrongs + wrongChange;
 
-          return { ...node, correct: !correct, wrong: false, corrects, wrongs };
+          return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
         });
       }
       event.currentTarget.blur();
@@ -1873,10 +1880,16 @@ const Dashboard = ({}: DashboardProps) => {
         }
         if (deleteOK) {
           await idToken();
-          getMapGraph(`/wrongNode/${nodeId}`);
+          getMapGraph(`/wrongNode/${nodeId}`).then(() => {
+            if (graph.nodes.hasOwnProperty(nodeId)) {
+              setNodeParts(nodeId, node => {
+                return { ...node, disableVotes: false };
+              });
+            }
+          });
 
           setNodeParts(nodeId, node => {
-            return { ...node, wrong: !wrong, correct: false, wrongs: _wrongs, corrects: _corrects };
+            return { ...node, wrong: !wrong, correct: false, wrongs: _wrongs, corrects: _corrects, disableVotes: true };
           });
           const nNode = graph.nodes[nodeId];
           if (nNode?.locked) return;
@@ -2447,7 +2460,7 @@ const Dashboard = ({}: DashboardProps) => {
 
             const parentNode = graph.nodes[newNode.parents[0].node];
             const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-            console.log("willBeApproved", graph.nodes[newNodeId]);
+
             const nodePartChanges = {
               editable: false,
               unaccepted: true,
@@ -2464,7 +2477,7 @@ const Dashboard = ({}: DashboardProps) => {
               nodePartChanges.unaccepted = false;
               nodePartChanges.simulated = true;
             }
-            console.log(nodePartChanges, "nodePartChanges");
+
             setNodeParts(newNodeId, node => ({ ...node, changedAt: new Date(), ...nodePartChanges }));
 
             getMapGraph("/proposeChildNode", postData, !willBeApproved);
@@ -2515,6 +2528,7 @@ const Dashboard = ({}: DashboardProps) => {
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
 
+      // iterate version and push userVersion and versionComments
       versionsData.forEach(versionDoc => {
         versionIds.push(versionDoc.id);
         const versionData = versionDoc.data();
@@ -2545,6 +2559,7 @@ const Dashboard = ({}: DashboardProps) => {
         versionsCommentsRefs.push(versionsCommentsQuery);
       });
 
+      // merge version and userVersion: version[id] = {...version[id],userVersion}
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async userVersionsRef => {
@@ -2568,6 +2583,7 @@ const Dashboard = ({}: DashboardProps) => {
         );
       }
 
+      // build version comments {}
       if (versionsCommentsRefs.length > 0) {
         await Promise.all(
           versionsCommentsRefs.map(async versionsCommentsRef => {
@@ -2591,6 +2607,7 @@ const Dashboard = ({}: DashboardProps) => {
           })
         );
 
+        // merge comments and userVersionComment
         if (userVersionsCommentsRefs.length > 0) {
           await Promise.all(
             userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
@@ -2611,11 +2628,14 @@ const Dashboard = ({}: DashboardProps) => {
           );
         }
       }
+
+      // merge comments into versions
       Object.values(comments).forEach((comment: any) => {
         versionId = comment.version;
         delete comment.version;
         versions[versionId].comments.push(comment);
       });
+
       const proposalsTemp = Object.values(versions);
       const orderedProposals = proposalsTemp.sort(
         (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
@@ -2768,13 +2788,13 @@ const Dashboard = ({}: DashboardProps) => {
           nodeType: selectedNodeType,
           nodeId: nodeBookState.selectedNode,
         };
-        setIsSubmitting(true);
+        // setIsSubmitting(true);
         await postWithToken("/deleteVersion", postData);
 
         let proposalsTemp = [...proposals];
         proposalsTemp.splice(proposalIdx, 1);
         setProposals(proposalsTemp);
-        setIsSubmitting(false);
+        // setIsSubmitting(false);
         scrollToNode(nodeBookState.selectedNode);
       }
     },
@@ -3140,6 +3160,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openProposal={openProposal}
                 db={db}
                 innerHeight={innerHeight}
+                username={user.uname}
               />
 
               <MemoizedUserSettingsSidebar
@@ -3172,7 +3193,16 @@ const Dashboard = ({}: DashboardProps) => {
               size={46}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${innerHeight * 0.5 + 7}px` : `7px`, md: "7px" },
+                top: {
+                  xs: !openSidebar
+                    ? "7px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 7}px`
+                    : window.innerWidth > 375
+                    ? `${innerHeight * 0.4 + 7}px`
+                    : `${innerHeight * 0.5 + 7}px`,
+                  md: "7px",
+                },
 
                 right: "7px",
                 zIndex: "1300",
@@ -3185,7 +3215,16 @@ const Dashboard = ({}: DashboardProps) => {
               placement="left"
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${innerHeight * 0.5 + 10}px` : `10px`, md: "10px" },
+                top: {
+                  xs: !openSidebar
+                    ? "10px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : window.innerWidth > 375
+                    ? `${innerHeight * 0.4 + 10}px`
+                    : `${innerHeight * 0.5 + 10}px`,
+                  md: "10px",
+                },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3202,7 +3241,16 @@ const Dashboard = ({}: DashboardProps) => {
             placement="left"
             sx={{
               position: "fixed",
-              top: { xs: openSidebar ? `${innerHeight * 0.5 + 65}px` : `60px`, md: "60px" },
+              top: {
+                xs: !openSidebar
+                  ? "60px"
+                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  ? `${innerHeight * 0.35 + 65}px`
+                  : window.innerWidth > 375
+                  ? `${innerHeight * 0.4 + 65}px`
+                  : `${innerHeight * 0.5 + 65}px`,
+                md: "60px",
+              },
               right: "10px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3218,7 +3266,16 @@ const Dashboard = ({}: DashboardProps) => {
               title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                top: { xs: openSidebar ? `${innerHeight * 0.5 + 120}px` : `110px`, md: "110px" },
+                top: {
+                  xs: !openSidebar
+                    ? "110px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 120}px`
+                    : window.innerWidth > 375
+                    ? `${innerHeight * 0.4 + 120}px`
+                    : `${innerHeight * 0.5 + 120}px`,
+                  md: "110px",
+                },
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3271,7 +3328,6 @@ const Dashboard = ({}: DashboardProps) => {
                   uploadNodeImage={uploadNodeImage}
                   removeImage={removeImage}
                   setOpenMedia={(imgUrl: string | boolean) => {
-                    console.log("first", imgUrl);
                     setOpenMedia(imgUrl);
                   }}
                   changeNodeHight={changeNodeHight}

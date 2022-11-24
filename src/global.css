@@ -1464,6 +1464,7 @@ button.MuiTab-textColorInherit:focus {
   hyphens: auto;
   font-size: inherit;
 }
+
 .MetaButton:hover svg {
   color: #ff9100 !important;
 }
@@ -1476,6 +1477,11 @@ button.MuiTab-textColorInherit:focus {
 
 .MetaButton.Clickable {
   cursor: pointer;
+}
+
+.MetaButton.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .LightMode .MetaButton {
@@ -2778,21 +2784,55 @@ button.MuiTab-textColorInherit:focus {
   }
 }
 
-.select-tab-button-node-footer {
-  height: 40px;
-  margin-right: 2px;
+.select-tab-button-node-footer-dark {
+  position: relative;
+  top: 4px;
+  height: 36.5px;
+  margin-right: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
   border: solid 1px #585858;
-  border-bottom: none;
+  border-bottom: solid 2px #1f1f1f;
+}
+
+.select-tab-button-node-footer-light {
+  position: relative;
+  top: 4px;
+  height: 36.5px;
+  margin-right: 10px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  border: solid 1px #585858;
+  border-bottom: solid 2px #f0f0f0;
+}
+
+.select-tab-button-node-footer-dark::after {
+  content: "";
+  background: #1f1f1f;
+  position: absolute;
+  top: 32px;
+  width: 103%;
+  right: -1px;
+  height: 6px;
+}
+
+.select-tab-button-node-footer-light::after {
+  content: "";
+  background: #f0f0f0;
+  position: absolute;
+  top: 33px;
+  width: 103%;
+  right: -1px;
+  height: 6px;
 }
 
 .tab-button-node-footer {
   padding: 5px;
   border-radius: 52px;
   display: flex;
-  margin-right: 4px;
+  margin-right: 10px;
   border: solid 1px #585858;
 }
 
@@ -2816,10 +2856,4 @@ button.MuiTab-textColorInherit:focus {
   align-items: center;
   background: #414141;
   margin-bottom: 7px;
-}
-
-.vertical-row {
-  width: 1px; /* edit this if you want */
-  background-color: rgb(220, 220, 220);
-  height: 13px;
 }

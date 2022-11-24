@@ -54,6 +54,7 @@ export const SidebarWrapper = ({
     if (!sidebarContentRef.current) return;
     sidebarContentRef.current.scrollTop = 0;
   }, [sidebarContentRef]);
+
   const sidebarContent = useMemo(() => {
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
@@ -70,7 +71,7 @@ export const SidebarWrapper = ({
           minWidth: { xs: "0px", sm: width },
           width: { xs: isMenuOpen ? "100%" : "auto", md: width },
           maxWidth: { xs: width, sm: "80px" },
-          height: innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
+          height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
           boxShadow:

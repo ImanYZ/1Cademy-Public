@@ -88,11 +88,17 @@ function drawChart(
         tooltip
           .html(`${findLabel(e.target.innerHTML)}`)
           .style("opacity", 1)
-          .style("top", `${e.offsetY}px`)
-          .style("left", `${offsetX}px`);
+          .style("poiner-events", "none");
+
+        const tooltipHeight = (tooltip.node() as HTMLElement).offsetHeight;
+        const tooltipWidth = (tooltip.node() as HTMLElement).offsetWidth;
+
+        tooltip
+          .style("top", `${e.offsetY - (tooltipHeight + 14)}px`)
+          .style("left", `${e.offsetX - tooltipWidth / 2}px`);
       })
       .on("mouseout", function () {
-        tooltip.style("opacity", 0);
+        tooltip.style("pointer-events", "none").style("opacity", 0);
       });
   }
 
@@ -311,7 +317,7 @@ export const BoxChart = ({
       </svg>
       <div
         id={`boxplot-label-tooltip-${identifier}`}
-        className={`tooltip-plot axis-y-label ${theme === "Light" ? "lightMode" : "darkMode"}`}
+        className={` label ${theme === "Light" ? "lightMode" : "darkMode"}`}
       ></div>
     </div>
   );

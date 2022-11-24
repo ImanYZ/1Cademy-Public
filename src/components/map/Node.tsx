@@ -54,6 +54,7 @@ type NodeProps = {
   wrongNum: any;
   markedWrong: any;
   references: string[];
+  disableVotes: boolean;
   tags: string[] | { node: string; title?: string; label?: string }[];
   parents: string[];
   nodesChildren: string[] | { node: string; title?: string; label?: string }[];
@@ -148,6 +149,7 @@ const Node = ({
   wrongNum,
   markedWrong,
   references,
+  disableVotes,
   tags,
   parents,
   nodesChildren,
@@ -652,6 +654,7 @@ const Node = ({
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}
                 wrongNode={wrongNodeHandler}
+                disableVotes={disableVotes}
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
                 citations={citations}
@@ -754,6 +757,7 @@ const Node = ({
                 selectNode={selectNodeHandler}
                 correctNode={correctNodeHandler}
                 wrongNode={wrongNodeHandler}
+                disableVotes={disableVotes}
                 uploadNodeImage={uploadNodeImageHandler}
                 user={user}
                 citations={citations}
