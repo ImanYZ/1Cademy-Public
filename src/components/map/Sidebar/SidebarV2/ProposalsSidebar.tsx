@@ -70,7 +70,7 @@ const ProposalsSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [isRetrieving, proposals, openProposal]);
+  }, [isRetrieving, proposals, openProposal, value]);
 
   return (
     <SidebarWrapper
@@ -95,7 +95,7 @@ const ProposalsSidebar = ({
               width: "100%",
             }}
           >
-            <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
+            <Tabs value={value} onChange={handleChange} aria-label={"Proposal Tabs"}>
               {["Pending Proposals", "Approved Proposals"].map((tabItem: string, idx: number) => (
                 <Tab key={tabItem} label={tabItem} {...a11yProps(idx)} />
               ))}
