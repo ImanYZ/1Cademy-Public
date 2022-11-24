@@ -77,7 +77,7 @@ function drawChart({ svgRef, data, width, boxHeight, margin, offsetX }: DrawChar
         -${boxHeightProcessed},${boxHeightProcessed}
         h-${x(d.amount) - boxHeightProcessed} z`;
     })
-    .style("fill", "#f58a42")
+    .style("fill", "#EF5350")
     .attr("transform", `translate(${offsetX},${boxHeight})`);
 }
 
