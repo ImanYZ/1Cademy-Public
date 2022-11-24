@@ -18,7 +18,7 @@ import RedditIcon from "@mui/icons-material/Reddit";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
-import { Badge, Menu, MenuItem, useTheme } from "@mui/material";
+import { Badge, Menu, MenuItem } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -142,7 +142,6 @@ const NodeFooter = ({
   openSidebar,
 }: NodeFooterProps) => {
   const router = useRouter();
-  const theme = useTheme();
   const { nodeBookState } = useNodeBook();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -283,6 +282,9 @@ const NodeFooter = ({
               inNodeFooter={true}
               reloadPermanentGrpah={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
+              sx={{
+                marginBottom: "10px",
+              }}
             />
           ) : (
             <MemoizedUserStatusIcon
@@ -295,6 +297,9 @@ const NodeFooter = ({
               inNodeFooter={true}
               reloadPermanentGrpah={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
+              sx={{
+                marginBottom: "10px",
+              }}
             />
           ))}
         <div
@@ -302,17 +307,29 @@ const NodeFooter = ({
           style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
-          {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
-          {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
+          {locked && (
+            <NodeTypeIcon
+              nodeType={"locked"}
+              tooltipPlacement={"top"}
+              fontSize={"inherit"}
+              sx={{ marginBottom: "10px" }}
+            />
+          )}
+          {!locked && (
+            <NodeTypeIcon
+              nodeType={nodeType}
+              tooltipPlacement={"top"}
+              fontSize={"inherit"}
+              sx={{ marginBottom: "10px" }}
+            />
+          )}
 
           {open && (
             <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
               <Box
                 className={
                   openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
-                    ? theme.palette.mode === "dark"
-                      ? "select-tab-button-node-footer-dark"
-                      : "select-tab-button-node-footer-light"
+                    ? "select-tab-button-node-footer"
                     : "tab-button-node-footer"
                 }
                 sx={{
@@ -500,13 +517,7 @@ const NodeFooter = ({
             {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
                 <Box
-                  className={
-                    openSidebar === "CITATIONS"
-                      ? theme.palette.mode === "dark"
-                        ? "select-tab-button-node-footer-dark"
-                        : "select-tab-button-node-footer-light"
-                      : "tab-button-node-footer"
-                  }
+                  className={openSidebar === "CITATIONS" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
                   sx={{
                     background: theme =>
                       theme.palette.mode === "dark"
@@ -544,13 +555,7 @@ const NodeFooter = ({
                   </MemoizedMetaButton>
                 </Box>
                 <Box
-                  className={
-                    openPart === "Tags"
-                      ? theme.palette.mode === "dark"
-                        ? "select-tab-button-node-footer-dark"
-                        : "select-tab-button-node-footer-light"
-                      : "tab-button-node-footer"
-                  }
+                  className={openPart === "Tags" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
                   sx={{
                     background: theme =>
                       theme.palette.mode === "dark"
@@ -584,13 +589,7 @@ const NodeFooter = ({
               </>
             ) : (
               <Box
-                className={
-                  openPart === "References"
-                    ? theme.palette.mode === "dark"
-                      ? "select-tab-button-node-footer-dark"
-                      : "select-tab-button-node-footer-light"
-                    : "tab-button-node-footer"
-                }
+                className={openPart === "References" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
                 sx={{
                   background: theme =>
                     theme.palette.mode === "dark"
@@ -739,13 +738,7 @@ const NodeFooter = ({
               </>
             )}
             <Box
-              className={
-                openPart === "LinkingWords"
-                  ? theme.palette.mode === "dark"
-                    ? "select-tab-button-node-footer-dark"
-                    : "select-tab-button-node-footer-light"
-                  : "tab-button-node-footer"
-              }
+              className={openPart === "LinkingWords" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
               sx={{
                 background: theme =>
                   theme.palette.mode === "dark"
@@ -796,7 +789,7 @@ const NodeFooter = ({
               onClick={handleClick}
               sx={{
                 border: "solid 1px #585858",
-                margin: 0,
+                marginBottom: "10px",
                 padding: "3px",
               }}
             >

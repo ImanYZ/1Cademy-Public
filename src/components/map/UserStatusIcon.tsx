@@ -163,6 +163,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
           justifyContent: "flex-start",
           gap: "5px",
           padding: "5px 0px",
+          ...props.sx,
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>

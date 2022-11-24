@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import React, { useCallback, useDeferredValue, useEffect, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
@@ -384,6 +384,40 @@ const Node = ({
     [deleteLink, identifier]
   );
 
+  const proposalSubmit = useCallback(
+    () => {
+      // here disable button
+      setAbleToPropose(false);
+      setTimeout(() => {
+        const firstParentId: any = parents[0];
+
+        if (isNew) {
+          saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
+          if (!firstParentId) return;
+          nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
+          return;
+        }
+        saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+        setOperation("ProposeProposals");
+      }, 500);
+    },
+
+    // TODO: check dependencies to remove eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isNew, identifier, reason, saveProposedChildNode, saveProposedImprovement]
+  );
+
+  const onCancelProposal = () => {
+    const firstParentId: any = parents[0];
+    const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
+    if (!scrollTo) return;
+    setAbleToPropose(false);
+    nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
+    setOperation("CancelProposals");
+    closeSideBar();
+  };
+
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
@@ -690,6 +724,29 @@ const Node = ({
               onResetButton={newValue => setAbleToPropose(newValue)}
               setOperation={setOperation}
             />
+          )}
+          {editable && (
+            <Box sx={{ paddingY: "15px", textAlign: "center" }}>
+              <div className="ProposalCommentSubmitButton">
+                <Button
+                  color="error"
+                  variant="contained"
+                  className="btn waves-effect waves-light hoverable red"
+                  onClick={onCancelProposal}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="success"
+                  variant="contained"
+                  className="btn waves-effect waves-light hoverable green"
+                  onClick={proposalSubmit}
+                  disabled={!ableToPropose ?? false}
+                >
+                  Propose
+                </Button>
+              </div>
+            </Box>
           )}
         </>
       ) : (

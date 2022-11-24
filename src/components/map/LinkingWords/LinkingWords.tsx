@@ -6,7 +6,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Box, Button, Link } from "@mui/material";
+import { Box, Link } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -155,40 +155,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
     [props.deleteLink, props.setAbleToPropose]
   );
 
-  const proposalSubmit = useCallback(
-    () => {
-      // here disable button
-      props.onResetButton(false);
-      setTimeout(() => {
-        const firstParentId = props.parents[0];
-
-        if (props.isNew) {
-          props.saveProposedChildNode(props.identifier, "", props.reason, () => props.onResetButton(true));
-          if (!firstParentId) return;
-          nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
-          return;
-        }
-        props.saveProposedImprovement("", props.reason, () => props.onResetButton(true));
-        nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
-        props.setOperation("ProposeProposals");
-      }, 500);
-    },
-
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.isNew, props.identifier, props.reason, props.saveProposedChildNode, props.saveProposedImprovement]
-  );
-
-  const onCancelProposal = () => {
-    const firstParentId = props.parents[0];
-    const scrollTo = props.isNew ? firstParentId.node ?? undefined : props.identifier;
-    if (!scrollTo) return;
-    props.setAbleToPropose(false);
-    nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
-    props.setOperation("CancelProposals");
-    props.closeSideBar();
-  };
-
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
     <>
       <Box sx={{ mx: "10px", borderTop: "solid 1px #484848" }} />
@@ -334,25 +300,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   </MemoizedMetaButton>
                 )
               )}
-              <div className="ProposalCommentSubmitButton">
-                <Button
-                  color="error"
-                  variant="contained"
-                  className="btn waves-effect waves-light hoverable red"
-                  onClick={onCancelProposal}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="success"
-                  variant="contained"
-                  className="btn waves-effect waves-light hoverable green"
-                  onClick={proposalSubmit}
-                  disabled={!props?.ableToPropose ?? false}
-                >
-                  Propose
-                </Button>
-              </div>
             </Box>
           )}
         </Box>
