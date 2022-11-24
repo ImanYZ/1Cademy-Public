@@ -334,6 +334,9 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 ),
                 inputRef: onFocusSearcherInput,
               }}
+              inputProps={{
+                style: { paddingLeft: "0", paddingRight: "0" },
+              }}
             />
           </div>
 
