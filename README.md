@@ -20,3 +20,7 @@ COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.pr
 docker-compose -f docker-compose.prod.yml up
 
 gcloud run deploy knowledge-dev --image gcr.io/next-docker-353422/knowledge-dev --region us-central1 --project next-docker-353422
+
+### Frontend Guidelines
+
+Read [here](./FrontendGuidelines.md)
