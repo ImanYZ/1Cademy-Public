@@ -639,8 +639,6 @@ const NodeFooter = ({
                       }}
                     >
                       <LocalOfferIcon
-                        // className={openPart === "References" ? "orange-text" : "grey-text"}
-                        className={openPart === "Tags" ? "orange-text" : "grey-text"}
                         color={openPart === "Tags" || openPart === "References" ? "primary" : "inherit"}
                         sx={{ fontSize: "16px", marginRight: "2px" }}
                       />
