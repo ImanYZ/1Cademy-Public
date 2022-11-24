@@ -19,7 +19,7 @@ import ProposalItem from "./ProposalItem/ProposalItem";
 dayjs.extend(relativeTime);
 
 type ProposalsListProps = {
-  proposals: any;
+  proposals: any[];
   setProposals: any;
   proposeNodeImprovement: any;
   fetchProposals: any;
@@ -29,14 +29,14 @@ type ProposalsListProps = {
   editHistory: boolean;
   proposeNewChild: any;
   openProposal: any;
-  isAdmin: any;
+  isAdmin: boolean;
   username: string;
 };
 
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
+  console.log("proposal", props.proposals);
   const rateProposalClick = useCallback(
     (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
-      console.log("proposal", proposal);
       return props.rateProposal(
         event,
         props.proposals,
