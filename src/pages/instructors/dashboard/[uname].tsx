@@ -452,8 +452,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         <Paper
           ref={infoWrapperRef}
           sx={{
-            px: "32px",
-            py: "40px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -472,8 +471,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         <Paper
           ref={stackBarWrapperRef}
           sx={{
-            px: "32px",
-            py: "40px",
+            p: isMovil ? "10px" : "16px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -526,8 +524,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         </Paper>
         <Paper
           sx={{
-            px: "32px",
-            py: "40px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -558,7 +555,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               <BubbleChart
                 data={bubble}
                 width={
-                  isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
+                  isMovil ? windowWidth - 10 - 20 - 10 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 32 - 16
                 }
                 margin={{ top: 10, right: 0, bottom: 60, left: 50 }}
                 theme={settings.theme}
@@ -591,7 +588,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            p: isMovil ? "10px 10px" : "40px 20px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -704,7 +701,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              p: isMovil ? "10px 10px" : "40px 20px",
+              p: isMovil ? "10px" : "16px",
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
             }}
           >
@@ -731,7 +728,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         {isLoading && (
           <Paper
             sx={{
-              p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+              p: isMovil ? "10px" : "16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -749,7 +746,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               <Paper
                 key={i}
                 sx={{
-                  p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+                  p: isMovil ? "10px" : "16px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

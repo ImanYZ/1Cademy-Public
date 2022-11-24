@@ -707,7 +707,7 @@ p {
   position: absolute;
   top: 0;
   left: 0;
-  background: #f8f8f8;
+  background: white;
   box-shadow: 0 2px 8px 1px gray;
   border-radius: 4px;
   opacity: 0;

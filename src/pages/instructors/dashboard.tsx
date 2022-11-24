@@ -250,6 +250,11 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     if (!element) return;
     setstackBarWidth(element.clientWidth);
   }, []);
+  // const bubbleRef = useCallback((element: HTMLDivElement) => {
+  //   if (!element) return;
+  //   console.log("element", element, element.clientWidth, element.offsetWidth);
+  //   setBubbleChartWidth(element.clientWidth);
+  // }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -297,6 +302,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
+
     setIsLoading(true);
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
@@ -562,8 +568,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         <Paper
           ref={infoWrapperRef}
           sx={{
-            px: "32px",
-            py: "40px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -581,8 +586,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         <Paper
           ref={stackBarWrapperRef}
           sx={{
-            px: "32px",
-            py: "40px",
+            p: isMovil ? "10px" : "16px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -632,8 +636,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           // ref={bubbleRef}
           // className="test"
           sx={{
-            px: "32px",
-            py: "40px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -664,7 +667,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <BubbleChart
                 data={bubble}
                 width={
-                  isMovil ? windowWidth - 10 - 64 - 32 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 64 - 32
+                  isMovil ? windowWidth - 10 - 20 - 10 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 32 - 16
                 }
                 margin={{ top: 20, right: 0, bottom: 40, left: 50 }}
                 theme={settings.theme}
@@ -692,7 +695,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            p: isMovil ? "10px 10px" : "40px 20px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -793,7 +796,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+            p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
@@ -808,7 +811,11 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               >
                 {"Collaborations"}
               </Box>
-              <SankeyChart labelCounts={parseInt(String(students?.length))} sankeyData={sankeyData} />
+              <SankeyChart
+                innerWidth={windowWidth}
+                labelCounts={parseInt(String(students?.length))}
+                sankeyData={sankeyData}
+              />
             </>
           )}
         </Paper>
@@ -816,7 +823,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         {isLoading && (
           <Paper
             sx={{
-              p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+              p: isMovil ? "10px" : "16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -834,7 +841,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               <Paper
                 key={i}
                 sx={{
-                  p: isMovil ? "10px" : isTablet ? "20px" : "40px",
+                  p: isMovil ? "10px" : "16px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
