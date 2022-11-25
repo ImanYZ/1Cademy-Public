@@ -131,6 +131,4 @@ const PendingProposalSidebar = ({
     />
   );
 };
-export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar, (prev, next) => {
-  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
-});
+export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar);
