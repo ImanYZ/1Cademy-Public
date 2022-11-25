@@ -8,7 +8,7 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Autocomplete, FormControlLabel, FormGroup, Switch, Tab, Tabs, TextField } from "@mui/material";
+import { Autocomplete, FormControlLabel, FormGroup, LinearProgress, Switch, Tab, Tabs, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
@@ -75,6 +75,7 @@ const UserSettigsSidebar = ({
 
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [value, setValue] = React.useState(0);
 
@@ -297,13 +298,17 @@ const UserSettigsSidebar = ({
   useEffect(() => {
     const setDefaultTag = async () => {
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
+        const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
         try {
           dispatch({
             type: "setAuthUser",
-            payload: { ...user, tagId: nodeBookState.chosenNode.id, tag: nodeBookState.chosenNode.title },
+            payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
-
-          await Post(`/changeDefaultTag/${nodeBookState.chosenNode.id}`);
+          setIsLoading(true);
+          await Post(`/changeDefaultTag/${nodeId}`);
+          setIsLoading(false);
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
 
           if (!reputation) throw Error("Cant find Reputation");
@@ -312,11 +317,10 @@ const UserSettigsSidebar = ({
           dispatch({ type: "setReputation", payload: reputation });
           dispatch({ type: "setAuthUser", payload: userUpdated });
         } catch (err) {
+          setIsLoading(false);
           console.error(err);
           // window.location.reload();
         }
-        nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        nodeBookDispatch({ type: "setChosenNode", payload: null });
       }
     };
     setDefaultTag();
@@ -896,6 +900,7 @@ const UserSettigsSidebar = ({
                     className="material-icons deep-orange-text"
                   />
                   {user.tag}
+                  {isLoading && <LinearProgress />}
                 </div>
               </MemoizedMetaButton>
               {shouldShowTagSearcher && (
