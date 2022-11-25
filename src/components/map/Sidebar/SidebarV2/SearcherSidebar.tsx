@@ -19,6 +19,7 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
+  useMediaQuery,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -56,6 +57,7 @@ type Pagination = {
 };
 
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+const MAX_TAGS_IN_MOBILE = 2;
 
 const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -73,6 +75,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
 
+  const isMovil = useMediaQuery("(max-width:999px)");
+
   const [searchResults, setSearchResults] = useState<Pagination>({
     data: [],
     lastPageLoaded: 0,
@@ -89,10 +93,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     [open]
   );
 
-  const getTagsSelected = useCallback<() => TagTreeView[]>(
-    () => Object.values(allTags).filter(tag => tag.checked),
-    [allTags]
-  );
+  const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
+  const viewTagsInMovil = useMemo<TagTreeView[]>(() => selectedTags.slice(0, MAX_TAGS_IN_MOBILE), [selectedTags]);
 
   const onSearch = useCallback(
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
@@ -107,7 +109,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q,
           nodeTypes,
-          tags: getTagsSelected().map(cur => cur.title),
+          tags: selectedTags.map(cur => cur.title),
           nodesUpdatedSince,
           sortOption,
           sortDirection,
@@ -129,7 +131,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
         setIsRetrieving(false);
       }
     },
-    [getTagsSelected, setIsRetrieving, setSearchResults, nodesUpdatedSince, searchResults.data]
+    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data]
   );
 
   useEffect(() => {
@@ -191,14 +193,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     [setAllTags]
   );
 
-  const setRecoverDefaultTags = useCallback(() => {
-    // console.log("setRecoverDefaultTags");
-    // setOnlyTags(true);
-    // setAllTags(oldAllTags => {
-    //   return { ...oldAllTags, [tag.node]: { ...oldAllTags[tag.node], checked: true } };
-    // });
-    // setChosenTags([tag.node]);
-  }, []);
+  // const setRecoverDefaultTags = useCallback(() => {
+  //   // console.log("setRecoverDefaultTags");
+  //   // setOnlyTags(true);
+  //   // setAllTags(oldAllTags => {
+  //   //   return { ...oldAllTags, [tag.node]: { ...oldAllTags[tag.node], checked: true } };
+  //   // });
+  //   // setChosenTags([tag.node]);
+  // }, []);
 
   const setNodesUpdatedSinceClick = useCallback((event: any) => setNodesUpdatedSince(event.target.value), []);
 
@@ -248,34 +250,48 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             </div>
           )}
 
-          <Box sx={{ marginTop: { xs: "8px", sm: "0px" }, marginBottom: { xs: "13px", sm: "8px" } }}>
-            <label className="Tooltip">
-              <span className="tagText">Tags: </span>
-              {chosenTags.length === Object.keys(allTags).length || !onlyTags ? (
-                <span className="tagText">All</span>
-              ) : (
-                getTagsSelected().map(tag => {
-                  return (
-                    <Chip
-                      key={"tag" + tag.nodeId}
-                      // name={tag.title}
-                      className="chip"
-                      variant="outlined"
-                      label={tag.title}
-                      onDelete={() => deleteChip(tag.nodeId)}
-                    />
-                  );
-                })
-              )}
-            </label>
-            <ControlPointIcon id="AddTagIcon" onClick={setShowTagSelectorClick} />
-            {onlyTags ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              columnGap: "4px",
+              rowGap: "2px",
+              marginTop: { xs: "0px", sm: "0px" },
+              marginBottom: { xs: "0px", sm: "8px" },
+              pr: "40px",
+            }}
+          >
+            <span className="tagText">Tags: </span>
+            {(isMovil ? viewTagsInMovil : selectedTags).map(tag => {
+              return (
+                <Chip
+                  key={"tag" + tag.nodeId}
+                  variant="outlined"
+                  label={tag.title}
+                  onDelete={() => deleteChip(tag.nodeId)}
+                  size="small"
+                />
+              );
+            })}
+
+            {isMovil && selectedTags.length > MAX_TAGS_IN_MOBILE && (
+              <Chip
+                key={"more-tags"}
+                variant="outlined"
+                label={`${selectedTags.length - MAX_TAGS_IN_MOBILE}+`}
+                size="small"
+              />
+            )}
+            <div>
+              <ControlPointIcon onClick={setShowTagSelectorClick} sx={{ zIndex: 1 }} />
+            </div>
+            {/* {onlyTags ? (
               ""
             ) : (
               <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
                 Recover Default Tag(s)
               </span>
-            )}
+            )} */}
           </Box>
 
           <div id="SearchQueryContainer">
