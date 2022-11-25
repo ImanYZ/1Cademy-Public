@@ -265,6 +265,4 @@ const NotificationSidebar = ({
     ></SidebarWrapper>
   );
 };
-export const MemoizedNotificationSidebar = React.memo(NotificationSidebar, (prev, next) => {
-  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
-});
+export const MemoizedNotificationSidebar = React.memo(NotificationSidebar);

@@ -168,11 +168,4 @@ const ProposalsSidebar = ({
   );
 };
 
-export const MemoizedProposalsSidebar = React.memo(ProposalsSidebar, (prev, next) => {
-  return (
-    prev.theme === next.theme &&
-    prev.open === next.open &&
-    prev.fetchProposals === next.fetchProposals &&
-    prev.openProposal === next.openProposal
-  );
-});
+export const MemoizedProposalsSidebar = React.memo(ProposalsSidebar);

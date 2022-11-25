@@ -452,6 +452,4 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     />
   );
 };
-export const MemoizedSearcherSidebar = React.memo(SearcherSidebar, (prev, next) => {
-  return prev.open === next.open;
-});
+export const MemoizedSearcherSidebar = React.memo(SearcherSidebar);
