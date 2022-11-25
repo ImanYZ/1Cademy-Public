@@ -104,7 +104,7 @@ const ProposalsSidebar = ({
         </Box>
       }
       SidebarContent={
-        <Box sx={{ px: "10px", paddingTop: "10px" }}>
+        <Box sx={{ px: "4px", paddingTop: "10px" }}>
           {isRetrieving && (
             <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
               <CircularProgress />
@@ -168,11 +168,4 @@ const ProposalsSidebar = ({
   );
 };
 
-export const MemoizedProposalsSidebar = React.memo(ProposalsSidebar, (prev, next) => {
-  return (
-    prev.theme === next.theme &&
-    prev.open === next.open &&
-    prev.fetchProposals === next.fetchProposals &&
-    prev.openProposal === next.openProposal
-  );
-});
+export const MemoizedProposalsSidebar = React.memo(ProposalsSidebar);

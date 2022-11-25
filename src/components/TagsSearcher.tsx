@@ -266,7 +266,7 @@ const TagExploratorySearcherPropsAreEqual = (
   prevProps: TagsExploratorySearcherProps,
   nextProps: TagsExploratorySearcherProps
 ) => {
-  return prevProps.allTags === nextProps.allTags;
+  return prevProps.allTags === nextProps.allTags && prevProps.chosenTags === nextProps.chosenTags;
 };
 
 export const MemoizedTagsSearcher = React.memo(TagsSearcher, TagExploratorySearcherPropsAreEqual);

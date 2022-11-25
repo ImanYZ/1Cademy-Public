@@ -124,13 +124,11 @@ const PendingProposalSidebar = ({
       innerHeight={innerHeight}
       contentSignalState={proposals}
       SidebarContent={
-        <Box sx={{ paddingX: "10px", paddingTop: "10px" }}>
+        <Box sx={{ p: "2px 4px" }}>
           <PendingProposalList proposals={proposals} openLinkedNode={openLinkedNode} />
         </Box>
       }
     />
   );
 };
-export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar, (prev, next) => {
-  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
-});
+export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar);

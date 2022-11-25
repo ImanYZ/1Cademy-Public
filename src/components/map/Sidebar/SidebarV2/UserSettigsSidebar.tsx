@@ -576,10 +576,10 @@ const UserSettigsSidebar = ({
     [changeAttr, dispatch, genderOtherValue, user]
   );
 
-  const getDisplayNameValue = (user: User) => {
+  const getDisplayNameValue = useCallback((user: User) => {
     if (user.chooseUname) return user.uname || "Your Username";
     return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
-  };
+  }, []);
 
   const canShowOtherEthnicityInput = useCallback((ethnicity: string[]) => {
     if (ethnicity.includes(ETHNICITY_VALUES[6])) return true;
@@ -830,6 +830,7 @@ const UserSettigsSidebar = ({
     ethnicityOtherValue,
     foundFromOtherValue,
     genderOtherValue,
+    getDisplayNameValue,
     handleBackgroundSwitch,
     handleChange,
     handleShowClusterOptionsSwitch,
@@ -849,9 +850,12 @@ const UserSettigsSidebar = ({
     states,
     user,
   ]);
-  const setUserImage = (newImage: string) => {
-    dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
-  };
+  const setUserImage = useCallback(
+    (newImage: string) => {
+      dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
+    },
+    [dispatch, user]
+  );
 
   const a11yProps = (index: number) => {
     return {
@@ -864,6 +868,155 @@ const UserSettigsSidebar = ({
     return { updates: true };
   }, [tabsItems, value]);
 
+  const shouldShowTagSearcher = useMemo(() => {
+    return nodeBookState?.choosingNode?.id === "tag";
+  }, [nodeBookState?.choosingNode?.id]);
+
+  const SidebarOptions = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+          width: "100%",
+          paddingTop: "40px",
+        }}
+      >
+        <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
+          <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
+
+          <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
+            <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
+            <div id="MiniUserPrifileTag">
+              <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
+                <div className="AccountSettingsButton">
+                  <LocalOfferIcon
+                    sx={{ marginRight: "8px" }}
+                    id="tagChangeIcon"
+                    className="material-icons deep-orange-text"
+                  />
+                  {user.tag}
+                </div>
+              </MemoizedMetaButton>
+              {shouldShowTagSearcher && (
+                <Suspense fallback={<div></div>}>
+                  <div id="tagModal">
+                    <Modal
+                      className="tagSelectorModalUserSetting"
+                      onClick={closeTagSelector}
+                      returnLeft={true}
+                      noBackground={true}
+                    >
+                      <MemoizedTagsSearcher
+                        setChosenTags={setChosenTags}
+                        chosenTags={chosenTags}
+                        allTags={allTags}
+                        setAllTags={setAllTags}
+                        sx={{ maxHeight: "235px", height: "235px" }}
+                      />
+                    </Modal>
+                  </div>
+                </Suspense>
+              )}
+            </div>
+            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
+              <OptimizedAvatar
+                imageUrl={instlogoURL}
+                name={user.deInstit + " logo"}
+                sx={{
+                  width: "25px",
+                  height: "25px",
+                  fontSize: "16px",
+                }}
+                renderAsAvatar={false}
+              />
+              <span>{user.deInstit}</span>
+            </div>
+            <div id="MiniUserPrifileTotalPoints">
+              <DoneIcon className="material-icons DoneIcon green-text" />
+              <span>{shortenNumber(totalPoints, 2, false)}</span>
+            </div>
+          </div>
+        </div>
+        <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
+          <div className="MiniUserProfilePoints">
+            <LocalLibraryIcon className="material-icons amber-text" />
+            <span className="ToolbarValue">
+              {shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false)}
+            </span>
+          </div>
+          <div className="MiniUserProfilePoints">
+            <ShareIcon className="material-icons amber-text" />
+            <span className="ToolbarValue">
+              {shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false)}
+            </span>
+          </div>
+          <div className="MiniUserProfilePoints">
+            <HelpOutlineIcon className="material-icons amber-text" />
+            <span className="ToolbarValue">
+              {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
+            </span>
+          </div>
+          <div className="MiniUserProfilePoints">
+            <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
+            <span className="ToolbarValue">
+              {shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false)}
+            </span>
+          </div>
+          <div className="MiniUserProfilePoints">
+            <CodeIcon className="material-icons amber-text" />
+            <span className="ToolbarValue">
+              {shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false)}
+            </span>
+          </div>
+          <div className="MiniUserProfilePoints">
+            <MenuBookIcon className="material-icons amber-text" />
+            <span className="ToolbarValue">
+              {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}
+            </span>
+          </div>
+        </div>
+        <Tabs value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
+          {tabsItems.map((tabItem: any, idx: number) => (
+            <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
+          ))}
+        </Tabs>
+      </Box>
+    );
+  }, [
+    allTags,
+    choosingNodeClick,
+    chosenTags,
+    closeTagSelector,
+    instlogoURL,
+    setAllTags,
+    setUserImage,
+    shouldShowTagSearcher,
+    tabsItems,
+    totalPoints,
+    user.chooseUname,
+    user.deInstit,
+    user.fName,
+    user.imageUrl,
+    user.lName,
+    user.tag,
+    user.uname,
+    user.userId,
+    userReputation.cdCorrects,
+    userReputation.cdWrongs,
+    userReputation.cnCorrects,
+    userReputation.cnWrongs,
+    userReputation.iCorrects,
+    userReputation.iWrongs,
+    userReputation.mCorrects,
+    userReputation.mWrongs,
+    userReputation.qCorrects,
+    userReputation.qWrongs,
+    userReputation.rfCorrects,
+    userReputation.rfWrongs,
+    value,
+  ]);
+
   return (
     <SidebarWrapper
       title=""
@@ -871,120 +1024,9 @@ const UserSettigsSidebar = ({
       open={open}
       onClose={onClose}
       width={430}
-      SidebarOptions={
-        <Box
-          sx={{
-            borderBottom: 1,
-            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
-            width: "100%",
-            paddingTop: "40px",
-          }}
-        >
-          <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-            <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
-
-            <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
-              <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
-              <div id="MiniUserPrifileTag">
-                <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
-                  <div className="AccountSettingsButton">
-                    <LocalOfferIcon
-                      sx={{ marginRight: "8px" }}
-                      id="tagChangeIcon"
-                      className="material-icons deep-orange-text"
-                    />
-                    {user.tag}
-                  </div>
-                </MemoizedMetaButton>
-                {nodeBookState?.choosingNode?.id === "tag" && (
-                  <Suspense fallback={<div></div>}>
-                    <div id="tagModal">
-                      <Modal
-                        className="tagSelectorModalUserSetting"
-                        onClick={closeTagSelector}
-                        returnLeft={true}
-                        noBackground={true}
-                      >
-                        <MemoizedTagsSearcher
-                          setChosenTags={setChosenTags}
-                          chosenTags={chosenTags}
-                          allTags={allTags}
-                          setAllTags={setAllTags}
-                          sx={{ maxHeight: "235px", height: "235px" }}
-                        />
-                      </Modal>
-                    </div>
-                  </Suspense>
-                )}
-              </div>
-              <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
-                <OptimizedAvatar
-                  imageUrl={instlogoURL}
-                  name={user.deInstit + " logo"}
-                  sx={{
-                    width: "25px",
-                    height: "25px",
-                    fontSize: "16px",
-                  }}
-                  renderAsAvatar={false}
-                />
-                <span>{user.deInstit}</span>
-              </div>
-              <div id="MiniUserPrifileTotalPoints">
-                <DoneIcon className="material-icons DoneIcon green-text" />
-                <span>{shortenNumber(totalPoints, 2, false)}</span>
-              </div>
-            </div>
-          </div>
-          <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
-            <div className="MiniUserProfilePoints">
-              <LocalLibraryIcon className="material-icons amber-text" />
-              <span className="ToolbarValue">
-                {shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false)}
-              </span>
-            </div>
-            <div className="MiniUserProfilePoints">
-              <ShareIcon className="material-icons amber-text" />
-              <span className="ToolbarValue">
-                {shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false)}
-              </span>
-            </div>
-            <div className="MiniUserProfilePoints">
-              <HelpOutlineIcon className="material-icons amber-text" />
-              <span className="ToolbarValue">
-                {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
-              </span>
-            </div>
-            <div className="MiniUserProfilePoints">
-              <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
-              <span className="ToolbarValue">
-                {shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false)}
-              </span>
-            </div>
-            <div className="MiniUserProfilePoints">
-              <CodeIcon className="material-icons amber-text" />
-              <span className="ToolbarValue">
-                {shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false)}
-              </span>
-            </div>
-            <div className="MiniUserProfilePoints">
-              <MenuBookIcon className="material-icons amber-text" />
-              <span className="ToolbarValue">
-                {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}
-              </span>
-            </div>
-          </div>
-          <Tabs value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
-            {tabsItems.map((tabItem: any, idx: number) => (
-              <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
-            ))}
-          </Tabs>
-        </Box>
-      }
-      SidebarContent={<Box sx={{ p: "10px" }}>{tabsItems[value].content}</Box>}
+      SidebarOptions={open ? SidebarOptions : null}
+      SidebarContent={open ? <Box sx={{ p: "10px" }}>{tabsItems[value].content}</Box> : null}
     />
   );
 };
-export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar, (prev, next) => {
-  return prev.open === next.open && prev.user === next.user;
-});
+export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar);

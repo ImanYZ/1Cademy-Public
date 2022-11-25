@@ -117,7 +117,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ p: "10px" }}>
+        <Box sx={{ p: "2px 4px" }}>
           {value === 0 && (
             <BookmarksList openLinkedNode={openLinkedNode} updates={true} bookmarks={bookmarkedUserNodes} />
           )}
@@ -130,6 +130,4 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
   );
 };
 
-export const MemoizedBookmarksSidebar = React.memo(BookmarksSidebar, (prev, next) => {
-  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
-});
+export const MemoizedBookmarksSidebar = React.memo(BookmarksSidebar);
