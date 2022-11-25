@@ -3103,7 +3103,11 @@ const Dashboard = ({}: DashboardProps) => {
             </Drawer>
           }
           {user && reputation && (
-            <Box>
+            <Box sx={{
+              "& .GainedPoint, & .LostPoint": {
+                borderRadius: "50%",
+              },
+            }}>
               <MemoizedToolbarSidebar
                 open={!openSidebar}
                 onClose={() => setOpenSidebar(null)}
