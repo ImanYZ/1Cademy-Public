@@ -296,7 +296,7 @@ const UserSettigsSidebar = ({
 
   useEffect(() => {
     const setDefaultTag = async () => {
-      if (nodeBookState.choosingNode?.id === "tag" && nodeBookState.chosenNode) {
+      if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         try {
           dispatch({
             type: "setAuthUser",
@@ -869,7 +869,7 @@ const UserSettigsSidebar = ({
   }, [tabsItems, value]);
 
   const shouldShowTagSearcher = useMemo(() => {
-    return nodeBookState?.choosingNode?.id === "tag";
+    return nodeBookState?.choosingNode?.id === "Tag";
   }, [nodeBookState?.choosingNode?.id]);
 
   const SidebarOptions = useMemo(() => {
@@ -888,7 +888,7 @@ const UserSettigsSidebar = ({
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
             <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
             <div id="MiniUserPrifileTag">
-              <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("tag")}>
+              <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("Tag")}>
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon
                     sx={{ marginRight: "8px" }}
