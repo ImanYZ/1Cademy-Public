@@ -74,7 +74,9 @@ describe("/signup", () => {
     body.data.email = "test@1cad123emy.edu";
     const { req, res } = createPostReq(body);
     await handler(req, res);
-    expect(JSON.parse(res._getData()).errorMessage).toEqual("Your institute not matched with your email.");
+    expect(JSON.parse(res._getData()).errorMessage).toEqual(
+      "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form."
+    );
     body.data.email = "test@1cademy.edu";
   });
 

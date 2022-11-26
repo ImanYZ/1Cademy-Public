@@ -183,7 +183,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       return res.status(500).json({ errorMessage: "This username is already taken." });
     }
     if (data.deInstit !== institution.name) {
-      return res.status(500).json({ errorMessage: "Your institute not matched with your email." });
+      return res
+        .status(500)
+        .json({
+          errorMessage:
+            "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form.",
+        });
     }
     const userRecord = await getAuth().createUser({
       email: data.email,
