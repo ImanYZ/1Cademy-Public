@@ -182,6 +182,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if ((await userRef.get()).exists) {
       return res.status(500).json({ errorMessage: "This username is already taken." });
     }
+    if (data.deInstit !== institution.name) {
+      return res.status(500).json({ errorMessage: "Your institute not matched with your email." });
+    }
     const userRecord = await getAuth().createUser({
       email: data.email,
       displayName: data.uname,
@@ -232,8 +235,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const _institution = institutions.docs[0];
     const institutionRef = db.collection("institutions").doc(_institution.id);
     batch.update(institutionRef, {
-      usersNum: _institution.data().usersNum + 1,
-      users: Array.from(_institution.data().users).concat([data.uname]),
+      usersNum: (_institution.data()?.usersNum || 0) + 1,
+      users: Array.from(_institution.data()?.users || []).concat([data.uname]),
     });
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
