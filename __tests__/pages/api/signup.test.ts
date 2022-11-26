@@ -25,6 +25,10 @@ describe("/signup", () => {
       name: "Franklin College Switzerland",
       domain: "@1cademy.edu",
     }),
+    createInstitution({
+      name: "Franklin Switzerland College",
+      domain: "@1cad123emy.edu",
+    }),
   ];
 
   const collects = [new MockData(institutions, "institutions"), tagsData, creditsData];
@@ -65,6 +69,16 @@ describe("/signup", () => {
       consented: true,
     },
   };
+
+  it("Should give error if email doesn't match with institute.", async () => {
+    body.data.email = "test@1cad123emy.edu";
+    const { req, res } = createPostReq(body);
+    await handler(req, res);
+    expect(JSON.parse(res._getData()).errorMessage).toEqual(
+      "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form."
+    );
+    body.data.email = "test@1cademy.edu";
+  });
 
   it("Should signup a new user.", async () => {
     const { req, res } = createPostReq(body);
