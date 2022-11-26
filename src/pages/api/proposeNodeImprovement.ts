@@ -13,6 +13,11 @@ import {
   versionCreateUpdate,
 } from "../../utils";
 import { INodeLink } from "src/types/INodeLink";
+import { detach } from "src/utils/helpers";
+import { INode } from "src/types/INode";
+import { IUser } from "src/types/IUser";
+import { IInstitution } from "src/types/IInstitution";
+import { updateNodeContributions } from "src/utils/version-helpers";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -285,6 +290,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       writeCounts,
     });
     await commitBatch(batch);
+
+    // we need update contributors, contribNames, institNames, institutions
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateNodeContributions({
+        nodeId: versionData.node,
+        uname: userData.uname,
+        accepted: versionData.accepted,
+        contribution: 1,
+      });
+    });
+
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error(err);
