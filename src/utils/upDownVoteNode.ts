@@ -17,6 +17,7 @@ import {
   updateReputation,
 } from ".";
 import { detach, doNeedToDeleteNode } from "./helpers";
+import { updateNodeContributions } from "./version-helpers";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -355,6 +356,19 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
         wrongVal: changedProposers[versionData.proposer].wrongVal + wrongVal,
       };
     }
+  }
+
+  for (const proposer in changedProposers) {
+    // we need update contributors, contribNames, institNames, institutions
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateNodeContributions({
+        nodeId,
+        uname: proposer,
+        accepted: true,
+        contribution: changedProposers[proposer].correctVal - changedProposers[proposer].wrongVal,
+      });
+    });
   }
 
   await detach(async () => {

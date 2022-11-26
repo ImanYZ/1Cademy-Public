@@ -1,3 +1,13 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers");
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback();
+    }),
+  };
+});
+
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import HttpMock, { MockResponse } from "node-mocks-http";
@@ -8,6 +18,7 @@ initFirebaseClientSDK();
 
 import { admin, db } from "src/lib/firestoreServer/admin";
 import proposeChildNodeHandler, { IProposeChildNodePayload } from "src/pages/api/proposeChildNode";
+import { IInstitution } from "src/types/IInstitution";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
@@ -15,8 +26,10 @@ import { INodeVersion } from "src/types/INodeVersion";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IReputation } from "src/types/IReputationPoint";
+import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
 import { getTypedCollections } from "src/utils";
+import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { createUserNode } from "testUtils/fakers/userNode";
@@ -57,7 +70,17 @@ describe("POST /api/proposeChildNode", () => {
     "mInst",
   ];
 
-  const users = [getDefaultUser({})];
+  const institutions = [
+    createInstitution({
+      domain: "@1cademy.com",
+    }),
+  ];
+
+  const users = [
+    getDefaultUser({
+      institutionName: institutions[0].name,
+    }),
+  ];
   const nodes = [
     getDefaultNode({
       admin: users[0],
@@ -68,6 +91,7 @@ describe("POST /api/proposeChildNode", () => {
     createUser({
       sNode: nodes[0],
       tag: nodes[0],
+      institutionName: institutions[0].name,
     })
   );
 
@@ -141,6 +165,7 @@ describe("POST /api/proposeChildNode", () => {
     nodeVersionsCollection,
     reputationsCollection,
     notificationsCollection,
+    new MockData(institutions, "institutions"),
     new MockData([], "monthlyReputations"),
     new MockData([], "weeklyReputations"),
     new MockData([], "othersReputations"),
@@ -597,6 +622,28 @@ describe("POST /api/proposeChildNode", () => {
         expect(notifications.docs.length).toEqual(1);
         expect(notifications.docs[0].data().oType).toEqual("PropoAccept");
         expect(notifications.docs[0].data().aType).toEqual("newChild");
+      });
+
+      it("contribution should be updated", async () => {
+        let contribution = 1;
+        const user = await db.collection("users").doc(String(users[0].documentId)).get();
+        const userData = user.data() as IUser;
+        expect(userData.totalPoints).toEqual(contribution);
+
+        const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+        const institutionData = institution.data() as IInstitution;
+        expect(institutionData.totalPoints).toEqual(contribution);
+
+        const node = await db.collection("nodes").doc(newNodeId).get();
+        const nodeData = node.data() as INode;
+
+        expect(nodeData.contribNames.includes(users[0].uname)).toEqual(true);
+        expect(nodeData.contributors.hasOwnProperty(users[0].uname)).toEqual(true);
+        expect(nodeData.contributors[users[0].uname].reputation).toEqual(contribution);
+
+        expect(nodeData.institNames.includes(users[0].deInstit)).toEqual(true);
+        expect(nodeData.institutions.hasOwnProperty(users[0].deInstit)).toEqual(true);
+        expect(nodeData.institutions[users[0].deInstit].reputation).toEqual(contribution);
       });
     });
   });

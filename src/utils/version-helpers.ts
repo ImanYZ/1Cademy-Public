@@ -13,6 +13,9 @@ import { NodeType } from "src/types";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { detach } from "./helpers";
+import { INode } from "src/types/INode";
+import { IUser } from "src/types/IUser";
+import { IInstitution } from "src/types/IInstitution";
 
 export const comPointTypes = [
   "comPoints",
@@ -1213,6 +1216,96 @@ export const createUpdateUserVersion = async ({
     [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
   }
   return [newBatch, writeCounts];
+};
+
+type IUpdateNodeContributionParam = {
+  nodeId: string;
+  uname: string;
+  accepted: boolean;
+  contribution: number;
+};
+export const updateNodeContributions = async ({
+  nodeId,
+  uname,
+  accepted,
+  contribution,
+}: IUpdateNodeContributionParam) => {
+  await db.runTransaction(async t => {
+    const nodeDoc = await t.get(db.collection("nodes").doc(nodeId));
+    const nodeRef = db.collection("nodes").doc(nodeDoc.id);
+    const nodeData = nodeDoc.data() as INode;
+
+    const userDoc = await t.get(db.collection("users").doc(uname));
+    const userRef = db.collection("users").doc(userDoc.id);
+    const userData = userDoc.data() as IUser;
+
+    const _institutations = await t.get(db.collection("institutions").where("name", "==", userData.deInstit).limit(1));
+    const institutionRef = db.collection("institutions").doc(_institutations.docs[0].id);
+    const institutionData = _institutations.docs[0].data() as IInstitution;
+
+    // if version is not accepted we don't need to calculate anything
+    if (!accepted) {
+      return;
+    }
+
+    // update contributors
+    const contribNames: string[] = nodeData.contribNames || [];
+    if (contribNames.indexOf(userData.uname) === -1) {
+      contribNames.push(userData.uname);
+    }
+
+    const contributors: {
+      [uname: string]: {
+        chooseUname: boolean;
+        fullname: string;
+        imageUrl: string;
+        reputation: number;
+      };
+    } = nodeData.contributors || {};
+    if (!contributors.hasOwnProperty(userData.uname)) {
+      contributors[userData.uname] = {
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
+        imageUrl: userData.imageUrl,
+        reputation: 0,
+      };
+    }
+    contributors[userData.uname].reputation += contribution;
+
+    // update institutions
+    const institNames: string[] = nodeData.institNames || [];
+    if (institNames.indexOf(userData.deInstit) === -1) {
+      institNames.push(userData.deInstit);
+    }
+
+    const institutions: {
+      [institutionName: string]: {
+        reputation: number;
+      };
+    } = nodeData.institutions || {};
+    if (!institutions.hasOwnProperty(userData.deInstit)) {
+      institutions[userData.deInstit] = {
+        reputation: 0,
+      };
+    }
+    institutions[userData.deInstit].reputation += contribution;
+
+    t.update(nodeRef, {
+      contributors,
+      contribNames,
+      institutions,
+      institNames,
+    });
+
+    // user totalPoints
+    t.update(userRef, {
+      totalPoints: userData.totalPoints + contribution,
+    });
+    // institution totalPoints
+    t.update(institutionRef, {
+      totalPoints: institutionData.totalPoints + contribution,
+    });
+  });
 };
 
 export const versionCreateUpdate = async ({

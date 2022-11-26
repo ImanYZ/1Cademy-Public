@@ -18,6 +18,11 @@ import { createPendingPropNum } from "testUtils/fakers/pending-prop-num";
 import { IComPoint } from "../../../src/types/IComPoint";
 import { IReputation } from "../../../src/types/IReputationPoint";
 initFirebaseClientSDK();
+import { IInstitution } from "src/types/IInstitution";
+import { INode } from "src/types/INode";
+import { IUser } from "src/types/IUser";
+import { createInstitution } from "testUtils/fakers/institution";
+
 import { admin, db } from "../../../src/lib/firestoreServer/admin";
 import wrongNodeHandler from "../../../src/pages/api/wrongNode/[nodeId]";
 import { createComMonthlyPoints, createComPoints, createComWeeklyPoints } from "../../../testUtils/fakers/com-point";
@@ -30,10 +35,23 @@ import {
 import { createUser, getDefaultUser } from "../../../testUtils/fakers/user";
 import { createUserNode } from "../../../testUtils/fakers/userNode";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
-import { conceptVersionsData, MockData } from "../../../testUtils/mockCollections";
+import { MockData } from "../../../testUtils/mockCollections";
 
 describe("POST /api/wrongNode", () => {
-  const users = [getDefaultUser({}), createUser({})];
+  const institutions = [
+    createInstitution({
+      domain: "@1cademy.com",
+    }),
+  ];
+
+  const users = [
+    getDefaultUser({
+      institutionName: institutions[0].name,
+    }),
+    createUser({
+      institutionName: institutions[0].name,
+    }),
+  ];
   const nodes = [
     getDefaultNode({
       admin: users[0],
@@ -295,7 +313,6 @@ describe("POST /api/wrongNode", () => {
     userNodesCollection,
     nodeVersionsCollection,
     reputationsCollection,
-    conceptVersionsData,
     comPointsCollection,
     comMonthlyPointsCollection,
     comWeeklyPointsCollection,
@@ -308,6 +325,7 @@ describe("POST /api/wrongNode", () => {
     otherReputationPointsCollection,
     otherMonthlyReputationPointsCollection,
     otherWeeklyReputationPointsCollection,
+    new MockData(institutions, "institutions"),
     new MockData([], "notificationNums"),
     new MockData([], "notifications"),
     new MockData([], "userNodesLog"),
@@ -447,6 +465,28 @@ describe("POST /api/wrongNode", () => {
     const notificationDoc = await db.collection("notifications").where("nodeId", "==", nodes[0].documentId).get();
     expect(notificationDoc.docs[0].data()?.aType).toEqual("Delete");
     expect(notificationDoc.docs[0].data()?.proposer).toEqual(nodes[0]?.admin);
+  });
+
+  it("contribution should be updated", async () => {
+    let contribution = -1;
+    const user = await db.collection("users").doc(String(users[0].documentId)).get();
+    const userData = user.data() as IUser;
+    expect(userData.totalPoints).toEqual(contribution);
+
+    const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+    const institutionData = institution.data() as IInstitution;
+    expect(institutionData.totalPoints).toEqual(contribution);
+
+    const node = await db.collection("nodes").doc(String(nodes[0].documentId)).get();
+    const nodeData = node.data() as INode;
+
+    expect(nodeData.contribNames.includes(users[0].uname)).toEqual(true);
+    expect(nodeData.contributors.hasOwnProperty(users[0].uname)).toEqual(true);
+    expect(nodeData.contributors[users[0].uname].reputation).toEqual(contribution);
+
+    expect(nodeData.institNames.includes(users[0].deInstit)).toEqual(true);
+    expect(nodeData.institutions.hasOwnProperty(users[0].deInstit)).toEqual(true);
+    expect(nodeData.institutions[users[0].deInstit].reputation).toEqual(contribution);
   });
 
   it("should be check reputataion", async () => {
