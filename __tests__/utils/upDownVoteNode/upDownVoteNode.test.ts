@@ -9,6 +9,7 @@ jest.mock("src/utils/helpers", () => {
 });
 
 import { INotificationNum } from "src/types/INotification";
+import { createInstitution } from "testUtils/fakers/institution";
 
 import { db } from "../../../src/lib/firestoreServer/admin";
 import { IComPoint } from "../../../src/types/IComPoint";
@@ -92,7 +93,23 @@ describe("UpDownVoteNode", () => {
   const otherReputationPointCollections = ["othersReputations", "othMonReputations", "othWeekReputations"];
 
   describe("Case 1: Upvote", () => {
-    const users = [getDefaultUser({}), createUser({}), createUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -309,6 +326,7 @@ describe("UpDownVoteNode", () => {
       notificationsCollection,
       notificationNumsCollection,
       userNodesLogCollection,
+      new MockData(institutions, "institutions"),
     ];
 
     beforeEach(async () => {
@@ -522,7 +540,23 @@ describe("UpDownVoteNode", () => {
   });
 
   describe("Case 2: Downvote", () => {
-    const users = [getDefaultUser({}), createUser({}), createUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -739,6 +773,7 @@ describe("UpDownVoteNode", () => {
       notificationsCollection,
       notificationNumsCollection,
       userNodesLogCollection,
+      new MockData(institutions, "institutions"),
     ];
 
     beforeEach(async () => {
@@ -952,7 +987,23 @@ describe("UpDownVoteNode", () => {
   });
 
   describe("Case 3: Upvote and Remove Downvote", () => {
-    const users = [getDefaultUser({}), createUser({}), createUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -1170,6 +1221,7 @@ describe("UpDownVoteNode", () => {
       notificationsCollection,
       notificationNumsCollection,
       userNodesLogCollection,
+      new MockData(institutions, "institutions"),
     ];
 
     beforeEach(async () => {
@@ -1383,7 +1435,23 @@ describe("UpDownVoteNode", () => {
   });
 
   describe("Case 4: Remove Upvote and Downvote", () => {
-    const users = [getDefaultUser({}), createUser({}), createUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -1601,6 +1669,7 @@ describe("UpDownVoteNode", () => {
       notificationsCollection,
       notificationNumsCollection,
       userNodesLogCollection,
+      new MockData(institutions, "institutions"),
     ];
 
     beforeEach(async () => {
@@ -1814,7 +1883,23 @@ describe("UpDownVoteNode", () => {
   });
 
   describe("Case 5: Remove Upvote", () => {
-    const users = [getDefaultUser({}), createUser({}), createUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -2032,6 +2117,7 @@ describe("UpDownVoteNode", () => {
       notificationsCollection,
       notificationNumsCollection,
       userNodesLogCollection,
+      new MockData(institutions, "institutions"),
     ];
 
     beforeEach(async () => {
@@ -2245,7 +2331,23 @@ describe("UpDownVoteNode", () => {
   });
 
   describe("Case 6: Remove Downvote", () => {
-    const users = [getDefaultUser({}), createUser({}), createUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+      createUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -2463,6 +2565,7 @@ describe("UpDownVoteNode", () => {
       notificationsCollection,
       notificationNumsCollection,
       userNodesLogCollection,
+      new MockData(institutions, "institutions"),
     ];
 
     beforeEach(async () => {
@@ -2677,7 +2780,23 @@ describe("UpDownVoteNode", () => {
 
   describe("Sub Logics", () => {
     describe("Delete node if downvotes are more than upvotes", () => {
-      const users = [getDefaultUser({}), createUser({}), createUser({})];
+      const institutions = [
+        createInstitution({
+          domain: "@1cademy.com",
+        }),
+      ];
+
+      const users = [
+        getDefaultUser({
+          institutionName: institutions[0].name,
+        }),
+        createUser({
+          institutionName: institutions[0].name,
+        }),
+        createUser({
+          institutionName: institutions[0].name,
+        }),
+      ];
       const nodes: INode[] = [];
       const defaultNode = getDefaultNode({
         admin: users[0],
@@ -2923,6 +3042,7 @@ describe("UpDownVoteNode", () => {
         otherMonthlyReputationPointsCollection,
         otherWeeklyReputationPointsCollection,
         userNodesLogCollection,
+        new MockData(institutions, "institutions"),
       ];
 
       beforeAll(async () => {
@@ -3005,7 +3125,23 @@ describe("UpDownVoteNode", () => {
     });
 
     describe("if node is not deleted then", () => {
-      const users = [getDefaultUser({}), createUser({}), createUser({})];
+      const institutions = [
+        createInstitution({
+          domain: "@1cademy.com",
+        }),
+      ];
+
+      const users = [
+        getDefaultUser({
+          institutionName: institutions[0].name,
+        }),
+        createUser({
+          institutionName: institutions[0].name,
+        }),
+        createUser({
+          institutionName: institutions[0].name,
+        }),
+      ];
       const nodes: INode[] = [];
       const defaultNode = getDefaultNode({
         admin: users[0],
@@ -3267,6 +3403,7 @@ describe("UpDownVoteNode", () => {
         notificationsCollection,
         notificationNumsCollection,
         userNodesLogCollection,
+        new MockData(institutions, "institutions"),
       ];
 
       beforeAll(async () => {
