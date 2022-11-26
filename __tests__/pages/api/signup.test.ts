@@ -1,4 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
+import { IInstitution } from "src/types/IInstitution";
+import { createInstitution } from "testUtils/fakers/institution";
 
 import { db } from "../../../src/lib/firestoreServer/admin";
 import handler from "../../../src/pages/api/signup";
@@ -7,7 +9,7 @@ import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import {
   bookmarkNumsData,
   creditsData,
-  institutionsData,
+  MockData,
   notificationNumsData,
   pendingPropsNumsData,
   reputationsData,
@@ -18,45 +20,53 @@ import {
 } from "../../../testUtils/mockCollections";
 
 describe("/signup", () => {
-  beforeEach(async () => {
-    await institutionsData.populate();
-    await tagsData.populate();
-    await creditsData.populate();
+  const institutions = [
+    createInstitution({
+      name: "Franklin College Switzerland",
+      domain: "@1cademy.edu",
+    }),
+  ];
+
+  const collects = [new MockData(institutions, "institutions"), tagsData, creditsData];
+
+  beforeAll(async () => {
+    await Promise.all(collects.map(collect => collect.populate()));
   });
 
+  const body = {
+    data: {
+      uname: "uname423",
+      email: "test@1cademy.edu",
+      fName: "first name",
+      lName: "last name",
+      password: "12345678",
+      lang: "English",
+      country: "United States",
+      state: "Alaska",
+      city: "Aleutians East Borough",
+      gender: "Female",
+      birthDate: "2001-08-04T00:00:00.000Z",
+      foundFrom: "Online searching",
+      education: "Doctoral degree (MD, Ph.D., ...)",
+      occupation: "graduate",
+      ethnicity: ["White / Caucasian"],
+      reason: "test",
+      chooseUname: false,
+      clickedConsent: false,
+      clickedTOS: false,
+      clickedPP: false,
+      clickedCP: false,
+      tag: "Information Theory",
+      tagId: "C7L3gNbNp5reFjQf8vAb",
+      deMajor: "Animal Sciences",
+      deInstit: "Franklin College Switzerland",
+      theme: "Dark",
+      background: "Image",
+      consented: true,
+    },
+  };
+
   it("Should signup a new user.", async () => {
-    const body = {
-      data: {
-        uname: "uname",
-        email: "test@usf.edu",
-        fName: "first name",
-        lName: "last name",
-        password: "12345678",
-        lang: "English",
-        country: "United States",
-        state: "Alaska",
-        city: "Aleutians East Borough",
-        gender: "Female",
-        birthDate: "2001-08-04T00:00:00.000Z",
-        foundFrom: "Online searching",
-        education: "Doctoral degree (MD, Ph.D., ...)",
-        occupation: "graduate",
-        ethnicity: ["White / Caucasian"],
-        reason: "test",
-        chooseUname: false,
-        clickedConsent: false,
-        clickedTOS: false,
-        clickedPP: false,
-        clickedCP: false,
-        tag: "Information Theory",
-        tagId: "C7L3gNbNp5reFjQf8vAb",
-        deMajor: "Animal Sciences",
-        deInstit: "Franklin College Switzerland",
-        theme: "Dark",
-        background: "Image",
-        consented: true,
-      },
-    };
     const { req, res } = createPostReq(body);
     await handler(req, res);
 
@@ -83,12 +93,17 @@ describe("/signup", () => {
     expect(res._getStatusCode()).toBe(201);
   });
 
-  afterEach(async () => {
+  it("institution collection should be present in usersNum and users", async () => {
+    const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+    const institutionData = institution.data() as IInstitution;
+    expect(institutionData.usersNum).toEqual(1);
+    expect(institutionData.users.includes(body.data.uname)).toBeTruthy();
+  });
+
+  afterAll(async () => {
     await deleteAllUsers();
+    await Promise.all(collects.map(collect => collect.clean()));
     await usersData.clean();
-    await institutionsData.clean();
-    await tagsData.clean();
-    await creditsData.clean();
     await bookmarkNumsData.clean();
     await notificationNumsData.clean();
     await pendingPropsNumsData.clean();
