@@ -1231,7 +1231,6 @@ export const updateNodeContributions = async ({
   contribution,
 }: IUpdateNodeContributionParam) => {
   await db.runTransaction(async t => {
-    console.log(uname, contribution, accepted, "updateNodeContributions");
     const nodeDoc = await t.get(db.collection("nodes").doc(nodeId));
     const nodeRef = db.collection("nodes").doc(nodeDoc.id);
     const nodeData = nodeDoc.data() as INode;
