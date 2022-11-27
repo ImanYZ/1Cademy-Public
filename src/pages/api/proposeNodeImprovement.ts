@@ -169,6 +169,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       removedParents,
       removedChildren,
       currentTimestamp,
+      newUpdates: {},
       writeCounts,
     });
 

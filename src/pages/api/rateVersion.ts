@@ -3,7 +3,7 @@ import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { detach, isVersionApproved } from "src/utils/helpers";
-import { updateNodeContributions } from "src/utils/version-helpers";
+import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
 import { admin, db } from "../../lib/firestoreServer/admin";
 import fbAuth from "../../middlewares/fbAuth";
@@ -113,13 +113,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let writeCounts = 0;
     let nodeData: INode, nodeRef, versionData: INodeVersion, versionRef, correct: number, wrong: number, award;
     let accepted: boolean, isApproved: boolean;
+    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
+
+    let newUpdates: any = {};
 
     await db.runTransaction(async t => {
       const addedParents = [];
       const addedChildren = [];
       const removedParents = [];
       const removedChildren = [];
-      const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
 
       ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }));
       ({ versionData, versionRef } = await getVersion({
@@ -203,6 +205,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         removedParents,
         removedChildren,
         currentTimestamp,
+        newUpdates,
         writeCounts,
         t,
         tWriteOperations,
@@ -369,6 +372,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         accepted: accepted || isApproved,
         contribution,
       });
+      if (accepted || isApproved) {
+        await signalNodeToTypesense({
+          nodeId: versionData.childType ? newUpdates.nodeId : versionData.node,
+          currentTimestamp,
+          versionData: versionData.childType ? newUpdates.versionData : versionData,
+        });
+      }
     });
 
     return res.status(200).json({ success: true });

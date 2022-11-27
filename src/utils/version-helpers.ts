@@ -1342,9 +1342,9 @@ export const signalNodeToTypesense = async ({
     choices: versionData.choices ? versionData.choices : [],
     content: versionData.content,
     contribNames: nodeData.contribNames,
-    institNames: nodeData.institNames,
-    contributors: nodeData.contributors,
-    contributorsNames: nodeData.contribNames,
+    institNames: nodeData.institNames || [],
+    contributors: nodeData.contributors || [],
+    contributorsNames: nodeData.contribNames || [],
     corrects: nodeData.corrects,
     wrongs: nodeData.wrongs,
     netVotes: nodeData.corrects - nodeData.wrongs,
@@ -1352,7 +1352,7 @@ export const signalNodeToTypesense = async ({
     id: nodeId,
     labelsReferences: nodeData.referenceLabels || [],
     institutions,
-    institutionsNames: nodeData.institNames,
+    institutionsNames: nodeData.institNames || [],
     nodeImage: nodeData.nodeImage || "",
     nodeType: nodeData.nodeType,
     isTag: nodeData.isTag || false,
@@ -1361,8 +1361,8 @@ export const signalNodeToTypesense = async ({
     titlesReferences: nodeData.references,
     versions: nodeData.versions + 1,
   };
-  if (await typesenseDocumentExists("nodes", versionData.node)) {
-    await typesense.collections("nodes").documents(versionData.node).update(tsNodeData);
+  if (await typesenseDocumentExists("nodes", nodeId)) {
+    await typesense.collections("nodes").documents(nodeId).update(tsNodeData);
   } else {
     await typesense.collections("nodes").documents().create(tsNodeData);
   }
@@ -1390,6 +1390,7 @@ export const versionCreateUpdate = async ({
   removedParents,
   removedChildren,
   currentTimestamp,
+  newUpdates,
   writeCounts,
   t,
   tWriteOperations,
@@ -1769,6 +1770,10 @@ export const versionCreateUpdate = async ({
             newBatch.set(versionRef, childVersion);
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
+
+          newUpdates.versionId = versionRef.id;
+          newUpdates.nodeId = childNodeRef.id;
+          newUpdates.versionData = childVersion;
 
           // Because it's a child version, the old version that was proposed on the parent node should be
           // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.
