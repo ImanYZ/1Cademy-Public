@@ -35,6 +35,8 @@ import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
 
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
+
 describe("POST /api/rateVersion", () => {
   describe("if version was previously accepted", () => {
     let res: MockResponse<any>;
@@ -528,6 +530,12 @@ describe("POST /api/rateVersion", () => {
         expect(nodeData.title).toEqual(nodeVersions[1].title);
       });
 
+      it("node title updated in typesense", async () => {
+        const typesense = getTypesenseClient();
+        const tsNodeData: any = await typesense.collections("nodes").documents(String(nodes[1].documentId)).retrieve();
+        expect(tsNodeData.title).toEqual(nodeVersions[1].title);
+      });
+
       it("create/set delete=false on tag doc that was tagged in this node and communities reputation docs", async () => {
         const tagDoc = await db.collection("tags").doc(String(tags[0].documentId)).get();
         const tagDocData = tagDoc.data() as ITag;
@@ -870,6 +878,12 @@ describe("POST /api/rateVersion", () => {
       it("add parent node (node where this new node was proposed as version) in new node", async () => {
         const newNodeData = newNode.data() as INode;
         expect(newNodeData.parents[0].node).toEqual(nodes[1].documentId);
+      });
+
+      it("created node's title in typesense", async () => {
+        const typesense = getTypesenseClient();
+        const tsNodeData: any = await typesense.collections("nodes").documents(newNode.id).retrieve();
+        expect(tsNodeData.title).toEqual(nodeVersions[1].title);
       });
 
       let newNodeVersion: DocumentSnapshot<any>;

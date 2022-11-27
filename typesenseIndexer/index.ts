@@ -191,8 +191,9 @@ const getReferencesData = async (nodeDocs: FirebaseFirestore.QuerySnapshot<Fireb
 
   const processedReferences: TypesenseProcessedReferences[] = fullReferences.reduce(
     (referencesSet: TypesenseProcessedReferences[], currentReference): TypesenseProcessedReferences[] => {
-      const indexReference = referencesSet.findIndex(cur => cur.title === currentReference.title);
+      const indexReference = referencesSet.findIndex(cur => cur.id === currentReference.node);
       const processedReference: TypesenseProcessedReferences = {
+        id: currentReference.node,
         title: currentReference.title,
         data: [{ label: currentReference.label, node: currentReference.node }],
       };

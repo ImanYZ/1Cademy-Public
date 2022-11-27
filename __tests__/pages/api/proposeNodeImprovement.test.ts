@@ -33,6 +33,8 @@ import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
 
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
+
 describe("POST /api/proposeNodeImprovement", () => {
   const positiveFields = [
     // for Concept nodes
@@ -513,6 +515,15 @@ describe("POST /api/proposeNodeImprovement", () => {
           expect(nodeDoc.data()?.versions).toBeGreaterThan(0);
           expect(nodeDoc.data()?.adminPoints).toBeGreaterThan(0);
           expect(nodeDoc.data()?.maxVersionRating).toBeGreaterThan(0);
+        });
+
+        it("node title updated in typesense", async () => {
+          const typesense = getTypesenseClient();
+          const tsNodeData: any = await typesense
+            .collections("nodes")
+            .documents(String(nodes[2].documentId))
+            .retrieve();
+          expect(tsNodeData.title).toEqual("RANDOM TITLE");
         });
 
         it("select admin based on maxRating", async () => {

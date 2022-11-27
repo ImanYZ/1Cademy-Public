@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 import { INodeLink } from "./INodeLink";
 import { INodeType } from "./INodeType";
 import { IQuestionChoice } from "./IQuestionChoice";
@@ -10,10 +12,10 @@ export type INodeVersion = {
   title: string;
   fullname: string;
   children: INodeLink[];
-  addedInstitContris: boolean; // TODO: investigate this, if it run worker even its assigned to true already
+  addedInstitContris?: boolean; // TODO: investigate this, if it run worker even its assigned to true already
   accepted: boolean;
   imageUrl: string;
-  updatedAt: Date;
+  updatedAt: Date | Timestamp;
   chooseUname: boolean;
   node: string;
   parents: INodeLink[];
@@ -40,6 +42,7 @@ export type INodeVersion = {
   addedReferences?: boolean;
   deletedReferences?: boolean;
   changedReferences?: boolean;
+  changedImage?: boolean;
   addedTags?: boolean;
   deletedTags?: boolean;
   changedTags?: boolean;
@@ -47,12 +50,15 @@ export type INodeVersion = {
   removedChildren?: boolean;
   awards: number;
   summary: string;
-  nodeImage: string;
+  nodeImage?: string;
+  nodeVideo?: string;
+  nodeAudio?: string;
+  subType?: string;
   referenceIds: string[];
   references: string[];
   referenceLabels: string[];
   wrongs: number;
-  createdAt: Date;
+  createdAt: Date | Timestamp;
   tags: string[];
   tagIds: string[];
 };

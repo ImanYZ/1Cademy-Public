@@ -4,7 +4,7 @@ import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { detach } from "src/utils/helpers";
-import { updateNodeContributions } from "src/utils/version-helpers";
+import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import {
@@ -339,6 +339,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         accepted: newVersion.accepted,
         contribution: 1,
       });
+      if (newVersion.accepted) {
+        await signalNodeToTypesense({
+          nodeId: newVersion.node,
+          currentTimestamp,
+          versionData: newVersion,
+        });
+      }
     });
 
     return res.status(200).json({ success: true });
