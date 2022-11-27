@@ -8,5 +8,6 @@ export type IInstitution = {
   usersNum: number;
   users: string[];
   country: string;
+  hasLogo?: boolean;
   totalPoints: number;
 };

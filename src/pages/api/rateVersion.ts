@@ -1,5 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
+import { INodeVersion } from "src/types/INodeVersion";
+import { detach, isVersionApproved } from "src/utils/helpers";
+import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
 import { admin, db } from "../../lib/firestoreServer/admin";
 import fbAuth from "../../middlewares/fbAuth";
@@ -106,14 +110,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { uname } = req.body?.data?.user?.userData;
     const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
 
+    let writeCounts = 0;
+    let nodeData: INode, nodeRef, versionData: INodeVersion, versionRef, correct: number, wrong: number, award;
+    let accepted: boolean, isApproved: boolean;
+    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
+
+    let newUpdates: any = {};
+
     await db.runTransaction(async t => {
-      let writeCounts = 0;
-      let nodeData, nodeRef, versionData, versionRef, correct, wrong, award;
       const addedParents = [];
       const addedChildren = [];
       const removedParents = [];
       const removedChildren = [];
-      const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
 
       ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }));
       ({ versionData, versionRef } = await getVersion({
@@ -168,6 +176,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       award = nodeData.admin === uname && versionData.proposer !== uname && req.body.award ? 1 : 0;
 
+      // it version was previously approved
+      accepted = versionData.accepted;
+      // if its going to approve now
+      isApproved = isVersionApproved({
+        corrects: versionData.corrects + correct,
+        wrongs: versionData.wrongs + wrong,
+        nodeData,
+      });
+
       //  if user already has an interaction with the version
       await versionCreateUpdate({
         versionNodeId: req.body.versionNodeId,
@@ -188,6 +205,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         removedParents,
         removedChildren,
         currentTimestamp,
+        newUpdates,
         writeCounts,
         t,
         tWriteOperations,
@@ -340,6 +358,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       });
     }
+
+    // we need update contributors, contribNames, institNames, institutions
+    // TODO: move these to queue
+    await detach(async () => {
+      let contribution: number = req.body.correct ? correct : wrong;
+      if (!accepted && isApproved) {
+        contribution = versionData.corrects + correct - (versionData.wrongs + wrong);
+      }
+      await updateNodeContributions({
+        nodeId: versionData.node,
+        uname: versionData.proposer,
+        accepted: accepted || isApproved,
+        contribution,
+      });
+      if (accepted || isApproved) {
+        await signalNodeToTypesense({
+          nodeId: versionData.childType ? newUpdates.nodeId : versionData.node,
+          currentTimestamp,
+          versionData: versionData.childType ? newUpdates.versionData : versionData,
+        });
+      }
+    });
 
     return res.status(200).json({ success: true });
   } catch (err) {

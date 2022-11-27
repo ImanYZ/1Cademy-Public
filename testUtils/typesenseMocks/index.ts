@@ -8,24 +8,26 @@ import ProcessedReferencesSchemaTS from "./processedReferences.schema";
 import UsersSchemaTS from "./users.schema";
 
 export class TypesenseMock {
-  constructor(private schema: CollectionFieldSchema[], private data: any[], private collecion: string) {}
+  constructor(private schema: CollectionFieldSchema[], private data: any[], private collection: string) {}
 
   public getData = () => this.data;
-  public getCollection = () => this.collecion;
+  public getCollection = () => this.collection;
 
   public populate = async () => {
-    if(await clientTypesense.collections(this.collecion).exists()) {
+    if (await clientTypesense.collections(this.collection).exists()) {
       await this.clean();
     }
     await clientTypesense.collections().create({
-      name: this.collecion,
+      name: this.collection,
       fields: this.schema,
     });
-    await clientTypesense.collections(this.collecion).documents().import(this.data);
+    if (this.data.length) {
+      await clientTypesense.collections(this.collection).documents().import(this.data);
+    }
   };
 
   public clean = async () => {
-    await clientTypesense.collections(this.collecion).delete();
+    await clientTypesense.collections(this.collection).delete();
   };
 }
 

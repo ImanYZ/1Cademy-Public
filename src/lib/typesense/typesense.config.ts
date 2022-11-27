@@ -24,3 +24,12 @@ export const getTypesenseClient = () => {
   });
   return client;
 };
+
+export const typesenseDocumentExists = async (collection: string, documentId: string) => {
+  const typesense = getTypesenseClient();
+  try {
+    await typesense.collections(collection).documents(documentId).retrieve();
+    return true;
+  } catch (e) {}
+  return false;
+};

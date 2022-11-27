@@ -15,8 +15,6 @@ import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.c
 import { createCredit } from "testUtils/fakers/credit";
 import { createPendingPropNum } from "testUtils/fakers/pending-prop-num";
 
-import { IComPoint } from "../../../src/types/IComPoint";
-import { IReputation } from "../../../src/types/IReputationPoint";
 initFirebaseClientSDK();
 import { Timestamp } from "firebase-admin/firestore";
 import { IInstitution } from "src/types/IInstitution";
@@ -27,10 +25,10 @@ import { createInstitution } from "testUtils/fakers/institution";
 import { TypesenseMock } from "testUtils/typesenseMocks";
 
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
-import { typesenseDocumentExists } from "@/lib/typesense/typesense.config";
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 
 import { admin, db } from "../../../src/lib/firestoreServer/admin";
-import wrongNodeHandler from "../../../src/pages/api/wrongNode/[nodeId]";
+import correctNodeHandler from "../../../src/pages/api/correctNode/[nodeId]";
 import { createComMonthlyPoints, createComPoints, createComWeeklyPoints } from "../../../testUtils/fakers/com-point";
 import { createNode, createNodeVersion, getDefaultNode } from "../../../testUtils/fakers/node";
 import {
@@ -337,68 +335,10 @@ describe("POST /api/wrongNode", () => {
     new MockData([], "userNodesLog"),
     new TypesenseMock(TypesenseNodeSchema, [], "nodes"),
   ];
-  const positiveFields = [
-    // for Concept nodes
-    "cnCorrects",
-    "cnInst",
-    // for Code nodes
-    "cdCorrects",
-    "cdInst",
-    // for Question nodes
-    "qCorrects",
-    "qInst",
-    //  for Profile nodes
-    "pCorrects",
-    "pInst",
-    //  for Sequel nodes
-    "sCorrects",
-    "sInst",
-    //  for Advertisement nodes
-    "aCorrects",
-    "aInst",
-    //  for Reference nodes
-    "rfCorrects",
-    "rfInst",
-    //  for News nodes
-    "nCorrects",
-    "nInst",
-    //  for Idea nodes
-    "iCorrects",
-    "iInst",
-    //  for Relation nodes
-    "mCorrects",
-    "mInst",
-  ];
-
-  const negativeFields = [
-    // for Concept nodes
-    "cnWrongs",
-    // for Code nodes
-    "cdWrongs",
-    // for Question nodes
-    "qWrongs",
-    //  for Profile nodes
-    "pWrongs",
-    //  for Sequel nodes
-    "sWrongs",
-    //  for Advertisement nodes
-    "aWrongs",
-    //  for Reference nodes
-    "rfWrongs",
-    //  for News nodes
-    "nWrongs",
-    //  for Idea nodes
-    "iWrongs",
-    //  for Relation nodes
-    "mWrongs",
-  ];
 
   let accessToken: string = "";
   let req: any = {};
   let res: any = {};
-  let nodeDoc: any = {};
-  let node1Doc: any = {};
-  let node2Doc: any = {};
   let prevVersionDoc: any = {};
   beforeAll(async () => {
     const user = await auth.createUser({
@@ -428,11 +368,7 @@ describe("POST /api/wrongNode", () => {
     });
     req.query.nodeId = nodes[0].documentId;
     res = HttpMock.createResponse();
-    await wrongNodeHandler(req, res as any);
-    nodeDoc = await db.collection("nodes").doc(String(nodes[0].documentId)).get();
-    node1Doc = await db.collection("nodes").doc(String(nodes[1].documentId)).get();
-    node2Doc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
-    //versionDoc = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
+    await correctNodeHandler(req, res as any);
   });
 
   afterAll(async () => {
@@ -444,45 +380,13 @@ describe("POST /api/wrongNode", () => {
     expect(res._getStatusCode()).toEqual(200);
   });
 
-  it("Should be deleted field true of nodes", async () => {
-    expect(nodeDoc.data()?.deleted).toEqual(true);
-  });
-
-  it("Should be delete node from parent node", async () => {
-    expect(Object.keys(node1Doc.data()?.parents).length).toEqual(0);
-  });
-
-  it("Should be delete node from children node", async () => {
-    expect(Object.keys(node2Doc.data()?.children).length).toEqual(0);
-  });
-
-  it("Should be isTag=false in both nodes", async () => {
-    expect(node1Doc.data()?.isTag).toBe(false);
-    expect(node2Doc.data()?.isTag).toBe(false);
-  });
-
-  it("Should be remove tags from nodes", async () => {
-    expect(Object.keys(node1Doc.data()?.tags).length).toEqual(0);
-    expect(Object.keys(node2Doc.data()?.tags).length).toEqual(0);
-  });
-
-  it("Should be update wrong field in version collection", async () => {
-    let wrongs = prevVersionDoc.docs[0].data()?.wrongs + 1;
-    expect(wrongs).toEqual(1);
-  });
-
-  it("Should be deleted=true in processing node field ", async () => {
-    expect(nodeDoc.data()?.deleted).toBe(true);
-  });
-
-  it("Should be set notification in notification collection", async () => {
-    const notificationDoc = await db.collection("notifications").where("nodeId", "==", nodes[0].documentId).get();
-    expect(notificationDoc.docs[0].data()?.aType).toEqual("Delete");
-    expect(notificationDoc.docs[0].data()?.proposer).toEqual(nodes[0]?.admin);
+  it("Should be update corrects field in version collection", async () => {
+    let corrects = prevVersionDoc.docs[0].data()?.corrects + 1;
+    expect(corrects).toEqual(2);
   });
 
   it("contribution should be updated", async () => {
-    let contribution = -1;
+    let contribution = 1;
     const user = await db.collection("users").doc(String(users[0].documentId)).get();
     const userData = user.data() as IUser;
     expect(userData.totalPoints).toEqual(contribution);
@@ -503,88 +407,10 @@ describe("POST /api/wrongNode", () => {
     expect(nodeData.institutions[users[0].deInstit].reputation).toEqual(contribution);
   });
 
-  it("should be check reputataion", async () => {
-    const reputationPointCollections = ["reputations", "monthlyReputations", "weeklyReputations"];
-    const otherReputationPointCollections = ["othersReputations", "othMonReputations", "othWeekReputations"];
-    // negative values for reputation point collections
-    let _reputationPointsPVEs: { [key: string]: number } = {};
-    // negative values for reputation point collections
-    let _reputationPointsNVEs: { [key: string]: number } = {};
-
-    for (const pointCollect of [...reputationPointCollections, ...otherReputationPointCollections]) {
-      const pointData: IComPoint = (
-        await db.collection(pointCollect).where("tagId", "==", nodes[0].documentId).get()
-      ).docs[0].data() as IComPoint;
-      _reputationPointsPVEs[pointCollect] = positiveFields.reduce(
-        (carry: number, positiveField: string) => carry + Number(pointData[positiveField as keyof IComPoint]),
-        0
-      );
-      _reputationPointsNVEs[pointCollect] = negativeFields.reduce(
-        (carry: number, negativeField: string) => carry + Number(pointData[negativeField as keyof IComPoint]),
-        0
-      );
-    }
-    for (const pointCollect of [...reputationPointCollections, ...otherReputationPointCollections]) {
-      const pointData: IReputation = (
-        await db
-          .collection(pointCollect)
-          .where("uname", "==", users[0].uname)
-          .where("tagId", "==", nodes[0].documentId)
-          .get()
-      ).docs[0].data() as IReputation;
-      const expectedPositive = positiveFields.reduce(
-        (carry: number, positiveField: string) => carry + Number(pointData[positiveField as keyof IReputation]),
-        0
-      );
-      const expectedNegative = negativeFields.reduce((carry: number, negativeField: string) => {
-        return carry + Number(pointData[negativeField as keyof IReputation]);
-      }, 0);
-
-      expect(expectedPositive).toEqual(0);
-      expect(expectedNegative).toBeGreaterThanOrEqual(0);
-    }
-  });
-
-  it("should be check community points", async () => {
-    const communityPointCollections = ["comPoints", "comMonthlyPoints", "comWeeklyPoints"];
-    const otherCommunityPointCollections = ["comOthersPoints", "comOthMonPoints", "comOthWeekPoints"];
-
-    // postive values for community point collections
-    let _communityPointsPVEs: { [key: string]: number } = {};
-    // negative values for community point collections
-    let _communityPointsNVEs: { [key: string]: number } = {};
-
-    for (const communityPointCollection of [...communityPointCollections, ...otherCommunityPointCollections]) {
-      const pointData: IComPoint = (
-        await db.collection(communityPointCollection).where("tagId", "==", nodes[0].documentId).get()
-      ).docs[0].data() as IComPoint;
-      _communityPointsPVEs[communityPointCollection] = positiveFields.reduce(
-        (carry: number, positiveField: string) => carry + Number(pointData[positiveField as keyof IComPoint]),
-        0
-      );
-      _communityPointsNVEs[communityPointCollection] = negativeFields.reduce(
-        (carry: number, negativeField: string) => carry + Number(pointData[negativeField as keyof IComPoint]),
-        0
-      );
-    }
-    for (const communityPointCollection of otherCommunityPointCollections) {
-      const pointData: IComPoint = (
-        await db.collection(communityPointCollection).where("tagId", "==", nodes[0].documentId).get()
-      ).docs[0].data() as IComPoint;
-      const expectedPositive = positiveFields.reduce(
-        (carry: number, positiveField: string) => carry + Number(pointData[positiveField as keyof IComPoint]),
-        0
-      );
-      const expectedNegative = negativeFields.reduce(
-        (carry: number, negativeField: string) => carry + Number(pointData[negativeField as keyof IComPoint]),
-        0
-      );
-      expect(expectedPositive).toEqual(_communityPointsPVEs[communityPointCollection]);
-      expect(expectedNegative).toBeGreaterThanOrEqual(_communityPointsNVEs[communityPointCollection]);
-    }
-  });
-
   it("node title updated in typesense", async () => {
-    expect(await typesenseDocumentExists("nodes", String(nodes[0].documentId))).toBeFalsy();
+    const nodeData = (await db.collection("nodes").doc(String(nodes[0].documentId)).get()).data() as INode;
+    const typesense = getTypesenseClient();
+    const tsNodeData: any = await typesense.collections("nodes").documents(String(nodes[0].documentId)).retrieve();
+    expect(tsNodeData.corrects).toEqual(nodeData.corrects);
   });
 });
