@@ -17,7 +17,8 @@ import {
   updateReputation,
 } from ".";
 import { detach, doNeedToDeleteNode } from "./helpers";
-import { updateNodeContributions } from "./version-helpers";
+import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -371,6 +372,7 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     });
   }
 
+  // TODO: move these to queue
   await detach(async () => {
     let batch = db.batch();
     let writeCounts = 0;
@@ -513,4 +515,19 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
   batch.set(userNodeRef, newuserNodeObj);
 
   await commitBatch(batch);
+
+  // TODO: move these to queue
+  await detach(async () => {
+    if (deleteNode) {
+      await signalNodeDeleteToTypesense({
+        nodeId,
+      });
+    } else {
+      await signalNodeVoteToTypesense({
+        nodeId,
+        corrects: nodeChanges.corrects,
+        wrongs: nodeChanges.wrongs,
+      });
+    }
+  });
 };

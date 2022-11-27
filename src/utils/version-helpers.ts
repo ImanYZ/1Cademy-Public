@@ -1312,6 +1312,35 @@ export const updateNodeContributions = async ({
   });
 };
 
+export const signalNodeDeleteToTypesense = async ({ nodeId }: { nodeId: string }) => {
+  const typesense = getTypesenseClient();
+  if (await typesenseDocumentExists("nodes", nodeId)) {
+    await typesense.collections("nodes").documents(nodeId).delete();
+  }
+};
+
+export const signalNodeVoteToTypesense = async ({
+  nodeId,
+  corrects,
+  wrongs,
+}: {
+  nodeId: string;
+  corrects: number;
+  wrongs: number;
+}) => {
+  const typesense = getTypesenseClient();
+
+  const tsNodeData = {
+    corrects: corrects,
+    wrongs: wrongs,
+    netVotes: corrects - wrongs,
+    mostHelpful: corrects - wrongs,
+  };
+  if (await typesenseDocumentExists("nodes", nodeId)) {
+    await typesense.collections("nodes").documents(nodeId).update(tsNodeData);
+  }
+};
+
 export const signalNodeToTypesense = async ({
   nodeId,
   currentTimestamp,
