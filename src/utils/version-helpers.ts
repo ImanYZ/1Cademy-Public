@@ -1316,6 +1316,7 @@ export const signalNodeDeleteToTypesense = async ({ nodeId }: { nodeId: string }
   const typesense = getTypesenseClient();
   if (await typesenseDocumentExists("nodes", nodeId)) {
     await typesense.collections("nodes").documents(nodeId).delete();
+    await typesense.collections("processedReferences").documents(nodeId).delete();
   }
 };
 
