@@ -1395,6 +1395,22 @@ export const signalNodeToTypesense = async ({
   } else {
     await typesense.collections("nodes").documents().create(tsNodeData);
   }
+
+  if (nodeData.nodeType === "Reference") {
+    if (await typesenseDocumentExists("processedReferences", nodeId)) {
+      await typesense.collections("processedReferences").documents(nodeId).update({
+        id: nodeId,
+        title: nodeData.title,
+        data: [],
+      });
+    } else {
+      await typesense.collections("processedReferences").documents().create({
+        id: nodeId,
+        title: nodeData.title,
+        data: [],
+      });
+    }
+  }
 };
 
 export const versionCreateUpdate = async ({
