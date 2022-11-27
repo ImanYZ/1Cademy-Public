@@ -303,11 +303,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         accepted: versionData.accepted,
         contribution: 1,
       });
-      await signalNodeToTypesense({
-        nodeId: versionData.node,
-        currentTimestamp,
-        versionData,
-      });
+      if (versionData.accepted) {
+        await signalNodeToTypesense({
+          nodeId: versionData.node,
+          currentTimestamp,
+          versionData,
+        });
+      }
     });
 
     return res.status(200).json({ success: true });

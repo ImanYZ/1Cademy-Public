@@ -36,6 +36,8 @@ import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
 
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
+
 describe("POST /api/proposeChildNode", () => {
   const positiveFields = [
     // for Concept nodes
@@ -543,6 +545,12 @@ describe("POST /api/proposeChildNode", () => {
           0
         );
         expect(newReputation).toEqual(oldReputation + 1);
+      });
+
+      it("node title updated in typesense", async () => {
+        const typesense = getTypesenseClient();
+        const tsNodeData: any = await typesense.collections("nodes").documents(newNodeId).retrieve();
+        expect(tsNodeData.title).toEqual("Question?");
       });
 
       it("create new node with given data", async () => {
