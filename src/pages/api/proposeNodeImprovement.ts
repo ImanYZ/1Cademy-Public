@@ -17,7 +17,9 @@ import { detach } from "src/utils/helpers";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { IInstitution } from "src/types/IInstitution";
-import { updateNodeContributions } from "src/utils/version-helpers";
+import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
+import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
+import { INodeVersion } from "src/types/INodeVersion";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -115,7 +117,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
     const versionRef = versionsColl.doc();
-    const versionData: any = {
+    const versionData: INodeVersion = {
       node: id,
       title,
       children,
@@ -174,7 +176,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // From here on, we specify the type of the changes that the user is proposing on this node
     // using some boolean fields to be added to the version.
-    if (nodeType === "Question") {
+    if (nodeType === "Question" && versionData.choices) {
       if (versionData.choices.length > nodeData.choices.length) {
         versionData.addedChoices = true;
       } else if (versionData.choices.length < nodeData.choices.length) {
@@ -291,6 +293,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
     await commitBatch(batch);
 
+    // update typesense record for node
     // we need update contributors, contribNames, institNames, institutions
     // TODO: move these to queue
     await detach(async () => {
@@ -299,6 +302,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         uname: userData.uname,
         accepted: versionData.accepted,
         contribution: 1,
+      });
+      await signalNodeToTypesense({
+        nodeId: versionData.node,
+        currentTimestamp,
+        versionData,
       });
     });
 

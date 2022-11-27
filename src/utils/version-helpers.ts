@@ -16,6 +16,10 @@ import { detach } from "./helpers";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { IInstitution } from "src/types/IInstitution";
+import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
+import { Timestamp } from "firebase-admin/firestore";
+import { INodeVersion } from "src/types/INodeVersion";
+import { TypesenseNodeSchema } from "@/lib/schemas/node";
 
 export const comPointTypes = [
   "comPoints",
@@ -1306,6 +1310,62 @@ export const updateNodeContributions = async ({
       totalPoints: institutionData.totalPoints + contribution,
     });
   });
+};
+
+export const signalNodeToTypesense = async ({
+  nodeId,
+  currentTimestamp,
+  versionData,
+}: {
+  nodeId: string;
+  currentTimestamp: Timestamp;
+  versionData: INodeVersion;
+}) => {
+  const typesense = getTypesenseClient();
+  const nodeData = (await db.collection("nodes").doc(nodeId).get()).data() as INode;
+  const institutions = Object.entries(nodeData.institutions || {})
+    .map(cur => ({ name: cur[0], reputation: cur[1].reputation || 0 }))
+    .sort((a, b) => b.reputation - a.reputation)
+    .map(institution => ({ name: institution.name }));
+
+  if (!(await typesense.collections("nodes").exists())) {
+    await typesense.collections().create({
+      name: "nodes",
+      fields: TypesenseNodeSchema,
+    });
+  }
+
+  const tsNodeData = {
+    updatedAt: currentTimestamp.toMillis(),
+    changedAt: currentTimestamp.toDate().toISOString(),
+    changedAtMillis: currentTimestamp.toMillis(),
+    choices: versionData.choices ? versionData.choices : [],
+    content: versionData.content,
+    contribNames: nodeData.contribNames,
+    institNames: nodeData.institNames,
+    contributors: nodeData.contributors,
+    contributorsNames: nodeData.contribNames,
+    corrects: nodeData.corrects,
+    wrongs: nodeData.wrongs,
+    netVotes: nodeData.corrects - nodeData.wrongs,
+    mostHelpful: nodeData.corrects - nodeData.wrongs,
+    id: nodeId,
+    labelsReferences: nodeData.referenceLabels || [],
+    institutions,
+    institutionsNames: nodeData.institNames,
+    nodeImage: nodeData.nodeImage || "",
+    nodeType: nodeData.nodeType,
+    isTag: nodeData.isTag || false,
+    tags: nodeData.tags,
+    title: nodeData.title,
+    titlesReferences: nodeData.references,
+    versions: nodeData.versions + 1,
+  };
+  if (await typesenseDocumentExists("nodes", versionData.node)) {
+    await typesense.collections("nodes").documents(versionData.node).update(tsNodeData);
+  } else {
+    await typesense.collections("nodes").documents().create(tsNodeData);
+  }
 };
 
 export const versionCreateUpdate = async ({
