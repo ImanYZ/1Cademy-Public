@@ -92,7 +92,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       if (!nodeIdChunk.length) {
         continue;
       }
-      const snapshot = await db.collection("userNodes").where("user", "==", uname).where("node", "in", nodeIds).get();
+      const snapshot = await db
+        .collection("userNodes")
+        .where("user", "==", uname)
+        .where("node", "in", nodeIdChunk)
+        .get();
       for (let i = 0; i < snapshot.docs.length; i++) {
         userNodeDocs.push(snapshot.docs[i]);
       }
