@@ -127,7 +127,7 @@ export const HorizontalBarsChart = ({
 }: HorizontalBarChartProps) => {
   let dataSorted = useMemo(() => {
     if (sort) {
-      return data.sort((x, y) => (order === "Ascending" ? y.amount - x.amount : x.amount - y.amount));
+      return data.sort((x, y) => (order === "Ascending" ? x.amount - y.amount : y.amount - x.amount));
     }
     return data;
   }, [data, order, sort]);
