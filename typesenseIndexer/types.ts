@@ -81,6 +81,7 @@ export type TypesenseNodesSchema = {
 };
 
 export type TypesenseProcessedReferences = {
+  id: string;
   title: string;
   data: { label: string; node: string }[];
 };

@@ -30,37 +30,57 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
   try {
     const typesenseClient = getTypesenseClient();
 
-    const searchParameters: SearchParams = {
-      q,
-      query_by: `title${!onlyTitle ? ",content" : ""}`,
-      sort_by: buildSort(sortOption, sortDirection),
-      filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
-      page,
-      num_typos: `2${!onlyTitle ? ",0" : ""}`,
-    };
+    const queryFields = ["title"];
+    if (!onlyTitle) {
+      queryFields.push("content");
+    }
 
-    const searchResults = await typesenseClient
-      .collections<TypesenseNodesSchema>("nodes")
-      .documents()
-      .search(searchParameters);
+    let allPostsData: SimpleNode[] = [];
+    let found: number = 0;
+    let currentPage: number = 0;
 
-    let allPostsData = (searchResults.hits ?? []).map(
-      (el): SimpleNode => ({
-        id: el.document.id,
-        title: el.document.title,
-        changedAt: el.document.changedAt,
-        content: el.document.content,
-        nodeType: el.document.nodeType,
-        nodeImage: el.document.nodeImage || "",
-        corrects: el.document.corrects,
-        wrongs: el.document.wrongs,
-        tags: el.document.tags,
-        contributors: el.document.contributors,
-        institutions: el.document.institutions,
-        choices: el.document.choices || [],
-        versions: el.document.versions,
-      })
-    );
+    for (const queryField of queryFields) {
+      const searchParameters: SearchParams = {
+        q,
+        query_by: queryField,
+        sort_by: buildSort(sortOption, sortDirection),
+        filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
+        page,
+        num_typos: `2`,
+        typo_tokens_threshold: 2,
+      };
+
+      const searchResults = await typesenseClient
+        .collections<TypesenseNodesSchema>("nodes")
+        .documents()
+        .search(searchParameters);
+      found = Math.max(found, searchResults.found);
+      currentPage = Math.max(currentPage, searchResults.page);
+
+      const _allPostsData = (searchResults.hits ?? []).map(
+        (el): SimpleNode => ({
+          id: el.document.id,
+          title: el.document.title,
+          changedAt: el.document.changedAt,
+          content: el.document.content,
+          nodeType: el.document.nodeType,
+          nodeImage: el.document.nodeImage || "",
+          corrects: el.document.corrects,
+          wrongs: el.document.wrongs,
+          tags: el.document.tags,
+          contributors: el.document.contributors,
+          institutions: el.document.institutions,
+          choices: el.document.choices || [],
+          versions: el.document.versions,
+        })
+      );
+      for (const postData of _allPostsData) {
+        const idx = allPostsData.findIndex(_postData => _postData.id === postData.id);
+        if (idx === -1) {
+          allPostsData.push(postData);
+        }
+      }
+    }
 
     const nodeIds = allPostsData.map(post => post.id);
     let userStudiedNodes: { [key: string]: boolean } = {};
@@ -89,8 +109,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
 
     res.status(200).json({
       data: allPostsData || [],
-      page: searchResults.page,
-      numResults: searchResults.found,
+      page: currentPage,
+      numResults: Math.max(allPostsData.length, found),
       perPage: homePageSortByDefaults.perPage,
     });
   } catch (error) {

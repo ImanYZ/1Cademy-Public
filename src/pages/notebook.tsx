@@ -817,11 +817,15 @@ const Dashboard = ({}: DashboardProps) => {
     [allTags, db, settings.showClusterOptions]
   );
 
+  // this useEffect manage states when sidebar is opened or closed
   useEffect(() => {
+    if (!openSidebar) {
+      nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    }
     if (openSidebar !== "PROPOSALS") {
       setOpenProposal("");
     }
-  }, [openSidebar]);
+  }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
     if (!db) return;
@@ -3099,7 +3103,11 @@ const Dashboard = ({}: DashboardProps) => {
             </Drawer>
           }
           {user && reputation && (
-            <Box>
+            <Box sx={{
+              "& .GainedPoint, & .LostPoint": {
+                borderRadius: "50%",
+              },
+            }}>
               <MemoizedToolbarSidebar
                 open={!openSidebar}
                 onClose={() => setOpenSidebar(null)}
