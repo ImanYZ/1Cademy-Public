@@ -247,7 +247,15 @@ const NodeFooter = ({
   );
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "10px" }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        mt: "10px",
+        marginBottom: openSidebar === "PROPOSALS" || openPart ? "0px" : "10px",
+      }}
+    >
       <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
         {open &&
           (isNew ? (
@@ -282,9 +290,6 @@ const NodeFooter = ({
               inNodeFooter={true}
               reloadPermanentGrpah={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
-              sx={{
-                marginBottom: "10px",
-              }}
             />
           ) : (
             <MemoizedUserStatusIcon
@@ -297,9 +302,6 @@ const NodeFooter = ({
               inNodeFooter={true}
               reloadPermanentGrpah={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
-              sx={{
-                marginBottom: "10px",
-              }}
             />
           ))}
         <div
@@ -307,22 +309,8 @@ const NodeFooter = ({
           style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
-          {locked && (
-            <NodeTypeIcon
-              nodeType={"locked"}
-              tooltipPlacement={"top"}
-              fontSize={"inherit"}
-              sx={{ marginBottom: "10px" }}
-            />
-          )}
-          {!locked && (
-            <NodeTypeIcon
-              nodeType={nodeType}
-              tooltipPlacement={"top"}
-              fontSize={"inherit"}
-              sx={{ marginBottom: "10px" }}
-            />
-          )}
+          {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+          {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
 
           {open && (
             <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
@@ -789,7 +777,6 @@ const NodeFooter = ({
               onClick={handleClick}
               sx={{
                 border: "solid 1px #585858",
-                marginBottom: "10px",
                 padding: "3px",
               }}
             >

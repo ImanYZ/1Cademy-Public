@@ -726,8 +726,17 @@ const Node = ({
             />
           )}
           {editable && (
-            <Box sx={{ paddingY: "15px", textAlign: "center" }}>
-              <div className="ProposalCommentSubmitButton">
+            <>
+              <Box sx={{ mx: "10px", borderTop: "solid 1px #484848" }} />
+              <Box
+                className="ProposalCommentSubmitButton"
+                sx={{
+                  textAlign: "center",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  margin: "10px",
+                }}
+              >
                 <Button
                   color="error"
                   variant="contained"
@@ -745,8 +754,8 @@ const Node = ({
                 >
                   Propose
                 </Button>
-              </div>
-            </Box>
+              </Box>
+            </>
           )}
         </>
       ) : (

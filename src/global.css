@@ -2785,7 +2785,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 .select-tab-button-node-footer {
-  margin-bottom: -5px;
+  margin-bottom: -1px;
   height: 45px;
   margin-right: 10px;
   border-top-left-radius: 8px;
@@ -2832,8 +2832,11 @@ button.MuiTab-textColorInherit:focus {
   border-radius: 52px;
   display: flex;
   margin-right: 10px;
-  margin-bottom: 10px;
   border: solid 1px #585858;
+}
+
+.node-footer-buttons-margin {
+  margin-bottom: 10px;
 }
 
 .select-tab-button-node-footer button:hover {
