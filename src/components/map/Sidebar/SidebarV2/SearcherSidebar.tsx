@@ -278,11 +278,12 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
           <Box
             sx={{
               display: "flex",
+              alignItems: "center",
               flexWrap: "wrap",
               columnGap: "4px",
               rowGap: "2px",
-              marginTop: { xs: "0px", sm: "0px" },
-              marginBottom: { xs: "0px", sm: "8px" },
+              marginTop: { xs: "8px", sm: "8px" },
+              marginBottom: { xs: "8px", sm: "8px" },
               pr: "40px",
             }}
           >
@@ -383,6 +384,9 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                     ),
                     inputRef: onFocusSearcherInput,
                   }}
+                  inputProps={{
+                    style: { paddingLeft: "0", paddingRight: "0" },
+                  }}
                 />
               </div>
 
@@ -436,7 +440,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ p: "10px" }}>
+        <Box sx={{ p: "2px 4px" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             {searchResults.data.map((resNode, idx) => {
               return (

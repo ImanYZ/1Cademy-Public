@@ -7,6 +7,7 @@ import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import { isEmail, isEmpty } from "@/lib/utils/utils";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
+import { IInstitution } from "src/types/IInstitution";
 
 const addPracticeQuestions = async (
   batch: WriteBatch,
@@ -181,6 +182,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if ((await userRef.get()).exists) {
       return res.status(500).json({ errorMessage: "This username is already taken." });
     }
+    if (data.deInstit !== institution.name) {
+      return res.status(500).json({
+        errorMessage:
+          "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form.",
+      });
+    }
     const userRecord = await getAuth().createUser({
       email: data.email,
       displayName: data.uname,
@@ -225,6 +232,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       userId: userRecord.uid,
       consented: data.consented,
     };
+
+    // 25 hour logic in api
+    const institutions = await db.collection("institutions").where("name", "==", data.deInstit).get();
+    const _institution = institutions.docs[0];
+    const institutionRef = db.collection("institutions").doc(_institution.id);
+    batch.update(institutionRef, {
+      usersNum: (_institution.data()?.usersNum || 0) + 1,
+      users: Array.from(_institution.data()?.users || []).concat([data.uname]),
+    });
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
     batch.set(userRef, userData);
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);

@@ -13,6 +13,13 @@ import { NodeType } from "src/types";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { detach } from "./helpers";
+import { INode } from "src/types/INode";
+import { IUser } from "src/types/IUser";
+import { IInstitution } from "src/types/IInstitution";
+import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
+import { Timestamp } from "firebase-admin/firestore";
+import { INodeVersion } from "src/types/INodeVersion";
+import { TypesenseNodeSchema } from "@/lib/schemas/node";
 
 export const comPointTypes = [
   "comPoints",
@@ -1215,6 +1222,200 @@ export const createUpdateUserVersion = async ({
   return [newBatch, writeCounts];
 };
 
+type IUpdateNodeContributionParam = {
+  nodeId: string;
+  uname: string;
+  accepted: boolean;
+  contribution: number;
+};
+export const updateNodeContributions = async ({
+  nodeId,
+  uname,
+  accepted,
+  contribution,
+}: IUpdateNodeContributionParam) => {
+  await db.runTransaction(async t => {
+    const nodeDoc = await t.get(db.collection("nodes").doc(nodeId));
+    const nodeRef = db.collection("nodes").doc(nodeDoc.id);
+    const nodeData = nodeDoc.data() as INode;
+
+    const userDoc = await t.get(db.collection("users").doc(uname));
+    const userRef = db.collection("users").doc(userDoc.id);
+    const userData = userDoc.data() as IUser;
+
+    const _institutations = await t.get(db.collection("institutions").where("name", "==", userData.deInstit).limit(1));
+    const institutionRef = db.collection("institutions").doc(_institutations.docs[0].id);
+    const institutionData = _institutations.docs[0].data() as IInstitution;
+
+    // if version is not accepted we don't need to calculate anything
+    if (!accepted) {
+      return;
+    }
+
+    // update contributors
+    const contribNames: string[] = nodeData.contribNames || [];
+    if (contribNames.indexOf(userData.uname) === -1) {
+      contribNames.push(userData.uname);
+    }
+
+    const contributors: {
+      [uname: string]: {
+        chooseUname: boolean;
+        fullname: string;
+        imageUrl: string;
+        reputation: number;
+      };
+    } = nodeData.contributors || {};
+    if (!contributors.hasOwnProperty(userData.uname)) {
+      contributors[userData.uname] = {
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
+        imageUrl: userData.imageUrl,
+        reputation: 0,
+      };
+    }
+    contributors[userData.uname].reputation += contribution;
+
+    // update institutions
+    const institNames: string[] = nodeData.institNames || [];
+    if (institNames.indexOf(userData.deInstit) === -1) {
+      institNames.push(userData.deInstit);
+    }
+
+    const institutions: {
+      [institutionName: string]: {
+        reputation: number;
+      };
+    } = nodeData.institutions || {};
+    if (!institutions.hasOwnProperty(userData.deInstit)) {
+      institutions[userData.deInstit] = {
+        reputation: 0,
+      };
+    }
+    institutions[userData.deInstit].reputation += contribution;
+
+    t.update(nodeRef, {
+      contributors,
+      contribNames,
+      institutions,
+      institNames,
+    });
+
+    // user totalPoints
+    t.update(userRef, {
+      totalPoints: userData.totalPoints + contribution,
+    });
+    // institution totalPoints
+    t.update(institutionRef, {
+      totalPoints: institutionData.totalPoints + contribution,
+    });
+  });
+};
+
+export const signalNodeDeleteToTypesense = async ({ nodeId }: { nodeId: string }) => {
+  const typesense = getTypesenseClient();
+  if (await typesenseDocumentExists("nodes", nodeId)) {
+    await typesense.collections("nodes").documents(nodeId).delete();
+  }
+  if (await typesenseDocumentExists("processedReferences", nodeId)) {
+    await typesense.collections("processedReferences").documents(nodeId).delete();
+  }
+};
+
+export const signalNodeVoteToTypesense = async ({
+  nodeId,
+  corrects,
+  wrongs,
+}: {
+  nodeId: string;
+  corrects: number;
+  wrongs: number;
+}) => {
+  const typesense = getTypesenseClient();
+
+  const tsNodeData = {
+    corrects: corrects,
+    wrongs: wrongs,
+    netVotes: corrects - wrongs,
+    mostHelpful: corrects - wrongs,
+  };
+  if (await typesenseDocumentExists("nodes", nodeId)) {
+    await typesense.collections("nodes").documents(nodeId).update(tsNodeData);
+  }
+};
+
+export const signalNodeToTypesense = async ({
+  nodeId,
+  currentTimestamp,
+  versionData,
+}: {
+  nodeId: string;
+  currentTimestamp: Timestamp;
+  versionData: INodeVersion;
+}) => {
+  const typesense = getTypesenseClient();
+  const nodeData = (await db.collection("nodes").doc(nodeId).get()).data() as INode;
+  const institutions = Object.entries(nodeData.institutions || {})
+    .map(cur => ({ name: cur[0], reputation: cur[1].reputation || 0 }))
+    .sort((a, b) => b.reputation - a.reputation)
+    .map(institution => ({ name: institution.name }));
+
+  if (!(await typesense.collections("nodes").exists())) {
+    await typesense.collections().create({
+      name: "nodes",
+      fields: TypesenseNodeSchema,
+    });
+  }
+
+  const tsNodeData = {
+    updatedAt: currentTimestamp.toMillis(),
+    changedAt: currentTimestamp.toDate().toISOString(),
+    changedAtMillis: currentTimestamp.toMillis(),
+    choices: versionData.choices ? versionData.choices : [],
+    content: versionData.content,
+    contribNames: nodeData.contribNames,
+    institNames: nodeData.institNames || [],
+    contributors: nodeData.contributors || [],
+    contributorsNames: nodeData.contribNames || [],
+    corrects: nodeData.corrects,
+    wrongs: nodeData.wrongs,
+    netVotes: nodeData.corrects - nodeData.wrongs,
+    mostHelpful: nodeData.corrects - nodeData.wrongs,
+    id: nodeId,
+    labelsReferences: nodeData.referenceLabels || [],
+    institutions,
+    institutionsNames: nodeData.institNames || [],
+    nodeImage: nodeData.nodeImage || "",
+    nodeType: nodeData.nodeType,
+    isTag: nodeData.isTag || false,
+    tags: nodeData.tags,
+    title: nodeData.title,
+    titlesReferences: nodeData.references,
+    versions: nodeData.versions + 1,
+  };
+  if (await typesenseDocumentExists("nodes", nodeId)) {
+    await typesense.collections("nodes").documents(nodeId).update(tsNodeData);
+  } else {
+    await typesense.collections("nodes").documents().create(tsNodeData);
+  }
+
+  if (nodeData.nodeType === "Reference") {
+    if (await typesenseDocumentExists("processedReferences", nodeId)) {
+      await typesense.collections("processedReferences").documents(nodeId).update({
+        id: nodeId,
+        title: nodeData.title,
+        data: [],
+      });
+    } else {
+      await typesense.collections("processedReferences").documents().create({
+        id: nodeId,
+        title: nodeData.title,
+        data: [],
+      });
+    }
+  }
+};
+
 export const versionCreateUpdate = async ({
   versionNodeId,
   batch,
@@ -1237,6 +1438,7 @@ export const versionCreateUpdate = async ({
   removedParents,
   removedChildren,
   currentTimestamp,
+  newUpdates,
   writeCounts,
   t,
   tWriteOperations,
@@ -1616,6 +1818,10 @@ export const versionCreateUpdate = async ({
             newBatch.set(versionRef, childVersion);
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
+
+          newUpdates.versionId = versionRef.id;
+          newUpdates.nodeId = childNodeRef.id;
+          newUpdates.versionData = childVersion;
 
           // Because it's a child version, the old version that was proposed on the parent node should be
           // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.

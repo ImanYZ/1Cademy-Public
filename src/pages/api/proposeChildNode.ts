@@ -3,6 +3,8 @@ import fbAuth from "src/middlewares/fbAuth";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
+import { detach } from "src/utils/helpers";
+import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import {
@@ -327,6 +329,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       writeCounts,
     });
     await commitBatch(batch);
+
+    // we need update contributors, contribNames, institNames, institutions
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateNodeContributions({
+        nodeId: newVersion.node,
+        uname: newVersion.proposer,
+        accepted: newVersion.accepted,
+        contribution: 1,
+      });
+      if (newVersion.accepted) {
+        await signalNodeToTypesense({
+          nodeId: newVersion.node,
+          currentTimestamp,
+          versionData: newVersion,
+        });
+      }
+    });
+
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error(err);

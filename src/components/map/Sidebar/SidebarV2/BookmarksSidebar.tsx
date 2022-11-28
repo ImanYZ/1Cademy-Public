@@ -117,7 +117,7 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ p: "10px" }}>
+        <Box sx={{ p: "2px 4px" }}>
           {value === 0 && (
             <BookmarksList openLinkedNode={openLinkedNode} updates={true} bookmarks={bookmarkedUserNodes} />
           )}
