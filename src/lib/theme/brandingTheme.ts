@@ -209,7 +209,8 @@ export function getThemedComponents(theme: Theme): {
         styleOverrides: {
           root: {
             "&": {
-              border: `solid 1px ${grey[300]}`,
+              border: `solid 1px ${grey[600]}`,
+              color: `solid 1px ${grey[100]}`,
             },
           },
           icon: {

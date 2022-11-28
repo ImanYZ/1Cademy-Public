@@ -295,6 +295,7 @@ const UserSettigsSidebar = ({
     }
   }, [allTags, chosenTags, nodeBookDispatch]);
 
+  // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
