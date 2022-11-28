@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 export type HorizontalBarchartData = {
@@ -102,7 +102,7 @@ function drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX
     .attr("transform", `translate(${offsetX},${boxHeight})`);
 }
 
-type BoxChartProps = {
+type HorizontalBarChartProps = {
   identifier: string;
   data: HorizontalBarchartData;
   width: number;
@@ -110,14 +110,32 @@ type BoxChartProps = {
   margin: plotMargin;
   offsetX: number;
   theme: UserTheme;
+  sort?: boolean;
+  order?: "Ascending" | "Descending";
 };
 
-export const HorizontalBarsChart = ({ identifier, width, data, boxHeight, margin, offsetX, theme }: BoxChartProps) => {
+export const HorizontalBarsChart = ({
+  identifier,
+  width,
+  data,
+  boxHeight,
+  margin,
+  offsetX,
+  theme,
+  sort,
+  order,
+}: HorizontalBarChartProps) => {
+  let dataSorted = useMemo(() => {
+    if (sort) {
+      return data.sort((x, y) => (order === "Ascending" ? y.amount - x.amount : x.amount - y.amount));
+    }
+    return data;
+  }, [data, order, sort]);
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX });
+      drawChart({ svgRef, identifier, data: dataSorted, width, boxHeight, margin, offsetX });
     },
-    [identifier, data, width, boxHeight, margin, offsetX]
+    [identifier, dataSorted, width, boxHeight, margin, offsetX]
   );
 
   return (
