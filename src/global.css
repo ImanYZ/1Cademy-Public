@@ -2784,19 +2784,18 @@ button.MuiTab-textColorInherit:focus {
   }
 }
 
-.select-tab-button-node-footer-dark {
-  position: relative;
-  top: 4px;
-  height: 36.5px;
+.select-tab-button-node-footer {
+  margin-bottom: -1px;
+  height: 45px;
   margin-right: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
   border: solid 1px #585858;
-  border-bottom: solid 2px #1f1f1f;
+  border-bottom: none;
 }
 
-.select-tab-button-node-footer-light {
+/* .select-tab-button-node-footer-light {
   position: relative;
   top: 4px;
   height: 36.5px;
@@ -2806,9 +2805,9 @@ button.MuiTab-textColorInherit:focus {
   display: flex;
   border: solid 1px #585858;
   border-bottom: solid 2px #f0f0f0;
-}
+} */
 
-.select-tab-button-node-footer-dark::after {
+/* .select-tab-button-node-footer-dark::after {
   content: "";
   background: #1f1f1f;
   position: absolute;
@@ -2816,9 +2815,9 @@ button.MuiTab-textColorInherit:focus {
   width: 103%;
   right: -1px;
   height: 6px;
-}
+} */
 
-.select-tab-button-node-footer-light::after {
+/* .select-tab-button-node-footer-light::after {
   content: "";
   background: #f0f0f0;
   position: absolute;
@@ -2826,7 +2825,7 @@ button.MuiTab-textColorInherit:focus {
   width: 103%;
   right: -1px;
   height: 6px;
-}
+} */
 
 .tab-button-node-footer {
   padding: 5px;
@@ -2834,6 +2833,14 @@ button.MuiTab-textColorInherit:focus {
   display: flex;
   margin-right: 10px;
   border: solid 1px #585858;
+}
+
+.node-footer-buttons-margin {
+  margin-bottom: 10px;
+}
+
+.select-tab-button-node-footer button:hover {
+  box-shadow: none !important;
 }
 
 .tab-button-node-footer button:hover {
