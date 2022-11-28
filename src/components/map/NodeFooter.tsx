@@ -149,7 +149,7 @@ const NodeFooter = ({
   const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
   const messageTwitter = () => {
-    return `1Cademy - Collaboratively Designing Learning Pathways 
+    return `1Cademy - Collaboratively Designing Learning Pathways
         ${encodeURIComponent(url)}`;
   };
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

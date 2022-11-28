@@ -1972,8 +1972,7 @@ button.MuiTab-textColorInherit:focus {
   width: 16px;
 }
 
-#SearchQueryContainer .MuiOutlinedInput-notchedOutline,
-#nodesUpdatedSinceContainer .MuiOutlinedInput-notchedOutline {
+#SearchQueryContainer .MuiOutlinedInput-notchedOutline {
   border-color: #ffffff;
   border-radius: 10px;
 }
@@ -2266,10 +2265,10 @@ button.MuiTab-textColorInherit:focus {
   padding: 4px 10px;
 }
 
-#recentNodesList .MuiOutlinedInput-notchedOutline {
+/* #recentNodesList .MuiOutlinedInput-notchedOutline {
   border-color: #ffffff;
   border-radius: 10px;
-}
+} */
 
 #recentNodesList .MuiInputBase-root {
   color: #ffffff;
@@ -2358,10 +2357,6 @@ button.MuiTab-textColorInherit:focus {
 }
 
 /* Light Mode */
-
-.LightMode #recentNodesList .MuiOutlinedInput-notchedOutline {
-  border-color: #454545;
-}
 
 /* .LightMode #recentNodesList .MuiInputBase-root,
 .LightMode .searchSelect .MuiListItemText-primary,

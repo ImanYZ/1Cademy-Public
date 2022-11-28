@@ -340,7 +340,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
 
         {((isMovil && !showTagSelector) || !isMovil) && (
           <>
-            <div id="SearchQueryContainer">
+            <Box>
               <ValidatedInput
                 identification="SearchQuery"
                 name="SearchQuery"
@@ -402,8 +402,15 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 inputProps={{
                   style: { paddingLeft: "0", paddingRight: "0" },
                 }}
+                sx={{
+                  "& fieldset": {
+                    borderWidth: 1,
+
+                    borderColor: "rgba(88, 88, 88,.7)",
+                  },
+                }}
               />
-            </div>
+            </Box>
 
             <div
               id="nodesUpdatedSinceContainer"
@@ -421,8 +428,17 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                   defaultValue={nodesUpdatedSince}
                   onChange={setNodesUpdatedSinceClick}
                   size="small"
-                  sx={{ width: "76px", p: "0px" }}
+                  sx={{
+                    width: "76px",
+                    p: "0px",
+                    "& fieldset": {
+                      borderWidth: 1,
+                      borderRadius: "16px",
+                      borderColor: "rgba(88, 88, 88,.7)",
+                    },
+                  }}
                   inputProps={{ style: { padding: "4px 8px" } }}
+                  variant="outlined"
                 />
                 days
               </Box>
