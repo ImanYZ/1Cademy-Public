@@ -54,6 +54,10 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
 
   const deleteProposalClick = useCallback(
     async (proposal: any, proposalIdx: any) => {
+      let deleteOK = false;
+      window.confirm("You are going to permanently delete this proposal. Are you sure?");
+      if (!deleteOK) return;
+
       setIsDeleting(true);
       await props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx);
       setIsDeleting(false);
