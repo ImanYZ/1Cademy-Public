@@ -157,7 +157,12 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                       </ContainedButton>
                       {isDeleting && (
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", paddingY: "5px" }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "50px",
+                          }}
                         >
                           <CircularProgress size={24} />
                         </Box>
