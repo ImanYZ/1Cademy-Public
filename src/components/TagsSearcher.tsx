@@ -7,6 +7,7 @@ import {
   AutocompleteChangeReason,
   AutocompleteRenderOptionState,
   Checkbox,
+  createFilterOptions,
   FormControlLabel,
   TextField,
 } from "@mui/material";
@@ -234,6 +235,10 @@ const TagsSearcher = ({
         renderTags={() => ""}
         renderInput={setAutocompleteInput}
         fullWidth
+        filterOptions={createFilterOptions({
+          matchFrom: "any",
+          limit: 10,
+        })}
         sx={{ marginTop: "5px", marginBottom: "5px" }}
       />
       <Box id="FilterTagsTreeView">

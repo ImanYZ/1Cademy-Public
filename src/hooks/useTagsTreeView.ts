@@ -24,34 +24,6 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
   const [allTagsLoaded, setAllTagsLoaded] = useState(false);
   const [tagsTreeView, setTagsTreeView] = useState<AllTagsTreeView>(initializeTagsTreeView(chosenTags));
 
-  // const resetTags = ()=>setTagsTreeView([])
-
-  const applyTagsTreeViewChanges = (
-    oldTags: AllTagsTreeView,
-    docChanges: DocumentChange<DocumentData>[] /*, dagreLoaded*/
-  ) => {
-    let oldAllTagsCopy = { ...oldTags };
-    for (let change of docChanges) {
-      const cType = change.type;
-      // const tagData = change.doc.data() as Tag;
-      let tagData = change.doc.data() as Tag;
-      tagData.tagIds = tagData.tagIds ?? [];
-      tagData.tags = tagData.tags ?? [];
-      const nodeId = tagData.node;
-      if (tagData.deleted || cType === "removed") {
-        // applyTagRemove(oldAllTagsCopy, nodeId, dagreLoaded);
-        applyTagRemove(oldAllTagsCopy, nodeId);
-      } else {
-        if (nodeId in oldAllTagsCopy) {
-          applyTagUpdate(oldAllTagsCopy, nodeId, tagData);
-        } else {
-          applyTagAdd(oldAllTagsCopy, nodeId, tagData);
-        }
-      }
-    }
-    return oldAllTagsCopy;
-  };
-
   useEffect(() => {
     const db = getFirestore();
     const tagsRef = collection(db, "tags");
@@ -70,6 +42,35 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
   }, [setTagsTreeView]);
 
   return { allTags: tagsTreeView, setAllTags: setTagsTreeView, allTagsLoaded };
+};
+
+// ------------------------------------------
+// ------------------------ helpers functions
+
+const applyTagsTreeViewChanges = (
+  oldTags: AllTagsTreeView,
+  docChanges: DocumentChange<DocumentData>[] /*, dagreLoaded*/
+) => {
+  let oldAllTagsCopy = { ...oldTags };
+  for (let change of docChanges) {
+    const cType = change.type;
+    // const tagData = change.doc.data() as Tag;
+    let tagData = change.doc.data() as Tag;
+    tagData.tagIds = tagData.tagIds ?? [];
+    tagData.tags = tagData.tags ?? [];
+    const nodeId = tagData.node;
+    if (tagData.deleted || cType === "removed") {
+      // applyTagRemove(oldAllTagsCopy, nodeId, dagreLoaded);
+      applyTagRemove(oldAllTagsCopy, nodeId);
+    } else {
+      if (nodeId in oldAllTagsCopy) {
+        applyTagUpdate(oldAllTagsCopy, nodeId, tagData);
+      } else {
+        applyTagAdd(oldAllTagsCopy, nodeId, tagData);
+      }
+    }
+  }
+  return oldAllTagsCopy;
 };
 
 export const applyTagRemove = (oldAllTags: AllTagsTreeView, nodeId: string /*, dagreLoaded*/) => {

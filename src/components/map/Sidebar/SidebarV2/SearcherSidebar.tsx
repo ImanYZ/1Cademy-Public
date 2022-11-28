@@ -152,7 +152,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
 
   // add tags by changing a chosenNode
   useEffect(() => {
-    if (!showTagSelector) return;
+    // if (!showTagSelector) return;
+    if (nodeBookState.choosingNode?.id !== "searcher") return;
     setAllTags(allTags => {
       if (!nodeBookState.chosenNode) return allTags;
       if (!allTags[nodeBookState.chosenNode.id]) return allTags;
@@ -167,7 +168,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     });
 
     nodeBookDispatch({ type: "setChosenNode", payload: null });
-  }, [nodeBookDispatch, nodeBookState.chosenNode, setAllTags, showTagSelector]);
+  }, [
+    allTags,
+    nodeBookDispatch,
+    nodeBookState.choosingNode?.id,
+    nodeBookState.chosenNode,
+    setAllTags,
+    showTagSelector,
+  ]);
 
   const handleChange = useCallback(
     (event: any) => {
@@ -180,15 +188,21 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     [nodeBookDispatch, setSearch]
   );
 
-  const onChangeSortOptions = (newSortOption: SortValues) => {
-    setSortOption(newSortOption);
-    onSearch(1, search, newSortOption, sortDirection, nodeTypes);
-  };
+  const onChangeSortOptions = useCallback(
+    (newSortOption: SortValues) => {
+      setSortOption(newSortOption);
+      onSearch(1, search, newSortOption, sortDirection, nodeTypes);
+    },
+    [nodeTypes, onSearch, search, sortDirection]
+  );
 
-  const onChangeSortDirection = (newSortDirection: SortDirection) => {
-    setSortDirection(newSortDirection);
-    onSearch(1, search, sortOption, newSortDirection, nodeTypes);
-  };
+  const onChangeSortDirection = useCallback(
+    (newSortDirection: SortDirection) => {
+      setSortDirection(newSortDirection);
+      onSearch(1, search, sortOption, newSortDirection, nodeTypes);
+    },
+    [nodeTypes, onSearch, search, sortOption]
+  );
 
   const onSearchEnter = useCallback(
     (event: any) => {
@@ -231,15 +245,241 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     });
   }, [nodeBookDispatch]);
 
-  const onChangeNoteType = (event: SelectChangeEvent<string[]>) => {
-    const newNodeTypes = event.target.value as NodeType[];
-    setNodeTypes(newNodeTypes);
-    onSearch(1, search, sortOption, sortDirection, newNodeTypes);
-  };
+  const onChangeNoteType = useCallback(
+    (event: SelectChangeEvent<string[]>) => {
+      const newNodeTypes = event.target.value as NodeType[];
+      setNodeTypes(newNodeTypes);
+      onSearch(1, search, sortOption, sortDirection, newNodeTypes);
+    },
+    [onSearch, search, sortDirection, sortOption]
+  );
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
   }, [isRetrieving, searchResults]);
+
+  const setChosenTagsCallback = useCallback(
+    (newChosenTags: ChosenTag[]) => {
+      setChosenTags(newChosenTags);
+    },
+    [setChosenTags]
+  );
+
+  const searcherOptionsMemoized = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          p: "10px",
+          borderBottom: 1,
+          borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+          width: "100%",
+        }}
+      >
+        {!isMovil && showTagSelector && (
+          <div id="tagModal">
+            <Modal onClick={setShowTagSelectorClick} returnLeft={true} noBackground={true}>
+              <MemoizedTagsSearcher
+                allTags={allTags}
+                setAllTags={setAllTags}
+                chosenTags={chosenTags}
+                setChosenTags={setChosenTagsCallback}
+                sx={{ maxHeight: "235px", height: "235px" }}
+                multiple
+              />
+            </Modal>
+          </div>
+        )}
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            columnGap: "4px",
+            rowGap: "2px",
+            marginTop: { xs: "8px", sm: "8px" },
+            marginBottom: { xs: "8px", sm: "8px" },
+            pr: "40px",
+          }}
+        >
+          <span className="tagText">Tags: </span>
+          {(isMovil ? viewTagsInMovil : selectedTags).map(tag => {
+            return (
+              <Chip
+                key={"tag" + tag.nodeId}
+                variant="outlined"
+                label={tag.title}
+                onDelete={() => deleteChip(tag.nodeId)} //
+                size="small"
+              />
+            );
+          })}
+
+          {isMovil && selectedTags.length > MAX_TAGS_IN_MOBILE && (
+            <Chip
+              key={"more-tags"}
+              variant="outlined"
+              label={`${selectedTags.length - MAX_TAGS_IN_MOBILE}+`}
+              size="small"
+            />
+          )}
+
+          <ControlPointIcon
+            onClick={setShowTagSelectorClick}
+            sx={{ zIndex: 1, transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)", cursor: "pointer" }}
+          />
+
+          {/* {onlyTags ? (
+              ""
+            ) : (
+              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
+                Recover Default Tag(s)
+              </span>
+            )} */}
+        </Box>
+
+        {((isMovil && !showTagSelector) || !isMovil) && (
+          <>
+            <div id="SearchQueryContainer">
+              <ValidatedInput
+                identification="SearchQuery"
+                name="SearchQuery"
+                type="text"
+                onChange={handleChange}
+                value={search}
+                onKeyPress={onSearchEnter}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Select
+                        multiple
+                        MenuProps={{ id: "nodeSelectMenu" }}
+                        value={nodeTypes}
+                        variant="outlined"
+                        displayEmpty
+                        renderValue={() => "Types"}
+                        onChange={onChangeNoteType}
+                        sx={{
+                          height: "46.31px",
+                          marginLeft: "-14px",
+                          zIndex: "99",
+                        }}
+                      >
+                        {NODE_TYPES_ARRAY.map(nodeType => (
+                          <MenuItem className="searchSelect" key={nodeType} value={nodeType} id="nodeTypesSelect">
+                            <Checkbox
+                              className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                              checked={nodeTypes.includes(nodeType)}
+                            />
+                            <ListItemIcon>
+                              <NodeTypeIcon
+                                className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                                nodeType={nodeType}
+                              />
+                            </ListItemIcon>
+                            <ListItemText
+                              className={nodeTypes.includes(nodeType) ? "selected" : ""}
+                              primary={nodeType}
+                            />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <Divider orientation="vertical" id="searchDivider" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        id="SearchIcon"
+                        onClick={() => onSearch(1, search, sortOption, sortDirection, nodeTypes)}
+                      >
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  inputRef: onFocusSearcherInput,
+                }}
+                inputProps={{
+                  style: { paddingLeft: "0", paddingRight: "0" },
+                }}
+              />
+            </div>
+
+            <div
+              id="nodesUpdatedSinceContainer"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                fontSize: "14px",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                Edited in past
+                <TextField
+                  type="number"
+                  defaultValue={nodesUpdatedSince}
+                  onChange={setNodesUpdatedSinceClick}
+                  size="small"
+                  sx={{ width: "76px", p: "0px" }}
+                  inputProps={{ style: { padding: "4px 8px" } }}
+                />
+                days
+              </Box>
+              <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
+              <RecentNodesList
+                id="recentNodesList"
+                recentNodes={searchResults}
+                setRecentNodes={setSearchResults}
+                onlyTags={onlyTags}
+                sortOption={sortOption}
+                setSortOption={onChangeSortOptions}
+                sortDirection={sortDirection}
+                setSortDirection={onChangeSortDirection}
+              />
+            </div>
+          </>
+        )}
+
+        {isMovil && showTagSelector && (
+          <MemoizedTagsSearcher
+            allTags={allTags}
+            setAllTags={setAllTags}
+            chosenTags={chosenTags}
+            setChosenTags={setChosenTagsCallback}
+            sx={{ maxHeight: "235px", height: "235px" }}
+            multiple
+          />
+        )}
+      </Box>
+    );
+  }, [
+    allTags,
+    chosenTags,
+    deleteChip,
+    handleChange,
+    isMovil,
+    nodeTypes,
+    nodesUpdatedSince,
+    onChangeNoteType,
+    onChangeSortDirection,
+    onChangeSortOptions,
+    onFocusSearcherInput,
+    onSearch,
+    onSearchEnter,
+    onlyTags,
+    search,
+    searchResults,
+    selectedTags,
+    setAllTags,
+    setChosenTagsCallback,
+    setNodesUpdatedSinceClick,
+    setShowTagSelectorClick,
+    showTagSelector,
+    sortDirection,
+    sortOption,
+    viewTagsInMovil,
+  ]);
 
   return (
     <SidebarWrapper
@@ -251,193 +491,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
       height={window.innerWidth > 899 ? 100 : window.innerWidth > 375 ? 40 : 50}
       innerHeight={innerHeight}
       // anchor="right"
-      SidebarOptions={
-        <Box
-          sx={{
-            p: "10px",
-            borderBottom: 1,
-            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
-            width: "100%",
-          }}
-        >
-          {!isMovil && showTagSelector && (
-            <div id="tagModal">
-              <Modal onClick={setShowTagSelectorClick} returnLeft={true}>
-                <MemoizedTagsSearcher
-                  allTags={allTags}
-                  setAllTags={setAllTags}
-                  chosenTags={chosenTags}
-                  setChosenTags={setChosenTags}
-                  sx={{ maxHeight: "235px", height: "235px" }}
-                  multiple
-                />
-              </Modal>
-            </div>
-          )}
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              flexWrap: "wrap",
-              columnGap: "4px",
-              rowGap: "2px",
-              marginTop: { xs: "8px", sm: "8px" },
-              marginBottom: { xs: "8px", sm: "8px" },
-              pr: "40px",
-            }}
-          >
-            <span className="tagText">Tags: </span>
-            {(isMovil ? viewTagsInMovil : selectedTags).map(tag => {
-              return (
-                <Chip
-                  key={"tag" + tag.nodeId}
-                  variant="outlined"
-                  label={tag.title}
-                  onDelete={() => deleteChip(tag.nodeId)} //
-                  size="small"
-                />
-              );
-            })}
-
-            {isMovil && selectedTags.length > MAX_TAGS_IN_MOBILE && (
-              <Chip
-                key={"more-tags"}
-                variant="outlined"
-                label={`${selectedTags.length - MAX_TAGS_IN_MOBILE}+`}
-                size="small"
-              />
-            )}
-
-            <ControlPointIcon
-              onClick={setShowTagSelectorClick}
-              sx={{ zIndex: 1, transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)", cursor: "pointer" }}
-            />
-
-            {/* {onlyTags ? (
-              ""
-            ) : (
-              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
-                Recover Default Tag(s)
-              </span>
-            )} */}
-          </Box>
-
-          {((isMovil && !showTagSelector) || !isMovil) && (
-            <>
-              <div id="SearchQueryContainer">
-                <ValidatedInput
-                  identification="SearchQuery"
-                  name="SearchQuery"
-                  type="text"
-                  onChange={handleChange}
-                  value={search}
-                  onKeyPress={onSearchEnter}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Select
-                          multiple
-                          MenuProps={{ id: "nodeSelectMenu" }}
-                          value={nodeTypes}
-                          variant="outlined"
-                          displayEmpty
-                          renderValue={() => "Types"}
-                          onChange={onChangeNoteType}
-                          sx={{
-                            height: "46.31px",
-                            marginLeft: "-14px",
-                            zIndex: "99",
-                          }}
-                        >
-                          {NODE_TYPES_ARRAY.map(nodeType => (
-                            <MenuItem className="searchSelect" key={nodeType} value={nodeType} id="nodeTypesSelect">
-                              <Checkbox
-                                className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
-                                checked={nodeTypes.includes(nodeType)}
-                              />
-                              <ListItemIcon>
-                                <NodeTypeIcon
-                                  className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
-                                  nodeType={nodeType}
-                                />
-                              </ListItemIcon>
-                              <ListItemText
-                                className={nodeTypes.includes(nodeType) ? "selected" : ""}
-                                primary={nodeType}
-                              />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <Divider orientation="vertical" id="searchDivider" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          id="SearchIcon"
-                          onClick={() => onSearch(1, search, sortOption, sortDirection, nodeTypes)}
-                        >
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                    inputRef: onFocusSearcherInput,
-                  }}
-                  inputProps={{
-                    style: { paddingLeft: "0", paddingRight: "0" },
-                  }}
-                />
-              </div>
-
-              <div
-                id="nodesUpdatedSinceContainer"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  fontSize: "14px",
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  Edited in past
-                  <TextField
-                    type="number"
-                    defaultValue={nodesUpdatedSince}
-                    onChange={setNodesUpdatedSinceClick}
-                    size="small"
-                    sx={{ width: "76px", p: "0px" }}
-                    inputProps={{ style: { padding: "4px 8px" } }}
-                  />
-                  days
-                </Box>
-                <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
-                <RecentNodesList
-                  id="recentNodesList"
-                  recentNodes={searchResults}
-                  setRecentNodes={setSearchResults}
-                  onlyTags={onlyTags}
-                  sortOption={sortOption}
-                  setSortOption={onChangeSortOptions}
-                  sortDirection={sortDirection}
-                  setSortDirection={onChangeSortDirection}
-                />
-              </div>
-            </>
-          )}
-
-          {isMovil && showTagSelector && (
-            <MemoizedTagsSearcher
-              allTags={allTags}
-              setAllTags={setAllTags}
-              chosenTags={chosenTags}
-              setChosenTags={setChosenTags}
-              sx={{ maxHeight: "235px", height: "235px" }}
-              multiple
-            />
-          )}
-        </Box>
-      }
+      SidebarOptions={searcherOptionsMemoized}
       contentSignalState={contentSignalState}
       SidebarContent={
         <Box sx={{ p: "2px 4px" }}>
