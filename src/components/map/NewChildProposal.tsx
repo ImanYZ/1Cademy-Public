@@ -35,22 +35,22 @@ const NewChildProposal = (props: NewChildProposalProps) => {
           props.openProposal !== "ProposeNew" + props.childNodeType + "ChildNode" ? proposeNewChildClick : undefined
         }
       >
-        <Box className="NewProposalButton" sx={{ fontSize: "14px" }}>
+        <Box className="NewProposalButton" sx={{ fontSize: "16px", textAlign: "center" }}>
           <div className="`NewProposalIcons`">
             {/* <i className="material-icons orange-text">add</i> */}
-            <AddIcon fontSize="small" />
+            <AddIcon fontSize="inherit" />
             {/* local_library */}
             {/* share */}
             {/* help_outline */}
             {/* code */}
             {/* menu_book */}
             {/* emoji_objects */}
-            {props.icon === "local_library" && <LocalLibraryIcon fontSize="small" />}
-            {props.icon === "share" && <ShareIcon fontSize="small" />}
-            {props.icon === "help_outline" && <HelpOutlineIcon fontSize="small" />}
-            {props.icon === "code" && <CodeIcon fontSize="small" />}
-            {props.icon === "menu_book" && <MenuBookIcon fontSize="small" />}
-            {props.icon === "emoji_objects" && <EmojiObjectsIcon fontSize="small" />}
+            {props.icon === "local_library" && <LocalLibraryIcon fontSize="inherit" />}
+            {props.icon === "share" && <ShareIcon fontSize="inherit" />}
+            {props.icon === "help_outline" && <HelpOutlineIcon fontSize="inherit" />}
+            {props.icon === "code" && <CodeIcon fontSize="inherit" />}
+            {props.icon === "menu_book" && <MenuBookIcon fontSize="inherit" />}
+            {props.icon === "emoji_objects" && <EmojiObjectsIcon fontSize="inherit" />}
             {/* <i className={"material-icons orange-text"}>{props.icon}</i> */}
           </div>
           <div className="NewProposalButtonText">{props.childNodeType}</div>
