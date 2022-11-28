@@ -8,6 +8,7 @@ type IFakeUserOptions = {
   tag?: INode;
   sNode?: INode;
   uname?: string;
+  institutionName?: string;
 };
 
 export function createUser(params: IFakeUserOptions): IUser {
@@ -21,7 +22,7 @@ export function createUser(params: IFakeUserOptions): IUser {
     tagId: String(params.tag?.documentId),
     institUpdated: false,
     deCourse: faker.hacker.noun(),
-    deInstit: faker.hacker.noun(),
+    deInstit: params.institutionName || faker.hacker.noun(),
     clickedTOS: false,
     imgOrColor: false,
     imageUrl: faker.image.imageUrl(),
@@ -71,7 +72,7 @@ export function getDefaultUser(params: IFakeUserOptions): IUser {
     tagId: "r98BjyFDCe4YyLA3U8ZE",
     institUpdated: false,
     deCourse: "SI491",
-    deInstit: "University of Michigan - Ann Arbor",
+    deInstit: params.institutionName || "University of Michigan - Ann Arbor",
     clickedTOS: false,
     imgOrColor: false,
     imageUrl: faker.image.imageUrl(),

@@ -224,7 +224,7 @@ const NotificationSidebar = ({
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ display: "flex", flexDirection: "column", p: "10px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
           {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
             <Box
               sx={{
@@ -265,6 +265,4 @@ const NotificationSidebar = ({
     ></SidebarWrapper>
   );
 };
-export const MemoizedNotificationSidebar = React.memo(NotificationSidebar, (prev, next) => {
-  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
-});
+export const MemoizedNotificationSidebar = React.memo(NotificationSidebar);

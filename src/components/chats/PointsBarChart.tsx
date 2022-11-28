@@ -77,12 +77,12 @@ function drawChart(
   svg
     .append("g")
     .attr("id", "axis-x")
-    .attr("transform", `translate(25, ${height + 30})`)
+    .attr("transform", `translate(30, ${height + 30})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add Y axis
   const y = d3.scaleLinear().domain([0, maxAxisY]).range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(25,30)`).call(d3.axisLeft(y));
+  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30,30)`).call(d3.axisLeft(y));
 
   // color palette = one color per subgroup
   const colorApha = d3
@@ -256,7 +256,7 @@ function drawChart(
     .attr("height", d => y(d[0]) - y(d[1]))
     .attr("width", x.bandwidth())
 
-    .attr("transform", `translate(25, 30)`);
+    .attr("transform", `translate(30, 30)`);
 
   if (studentLocation) {
     const locationIconPath =
@@ -268,7 +268,7 @@ function drawChart(
       .data(locations)
       .join("path")
       .attr("d", locationIconPath)
-      .attr("transform", d => `translate(${d.x},${y(maxAxisY - d.y) + 11})`)
+      .attr("transform", d => `translate(${d.x + 5},${y(maxAxisY - d.y) + 11})`)
       .attr("fill", "#EF5350");
     svg
       .select("#location-line")
@@ -277,7 +277,7 @@ function drawChart(
       .join("rect")
       .attr("height", "1px")
       .attr("width", x.bandwidth() + 11)
-      .attr("transform", d => `translate(${d.x - 1.05 * x.bandwidth()},${y(maxAxisY - d.y) + 30})`)
+      .attr("transform", d => `translate(${d.x - 0.99 * x.bandwidth()},${y(maxAxisY - d.y) + 30})`)
       .attr("fill", "#EF5350");
   }
 }
@@ -309,7 +309,7 @@ export const PointsBarChart = ({
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg}>
-        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={5} y={20}>
+        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={10} y={20}>
           # of Students
         </text>
         <g id="bars"></g>

@@ -19,24 +19,39 @@ initFirebaseClientSDK();
 import { DocumentSnapshot } from "firebase-admin/firestore";
 import { admin, db } from "src/lib/firestoreServer/admin";
 import rateVersionHandler, { IRateVersionPayload } from "src/pages/api/rateVersion";
+import { IInstitution } from "src/types/IInstitution";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeVersion } from "src/types/INodeVersion";
 import { INotification } from "src/types/INotification";
 import { ITag } from "src/types/ITag";
+import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
 import { getTypedCollections } from "src/utils";
+import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, createUserNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
 
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
+
 describe("POST /api/rateVersion", () => {
   describe("if version was previously accepted", () => {
     let res: MockResponse<any>;
 
-    const users = [getDefaultUser({})];
+    const institutions = [
+      createInstitution({
+        domain: "@1cademy.com",
+      }),
+    ];
+
+    const users = [
+      getDefaultUser({
+        institutionName: institutions[0].name,
+      }),
+    ];
     const nodes = [
       getDefaultNode({
         admin: users[0],
@@ -47,6 +62,7 @@ describe("POST /api/rateVersion", () => {
       createUser({
         sNode: nodes[0],
         tag: nodes[0],
+        institutionName: institutions[0].name,
       })
     );
 
@@ -147,6 +163,7 @@ describe("POST /api/rateVersion", () => {
       new MockData([], "userNodesLog"),
       new MockData([], "userVersionsLog"),
       new MockData([], "tags"),
+      new MockData(institutions, "institutions"),
 
       new MockData(
         [
@@ -239,6 +256,27 @@ describe("POST /api/rateVersion", () => {
       expect(userNodeData.nodeChanges?.maxVersionRating).toEqual(3);
     });
 
+    it("contribution should be updated", async () => {
+      const user = await db.collection("users").doc(String(users[0].documentId)).get();
+      const userData = user.data() as IUser;
+      expect(userData.totalPoints).toEqual(1);
+
+      const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+      const institutionData = institution.data() as IInstitution;
+      expect(institutionData.totalPoints).toEqual(1);
+
+      const node = await db.collection("nodes").doc(String(nodes[0].documentId)).get();
+      const nodeData = node.data() as INode;
+
+      expect(nodeData.contribNames.includes(users[0].uname)).toEqual(true);
+      expect(nodeData.contributors.hasOwnProperty(users[0].uname)).toEqual(true);
+      expect(nodeData.contributors[users[0].uname].reputation).toEqual(1);
+
+      expect(nodeData.institNames.includes(users[0].deInstit)).toEqual(true);
+      expect(nodeData.institutions.hasOwnProperty(users[0].deInstit)).toEqual(true);
+      expect(nodeData.institutions[users[0].deInstit].reputation).toEqual(1);
+    });
+
     describe("create notification", () => {
       it("if version was previously accepted oType=AccProposal", async () => {
         const notifications = await db.collection("notifications").where("uname", "==", users[1].uname).get();
@@ -253,6 +291,12 @@ describe("POST /api/rateVersion", () => {
     describe("if its an improvement", () => {
       let res: MockResponse<any>;
 
+      const institutions = [
+        createInstitution({
+          domain: "@1cademy.com",
+        }),
+      ];
+
       const users = [getDefaultUser({})];
       const nodes = [
         getDefaultNode({
@@ -264,6 +308,7 @@ describe("POST /api/rateVersion", () => {
         createUser({
           sNode: nodes[0],
           tag: nodes[0],
+          institutionName: institutions[0].name,
         })
       );
 
@@ -384,6 +429,7 @@ describe("POST /api/rateVersion", () => {
         nodeVersionsCollection,
         reputationsCollection,
         notificationsCollection,
+        new MockData(institutions, "institutions"),
         new MockData([], "monthlyReputations"),
         new MockData([], "weeklyReputations"),
         new MockData([], "othersReputations"),
@@ -484,6 +530,12 @@ describe("POST /api/rateVersion", () => {
         expect(nodeData.title).toEqual(nodeVersions[1].title);
       });
 
+      it("node title updated in typesense", async () => {
+        const typesense = getTypesenseClient();
+        const tsNodeData: any = await typesense.collections("nodes").documents(String(nodes[1].documentId)).retrieve();
+        expect(tsNodeData.title).toEqual(nodeVersions[1].title);
+      });
+
       it("create/set delete=false on tag doc that was tagged in this node and communities reputation docs", async () => {
         const tagDoc = await db.collection("tags").doc(String(tags[0].documentId)).get();
         const tagDocData = tagDoc.data() as ITag;
@@ -498,6 +550,28 @@ describe("POST /api/rateVersion", () => {
         const childNodeData = childNode.data() as INode;
         expect(parentNodeData.children[0].title).toEqual(nodeVersions[1].title);
         expect(childNodeData.parents[0].title).toEqual(nodeVersions[1].title);
+      });
+
+      it("contribution should be updated", async () => {
+        let contribution = 4;
+        const user = await db.collection("users").doc(String(users[1].documentId)).get();
+        const userData = user.data() as IUser;
+        expect(userData.totalPoints).toEqual(contribution);
+
+        const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+        const institutionData = institution.data() as IInstitution;
+        expect(institutionData.totalPoints).toEqual(contribution);
+
+        const node = await db.collection("nodes").doc(String(nodes[1].documentId)).get();
+        const nodeData = node.data() as INode;
+
+        expect(nodeData.contribNames.includes(users[1].uname)).toEqual(true);
+        expect(nodeData.contributors.hasOwnProperty(users[1].uname)).toEqual(true);
+        expect(nodeData.contributors[users[1].uname].reputation).toEqual(contribution);
+
+        expect(nodeData.institNames.includes(users[1].deInstit)).toEqual(true);
+        expect(nodeData.institutions.hasOwnProperty(users[1].deInstit)).toEqual(true);
+        expect(nodeData.institutions[users[1].deInstit].reputation).toEqual(contribution);
       });
 
       // Not checking these soon I will detach this with main process
@@ -535,6 +609,12 @@ describe("POST /api/rateVersion", () => {
     describe("if its not an improvement and a child node", () => {
       let res: MockResponse<any>;
 
+      const institutions = [
+        createInstitution({
+          domain: "@1cademy.com",
+        }),
+      ];
+
       const users = [getDefaultUser({})];
       const nodes = [
         getDefaultNode({
@@ -546,6 +626,7 @@ describe("POST /api/rateVersion", () => {
         createUser({
           sNode: nodes[0],
           tag: nodes[0],
+          institutionName: institutions[0].name,
         })
       );
 
@@ -674,6 +755,7 @@ describe("POST /api/rateVersion", () => {
         nodeVersionsCollection,
         reputationsCollection,
         notificationsCollection,
+        new MockData(institutions, "institutions"),
         new MockData([], "monthlyReputations"),
         new MockData([], "weeklyReputations"),
         new MockData([], "othersReputations"),
@@ -798,6 +880,12 @@ describe("POST /api/rateVersion", () => {
         expect(newNodeData.parents[0].node).toEqual(nodes[1].documentId);
       });
 
+      it("created node's title in typesense", async () => {
+        const typesense = getTypesenseClient();
+        const tsNodeData: any = await typesense.collections("nodes").documents(newNode.id).retrieve();
+        expect(tsNodeData.title).toEqual(nodeVersions[1].title);
+      });
+
       let newNodeVersion: DocumentSnapshot<any>;
 
       it("create version for new node that is accepted", async () => {
@@ -859,6 +947,28 @@ describe("POST /api/rateVersion", () => {
           const versionData = userVersions.docs[0].data() as INodeVersion;
           expect(versionData.deleted).toEqual(true);
         });
+      });
+
+      it("contribution should be updated", async () => {
+        let contribution = 2;
+        const user = await db.collection("users").doc(String(users[1].documentId)).get();
+        const userData = user.data() as IUser;
+        expect(userData.totalPoints).toEqual(contribution);
+
+        const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+        const institutionData = institution.data() as IInstitution;
+        expect(institutionData.totalPoints).toEqual(contribution);
+
+        const node = await db.collection("nodes").doc(String(nodes[1].documentId)).get();
+        const nodeData = node.data() as INode;
+
+        expect(nodeData.contribNames.includes(users[1].uname)).toEqual(true);
+        expect(nodeData.contributors.hasOwnProperty(users[1].uname)).toEqual(true);
+        expect(nodeData.contributors[users[1].uname].reputation).toEqual(contribution);
+
+        expect(nodeData.institNames.includes(users[1].deInstit)).toEqual(true);
+        expect(nodeData.institutions.hasOwnProperty(users[1].deInstit)).toEqual(true);
+        expect(nodeData.institutions[users[1].deInstit].reputation).toEqual(contribution);
       });
 
       describe("create notification", () => {

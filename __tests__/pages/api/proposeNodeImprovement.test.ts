@@ -18,17 +18,22 @@ initFirebaseClientSDK();
 
 import { admin, db } from "src/lib/firestoreServer/admin";
 import proposeNodeImprovementHandler from "src/pages/api/proposeNodeImprovement";
+import { IInstitution } from "src/types/IInstitution";
 import { INode } from "src/types/INode";
 import { INotification } from "src/types/INotification";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IReputation } from "src/types/IReputationPoint";
 import { ITag } from "src/types/ITag";
+import { IUser } from "src/types/IUser";
 import { firstWeekMonthDays } from "src/utils";
+import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { createUserNode } from "testUtils/fakers/userNode";
 import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
+
+import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 
 describe("POST /api/proposeNodeImprovement", () => {
   const positiveFields = [
@@ -64,7 +69,17 @@ describe("POST /api/proposeNodeImprovement", () => {
     "mInst",
   ];
 
-  const users = [getDefaultUser({})];
+  const institutions = [
+    createInstitution({
+      domain: "@1cademy.com",
+    }),
+  ];
+
+  const users = [
+    getDefaultUser({
+      institutionName: institutions[0].name,
+    }),
+  ];
   const nodes = [
     getDefaultNode({
       admin: users[0],
@@ -75,6 +90,7 @@ describe("POST /api/proposeNodeImprovement", () => {
     createUser({
       sNode: nodes[0],
       tag: nodes[0],
+      institutionName: institutions[0].name,
     })
   );
 
@@ -217,6 +233,7 @@ describe("POST /api/proposeNodeImprovement", () => {
     weeklyReputationPointsCollection,
     notificationsCollection,
     new MockData(tags, "tags"),
+    new MockData(institutions, "institutions"),
 
     new MockData([], "comPoints"),
     new MockData([], "comMonthlyPoints"),
@@ -468,6 +485,29 @@ describe("POST /api/proposeNodeImprovement", () => {
       );
       expect(newReputation).toEqual(oldReputation + 1);
     });
+
+    it("contribution should be updated", async () => {
+      let contribution = 1;
+      const user = await db.collection("users").doc(String(users[0].documentId)).get();
+      const userData = user.data() as IUser;
+      expect(userData.totalPoints).toEqual(contribution);
+
+      const institution = await db.collection("institutions").doc(String(institutions[0].documentId)).get();
+      const institutionData = institution.data() as IInstitution;
+      expect(institutionData.totalPoints).toEqual(contribution);
+
+      const node = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
+      const nodeData = node.data() as INode;
+
+      expect(nodeData.contribNames.includes(users[0].uname)).toEqual(true);
+      expect(nodeData.contributors.hasOwnProperty(users[0].uname)).toEqual(true);
+      expect(nodeData.contributors[users[0].uname].reputation).toEqual(contribution);
+
+      expect(nodeData.institNames.includes(users[0].deInstit)).toEqual(true);
+      expect(nodeData.institutions.hasOwnProperty(users[0].deInstit)).toEqual(true);
+      expect(nodeData.institutions[users[0].deInstit].reputation).toEqual(contribution);
+    });
+
     describe("if version getting accepted now", () => {
       describe("if its an improvement", () => {
         it("increase version points of node admin", async () => {
@@ -475,6 +515,15 @@ describe("POST /api/proposeNodeImprovement", () => {
           expect(nodeDoc.data()?.versions).toBeGreaterThan(0);
           expect(nodeDoc.data()?.adminPoints).toBeGreaterThan(0);
           expect(nodeDoc.data()?.maxVersionRating).toBeGreaterThan(0);
+        });
+
+        it("node title updated in typesense", async () => {
+          const typesense = getTypesenseClient();
+          const tsNodeData: any = await typesense
+            .collections("nodes")
+            .documents(String(nodes[2].documentId))
+            .retrieve();
+          expect(tsNodeData.title).toEqual("RANDOM TITLE");
         });
 
         it("select admin based on maxRating", async () => {

@@ -382,6 +382,4 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     />
   );
 };
-export const MemoizedUserInfoSidebar = React.memo(UserInfoSidebar, (prev, next) => {
-  return prev.theme === next.theme && prev.username === next.username && prev.open === next.open;
-});
+export const MemoizedUserInfoSidebar = React.memo(UserInfoSidebar);

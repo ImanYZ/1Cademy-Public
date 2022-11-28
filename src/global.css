@@ -506,12 +506,12 @@
   -moz-transition: all 2.2s; /* Firefox */
   -webkit-transition: all 2.2s; /*safari and chrome */
 }
-.SidebarButton .GainedPoint .SidebarButton .GainedPoint {
+.SidebarButton .GainedPoint {
   -webkit-box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
   -moz-box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
   box-shadow: 1px 1px 13px 4px rgba(21, 255, 0, 1);
 }
-.SidebarButton .LostPoint .SidebarButton .LostPoint {
+.SidebarButton .LostPoint {
   -webkit-box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
   -moz-box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
   box-shadow: 1px 1px 13px 4px rgba(255, 0, 0, 1);
