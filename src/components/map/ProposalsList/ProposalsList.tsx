@@ -113,6 +113,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                       <ContainedButton
                         title="Click if you find this proposal Unhelpful."
                         onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
+                        disabled={isDeleting}
                       >
                         <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                           <CloseIcon
@@ -126,6 +127,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                       <ContainedButton
                         title="Click if you find this proposal helpful."
                         onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
+                        disabled={isDeleting}
                       >
                         <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                           <DoneIcon
