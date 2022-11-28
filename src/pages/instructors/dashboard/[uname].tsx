@@ -714,6 +714,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
               boxHeight={8}
               offsetX={100}
               theme={settings.theme}
+              sort={true}
+              order={"Descending"}
             />
           </Paper>
         </Box>
