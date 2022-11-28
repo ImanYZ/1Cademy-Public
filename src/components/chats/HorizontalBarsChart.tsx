@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 export type HorizontalBarchartData = {
@@ -86,7 +86,7 @@ function drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX
     .on("mouseover", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
-      d3.select(this).transition().style("fill", "#ed3737");
+      d3.select(this).transition().style("fill", "rgb(255, 85, 55)");
       tooltip
         .html(`<div>${d.label} - ${d.amount}</div>`)
         .style("pointer-events", "none")
@@ -95,14 +95,14 @@ function drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX
         .style("left", `${e.offsetX - d.label.length * 4}px`);
     })
     .on("mouseout", function () {
-      d3.select(this).transition().style("fill", "#EF5350");
+      d3.select(this).transition().style("fill", "tomato");
       tooltip.style("pointer-events", "none").style("opacity", 0);
     })
-    .style("fill", "#EF5350")
+    .style("fill", "tomato")
     .attr("transform", `translate(${offsetX},${boxHeight})`);
 }
 
-type BoxChartProps = {
+type HorizontalBarChartProps = {
   identifier: string;
   data: HorizontalBarchartData;
   width: number;
@@ -110,14 +110,32 @@ type BoxChartProps = {
   margin: plotMargin;
   offsetX: number;
   theme: UserTheme;
+  sort?: boolean;
+  order?: "Ascending" | "Descending";
 };
 
-export const HorizontalBarsChart = ({ identifier, width, data, boxHeight, margin, offsetX, theme }: BoxChartProps) => {
+export const HorizontalBarsChart = ({
+  identifier,
+  width,
+  data,
+  boxHeight,
+  margin,
+  offsetX,
+  theme,
+  sort,
+  order,
+}: HorizontalBarChartProps) => {
+  let dataSorted = useMemo(() => {
+    if (sort) {
+      return data.sort((x, y) => (order === "Ascending" ? x.amount - y.amount : y.amount - x.amount));
+    }
+    return data;
+  }, [data, order, sort]);
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart({ svgRef, identifier, data, width, boxHeight, margin, offsetX });
+      drawChart({ svgRef, identifier, data: dataSorted, width, boxHeight, margin, offsetX });
     },
-    [identifier, data, width, boxHeight, margin, offsetX]
+    [identifier, dataSorted, width, boxHeight, margin, offsetX]
   );
 
   return (
