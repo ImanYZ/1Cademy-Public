@@ -296,7 +296,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             alignItems: "center",
             flexWrap: "wrap",
             columnGap: "4px",
-            rowGap: "2px",
+            rowGap: "8px",
             marginTop: { xs: "8px", sm: "8px" },
             marginBottom: { xs: "8px", sm: "8px" },
             pr: "40px",
@@ -326,7 +326,13 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
 
           <ControlPointIcon
             onClick={setShowTagSelectorClick}
-            sx={{ zIndex: 1, transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)", cursor: "pointer" }}
+            sx={{
+              zIndex: 1,
+              transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)",
+              cursor: "pointer",
+              color: "rgba(88, 88, 88,1)",
+              fontWeight: "none",
+            }}
           />
 
           {/* {onlyTags ? (
@@ -405,8 +411,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 sx={{
                   "& fieldset": {
                     borderWidth: 1,
-
                     borderColor: "rgba(88, 88, 88,.7)",
+                    borderRadius: "32px",
                   },
                 }}
               />
@@ -435,6 +441,9 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                       borderWidth: 1,
                       borderRadius: "16px",
                       borderColor: "rgba(88, 88, 88,.7)",
+                    },
+                    "&:hover": {
+                      borderColor: "red",
                     },
                   }}
                   inputProps={{ style: { padding: "4px 8px" } }}
