@@ -371,11 +371,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                           "&> fieldset": {
                             borderWidth: 1,
                             borderColor: "rgba(88, 88, 88,.7)",
-                            borderRight: "1px solid inherit !important",
-                            borderLeft: "0 !important",
-                            borderBottom: "0 !important",
-                            borderTop: "0 !important",
-                            borderRadius: "0 !important",
+                            border: "1px solid inherit !important",
+                            borderRadius: "32px 0 0 32px !important",
                           },
                         }}
                       >
@@ -420,9 +417,6 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                     borderWidth: 1,
                     borderColor: "rgba(88, 88, 88,.7)",
                     borderRadius: "32px",
-                  },
-                  ": focus": {
-                    borderColor: "yellow",
                   },
                 }}
               />
