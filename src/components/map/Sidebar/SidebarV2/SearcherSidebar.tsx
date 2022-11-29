@@ -9,7 +9,6 @@ import {
   Checkbox,
   Chip,
   CircularProgress,
-  Divider,
   IconButton,
   InputAdornment,
   ListItemIcon,
@@ -369,6 +368,15 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                           height: "46.31px",
                           marginLeft: "-14px",
                           zIndex: "99",
+                          "&> fieldset": {
+                            borderWidth: 1,
+                            borderColor: "rgba(88, 88, 88,.7)",
+                            borderRight: "1px solid inherit !important",
+                            borderLeft: "0 !important",
+                            borderBottom: "0 !important",
+                            borderTop: "0 !important",
+                            borderRadius: "0 !important",
+                          },
                         }}
                       >
                         {NODE_TYPES_ARRAY.map(nodeType => (
@@ -390,7 +398,6 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                           </MenuItem>
                         ))}
                       </Select>
-                      <Divider orientation="vertical" id="searchDivider" />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -413,6 +420,9 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                     borderWidth: 1,
                     borderColor: "rgba(88, 88, 88,.7)",
                     borderRadius: "32px",
+                  },
+                  ": focus": {
+                    borderColor: "yellow",
                   },
                 }}
               />
