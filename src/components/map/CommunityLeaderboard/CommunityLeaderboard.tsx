@@ -81,6 +81,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     }
   }, [db, comPointsOthersLoaded, userTagId]);
 
+  // TEST
   const loadReputationPoints = useCallback((comPsDict: any, comPsDict2: any = null) => {
     const comPs = [];
     for (let comId in comPsDict) {
@@ -110,42 +111,42 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     if (comLeaderboardType === "All Time") {
       loadReputationPoints(comPointsDict);
     }
-  }, [comLeaderboardType, comPointsDict]);
+  }, [comLeaderboardType, comPointsDict, loadReputationPoints]);
 
   useEffect(() => {
     if (comLeaderboardType === "Monthly") {
       // console.log("[Com 7]:");
       loadReputationPoints(comPointsMonthlyDict);
     }
-  }, [comLeaderboardType, comPointsMonthlyDict]);
+  }, [comLeaderboardType, comPointsMonthlyDict, loadReputationPoints]);
 
   useEffect(() => {
     if (comLeaderboardType === "Weekly") {
       // console.log("[Com 8]:");
       loadReputationPoints(comPointsWeeklyDict);
     }
-  }, [comLeaderboardType, comPointsWeeklyDict]);
+  }, [comLeaderboardType, comPointsWeeklyDict, loadReputationPoints]);
 
   useEffect(() => {
     if (comLeaderboardType === "Self-votes") {
       console.log("[Com 9]:", { comPointsDict, comPointsOthersDict });
       loadReputationPoints(comPointsDict, comPointsOthersDict);
     }
-  }, [comLeaderboardType, comPointsDict, comPointsOthersDict]);
+  }, [comLeaderboardType, comPointsDict, comPointsOthersDict, loadReputationPoints]);
 
   useEffect(() => {
     if (comLeaderboardType === "Others' Votes") {
       // console.log("[Com 10]:");
       loadReputationPoints(comPointsOthersDict);
     }
-  }, [comLeaderboardType, comPointsOthersDict]);
+  }, [comLeaderboardType, comPointsOthersDict, loadReputationPoints]);
 
   useEffect(() => {
     if (comLeaderboardType === "Others Monthly") {
       // console.log("[Com 11]:");
       loadReputationPoints(comPointsOthersMonthlyDict);
     }
-  }, [comLeaderboardType, comPointsOthersMonthlyDict]);
+  }, [comLeaderboardType, comPointsOthersMonthlyDict, loadReputationPoints]);
 
   const openComLeaderboard = useCallback(() => {
     setComLeaderboardOpen(oldCL => !oldCL);
