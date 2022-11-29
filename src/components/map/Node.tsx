@@ -727,7 +727,13 @@ const Node = ({
           )}
           {editable && (
             <>
-              <Box sx={{ mx: "10px", borderTop: "solid 1px #484848" }} />
+              <Box
+                sx={{
+                  mx: "10px",
+                  borderTop: theme =>
+                    theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+                }}
+              />
               <Box
                 className="ProposalCommentSubmitButton"
                 sx={{
@@ -837,7 +843,13 @@ const Node = ({
       )}
       {openSidebar === "PROPOSALS" && nodeBookState.selectedNode == identifier ? (
         <>
-          <Box sx={{ mx: "10px", borderTop: "solid 1px" }} />
+          <Box
+            sx={{
+              mx: "10px",
+              borderTop: theme =>
+                theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+            }}
+          />
           <Box sx={{ p: "13px 10px" }}>
             <Box
               sx={{
