@@ -379,20 +379,31 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                         }}
                       >
                         {NODE_TYPES_ARRAY.map(nodeType => (
-                          <MenuItem key={nodeType} value={nodeType} id="nodeTypesSelect" sx={{ py: "0px" }}>
+                          <MenuItem
+                            key={nodeType}
+                            value={nodeType}
+                            id="nodeTypesSelect"
+                            sx={{
+                              py: "0px",
+                              color: nodeTypes.includes(nodeType) ? "blue" : undefined,
+                              fontSize: "12px",
+                            }}
+                          >
                             <Checkbox
-                              className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                              // className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
                               checked={nodeTypes.includes(nodeType)}
+                              // sx={{}}
                             />
                             <ListItemIcon>
                               <NodeTypeIcon
-                                className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                                // className={nodeTypes.includes(nodeType) ? "selected" : ""}
                                 nodeType={nodeType}
                               />
                             </ListItemIcon>
                             <ListItemText
-                              className={nodeTypes.includes(nodeType) ? "selected" : ""}
+                              // className={nodeTypes.includes(nodeType) ? "selected" : ""}
                               primary={nodeType}
+                              sx={{ fontSize: "12px" }}
                             />
                           </MenuItem>
                         ))}

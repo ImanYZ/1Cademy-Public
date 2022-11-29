@@ -175,6 +175,14 @@ export function getThemedComponents(theme: Theme): {
               },
             },
           },
+          // {
+          //   props: { variant: "outlined" },
+          //   style: {
+          //     "&:hover": {
+          //       backgroundColor: "red",
+          //     },
+          //   },
+          // },
         ],
       },
       // MuiAutocomplete: {
@@ -268,6 +276,13 @@ export function getThemedComponents(theme: Theme): {
           },
         },
       },
+      // MuiMenuItem:{
+      //   styleOverrides:{
+      //     root:{
+      //       ":hover"
+      //     }
+      //   }
+      // }
     },
   };
 }
