@@ -157,7 +157,12 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
     <>
-      <Box sx={{ mx: "10px", borderTop: "solid 1px #484848" }} />
+      <Box
+        sx={{
+          mx: "10px",
+          borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #757171" : "solid 1px #484848"),
+        }}
+      />
       <div className="LinkingWordsContainer card-action">
         <Box className="LearnBefore" sx={{ borderRight: "solid 1px" }}>
           {props.openPart === "LinkingWords" && (
@@ -306,7 +311,10 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
         {/* <Box sx={{ mx: "10px", borderLeft: "solid 1px" }} /> */}
 
-        <Box className="LearnAfter" sx={{ borderLeft: "solid 1px" }}>
+        <Box
+          className="LearnAfter"
+          sx={{ borderLeft: theme => (theme.palette.mode === "dark" ? "solid 1px #484848" : "solid 1px") }}
+        >
           {props.openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71
             <Box sx={{ fontSize: "16px" }}>
