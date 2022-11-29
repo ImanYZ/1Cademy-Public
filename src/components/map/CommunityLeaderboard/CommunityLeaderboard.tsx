@@ -1,30 +1,16 @@
-// import "./ComLeaderboard.css";
-
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Box } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-// import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-// import { User } from "src/knowledgeTypes";
-// import { tagId } from "../../../store/AuthAtoms";
 import { loadReputationsData } from "@/lib/utils/Map.utils";
 
-// import React, { useCallback, useEffect, useMemo, useState } from "react";
-// import { useRecoilValue } from "recoil";
-// import LoadingImg from "../../../../public/1Cademy_Loading_Dots.gif";
 import { MemoizedMetaButton } from "../MetaButton";
 import MultipleChoiceBtn from "../Sidebar/MultipleChoiceBtn";
 import { MemoizedComLeaderboardChip } from "./ComLeaderboardChip/ComLeaderboardChip";
-// import { loadReputationsData } from "../MapUtils";
-// import MetaButton from "../MetaButton/MetaButton";
-// import MultipleChoiceBtn from "../MetaButton/MultipleChoiceBtn/MultipleChoiceBtn";
-// import ComLeaderboardChip from "./ComLeaderboardChip/ComLeaderboardChip";
 
 const comLBTypes = ["Weekly", "Monthly", "All Time", "Self-votes", "Others' Votes", "Others Monthly"];
-// type CommunityLeaderboardProps = {};
-// props: CommunityLeaderboardProps
 
 type CommunityLeaderboardProps = {
   userTagId: string;
@@ -58,35 +44,30 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
 
   useEffect(() => {
     if (db && userTagId && pendingProposalsLoaded) {
-      // console.log("[Com 1]:In reputationsOthersMonthlyLoaded useEffect");
       loadReputationsData(db, true, "All Time", userTagId, setComPointsDict, setComPointsLoaded);
     }
   }, [db, pendingProposalsLoaded, setComPointsLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsLoaded) {
-      // console.log("[Com 2]:In comPointsLoaded useEffect");
       loadReputationsData(db, true, "Monthly", userTagId, setComPointsMonthlyDict, setComPointsMonthlyLoaded);
     }
   }, [db, comPointsLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsMonthlyLoaded) {
-      // console.log("[Com 3]:In comPointsMonthlyLoaded useEffect");
       loadReputationsData(db, true, "Weekly", userTagId, setComPointsWeeklyDict, setComPointsWeeklyLoaded);
     }
   }, [db, comPointsMonthlyLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsWeeklyLoaded) {
-      // console.log("[Com 4]:In comPointsWeeklyLoaded useEffect");
       loadReputationsData(db, true, "Others", userTagId, setComPointsOthersDict, setComPointsOthersLoaded);
     }
   }, [db, comPointsWeeklyLoaded, userTagId]);
 
   useEffect(() => {
     if (db && userTagId && comPointsOthersLoaded) {
-      // console.log("[Com 5]:In comPointsOthersLoaded useEffect");
       loadReputationsData(
         db,
         true,
@@ -100,7 +81,6 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
 
   const loadReputationPoints = useCallback((comPsDict: any, comPsDict2: any = null) => {
     const comPs = [];
-    // console.log("COM POINTS comPsDict, ", comPsDict);
     for (let comId in comPsDict) {
       const newComObj = { ...comPsDict[comId], tagId: comId };
       if (comPsDict2) {
@@ -121,13 +101,11 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
       }
     }
     comPs.sort((a, b) => b.totalPoints - a.totalPoints);
-    // console.log("COM POINTS, ", comPs);
     setComPoints(comPs.slice(0, 25));
   }, []);
 
   useEffect(() => {
     if (comLeaderboardType === "All Time") {
-      // console.log("[Com 6]:comPointsDict", comPointsDict);
       loadReputationPoints(comPointsDict);
     }
   }, [comLeaderboardType, comPointsDict]);
@@ -176,16 +154,6 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     setComLeaderboardTypeOpen(oldCLT => !oldCLT);
   }, []);
 
-  // // const changeComLeaderboard = useCallback((event) => {
-  // //   setComLeaderboardType((oldCLT) => {
-  // //     let idx = comLBTypes.findIndex((comLBT) => comLBT === oldCLT);
-  // //     if (idx === -1 || idx >= comLBTypes.length - 1) {
-  // //       return comLBTypes[0];
-  // //     }
-  // //     return comLBTypes[idx + 1];
-  // //   });
-  // // }, []);
-
   const changeComLeaderboard = useCallback(
     (comLType: any) => () => {
       setComLeaderboardType(comLType);
@@ -207,9 +175,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
       id="ComLeaderboardMain"
       className={comLeaderboardOpen ? undefined : "Minimized"}
       sx={{ width: { xs: "100%", sm: "70%", md: "90%" } }}
-      // style={{ border: "solid 2px red" }}
     >
-      {/* <div id="ComLeaderboardSidebarOverlap"></div> */}
       <Box id="ComLeaderboardMinimizer">
         <MemoizedMetaButton onClick={openComLeaderboard}>
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
@@ -268,40 +234,12 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
                 key={comObj.tagId}
                 idx={idx}
                 comTitle={comObj.tag}
-                // uname={comObj.admin}
                 totalPoints={comObj.totalPoints}
-                // imageUrl={comObj.aImgUrl}
-                // fullname={comObj.aFullname}
-                // chooseUname={comObj.aChooseUname}
-                // totalPoints={comObj.totalPoints}
                 totalPositives={comObj.positives}
                 totalNegatives={comObj.negatives}
-                // reloadPermanentGrpah={props.reloadPermanentGrpah}
               />
             );
           })}
-          {/* {comPoints.length > 0 ? (
-            comPoints.map((comObj, idx) => {
-              return (
-                <MemoizedComLeaderboardChip
-                  key={comObj.tagId}
-                  idx={idx}
-                  comTitle={comObj.tag}
-                  // uname={comObj.admin}
-                  totalPoints={comObj.totalPoints}
-                  // imageUrl={comObj.aImgUrl}
-                  // fullname={comObj.aFullname}
-                  // chooseUname={comObj.aChooseUname}
-                  // totalPoints={comObj.totalPoints}
-                  totalPositives={comObj.positives}
-                  totalNegatives={comObj.negatives}
-                  // reloadPermanentGrpah={props.reloadPermanentGrpah}
-                />
-              );
-            })
-          ) : (
-            <Image className="" src={LoadingImg} alt="Loading" />
-          )} */}
         </Box>
       </Box>
     </Box>
