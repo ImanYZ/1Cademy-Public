@@ -9,7 +9,6 @@ import {
   Checkbox,
   Chip,
   CircularProgress,
-  Divider,
   IconButton,
   InputAdornment,
   ListItemIcon,
@@ -296,7 +295,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             alignItems: "center",
             flexWrap: "wrap",
             columnGap: "4px",
-            rowGap: "2px",
+            rowGap: "8px",
             marginTop: { xs: "8px", sm: "8px" },
             marginBottom: { xs: "8px", sm: "8px" },
             pr: "40px",
@@ -326,7 +325,13 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
 
           <ControlPointIcon
             onClick={setShowTagSelectorClick}
-            sx={{ zIndex: 1, transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)", cursor: "pointer" }}
+            sx={{
+              zIndex: 1,
+              transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)",
+              cursor: "pointer",
+              color: "rgba(88, 88, 88,1)",
+              fontWeight: "none",
+            }}
           />
 
           {/* {onlyTags ? (
@@ -340,7 +345,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
 
         {((isMovil && !showTagSelector) || !isMovil) && (
           <>
-            <div id="SearchQueryContainer">
+            <Box>
               <ValidatedInput
                 identification="SearchQuery"
                 name="SearchQuery"
@@ -363,28 +368,46 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                           height: "46.31px",
                           marginLeft: "-14px",
                           zIndex: "99",
+
+                          ":hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: theme => theme.palette.common.orange,
+                          },
+                          "&> fieldset": {
+                            borderWidth: "1px",
+                            borderRadius: "32px 0 0 32px ",
+                          },
                         }}
                       >
                         {NODE_TYPES_ARRAY.map(nodeType => (
-                          <MenuItem className="searchSelect" key={nodeType} value={nodeType} id="nodeTypesSelect">
+                          <MenuItem
+                            key={nodeType}
+                            value={nodeType}
+                            id="nodeTypesSelect"
+                            sx={{
+                              py: "0px",
+                              color: nodeTypes.includes(nodeType) ? "blue" : undefined,
+                              fontSize: "12px",
+                            }}
+                          >
                             <Checkbox
-                              className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                              // className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
                               checked={nodeTypes.includes(nodeType)}
+                              // sx={{}}
                             />
                             <ListItemIcon>
                               <NodeTypeIcon
-                                className={"searchIcon " + (nodeTypes.includes(nodeType) ? "selected" : "")}
+                                // className={nodeTypes.includes(nodeType) ? "selected" : ""}
                                 nodeType={nodeType}
                               />
                             </ListItemIcon>
                             <ListItemText
-                              className={nodeTypes.includes(nodeType) ? "selected" : ""}
+                              // className={nodeTypes.includes(nodeType) ? "selected" : ""}
                               primary={nodeType}
+                              sx={{ fontSize: "12px" }}
                             />
                           </MenuItem>
                         ))}
                       </Select>
-                      <Divider orientation="vertical" id="searchDivider" />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -402,8 +425,15 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 inputProps={{
                   style: { paddingLeft: "0", paddingRight: "0" },
                 }}
+                sx={{
+                  "& fieldset": {
+                    borderWidth: 1,
+                    borderColor: "rgba(88, 88, 88,.7)",
+                    borderRadius: "32px",
+                  },
+                }}
               />
-            </div>
+            </Box>
 
             <div
               id="nodesUpdatedSinceContainer"
@@ -421,8 +451,20 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                   defaultValue={nodesUpdatedSince}
                   onChange={setNodesUpdatedSinceClick}
                   size="small"
-                  sx={{ width: "76px", p: "0px" }}
+                  sx={{
+                    width: "76px",
+                    p: "0px",
+                    "& fieldset": {
+                      borderWidth: 1,
+                      borderRadius: "16px",
+                      borderColor: "rgba(88, 88, 88,.7)",
+                    },
+                    "&:hover": {
+                      borderColor: "red",
+                    },
+                  }}
                   inputProps={{ style: { padding: "4px 8px" } }}
+                  variant="outlined"
                 />
                 days
               </Box>

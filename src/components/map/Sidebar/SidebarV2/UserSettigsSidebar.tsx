@@ -995,6 +995,7 @@ const UserSettigsSidebar = ({
     chosenTags,
     closeTagSelector,
     instlogoURL,
+    isLoading,
     setAllTags,
     setUserImage,
     shouldShowTagSearcher,

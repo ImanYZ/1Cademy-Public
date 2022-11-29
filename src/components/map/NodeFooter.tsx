@@ -151,7 +151,7 @@ const NodeFooter = ({
   const [openMenu, setOpenMenu] = useState(false);
 
   const messageTwitter = () => {
-    return `1Cademy - Collaboratively Designing Learning Pathways 
+    return `1Cademy - Collaboratively Designing Learning Pathways
         ${encodeURIComponent(url)}`;
   };
 

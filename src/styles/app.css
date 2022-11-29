@@ -353,16 +353,11 @@ label {
 
 .LightMode .MuiChip-outlined.chip,
 .LightMode .MuiChip-outlined.chip svg,
-.LightMode #SearchQueryContainer .MuiOutlinedInput-notchedOutline,
-.LightMode #nodesUpdatedSinceContainer .MuiFormControl-root .MuiOutlinedInput-notchedOutline {
+.LightMode #SearchQueryContainer .MuiOutlinedInput-notchedOutline {
   border-color: #454545;
   color: #454545;
 }
 
-.MuiInputLabel-root.MuiInputLabel-root,
-.MuiInputBase-input {
-  /* color: #f6f6f6; */
-}
 .LightMode .MuiInputLabel-root.MuiInputLabel-root,
 .LightMode .MuiInputBase-input {
   color: #454545;
