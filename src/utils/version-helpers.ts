@@ -595,7 +595,7 @@ export const changeNodeTitle = async ({
     for (let citingNodeDoc of citingNodesDocs.docs) {
       const linkedRef = db.collection("nodes").doc(citingNodeDoc.id);
       const linkedData = citingNodeDoc.data();
-      const theRefIdx = linkedData.referenceIds.findIndex(nodeId);
+      const theRefIdx = linkedData.referenceIds.indexOf(nodeId);
       linkedData.references[theRefIdx] = newTitle;
       linkedDataChanges = {
         references: linkedData.references,
