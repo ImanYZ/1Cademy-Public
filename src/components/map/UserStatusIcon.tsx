@@ -153,16 +153,17 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   return (
     <Tooltip title={getTooltipTitle()} placement="right">
       <Box
-        // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
-        className="SidebarButton"
+        className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
+        // className="SidebarButton"
         onClick={openUserInfo}
         sx={{
           // border: "dashed 2px pink",
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-start",
-          gap: "5px",
+          justifyContent: "flex-center",
+          gap: "10px",
           padding: "5px 0px",
+          // width: "100%",
           ...props.sx,
         }}
       >
@@ -179,7 +180,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
         </div>
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
-          <Box className="customUserStatusTotalPoints fromSideBar" sx={{ ...props.sx }}>
+          <Box className="customUserStatusTotalPoints fromSideBar">
             <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
             <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
             {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}

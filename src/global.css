@@ -2677,6 +2677,11 @@ button.MuiTab-textColorInherit:focus {
   display: none;
 }
 
+.toolbar-opened .customUserStatusTotalPoints {
+  display: flex;
+  align-items: center;
+}
+
 #SidebarButtonsContainer:hover .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
@@ -2742,12 +2747,12 @@ button.MuiTab-textColorInherit:focus {
 }
 /* scroll-styled */
 
-.toolbar:focus .scroll-styled,
+/* .toolbar:focus .scroll-styled,
 .toolbar:hover .scroll-styled {
   display: flex;
   align-items: flex-start;
   margin-left: 10px;
-}
+} */
 
 /* table edit component css */
 
@@ -2773,7 +2778,7 @@ button.MuiTab-textColorInherit:focus {
   opacity: 0.6;
 }
 
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .scroll-styled {
     display: flex;
     align-items: flex-start !important;
@@ -2782,7 +2787,7 @@ button.MuiTab-textColorInherit:focus {
   .fromSideBar {
     display: flex !important;
   }
-}
+} */
 
 .select-tab-button-node-footer {
   margin-bottom: -1px;
