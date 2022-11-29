@@ -771,8 +771,13 @@ const Dashboard = ({}: DashboardProps) => {
           setGraph(({ nodes, edges }) => {
             const visibleFullNodesMerged = visibleFullNodes.map(cur => {
               const tmpNode = nodes[cur.node];
-              if (tmpNode && tmpNode.hasOwnProperty("simulated")) {
-                delete tmpNode["simulated"];
+              if (tmpNode) {
+                if (tmpNode.hasOwnProperty("simulated")) {
+                  delete tmpNode["simulated"];
+                }
+                if (tmpNode.hasOwnProperty("isNew")) {
+                  delete tmpNode["isNew"];
+                }
               }
 
               const hasParent = cur.parents.length;
