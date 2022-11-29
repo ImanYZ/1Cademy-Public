@@ -147,10 +147,18 @@ const Toolbar = ({
 
   return (
     <Box
-      className="toolbar"
+      className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
       sx={{
         overflow: "hidden",
         display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
+        "& .list-tmp": {
+          alignItems: isMenuOpen ? "flex-start" : undefined,
+        },
+        ":hover": {
+          "& .list-tmp": {
+            alignItems: "flex-start",
+          },
+        },
       }}
     >
       {/* IMPORTANT : if you modify the height you must modify the Box below  */}
@@ -166,8 +174,8 @@ const Toolbar = ({
       >
         <Box sx={{ marginTop: "20px" }}>
           <MemoizedMetaButton>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <Box sx={{ display: "grid", placeItems: "center" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
             </Box>
           </MemoizedMetaButton>
@@ -187,7 +195,7 @@ const Toolbar = ({
 
         {/* Searcher button */}
         <Button
-          className="SearchBarIconToolbar"
+          // className="SearchBarIconToolbar"
           onClick={() => {
             onOpenSidebar("SEARCHER_SIDEBAR", "Search");
             setIsMenuOpen(false);
@@ -538,6 +546,7 @@ const Toolbar = ({
           </>
         )}
       </Box>
+
       <Box sx={{ height: `calc(100vh - ${isSafari ? safariOffset : chromeOffset}px)`, paddingBottom: "20px" }}>
         {user?.tag && leaderboardType && (
           <UsersStatusList
@@ -545,7 +554,7 @@ const Toolbar = ({
             reloadPermanentGraph={reloadPermanentGrpah}
             setOpenSideBar={setOpenSideBar}
             sx={{
-              display: isMenuOpen ? "flex" : "",
+              // display: isMenuOpen ? "flex" : "flex",
               justifyContent: "flex-start",
               alignItems: "center",
             }}
@@ -611,7 +620,7 @@ export const ToolbarSidebar = ({
         open={open}
         onClose={onClose}
         width={isMenuOpen ? 150 : 80}
-        hoverWidth={150}
+        hoverWidth={168}
         showCloseButton={false}
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}
