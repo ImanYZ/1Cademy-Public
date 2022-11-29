@@ -256,6 +256,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     editable: boolean;
     left: number;
     openHeight?: number;
+    isNew?: boolean;
     top: number;
     userNodeId: string;
     nodeChangeType: string /*'added' | ''*/;
