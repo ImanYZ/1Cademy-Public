@@ -2671,6 +2671,11 @@ right: 5px; */
   display: none;
 }
 
+.toolbar-opened .customUserStatusTotalPoints {
+  display: flex;
+  align-items: center;
+}
+
 #SidebarButtonsContainer:hover .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
@@ -2736,12 +2741,12 @@ right: 5px; */
 }
 /* scroll-styled */
 
-.toolbar:focus .scroll-styled,
+/* .toolbar:focus .scroll-styled,
 .toolbar:hover .scroll-styled {
   display: flex;
   align-items: flex-start;
   margin-left: 10px;
-}
+} */
 
 /* table edit component css */
 
@@ -2767,7 +2772,7 @@ right: 5px; */
   opacity: 0.6;
 }
 
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .scroll-styled {
     display: flex;
     align-items: flex-start !important;
@@ -2776,7 +2781,7 @@ right: 5px; */
   .fromSideBar {
     display: flex !important;
   }
-}
+} */
 
 .select-tab-button-node-footer {
   margin-bottom: -1px;
