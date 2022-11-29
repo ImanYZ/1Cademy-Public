@@ -804,12 +804,11 @@ const NodeFooter = ({
                   >
                     <MenuItem>
                       <MemoizedMetaButton
-                        onClick={markStudied}
                         tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                         style={{ padding: "0" }}
                         tooltipPosition="top"
                       >
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={markStudied}>
                           <Badge
                             badgeContent={shortenNumber(studied, 2, false) ?? 0}
                             color="error"
@@ -830,13 +829,8 @@ const NodeFooter = ({
                       </MemoizedMetaButton>
                     </MenuItem>
                     <MenuItem>
-                      <MemoizedMetaButton
-                        onClick={bookmark}
-                        tooltip="Bookmark this node."
-                        tooltipPosition="top"
-                        style={{ padding: "0" }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <MemoizedMetaButton tooltip="Bookmark this node." tooltipPosition="top" style={{ padding: "0" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={bookmark}>
                           <Badge
                             className="toolbarBadge"
                             badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
@@ -862,12 +856,11 @@ const NodeFooter = ({
                     </MenuItem>
                     <MenuItem>
                       <MemoizedMetaButton
-                        onClick={narrateNode}
                         tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
                         tooltipPosition="top"
                         style={{ padding: "0" }}
                       >
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={narrateNode}>
                           {isSpeaking ? (
                             <VoiceOverOffIcon sx={{ fontSize: "16px" }} />
                           ) : (
@@ -980,7 +973,6 @@ const NodeFooter = ({
                         </Box>
                       </MemoizedMetaButton>
                     </MenuItem>
-
                     <MenuItem>
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
