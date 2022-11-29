@@ -15,7 +15,7 @@
 }
 
 #ComLeaderboardMain.Minimized {
-  width: 31px;
+  width: 35px;
 }
 
 #ComLeaderboardContainer {
@@ -42,8 +42,8 @@
   position: relative;
   left: 0;
   top: 0;
-  width: 40px;
-  height: 90px;
+  width: 50px;
+  height: 86px;
   padding-right: 10px;
   border-radius: 10px 0px 0px 10px;
   background-color: rgb(31, 31, 31);

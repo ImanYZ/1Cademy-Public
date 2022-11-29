@@ -206,13 +206,16 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     <Box
       id="ComLeaderboardMain"
       className={comLeaderboardOpen ? undefined : "Minimized"}
-      sx={{ width: { xs: "70%", md: "90%" } }}
+      sx={{ width: { xs: "100%", sm: "70%", md: "90%" } }}
       // style={{ border: "solid 2px red" }}
     >
       {/* <div id="ComLeaderboardSidebarOverlap"></div> */}
       <Box id="ComLeaderboardMinimizer">
         <MemoizedMetaButton onClick={openComLeaderboard}>
-          <Box sx={{ paddingRight: "5px" }}>{comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}</Box>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <Box sx={{ color: "ButtonHighlight", fontSize: "18px" }}>🏆</Box>
+            <Box sx={{}}>{comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}</Box>
+          </Box>
         </MemoizedMetaButton>
       </Box>
       <Box
@@ -240,9 +243,6 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
                 paddingLeft: "5px",
               }}
             >
-              <Box id="ComLeaderbaordChangerIcon" sx={{ color: "ButtonHighlight" }}>
-                🏆
-              </Box>
               <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
             </Box>
           </MemoizedMetaButton>
