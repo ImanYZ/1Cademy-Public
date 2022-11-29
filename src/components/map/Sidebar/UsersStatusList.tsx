@@ -371,21 +371,19 @@ const UsersStatusList = (props: UsersStatusListProps) => {
         />
       ));
     },
-    [props.setOpenSideBar]
+    [props.setOpenSideBar, props.sx]
   );
 
   return (
     <Box
-      // id="UsersStatusList"
-      className="scroll-styled"
+      className="scroll-styled list-tmp"
       sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "center", // this value is modified by parent in toolbar sidebar when isMenuOpen
         overflowY: "auto",
-        px: "10px",
-        // width: "80px",
+        px: "20px",
       }}
     >
       {renderUsersList(onlineUsersList, true)}

@@ -18,7 +18,7 @@ import RedditIcon from "@mui/icons-material/Reddit";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
-import { Badge, Menu, MenuItem } from "@mui/material";
+import { Badge, ClickAwayListener, MenuItem, Paper } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -148,23 +148,24 @@ const NodeFooter = ({
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
+  const [openMenu, setOpenMenu] = useState(false);
+
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways 
         ${encodeURIComponent(url)}`;
   };
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const openMenu = Boolean(anchorEl);
+
   useEffect(() => {
     const URL = window.location.href;
     setUrl(URL);
   }, [router]);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = () => {
+    setOpenMenu(true);
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setOpenMenu(false);
   };
 
   const onShareByLink = () => {
@@ -175,7 +176,7 @@ const NodeFooter = ({
     }
     let url: any = protocol + "//" + hostName + "/n/" + identifier;
     navigator.clipboard.writeText(url);
-    setAnchorEl(null);
+    setOpenMenu(false);
   };
 
   const selectReferences = useCallback(
@@ -728,6 +729,7 @@ const NodeFooter = ({
             <Box
               className={openPart === "LinkingWords" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
               sx={{
+                position: "relative",
                 background: theme =>
                   theme.palette.mode === "dark"
                     ? openPart === "LinkingWords"
@@ -786,6 +788,271 @@ const NodeFooter = ({
                 }}
               />
             </IconButton>
+
+            {openMenu && (
+              <ClickAwayListener onClickAway={handleClose}>
+                <Box sx={{ position: "relative" }}>
+                  <Paper
+                    sx={{
+                      p: "8px 4px",
+                      position: "absolute",
+                      width: "175px",
+                      zIndex: "9",
+                      top: "10px",
+                      left: "0px",
+                    }}
+                  >
+                    <MenuItem>
+                      <MemoizedMetaButton
+                        tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
+                        style={{ padding: "0" }}
+                        tooltipPosition="top"
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={markStudied}>
+                          <Badge
+                            badgeContent={shortenNumber(studied, 2, false) ?? 0}
+                            color="error"
+                            anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                            sx={{ wordBreak: "normal", padding: "1px" }}
+                          >
+                            {isStudied ? (
+                              <DraftsIcon sx={{ fontSize: "16px" }} />
+                            ) : (
+                              <MailIcon sx={{ fontSize: "16px" }} />
+                            )}
+                          </Badge>
+
+                          <Box component="span" sx={{ marginLeft: "10px" }}>
+                            Mark as studied
+                          </Box>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                    <MenuItem>
+                      <MemoizedMetaButton tooltip="Bookmark this node." tooltipPosition="top" style={{ padding: "0" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={bookmark}>
+                          <Badge
+                            className="toolbarBadge"
+                            badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
+                            color="error"
+                            anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                            sx={{ wordBreak: "normal", padding: "1px" }}
+                          >
+                            {bookmarked ? (
+                              <BookmarkIcon color={bookmarked ? "primary" : "secondary"} sx={{ fontSize: "16px" }} />
+                            ) : (
+                              <BookmarkBorderIcon
+                                color={bookmarked ? "primary" : "secondary"}
+                                sx={{ fontSize: "16px" }}
+                              />
+                            )}
+                          </Badge>
+
+                          <Box component="span" sx={{ marginLeft: "10px" }}>
+                            Bookmark
+                          </Box>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                    <MenuItem>
+                      <MemoizedMetaButton
+                        tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
+                        tooltipPosition="top"
+                        style={{ padding: "0" }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={narrateNode}>
+                          {isSpeaking ? (
+                            <VoiceOverOffIcon sx={{ fontSize: "16px" }} />
+                          ) : (
+                            <RecordVoiceOverIcon sx={{ fontSize: "16px" }} />
+                          )}
+                          <Box component="span" sx={{ marginLeft: "10px" }}>
+                            Narrate Node
+                          </Box>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+
+                    <MenuItem>
+                      <MemoizedMetaButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={onShareByLink}>
+                          <IconButton
+                            sx={{
+                              color: "#BDBDBD",
+                              padding: "0",
+                            }}
+                            aria-label="Share on url"
+                          >
+                            <LinkIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            />
+                          </IconButton>
+                          <Box component="span" sx={{ marginLeft: "10px" }}>
+                            Copy Link
+                          </Box>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                    <MenuItem>
+                      <MemoizedMetaButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <IconButton
+                            href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
+                            sx={{
+                              color: "#BDBDBD",
+                              padding: "0",
+                              ":hover": {
+                                background: "none",
+                              },
+                            }}
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Share on Twitter"
+                          >
+                            <TwitterIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            />
+                            <Box
+                              component="span"
+                              sx={{
+                                marginLeft: "10px",
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            >
+                              Twitter
+                            </Box>
+                          </IconButton>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                    <MenuItem>
+                      <MemoizedMetaButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <IconButton
+                            href={`http://www.reddit.com/submit?url=${url}`}
+                            sx={{
+                              color: "#BDBDBD",
+                              padding: "0",
+                              ":hover": {
+                                background: "none",
+                              },
+                            }}
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Share on Facebook"
+                          >
+                            <RedditIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            />
+                            <Box
+                              component="span"
+                              sx={{
+                                marginLeft: "10px",
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            >
+                              Reddit
+                            </Box>
+                          </IconButton>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                    <MenuItem>
+                      <MemoizedMetaButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <IconButton
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
+                            sx={{
+                              color: "#BDBDBD",
+                              padding: "0",
+                              ":hover": {
+                                background: "none",
+                              },
+                            }}
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Share on Facebook"
+                          >
+                            <FacebookRoundedIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            />
+                            <Box
+                              component="span"
+                              sx={{
+                                marginLeft: "10px",
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            >
+                              Facebook
+                            </Box>
+                          </IconButton>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                    <MenuItem>
+                      <MemoizedMetaButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <IconButton
+                            href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
+                            sx={{
+                              color: "#BDBDBD",
+                              padding: "0",
+                              ":hover": {
+                                background: "none",
+                              },
+                            }}
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Share on Linkedin"
+                          >
+                            <LinkedInIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            />
+                            <Box
+                              component="span"
+                              sx={{
+                                marginLeft: "10px",
+                                fontSize: "16px",
+                                color: theme =>
+                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                              }}
+                            >
+                              Linkdein
+                            </Box>
+                          </IconButton>
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                  </Paper>
+                </Box>
+              </ClickAwayListener>
+            )}
           </Box>
         ) : (
           <Box
@@ -856,324 +1123,7 @@ const NodeFooter = ({
                 <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
               </Box>
             </MemoizedMetaButton>
-
-            {/* <MemoizedMetaButton tooltip="# of 1Cademists who have this node visible on their map.">
-              <i className="material-icons grey-text">visibility</i>
-              <span>{shortenNumber(viewers, 2, false)}</span>
-            </MemoizedMetaButton> */}
-
-            {/* <MemoizedMetaButton tooltip="# of 1Cademists who have studied this node.">
-              <i
-                className={
-                  "material-icons " + (
-                  studied
-                    ? "orange-text"
-                    : "grey-text"
-                  )}
-              >school</i>
-              <span>{shortenNumber(studied, 2, false)}</span>
-            </MemoizedMetaButton> */}
           </Box>
-        )}
-        {open && (
-          <>
-            <Menu
-              id="long-menu"
-              MenuListProps={{
-                "aria-labelledby": "long-button",
-              }}
-              anchorEl={anchorEl}
-              open={openMenu}
-              onClose={handleClose}
-              PaperProps={{
-                style: {
-                  width: "20ch",
-                },
-              }}
-              sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-              }}
-            >
-              <MenuItem>
-                <MemoizedMetaButton
-                  onClick={markStudied}
-                  tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
-                  // {
-                  //   (!isStudied
-                  //     ? "You've not marked this node as Studied. "
-                  //     : `This node is ${
-                  //         changed ? "changed" : "not chagned"
-                  //       } since the last time you marked it as Studied. `) +
-                  //   shortenNumber(studied, 2, false) +
-                  //   " 1Cademist" +
-                  //   (studied === 1 ? " has" : "s have") +
-                  //   " studied this node."
-                  // }
-                  style={{ padding: "0" }}
-                  tooltipPosition="top"
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Badge
-                      className="toolbarBadge"
-                      badgeContent={shortenNumber(studied, 2, false) ?? 0}
-                      color="error"
-                      anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                      sx={{ wordBreak: "normal", padding: "1px" }}
-                    >
-                      {isStudied ? <DraftsIcon sx={{ fontSize: "16px" }} /> : <MailIcon sx={{ fontSize: "16px" }} />}
-                    </Badge>
-
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Mark as studied
-                    </Box>
-                    {/* <span>{shortenNumber(studied, 2, false)}</span> */}
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-              <MenuItem>
-                <MemoizedMetaButton
-                  onClick={bookmark}
-                  tooltip="Bookmark this node."
-                  // {
-                  //   `You've ${
-                  //     !bookmarked ? "not " : ""
-                  //   }bookmarked this node. ` +
-                  //   shortenNumber(bookmarks, 2, false) +
-                  //   " 1Cademist" +
-                  //   (bookmarks === 1 ? " has" : "s have") +
-                  //   " bookmarked this node."
-                  // }
-                  tooltipPosition="top"
-                  style={{ padding: "0" }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Badge
-                      className="toolbarBadge"
-                      badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
-                      color="error"
-                      anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                      sx={{ wordBreak: "normal", padding: "1px" }}
-                    >
-                      {bookmarked ? (
-                        <BookmarkIcon color={bookmarked ? "primary" : "secondary"} sx={{ fontSize: "16px" }} />
-                      ) : (
-                        <BookmarkBorderIcon
-                          // color={bookmarked ? "orange-text" : "grey-text"}
-                          // className={bookmarked ? "orange-text" : "grey-text"}
-                          color={bookmarked ? "primary" : "secondary"}
-                          sx={{ fontSize: "16px" }}
-                        />
-                      )}
-                    </Badge>
-
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Bookmark
-                    </Box>
-                    {/* <span>{shortenNumber(bookmarks, 2, false)}</span> */}
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-              <MenuItem>
-                <MemoizedMetaButton
-                  onClick={narrateNode}
-                  tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
-                  tooltipPosition="top"
-                  style={{ padding: "0" }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {isSpeaking ? (
-                      <VoiceOverOffIcon sx={{ fontSize: "16px" }} />
-                    ) : (
-                      <RecordVoiceOverIcon sx={{ fontSize: "16px" }} />
-                    )}
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Narrate Node
-                    </Box>
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-              {/* <MenuItem>
-            <MemoizedMetaButton>
-              <Box sx={{ display: "flex", alignItems: "center" }} onClick={handleSocialMenuClick}>
-                <ReplyAllIcon sx={{ fontSize: "16px", transform: "scaleX(-1)" }} />
-                <Box component="span" sx={{ marginLeft: "10px" }}>
-                  Share Node
-                </Box>
-                <KeyboardArrowRightIcon sx={{ marginLeft: "20px" }} />
-              </Box>
-            </MemoizedMetaButton>
-          </MenuItem> */}
-              <MenuItem>
-                <MemoizedMetaButton>
-                  <Box sx={{ display: "flex", alignItems: "center" }} onClick={onShareByLink}>
-                    <IconButton
-                      sx={{
-                        color: "#BDBDBD",
-                        padding: "0",
-                      }}
-                      aria-label="Share on url"
-                    >
-                      <LinkIcon
-                        sx={{
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      />
-                    </IconButton>
-                    <Box component="span" sx={{ marginLeft: "10px" }}>
-                      Copy Link
-                    </Box>
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-              <MenuItem>
-                <MemoizedMetaButton>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <IconButton
-                      href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
-                      sx={{
-                        color: "#BDBDBD",
-                        padding: "0",
-                        ":hover": {
-                          background: "none",
-                        },
-                      }}
-                      target="_blank"
-                      rel="noopener"
-                      aria-label="Share on Twitter"
-                    >
-                      <TwitterIcon
-                        sx={{
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      />
-                      <Box
-                        component="span"
-                        sx={{
-                          marginLeft: "10px",
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      >
-                        Twitter
-                      </Box>
-                    </IconButton>
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-              <MenuItem>
-                <MemoizedMetaButton>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <IconButton
-                      href={`http://www.reddit.com/submit?url=${url}`}
-                      sx={{
-                        color: "#BDBDBD",
-                        padding: "0",
-                        ":hover": {
-                          background: "none",
-                        },
-                      }}
-                      target="_blank"
-                      rel="noopener"
-                      aria-label="Share on Facebook"
-                    >
-                      <RedditIcon
-                        sx={{
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      />
-                      <Box
-                        component="span"
-                        sx={{
-                          marginLeft: "10px",
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      >
-                        Reddit
-                      </Box>
-                    </IconButton>
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-
-              <MenuItem>
-                <MemoizedMetaButton>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <IconButton
-                      href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
-                      sx={{
-                        color: "#BDBDBD",
-                        padding: "0",
-                        ":hover": {
-                          background: "none",
-                        },
-                      }}
-                      target="_blank"
-                      rel="noopener"
-                      aria-label="Share on Facebook"
-                    >
-                      <FacebookRoundedIcon
-                        sx={{
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      />
-                      <Box
-                        component="span"
-                        sx={{
-                          marginLeft: "10px",
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      >
-                        Facebook
-                      </Box>
-                    </IconButton>
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-              <MenuItem>
-                <MemoizedMetaButton>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <IconButton
-                      href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
-                      sx={{
-                        color: "#BDBDBD",
-                        padding: "0",
-                        ":hover": {
-                          background: "none",
-                        },
-                      }}
-                      target="_blank"
-                      rel="noopener"
-                      aria-label="Share on Linkedin"
-                    >
-                      <LinkedInIcon
-                        sx={{
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      />
-                      <Box
-                        component="span"
-                        sx={{
-                          marginLeft: "10px",
-                          fontSize: "16px",
-                          color: theme => (theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important"),
-                        }}
-                      >
-                        Linkdein
-                      </Box>
-                    </IconButton>
-                  </Box>
-                </MemoizedMetaButton>
-              </MenuItem>
-            </Menu>
-          </>
         )}
       </Box>
     </Box>
