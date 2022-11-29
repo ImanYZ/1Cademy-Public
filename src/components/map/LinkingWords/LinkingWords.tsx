@@ -184,7 +184,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: "auto 32px",
+                      gridTemplateColumns: props.editable ? "1fr 32px" : "1fr",
                     }}
                     key={props.identifier + "LinkTo" + parent.node}
                   >
@@ -417,7 +417,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: "auto 32px",
+                      gridTemplateColumns: props.editable ? "1fr 32px" : "1fr",
                     }}
                     key={props.identifier + "LinkTo" + child.node + "DIV"}
                   >
