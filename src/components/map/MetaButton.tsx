@@ -48,7 +48,7 @@ const MetaButton = (props: MetaButtonProps) => {
 
   if ("onClick" in props && props.onClick) {
     return (
-      <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition}>
+      <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition} disableInteractive>
         <button
           className={
             // (isSubmitting
