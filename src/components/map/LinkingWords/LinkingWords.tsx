@@ -160,7 +160,8 @@ const LinkingWords = (props: LinkingWordsProps) => {
       <Box
         sx={{
           mx: "10px",
-          borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #757171" : "solid 1px #484848"),
+          borderTop: theme =>
+            theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
         }}
       />
       <div className="LinkingWordsContainer card-action">
@@ -313,7 +314,10 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
         <Box
           className="LearnAfter"
-          sx={{ borderLeft: theme => (theme.palette.mode === "dark" ? "solid 1px #484848" : "solid 1px") }}
+          sx={{
+            borderLeft: theme =>
+              theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+          }}
         >
           {props.openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71

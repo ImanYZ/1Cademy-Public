@@ -731,11 +731,7 @@ const Node = ({
                 sx={{
                   mx: "10px",
                   borderTop: theme =>
-                    theme.palette.mode === "dark"
-                      ? openPart
-                        ? "solid 1px #484848"
-                        : "solid 1px #757171"
-                      : "solid 1px",
+                    theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
                 }}
               />
               <Box
@@ -851,7 +847,7 @@ const Node = ({
             sx={{
               mx: "10px",
               borderTop: theme =>
-                theme.palette.mode === "dark" ? (openPart ? "solid 1px #484848" : "solid 1px #757171") : "solid 1px",
+                theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
             }}
           />
           <Box sx={{ p: "13px 10px" }}>

@@ -12,6 +12,7 @@ declare module "@mui/material/styles/createPalette" {
     orangeDark: string;
     darkGrayBackground: string;
     gray: string;
+    borderColor: string;
   }
 }
 
@@ -23,6 +24,7 @@ const common = {
   orangeDark: "#ff6d00",
   darkGrayBackground: "#28282A",
   gray: "#D3D3D3",
+  borderColor: "#585858",
 };
 
 const systemFont = ["Roboto", "sans-serif"];
