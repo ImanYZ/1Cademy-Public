@@ -184,7 +184,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: "auto 28px",
+                      gridTemplateColumns: "auto 32px",
                     }}
                     key={props.identifier + "LinkTo" + parent.node}
                   >
