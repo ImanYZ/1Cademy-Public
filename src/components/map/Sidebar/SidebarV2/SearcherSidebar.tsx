@@ -368,16 +368,18 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                           height: "46.31px",
                           marginLeft: "-14px",
                           zIndex: "99",
+
+                          ":hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: theme => theme.palette.common.orange,
+                          },
                           "&> fieldset": {
-                            borderWidth: 1,
-                            borderColor: "rgba(88, 88, 88,.7)",
-                            border: "1px solid inherit !important",
-                            borderRadius: "32px 0 0 32px !important",
+                            borderWidth: "1px",
+                            borderRadius: "32px 0 0 32px ",
                           },
                         }}
                       >
                         {NODE_TYPES_ARRAY.map(nodeType => (
-                          <MenuItem className="searchSelect" key={nodeType} value={nodeType} id="nodeTypesSelect">
+                          <MenuItem key={nodeType} value={nodeType} id="nodeTypesSelect" sx={{ py: "0px" }}>
                             <Checkbox
                               className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
                               checked={nodeTypes.includes(nodeType)}

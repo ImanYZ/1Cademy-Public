@@ -2292,7 +2292,7 @@ button.MuiTab-textColorInherit:focus {
 .searchSelect .MuiListItemText-primary {
   font-family: Roboto;
   font-size: 14px;
-  line-height: 16px;
+  /* line-height: 16px; */
   /* color: #ffffff; */
 }
 
