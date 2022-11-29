@@ -66,6 +66,8 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     }
   }, [db, comPointsWeeklyLoaded, userTagId]);
 
+  console.log("userTagId", userTagId);
+
   useEffect(() => {
     if (db && userTagId && comPointsOthersLoaded) {
       loadReputationsData(
@@ -83,7 +85,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     const comPs = [];
     for (let comId in comPsDict) {
       const newComObj = { ...comPsDict[comId], tagId: comId };
-      if (comPsDict2) {
+      if (comPsDict2 && comPsDict2[comId]) {
         newComObj.totalPoints = comPsDict[comId].totalPoints - comPsDict2[comId].totalPoints;
         newComObj.positives = comPsDict[comId].positives - comPsDict2[comId].positives;
         newComObj.negatives = comPsDict[comId].negatives - comPsDict2[comId].negatives;
@@ -126,7 +128,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
 
   useEffect(() => {
     if (comLeaderboardType === "Self-votes") {
-      // console.log("[Com 9]:");
+      console.log("[Com 9]:", { comPointsDict, comPointsOthersDict });
       loadReputationPoints(comPointsDict, comPointsOthersDict);
     }
   }, [comLeaderboardType, comPointsDict, comPointsOthersDict]);
