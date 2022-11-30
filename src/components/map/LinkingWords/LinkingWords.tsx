@@ -184,7 +184,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
         <Box
           className="LearnBefore"
           sx={{
-            borderRight: "solid 1px",
             p: "10px 6px 10px 13px",
           }}
         >
@@ -198,6 +197,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     sx={{
                       display: "grid",
                       gridTemplateColumns: props.editable && props.parents.length > 1 ? "1fr 32px" : "1fr",
+                      alignItems: "center",
                     }}
                     key={props.identifier + "LinkTo" + parent.node}
                   >
@@ -221,7 +221,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Parent")} sx={{ alignItems: "center", my: "auto" }}>
+                        <IconButton onClick={deleteLink(idx, "Parent")}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
                       </Tooltip>
@@ -315,7 +315,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
                     {urlRefLabel[0] && (
                       <Tooltip
-                        title=" Open  in new tab."
+                        title=" Open link in new tab."
                         placement="right"
                         sx={{
                           color: "#bebebe",
@@ -459,6 +459,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     sx={{
                       display: "grid",
                       gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
+                      alignItems: "center",
                     }}
                     key={props.identifier + "LinkTo" + child.node + "DIV"}
                   >
@@ -483,7 +484,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Child")} sx={{ alignItems: "center", my: "auto" }}>
+                        <IconButton onClick={deleteLink(idx, "Child")}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
                       </Tooltip>
