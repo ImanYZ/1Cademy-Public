@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid";
 import dayjs from "dayjs";
 import { getAuth } from "firebase/auth";
 import { useRouter } from "next/router";
-import { GetServerSideProps, NextPage } from "next/types";
+import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
 
@@ -16,7 +16,7 @@ import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 import PagesNavbar from "@/components/PagesNavbar";
 import { ReferencesList } from "@/components/ReferencesList";
 import { TagsList } from "@/components/TagsList";
-import { getNodeData } from "@/lib/firestoreServer/nodes";
+import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServer/nodes";
 import ROUTES from "@/lib/utils/routes";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
 
@@ -35,7 +35,7 @@ interface Params extends ParsedUrlQuery {
   title: string;
 }
 
-export const getServerSideProps: GetServerSideProps<Props, Params> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<Props, Params> = async ({ params }) => {
   const nodeData = await getNodeData(params?.id || "");
   if (!nodeData) {
     return {
@@ -58,7 +58,18 @@ export const getServerSideProps: GetServerSideProps<Props, Params> = async ({ pa
       updatedStr,
       createdStr,
     },
+    revalidate: 20,
   };
+};
+
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
+  const paths = [{ params: { id: "", title: "" } }];
+  if (process.env.NODE_ENV === "production") {
+    const nodes = await getAllNodeParamsForStaticProps();
+    return { paths: nodes, fallback: "blocking" };
+  }
+
+  return { paths, fallback: "blocking" };
 };
 
 const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) => {
