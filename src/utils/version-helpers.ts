@@ -1360,6 +1360,10 @@ export const signalNodeToTypesense = async ({
     .sort((a, b) => b.reputation - a.reputation)
     .map(institution => ({ name: institution.name }));
 
+  const contributors = Object.entries(nodeData.contributors || {})
+    .map(cur => ({ uname: cur[0], ...cur[1] }))
+    .sort((a, b) => b.reputation - a.reputation);
+
   if (!(await typesense.collections("nodes").exists())) {
     await typesense.collections().create({
       name: "nodes",
@@ -1375,7 +1379,7 @@ export const signalNodeToTypesense = async ({
     content: versionData.content,
     contribNames: nodeData.contribNames,
     institNames: nodeData.institNames || [],
-    contributors: nodeData.contributors || [],
+    contributors: contributors || [],
     contributorsNames: nodeData.contribNames || [],
     corrects: nodeData.corrects,
     wrongs: nodeData.wrongs,
