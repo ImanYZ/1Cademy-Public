@@ -177,7 +177,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           }}
         >
           {props.openPart === "LinkingWords" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <strong>Parents (Prerequisites)</strong>
 
               {props.parents.map((parent: any, idx: number) => {
@@ -243,7 +243,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 return (
                   <Box
                     key={props.identifier + "LinkTo" + reference.node + "DIV"}
-                    sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px" }}
+                    sx={{ display: "flex", flexDirection: "column", gap: "4px" }}
                   >
                     <LinkingButton
                       key={props.identifier + "LinkTo" + reference.node}
@@ -257,7 +257,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     />
                     {urlRefLabel[0] && urlRefLabel[1]}
                     {props.editable && (
-                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         <ReferenceLabelInput
                           key={props.identifier + "LinkTo" + reference.node + "Label"}
                           inputProperties={{

@@ -27,10 +27,12 @@ export const ReferenceLabelInput = ({
       <TextField
         id={inputProperties.id}
         name={inputProperties.name}
+        variant="standard"
+        placeholder="Enter page # or voice/video time"
         type="text"
         value={labelCopy}
         onChange={onChange}
-        label="Enter page # or voice/video time"
+        fullWidth
         size="small"
         sx={sx}
       />
