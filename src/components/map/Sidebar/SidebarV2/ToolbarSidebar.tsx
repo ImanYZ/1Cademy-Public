@@ -102,7 +102,7 @@ export const ToolbarSidebar = ({
     setAnchorEl(null);
   };
 
-  const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 50 : 0;
+  const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 40 : 0;
 
   const firstBoxHeight = 375 + instructorsButtonHeight;
 
@@ -160,7 +160,6 @@ export const ToolbarSidebar = ({
           direction="column"
           sx={{
             height: firstBoxHeight,
-            border: "solid 2px royalBlue",
           }}
         >
           <Box sx={{ marginTop: "20px" }}>
@@ -544,7 +543,6 @@ export const ToolbarSidebar = ({
           sx={{
             height: `calc(${windowHeight}px - ${firstBoxHeight}px)`,
             paddingBottom: "20px",
-            border: "solid 2px pink",
           }}
         >
           {user?.tag && leaderBoardType && (
@@ -596,6 +594,7 @@ export const ToolbarSidebar = ({
     pendingProposalsNum,
     reputation,
     windowHeight,
+    anchorEl,
   ]);
 
   return (
