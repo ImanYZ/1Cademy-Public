@@ -225,7 +225,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           )}
 
           {props.openPart === "References" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <strong>References</strong>
 
               {props.references.map((reference: any, idx: number) => {
@@ -240,12 +240,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
                   }
                 }
                 return (
-                  <div
-                    style={{
-                      margin: "5px 5px 0px 0px",
-                    }}
+                  <Box
                     key={props.identifier + "LinkTo" + reference.node + "DIV"}
-                    className="ReferenceLink"
+                    sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px" }}
                   >
                     <LinkingButton
                       key={props.identifier + "LinkTo" + reference.node}
@@ -259,7 +256,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                     />
                     {urlRefLabel[0] && urlRefLabel[1]}
                     {props.editable && (
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
                         <ReferenceLabelInput
                           key={props.identifier + "LinkTo" + reference.node + "Label"}
                           inputProperties={{
@@ -268,7 +265,6 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           }}
                           referenceLabelChangeHandler={(newLabel: string) => referenceLabelChangeHandler(newLabel, idx)}
                           reference={reference}
-                          sx={{ mt: "10px" }}
                         />
                         {/* <TextField
                         key={props.identifier + "LinkTo" + reference.node + "Label"}
@@ -281,18 +277,14 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         label="Enter page # or voice/video time"
                         size="small"
                       /> */}
-                        <div className="LinkDeleteButton">
-                          <MemoizedMetaButton
-                            onClick={deleteLink(idx, "Reference")}
-                            tooltip="Delete the link to this reference."
-                            tooltipPosition="right"
-                          >
+                        <Tooltip title="Delete the link to this reference." placement="right">
+                          <IconButton onClick={deleteLink(idx, "Reference")}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                          </MemoizedMetaButton>
-                        </div>
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     )}
-                  </div>
+                  </Box>
                 );
               })}
 
