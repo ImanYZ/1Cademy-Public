@@ -330,6 +330,7 @@ const NodeFooter = ({
                       : openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
                       ? "#DCDCDC"
                       : "transparent",
+                  maxWidth: "133px",
                 }}
               >
                 <MemoizedMetaButton
@@ -346,6 +347,7 @@ const NodeFooter = ({
                   tooltipPosition="top"
                   style={{
                     fontSize: "14px",
+                    lineHeight: "10px",
                   }}
                 >
                   <>
