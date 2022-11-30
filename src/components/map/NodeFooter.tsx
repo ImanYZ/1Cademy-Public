@@ -336,16 +336,16 @@ const NodeFooter = ({
                   sx={{
                     background: (theme: any) =>
                       theme.palette.mode === "dark"
-                        ? theme.palette.common.nodeFooterButtonDarkBackground
-                        : theme.palette.common.nodeFooterButtonLightBackground,
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
                     fontWeight: 400,
                     color: "inherit",
                     ":hover": {
                       borderWidth: "0px",
                       background: (theme: any) =>
                         theme.palette.mode === "dark"
-                          ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                          : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
                     },
                   }}
                 >
@@ -361,8 +361,8 @@ const NodeFooter = ({
                 sx={{
                   background: theme =>
                     theme.palette.mode === "dark"
-                      ? theme.palette.common.nodeFooterButtonDarkBackground
-                      : theme.palette.common.nodeFooterButtonLightBackground,
+                      ? theme.palette.common.darkBackground1
+                      : theme.palette.common.lightBackground1,
                   display: "flex",
                   alignItems: "center",
                   marginLeft: "10px",
@@ -375,8 +375,8 @@ const NodeFooter = ({
                     ":hover": {
                       background: theme =>
                         theme.palette.mode === "dark"
-                          ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                          : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
                     },
                   }}
                 >
@@ -431,8 +431,8 @@ const NodeFooter = ({
                     ":hover": {
                       background: theme =>
                         theme.palette.mode === "dark"
-                          ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                          : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
                     },
                   }}
                 >
@@ -538,8 +538,8 @@ const NodeFooter = ({
                   sx={{
                     background: (theme: any) =>
                       theme.palette.mode === "dark"
-                        ? theme.palette.common.nodeFooterButtonDarkBackground
-                        : theme.palette.common.nodeFooterButtonLightBackground,
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
                     color: "inherit",
                     fontWeight: 400,
                     height: "28.7px",
@@ -547,8 +547,8 @@ const NodeFooter = ({
                       borderWidth: "0px",
                       background: (theme: any) =>
                         theme.palette.mode === "dark"
-                          ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                          : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
                     },
                   }}
                 >
@@ -597,16 +597,16 @@ const NodeFooter = ({
                       sx={{
                         background: (theme: any) =>
                           theme.palette.mode === "dark"
-                            ? theme.palette.common.nodeFooterButtonDarkBackground
-                            : theme.palette.common.nodeFooterButtonLightBackground,
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
                         color: "inherit",
                         fontWeight: 400,
                         ":hover": {
                           borderWidth: "0px",
                           background: (theme: any) =>
                             theme.palette.mode === "dark"
-                              ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                              : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
                         },
                       }}
                     >
@@ -652,16 +652,16 @@ const NodeFooter = ({
                       sx={{
                         background: (theme: any) =>
                           theme.palette.mode === "dark"
-                            ? theme.palette.common.nodeFooterButtonDarkBackground
-                            : theme.palette.common.nodeFooterButtonLightBackground,
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
                         color: "inherit",
                         fontWeight: 400,
                         ":hover": {
                           borderWidth: "0px",
                           background: (theme: any) =>
                             theme.palette.mode === "dark"
-                              ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                              : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
                         },
                       }}
                     >
@@ -742,8 +742,8 @@ const NodeFooter = ({
                       sx={{
                         background: (theme: any) =>
                           theme.palette.mode === "dark"
-                            ? theme.palette.common.nodeFooterButtonDarkBackground
-                            : theme.palette.common.nodeFooterButtonLightBackground,
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
                         color: "inherit",
                         fontWeight: 400,
                         height: "28.7px",
@@ -751,8 +751,8 @@ const NodeFooter = ({
                           borderWidth: "0px",
                           background: (theme: any) =>
                             theme.palette.mode === "dark"
-                              ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                              : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
                         },
                       }}
                     >
@@ -922,16 +922,16 @@ const NodeFooter = ({
                   sx={{
                     background: (theme: any) =>
                       theme.palette.mode === "dark"
-                        ? theme.palette.common.nodeFooterButtonDarkBackground
-                        : theme.palette.common.nodeFooterButtonLightBackground,
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
                     color: "inherit",
                     fontWeight: 400,
                     ":hover": {
                       borderWidth: "0px",
                       background: (theme: any) =>
                         theme.palette.mode === "dark"
-                          ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                          : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
                     },
                   }}
                 >
@@ -954,14 +954,14 @@ const NodeFooter = ({
               sx={{
                 background: theme =>
                   theme.palette.mode === "dark"
-                    ? theme.palette.common.nodeFooterButtonDarkBackground
-                    : theme.palette.common.nodeFooterButtonLightBackground,
+                    ? theme.palette.common.darkBackground1
+                    : theme.palette.common.lightBackground1,
                 padding: "3px",
                 ":hover": {
                   background: (theme: any) =>
                     theme.palette.mode === "dark"
-                      ? theme.palette.common.nodeFooterButtonDarkHoverBackground
-                      : theme.palette.common.nodeFooterButtonLightHoverBackground,
+                      ? theme.palette.common.darkBackground2
+                      : theme.palette.common.lightBackground2,
                 },
               }}
             >

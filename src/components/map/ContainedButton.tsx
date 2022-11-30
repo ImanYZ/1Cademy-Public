@@ -1,15 +1,29 @@
 import { Button, Tooltip, useTheme } from "@mui/material";
+import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
 import { UserTheme } from "../../knowledgeTypes";
 
 type ContainedButtonProps = {
   title: string;
-  tooltipPosition?: any;
+  tooltipPosition?:
+    | "top"
+    | "right"
+    | "bottom"
+    | "left"
+    | "bottom-end"
+    | "bottom-start"
+    | "left-end"
+    | "left-start"
+    | "right-end"
+    | "right-start"
+    | "top-end"
+    | "top-start"
+    | undefined;
   onClick: any;
   disabled?: boolean;
   children: JSX.Element;
-  sx?: any;
+  sx?: SxProps<Theme>;
 };
 
 export const ContainedButton = ({
