@@ -73,8 +73,8 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                     borderBottom: "orange",
                   }}
                 />
-                &nbsp; by casting on other's proposals, which is in agreement with the instructors(s)' vote on the same
-                proposal.
+                &nbsp; by casting votes on others' proposals, which is in agreement with the instructors(s)' vote on the
+                same proposal.
               </Typography>
             </Box>
             <Box sx={{ display: "flex", flexWrap: "wrap", alignContent: "center", alignItems: "baseline" }}>
@@ -109,8 +109,8 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                     borderBottom: "orange",
                   }}
                 />
-                &nbsp; by casting on other's proposals, which is in disagreement with the instructors(s)' vote on the
-                same proposal.
+                &nbsp; by casting votes on others' proposals, which is in disagreement with the instructors(s)' vote on
+                the same proposal.
               </Typography>
             </Box>
           </Box>
