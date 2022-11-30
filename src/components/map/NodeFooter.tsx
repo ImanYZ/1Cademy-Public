@@ -347,6 +347,7 @@ const NodeFooter = ({
                   tooltipPosition="top"
                   style={{
                     fontSize: "14px",
+                    lineHeight: "10px",
                   }}
                 >
                   <>
