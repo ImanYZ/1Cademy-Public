@@ -6,6 +6,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ShareIcon from "@mui/icons-material/Share";
 import { Box, IconButton, Link, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
@@ -26,20 +27,20 @@ import { MemoizedMetaButton } from "../MetaButton";
 import LinkingButton from "./LinkingButton";
 import { ReferenceLabelInput } from "./ReferenceLabelInput";
 
-const separateURL = (text: string): [boolean, any] => {
+const separateURL = (text: string, url: string): [boolean, any] => {
   // console.log("separateURL", text);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const matches = text.match(urlRegex);
+  const matches = url.match(urlRegex);
   if (matches && matches.length > 0) {
     return [
       true,
       // eslint-disable-next-line react/jsx-key
-      <Link href={matches[0]} target="_blank" rel="noreferrer">
-        Open the URL in new tab.
+      <Link href={matches[0]} target="_blank" rel="noreferrer" sx={{ fontSize: "14px" }}>
+        <ShareIcon fontSize="inherit" /> {text}
       </Link>,
     ];
   } else {
-    return [false, text];
+    return [false, url];
   }
 };
 
@@ -232,7 +233,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 let refTitle = reference.title;
                 let urlRefLabel = [false, false];
                 if ("label" in reference && reference.label !== "") {
-                  const separatedURL = separateURL(reference.label ?? "");
+                  const separatedURL = separateURL(reference.title ?? "", reference.label ?? "");
                   if (separatedURL[0]) {
                     urlRefLabel = separatedURL;
                   } else {
