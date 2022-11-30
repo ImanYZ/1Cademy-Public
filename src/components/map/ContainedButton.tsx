@@ -1,16 +1,26 @@
-import { Button, Tooltip, useTheme } from "@mui/material";
+import { Button, Tooltip, TooltipProps,useTheme } from "@mui/material";
+import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
 import { UserTheme } from "../../knowledgeTypes";
 
 type ContainedButtonProps = {
   title: string;
-  onClick: () => void;
+  tooltipPosition?: TooltipProps["placement"];
+  onClick: any;
   disabled?: boolean;
   children: JSX.Element;
+  sx?: SxProps<Theme>;
 };
 
-export const ContainedButton = ({ title, onClick, disabled = false, children }: ContainedButtonProps) => {
+export const ContainedButton = ({
+  title,
+  onClick,
+  disabled = false,
+  children,
+  tooltipPosition = "bottom-start",
+  sx,
+}: ContainedButtonProps) => {
   const theme = useTheme();
   const getColorText = (isDisable: boolean, userTheme: UserTheme) => {
     if (isDisable) return "Dark" ? "dimgrey" : "rgba(0, 0, 0, 0.26)";
@@ -20,7 +30,7 @@ export const ContainedButton = ({ title, onClick, disabled = false, children }: 
   // const TooltipWrapper = disabled = ()
 
   return (
-    <Tooltip title={title} placement={"bottom-start"}>
+    <Tooltip title={title} placement={tooltipPosition}>
       {/* this span prevents Tooltip error when button is disable */}
       <span>
         <Button
@@ -40,6 +50,7 @@ export const ContainedButton = ({ title, onClick, disabled = false, children }: 
               borderWidth: "0px",
               background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
             },
+            ...sx,
           }}
         >
           {children}

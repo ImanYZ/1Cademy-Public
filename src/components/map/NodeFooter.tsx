@@ -18,7 +18,7 @@ import RedditIcon from "@mui/icons-material/Reddit";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
-import { Badge, ClickAwayListener, MenuItem, Paper } from "@mui/material";
+import { Badge, Button, ClickAwayListener, Divider, MenuItem, Paper, Tooltip } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -33,6 +33,7 @@ import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { OpenPart } from "../../nodeBookTypes";
 import NodeTypeIcon from "../NodeTypeIcon";
+import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
 import { MemoizedUserStatusIcon } from "./UserStatusIcon";
 
@@ -315,101 +316,156 @@ const NodeFooter = ({
 
           {open && (
             <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
+              {openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier ? (
+                <Box
+                  onClick={selectPendingProposals}
+                  className={"select-tab-button-node-footer"}
+                  sx={{
+                    background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                    cursor: "pointer",
+                  }}
+                >
+                  <CreateIcon sx={{ fontSize: "16px" }} />
+                  <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
+                </Box>
+              ) : (
+                <ContainedButton
+                  title="Propose/evaluate versions of this node."
+                  onClick={selectPendingProposals}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
+                    fontWeight: 400,
+                    color: "inherit",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <CreateIcon sx={{ fontSize: "16px" }} />
+                    <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
+                  </Box>
+                </ContainedButton>
+              )}
+
               <Box
-                className={
-                  openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
-                    ? "select-tab-button-node-footer"
-                    : "tab-button-node-footer"
-                }
+                className="tab-double-button-node-footer"
                 sx={{
                   background: theme =>
                     theme.palette.mode === "dark"
-                      ? openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
-                        ? "#414141"
-                        : "transparent"
-                      : openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier
-                      ? "#DCDCDC"
-                      : "transparent",
-                  maxWidth: "133px",
-                }}
-              >
-                <MemoizedMetaButton
-                  onClick={selectPendingProposals}
-                  tooltip="Propose/evaluate versions of this node."
-                  // {
-                  //   shortenNumber(proposalsNum, 2, false) +
-                  //   " proposal" +
-                  //   (proposalsNum > 1 ? "s" : "") +
-                  //   " exist" +
-                  //   (proposalsNum === 1 ? "s" : "") +
-                  //   " on this node. Click to propose an improvement or review a proposal on the pending proposals list."
-                  // }
-                  tooltipPosition="top"
-                  style={{
-                    fontSize: "14px",
-                    lineHeight: "10px",
-                  }}
-                >
-                  <>
-                    <CreateIcon sx={{ fontSize: "16px" }} />
-                    <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
-                  </>
-                </MemoizedMetaButton>
-              </Box>
-              <Box
-                className="tab-button-node-footer"
-                sx={{
-                  background: "transparent",
+                      ? theme.palette.common.darkBackground1
+                      : theme.palette.common.lightBackground1,
                   display: "flex",
                   alignItems: "center",
+                  marginLeft: "10px",
                 }}
               >
-                <MemoizedMetaButton
-                  disabled={disableVotes}
-                  onClick={wrongNode}
-                  tooltip="Vote to delete node."
-                  tooltipPosition="top"
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      fontSize: "14px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span>{shortenNumber(wrongNum, 2, false)}</span>
-                    <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit", marginLeft: "1px" }} />
-                  </Box>
-                </MemoizedMetaButton>
                 <Box
                   sx={{
-                    width: "1px",
-                    background: theme =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.gray
-                        : theme.palette.common.darkGrayBackground,
-                    height: "13px",
+                    padding: "2px 0px 2px 5px",
+                    borderRadius: "52px 0px 0px 52px",
+                    ":hover": {
+                      background: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
                   }}
-                ></Box>
-                <MemoizedMetaButton
-                  disabled={disableVotes}
-                  onClick={correctNode}
-                  tooltip="Vote to prevent further changes."
-                  tooltipPosition="top"
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      fontSize: "14px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span>{shortenNumber(correctNum, 2, false)}</span>
-                    <DoneIcon
-                      sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
-                    />
-                  </Box>
-                </MemoizedMetaButton>
+                  <Tooltip title={"Vote to delete node."} placement={"top"}>
+                    <Button
+                      onClick={wrongNode}
+                      disabled={disableVotes}
+                      sx={{
+                        padding: "0",
+                        color: "inherit",
+                        fontWeight: 400,
+                        minWidth: "40px",
+                        ":hover": {
+                          color: "inherit",
+                          background: "transparent",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          fontSize: "14px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span>{shortenNumber(wrongNum, 2, false)}</span>
+                        <CloseIcon
+                          sx={{
+                            fontSize: "16px",
+                            color: markedWrong ? "red" : "inherit",
+                            marginLeft: "1px",
+                          }}
+                        />
+                      </Box>
+                    </Button>
+                  </Tooltip>
+                </Box>
+                <Divider
+                  orientation="vertical"
+                  variant="middle"
+                  flexItem
+                  sx={{
+                    borderColor: disableVotes
+                      ? "#6A6A6A"
+                      : theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                  }}
+                />
+                <Box
+                  sx={{
+                    padding: "2px 5px 2px 5px",
+                    borderRadius: "0px 52px 52px 0px",
+                    ":hover": {
+                      background: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                  }}
+                >
+                  <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
+                    <Button
+                      onClick={correctNode}
+                      disabled={disableVotes}
+                      sx={{
+                        padding: "0",
+                        color: "inherit",
+                        fontWeight: 400,
+                        minWidth: "40px",
+                        ":hover": {
+                          color: "inherit",
+                          background: "transparent",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          fontSize: "14px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span>{shortenNumber(correctNum, 2, false)}</span>
+                        <DoneIcon
+                          sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
+                        />
+                      </Box>
+                    </Button>
+                  </Tooltip>
+                </Box>
               </Box>
             </Box>
           )}
@@ -466,35 +522,39 @@ const NodeFooter = ({
               </>
             ) : (
               // new Node or unaccepted proposal
+
               <Box
-                className={"tab-button-node-footer"}
                 sx={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
                   display: "flex",
-                  justifyContent: "center",
                   alignItems: "center",
+                  gap: "5px",
+                  marginRight: "10px",
                 }}
               >
-                <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
-                <MemoizedMetaButton
-                  onClick={uploadImageClicked}
-                  tooltip="Upload an image for this node."
+                <ContainedButton
+                  title="View tags and citations used in this node."
+                  onClick={() => uploadImageClicked()}
                   tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
+                    color: "inherit",
+                    fontWeight: 400,
+                    height: "28.7px",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                  }}
                 >
                   <>
+                    <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
                     {isUploading ? (
-                      // <>
-                      //   <div className="preloader-wrapper active inherit ImageUploadButtonLoader">
-                      //     <div className="spinner-layer spinner-yellow-only">
-                      //       <div className="circle-clipper left">
-                      //         <div className="circle"></div>
-                      //       </div>
-                      //     </div>
-                      //   </div>
-
-                      // </>
                       <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
                         {percentageUploaded + "%"}
                       </span>
@@ -502,69 +562,69 @@ const NodeFooter = ({
                       <ImageIcon sx={{ fontSize: "16px" }} />
                     )}
                   </>
-                </MemoizedMetaButton>
+                </ContainedButton>
               </Box>
             )}
             {!editable && !unaccepted && nodeType === "Reference" ? (
               <>
-                <Box
-                  className={openSidebar === "CITATIONS" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
-                  sx={{
-                    background: theme =>
-                      theme.palette.mode === "dark"
-                        ? openSidebar === "CITATIONS"
-                          ? "#414141"
-                          : "transparent"
-                        : openSidebar === "CITATIONS"
-                        ? "#DCDCDC"
-                        : "transparent",
-                  }}
-                >
-                  <MemoizedMetaButton
+                {openSidebar === "CITATIONS" ? (
+                  <Box
                     onClick={selectCitations}
-                    tooltip="View nodes that have cited this node."
-                    tooltipPosition="top"
-                    style={{
-                      borderTopRightRadius: "8px",
-                      borderTopLeftRadius: "8px",
+                    className={"select-tab-button-node-footer"}
+                    sx={{
+                      background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                      cursor: "pointer",
                     }}
                   >
                     <>
-                      {openSidebar === "CITATIONS" ? (
-                        <>
-                          <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                          <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                        </>
-                      ) : (
-                        <>
-                          <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                          <MenuBookIcon sx={{ fontSize: "16px" }} />
-                        </>
-                      )}
-                      {/* <span>{shortenNumber(citations[identifier]?.size ?? 0, 2, false)}</span> */}
+                      <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
+                      <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
                     </>
-                  </MemoizedMetaButton>
-                </Box>
-                <Box
-                  className={openPart === "Tags" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
-                  sx={{
-                    background: theme =>
-                      theme.palette.mode === "dark"
-                        ? openPart === "Tags"
-                          ? "#414141"
-                          : "transparent"
-                        : openPart === "Tags"
-                        ? "#DCDCDC"
-                        : "transparent",
-                  }}
-                >
-                  <MemoizedMetaButton
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    <ContainedButton
+                      title="View nodes that have cited this node."
+                      onClick={selectCitations}
+                      tooltipPosition="top"
+                      sx={{
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
+                        color: "inherit",
+                        fontWeight: 400,
+                        ":hover": {
+                          borderWidth: "0px",
+                          background: (theme: any) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
+                        <ArrowForwardIcon sx={{ fontSize: "16px" }} />
+                        <MenuBookIcon sx={{ fontSize: "16px" }} />
+                      </Box>
+                    </ContainedButton>
+                  </Box>
+                )}
+
+                {openPart === "Tags" ? (
+                  <Box
                     onClick={selectTags}
-                    tooltip="View tags assigned to this node."
-                    tooltipPosition="top"
-                    style={{
-                      borderTopRightRadius: "8px",
-                      borderTopLeftRadius: "8px",
+                    className={"select-tab-button-node-footer"}
+                    sx={{
+                      background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                      cursor: "pointer",
                     }}
                   >
                     <>
@@ -575,68 +635,172 @@ const NodeFooter = ({
                       />
                       <span>{shortenNumber(tags.length, 2, false)}</span>
                     </>
-                  </MemoizedMetaButton>
-                </Box>
-              </>
-            ) : (
-              <Box
-                className={openPart === "References" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
-                sx={{
-                  background: theme =>
-                    theme.palette.mode === "dark"
-                      ? openPart === "References"
-                        ? "#414141"
-                        : "transparent"
-                      : openPart === "References"
-                      ? "#DCDCDC"
-                      : "transparent",
-                }}
-              >
-                <MemoizedMetaButton
-                  onClick={selectReferences}
-                  tooltip="View tags and citations used in this node."
-                  tooltipPosition="top"
-                  style={{
-                    borderRadius: "8px",
-                  }}
-                >
+                  </Box>
+                ) : (
                   <Box
                     sx={{
                       display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    <ContainedButton
+                      title="View tags assigned to this node."
+                      onClick={(e: any) => selectTags(e)}
+                      tooltipPosition="top"
+                      sx={{
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
+                        color: "inherit",
+                        fontWeight: 400,
+                        ":hover": {
+                          borderWidth: "0px",
+                          background: (theme: any) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
+                        <LocalOfferIcon
+                          // className={openPart === "Tags" ? "orange-text" : "grey-text"}
+
+                          sx={{ fontSize: "16px" }}
+                        />
+                        <span>{shortenNumber(tags.length, 2, false)}</span>
+                      </Box>
+                    </ContainedButton>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <>
+                {openPart === "References" ? (
+                  <Box
+                    onClick={selectReferences}
+                    className={"select-tab-button-node-footer"}
+                    sx={{
+                      background: theme =>
+                        theme.palette.mode === "dark"
+                          ? openPart === "References"
+                            ? "#414141"
+                            : "transparent"
+                          : openPart === "References"
+                          ? "#DCDCDC"
+                          : "transparent",
+                      cursor: "pointer",
                     }}
                   >
                     <Box
                       sx={{
                         display: "flex",
-                        alignItems: "center",
                       }}
                     >
-                      <MenuBookIcon
-                        // className={openPart === "References" ? "orange-text" : "grey-text"}
-                        color={openPart === "References" ? "primary" : "inherit"}
-                        sx={{ fontSize: "16px", marginRight: "2px" }}
-                      />
-
-                      <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
-                    </Box>
-                    <Box component={"span"} sx={{ marginInline: "5px" }}>
-                      |
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <LocalOfferIcon
-                        color={openPart === "Tags" || openPart === "References" ? "primary" : "inherit"}
-                        sx={{ fontSize: "16px", marginRight: "2px" }}
-                      />
-                      <span>{shortenNumber(tags.length, 2, false)}</span>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <MenuBookIcon
+                          color={openPart === "References" ? "primary" : "inherit"}
+                          sx={{ fontSize: "16px", marginRight: "2px" }}
+                        />
+                        <span className="CitationsSpanBeforeTagIcon">{shortenNumber(references.length, 2, false)}</span>
+                      </Box>
+                      <Box component={"span"} sx={{ marginInline: "5px" }}>
+                        |
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <LocalOfferIcon color={"primary"} sx={{ fontSize: "16px", marginRight: "2px" }} />
+                        <span>{shortenNumber(tags.length, 2, false)}</span>
+                      </Box>
                     </Box>
                   </Box>
-                </MemoizedMetaButton>
-              </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    <ContainedButton
+                      title="View tags and citations used in this node."
+                      onClick={selectReferences}
+                      tooltipPosition="top"
+                      sx={{
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
+                        color: "inherit",
+                        fontWeight: 400,
+                        height: "28.7px",
+                        ":hover": {
+                          borderWidth: "0px",
+                          background: (theme: any) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: "5px",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <MenuBookIcon
+                            // className={openPart === "References" ? "orange-text" : "grey-text"}
+                            color={"inherit"}
+                            sx={{ fontSize: "16px", marginRight: "2px" }}
+                          />
+
+                          <span className="CitationsSpanBeforeTagIcon" style={{ marginTop: "3px" }}>
+                            {shortenNumber(references.length, 2, false)}
+                          </span>
+                        </Box>
+                        <Divider
+                          orientation="vertical"
+                          variant="middle"
+                          flexItem
+                          sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+                        />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <LocalOfferIcon
+                            color={openPart === "Tags" ? "primary" : "inherit"}
+                            sx={{ fontSize: "16px", marginRight: "2px" }}
+                          />
+                          <span style={{ marginTop: "3px" }}>{shortenNumber(tags.length, 2, false)}</span>
+                        </Box>
+                      </Box>
+                    </ContainedButton>
+                  </Box>
+                )}
+              </>
             )}
             {!editable && !unaccepted && (
               <>
@@ -728,50 +892,58 @@ const NodeFooter = ({
                 </MemoizedMetaButton> */}
               </>
             )}
-            <Box
-              className={openPart === "LinkingWords" ? "select-tab-button-node-footer" : "tab-button-node-footer"}
-              sx={{
-                position: "relative",
-                background: theme =>
-                  theme.palette.mode === "dark"
-                    ? openPart === "LinkingWords"
-                      ? "#414141"
-                      : "transparent"
-                    : openPart === "LinkingWords"
-                    ? "#DCDCDC"
-                    : "transparent",
-              }}
-            >
-              <MemoizedMetaButton
+            {openPart === "LinkingWords" ? (
+              <Box
                 onClick={selectLinkingWords}
-                tooltip="View parent and child nodes."
-                // {
-                //   "This node has " +
-                //   shortenNumber(parents.length, 2, false) +
-                //   " parent node" +
-                //   (parents.length === 1 ? "" : "s") +
-                //   " and " +
-                //   shortenNumber(children.length, 2, false) +
-                //   " child node" +
-                //   (children.length === 1 ? "." : "s.") +
-                //   " Click to see the child and parent nodes of this node."
-                // }
-                tooltipPosition="top"
-                style={{
-                  borderTopRightRadius: "8px",
-                  borderTopLeftRadius: "8px",
+                className={"select-tab-button-node-footer"}
+                sx={{
+                  position: "relative",
+                  background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                  cursor: "pointer",
                 }}
               >
-                <>
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
-                  <SwapHorizIcon
-                    sx={{ fontSize: "16px" }}
-                    color={openPart === "LinkingWords" ? "primary" : "inherit"}
-                  />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
-                </>
-              </MemoizedMetaButton>
-            </Box>
+                <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                <SwapHorizIcon sx={{ fontSize: "16px" }} color={openPart === "LinkingWords" ? "primary" : "inherit"} />
+                <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginRight: "10px",
+                }}
+              >
+                <ContainedButton
+                  title="View parent and child nodes."
+                  onClick={selectLinkingWords}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
+                    color: "inherit",
+                    fontWeight: 400,
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                    <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
+                    <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  </Box>
+                </ContainedButton>
+              </Box>
+            )}
+
             <IconButton
               aria-label="more"
               id="long-button"
@@ -780,13 +952,22 @@ const NodeFooter = ({
               aria-haspopup="true"
               onClick={handleClick}
               sx={{
-                border: "solid 1px #585858",
+                background: theme =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.darkBackground1
+                    : theme.palette.common.lightBackground1,
                 padding: "3px",
+                ":hover": {
+                  background: (theme: any) =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.darkBackground2
+                      : theme.palette.common.lightBackground2,
+                },
               }}
             >
               <MoreHorizIcon
                 sx={{
-                  color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "grey"),
+                  color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "#545968"),
                 }}
               />
             </IconButton>
