@@ -35,8 +35,20 @@ const separateURL = (text: string, url: string): [boolean, any] => {
     return [
       true,
       // eslint-disable-next-line react/jsx-key
-      <Link href={matches[0]} target="_blank" rel="noreferrer" sx={{ fontSize: "14px" }}>
-        <LaunchIcon fontSize="inherit" sx={{ marginRight: "3px" }} /> {text}
+      <Link
+        href={matches[0]}
+        target="_blank"
+        rel="noreferrer"
+        sx={{
+          display: "grid",
+          placeItems: "center",
+          color: "#bebebe",
+          ":hover": {
+            color: theme => theme.palette.common.orange,
+          },
+        }}
+      >
+        <LaunchIcon sx={{ fontSize: "16px" }} /> {/* {text} */}
       </Link>,
     ];
   } else {
@@ -199,7 +211,16 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       visible={parent.visible}
                     />
                     {props.editable && props.parents.length > 1 && (
-                      <Tooltip title="Delete the link to this parent." placement="right">
+                      <Tooltip
+                        title="Delete the link to this parent."
+                        placement="right"
+                        sx={{
+                          color: "#bebebe",
+                          ":hover": {
+                            color: theme => theme.palette.common.orange,
+                          },
+                        }}
+                      >
                         <IconButton onClick={deleteLink(idx, "Parent")} sx={{ alignItems: "center", my: "auto" }}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
@@ -226,7 +247,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           )}
 
           {props.openPart === "References" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <strong>References</strong>
 
               {props.references.map((reference: any, idx: number) => {
@@ -243,21 +264,43 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 return (
                   <Box
                     key={props.identifier + "LinkTo" + reference.node + "DIV"}
-                    sx={{ display: "flex", flexDirection: "column", gap: "4px" }}
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 32px",
+                      gridTemplateRows: "auto",
+                      alignItems: "center",
+                      gap: "1px 4px",
+                    }}
                   >
-                    <LinkingButton
-                      key={props.identifier + "LinkTo" + reference.node}
-                      onClick={props.openLinkedNode}
-                      // nodeID={props.identifier}
-                      linkedNodeID={reference.node}
-                      // linkedNodeTitle={refTitle+(reference.label?':'+{reference.label}:'')}
-                      linkedNodeTitle={refTitle}
-                      linkedNodeType="reference"
-                      iClassName="menu_book"
-                    />
-                    {urlRefLabel[0] && urlRefLabel[1]}
+                    <Box sx={{ gridColumn: urlRefLabel[0] || props.editable ? "1 / 2" : "1 / span 2" }}>
+                      <LinkingButton
+                        key={props.identifier + "LinkTo" + reference.node}
+                        onClick={props.openLinkedNode}
+                        // nodeID={props.identifier}
+                        linkedNodeID={reference.node}
+                        // linkedNodeTitle={refTitle+(reference.label?':'+{reference.label}:'')}
+                        linkedNodeTitle={refTitle}
+                        linkedNodeType="reference"
+                        iClassName="menu_book"
+                      />
+                    </Box>
                     {props.editable && (
-                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <>
+                        <Tooltip
+                          title="Delete the link to this reference."
+                          placement="right"
+                          sx={{
+                            color: "#bebebe",
+                            ":hover": {
+                              color: theme => theme.palette.common.orange,
+                            },
+                          }}
+                        >
+                          <IconButton onClick={deleteLink(idx, "Reference")}>
+                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                          </IconButton>
+                        </Tooltip>
+
                         <ReferenceLabelInput
                           key={props.identifier + "LinkTo" + reference.node + "Label"}
                           inputProperties={{
@@ -267,23 +310,22 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           referenceLabelChangeHandler={(newLabel: string) => referenceLabelChangeHandler(newLabel, idx)}
                           reference={reference}
                         />
-                        {/* <TextField
-                        key={props.identifier + "LinkTo" + reference.node + "Label"}
-                        id={props.identifier + "LinkTo" + reference.node + "Label"}
-                        name={props.identifier + "LinkTo" + reference.node + "Label"}
-                        type="text"
-                        value={reference.label}
-                        onChange={referenceLabelChangeHandler(idx)}
-                        onBlur={referenceLabelChangeHandler(idx)}
-                        label="Enter page # or voice/video time"
-                        size="small"
-                      /> */}
-                        <Tooltip title="Delete the link to this reference." placement="right">
-                          <IconButton onClick={deleteLink(idx, "Reference")}>
-                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
+                      </>
+                    )}
+
+                    {urlRefLabel[0] && (
+                      <Tooltip
+                        title=" Open  in new tab."
+                        placement="right"
+                        sx={{
+                          color: "#bebebe",
+                          ":hover": {
+                            color: theme => theme.palette.common.orange,
+                          },
+                        }}
+                      >
+                        <IconButton onClick={deleteLink(idx, "Reference")}>{urlRefLabel[1]}</IconButton>
+                      </Tooltip>
                     )}
                   </Box>
                 );
@@ -343,7 +385,16 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       iClassName="local_offer"
                     />
                     {props.editable && (
-                      <Tooltip title="Delete the link to this tag." placement="right">
+                      <Tooltip
+                        title="Delete the link to this tag."
+                        placement="right"
+                        sx={{
+                          color: "#bebebe",
+                          ":hover": {
+                            color: theme => theme.palette.common.orange,
+                          },
+                        }}
+                      >
                         <IconButton onClick={deleteLink(idx, "Tag")}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
@@ -422,7 +473,16 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       visible={child.visible}
                     />
                     {props.editable && (
-                      <Tooltip title="Delete the link to this child." placement="right">
+                      <Tooltip
+                        title="Delete the link to this child."
+                        placement="right"
+                        sx={{
+                          color: "#bebebe",
+                          ":hover": {
+                            color: theme => theme.palette.common.orange,
+                          },
+                        }}
+                      >
                         <IconButton onClick={deleteLink(idx, "Child")} sx={{ alignItems: "center", my: "auto" }}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
