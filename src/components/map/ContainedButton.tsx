@@ -1,4 +1,4 @@
-import { Button, Tooltip, useTheme } from "@mui/material";
+import { Button, Tooltip, TooltipProps,useTheme } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
@@ -6,20 +6,7 @@ import { UserTheme } from "../../knowledgeTypes";
 
 type ContainedButtonProps = {
   title: string;
-  tooltipPosition?:
-    | "top"
-    | "right"
-    | "bottom"
-    | "left"
-    | "bottom-end"
-    | "bottom-start"
-    | "left-end"
-    | "left-start"
-    | "right-end"
-    | "right-start"
-    | "top-end"
-    | "top-start"
-    | undefined;
+  tooltipPosition?: TooltipProps["placement"];
   onClick: any;
   disabled?: boolean;
   children: JSX.Element;
