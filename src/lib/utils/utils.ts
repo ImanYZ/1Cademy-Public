@@ -46,6 +46,8 @@ export function generateAlias(name?: string) {
     .trim()
     .replace(/ /g, "-")
     .replace(/[-]+/g, "-")
+    .replace(/^-/, "")
+    .replace(/-$/, "")
     .split("-")
     .splice(0, 20)
     .join("-");
