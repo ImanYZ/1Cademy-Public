@@ -2785,64 +2785,30 @@ right: 5px; */
 
 .select-tab-button-node-footer {
   margin-bottom: -1px;
-  height: 45px;
+  height: 39px;
   margin-right: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   display: flex;
   border: solid 1px #585858;
   border-bottom: none;
+  align-items: center;
+  padding: 0px 6px;
+  font-weight: 400;
 }
 
-/* .select-tab-button-node-footer-light {
-  position: relative;
-  top: 4px;
-  height: 36.5px;
-  margin-right: 10px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  display: flex;
-  border: solid 1px #585858;
-  border-bottom: solid 2px #f0f0f0;
-} */
-
-/* .select-tab-button-node-footer-dark::after {
-  content: "";
-  background: #1f1f1f;
-  position: absolute;
-  top: 32px;
-  width: 103%;
-  right: -1px;
-  height: 6px;
-} */
-
-/* .select-tab-button-node-footer-light::after {
-  content: "";
-  background: #f0f0f0;
-  position: absolute;
-  top: 33px;
-  width: 103%;
-  right: -1px;
-  height: 6px;
-} */
-
-.tab-button-node-footer {
-  padding: 5px;
+.tab-double-button-node-footer {
   border-radius: 52px;
   display: flex;
   margin-right: 10px;
-  border: solid 1px #585858;
+  height: 28.7px;
 }
 
 .node-footer-buttons-margin {
   margin-bottom: 10px;
 }
 
-.select-tab-button-node-footer button:hover {
-  box-shadow: none !important;
-}
-
-.tab-button-node-footer button:hover {
+.tab-double-button-node-footer button:hover {
   box-shadow: none !important;
 }
 
@@ -2850,16 +2816,4 @@ right: 5px; */
 .tab-button-node-footer:active {
   padding: 5px;
   border-radius: 52px !important;
-}
-.vote-area {
-  margin-left: 5px;
-  display: flex;
-  border: solid 1px #585858;
-  border-radius: 10px;
-  padding: 0 5px;
-  justify-content: center;
-  height: 33px;
-  align-items: center;
-  background: #414141;
-  margin-bottom: 7px;
 }
