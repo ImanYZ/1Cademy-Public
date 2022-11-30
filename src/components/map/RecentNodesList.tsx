@@ -81,7 +81,16 @@ const RecentNodesList = (props: any) => {
 
   return (
     <>
-      <FormControl id={props.id}>
+      <FormControl
+        id={props.id}
+        sx={{
+          "& fieldset": {
+            borderWidth: 1,
+            borderRadius: "16px",
+            borderColor: "rgba(88, 88, 88,.7)",
+          },
+        }}
+      >
         <Select
           MenuProps={{ id: "sortFilterMenu" }}
           // multiple

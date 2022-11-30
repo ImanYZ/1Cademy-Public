@@ -15,7 +15,7 @@
 }
 
 #ComLeaderboardMain.Minimized {
-  width: 31px;
+  width: 35px;
 }
 
 #ComLeaderboardContainer {
@@ -28,22 +28,12 @@
   background-color: #f0f0f0;
 }
 
-/* #ComLeaderboardContainer.ComLeaderboardContainerSelfVotes {
-  padding-left: 88px;
-}
-#ComLeaderboardContainer.ComLeaderboardContainerOthersVotes {
-  padding-left: 100px;
-}
-#ComLeaderboardContainer.ComLeaderboardContainerOthersMonthly {
-  padding-left: 109px;
-} */
-
 #ComLeaderboardMinimizer {
   position: relative;
   left: 0;
   top: 0;
-  width: 40px;
-  height: 90px;
+  width: 50px;
+  height: 86px;
   padding-right: 10px;
   border-radius: 10px 0px 0px 10px;
   background-color: rgb(31, 31, 31);
@@ -58,11 +48,7 @@
 }
 
 #ComLeaderbaordChanger {
-  /* position: absolute; */
-  /* top: 4px; */
-  /* left: 157px; */
   font-size: 25px;
-  /* text-align: center; */
 }
 
 #ComLeaderbaordChangerText {

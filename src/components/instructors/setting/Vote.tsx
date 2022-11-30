@@ -1,7 +1,7 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import StarIcon from "@mui/icons-material/Star";
-import { FilledInput, Grid, InputAdornment, Paper, Typography } from "@mui/material";
+import { FilledInput, Grid, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React from "react";
@@ -54,13 +54,6 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   type="number"
                   value={semester.votes.pointIncrementOnAgreement}
                   onChange={event => inputsHandler(event, "votes", "pointIncrementOnAgreement")}
-                  endAdornment={
-                    <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">
-                        {semester.votes.pointIncrementOnAgreement > 1 ? "points/vote" : "point/vote"}
-                      </InputAdornment>
-                    </Box>
-                  }
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
@@ -69,12 +62,12 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "150px",
+                    width: "70px",
                     borderBottom: "orange",
                   }}
                 />
-                &nbsp; by casting on other's proposals, which is in agreement with the instructors(s)' vote on the same
-                proposal.
+                &nbsp; by casting votes on others' proposals, which is in agreement with the instructors(s)' vote on the
+                same proposal.
               </Typography>
             </Box>
             <Box sx={{ display: "flex", flexWrap: "wrap", alignContent: "center", alignItems: "baseline" }}>
@@ -90,13 +83,6 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   type="number"
                   value={semester.votes.pointDecrementOnAgreement}
                   onChange={event => inputsHandler(event, "votes", "pointDecrementOnAgreement")}
-                  endAdornment={
-                    <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">
-                        {semester.votes.pointDecrementOnAgreement > 1 ? "points/vote" : "point/vote"}
-                      </InputAdornment>
-                    </Box>
-                  }
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
@@ -105,12 +91,12 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "150px",
+                    width: "70px",
                     borderBottom: "orange",
                   }}
                 />
-                &nbsp; by casting on other's proposals, which is in disagreement with the instructors(s)' vote on the
-                same proposal.
+                &nbsp; by casting votes on others' proposals, which is in disagreement with the instructors(s)' vote on
+                the same proposal.
               </Typography>
             </Box>
           </Box>
@@ -157,13 +143,6 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   type="number"
                   value={semester.votes.onReceiveVote}
                   onChange={event => inputsHandler(event, "votes", "onReceiveVote")}
-                  endAdornment={
-                    <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">
-                        {semester.votes.onReceiveVote > 1 ? "points/vote" : "point/vote"}
-                      </InputAdornment>
-                    </Box>
-                  }
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
@@ -172,11 +151,11 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "150px",
+                    width: "70px",
                     borderBottom: "orange",
                   }}
                 />
-                .
+                &nbsp;{semester.votes.onReceiveVote > 1 ? "points/vote" : "point/vote"}.
               </Typography>
             </Box>
             <Box>
@@ -204,13 +183,6 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   type="number"
                   value={semester.votes.onReceiveDownVote}
                   onChange={event => inputsHandler(event, "votes", "onReceiveDownVote")}
-                  endAdornment={
-                    <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">
-                        {semester.votes.onReceiveDownVote > 1 ? "points/vote" : "point/vote"}
-                      </InputAdornment>
-                    </Box>
-                  }
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
@@ -219,11 +191,11 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "150px",
+                    width: "70px",
                     borderBottom: "orange",
                   }}
                 />
-                .
+                &nbsp;{semester.votes.onReceiveDownVote > 1 ? "points/vote" : "point/vote"}.
               </Typography>
             </Box>
             <Box>
@@ -250,13 +222,13 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   type="number"
                   value={semester.votes.onReceiveStar}
                   onChange={event => inputsHandler(event, "votes", "onReceiveStar")}
-                  endAdornment={
-                    <Box style={{ marginBottom: "-18px" }}>
-                      <InputAdornment position="end">
-                        {semester.votes.onReceiveStar > 1 ? "points/vote" : "point/vote"}
-                      </InputAdornment>
-                    </Box>
-                  }
+                  // endAdornment={
+                  //   <Box style={{ marginBottom: "-18px" }}>
+                  //     <InputAdornment position="end">
+                  //       {semester.votes.onReceiveStar > 1 ? "points/vote" : "point/vote"}
+                  //     </InputAdornment>
+                  //   </Box>
+                  // }
                   aria-describedby="filled-weight-helper-text"
                   inputProps={{
                     "aria-label": "days",
@@ -265,11 +237,11 @@ const Vote: FC<Props> = ({ semester, inputsHandler }) => {
                   sx={{
                     paddingBottom: "10px",
                     height: "40px",
-                    width: "150px",
+                    width: "70px",
                     borderBottom: "orange",
                   }}
                 />
-                .
+                &nbsp;{semester.votes.onReceiveStar > 1 ? "points/vote" : "point/vote"}.
               </Typography>
             </Box>
           </Box>

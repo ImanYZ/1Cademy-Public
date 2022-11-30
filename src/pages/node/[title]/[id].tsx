@@ -34,6 +34,7 @@ interface Params extends ParsedUrlQuery {
   id: string;
   title: string;
 }
+
 export const getStaticProps: GetStaticProps<Props, Params> = async ({ params }) => {
   const nodeData = await getNodeData(params?.id || "");
   if (!nodeData) {
@@ -65,10 +66,10 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
   const paths = [{ params: { id: "", title: "" } }];
   if (process.env.NODE_ENV === "production") {
     const nodes = await getAllNodeParamsForStaticProps();
-    return { paths: nodes, fallback: true };
+    return { paths: nodes, fallback: "blocking" };
   }
 
-  return { paths, fallback: true };
+  return { paths, fallback: "blocking" };
 };
 
 const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) => {

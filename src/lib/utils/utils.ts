@@ -45,7 +45,12 @@ export function generateAlias(name?: string) {
     .replace(/[^a-z- ]/g, "")
     .trim()
     .replace(/ /g, "-")
-    .replace(/[-]+/g, "-");
+    .replace(/[-]+/g, "-")
+    .replace(/^-/, "")
+    .replace(/-$/, "")
+    .split("-")
+    .splice(0, 20)
+    .join("-");
   if (!alias.length) return "-";
   return alias;
 }
