@@ -225,7 +225,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           )}
 
           {props.openPart === "References" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <strong>References</strong>
 
               {props.references.map((reference: any, idx: number) => {
@@ -289,7 +289,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               })}
 
               {props.editable && (
-                <Box sx={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {!props.isNew && nodeBookState.selectedNode === props.identifier && (
                     <MemoizedMetaButton
                       onClick={choosingNewLinkedNode("Reference")}
@@ -322,13 +322,14 @@ const LinkingWords = (props: LinkingWordsProps) => {
         >
           {props.openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71
-            <Box sx={{ fontSize: "16px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}>
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (
-                  <div
-                    style={{
-                      margin: "5px 5px 0px 0px",
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
                     }}
                     key={props.identifier + "LinkTo" + tag.node + "DIV"}
                   >
@@ -341,17 +342,13 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       iClassName="local_offer"
                     />
                     {props.editable && (
-                      <div className="LinkDeleteButton">
-                        <MemoizedMetaButton
-                          onClick={deleteLink(idx, "Tag")}
-                          tooltip="Delete the link to this tag."
-                          tooltipPosition="right"
-                        >
-                          <DeleteForeverIcon sx={{ fontSize: "inherit" }} />
-                        </MemoizedMetaButton>
-                      </div>
+                      <Tooltip title="Delete the link to this tag." placement="right">
+                        <IconButton onClick={deleteLink(idx, "Tag")}>
+                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                        </IconButton>
+                      </Tooltip>
                     )}
-                  </div>
+                  </Box>
                 );
               })}
               {props.editable && props.openPart === "References" && (
