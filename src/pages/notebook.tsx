@@ -3252,6 +3252,9 @@ const Dashboard = ({}: DashboardProps) => {
                 right: "10px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
                 transition: "all 1s ease",
               }}
             >
@@ -3278,6 +3281,9 @@ const Dashboard = ({}: DashboardProps) => {
               right: "10px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+              },
               transition: "all 1s ease",
             }}
           >
@@ -3302,8 +3308,11 @@ const Dashboard = ({}: DashboardProps) => {
                 },
                 right: "10px",
                 zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 transition: "all 1s ease",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
               }}
             >
               {/* DEVTOOLS */}

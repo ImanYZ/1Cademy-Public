@@ -576,11 +576,11 @@
 /* --------------------------------------------- */
 /* LinkingWords styles */
 
-.LinkingWordsContainer {
+/* .LinkingWordsContainer {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 100%;
-}
+} */
 
 .ReferenceLink input {
   color: rgb(220, 220, 220);
@@ -612,10 +612,10 @@
   color: #00e676 !important;
 }
 
-.LearnBefore .MetaButton,
+/* .LearnBefore .MetaButton,
 .LearnAfter .MetaButton {
   width: 264px;
-}
+} */
 
 .LinkDeleteButton {
   float: right;
