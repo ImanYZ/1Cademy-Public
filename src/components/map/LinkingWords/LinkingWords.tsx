@@ -4,9 +4,9 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShareIcon from "@mui/icons-material/Share";
 import { Box, IconButton, Link, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
@@ -36,7 +36,7 @@ const separateURL = (text: string, url: string): [boolean, any] => {
       true,
       // eslint-disable-next-line react/jsx-key
       <Link href={matches[0]} target="_blank" rel="noreferrer" sx={{ fontSize: "14px" }}>
-        <ShareIcon fontSize="inherit" /> {text}
+        <LaunchIcon fontSize="inherit" sx={{ marginRight: "3px" }} /> {text}
       </Link>,
     ];
   } else {
