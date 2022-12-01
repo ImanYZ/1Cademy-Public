@@ -368,6 +368,11 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                           height: "46.31px",
                           marginLeft: "-14px",
                           zIndex: "99",
+                          borderRadius: "32px 0 0 32px ",
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground1
+                              : theme.palette.common.lightBackground1,
 
                           ":hover .MuiOutlinedInput-notchedOutline": {
                             borderColor: theme => theme.palette.common.orange,
