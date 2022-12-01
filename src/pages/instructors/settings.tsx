@@ -241,7 +241,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         });
         setRequestLoader(false);
         return;
-      } else if (questionProposalDateDiff > semester.days) {
+      } else if (questionProposalDateDiff > semester.days && semester.isQuestionProposalRequired) {
         setErrorState({
           ...initialErrorsState,
           questionProposalDate: true,
@@ -249,7 +249,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         });
         setRequestLoader(false);
         return;
-      } else if (questionProposalDateDiff <= 0) {
+      } else if (questionProposalDateDiff <= 0 && semester.isQuestionProposalRequired) {
         setErrorState({
           ...initialErrorsState,
           questionProposalDate: true,
@@ -258,8 +258,8 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setRequestLoader(false);
         return;
       } else if (
-        semester.nodeProposals.totalDaysOfCourse > semester.days ||
-        semester.nodeProposals.totalDaysOfCourse <= 0
+        (semester.nodeProposals.totalDaysOfCourse > semester.days || semester.nodeProposals.totalDaysOfCourse <= 0) &&
+        semester.isProposalRequired
       ) {
         setErrorState({
           ...initialErrorsState,
@@ -269,8 +269,9 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setRequestLoader(false);
         return;
       } else if (
-        semester.questionProposals.totalDaysOfCourse > semester.days ||
-        semester.questionProposals.totalDaysOfCourse <= 0
+        (semester.questionProposals.totalDaysOfCourse > semester.days ||
+          semester.questionProposals.totalDaysOfCourse <= 0) &&
+        semester.isQuestionProposalRequired
       ) {
         setErrorState({
           ...initialErrorsState,
