@@ -62,6 +62,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       onReceiveDownVote: 1,
       onReceiveStar: 1,
     },
+    isProposalRequired: false,
+    isQuestionProposalRequired: false,
+    isCastingVotesRequired: false,
+    isGettingVotesRequired: false,
   });
 
   useEffect(() => {
@@ -85,6 +89,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
                 endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-MM-DD"),
               },
               votes: semester.votes,
+              isProposalRequired: semester.isProposalRequired,
+              isQuestionProposalRequired: semester.isQuestionProposalRequired,
+              isCastingVotesRequired: semester.isCastingVotesRequired,
+              isGettingVotesRequired: semester.isGettingVotesRequired,
             };
           });
           setChapters(semester.syllabus);
@@ -170,6 +178,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     }
   };
 
+  const switchHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSemester({ ...semester, [event.target.name]: event.target.checked });
+  };
+
   const onSubmitHandler = async () => {
     try {
       setRequestLoader(true);
@@ -213,7 +225,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setErrorState({ ...initialErrorsState, days: true, errorText: `Total days should be greater than 0.` });
         setRequestLoader(false);
         return;
-      } else if (nodeProposalDateDiff > semester.days) {
+      } else if (nodeProposalDateDiff > semester.days && semester.isProposalRequired) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalDate: true,
@@ -221,7 +233,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         });
         setRequestLoader(false);
         return;
-      } else if (nodeProposalDateDiff <= 0) {
+      } else if (nodeProposalDateDiff <= 0 && semester.isProposalRequired) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalDate: true,
@@ -325,11 +337,16 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Proposal errorState={errorState} semester={semester} inputsHandler={inputsHandler} />
+          <Proposal
+            errorState={errorState}
+            semester={semester}
+            inputsHandler={inputsHandler}
+            switchHandler={switchHandler}
+          />
         </Grid>
       </Grid>
       <Grid container spacing={0} mt={5}>
-        <Vote semester={semester} inputsHandler={inputsHandler} />
+        <Vote semester={semester} inputsHandler={inputsHandler} switchHandler={switchHandler} />
       </Grid>
       <Box display="flex" justifyContent="space-between" alignItems="center" gap="10px" mt={3}>
         <LoadingButton
