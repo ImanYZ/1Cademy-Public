@@ -333,7 +333,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
               {props.editable && (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {!props.isNew && nodeBookState.selectedNode === props.identifier && (
+                  {nodeBookState.selectedNode === props.identifier && (
                     <MemoizedMetaButton
                       onClick={choosingNewLinkedNode("Reference")}
                       tooltip="Link to a reference node."
