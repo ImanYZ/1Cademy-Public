@@ -186,35 +186,42 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // Load all time reputation after load user
   useEffect(() => {
     if (user?.tagId && usersDictLoaded) {
-      loadReputationsData(db, false, "All Time", user.tagId, setReputationsDict, setReputationsLoaded);
+      return loadReputationsData(db, false, "All Time", user.tagId, setReputationsDict, setReputationsLoaded);
     }
   }, [db, user, usersDictLoaded]);
 
   // Load monthly reputation after load allTime reputation
   useEffect(() => {
     if (user?.tagId && reputationsLoaded) {
-      loadReputationsData(db, false, "Monthly", user.tagId, setReputationsMonthlyDict, setReputationsMonthlyLoaded);
+      return loadReputationsData(
+        db,
+        false,
+        "Monthly",
+        user.tagId,
+        setReputationsMonthlyDict,
+        setReputationsMonthlyLoaded
+      );
     }
   }, [db, reputationsLoaded, user]);
 
   // Load weekly reputation after load monthly reputation
   useEffect(() => {
     if (user?.tagId && reputationsMonthlyLoaded) {
-      loadReputationsData(db, false, "Weekly", user.tagId, setReputationsWeeklyDict, setReputationsWeeklyLoaded);
+      return loadReputationsData(db, false, "Weekly", user.tagId, setReputationsWeeklyDict, setReputationsWeeklyLoaded);
     }
   }, [db, reputationsMonthlyLoaded, user]);
 
   // Load others reputation after load weekly reputation
   useEffect(() => {
     if (user?.tagId && reputationsWeeklyLoaded) {
-      loadReputationsData(db, false, "Others", user.tagId, setReputationsOthersDict, setReputationsOthersLoaded);
+      return loadReputationsData(db, false, "Others", user.tagId, setReputationsOthersDict, setReputationsOthersLoaded);
     }
   }, [db, reputationsWeeklyLoaded, user]);
 
   // load othersMonthly reputation data after load other reputation
   useEffect(() => {
     if (user?.tagId && reputationsOthersLoaded) {
-      loadReputationsData(
+      return loadReputationsData(
         db,
         false,
         "Others Monthly",
@@ -321,6 +328,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
   useEffect(() => {
     if (usersOnlineStatusLoaded && props.usersStatus === "All Time") {
+      console.log(reputationsDict, "reputationsDict");
       loadReputationPoints(reputationsDict, props.usersStatus);
     }
   }, [usersOnlineStatusLoaded, reputationsDict, props.usersStatus, loadReputationPoints]);
