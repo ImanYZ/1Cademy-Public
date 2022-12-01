@@ -473,7 +473,6 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 />
                 days
               </Box>
-              <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
               <RecentNodesList
                 id="recentNodesList"
                 recentNodes={searchResults}
@@ -484,6 +483,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 sortDirection={sortDirection}
                 setSortDirection={onChangeSortDirection}
               />
+              <div>{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
             </div>
           </>
         )}
