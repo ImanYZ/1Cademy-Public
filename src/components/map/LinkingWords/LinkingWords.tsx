@@ -324,7 +324,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Reference")}>{urlRefLabel[1]}</IconButton>
+                        <IconButton>{urlRefLabel[1]}</IconButton>
                       </Tooltip>
                     )}
                   </Box>
