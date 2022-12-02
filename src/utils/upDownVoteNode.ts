@@ -1,10 +1,4 @@
-import {
-  admin,
-  checkRestartBatchWriteCounts,
-  commitBatch,
-  db,
-  MIN_ACCEPTED_VERSION_POINT_WEIGHT,
-} from "../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import { WriteBatch } from "firebase-admin/firestore";
 import {
   deleteTagCommunityAndTagsOfTags,
@@ -16,9 +10,8 @@ import {
   signalAllUserNodesChanges,
   updateReputation,
 } from ".";
-import { detach, doNeedToDeleteNode } from "./helpers";
+import { detach, doNeedToDeleteNode, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "./helpers";
 import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
-import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 
 export const setOrIncrementNotificationNums = async ({
   batch,

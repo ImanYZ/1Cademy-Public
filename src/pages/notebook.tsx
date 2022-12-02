@@ -40,6 +40,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { INodeVersion } from "src/types/INodeVersion";
 /* eslint-enable */
 import { INotificationNum } from "src/types/INotification";
 
@@ -67,7 +68,7 @@ import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
-import { NodeChanges } from "../knowledgeTypes";
+import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
@@ -102,7 +103,7 @@ import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodes
 import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
-import { doNeedToDeleteNode, isVersionApproved } from "../utils/helpers";
+import { doNeedToDeleteNode, isVersionApproved, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "../utils/helpers";
 
 type DashboardProps = {};
 
@@ -169,6 +170,7 @@ const Dashboard = ({}: DashboardProps) => {
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
+  const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1855,12 +1857,55 @@ const Dashboard = ({}: DashboardProps) => {
           const corrects = node.corrects + correctChange;
           const wrongs = node.wrongs + wrongChange;
 
+          if (node.tagIds && node.tagIds.includes(String(user?.tagId))) {
+            let reputation: number = correctChange;
+            setTimeout(async () => {
+              const { versionsColl } = getTypedCollections(db, node.nodeType);
+              if (versionsColl) {
+                const versionsQuery = query(versionsColl, where("node", "==", nodeId), where("deleted", "==", false));
+                const versionsData = await getDocs(versionsQuery);
+                let maxVersionRating: number = 0;
+                for (const doc of versionsData.docs) {
+                  const nodeVersion = doc.data() as INodeVersion;
+                  if (!nodeVersion.accepted) {
+                    continue;
+                  }
+                  const netVote: number = nodeVersion.corrects - nodeVersion.wrongs;
+                  if (maxVersionRating < netVote) {
+                    maxVersionRating = netVote;
+                  }
+                }
+                const signals: ReputationSignal[] = [];
+                for (const doc of versionsData.docs) {
+                  const types: string[] = ["Weekly", "Monthly", "All Time"];
+                  const nodeVersion = doc.data() as INodeVersion;
+                  if (nodeVersion.proposer != user?.uname) {
+                    types.push(...["Others Votes", "Others Monthly"]);
+                  }
+                  if (!nodeVersion.accepted) {
+                    continue;
+                  }
+                  let versionRatingChange =
+                    Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, nodeVersion.corrects - nodeVersion.wrongs) /
+                    maxVersionRating;
+                  versionRatingChange *= reputation;
+                  signals.push({
+                    reputation: versionRatingChange,
+                    type: types as any,
+                    uname: String(user?.uname),
+                  });
+                }
+                setReputationSignal(signals);
+              }
+            });
+          }
+
           return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
         });
       }
       event.currentTarget.blur();
     },
-    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts, setReputationSignal]
   );
 
   const wrongNode = useCallback(
@@ -3078,6 +3123,32 @@ const Dashboard = ({}: DashboardProps) => {
                 {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
                 <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
                 <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+                <Button
+                  onClick={() =>
+                    setReputationSignal([
+                      {
+                        uname: "1man",
+                        reputation: 1,
+                        type: ["All Time", "Weekly"],
+                      },
+                    ])
+                  }
+                >
+                  Test Increment Reputation
+                </Button>
+                <Button
+                  onClick={() =>
+                    setReputationSignal([
+                      {
+                        uname: "1man",
+                        reputation: -1,
+                        type: ["All Time", "Weekly"],
+                      },
+                    ])
+                  }
+                >
+                  Test Decrement Reputation
+                </Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
@@ -3120,6 +3191,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onClose={() => setOpenSidebar(null)}
                 reloadPermanentGrpah={reloadPermanentGraph}
                 user={user}
+                reputationSignal={reputationSignal}
                 reputation={reputation}
                 theme={settings.theme}
                 setOpenSideBar={onOpenSideBar}

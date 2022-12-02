@@ -1234,82 +1234,87 @@ export const updateNodeContributions = async ({
   accepted,
   contribution,
 }: IUpdateNodeContributionParam) => {
-  await db.runTransaction(async t => {
-    const nodeDoc = await t.get(db.collection("nodes").doc(nodeId));
-    const nodeRef = db.collection("nodes").doc(nodeDoc.id);
-    const nodeData = nodeDoc.data() as INode;
+  let batch = db.batch();
+  let writeCounts: number = 0;
 
-    const userDoc = await t.get(db.collection("users").doc(uname));
-    const userRef = db.collection("users").doc(userDoc.id);
-    const userData = userDoc.data() as IUser;
+  const nodeDoc = await db.collection("nodes").doc(nodeId).get();
+  const nodeRef = db.collection("nodes").doc(nodeDoc.id);
+  const nodeData = nodeDoc.data() as INode;
 
-    const _institutations = await t.get(db.collection("institutions").where("name", "==", userData.deInstit).limit(1));
-    const institutionRef = db.collection("institutions").doc(_institutations.docs[0].id);
-    const institutionData = _institutations.docs[0].data() as IInstitution;
+  const userDoc = await db.collection("users").doc(uname).get();
+  const userRef = db.collection("users").doc(userDoc.id);
+  const userData = userDoc.data() as IUser;
 
-    // if version is not accepted we don't need to calculate anything
-    if (!accepted) {
-      return;
-    }
+  const _institutations = await db.collection("institutions").where("name", "==", userData.deInstit).limit(1).get();
+  const institutionRef = db.collection("institutions").doc(_institutations.docs[0].id);
+  const institutionData = _institutations.docs[0].data() as IInstitution;
 
-    // update contributors
-    const contribNames: string[] = nodeData.contribNames || [];
-    if (contribNames.indexOf(userData.uname) === -1) {
-      contribNames.push(userData.uname);
-    }
+  // if version is not accepted we don't need to calculate anything
+  if (!accepted) {
+    return;
+  }
 
-    const contributors: {
-      [uname: string]: {
-        chooseUname: boolean;
-        fullname: string;
-        imageUrl: string;
-        reputation: number;
-      };
-    } = nodeData.contributors || {};
-    if (!contributors.hasOwnProperty(userData.uname)) {
-      contributors[userData.uname] = {
-        chooseUname: userData.chooseUname,
-        fullname: `${userData.fName} ${userData.lName}`,
-        imageUrl: userData.imageUrl,
-        reputation: 0,
-      };
-    }
-    contributors[userData.uname].reputation += contribution;
+  // update contributors
+  const contribNames: string[] = nodeData.contribNames || [];
+  if (contribNames.indexOf(userData.uname) === -1) {
+    contribNames.push(userData.uname);
+  }
 
-    // update institutions
-    const institNames: string[] = nodeData.institNames || [];
-    if (institNames.indexOf(userData.deInstit) === -1) {
-      institNames.push(userData.deInstit);
-    }
+  const contributors: {
+    [uname: string]: {
+      chooseUname: boolean;
+      fullname: string;
+      imageUrl: string;
+      reputation: number;
+    };
+  } = nodeData.contributors || {};
+  if (!contributors.hasOwnProperty(userData.uname)) {
+    contributors[userData.uname] = {
+      chooseUname: userData.chooseUname,
+      fullname: `${userData.fName} ${userData.lName}`,
+      imageUrl: userData.imageUrl,
+      reputation: 0,
+    };
+  }
+  contributors[userData.uname].reputation += contribution;
 
-    const institutions: {
-      [institutionName: string]: {
-        reputation: number;
-      };
-    } = nodeData.institutions || {};
-    if (!institutions.hasOwnProperty(userData.deInstit)) {
-      institutions[userData.deInstit] = {
-        reputation: 0,
-      };
-    }
-    institutions[userData.deInstit].reputation += contribution;
+  // update institutions
+  const institNames: string[] = nodeData.institNames || [];
+  if (institNames.indexOf(userData.deInstit) === -1) {
+    institNames.push(userData.deInstit);
+  }
 
-    t.update(nodeRef, {
-      contributors,
-      contribNames,
-      institutions,
-      institNames,
-    });
+  const institutions: {
+    [institutionName: string]: {
+      reputation: number;
+    };
+  } = nodeData.institutions || {};
+  if (!institutions.hasOwnProperty(userData.deInstit)) {
+    institutions[userData.deInstit] = {
+      reputation: 0,
+    };
+  }
+  institutions[userData.deInstit].reputation += contribution;
 
-    // user totalPoints
-    t.update(userRef, {
-      totalPoints: userData.totalPoints + contribution,
-    });
-    // institution totalPoints
-    t.update(institutionRef, {
-      totalPoints: institutionData.totalPoints + contribution,
-    });
+  batch.update(nodeRef, {
+    contributors,
+    contribNames,
+    institutions,
+    institNames,
   });
+  [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+  // user totalPoints
+  batch.update(userRef, {
+    totalPoints: userData.totalPoints + contribution,
+  });
+  [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+  // institution totalPoints
+  batch.update(institutionRef, {
+    totalPoints: institutionData.totalPoints + contribution,
+  });
+  [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 };
 
 export const signalNodeDeleteToTypesense = async ({ nodeId }: { nodeId: string }) => {

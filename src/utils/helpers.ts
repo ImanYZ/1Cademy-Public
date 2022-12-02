@@ -13,6 +13,8 @@ export const firstWeekMonthDays = (thisDate?: any) => {
   return { firstWeekDay, firstMonthDay };
 };
 
+export const MIN_ACCEPTED_VERSION_POINT_WEIGHT = 0.1;
+
 export type DetachCallback = () => Promise<void>;
 
 // we defined it like this because, we need to control behaviour of this in tests
