@@ -67,7 +67,7 @@ import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
-import { NodeChanges } from "../knowledgeTypes";
+import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
@@ -85,6 +85,7 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
+  generateReputationSignal,
   getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
@@ -169,6 +170,7 @@ const Dashboard = ({}: DashboardProps) => {
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
+  const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1855,12 +1857,14 @@ const Dashboard = ({}: DashboardProps) => {
           const corrects = node.corrects + correctChange;
           const wrongs = node.wrongs + wrongChange;
 
+          generateReputationSignal(db, node, user, correctChange, "Correct", nodeId, setReputationSignal);
+
           return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
         });
       }
       event.currentTarget.blur();
     },
-    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts]
+    [nodeBookState.choosingNode, nodeBookDispatch, getMapGraph, setNodeParts, setReputationSignal]
   );
 
   const wrongNode = useCallback(
@@ -1882,6 +1886,12 @@ const Dashboard = ({}: DashboardProps) => {
         const wrongChange = wrong ? -1 : 1;
         const _corrects = corrects + correctChange;
         const _wrongs = wrongs + wrongChange;
+
+        setGraph(graph => {
+          const node = graph.nodes[nodeId];
+          generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
+          return graph;
+        });
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
         if (willRemoveNode) {
@@ -3078,6 +3088,32 @@ const Dashboard = ({}: DashboardProps) => {
                 {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
                 <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
                 <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+                <Button
+                  onClick={() =>
+                    setReputationSignal([
+                      {
+                        uname: "1man",
+                        reputation: 1,
+                        type: ["All Time", "Weekly"],
+                      },
+                    ])
+                  }
+                >
+                  Test Increment Reputation
+                </Button>
+                <Button
+                  onClick={() =>
+                    setReputationSignal([
+                      {
+                        uname: "1man",
+                        reputation: -1,
+                        type: ["All Time", "Weekly"],
+                      },
+                    ])
+                  }
+                >
+                  Test Decrement Reputation
+                </Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
@@ -3120,6 +3156,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onClose={() => setOpenSidebar(null)}
                 reloadPermanentGrpah={reloadPermanentGraph}
                 user={user}
+                reputationSignal={reputationSignal}
                 reputation={reputation}
                 theme={settings.theme}
                 setOpenSideBar={onOpenSideBar}
@@ -3129,6 +3166,7 @@ const Dashboard = ({}: DashboardProps) => {
                 bookmarkUpdatesNum={bookmarkUpdatesNum}
                 pendingProposalsNum={pendingProposalsNum}
                 openSidebar={openSidebar}
+                windowHeight={windowHeight}
               />
 
               <MemoizedBookmarksSidebar
@@ -3218,13 +3256,7 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar
-                    ? "7px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 7}px`
-                    : window.innerWidth > 375
-                    ? `${innerHeight * 0.4 + 7}px`
-                    : `${innerHeight * 0.5 + 7}px`,
+                  xs: !openSidebar ? "7px" : `${innerHeight * 0.35 + 7}px`,
                   md: "7px",
                 },
 
@@ -3240,13 +3272,7 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar
-                    ? "10px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 10}px`
-                    : window.innerWidth > 375
-                    ? `${innerHeight * 0.4 + 10}px`
-                    : `${innerHeight * 0.5 + 10}px`,
+                  xs: !openSidebar ? "10px" : `${innerHeight * 0.35 + 10}px`,
                   md: "10px",
                 },
                 right: "10px",
@@ -3269,13 +3295,7 @@ const Dashboard = ({}: DashboardProps) => {
             sx={{
               position: "fixed",
               top: {
-                xs: !openSidebar
-                  ? "60px"
-                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  ? `${innerHeight * 0.35 + 65}px`
-                  : window.innerWidth > 375
-                  ? `${innerHeight * 0.4 + 65}px`
-                  : `${innerHeight * 0.5 + 65}px`,
+                xs: !openSidebar ? "60px" : `${innerHeight * 0.35 + 65}px`,
                 md: "60px",
               },
               right: "10px",
@@ -3297,13 +3317,8 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar
-                    ? "110px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 120}px`
-                    : window.innerWidth > 375
-                    ? `${innerHeight * 0.4 + 120}px`
-                    : `${innerHeight * 0.5 + 120}px`,
+                  xs: !openSidebar ? "110px" : `${innerHeight * 0.35 + 120}px`,
+
                   md: "110px",
                 },
                 right: "10px",

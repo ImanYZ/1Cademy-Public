@@ -1,7 +1,11 @@
 import dagre from "dagre";
-import { collection, Firestore, onSnapshot, query, where } from "firebase/firestore";
+import { collection, Firestore, getDocs, onSnapshot, query, where } from "firebase/firestore";
+import { ReputationSignal } from "src/knowledgeTypes";
+import { INodeVersion } from "src/types/INodeVersion";
+import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
 import { EdgesData, FullNodeData, FullNodesData, NodeFireStore } from "../../nodeBookTypes";
+import { getTypedCollections } from "./getTypedCollections";
 
 // import { FullNodeData } from "../../noteBookTypes";
 
@@ -1279,6 +1283,58 @@ export const applyAllTagChanges = (
     }
   }
   return oldAllTags;
+};
+
+export const generateReputationSignal = (
+  db: Firestore,
+  node: any,
+  user: any,
+  change: number,
+  changeType: "Correct" | "Wrong",
+  nodeId: string,
+  setReputationSignal: any
+) => {
+  if (node.tagIds && node.tagIds.includes(String(user?.tagId))) {
+    let reputation: number = change * (changeType === "Wrong" ? -1 : 1);
+    setTimeout(async () => {
+      const { versionsColl } = getTypedCollections(db, node.nodeType);
+      if (versionsColl) {
+        const versionsQuery = query(versionsColl, where("node", "==", nodeId), where("deleted", "==", false));
+        const versionsData = await getDocs(versionsQuery);
+        let maxVersionRating: number = 1;
+        for (const doc of versionsData.docs) {
+          const nodeVersion = doc.data() as INodeVersion;
+          if (!nodeVersion.accepted) {
+            continue;
+          }
+          const netVote: number = nodeVersion.corrects - nodeVersion.wrongs;
+          if (maxVersionRating < netVote) {
+            maxVersionRating = netVote;
+          }
+        }
+        const signals: ReputationSignal[] = [];
+        for (const doc of versionsData.docs) {
+          const types: string[] = ["Weekly", "Monthly", "All Time"];
+          const nodeVersion = doc.data() as INodeVersion;
+          if (nodeVersion.proposer != user?.uname) {
+            types.push(...["Others Votes", "Others Monthly"]);
+          }
+          if (!nodeVersion.accepted) {
+            continue;
+          }
+          let versionRatingChange =
+            Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, nodeVersion.corrects - nodeVersion.wrongs) / maxVersionRating;
+          versionRatingChange *= reputation;
+          signals.push({
+            reputation: versionRatingChange,
+            type: types as any,
+            uname: String(nodeVersion.proposer),
+          });
+        }
+        setReputationSignal(signals);
+      }
+    });
+  }
 };
 
 {

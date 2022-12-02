@@ -29,9 +29,9 @@ const common = {
   darkGrayBackground: "#28282A",
   gray: "#D3D3D3",
   borderColor: "#585858",
-  darkBackground1: "#141414",
+  darkBackground1: "#302f2f",
   lightBackground1: "#E7E7E7",
-  darkBackground2: "#313131",
+  darkBackground2: "#525151",
   lightBackground2: "#dbd9d9",
 };
 

@@ -1,6 +1,6 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Badge, Box, Button, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import { Badge, Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -8,7 +8,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
-import { Reputation, User, UserTheme } from "../../../../knowledgeTypes";
+import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
@@ -32,41 +32,29 @@ type MainSidebarProps = {
   bookmarkUpdatesNum: number;
   pendingProposalsNum: number;
   openSidebar?: OpenSidebar;
+  windowHeight: number;
+  reputationSignal: ReputationSignal[];
 };
 
-// TODO:
-// create a utils function to detect OS and Browser
-// for using cross browser functionality issues
-const isSafari =
-  typeof window === "undefined" ? false : /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
-
-type IToolbarProps = {
-  isMenuOpen: boolean;
-  setIsMenuOpen: (isMenuOpen: boolean) => void;
-  user: any;
-  reloadPermanentGrpah: () => void;
-  selectedUser: any;
-  setOpenSideBar: (openSidebar: OpenSidebar) => void;
-  theme: string;
-  reputation: any;
-  uncheckedNotificationsNum: number;
-  bookmarkUpdatesNum: number;
-  pendingProposalsNum: number;
-};
-
-const Toolbar = ({
-  isMenuOpen,
-  setIsMenuOpen,
-  user,
+export const ToolbarSidebar = ({
+  open,
+  onClose,
   reloadPermanentGrpah,
-  selectedUser,
-  setOpenSideBar,
-  theme,
+  user,
   reputation,
+  theme,
+  setOpenSideBar,
+  selectedUser,
   uncheckedNotificationsNum,
   bookmarkUpdatesNum,
   pendingProposalsNum,
-}: IToolbarProps) => {
+  openSidebar,
+  windowHeight,
+  reputationSignal,
+}: MainSidebarProps) => {
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const isMenuOpen = nodeBookState.isMenuOpen;
+
   const db = getFirestore();
 
   const onOpenSidebarLog = useCallback(
@@ -116,16 +104,15 @@ const Toolbar = ({
     setAnchorEl(null);
   };
 
-  const gapUsersBtwOptions = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 50 : 0;
+  const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 40 : 0;
 
-  const safariOffset = 400 + gapUsersBtwOptions;
-  const chromeOffset = 375 + gapUsersBtwOptions;
+  const firstBoxHeight = 375 + instructorsButtonHeight;
 
-  const [leaderboardType, setLeaderboardType] = useState<UsersStatus>("Weekly");
+  const [leaderBoardType, setLeaderBoardType] = useState<UsersStatus>("Weekly");
 
-  const changeLeaderboard = useCallback(
+  const changeLeaderBoard = useCallback(
     async (lBType: any, username: string) => {
-      setLeaderboardType(lBType);
+      setLeaderBoardType(lBType);
       setAnchorEl(null);
 
       await addDoc(collection(db, "userLeaderboardLog"), {
@@ -141,147 +128,100 @@ const Toolbar = ({
     if (!user) return [];
 
     return lBTypes.map(lBType => {
-      return { label: lBType, choose: () => changeLeaderboard(lBType, user.uname) };
+      return { label: lBType, choose: () => changeLeaderBoard(lBType, user.uname) };
     });
-  }, [changeLeaderboard, user]);
+  }, [changeLeaderBoard, user]);
 
-  return (
-    <Box
-      className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
-      sx={{
-        overflow: "hidden",
-        display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
-        "& .list-tmp": {
-          alignItems: isMenuOpen ? "flex-start" : undefined,
-        },
-        ":hover": {
-          "& .list-tmp": {
-            alignItems: "flex-start",
-          },
-        },
-      }}
-    >
-      {/* IMPORTANT : if you modify the height you must modify the Box below  */}
+  const setIsMenuOpen = useCallback(
+    (value: boolean) => {
+      nodeBookDispatch({ type: "setIsMenuOpen", payload: value });
+    },
+    [nodeBookDispatch]
+  );
 
+  const toolbarContentMemoized = useMemo(() => {
+    return (
       <Box
+        className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "10px",
-          height: isSafari ? safariOffset : chromeOffset,
+          overflow: "hidden",
+          display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
+          "& .list-tmp": {
+            alignItems: isMenuOpen ? "flex-start" : undefined,
+          },
+          ":hover": {
+            "& .list-tmp": {
+              alignItems: "flex-start",
+            },
+          },
         }}
       >
-        <Box sx={{ marginTop: "20px" }}>
-          <MemoizedMetaButton>
-            <Box sx={{ display: "grid", placeItems: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
-            </Box>
-          </MemoizedMetaButton>
-        </Box>
-
-        {/* User info button */}
-        <MemoizedUserStatusSettings
-          user={user}
-          totalPoints={reputation?.totalPoints || 0}
-          totalPositives={reputation?.positives || 0}
-          totalNegatives={reputation?.negatives || 0}
-          imageUrl={user.imageUrl || ""}
-          online={true} // TODO: get online state from useUserState useEffect
-          sx={{ display: isMenuOpen ? "flex" : "", alignItems: "center" }}
-          onClick={onOpenUserSettingsSidebar}
-        />
-
-        {/* Searcher button */}
-        <Button
-          // className="SearchBarIconToolbar"
-          onClick={() => {
-            onOpenSidebar("SEARCHER_SIDEBAR", "Search");
-            setIsMenuOpen(false);
-          }}
+        <Stack
+          spacing={"10px"}
+          alignItems="center"
+          direction="column"
           sx={{
-            width: "100%",
-            borderRadius: "0px 50px 50px 0px",
-            backgroundColor: "rgba(255, 152, 0, 1)",
-            color: "white",
-            lineHeight: "19px",
-            height: "40px",
-            textAlign: "left",
-            alignSelf: "flex-start",
-            display: "flex",
-            gap: isMenuOpen ? "6px" : "6px",
-            padding: "6px 0px",
-            paddingLeft: isMenuOpen ? "20px" : "0px",
-            ":hover": {
+            height: firstBoxHeight,
+          }}
+        >
+          <Box sx={{ marginTop: "20px" }}>
+            <MemoizedMetaButton>
+              <Box sx={{ display: "grid", placeItems: "center" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+              </Box>
+            </MemoizedMetaButton>
+          </Box>
+
+          {/* User info button */}
+          <MemoizedUserStatusSettings
+            user={user}
+            totalPoints={reputation?.totalPoints || 0}
+            totalPositives={reputation?.positives || 0}
+            totalNegatives={reputation?.negatives || 0}
+            imageUrl={user.imageUrl || ""}
+            online={true} // TODO: get online state from useUserState useEffect
+            sx={{ display: isMenuOpen ? "flex" : "", alignItems: "center" }}
+            onClick={onOpenUserSettingsSidebar}
+          />
+
+          {/* Searcher button */}
+          <Button
+            // className="SearchBarIconToolbar"
+            onClick={() => {
+              onOpenSidebar("SEARCHER_SIDEBAR", "Search");
+              setIsMenuOpen(false);
+            }}
+            sx={{
+              width: "100%",
+              borderRadius: "0px 50px 50px 0px",
               backgroundColor: "rgba(255, 152, 0, 1)",
-            },
-          }}
-        >
-          <Box
-            className="toolbarBadge"
-            sx={{
+              color: "white",
+              lineHeight: "19px",
+              height: "40px",
+              textAlign: "left",
+              alignSelf: "flex-start",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "19px",
+              gap: isMenuOpen ? "6px" : "6px",
+              padding: "6px 0px",
+              paddingLeft: isMenuOpen ? "20px" : "0px",
+              ":hover": {
+                backgroundColor: "rgba(255, 152, 0, 1)",
+              },
             }}
           >
-            🔍
-          </Box>
-
-          <Box
-            component="span"
-            className="toolbarDescription"
-            sx={{
-              fontSize: "15px",
-              lineHeight: isMenuOpen ? "16px" : "0",
-              height: isMenuOpen ? "24px" : "0",
-              overflow: "hidden",
-              visibility: isMenuOpen ? "visible" : "hidden",
-              transition: isMenuOpen
-                ? "visibility 1s, line-height 1s, height 1s"
-                : "visibility 0s, line-height 0s, height 0s",
-              width: isMenuOpen ? "100px" : "0",
-              display: isMenuOpen ? "flex" : "block",
-              alignItems: "center",
-              textAlign: "center",
-            }}
-          >
-            Search
-          </Box>
-        </Button>
-
-        {/* Notifications button */}
-        <MemoizedMetaButton
-          onClick={() => {
-            onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
-            setIsMenuOpen(false);
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "5px",
-              height: "30px",
-            }}
-          >
-            <Badge
+            <Box
               className="toolbarBadge"
-              badgeContent={uncheckedNotificationsNum ?? 0}
-              color="error"
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
               sx={{
-                wordBreak: "normal",
-                padding: "1px",
-                marginLeft: isMenuOpen ? "20px" : "0px",
-                color: "ButtonHighlight",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "19px",
               }}
             >
-              🔔
-            </Badge>
+              🔍
+            </Box>
+
             <Box
               component="span"
               className="toolbarDescription"
@@ -297,105 +237,18 @@ const Toolbar = ({
                 width: isMenuOpen ? "100px" : "0",
                 display: isMenuOpen ? "flex" : "block",
                 alignItems: "center",
+                textAlign: "center",
               }}
             >
-              Notifications
+              Search
             </Box>
-          </Box>
-        </MemoizedMetaButton>
+          </Button>
 
-        {/* Bookmarks button */}
-        <MemoizedMetaButton
-          onClick={() => {
-            onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
-            setIsMenuOpen(false);
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
-            <Badge
-              className="toolbarBadge"
-              badgeContent={bookmarkUpdatesNum ?? 0}
-              color="error"
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
-              sx={{
-                wordBreak: "normal",
-                padding: "1px",
-                marginLeft: isMenuOpen ? "20px" : "0px",
-                color: "ButtonHighlight",
-              }}
-            >
-              🔖
-            </Badge>
-            <Box
-              component="span"
-              className="toolbarDescription"
-              sx={{
-                fontSize: "15px",
-                lineHeight: isMenuOpen ? "16px" : "0",
-                height: isMenuOpen ? "24px" : "0",
-                overflow: "hidden",
-                visibility: isMenuOpen ? "visible" : "hidden",
-                transition: isMenuOpen
-                  ? "visibility 1s, line-height 1s, height 1s"
-                  : "visibility 0s, line-height 0s, height 0s",
-                width: isMenuOpen ? "100px" : "0",
-                display: isMenuOpen ? "flex" : "block",
-                alignItems: "center",
-              }}
-            >
-              Bookmarks
-            </Box>
-          </Box>
-        </MemoizedMetaButton>
-
-        {/* Pending proposal sidebar */}
-        <MemoizedMetaButton
-          onClick={() => {
-            onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
-            setIsMenuOpen(false);
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
-            <Badge
-              className="toolbarBadge"
-              badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
-              color="error"
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
-              sx={{
-                padding: "1px",
-                wordBreak: "normal",
-                marginLeft: isMenuOpen ? "20px" : "0px",
-                color: "ButtonHighlight",
-              }}
-            >
-              ✏️
-            </Badge>
-            <Box
-              component="span"
-              className="toolbarDescription"
-              sx={{
-                fontSize: "15px",
-                lineHeight: isMenuOpen ? "16px" : "0",
-                height: isMenuOpen ? "24px" : "0",
-                overflow: "hidden",
-                visibility: isMenuOpen ? "visible" : "hidden",
-                transition: isMenuOpen
-                  ? "visibility 1s, line-height 1s, height 1s"
-                  : "visibility 0s, line-height 0s, height 0s",
-                width: isMenuOpen ? "100px" : "0",
-                display: isMenuOpen ? "flex" : "block",
-                alignItems: "center",
-              }}
-            >
-              Pending List
-            </Box>
-          </Box>
-        </MemoizedMetaButton>
-        {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
+          {/* Notifications button */}
           <MemoizedMetaButton
             onClick={() => {
-              if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
-              if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+              onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
+              setIsMenuOpen(false);
             }}
           >
             <Box
@@ -407,56 +260,136 @@ const Toolbar = ({
                 height: "30px",
               }}
             >
-              <Box
-                className="LeaderbaordIcon toolbarBadge"
+              <Badge
+                className="toolbarBadge"
+                badgeContent={uncheckedNotificationsNum ?? 0}
+                color="error"
+                anchorOrigin={{ vertical: "top", horizontal: "left" }}
                 sx={{
-                  fontSize: "20px",
+                  wordBreak: "normal",
+                  padding: "1px",
+                  marginLeft: isMenuOpen ? "20px" : "0px",
+                  color: "ButtonHighlight",
+                }}
+              >
+                🔔
+              </Badge>
+              <Box
+                component="span"
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  lineHeight: isMenuOpen ? "16px" : "0",
+                  height: isMenuOpen ? "24px" : "0",
+                  overflow: "hidden",
+                  visibility: isMenuOpen ? "visible" : "hidden",
+                  transition: isMenuOpen
+                    ? "visibility 1s, line-height 1s, height 1s"
+                    : "visibility 0s, line-height 0s, height 0s",
+                  width: isMenuOpen ? "100px" : "0",
+                  display: isMenuOpen ? "flex" : "block",
+                  alignItems: "center",
+                }}
+              >
+                Notifications
+              </Box>
+            </Box>
+          </MemoizedMetaButton>
+
+          {/* Bookmarks button */}
+          <MemoizedMetaButton
+            onClick={() => {
+              onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
+              setIsMenuOpen(false);
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
+              <Badge
+                className="toolbarBadge"
+                badgeContent={bookmarkUpdatesNum ?? 0}
+                color="error"
+                anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                sx={{
+                  wordBreak: "normal",
+                  padding: "1px",
+                  marginLeft: isMenuOpen ? "20px" : "0px",
+                  color: "ButtonHighlight",
+                }}
+              >
+                🔖
+              </Badge>
+              <Box
+                component="span"
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  lineHeight: isMenuOpen ? "16px" : "0",
+                  height: isMenuOpen ? "24px" : "0",
+                  overflow: "hidden",
+                  visibility: isMenuOpen ? "visible" : "hidden",
+                  transition: isMenuOpen
+                    ? "visibility 1s, line-height 1s, height 1s"
+                    : "visibility 0s, line-height 0s, height 0s",
+                  width: isMenuOpen ? "100px" : "0",
+                  display: isMenuOpen ? "flex" : "block",
+                  alignItems: "center",
+                }}
+              >
+                Bookmarks
+              </Box>
+            </Box>
+          </MemoizedMetaButton>
+
+          {/* Pending proposal sidebar */}
+          <MemoizedMetaButton
+            onClick={() => {
+              onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
+              setIsMenuOpen(false);
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
+              <Badge
+                className="toolbarBadge"
+                badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
+                color="error"
+                anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                sx={{
                   padding: "1px",
                   wordBreak: "normal",
                   marginLeft: isMenuOpen ? "20px" : "0px",
                   color: "ButtonHighlight",
                 }}
               >
-                🎓
-              </Box>
-
+                ✏️
+              </Badge>
               <Box
                 component="span"
-                className="toolbarButtonDescription"
+                className="toolbarDescription"
                 sx={{
                   fontSize: "15px",
                   lineHeight: isMenuOpen ? "16px" : "0",
-                  height: isMenuOpen ? "41px" : "0",
-                  width: isMenuOpen ? "100px" : "0",
+                  height: isMenuOpen ? "24px" : "0",
                   overflow: "hidden",
                   visibility: isMenuOpen ? "visible" : "hidden",
                   transition: isMenuOpen
-                    ? "visibility 1s, line-height 1s, height 1s;"
+                    ? "visibility 1s, line-height 1s, height 1s"
                     : "visibility 0s, line-height 0s, height 0s",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "flex-start",
-                  flexDirection: "column",
+                  width: isMenuOpen ? "100px" : "0",
+                  display: isMenuOpen ? "flex" : "block",
+                  alignItems: "center",
                 }}
               >
-                <div
-                  id=""
-                  style={{
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    maxWidth: "90px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Dashboard
-                </div>
+                Pending List
               </Box>
             </Box>
           </MemoizedMetaButton>
-        )}
-        {user?.tag && (
-          <>
-            <MemoizedMetaButton onClick={(e: any) => onOpenLeaderboardOptions(e)}>
+          {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
+            <MemoizedMetaButton
+              onClick={() => {
+                if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
+                if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",
@@ -476,7 +409,7 @@ const Toolbar = ({
                     color: "ButtonHighlight",
                   }}
                 >
-                  🏆
+                  🎓
                 </Box>
 
                 <Box
@@ -507,88 +440,167 @@ const Toolbar = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {user.tag}
-                  </div>
-                  <div
-                    id=""
-                    style={{
-                      fontSize: "12px",
-                      maxWidth: "90px",
-                      textOverflow: "ellipsis",
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {leaderboardType ? leaderboardType : "Leaderboard"}
+                    Dashboard
                   </div>
                 </Box>
               </Box>
             </MemoizedMetaButton>
-            {
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={onCloseLeaderBoardOptions}
-                MenuListProps={{
-                  "aria-labelledby": "basic-button",
-                }}
-              >
-                {choices.map(choice => {
-                  return (
-                    <MenuItem key={choice.label} onClick={choice.choose}>
-                      {choice.label}
-                    </MenuItem>
-                  );
-                })}
-              </Menu>
-            }
-          </>
-        )}
+          )}
+          {user?.tag && (
+            <>
+              <MemoizedMetaButton onClick={(e: any) => onOpenLeaderboardOptions(e)}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "5px",
+                    height: "30px",
+                  }}
+                >
+                  <Box
+                    className="LeaderbaordIcon toolbarBadge"
+                    sx={{
+                      fontSize: "20px",
+                      padding: "1px",
+                      wordBreak: "normal",
+                      marginLeft: isMenuOpen ? "20px" : "0px",
+                      color: "ButtonHighlight",
+                    }}
+                  >
+                    🏆
+                  </Box>
+
+                  <Box
+                    component="span"
+                    className="toolbarButtonDescription"
+                    sx={{
+                      fontSize: "15px",
+                      lineHeight: isMenuOpen ? "16px" : "0",
+                      height: isMenuOpen ? "41px" : "0",
+                      width: isMenuOpen ? "100px" : "0",
+                      overflow: "hidden",
+                      visibility: isMenuOpen ? "visible" : "hidden",
+                      transition: isMenuOpen
+                        ? "visibility 1s, line-height 1s, height 1s;"
+                        : "visibility 0s, line-height 0s, height 0s",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <div
+                      id=""
+                      style={{
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        maxWidth: "90px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {user.tag}
+                    </div>
+                    <div
+                      id=""
+                      style={{
+                        fontSize: "12px",
+                        maxWidth: "90px",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {leaderBoardType ? leaderBoardType : "Leaderboard"}
+                    </div>
+                  </Box>
+                </Box>
+              </MemoizedMetaButton>
+              {
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={onCloseLeaderBoardOptions}
+                  MenuListProps={{
+                    "aria-labelledby": "basic-button",
+                  }}
+                >
+                  {choices.map(choice => {
+                    return (
+                      <MenuItem key={choice.label} onClick={choice.choose}>
+                        {choice.label}
+                      </MenuItem>
+                    );
+                  })}
+                </Menu>
+              }
+            </>
+          )}
+        </Stack>
+
+        <Stack
+          spacing={"10px"}
+          direction="column"
+          sx={{
+            height: `calc(${windowHeight}px - ${firstBoxHeight}px)`,
+            paddingBottom: "20px",
+          }}
+        >
+          {user?.tag && leaderBoardType && (
+            <UsersStatusList
+              usersStatus={leaderBoardType}
+              reloadPermanentGraph={reloadPermanentGrpah}
+              setOpenSideBar={setOpenSideBar}
+              reputationSignal={reputationSignal}
+              sx={{
+                // display: isMenuOpen ? "flex" : "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
+            />
+          )}
+        </Stack>
       </Box>
+    );
+  }, [
+    anchorEl,
+    bookmarkUpdatesNum,
+    choices,
+    firstBoxHeight,
+    isMenuOpen,
+    leaderBoardType,
+    onOpenSidebar,
+    onOpenUserSettingsSidebar,
+    pendingProposalsLoaded,
+    pendingProposalsNum,
+    reloadPermanentGrpah,
+    reputation?.negatives,
+    reputation?.positives,
+    reputation?.totalPoints,
+    setIsMenuOpen,
+    setOpenSideBar,
+    theme,
+    uncheckedNotificationsNum,
+    user,
+    windowHeight,
+    reputationSignal,
+  ]);
 
-      <Box sx={{ height: `calc(100vh - ${isSafari ? safariOffset : chromeOffset}px)`, paddingBottom: "20px" }}>
-        {user?.tag && leaderboardType && (
-          <UsersStatusList
-            usersStatus={leaderboardType}
-            reloadPermanentGraph={reloadPermanentGrpah}
-            setOpenSideBar={setOpenSideBar}
-            sx={{
-              // display: isMenuOpen ? "flex" : "flex",
-              justifyContent: "flex-start",
-              alignItems: "center",
-            }}
-          />
-        )}
-      </Box>
-    </Box>
-  );
-};
-
-export const ToolbarMemo = React.memo(Toolbar);
-
-export const ToolbarSidebar = ({
-  open,
-  onClose,
-  reloadPermanentGrpah,
-  user,
-  reputation,
-  theme,
-  setOpenSideBar,
-  selectedUser,
-  uncheckedNotificationsNum,
-  bookmarkUpdatesNum,
-  pendingProposalsNum,
-  openSidebar,
-}: MainSidebarProps) => {
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const isMenuOpen = nodeBookState.isMenuOpen;
-  const setIsMenuOpen = (value: boolean) => {
-    nodeBookDispatch({ type: "setIsMenuOpen", payload: value });
-  };
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [user, selectedUser, isMenuOpen, bookmarkUpdatesNum, uncheckedNotificationsNum, pendingProposalsNum, reputation]);
+  }, [
+    user,
+    selectedUser,
+    isMenuOpen,
+    bookmarkUpdatesNum,
+    uncheckedNotificationsNum,
+    pendingProposalsNum,
+    reputation,
+    windowHeight,
+    anchorEl,
+    reputationSignal,
+  ]);
 
   return (
     <>
@@ -626,22 +638,7 @@ export const ToolbarSidebar = ({
         isMenuOpen={isMenuOpen}
         openSidebar={openSidebar}
         contentSignalState={contentSignalState}
-        SidebarContent={
-          <ToolbarMemo
-            isMenuOpen={isMenuOpen}
-            setIsMenuOpen={setIsMenuOpen}
-            setOpenSideBar={setOpenSideBar}
-            bookmarkUpdatesNum={bookmarkUpdatesNum}
-            uncheckedNotificationsNum={uncheckedNotificationsNum}
-            user={user}
-            reloadPermanentGrpah={reloadPermanentGrpah}
-            selectedUser={selectedUser}
-            theme={theme}
-            reputation={reputation}
-            pendingProposalsNum={pendingProposalsNum}
-            key="toolbar"
-          />
-        }
+        SidebarContent={toolbarContentMemoized}
       />
     </>
   );

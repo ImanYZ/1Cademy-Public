@@ -321,7 +321,8 @@ const NodeFooter = ({
                   onClick={selectPendingProposals}
                   className={"select-tab-button-node-footer"}
                   sx={{
-                    background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                    background: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
                     cursor: "pointer",
                   }}
                 >
@@ -572,7 +573,8 @@ const NodeFooter = ({
                     onClick={selectCitations}
                     className={"select-tab-button-node-footer"}
                     sx={{
-                      background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                      background: theme =>
+                        theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
                       cursor: "pointer",
                     }}
                   >
@@ -623,7 +625,8 @@ const NodeFooter = ({
                     onClick={selectTags}
                     className={"select-tab-button-node-footer"}
                     sx={{
-                      background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                      background: theme =>
+                        theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
                       cursor: "pointer",
                     }}
                   >
@@ -685,13 +688,7 @@ const NodeFooter = ({
                     className={"select-tab-button-node-footer"}
                     sx={{
                       background: theme =>
-                        theme.palette.mode === "dark"
-                          ? openPart === "References"
-                            ? "#414141"
-                            : "transparent"
-                          : openPart === "References"
-                          ? "#DCDCDC"
-                          : "transparent",
+                        theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
                       cursor: "pointer",
                     }}
                   >
@@ -898,7 +895,8 @@ const NodeFooter = ({
                 className={"select-tab-button-node-footer"}
                 sx={{
                   position: "relative",
-                  background: theme => (theme.palette.mode === "dark" ? "#414141" : "#DCDCDC"),
+                  background: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
                   cursor: "pointer",
                 }}
               >

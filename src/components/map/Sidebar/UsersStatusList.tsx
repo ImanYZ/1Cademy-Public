@@ -1,6 +1,7 @@
-import { Box, SxProps, Theme } from "@mui/material";
+import { Stack, SxProps, Theme } from "@mui/material";
 import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+import { ReputationSignal } from "src/knowledgeTypes";
 
 import { OpenSidebar } from "@/pages/notebook";
 
@@ -11,9 +12,16 @@ import { UsersStatus } from "../../../nodeBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 
 // const scale = 1;
+type DictByReputationType = {
+  "All Time": any;
+  Monthly: any;
+  Weekly: any;
+  "Others Votes": any;
+  "Others Monthly": any;
+};
 
 const usersListObjFromReputationObj = (user: any, userReputation: any, uname: string) => {
-  return {
+  const reputationObj = {
     ...user,
     ...userReputation,
     uname,
@@ -76,11 +84,16 @@ const usersListObjFromReputationObj = (user: any, userReputation: any, uname: st
         userReputation.mWrongs +
         userReputation.iWrongs,
   };
+  reputationObj.totalPositives = !isNaN(reputationObj.totalPositives) ? reputationObj.totalPositives : 0;
+  reputationObj.totalNegatives = !isNaN(reputationObj.totalNegatives) ? reputationObj.totalNegatives : 0;
+  reputationObj.totalPoints = !isNaN(reputationObj.totalPoints) ? reputationObj.totalPoints : 0;
+  return reputationObj;
 };
 
 type UsersStatusListProps = {
   usersStatus: UsersStatus;
   reloadPermanentGraph: any;
+  reputationSignal: ReputationSignal[];
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   sx?: SxProps<Theme>;
 };
@@ -91,11 +104,11 @@ const UsersStatusList = (props: UsersStatusListProps) => {
 
   const [usersDict, setUsersDict] = useState<{ [key: string]: any }>({});
   const [usersDictLoaded, setUsersDictLoaded] = useState(false);
-  const [reputationsDict, setReputationsDict] = useState({});
-  const [reputationsWeeklyDict, setReputationsWeeklyDict] = useState({});
-  const [reputationsMonthlyDict, setReputationsMonthlyDict] = useState({});
-  const [reputationsOthersDict, setReputationsOthersDict] = useState({});
-  const [reputationsOthersMonthlyDict, setReputationsOthersMonthlyDict] = useState({});
+  const [reputationsDict, setReputationsDict] = useState<any>({});
+  const [reputationsWeeklyDict, setReputationsWeeklyDict] = useState<any>({});
+  const [reputationsMonthlyDict, setReputationsMonthlyDict] = useState<any>({});
+  const [reputationsOthersDict, setReputationsOthersDict] = useState<any>({});
+  const [reputationsOthersMonthlyDict, setReputationsOthersMonthlyDict] = useState<any>({});
   // flag for whether reputation data is downloaded from server
   const [reputationsLoaded, setReputationsLoaded] = useState(false);
   // flag for whether monthly reputation data is downloaded from server
@@ -150,6 +163,57 @@ const UsersStatusList = (props: UsersStatusListProps) => {
     },
     [setUsersDict]
   );
+
+  const dictByReputationType: DictByReputationType = {
+    "All Time": setReputationsDict,
+    Monthly: setReputationsMonthlyDict,
+    Weekly: setReputationsWeeklyDict,
+    "Others Votes": setReputationsOthersDict,
+    "Others Monthly": setReputationsOthersMonthlyDict,
+  };
+
+  useEffect(() => {
+    if (props.reputationSignal && props.reputationSignal.length) {
+      for (const repType in dictByReputationType) {
+        const setRepDict = dictByReputationType[repType as keyof DictByReputationType];
+        setRepDict((repDict: any) => {
+          for (const signal of props.reputationSignal) {
+            if (!signal.type.includes(repType as any)) {
+              continue;
+            }
+            if (!repDict.hasOwnProperty(signal.uname)) {
+              repDict[signal.uname] = {
+                totalPoints: signal.reputation,
+                positives: 0,
+                negatives: 0,
+              };
+            } else {
+              repDict[signal.uname].totalPoints += signal.reputation;
+            }
+
+            if (signal.reputation > 0) {
+              repDict[signal.uname].positives += signal.reputation;
+            } else {
+              repDict[signal.uname].negatives += Math.abs(signal.reputation);
+            }
+
+            if (isNaN(repDict[signal.uname].totalPoints)) {
+              repDict[signal.uname].totalPoints = signal.reputation;
+            }
+
+            if (isNaN(repDict[signal.uname].positives)) {
+              repDict[signal.uname].positives = signal.reputation;
+            }
+
+            if (isNaN(repDict[signal.uname].negatives)) {
+              repDict[signal.uname].negatives = Math.abs(signal.reputation);
+            }
+          }
+          return { ...repDict };
+        });
+      }
+    }
+  }, [props.reputationSignal]);
 
   // Get user data by tag selected
   useEffect(() => {
@@ -375,20 +439,22 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   );
 
   return (
-    <Box
+    <Stack
       className="scroll-styled list-tmp"
+      direction="column"
+      alignItems={"center"} // this value is modified by parent in toolbar sidebar when isMenuOpen
       sx={{
         height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center", // this value is modified by parent in toolbar sidebar when isMenuOpen
+        // display: "flex",
+        // flexDirection: "column",
+        // alignItems: "center",
         overflowY: "auto",
         px: "20px",
       }}
     >
       {renderUsersList(onlineUsersList, true)}
       {renderUsersList(usersList, false)}
-    </Box>
+    </Stack>
   );
 };
 
