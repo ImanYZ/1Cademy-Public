@@ -15,6 +15,8 @@ export type ISemesterStudent = {
 // document id should be semester id as well
 export type ISemester = {
   documentId?: string;
+  startDate: Timestamp;
+  endDate: Timestamp;
   instructors: string[]; // list of uid/uname
   title: string;
   tagId: string; // semester tag id

@@ -165,6 +165,8 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     coursesCollection,
     semestersCollection,
     instructorsCollection,
+    new MockData([], "semesterStudentStats"),
+    new MockData([], "semesterStudentVoteStats"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
