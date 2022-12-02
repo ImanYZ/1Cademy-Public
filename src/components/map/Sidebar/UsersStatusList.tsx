@@ -1,4 +1,4 @@
-import { Box, SxProps, Theme } from "@mui/material";
+import { Stack, SxProps, Theme } from "@mui/material";
 import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -375,20 +375,22 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   );
 
   return (
-    <Box
+    <Stack
       className="scroll-styled list-tmp"
+      direction="column"
+      alignItems={"center"} // this value is modified by parent in toolbar sidebar when isMenuOpen
       sx={{
         height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center", // this value is modified by parent in toolbar sidebar when isMenuOpen
+        // display: "flex",
+        // flexDirection: "column",
+        // alignItems: "center",
         overflowY: "auto",
         px: "20px",
       }}
     >
       {renderUsersList(onlineUsersList, true)}
       {renderUsersList(usersList, false)}
-    </Box>
+    </Stack>
   );
 };
 

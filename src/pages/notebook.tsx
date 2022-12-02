@@ -3129,6 +3129,7 @@ const Dashboard = ({}: DashboardProps) => {
                 bookmarkUpdatesNum={bookmarkUpdatesNum}
                 pendingProposalsNum={pendingProposalsNum}
                 openSidebar={openSidebar}
+                windowHeight={windowHeight}
               />
 
               <MemoizedBookmarksSidebar

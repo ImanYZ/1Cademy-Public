@@ -333,19 +333,17 @@ const LinkingWords = (props: LinkingWordsProps) => {
 
               {props.editable && (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {!props.isNew && nodeBookState.selectedNode === props.identifier && (
-                    <MemoizedMetaButton
-                      onClick={choosingNewLinkedNode("Reference")}
-                      tooltip="Link to a reference node."
-                      tooltipPosition="left"
-                    >
-                      <Box sx={{ fontSize: "16px", display: "flex", gap: "5px" }}>
-                        <MenuBookIcon sx={{ color: "#f9a825", fontSize: "inherit" }} />
-                        <AddIcon sx={{ color: "#00E676", fontSize: "inherit" }} />
-                        <span> Cite an existing Reference</span>
-                      </Box>
-                    </MemoizedMetaButton>
-                  )}
+                  <MemoizedMetaButton
+                    onClick={choosingNewLinkedNode("Reference")}
+                    tooltip="Link to a reference node."
+                    tooltipPosition="left"
+                  >
+                    <Box sx={{ fontSize: "16px", display: "flex", gap: "5px" }}>
+                      <MenuBookIcon sx={{ color: "#f9a825", fontSize: "inherit" }} />
+                      <AddIcon sx={{ color: "#00E676", fontSize: "inherit" }} />
+                      <span> Cite an existing Reference</span>
+                    </Box>
+                  </MemoizedMetaButton>
                 </Box>
               )}
             </Box>
