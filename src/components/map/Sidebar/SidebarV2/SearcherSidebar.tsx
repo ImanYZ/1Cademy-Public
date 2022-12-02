@@ -449,6 +449,16 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 fontSize: "14px",
               }}
             >
+              <RecentNodesList
+                id="recentNodesList"
+                recentNodes={searchResults}
+                setRecentNodes={setSearchResults}
+                onlyTags={onlyTags}
+                sortOption={sortOption}
+                setSortOption={onChangeSortOptions}
+                sortDirection={sortDirection}
+                setSortDirection={onChangeSortDirection}
+              />
               <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 Edited in past
                 <TextField
@@ -473,17 +483,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 />
                 days
               </Box>
-              <RecentNodesList
-                id="recentNodesList"
-                recentNodes={searchResults}
-                setRecentNodes={setSearchResults}
-                onlyTags={onlyTags}
-                sortOption={sortOption}
-                setSortOption={onChangeSortOptions}
-                sortDirection={sortDirection}
-                setSortDirection={onChangeSortDirection}
-              />
-              <div>{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
+              <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
             </div>
           </>
         )}
