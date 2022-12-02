@@ -40,7 +40,6 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
-import { INodeVersion } from "src/types/INodeVersion";
 /* eslint-enable */
 import { INotificationNum } from "src/types/INotification";
 
@@ -86,6 +85,7 @@ import {
   compareProperty,
   copyNode,
   createOrUpdateNode,
+  generateReputationSignal,
   getSelectionText,
   hideNodeAndItsLinks,
   makeNodeVisibleInItsLinks,
@@ -103,7 +103,7 @@ import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodes
 import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
-import { doNeedToDeleteNode, isVersionApproved, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "../utils/helpers";
+import { doNeedToDeleteNode, isVersionApproved } from "../utils/helpers";
 
 type DashboardProps = {};
 
@@ -1857,48 +1857,7 @@ const Dashboard = ({}: DashboardProps) => {
           const corrects = node.corrects + correctChange;
           const wrongs = node.wrongs + wrongChange;
 
-          if (node.tagIds && node.tagIds.includes(String(user?.tagId))) {
-            let reputation: number = correctChange;
-            setTimeout(async () => {
-              const { versionsColl } = getTypedCollections(db, node.nodeType);
-              if (versionsColl) {
-                const versionsQuery = query(versionsColl, where("node", "==", nodeId), where("deleted", "==", false));
-                const versionsData = await getDocs(versionsQuery);
-                let maxVersionRating: number = 0;
-                for (const doc of versionsData.docs) {
-                  const nodeVersion = doc.data() as INodeVersion;
-                  if (!nodeVersion.accepted) {
-                    continue;
-                  }
-                  const netVote: number = nodeVersion.corrects - nodeVersion.wrongs;
-                  if (maxVersionRating < netVote) {
-                    maxVersionRating = netVote;
-                  }
-                }
-                const signals: ReputationSignal[] = [];
-                for (const doc of versionsData.docs) {
-                  const types: string[] = ["Weekly", "Monthly", "All Time"];
-                  const nodeVersion = doc.data() as INodeVersion;
-                  if (nodeVersion.proposer != user?.uname) {
-                    types.push(...["Others Votes", "Others Monthly"]);
-                  }
-                  if (!nodeVersion.accepted) {
-                    continue;
-                  }
-                  let versionRatingChange =
-                    Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, nodeVersion.corrects - nodeVersion.wrongs) /
-                    maxVersionRating;
-                  versionRatingChange *= reputation;
-                  signals.push({
-                    reputation: versionRatingChange,
-                    type: types as any,
-                    uname: String(user?.uname),
-                  });
-                }
-                setReputationSignal(signals);
-              }
-            });
-          }
+          generateReputationSignal(db, node, user, correctChange, "Correct", nodeId, setReputationSignal);
 
           return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
         });
@@ -1927,6 +1886,12 @@ const Dashboard = ({}: DashboardProps) => {
         const wrongChange = wrong ? -1 : 1;
         const _corrects = corrects + correctChange;
         const _wrongs = wrongs + wrongChange;
+
+        setGraph(graph => {
+          const node = graph.nodes[nodeId];
+          generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
+          return graph;
+        });
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
         if (willRemoveNode) {
