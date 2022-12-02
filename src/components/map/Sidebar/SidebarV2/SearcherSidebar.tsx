@@ -298,7 +298,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             flexWrap: "wrap",
             columnGap: "4px",
             rowGap: "8px",
-            marginTop: { xs: "0px", sm: "8px" },
+            marginTop: { xs: "8px", sm: "8px" },
             marginBottom: { xs: "8px", sm: "8px" },
             pr: "40px",
           }}
