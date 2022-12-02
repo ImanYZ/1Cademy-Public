@@ -4,6 +4,7 @@ import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Checkbox,
@@ -71,6 +72,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
+  const [openSortOptions, setOpenSortOptions] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
 
@@ -334,6 +336,17 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             }}
           />
 
+          <FilterListIcon
+            onClick={() => setOpenSortOptions(!openSortOptions)}
+            sx={{
+              display: window.innerWidth <= 400 ? "block" : "none",
+              zIndex: 1,
+              cursor: "pointer",
+              color: "rgba(88, 88, 88,1)",
+              fontWeight: "none",
+            }}
+          />
+
           {/* {onlyTags ? (
               ""
             ) : (
@@ -439,11 +452,10 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                 }}
               />
             </Box>
-
             <div
               id="nodesUpdatedSinceContainer"
               style={{
-                display: "flex",
+                display: window.innerWidth > 400 || openSortOptions ? "flex" : "none",
                 justifyContent: "space-between",
                 alignItems: "center",
                 fontSize: "14px",
@@ -526,6 +538,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     sortDirection,
     sortOption,
     viewTagsInMovil,
+    openSortOptions,
   ]);
 
   return (
@@ -535,7 +548,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
       open={open}
       onClose={onClose}
       width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : window.innerWidth > 375 ? 40 : 50}
+      height={window.innerWidth > 899 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={searcherOptionsMemoized}
@@ -590,7 +603,18 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                   </div>
                   <div className="SearchResultTitle">
                     {/* CHECK: here is causing problems to hide scroll */}
-                    <Editor label="" readOnly={true} setValue={doNothing} value={resNode.title} />
+                    <Editor
+                      sxPreview={{
+                        fontSize: {
+                          xs: "14px",
+                          sm: "16px",
+                        },
+                      }}
+                      label=""
+                      readOnly={true}
+                      setValue={doNothing}
+                      value={resNode.title}
+                    />
                   </div>
                 </Paper>
               );
