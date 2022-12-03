@@ -53,11 +53,16 @@ export type ISemester = {
     onReceiveDownVote: number;
     onReceiveStar: number;
   };
+  isProposalRequired: boolean;
+  isQuestionProposalRequired: boolean;
+  isCastingVotesRequired: boolean;
+  isGettingVotesRequired: boolean;
   deleted: boolean;
   students: ISemesterStudent[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
+
 export type ICourseTag = {
   pTagId: string; // program tag id
   pTitle: string;
