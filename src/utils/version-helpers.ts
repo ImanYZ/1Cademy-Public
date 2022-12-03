@@ -1315,6 +1315,8 @@ export const updateNodeContributions = async ({
     totalPoints: institutionData.totalPoints + contribution,
   });
   [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+  await commitBatch(batch);
 };
 
 export const signalNodeDeleteToTypesense = async ({ nodeId }: { nodeId: string }) => {
