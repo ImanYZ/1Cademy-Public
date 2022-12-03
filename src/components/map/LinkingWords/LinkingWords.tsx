@@ -230,7 +230,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 );
               })}
 
-              {props.openPart === "LinkingWords" && !props.isNew && nodeBookState.selectedNode === props.identifier && (
+              {props.editable && !props.isNew && nodeBookState.selectedNode === props.identifier && (
                 <MemoizedMetaButton
                   onClick={choosingNewLinkedNode("Parent")}
                   tooltip="Link to an existing parent node."
@@ -509,22 +509,19 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 nodeType={"Relation"}
                 visible={false}
               />
-              {props.editable &&
-                !props.isNew &&
-                nodeBookState.selectedNode === props.identifier &&
-                props.openPart === "LinkingWords" && (
-                  <MemoizedMetaButton
-                    onClick={choosingNewLinkedNode("Child")}
-                    tooltip="Link to an existing child node."
-                    tooltipPosition="right"
-                  >
-                    <>
-                      <span>Link to an existing Child node</span>
-                      <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
-                      <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
-                    </>
-                  </MemoizedMetaButton>
-                )}
+              {props.editable && !props.isNew && nodeBookState.selectedNode === props.identifier && (
+                <MemoizedMetaButton
+                  onClick={choosingNewLinkedNode("Child")}
+                  tooltip="Link to an existing child node."
+                  tooltipPosition="right"
+                >
+                  <>
+                    <span>Link to an existing Child node</span>
+                    <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                    <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                  </>
+                </MemoizedMetaButton>
+              )}
             </Box>
           )}
         </Box>
