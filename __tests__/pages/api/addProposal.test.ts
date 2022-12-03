@@ -38,7 +38,7 @@ describe("POST /api/addProposal", () => {
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
 
-  const collects = [usersCollection, nodesCollection];
+  const collects = [usersCollection, nodesCollection, new MockData([], "conceptVersions")];
 
   let accessToken: string = "";
   let req: any = {};

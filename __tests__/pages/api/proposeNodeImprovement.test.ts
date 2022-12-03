@@ -247,6 +247,10 @@ describe("POST /api/proposeNodeImprovement", () => {
     new MockData([], "userVersionsLog"),
 
     new MockData([], "monthlyReputations"),
+
+    new MockData([], "othMonReputations"),
+    new MockData([], "othWeekReputations"),
+    new MockData([], "othersReputations"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");

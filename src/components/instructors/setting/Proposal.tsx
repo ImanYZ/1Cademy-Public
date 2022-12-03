@@ -1,16 +1,16 @@
 import { useTheme } from "@emotion/react";
-import { FilledInput, Paper, Typography } from "@mui/material";
+import { FilledInput, Paper, Switch, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React from "react";
 type Props = {
   semester: any;
+  switchHandler: any;
   inputsHandler: any;
   errorState: any;
 };
-const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
+const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorState }) => {
   const layoutTheme: any = useTheme();
-
   return (
     <Paper className="remove-arrow-buttons unselect-date-placeholder" sx={{ padding: "40px 40px" }} elevation={2}>
       <Typography variant="h3">Course Contributions</Typography>
@@ -43,9 +43,25 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
         </Typography>
       </Box>
       <Box sx={{ marginTop: "50px" }}>
-        <Typography variant="h3">Proposals</Typography>
+        <Typography variant="h3" sx={{ display: "flex", justifyContent: "space-between" }}>
+          Proposals
+          <Switch
+            inputProps={{ "aria-label": "controlled" }}
+            checked={semester.isProposalRequired}
+            color="primary"
+            name="isProposalRequired"
+            onChange={switchHandler}
+          />
+        </Typography>
         <hr style={{ color: "#A5A5A5" }} />
-        <Box>
+        <Box
+          sx={{
+            ...(!semester.isProposalRequired && {
+              pointerEvents: "none",
+              opacity: "0.4",
+            }),
+          }}
+        >
           <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
             From&nbsp;
             <FilledInput
@@ -165,9 +181,29 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
         </Box>
       </Box>
       <Box sx={{ marginTop: "50px" }}>
-        <Typography variant="h3">Question Proposals</Typography>
+        <Typography variant="h3" sx={{ display: "flex", justifyContent: "space-between" }}>
+          Question Proposals
+          <Switch
+            inputProps={{ "aria-label": "controlled" }}
+            checked={semester.isQuestionProposalRequired}
+            color="primary"
+            name="isQuestionProposalRequired"
+            onChange={switchHandler}
+          />
+        </Typography>
         <hr style={{ color: "#A5A5A5" }} />
-        <Box sx={{ display: "flex", flexWrap: "wrap", alignContent: "center", alignItems: "baseline" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignContent: "center",
+            alignItems: "baseline",
+            ...(!semester.isQuestionProposalRequired && {
+              pointerEvents: "none",
+              opacity: "0.4",
+            }),
+          }}
+        >
           <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
             From&nbsp;
             <FilledInput

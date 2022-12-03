@@ -15,7 +15,9 @@ import { deleteNode } from "src/utils/instructor";
 
 export type InstructorSemesterSettingPayload = {
   syllabus: ISemesterSyllabusItem[];
-  days: number;
+  // days: number;
+  startDate: string;
+  endDate: string;
   nodeProposals: {
     startDate: string;
     endDate: string;
@@ -495,8 +497,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
 
+    const startDate = moment(payload.startDate);
+    const endDate = moment(payload.endDate);
+
     semesterData.syllabus = payload.syllabus;
-    semesterData.days = Math.floor(payload.days);
+    semesterData.startDate = Timestamp.fromDate(startDate.toDate());
+    semesterData.endDate = Timestamp.fromDate(startDate.toDate());
+    semesterData.days = endDate.diff(startDate, "days");
     semesterData.nodeProposals = {
       startDate: Timestamp.fromDate(moment(payload.nodeProposals.startDate).toDate()),
       endDate: Timestamp.fromDate(moment(payload.nodeProposals.endDate).toDate()),
