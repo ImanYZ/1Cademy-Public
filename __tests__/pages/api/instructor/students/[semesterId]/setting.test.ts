@@ -264,6 +264,10 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
             ],
           },
         ],
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -331,6 +335,10 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         },
         votes: semesterData.votes,
         syllabus: semesterData.syllabus,
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -383,6 +391,10 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         },
         votes: semesterData.votes,
         syllabus: semesterData.syllabus,
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -462,6 +474,10 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         },
         votes: semesterData.votes,
         syllabus: semesterData.syllabus,
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({

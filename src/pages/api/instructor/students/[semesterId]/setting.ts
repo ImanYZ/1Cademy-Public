@@ -39,6 +39,10 @@ export type InstructorSemesterSettingPayload = {
     onReceiveDownVote: number;
     onReceiveStar: number;
   };
+  isProposalRequired: boolean;
+  isQuestionProposalRequired: boolean;
+  isCastingVotesRequired: boolean;
+  isGettingVotesRequired: boolean;
 };
 
 type IProcessNodeParam = {
@@ -519,6 +523,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       numQuestionsPerDay: payload.questionProposals.numQuestionsPerDay,
       totalDaysOfCourse: payload.questionProposals.totalDaysOfCourse,
     };
+
+    semesterData.isProposalRequired = payload.isProposalRequired;
+    semesterData.isQuestionProposalRequired = payload.isQuestionProposalRequired;
+    semesterData.isCastingVotesRequired = payload.isCastingVotesRequired;
+    semesterData.isGettingVotesRequired = payload.isGettingVotesRequired;
 
     semesterData.votes = { ...payload.votes };
     batch.update(semesterRef, semesterData);
