@@ -8,7 +8,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
-import { Reputation, User, UserTheme } from "../../../../knowledgeTypes";
+import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
@@ -33,6 +33,7 @@ type MainSidebarProps = {
   pendingProposalsNum: number;
   openSidebar?: OpenSidebar;
   windowHeight: number;
+  reputationSignal: ReputationSignal[];
 };
 
 export const ToolbarSidebar = ({
@@ -49,6 +50,7 @@ export const ToolbarSidebar = ({
   pendingProposalsNum,
   openSidebar,
   windowHeight,
+  reputationSignal,
 }: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const isMenuOpen = nodeBookState.isMenuOpen;
@@ -550,6 +552,7 @@ export const ToolbarSidebar = ({
               usersStatus={leaderBoardType}
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
+              reputationSignal={reputationSignal}
               sx={{
                 // display: isMenuOpen ? "flex" : "flex",
                 justifyContent: "flex-start",
@@ -581,6 +584,7 @@ export const ToolbarSidebar = ({
     uncheckedNotificationsNum,
     user,
     windowHeight,
+    reputationSignal,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -595,6 +599,7 @@ export const ToolbarSidebar = ({
     reputation,
     windowHeight,
     anchorEl,
+    reputationSignal,
   ]);
 
   return (

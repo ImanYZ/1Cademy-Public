@@ -1,5 +1,6 @@
 import { commitBatch, db } from "@/lib/firestoreServer/admin";
 import { DocumentReference, Timestamp } from "firebase-admin/firestore";
+import moment from "moment";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { ICourse, IInstructor, ISemester } from "src/types/ICourse";
@@ -7,6 +8,8 @@ import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 
 export type InstructorCourseCreatePayload = {
+  startDate: string;
+  endDate: string;
   courseCode: string;
   semesterName: string;
   programName: string;
@@ -59,6 +62,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const userData = req?.body?.data?.user?.userData as IUser;
 
   const payload = req.body as InstructorCourseCreatePayload;
+
+  const startDate = moment(payload.startDate);
+  const endDate = moment(payload.endDate);
 
   const courseCode = payload.courseCode;
   const semesterName = payload.semesterName;
@@ -639,17 +645,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       pTitle: `${programName} in ${departmentName}`, // program tile
       pTagId: programNodeId, // program tag id
       syllabus: [],
-      days: 1,
+      startDate: Timestamp.fromDate(startDate.toDate()),
+      endDate: Timestamp.fromDate(endDate.toDate()),
+      days: endDate.diff(startDate, "days"),
       nodeProposals: {
-        startDate: Timestamp.now(),
-        endDate: Timestamp.now(),
+        startDate: Timestamp.fromDate(startDate.toDate()),
+        endDate: Timestamp.fromDate(endDate.toDate()),
         numPoints: 1,
         numProposalPerDay: 1,
         totalDaysOfCourse: 1,
       },
       questionProposals: {
-        startDate: Timestamp.now(),
-        endDate: Timestamp.now(),
+        startDate: Timestamp.fromDate(startDate.toDate()),
+        endDate: Timestamp.fromDate(endDate.toDate()),
         numPoints: 1,
         numQuestionsPerDay: 1,
         totalDaysOfCourse: 1,
@@ -661,6 +669,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         onReceiveDownVote: 1,
         onReceiveStar: 1,
       },
+      isProposalRequired: false,
+      isQuestionProposalRequired: false,
+      isCastingVotesRequired: false,
+      isGettingVotesRequired: false,
       deleted: false,
       students: [],
       createdAt: Timestamp.now(),

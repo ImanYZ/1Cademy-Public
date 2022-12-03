@@ -15,7 +15,9 @@ import { deleteNode } from "src/utils/instructor";
 
 export type InstructorSemesterSettingPayload = {
   syllabus: ISemesterSyllabusItem[];
-  days: number;
+  // days: number;
+  startDate: string;
+  endDate: string;
   nodeProposals: {
     startDate: string;
     endDate: string;
@@ -37,6 +39,10 @@ export type InstructorSemesterSettingPayload = {
     onReceiveDownVote: number;
     onReceiveStar: number;
   };
+  isProposalRequired: boolean;
+  isQuestionProposalRequired: boolean;
+  isCastingVotesRequired: boolean;
+  isGettingVotesRequired: boolean;
 };
 
 type IProcessNodeParam = {
@@ -495,8 +501,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
 
+    const startDate = moment(payload.startDate);
+    const endDate = moment(payload.endDate);
+
     semesterData.syllabus = payload.syllabus;
-    semesterData.days = Math.floor(payload.days);
+    semesterData.startDate = Timestamp.fromDate(startDate.toDate());
+    semesterData.endDate = Timestamp.fromDate(startDate.toDate());
+    semesterData.days = endDate.diff(startDate, "days");
     semesterData.nodeProposals = {
       startDate: Timestamp.fromDate(moment(payload.nodeProposals.startDate).toDate()),
       endDate: Timestamp.fromDate(moment(payload.nodeProposals.endDate).toDate()),
@@ -512,6 +523,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       numQuestionsPerDay: payload.questionProposals.numQuestionsPerDay,
       totalDaysOfCourse: payload.questionProposals.totalDaysOfCourse,
     };
+
+    semesterData.isProposalRequired = payload.isProposalRequired;
+    semesterData.isQuestionProposalRequired = payload.isQuestionProposalRequired;
+    semesterData.isCastingVotesRequired = payload.isCastingVotesRequired;
+    semesterData.isGettingVotesRequired = payload.isGettingVotesRequired;
 
     semesterData.votes = { ...payload.votes };
     batch.update(semesterRef, semesterData);

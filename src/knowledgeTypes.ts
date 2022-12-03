@@ -644,3 +644,9 @@ export type NodeChanges = {
   nId: string;
   nData: NodeFireStore;
 };
+
+export type ReputationSignal = {
+  uname: string;
+  type: ("All Time" | "Monthly" | "Weekly" | "Others Votes" | "Others Monthly")[];
+  reputation: number;
+};
