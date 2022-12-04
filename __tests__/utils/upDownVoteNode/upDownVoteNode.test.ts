@@ -3043,6 +3043,7 @@ describe("UpDownVoteNode", () => {
         otherWeeklyReputationPointsCollection,
         userNodesLogCollection,
         new MockData(institutions, "institutions"),
+        new MockData([], "actionTracks"),
       ];
 
       beforeAll(async () => {
@@ -3404,6 +3405,7 @@ describe("UpDownVoteNode", () => {
         notificationNumsCollection,
         userNodesLogCollection,
         new MockData(institutions, "institutions"),
+        new MockData([], "actionTracks"),
       ];
 
       beforeAll(async () => {
@@ -3438,6 +3440,13 @@ describe("UpDownVoteNode", () => {
         expect(notificationNums.length).toEqual(1);
         const notificationNumDoc = notificationNums[0].data() as INotificationNum;
         expect(notificationNumDoc.nNum).toEqual(1);
+      });
+
+      it("actionTracks based on sections", async () => {
+        const actionTracks = (await db.collection("actionTracks").get()).docs;
+        expect(actionTracks.length).toEqual(1);
+
+        expect(actionTracks[0].data().doer).toEqual(users[0].uname);
       });
     });
   });

@@ -1,3 +1,15 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers");
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback();
+    }),
+  };
+});
+
+import { createUser, getDefaultUser } from "testUtils/fakers/user";
+
 import { admin, commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { versionCreateUpdate } from "../../../src/utils";
@@ -26,6 +38,19 @@ describe("versionCreateUpdate", () => {
   collects.push(new MockData([], "reputations"));
   collects.push(new MockData([], "tags"));
   collects.push(new MockData([], "weeklyReputations"));
+  collects.push(new MockData([], "actionTracks"));
+
+  collects.push(
+    new MockData(
+      [
+        getDefaultUser({}),
+        createUser({
+          uname: "Haroon",
+        }),
+      ],
+      "users"
+    )
+  );
 
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
@@ -58,7 +83,7 @@ describe("versionCreateUpdate", () => {
       versionData: data,
       newVersion: true,
       childType: false,
-      voter: userVersionsData.version,
+      voter: userVersionsData.user,
       correct: 1,
       wrong: 0,
       award: 0,

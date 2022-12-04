@@ -20,6 +20,7 @@ import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typ
 import { Timestamp } from "firebase-admin/firestore";
 import { INodeVersion } from "src/types/INodeVersion";
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
+import { IActionTrack } from "src/types/IActionTrack";
 
 export const comPointTypes = [
   "comPoints",
@@ -2061,6 +2062,25 @@ export const versionCreateUpdate = async ({
         });
       }
     }
+
+    // TODO: move these to queue
+    // action tracks
+    await detach(async () => {
+      const user = await db.collection("users").doc(voter).get();
+      const userData = user.data() as IUser;
+      const isAccepted = !!(versionData.accepted || accepted);
+      const actionRef = db.collection("actionTracks").doc();
+      actionRef.create({
+        accepted: isAccepted,
+        type: !childType ? "Improvement" : "ChildNode",
+        action: versionId,
+        imageUrl: userData.imageUrl,
+        createdAt: currentTimestamp,
+        doer: voter,
+        nodeId: childType ? newUpdates.nodeId : versionData.node,
+        receivers: [versionData.proposer],
+      } as IActionTrack);
+    });
   }
 
   return [newBatch, writeCounts];

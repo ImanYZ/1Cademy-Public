@@ -12,6 +12,7 @@ import {
 } from ".";
 import { detach, doNeedToDeleteNode, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "./helpers";
 import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
+import { IActionTrack } from "src/types/IActionTrack";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -364,6 +365,52 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
       });
     });
   }
+
+  // TODO: move these to queue
+  // action tracks
+  await detach(async () => {
+    let batch = db.batch();
+
+    let actions: string[] = [];
+    let receivers: string[] = Object.keys(changedProposers);
+
+    if (actionType === "Correct") {
+      if (correctChange === 1) {
+        actions.push("Correct");
+      } else if (correctChange === -1) {
+        actions.push("CorrectRM");
+      }
+
+      if (wrongChange === -1) {
+        actions.push("WrongRM");
+      }
+    } else if (actionType === "Wrong") {
+      if (wrongChange === 1) {
+        actions.push("Wrong");
+      } else if (wrongChange === -1) {
+        actions.push("WrongRM");
+      }
+
+      if (correctChange === -1) {
+        actions.push("CorrectRM");
+      }
+    }
+
+    for (const action of actions) {
+      let actionRef = db.collection("actionTracks").doc();
+      batch.create(actionRef, {
+        accepted: true,
+        type: "NodeVote",
+        action,
+        createdAt: currentTimestamp,
+        doer: uname,
+        nodeId,
+        receivers,
+      });
+    }
+
+    await commitBatch(batch);
+  });
 
   // TODO: move these to queue
   await detach(async () => {
