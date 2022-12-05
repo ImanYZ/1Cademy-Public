@@ -16,29 +16,55 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, errorState }) => {
       <Typography variant="h3">Course Contributions</Typography>
       <Box>
         <Typography mt={3} variant="h4">
-          This class has&nbsp;
+          This class will start &nbsp;
           <FilledInput
-            type="number"
-            value={semester.days}
-            onChange={event => inputsHandler(event, "days")}
+            className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+            type="date"
+            value={semester.startDate}
             id="filled-adornment-weight"
+            onChange={event => inputsHandler(event, "chapters", "startDate")}
             aria-describedby="filled-weight-helper-text"
             inputProps={{
               "aria-label": "days",
-              min: 1,
-              pattern: "[0-9]",
             }}
             sx={{
-              border: "none",
               paddingBottom: "10px",
               height: "40px",
-              width: "70px",
+              width: "150px",
+              borderBottom: "orange",
+              color: theme =>
+                semester.startDate != "" ? (theme.palette.mode === "dark" ? "white" : "black") : "transparent",
             }}
-            error={errorState.days}
+            error={errorState.startDate}
           />
-          &nbsp; {semester.days > 1 ? "days" : "day"} in total.
+          &nbsp; and will end on{" "}
+          <FilledInput
+            className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+            type="date"
+            value={semester.endDate}
+            id="filled-adornment-weight"
+            onChange={event => inputsHandler(event, "chapters", "endDate")}
+            aria-describedby="filled-weight-helper-text"
+            inputProps={{
+              "aria-label": "days",
+            }}
+            sx={{
+              paddingBottom: "10px",
+              height: "40px",
+              width: "150px",
+              borderBottom: "orange",
+              color: theme =>
+                semester.endDate != "" ? (theme.palette.mode === "dark" ? "white" : "black") : "transparent",
+            }}
+            error={errorState.endDate}
+          />
+          .
         </Typography>
-        <Typography mt={3} color="error" sx={{ display: errorState.days ? "block" : "none" }}>
+        <Typography
+          mt={3}
+          color="error"
+          sx={{ display: errorState.startDate || errorState.endDate ? "block" : "none" }}
+        >
           * {errorState.errorText}
         </Typography>
       </Box>

@@ -22,7 +22,8 @@ import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 
 const initialErrorsState = {
-  days: false,
+  startDate: false,
+  endDate: false,
   nodeProposalDay: false,
   nodeProposalDate: false,
   questionProposalDay: false,
@@ -40,7 +41,8 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
     syllabus: [],
-    days: 100,
+    startDate: "",
+    endDate: "",
     nodeProposals: {
       startDate: "",
       endDate: "",
@@ -164,7 +166,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       if (e.target) {
         setSemester({
           ...semester,
-          days: Number(parseInt(e.target.value)),
+          [field]: String(e.target.value),
         });
       }
     }
@@ -205,27 +207,40 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         }
       });
 
-      let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
+      let startDate = moment(semester.start);
+      //let endDate = moment(semester.endDate);
+      //let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
       let questionProposalEndDate = moment(semester.questionProposals.endDate);
-      let nodeProposalDateDiff = nodeProposalEndDate.diff(semester.nodeProposals.startDate, "days") + 1;
+      //let nodeProposalDateDiff = nodeProposalEndDate.diff(semester.nodeProposals.startDate, "days") + 1;
       let questionProposalDateDiff = questionProposalEndDate.diff(semester.questionProposals.startDate, "days") + 1;
-      if (semester.days <= 0) {
-        setErrorState({ ...initialErrorsState, days: true, errorText: `Total days should be greater than 0.` });
+      console.log(startDate.diff(semester.nodeProposals.startDate, "days"), "diff");
+      if (!semester.startDate) {
+        setErrorState({ ...initialErrorsState, startDate: true, errorText: `Chapter start date is required.` });
         setRequestLoader(false);
         return;
-      } else if (nodeProposalDateDiff > semester.days) {
+      } else if (!semester.endDate) {
+        setErrorState({ ...initialErrorsState, endDate: true, errorText: `Chapter end date is required.` });
+        setRequestLoader(false);
+        return;
+      } else if (
+        semester.nodeProposals.startDate < semester.startDate ||
+        semester.nodeProposals.startDate > semester.endDate
+      ) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalDate: true,
-          errorText: `Node proposal date range should not exceed ${semester.days} days.`,
+          errorText: `Node proposal start date should be greater or equal to chapter startDate`,
         });
         setRequestLoader(false);
         return;
-      } else if (nodeProposalDateDiff <= 0) {
+      } else if (
+        semester.nodeProposals.endDate > semester.endDate ||
+        semester.nodeProposals.endDate < semester.startDate
+      ) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalDate: true,
-          errorText: `Ending date should not be less than starting date in node proposal.`,
+          errorText: `Node proposal end date should be less or equal to chapter endDate`,
         });
         setRequestLoader(false);
         return;
