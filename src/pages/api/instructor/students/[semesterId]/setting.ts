@@ -506,7 +506,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     semesterData.syllabus = payload.syllabus;
     semesterData.startDate = Timestamp.fromDate(startDate.toDate());
-    semesterData.endDate = Timestamp.fromDate(startDate.toDate());
+    semesterData.endDate = Timestamp.fromDate(endDate.toDate());
     semesterData.days = endDate.diff(startDate, "days");
     semesterData.nodeProposals = {
       startDate: Timestamp.fromDate(moment(payload.nodeProposals.startDate).toDate()),
