@@ -56,6 +56,12 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
     pTagId: program?.documentId || faker.datatype.uuid(), // program tag id
     syllabus: [],
     days: 0,
+    isProposalRequired: true,
+    isQuestionProposalRequired: true,
+    isCastingVotesRequired: true,
+    isGettingVotesRequired: true,
+    startDate: Timestamp.now(),
+    endDate: Timestamp.now(),
     nodeProposals: {
       startDate: Timestamp.now(),
       endDate: Timestamp.now(),

@@ -1,3 +1,13 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers");
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback();
+    }),
+  };
+});
+
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import HttpMock from "node-mocks-http";
@@ -168,6 +178,7 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
     coursesCollection,
     semestersCollection,
     instructorsCollection,
+    new MockData([], "relationVersions"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -197,18 +208,21 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
 
   describe("should be able to update syllabus", () => {
     beforeAll(async () => {
+      const startDate = moment().format("YYYY-MM-DD");
+      const endDate = moment().add(1, "day").format("YYYY-MM-DD");
       const body = {
-        days: 30,
+        startDate,
+        endDate,
         nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          startDate: startDate,
+          endDate: endDate,
           numPoints: 1,
           numProposalPerDay: 1,
           totalDaysOfCourse: 30,
         },
         questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          startDate: startDate,
+          endDate: endDate,
           numPoints: 1,
           numQuestionsPerDay: 1,
           totalDaysOfCourse: 30,
@@ -250,6 +264,10 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
             ],
           },
         ],
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -295,24 +313,32 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
       const nodeId = semesterData.syllabus[0].node;
       delete semesterData.syllabus[0].node;
 
+      const startDate = moment().format("YYYY-MM-DD");
+      const endDate = moment().add(1, "day").format("YYYY-MM-DD");
+
       const body = {
-        days: semesterData.days,
+        startDate,
+        endDate,
         nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          startDate,
+          endDate,
           numPoints: 1,
           numProposalPerDay: 1,
           totalDaysOfCourse: 30,
         },
         questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          startDate,
+          endDate,
           numPoints: 1,
           numQuestionsPerDay: 1,
           totalDaysOfCourse: 30,
         },
         votes: semesterData.votes,
         syllabus: semesterData.syllabus,
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -343,24 +369,32 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
 
       semesterData.syllabus[0].title = "TEST TITLE";
 
+      const startDate = moment().format("YYYY-MM-DD");
+      const endDate = moment().add(1, "day").format("YYYY-MM-DD");
+
       const body = {
-        days: semesterData.days,
+        startDate,
+        endDate,
         nodeProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          startDate,
+          endDate,
           numPoints: 1,
           numProposalPerDay: 1,
           totalDaysOfCourse: 30,
         },
         questionProposals: {
-          startDate: moment().format("YYYY-MM-DD"),
-          endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+          startDate,
+          endDate,
           numPoints: 1,
           numQuestionsPerDay: 1,
           totalDaysOfCourse: 30,
         },
         votes: semesterData.votes,
         syllabus: semesterData.syllabus,
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -412,56 +446,64 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
       }
     });
 
-    // it("check if removed node and its usernodes flagged as deleted", async () => {
-    //   const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
-    //   const semesterData = semesterDoc.data() as ISemester;
+    it("check if removed node and its usernodes flagged as deleted", async () => {
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
 
-    //   const items = semesterData.syllabus[0].children?.splice(0, 1) as ISemesterSyllabusItem[];
+      const items = semesterData.syllabus[0].children?.splice(0, 1) as ISemesterSyllabusItem[];
 
-    //   const body = {
-    //     days: semesterData.days,
-    //     nodeProposals: {
-    //       startDate: moment().format("YYYY-MM-DD"),
-    //       endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-    //       numPoints: 1,
-    //       numProposalPerDay: 1,
-    //       totalDaysOfCourse: 30,
-    //     },
-    //     questionProposals: {
-    //       startDate: moment().format("YYYY-MM-DD"),
-    //       endDate: moment().add(1, "day").format("YYYY-MM-DD"),
-    //       numPoints: 1,
-    //       numQuestionsPerDay: 1,
-    //       totalDaysOfCourse: 30,
-    //     },
-    //     votes: semesterData.votes,
-    //     syllabus: semesterData.syllabus,
-    //   } as InstructorSemesterSettingPayload;
+      const startDate = moment().format("YYYY-MM-DD");
+      const endDate = moment().add(1, "day").format("YYYY-MM-DD");
 
-    //   const req: any = HttpMock.createRequest({
-    //     method: "POST",
-    //     query: {
-    //       semesterId: semester.documentId,
-    //     },
-    //     body,
-    //     headers: {
-    //       authorization: "Bearer " + accessToken,
-    //     },
-    //   });
+      const body = {
+        startDate,
+        endDate,
+        nodeProposals: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numProposalPerDay: 1,
+          totalDaysOfCourse: 30,
+        },
+        questionProposals: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: 30,
+        },
+        votes: semesterData.votes,
+        syllabus: semesterData.syllabus,
+        isProposalRequired: true,
+        isQuestionProposalRequired: true,
+        isCastingVotesRequired: true,
+        isGettingVotesRequired: true,
+      } as InstructorSemesterSettingPayload;
 
-    //   const res = HttpMock.createResponse();
-    //   await settingHandler(req, res as any);
+      const req: any = HttpMock.createRequest({
+        method: "POST",
+        query: {
+          semesterId: semester.documentId,
+        },
+        body,
+        headers: {
+          authorization: "Bearer " + accessToken,
+        },
+      });
 
-    //   const removedNodeId = String(items[0].node);
-    //   const userNodes = await db
-    //     .collection("userNodes")
-    //     .where("user", "==", users[0].uname)
-    //     .where("node", "==", removedNodeId)
-    //     .get();
-    //   for (const userNode of userNodes.docs) {
-    //     expect(userNode.data()?.deleted).toBeTruthy();
-    //   }
-    // });
+      const res = HttpMock.createResponse();
+      await settingHandler(req, res as any);
+
+      const removedNodeId = String(items[0].node);
+      const userNodes = await db
+        .collection("userNodes")
+        .where("user", "==", users[0].uname)
+        .where("node", "==", removedNodeId)
+        .get();
+      for (const userNode of userNodes.docs) {
+        expect(userNode.data()?.deleted).toBeTruthy();
+      }
+    });
   });
 
   afterAll(async () => {

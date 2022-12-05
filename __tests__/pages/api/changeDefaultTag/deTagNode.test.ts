@@ -84,7 +84,17 @@ describe("POST /api/changeDefaultTag/:deTagNode", () => {
 
   const reputationsCollection = new MockData(reputations, "reputations");
 
-  const collects = [usersCollection, creditsCollection, nodeVersionsCollection, reputationsCollection];
+  const collects = [
+    usersCollection,
+    creditsCollection,
+    nodeVersionsCollection,
+    reputationsCollection,
+    new MockData([], "monthlyReputations"),
+    new MockData([], "othMonReputations"),
+    new MockData([], "othWeekReputations"),
+    new MockData([], "othersReputations"),
+    new MockData([], "weeklyReputations"),
+  ];
 
   const nodesCollection = new MockData(nodes, "nodes");
   collects.push(nodesCollection);

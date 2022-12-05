@@ -25,9 +25,11 @@ const initialErrorsState = {
   startDate: false,
   endDate: false,
   nodeProposalDay: false,
-  nodeProposalDate: false,
+  nodeProposalStartDate: false,
+  nodeProposalEndDate: false,
   questionProposalDay: false,
-  questionProposalDate: false,
+  questionProposalStartDate: false,
+  questionProposalEndDate: false,
   errorText: "",
 };
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
@@ -64,6 +66,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       onReceiveDownVote: 1,
       onReceiveStar: 1,
     },
+    isProposalRequired: false,
+    isQuestionProposalRequired: false,
+    isCastingVotesRequired: false,
+    isGettingVotesRequired: false,
   });
 
   useEffect(() => {
@@ -74,7 +80,8 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           setSemester((prevSemester: any) => {
             return {
               ...prevSemester,
-              days: semester.days,
+              startDate: semester.startDate ? moment(new Date(semester.startDate.toDate())).format("YYYY-MM-DD") : "",
+              endDate: semester.endDate ? moment(new Date(semester.endDate.toDate())).format("YYYY-MM-DD") : "",
               syllabus: semester.syllabus,
               nodeProposals: {
                 ...semester.nodeProposals,
@@ -87,6 +94,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
                 endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-MM-DD"),
               },
               votes: semester.votes,
+              isProposalRequired: semester.isProposalRequired,
+              isQuestionProposalRequired: semester.isQuestionProposalRequired,
+              isCastingVotesRequired: semester.isCastingVotesRequired,
+              isGettingVotesRequired: semester.isGettingVotesRequired,
             };
           });
           setChapters(semester.syllabus);
@@ -172,6 +183,10 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
     }
   };
 
+  const switchHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSemester({ ...semester, [event.target.name]: event.target.checked });
+  };
+
   const onSubmitHandler = async () => {
     try {
       setRequestLoader(true);
@@ -207,13 +222,14 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         }
       });
 
-      let startDate = moment(semester.start);
-      //let endDate = moment(semester.endDate);
-      //let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
+      let startDate = moment(semester.startDate);
+      let endDate = moment(semester.endDate);
+      let nodeProposalStartDate = moment(semester.nodeProposals.startDate);
+      let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
+      let questionProposalStartDate = moment(semester.questionProposals.startDate);
       let questionProposalEndDate = moment(semester.questionProposals.endDate);
-      //let nodeProposalDateDiff = nodeProposalEndDate.diff(semester.nodeProposals.startDate, "days") + 1;
-      let questionProposalDateDiff = questionProposalEndDate.diff(semester.questionProposals.startDate, "days") + 1;
-      console.log(startDate.diff(semester.nodeProposals.startDate, "days"), "diff");
+      let chapterDateDiff = endDate.diff(startDate, "days");
+
       if (!semester.startDate) {
         setErrorState({ ...initialErrorsState, startDate: true, errorText: `Chapter start date is required.` });
         setRequestLoader(false);
@@ -222,63 +238,89 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setErrorState({ ...initialErrorsState, endDate: true, errorText: `Chapter end date is required.` });
         setRequestLoader(false);
         return;
+      } else if (chapterDateDiff <= 0) {
+        setErrorState({
+          ...initialErrorsState,
+          endDate: true,
+          errorText: `The end date should be greater than the start date.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (!nodeProposalStartDate.isBetween(startDate, endDate, null, "[)") && semester.isProposalRequired) {
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalStartDate: true,
+          errorText: `The start date of the node proposal should fall between the start and end dates of the chapter.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (!nodeProposalEndDate.isBetween(startDate, endDate, null, "(]") && semester.isProposalRequired) {
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalEndDate: true,
+          errorText: `The end date of a node proposal should fall between the start and end dates of the chapter.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (nodeProposalEndDate < nodeProposalStartDate && semester.isProposalRequired) {
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalEndDate: true,
+          errorText: `The end date of a node proposal should be less than the start date of the node proposal.`,
+        });
+        setRequestLoader(false);
+        return;
       } else if (
-        semester.nodeProposals.startDate < semester.startDate ||
-        semester.nodeProposals.startDate > semester.endDate
+        !questionProposalStartDate.isBetween(startDate, endDate, null, "[)") &&
+        semester.isQuestionProposalRequired
       ) {
         setErrorState({
           ...initialErrorsState,
-          nodeProposalDate: true,
-          errorText: `Node proposal start date should be greater or equal to chapter startDate`,
+          questionProposalStartDate: true,
+          errorText: `The start date of the question proposal should fall between the start and end dates of the chapter.`,
         });
         setRequestLoader(false);
         return;
       } else if (
-        semester.nodeProposals.endDate > semester.endDate ||
-        semester.nodeProposals.endDate < semester.startDate
+        !questionProposalEndDate.isBetween(startDate, endDate, null, "(]") &&
+        semester.isQuestionProposalRequired
       ) {
         setErrorState({
           ...initialErrorsState,
-          nodeProposalDate: true,
-          errorText: `Node proposal end date should be less or equal to chapter endDate`,
+          questionProposalEndDate: true,
+          errorText: `The end date of the question proposal should fall between the start and end dates of the chapter.`,
         });
         setRequestLoader(false);
         return;
-      } else if (questionProposalDateDiff > semester.days) {
+      } else if (questionProposalEndDate < questionProposalStartDate && semester.isQuestionProposalRequired) {
         setErrorState({
           ...initialErrorsState,
-          questionProposalDate: true,
-          errorText: `Question proposal date range should not exceed ${semester.days} days.`,
-        });
-        setRequestLoader(false);
-        return;
-      } else if (questionProposalDateDiff <= 0) {
-        setErrorState({
-          ...initialErrorsState,
-          questionProposalDate: true,
-          errorText: `Ending date should not be less than starting date in question proposal.`,
+          questionProposalEndDate: true,
+          errorText: `The end date of the question proposal should be less than the start date of the question proposal.`,
         });
         setRequestLoader(false);
         return;
       } else if (
-        semester.nodeProposals.totalDaysOfCourse > semester.days ||
-        semester.nodeProposals.totalDaysOfCourse <= 0
+        (semester.nodeProposals.totalDaysOfCourse > chapterDateDiff + 1 ||
+          semester.nodeProposals.totalDaysOfCourse <= 0) &&
+        semester.isProposalRequired
       ) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalDay: true,
-          errorText: `Days should be between 1 to ${semester.days} in node proposal.`,
+          errorText: `Days should be between 1 and ${chapterDateDiff + 1} in node proposal.`,
         });
         setRequestLoader(false);
         return;
       } else if (
-        semester.questionProposals.totalDaysOfCourse > semester.days ||
-        semester.questionProposals.totalDaysOfCourse <= 0
+        (semester.questionProposals.totalDaysOfCourse > chapterDateDiff + 1 ||
+          semester.questionProposals.totalDaysOfCourse <= 0) &&
+        semester.isQuestionProposalRequired
       ) {
         setErrorState({
           ...initialErrorsState,
           questionProposalDay: true,
-          errorText: `Days should be between 1 to ${semester.days} in question proposal.`,
+          errorText: `Days should be between 1 and ${chapterDateDiff + 1} in question proposal.`,
         });
         setRequestLoader(false);
         return;
@@ -340,11 +382,16 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Proposal errorState={errorState} semester={semester} inputsHandler={inputsHandler} />
+          <Proposal
+            errorState={errorState}
+            semester={semester}
+            inputsHandler={inputsHandler}
+            switchHandler={switchHandler}
+          />
         </Grid>
       </Grid>
       <Grid container spacing={0} mt={5}>
-        <Vote semester={semester} inputsHandler={inputsHandler} />
+        <Vote semester={semester} inputsHandler={inputsHandler} switchHandler={switchHandler} />
       </Grid>
       <Box display="flex" justifyContent="space-between" alignItems="center" gap="10px" mt={3}>
         <LoadingButton
