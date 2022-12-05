@@ -180,6 +180,7 @@ describe("POST /api/rateVersion", () => {
         ],
         "status"
       ),
+      new MockData([], "actionTracks"),
     ];
 
     const nodesCollection = new MockData(nodes, "nodes");
@@ -465,6 +466,7 @@ describe("POST /api/rateVersion", () => {
           ],
           "status"
         ),
+        new MockData([], "actionTracks"),
       ];
 
       const nodesCollection = new MockData(nodes, "nodes");
@@ -603,6 +605,14 @@ describe("POST /api/rateVersion", () => {
           const notification = notifications.docs[0].data() as INotification;
           expect(notification.aType).toEqual("Accept");
         });
+      });
+
+      it("actionTracks based on sections", async () => {
+        const actionTracks = (await db.collection("actionTracks").get()).docs;
+        expect(actionTracks.length).toEqual(1);
+
+        expect(actionTracks[0].data().doer).toEqual(users[1].uname);
+        expect(actionTracks[0].data().receivers.includes(users[1].uname)).toBeTruthy();
       });
     });
 
@@ -806,6 +816,7 @@ describe("POST /api/rateVersion", () => {
           ],
           "userConceptVersions"
         ),
+        new MockData([], "actionTracks"),
       ];
 
       const nodesCollection = new MockData(nodes, "nodes");
@@ -983,6 +994,14 @@ describe("POST /api/rateVersion", () => {
           const notification = notifications.docs[0].data() as INotification;
           expect(notification.aType).toEqual("Accept");
         });
+      });
+
+      it("actionTracks based on sections", async () => {
+        const actionTracks = (await db.collection("actionTracks").get()).docs;
+        expect(actionTracks.length).toEqual(1);
+
+        expect(actionTracks[0].data().doer).toEqual(users[1].uname);
+        expect(actionTracks[0].data().receivers.includes(users[1].uname)).toBeTruthy();
       });
     });
   });

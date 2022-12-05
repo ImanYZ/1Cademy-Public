@@ -45,6 +45,7 @@ import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { LivelinessBar } from "@/components/map/LivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -3337,6 +3338,8 @@ const Dashboard = ({}: DashboardProps) => {
             </Tooltip>
           )}
           {/* end Data from map */}
+
+          <LivelinessBar db={db} />
 
           {settings.view === "Graph" && (
             <Box

@@ -335,6 +335,7 @@ describe("POST /api/wrongNode", () => {
     new MockData([], "notificationNums"),
     new MockData([], "notifications"),
     new MockData([], "userNodesLog"),
+    new MockData([], "actionTracks"),
     new TypesenseMock(TypesenseNodeSchema, [], "nodes"),
   ];
   const positiveFields = [
@@ -586,5 +587,12 @@ describe("POST /api/wrongNode", () => {
 
   it("node title updated in typesense", async () => {
     expect(await typesenseDocumentExists("nodes", String(nodes[0].documentId))).toBeFalsy();
+  });
+
+  it("actionTracks based on sections", async () => {
+    const actionTracks = (await db.collection("actionTracks").get()).docs;
+    expect(actionTracks.length).toEqual(1);
+
+    expect(actionTracks[0].data().doer).toEqual(users[0].uname);
   });
 });

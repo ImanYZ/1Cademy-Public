@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
+import { IActionTrack } from "src/types/IActionTrack";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
@@ -329,6 +330,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       writeCounts,
     });
     await commitBatch(batch);
+
+    // TODO: move these to queue
+    // action tracks
+    await detach(async () => {
+      const actionRef = db.collection("actionTracks").doc();
+      actionRef.create({
+        accepted: !!newVersion.accepted,
+        type: "ChildNode",
+        imageUrl: req.body.data.user.userData.imageUrl,
+        action: versionRef.id,
+        createdAt: currentTimestamp,
+        doer: newVersion.proposer,
+        nodeId: newVersion.node,
+        receivers: [req.body.data.user.userData.uname],
+      } as IActionTrack);
+    });
 
     // we need update contributors, contribNames, institNames, institutions
     // TODO: move these to queue

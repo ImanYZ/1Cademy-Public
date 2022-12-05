@@ -189,6 +189,7 @@ describe("POST /api/proposeChildNode", () => {
     new MockData([], "userQuestionVersions"),
     new MockData([], "userVersionsLog"),
     new MockData([], "tags"),
+    new MockData([], "actionTracks"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -652,6 +653,13 @@ describe("POST /api/proposeChildNode", () => {
         expect(nodeData.institNames.includes(users[0].deInstit)).toEqual(true);
         expect(nodeData.institutions.hasOwnProperty(users[0].deInstit)).toEqual(true);
         expect(nodeData.institutions[users[0].deInstit].reputation).toEqual(contribution);
+      });
+
+      it("actionTracks based on sections", async () => {
+        const actionTracks = (await db.collection("actionTracks").get()).docs;
+        expect(actionTracks.length).toEqual(1);
+
+        expect(actionTracks[0].data().doer).toEqual(users[0].uname);
       });
     });
   });
