@@ -45,7 +45,6 @@ import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
-import { LivelinessBar } from "@/components/map/LivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -85,6 +84,7 @@ import {
   compareLinks,
   compareProperty,
   copyNode,
+  createActionTrack,
   createOrUpdateNode,
   generateReputationSignal,
   getSelectionText,
@@ -1430,6 +1430,8 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
+        createActionTrack(db, "NodeOpen", "", String(user?.uname), String(user?.imageUrl), linkedNodeID, []);
+
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
           lastNodeOperation.current = "Searcher";
@@ -1446,7 +1448,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, openNodeHandler]
+    [nodeBookState.choosingNode, openNodeHandler, user]
   );
 
   const getNodeUserNode = useCallback(
@@ -1523,6 +1525,8 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+
+          createActionTrack(db, "NodeHide", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
         }
 
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
@@ -1660,6 +1664,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
+
+          if (!thisNode.open) {
+            createActionTrack(db, "NodeCollapse", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          }
           return { nodes: oldNodes, edges };
         });
       }
@@ -1710,6 +1718,13 @@ const Dashboard = ({}: DashboardProps) => {
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, nodeBookState.choosingNode /*selectionType*/]
+  );
+
+  const onNodeShare = useCallback(
+    (nodeId: string, platform: string) => {
+      createActionTrack(db, "NodeShare", platform, String(user?.uname), String(user?.imageUrl), nodeId, []);
+    },
+    [user]
   );
 
   const referenceLabelChange = useCallback(
@@ -1774,6 +1789,11 @@ const Dashboard = ({}: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
+
+          if (!thisNode.isStudied) {
+            createActionTrack(db, "NodeStudied", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          }
+
           setDoc(doc(userNodeLogRef), userNodeLogData);
           return { nodes: oldNodes, edges };
         });
@@ -1829,6 +1849,8 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
+
+          createActionTrack(db, "NodeBookmark", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
           return { nodes: oldNodes, edges };
         });
       }
@@ -3339,8 +3361,6 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          <LivelinessBar db={db} />
-
           {settings.view === "Graph" && (
             <Box
               id="MapContent"
@@ -3372,6 +3392,7 @@ const Dashboard = ({}: DashboardProps) => {
                   hideOffsprings={hideOffsprings}
                   toggleNode={toggleNode}
                   openNodePart={openNodePart}
+                  onNodeShare={onNodeShare}
                   selectNode={selectNode}
                   nodeClicked={nodeClicked} // CHECK when is used
                   correctNode={correctNode}

@@ -84,6 +84,7 @@ type NodeProps = {
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
+  onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: any;
   nodeClicked: any;
   correctNode: any;
@@ -179,6 +180,7 @@ const Node = ({
   hideOffsprings: onHideOffsprings,
   toggleNode,
   openNodePart,
+  onNodeShare,
   selectNode,
   nodeClicked,
   correctNode,
@@ -682,6 +684,7 @@ const Node = ({
                 bookmarked={bookmarked}
                 bookmarks={bookmarks}
                 reloadPermanentGrpah={reloadPermanentGrpah}
+                onNodeShare={onNodeShare}
                 markStudied={markStudiedHandler}
                 bookmark={bookmarkHandler}
                 openNodePart={openNodePartHandler}
@@ -823,6 +826,7 @@ const Node = ({
                 bookmarked={bookmarked}
                 bookmarks={bookmarks}
                 reloadPermanentGrpah={reloadPermanentGrpah}
+                onNodeShare={onNodeShare}
                 markStudied={markStudiedHandler}
                 bookmark={bookmarkHandler}
                 openNodePart={openNodePartHandler}

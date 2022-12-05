@@ -77,6 +77,7 @@ type NodeFooterProps = {
   bookmarked: any;
   bookmarks: any;
   reloadPermanentGrpah: any;
+  onNodeShare: (nodeId: string, platform: string) => void;
   markStudied: any;
   bookmark: any;
   openNodePart: any;
@@ -129,6 +130,7 @@ const NodeFooter = ({
   bookmarked,
   bookmarks,
   reloadPermanentGrpah,
+  onNodeShare,
   markStudied,
   bookmark,
   openNodePart,
@@ -178,6 +180,8 @@ const NodeFooter = ({
     let url: any = protocol + "//" + hostName + "/n/" + identifier;
     navigator.clipboard.writeText(url);
     setOpenMenu(false);
+
+    onNodeShare(identifier, "copy-link");
   };
 
   const selectReferences = useCallback(
@@ -1082,6 +1086,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "twitter")}
                             href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
                             sx={{
                               color: "#BDBDBD",
@@ -1120,6 +1125,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "reddit")}
                             href={`http://www.reddit.com/submit?url=${url}`}
                             sx={{
                               color: "#BDBDBD",
@@ -1158,6 +1164,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "facebook")}
                             href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
                             sx={{
                               color: "#BDBDBD",
@@ -1196,6 +1203,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "linkedin")}
                             href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
                             sx={{
                               color: "#BDBDBD",
