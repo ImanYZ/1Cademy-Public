@@ -101,12 +101,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
       try {
         setIsRetrieving(true);
-        setSearchResults({
-          data: [],
-          lastPageLoaded: 0,
-          totalPage: 0,
-          totalResults: 0,
-        });
+        if (page < 2) {
+          setSearchResults({
+            data: [],
+            lastPageLoaded: 0,
+            totalPage: 0,
+            totalResults: 0,
+          });
+        }
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q,
           nodeTypes,
