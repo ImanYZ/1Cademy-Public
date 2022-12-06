@@ -1,0 +1,5 @@
+.rive-canvas {
+  width: inherit;
+  height: inherit;
+  border: solid 2px pink;
+}
