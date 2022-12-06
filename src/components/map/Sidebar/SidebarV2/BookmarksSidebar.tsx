@@ -96,8 +96,8 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
       open={open}
       onClose={onClose}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={window.innerWidth > 599 ? 430 : window.innerWidth}
+      height={window.innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={

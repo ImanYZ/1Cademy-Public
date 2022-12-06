@@ -119,8 +119,8 @@ const PendingProposalSidebar = ({
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={window.innerWidth > 599 ? 430 : window.innerWidth}
+      height={window.innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       contentSignalState={proposals}
       SidebarContent={

@@ -202,8 +202,8 @@ const NotificationSidebar = ({
       open={open}
       title="Notifications"
       headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={window.innerWidth > 599 ? 430 : window.innerWidth}
+      height={window.innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       onClose={onClose}
