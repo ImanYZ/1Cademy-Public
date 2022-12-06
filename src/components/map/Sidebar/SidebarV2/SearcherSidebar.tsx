@@ -578,6 +578,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
     sortOption,
     viewTagsInMovil,
     openSortOptions,
+    innerWidth,
   ]);
 
   return (
@@ -603,7 +604,10 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
                   onClick={() => openLinkedNode(resNode.id, "Searcher")}
                   sx={{
                     listStyle: "none",
-                    padding: "10px",
+                    padding: {
+                      xs: "5px 10px",
+                      sm: "10px",
+                    },
                     borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
                     cursor: "pointer",
                   }}
