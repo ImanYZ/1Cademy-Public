@@ -238,7 +238,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setErrorState({ ...initialErrorsState, endDate: true, errorText: `Chapter end date is required.` });
         setRequestLoader(false);
         return;
-      } else if (chapterDateDiff <= 0) {
+      } else if (chapterDateDiff < 0) {
         setErrorState({
           ...initialErrorsState,
           endDate: true,
@@ -246,7 +246,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         });
         setRequestLoader(false);
         return;
-      } else if (!nodeProposalStartDate.isBetween(startDate, endDate, null, "[)") && semester.isProposalRequired) {
+      } else if (!nodeProposalStartDate.isBetween(startDate, endDate, null, "[]") && semester.isProposalRequired) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalStartDate: true,
@@ -254,7 +254,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         });
         setRequestLoader(false);
         return;
-      } else if (!nodeProposalEndDate.isBetween(startDate, endDate, null, "(]") && semester.isProposalRequired) {
+      } else if (!nodeProposalEndDate.isBetween(startDate, endDate, null, "[]") && semester.isProposalRequired) {
         setErrorState({
           ...initialErrorsState,
           nodeProposalEndDate: true,
@@ -271,7 +271,19 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setRequestLoader(false);
         return;
       } else if (
-        !questionProposalStartDate.isBetween(startDate, endDate, null, "[)") &&
+        (semester.nodeProposals.totalDaysOfCourse > chapterDateDiff + 1 ||
+          semester.nodeProposals.totalDaysOfCourse <= 0) &&
+        semester.isProposalRequired
+      ) {
+        setErrorState({
+          ...initialErrorsState,
+          nodeProposalDay: true,
+          errorText: `Days should be between 1 and ${chapterDateDiff + 1} in node proposal.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (
+        !questionProposalStartDate.isBetween(startDate, endDate, null, "[]") &&
         semester.isQuestionProposalRequired
       ) {
         setErrorState({
@@ -282,7 +294,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setRequestLoader(false);
         return;
       } else if (
-        !questionProposalEndDate.isBetween(startDate, endDate, null, "(]") &&
+        !questionProposalEndDate.isBetween(startDate, endDate, null, "[]") &&
         semester.isQuestionProposalRequired
       ) {
         setErrorState({
@@ -297,18 +309,6 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           ...initialErrorsState,
           questionProposalEndDate: true,
           errorText: `The end date of the question proposal should be less than the start date of the question proposal.`,
-        });
-        setRequestLoader(false);
-        return;
-      } else if (
-        (semester.nodeProposals.totalDaysOfCourse > chapterDateDiff + 1 ||
-          semester.nodeProposals.totalDaysOfCourse <= 0) &&
-        semester.isProposalRequired
-      ) {
-        setErrorState({
-          ...initialErrorsState,
-          nodeProposalDay: true,
-          errorText: `Days should be between 1 and ${chapterDateDiff + 1} in node proposal.`,
         });
         setRequestLoader(false);
         return;

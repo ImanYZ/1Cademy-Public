@@ -112,7 +112,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
                       : "black"
                     : "transparent",
               }}
-              error={errorState.nodeProposaStartlDate}
+              error={errorState.nodeProposalStartDate}
             />
             &nbsp; to &nbsp;
             <FilledInput
