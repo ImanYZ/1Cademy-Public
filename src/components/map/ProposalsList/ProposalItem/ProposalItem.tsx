@@ -48,7 +48,14 @@ const ProposalItem = (props: any) => {
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
       onClick={openLinkedNodeClick(props.proposal)}
-      style={{ display: "flex", flexDirection: "column", padding: "10px 20px" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        padding: {
+          xs: "5px 10px",
+          sm: "10px 20px",
+        },
+      }}
     >
       {/* <h6>{props.proposal.newNodeId}</h6> */}
       <div style={{ display: "flex", justifyContent: "space-between" }}>
