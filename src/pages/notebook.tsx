@@ -3208,12 +3208,14 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "BOOKMARKS_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedSearcherSidebar
                 openLinkedNode={openLinkedNode}
                 open={openSidebar === "SEARCHER_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}
@@ -3222,6 +3224,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedPendingProposalSidebar
                 theme={settings.theme}
@@ -3231,6 +3234,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "PENDING_PROPOSALS"}
                 onClose={() => onCloseSidebar()}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}
@@ -3254,6 +3258,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openProposal={openProposal}
                 db={db}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
                 username={user.uname}
               />
 
@@ -3276,6 +3281,7 @@ const Dashboard = ({}: DashboardProps) => {
                   openLinkedNode={openLinkedNode}
                   identifier={nodeBookState.selectedNode}
                   innerHeight={innerHeight}
+                  innerWidth={windowWith}
                 />
               )}
             </Box>
@@ -3288,7 +3294,11 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar ? "7px" : `${innerHeight * 0.35 + 7}px`,
+                  xs: !openSidebar
+                    ? "7px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 7}px`
+                    : `${innerHeight * 0.25 + 7}px`,
                   md: "7px",
                 },
 
@@ -3304,7 +3314,11 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar ? "10px" : `${innerHeight * 0.35 + 10}px`,
+                  xs: !openSidebar
+                    ? "10px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : `${innerHeight * 0.25 + 10}px`,
                   md: "10px",
                 },
                 right: "10px",
@@ -3327,7 +3341,11 @@ const Dashboard = ({}: DashboardProps) => {
             sx={{
               position: "fixed",
               top: {
-                xs: !openSidebar ? "60px" : `${innerHeight * 0.35 + 65}px`,
+                xs: !openSidebar
+                  ? "60px"
+                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  ? `${innerHeight * 0.35 + 65}px`
+                  : `${innerHeight * 0.25 + 65}px`,
                 md: "60px",
               },
               right: "10px",
@@ -3349,8 +3367,11 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar ? "110px" : `${innerHeight * 0.35 + 120}px`,
-
+                  xs: !openSidebar
+                    ? "110px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 120}px`
+                    : `${innerHeight * 0.25 + 120}px`,
                   md: "110px",
                 },
                 right: "10px",

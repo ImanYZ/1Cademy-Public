@@ -72,7 +72,14 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             // CHECK: I changed: node.id to node.userNodeId
             key={`node${node.userNodeId}`}
             onClick={() => openLinkedNode(node.node)}
-            sx={{ listStyle: "none", padding: "10px", cursor: "pointer" }}
+            sx={{
+              listStyle: "none",
+              padding: {
+                xs: "5px 10px",
+                sm: "10px",
+              },
+              cursor: "pointer",
+            }}
           >
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
               <NodeTypeIcon nodeType={node.nodeType} sx={{ fontSize: "16px" }} />

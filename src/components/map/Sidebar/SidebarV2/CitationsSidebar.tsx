@@ -16,6 +16,7 @@ type CitationSidebarProps = {
   openLinkedNode: any;
   identifier: string;
   innerHeight?: number;
+  innerWidth: number;
 };
 
 type Citation = {
@@ -23,7 +24,14 @@ type Citation = {
   title: string;
   nodeType: NodeType;
 };
-export const CitationsSidebar = ({ identifier, openLinkedNode, open, onClose, innerHeight }: CitationSidebarProps) => {
+export const CitationsSidebar = ({
+  identifier,
+  openLinkedNode,
+  open,
+  onClose,
+  innerHeight,
+  innerWidth,
+}: CitationSidebarProps) => {
   const db = getFirestore();
 
   const [citationList, setCitationList] = useState<Citation[]>([]);
@@ -60,8 +68,8 @@ export const CitationsSidebar = ({ identifier, openLinkedNode, open, onClose, in
       headerImage={citation}
       open={open}
       onClose={onClose}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={innerWidth > 599 ? 430 : innerWidth}
+      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       contentSignalState={citationList}

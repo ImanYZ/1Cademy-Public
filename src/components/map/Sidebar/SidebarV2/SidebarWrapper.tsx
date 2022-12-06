@@ -169,7 +169,16 @@ export const SidebarWrapper = ({
       </Box>
 
       {showCloseButton && (
-        <Box sx={{ position: "absolute", top: "10px", right: "10px" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: {
+              xs: "2px",
+              sm: "10px",
+            },
+            right: "10px",
+          }}
+        >
           <Tooltip title="Close the sidebar." placement="left">
             <IconButton
               onClick={onClose}
