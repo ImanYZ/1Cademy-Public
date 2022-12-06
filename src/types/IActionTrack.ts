@@ -1,6 +1,17 @@
 import { Timestamp } from "firebase-admin/firestore";
 
-export type IActionTrackType = "NodeVote" | "Improvement" | "ChildNode" | "RateVersion";
+export type IActionTrackType =
+  | "NodeVote"
+  | "Improvement"
+  | "ChildNode"
+  | "RateVersion"
+  | "NodeOpen"
+  | "NodeHide"
+  | "NodeCollapse"
+  | "NodeStudied"
+  | "NodeBookmark"
+  | "NodeShare"
+  | "Search";
 export type IActionTrackAction = "Correct" | "Wrong" | "CorrectRM" | "WrongRM" | string;
 
 export type IActionTrack = {

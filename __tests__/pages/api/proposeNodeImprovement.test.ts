@@ -569,7 +569,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
         it("actionTracks based on sections", async () => {
           const actionTracks = (await db.collection("actionTracks").get()).docs;
-          expect(actionTracks.length).toEqual(1);
+          expect(actionTracks.length).toEqual(2);
 
           expect(actionTracks[0].data().doer).toEqual(users[0].uname);
         });

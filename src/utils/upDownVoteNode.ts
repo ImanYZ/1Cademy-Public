@@ -13,6 +13,7 @@ import {
 import { detach, doNeedToDeleteNode, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "./helpers";
 import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
 import { IActionTrack } from "src/types/IActionTrack";
+import { IUser } from "src/types/IUser";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -397,6 +398,9 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     }
 
     for (const action of actions) {
+      const user = await db.collection("users").doc(uname).get();
+      const userData = user.data() as IUser;
+
       let actionRef = db.collection("actionTracks").doc();
       batch.create(actionRef, {
         accepted: true,
@@ -404,9 +408,10 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
         action,
         createdAt: currentTimestamp,
         doer: uname,
+        imageUrl: userData.imageUrl,
         nodeId,
         receivers,
-      });
+      } as IActionTrack);
     }
 
     await commitBatch(batch);

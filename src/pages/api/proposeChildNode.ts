@@ -345,6 +345,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
       } as IActionTrack);
+
+      const rateActionRef = db.collection("actionTracks").doc();
+      rateActionRef.create({
+        accepted: !!newVersion.accepted,
+        type: "RateVersion",
+        imageUrl: req.body.data.user.userData.imageUrl,
+        action: "Correct-" + versionRef.id,
+        createdAt: currentTimestamp,
+        doer: newVersion.proposer,
+        nodeId: newVersion.node,
+        receivers: [req.body.data.user.userData.uname],
+      } as IActionTrack);
     });
 
     // we need update contributors, contribNames, institNames, institutions

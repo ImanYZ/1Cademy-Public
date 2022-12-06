@@ -20,6 +20,7 @@ type NodeListProps = {
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
   openNodePart: any;
+  onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: any;
   nodeClicked: any;
   correctNode: any;
@@ -63,6 +64,7 @@ const NodesList = ({
   hideNodeHandler,
   toggleNode,
   openNodePart,
+  onNodeShare,
   selectNode,
   nodeClicked,
   correctNode,
@@ -194,6 +196,7 @@ const NodesList = ({
             hideOffsprings={hideOffsprings}
             toggleNode={toggleNode}
             openNodePart={openNodePart}
+            onNodeShare={onNodeShare}
             selectNode={selectNode}
             nodeClicked={nodeClicked}
             correctNode={correctNode}
