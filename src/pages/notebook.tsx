@@ -173,6 +173,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
+  const [showLivelinessBar, setShowLivelinessBar] = useState<boolean>(false);
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -285,6 +286,13 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
+    const _window: any = window;
+    const internalId = setInterval(() => {
+      if(_window.google_optimize !== undefined) {
+        setShowLivelinessBar(!!_window.livelinessBar);
+        clearInterval(internalId);
+      }
+    }, 500);
   }, []);
 
   const scrollToNode = useCallback(
@@ -3362,7 +3370,9 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          <MemoizedLivelinessBar db={db} openSidebar={openSidebar} />
+          {showLivelinessBar ? (
+            <MemoizedLivelinessBar db={db} openSidebar={openSidebar} />
+          ) : <div />}
 
           {settings.view === "Graph" && (
             <Box

@@ -32,7 +32,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
 
   useEffect(() => {
     let t: any = null;
-    const ts = new Date().getTime() - 86400000;
+    const ts = new Date().getTime() - 3600000;
     const actionTracksCol = collection(db, "actionTracks");
     const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
     const unsubscribe = onSnapshot(q, async snapshot => {
