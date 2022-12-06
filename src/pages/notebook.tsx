@@ -288,7 +288,7 @@ const Dashboard = ({}: DashboardProps) => {
     setInnerHeight(window.innerHeight);
     const _window: any = window;
     const internalId = setInterval(() => {
-      if(_window.google_optimize !== undefined) {
+      if (_window.google_optimize !== undefined) {
         setShowLivelinessBar(!!_window.livelinessBar);
         clearInterval(internalId);
       }
@@ -3370,9 +3370,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? (
-            <MemoizedLivelinessBar db={db} openSidebar={openSidebar} />
-          ) : <div />}
+          {showLivelinessBar ? <MemoizedLivelinessBar db={db} openSidebar={!!openSidebar} /> : <div />}
 
           {settings.view === "Graph" && (
             <Box
