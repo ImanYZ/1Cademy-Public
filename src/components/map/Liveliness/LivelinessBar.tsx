@@ -177,6 +177,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
         >
           <ArrowForwardIosIcon
             sx={{
+              fontSize: "14px",
               position: "absolute",
               right: "0px",
               transform: "translate(40%, -50%)",
@@ -203,7 +204,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             }}
           >
             {unames.map((uname: string) => {
-              const seekPosition = (usersInteractions[uname].count / maxActions) * barWidth - 28;
+              const seekPosition = (usersInteractions[uname].count / maxActions) * barWidth - 32;
               return (
                 <Tooltip key={uname} title={uname}>
                   <Box
