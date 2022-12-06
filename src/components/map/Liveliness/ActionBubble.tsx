@@ -12,6 +12,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { Box } from "@mui/material";
 import { keyframes } from "@mui/system";
 import React, { useEffect, useState } from "react";
+import { ActionTrackType } from "src/knowledgeTypes";
 
 const slideInAnimation = keyframes`
   from {
@@ -22,24 +23,11 @@ const slideInAnimation = keyframes`
   }
 `;
 
-type ActionType =
-  | "Correct"
-  | "Wrong"
-  | "Improvement"
-  | "ChildNode"
-  | "NodeOpen"
-  | "NodeHide"
-  | "NodeCollapse"
-  | "NodeStudied"
-  | "NodeBookmark"
-  | "NodeShare"
-  | "Search";
-
 type ActionBubbleProps = {
-  actionType: ActionType;
+  actionType: ActionTrackType;
 };
 
-const getActionIcon = (actionType: ActionType) => {
+const getActionIcon = (actionType: ActionTrackType) => {
   if (actionType === "Correct") return CheckIcon;
   if (actionType === "Wrong") return CloseIcon;
   if (actionType === "Improvement") return AutoAwesomeIcon;
@@ -74,7 +62,7 @@ const ActionBubble = ({ actionType }: ActionBubbleProps) => {
         borderRadius: "50%",
         background: actionType === "Wrong" ? "#F45B2B" : "#3FAB51",
         fontSize: "10px",
-        animation: `${slideInAnimation} 3s ease-out 0s infinite normal forwards`,
+        animation: `${slideInAnimation} 3s ease-out 0s normal forwards`,
       }}
     >
       <Icon

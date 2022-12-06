@@ -45,7 +45,7 @@ import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
-import { LivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
+import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -1431,16 +1431,7 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
-
-        createActionTrack(
-          db,
-          "NodeOpen",
-          "",
-          String(user?.uname),
-          String(user?.imageUrl),
-          linkedNodeID,
-          []
-        );
+        createActionTrack(db, "NodeOpen", "", String(user?.uname), String(user?.imageUrl), linkedNodeID, []);
 
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
@@ -1536,15 +1527,7 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
-          createActionTrack(
-            db,
-            "NodeHide",
-            "",
-            String(user?.uname),
-            String(user?.imageUrl),
-            nodeId,
-            []
-          );
+          createActionTrack(db, "NodeHide", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
         }
 
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
@@ -1683,16 +1666,8 @@ const Dashboard = ({}: DashboardProps) => {
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
-          if(!thisNode.open) {
-            createActionTrack(
-              db,
-              "NodeCollapse",
-              "",
-              String(user?.uname),
-              String(user?.imageUrl),
-              nodeId,
-              []
-            );
+          if (!thisNode.open) {
+            createActionTrack(db, "NodeCollapse", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
           }
           return { nodes: oldNodes, edges };
         });
@@ -1746,17 +1721,12 @@ const Dashboard = ({}: DashboardProps) => {
     [user, nodeBookState.choosingNode /*selectionType*/]
   );
 
-  const onNodeShare = useCallback((nodeId: string, platform: string) => {
-    createActionTrack(
-      db,
-      "NodeShare",
-      platform,
-      String(user?.uname),
-      String(user?.imageUrl),
-      nodeId,
-      []
-    );
-  }, [user]);
+  const onNodeShare = useCallback(
+    (nodeId: string, platform: string) => {
+      createActionTrack(db, "NodeShare", platform, String(user?.uname), String(user?.imageUrl), nodeId, []);
+    },
+    [user]
+  );
 
   const referenceLabelChange = useCallback(
     (newLabel: string, nodeId: string, referenceIdx: number) => {
@@ -1821,16 +1791,8 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
 
-          if(!thisNode.isStudied) {
-            createActionTrack(
-              db,
-              "NodeStudied",
-              "",
-              String(user?.uname),
-              String(user?.imageUrl),
-              nodeId,
-              []
-            );
+          if (!thisNode.isStudied) {
+            createActionTrack(db, "NodeStudied", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
           }
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
@@ -1889,15 +1851,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
-          createActionTrack(
-            db,
-            "NodeBookmark",
-            "",
-            String(user?.uname),
-            String(user?.imageUrl),
-            nodeId,
-            []
-          );
+          createActionTrack(db, "NodeBookmark", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
           return { nodes: oldNodes, edges };
         });
       }
@@ -3408,7 +3362,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          <LivelinessBar db={db} />
+          <MemoizedLivelinessBar db={db} openSidebar={openSidebar} />
 
           {settings.view === "Graph" && (
             <Box
