@@ -17,9 +17,18 @@ type SearcherSidebarProps = {
   openLinkedNode: any;
   username: string;
   innerHeight?: number;
+  innerWidth: number;
 };
 
-export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNode }: SearcherSidebarProps) => {
+export const BookmarksSidebar = ({
+  open,
+  onClose,
+  theme,
+  username,
+  openLinkedNode,
+  innerHeight,
+  innerWidth,
+}: SearcherSidebarProps) => {
   const db = getFirestore();
   const [bookmarks, setBookmarks] = useState<FullNodesData>({});
   const [value, setValue] = React.useState(0);
@@ -96,8 +105,8 @@ export const BookmarksSidebar = ({ open, onClose, theme, username, openLinkedNod
       headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
       open={open}
       onClose={onClose}
-      width={window.innerWidth > 599 ? 430 : window.innerWidth}
-      height={window.innerWidth > 599 ? 100 : 35}
+      width={innerWidth > 599 ? 430 : innerWidth}
+      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={

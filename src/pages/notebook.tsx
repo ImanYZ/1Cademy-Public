@@ -3177,6 +3177,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "BOOKMARKS_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedSearcherSidebar
                 openLinkedNode={openLinkedNode}
@@ -3192,6 +3193,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedPendingProposalSidebar
                 theme={settings.theme}
@@ -3201,6 +3203,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "PENDING_PROPOSALS"}
                 onClose={() => onCloseSidebar()}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}
@@ -3224,6 +3227,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openProposal={openProposal}
                 db={db}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
                 username={user.uname}
               />
 
@@ -3246,6 +3250,7 @@ const Dashboard = ({}: DashboardProps) => {
                   openLinkedNode={openLinkedNode}
                   identifier={nodeBookState.selectedNode}
                   innerHeight={innerHeight}
+                  innerWidth={windowWith}
                 />
               )}
             </Box>
