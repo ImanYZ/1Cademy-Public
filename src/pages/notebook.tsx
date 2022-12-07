@@ -289,11 +289,11 @@ const Dashboard = ({}: DashboardProps) => {
     const _window: any = window;
     const internalId = setInterval(() => {
       if (_window.google_optimize !== undefined) {
-        setShowLivelinessBar(!!_window.livelinessBar);
+        setShowLivelinessBar(!!_window.livelinessBar || ["1man"].includes(String(user?.uname)));
         clearInterval(internalId);
       }
     }, 500);
-  }, []);
+  }, [user?.uname]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
