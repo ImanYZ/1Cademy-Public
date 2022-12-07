@@ -1,6 +1,6 @@
 // import "./MetaButton.css";
 
-import { Box, Tooltip, TooltipProps } from "@mui/material";
+import { Box, Button, Tooltip, TooltipProps } from "@mui/material";
 import React, { useCallback } from "react";
 
 // import { useRecoilValue } from "recoil";
@@ -49,7 +49,7 @@ const MetaButton = (props: MetaButtonProps) => {
   if ("onClick" in props && props.onClick) {
     return (
       <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition} disableInteractive>
-        <button
+        <Button
           className={
             // (isSubmitting
             //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
@@ -63,7 +63,10 @@ const MetaButton = (props: MetaButtonProps) => {
           // disabled={isSubmitting}
           onClick={metaButtonClick}
           onDoubleClick={handleDoubleClick}
-          style={props?.style}
+          sx={{
+            fontSize: "14px",
+            ...props?.style,
+          }}
         >
           {props.children}
           {/* {"tooltip" in props && props.tooltip && (
@@ -74,7 +77,7 @@ const MetaButton = (props: MetaButtonProps) => {
             {props.tooltip}
           </span>
         )} */}
-        </button>
+        </Button>
       </Tooltip>
     );
   } else {

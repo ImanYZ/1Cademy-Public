@@ -7,7 +7,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Box, IconButton, Link, Tooltip } from "@mui/material";
+import { Box, IconButton, Link, Stack, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect } from "react";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -367,11 +367,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
-                    }}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
                     key={props.identifier + "LinkTo" + tag.node + "DIV"}
                   >
                     <LinkingButton
@@ -398,7 +396,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         </IconButton>
                       </Tooltip>
                     )}
-                  </Box>
+                  </Stack>
                 );
               })}
               {props.editable && props.openPart === "References" && (

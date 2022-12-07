@@ -1522,7 +1522,10 @@ button.MuiTab-textColorInherit:focus {
   color: red !important;
 }
 
-.MetaButton.hoverable:hover,
+.MetaButton.hoverable:hover {
+  background: #525151;
+}
+
 .MetaButton.hoverable:focus,
 .TooltipText {
   /* -webkit-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
