@@ -289,11 +289,11 @@ const Dashboard = ({}: DashboardProps) => {
     const _window: any = window;
     const internalId = setInterval(() => {
       if (_window.google_optimize !== undefined) {
-        setShowLivelinessBar(!!_window.livelinessBar);
+        setShowLivelinessBar(!!_window.livelinessBar || ["1man"].includes(String(user?.uname)));
         clearInterval(internalId);
       }
     }, 500);
-  }, []);
+  }, [user?.uname]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
@@ -3369,13 +3369,13 @@ const Dashboard = ({}: DashboardProps) => {
                 position: "fixed",
                 top: {
                   xs: !openSidebar
-                    ? "110px"
+                    ? "10px"
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
                     ? `${innerHeight * 0.35 + 120}px`
                     : `${innerHeight * 0.25 + 120}px`,
-                  md: "110px",
+                  md: "10px",
                 },
-                right: "10px",
+                right: "60px",
                 zIndex: "1300",
                 transition: "all 1s ease",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
