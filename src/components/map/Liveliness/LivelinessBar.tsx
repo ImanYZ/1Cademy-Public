@@ -145,7 +145,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
         <Box
           id="livebar"
           sx={{
-            width: "80px",
+            width: "56px",
             background: "#1f1f1f",
             borderRadius: "10px 0px 0px 10px",
             right: 0,
@@ -154,10 +154,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             height: "100%",
             transform: !open ? "translate(calc(100%), 0px)" : null,
             transition: "all 0.2s 0s ease",
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            alignItems: "center",
+            padding: "0px 0px 0px 32px",
           }}
         >
           <Box
@@ -167,6 +164,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               width: "1px",
               borderRight: "2px solid #ffffff",
               position: "relative",
+              marginTop: "10px",
             }}
           >
             <KeyboardArrowDownIcon
@@ -189,13 +187,6 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             >
               {unames.map((uname: string) => {
                 const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
-                console.log(
-                  barHeight,
-                  usersInteractions[uname].count,
-                  maxActions,
-                  uname,
-                  "barHeight, usersInteractions[uname].count, maxActions, uname"
-                );
                 return (
                   <Tooltip key={uname} title={uname}>
                     <Box
@@ -244,9 +235,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                       <Box
                         sx={{
                           position: "absolute",
-                          top: "-18px",
-                          left: "50%",
-                          transform: "translate(-50%, 0px)",
+                          bottom: "6px",
+                          left: "-16px",
                         }}
                       >
                         {usersInteractions[uname].actions.map((action, index) => {
@@ -268,8 +258,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               display: "flex",
               top: "50%",
               transform: "translate(0px, -50%)",
-              left: "-30px",
-              width: "30px",
+              left: "-22px",
+              width: "22px",
               height: "30px",
               color: "#ffffff",
               position: "absolute",
