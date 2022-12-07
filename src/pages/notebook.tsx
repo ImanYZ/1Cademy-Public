@@ -3083,6 +3083,7 @@ const Dashboard = ({}: DashboardProps) => {
         id="Map"
         sx={{
           overflow: "hidden",
+          position: "relative",
           background:
             settings.background === "Color"
               ? theme =>
@@ -3391,7 +3392,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? <MemoizedLivelinessBar db={db} openSidebar={!!openSidebar} /> : <div />}
+          {showLivelinessBar ? <MemoizedLivelinessBar db={db} /> : <div />}
 
           {settings.view === "Graph" && (
             <Box
