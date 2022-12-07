@@ -1,6 +1,7 @@
+import styled from "@emotion/styled";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Box, Tooltip, useTheme } from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
+import { Box, Tooltip } from "@mui/material";
 import { collection, Firestore, onSnapshot, query, Timestamp, where } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
@@ -9,9 +10,16 @@ import { IActionTrack } from "src/types/IActionTrack";
 
 import { MemoizedActionBubble } from "./ActionBubble";
 
+const Livelinessbar = styled.div`
+  top: 120px;
+  right: 0px;
+  z-index: 1199;
+  position: absolute;
+  height: calc(100% - 220px);
+`;
+
 type ILivelinessBarProps = {
   db: Firestore;
-  openSidebar: boolean;
 };
 
 type UserInteractions = {
@@ -24,11 +32,11 @@ type UserInteractions = {
 };
 
 const LivelinessBar = (props: ILivelinessBarProps) => {
-  const { db, openSidebar } = props;
+  const { db } = props;
   const [open, setOpen] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
-  const [barWidth, setBarWidth] = useState<number>(0);
-  const theme = useTheme();
+  const [barHeight, setBarHeight] = useState<number>(0);
+  // const theme = useTheme();
 
   useEffect(() => {
     let t: any = null;
@@ -114,7 +122,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
   }, []);
 
   useEffect(() => {
-    setBarWidth(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientWidth)));
+    setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
   }, []);
 
   const unames = useMemo(() => {
@@ -132,172 +140,157 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
   }, [usersInteractions]);
 
   return (
-    <Box
-      sx={{
-        transform: !open ? "translate(0px, calc(-100% + 30px))" : null,
-        transition: "all 0.2s 0s ease",
-        position: "relative",
-        zIndex: 1199,
-      }}
-    >
-      <Box
-        sx={{
-          position: "relative",
-          background: "#1f1f1f",
-          borderRadius: "0px 0px 10px 10px",
-          width: "900px",
-          maxWidth: "100%",
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "48px 0px 25px",
-          [theme.breakpoints.down("lg")]: {
-            width: !openSidebar ? "80%" : "75%",
-            marginLeft: "50%",
-            transform: !openSidebar ? "translate(-47%, 0px)" : "translate(-43%, 0px)",
-          },
-          [theme.breakpoints.down("md")]: {
-            width: !openSidebar ? "585px" : "530px",
-            transform: !openSidebar ? "translate(-45%, 0px)" : "translate(-38%, 0px)",
-          },
-          [theme.breakpoints.down("sm")]: {
-            width: "320px",
-            transform: "translate(-49%, 0px)",
-          },
-        }}
-      >
+    <>
+      <Livelinessbar>
         <Box
-          className="seekbar"
+          id="livebar"
           sx={{
-            width: "calc(100% - 40px)",
-            borderBottom: "2px solid #ffffff",
-            position: "relative",
+            width: "80px",
+            background: "#1f1f1f",
+            borderRadius: "10px 0px 0px 10px",
+            right: 0,
+            top: 0,
+            position: "absolute",
+            height: "100%",
+            transform: !open ? "translate(calc(100%), 0px)" : null,
+            transition: "all 0.2s 0s ease",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <ArrowForwardIosIcon
-            sx={{
-              fontSize: "14px",
-              position: "absolute",
-              right: "0px",
-              transform: "translate(40%, -50%)",
-            }}
-          />
           <Box
-            className="seekbar-users"
-            id="liveliness-seekbar"
+            className="seekbar"
             sx={{
-              width: "100%",
-              position: "absolute",
-              top: "0px",
-              left: "0px",
-              transform: "translate(0px, -50%)",
-              "&:before": {
-                content: '" "',
-                border: "3px solid #ffffff",
-                borderRadius: "50%",
-                display: "inline-block",
-                position: "absolute",
-                left: "-4px",
-                top: "-2px",
-              },
+              height: "calc(100% - 40px)",
+              width: "1px",
+              borderRight: "2px solid #ffffff",
+              position: "relative",
             }}
           >
-            {unames.map((uname: string) => {
-              const seekPosition = (usersInteractions[uname].count / maxActions) * barWidth - 32;
-              return (
-                <Tooltip key={uname} title={uname}>
-                  <Box
-                    className={
-                      usersInteractions[uname].reputation === "Gain"
-                        ? "GainedPoint"
-                        : usersInteractions[uname].reputation === "Loss"
-                        ? "LostPoint"
-                        : ""
-                    }
-                    sx={{
-                      width: "28px",
-                      height: "28px",
-                      // display: "inline-block",
-                      position: "absolute",
-                      left: "0px",
-                      top: "0px",
-                      transition: "all 0.2s 0s ease",
-                      transform: `translate(${seekPosition}px, -50%)`,
-                      "& > .user-image": {
-                        borderRadius: "50%",
-                        overflow: "hidden",
+            <KeyboardArrowDownIcon
+              sx={{
+                fontSize: "20px",
+                position: "absolute",
+                top: "0px",
+                transform: "translate(-9px, -9px)",
+              }}
+            />
+            <Box
+              className="seekbar-users"
+              id="liveliness-seekbar"
+              sx={{
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                top: "0px",
+              }}
+            >
+              {unames.map((uname: string) => {
+                const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
+                console.log(
+                  barHeight,
+                  usersInteractions[uname].count,
+                  maxActions,
+                  uname,
+                  "barHeight, usersInteractions[uname].count, maxActions, uname"
+                );
+                return (
+                  <Tooltip key={uname} title={uname}>
+                    <Box
+                      className={
+                        usersInteractions[uname].reputation === "Gain"
+                          ? "GainedPoint"
+                          : usersInteractions[uname].reputation === "Loss"
+                          ? "LostPoint"
+                          : ""
+                      }
+                      sx={{
                         width: "28px",
                         height: "28px",
-                      },
-                      "&.GainedPoint": {
-                        "& > .user-image": {
-                          boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
-                        },
-                      },
-                      "&.LostPoint": {
-                        "& > .user-image": {
-                          boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
-                        },
-                      },
-                      "@keyframes slidein": {
-                        from: {
-                          transform: "translateY(0%)",
-                        },
-                        to: {
-                          transform: "translateY(100%)",
-                        },
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
+                        // display: "inline-block",
                         position: "absolute",
-                        top: "-18px",
-                        left: "50%",
-                        transform: "translate(-50%, 0px)",
+                        left: "0px",
+                        bottom: "0px",
+                        transition: "all 0.2s 0s ease",
+                        transform: `translate(-50%, ${seekPosition}px)`,
+                        "& > .user-image": {
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          width: "28px",
+                          height: "28px",
+                        },
+                        "&.GainedPoint": {
+                          "& > .user-image": {
+                            boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
+                          },
+                        },
+                        "&.LostPoint": {
+                          "& > .user-image": {
+                            boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
+                          },
+                        },
+                        "@keyframes slidein": {
+                          from: {
+                            transform: "translateY(0%)",
+                          },
+                          to: {
+                            transform: "translateY(100%)",
+                          },
+                        },
                       }}
                     >
-                      {usersInteractions[uname].actions.map((action, index) => {
-                        return <MemoizedActionBubble key={index} actionType={action} />;
-                      })}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: "-18px",
+                          left: "50%",
+                          transform: "translate(-50%, 0px)",
+                        }}
+                      >
+                        {usersInteractions[uname].actions.map((action, index) => {
+                          return <MemoizedActionBubble key={index} actionType={action} />;
+                        })}
+                      </Box>
+                      <Box className="user-image">
+                        <Image src={usersInteractions[uname].imageUrl} width={28} height={28} />
+                      </Box>
                     </Box>
-                    <Box className="user-image">
-                      <Image src={usersInteractions[uname].imageUrl} width={28} height={28} />
-                    </Box>
-                  </Box>
-                </Tooltip>
-              );
-            })}
+                  </Tooltip>
+                );
+              })}
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              background: "#1f1f1f",
+              display: "flex",
+              top: "50%",
+              transform: "translate(0px, -50%)",
+              left: "-30px",
+              width: "30px",
+              height: "30px",
+              color: "#ffffff",
+              position: "absolute",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "20px",
+              borderRadius: "6px 0px 0px 6px",
+              cursor: "pointer",
+            }}
+            onClick={() => setOpen(!open)}
+          >
+            <ArrowForwardIosIcon
+              fontSize="inherit"
+              sx={{
+                transform: !open ? "scaleX(-1)" : null,
+              }}
+            />
           </Box>
         </Box>
-      </Box>
-      <Box
-        sx={{
-          background: "#1f1f1f",
-          display: "flex",
-          margin: "0 auto",
-          width: "30px",
-          height: "30px",
-          color: "#ffffff",
-          position: "relative",
-          zIndex: 1199,
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "30px",
-          borderRadius: "0px 0px 6px 6px",
-          cursor: "pointer",
-        }}
-        onClick={() => setOpen(!open)}
-      >
-        <KeyboardArrowDownIcon
-          fontSize="inherit"
-          sx={{
-            transform: open ? "scaleY(-1)" : null,
-          }}
-        />
-      </Box>
-    </Box>
+      </Livelinessbar>
+    </>
   );
 };
 
