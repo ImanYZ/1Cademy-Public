@@ -462,7 +462,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (windowWith >= theme.breakpoints.values.md) {
         width = 480;
       } else if (windowWith >= theme.breakpoints.values.sm) {
-        width = 300;
+        width = 320;
       } else {
         width = windowWith;
       }
