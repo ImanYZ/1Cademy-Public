@@ -136,6 +136,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
       snapshotInitializer();
     }, 3600000);
 
+    snapshotInitializer();
+
     return () => unsubscribe.finalizer();
   }, []);
 
