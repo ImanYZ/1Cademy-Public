@@ -251,6 +251,7 @@ describe("POST /api/proposeNodeImprovement", () => {
     new MockData([], "othMonReputations"),
     new MockData([], "othWeekReputations"),
     new MockData([], "othersReputations"),
+    new MockData([], "actionTracks"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -564,6 +565,13 @@ describe("POST /api/proposeNodeImprovement", () => {
               "removedParents",
             ]);
           });
+        });
+
+        it("actionTracks based on sections", async () => {
+          const actionTracks = (await db.collection("actionTracks").get()).docs;
+          expect(actionTracks.length).toEqual(2);
+
+          expect(actionTracks[0].data().doer).toEqual(users[0].uname);
         });
       });
     });

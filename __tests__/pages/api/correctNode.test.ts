@@ -333,6 +333,7 @@ describe("POST /api/wrongNode", () => {
     new MockData([], "notificationNums"),
     new MockData([], "notifications"),
     new MockData([], "userNodesLog"),
+    new MockData([], "actionTracks"),
     new TypesenseMock(TypesenseNodeSchema, [], "nodes"),
   ];
 
@@ -412,5 +413,12 @@ describe("POST /api/wrongNode", () => {
     const typesense = getTypesenseClient();
     const tsNodeData: any = await typesense.collections("nodes").documents(String(nodes[0].documentId)).retrieve();
     expect(tsNodeData.corrects).toEqual(nodeData.corrects);
+  });
+
+  it("actionTracks based on sections", async () => {
+    const actionTracks = (await db.collection("actionTracks").get()).docs;
+    expect(actionTracks.length).toEqual(1);
+
+    expect(actionTracks[0].data().doer).toEqual(users[0].uname);
   });
 });

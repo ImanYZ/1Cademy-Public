@@ -20,6 +20,7 @@ import {
   SelectChangeEvent,
   TextField,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -47,7 +48,13 @@ const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
-type SearcherSidebarProps = { openLinkedNode: any; open: boolean; onClose: () => void; innerHeight?: number };
+type SearcherSidebarProps = {
+  openLinkedNode: any;
+  open: boolean;
+  onClose: () => void;
+  innerHeight?: number;
+  innerWidth: number;
+};
 
 type Pagination = {
   data: any[];
@@ -59,10 +66,10 @@ type Pagination = {
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 const MAX_TAGS_IN_MOBILE = 2;
 
-const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: SearcherSidebarProps) => {
+const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidth }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
-
+  const theme = useTheme();
   const [nodesUpdatedSince, setNodesUpdatedSince] = useState(1000);
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [onlyTags /*setOnlyTags*/] = useState(true);
@@ -101,12 +108,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
       try {
         setIsRetrieving(true);
-        setSearchResults({
-          data: [],
-          lastPageLoaded: 0,
-          totalPage: 0,
-          totalResults: 0,
-        });
+        if (page < 2) {
+          setSearchResults({
+            data: [],
+            lastPageLoaded: 0,
+            totalPage: 0,
+            totalResults: 0,
+          });
+        }
         const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
           q,
           nodeTypes,
@@ -298,7 +307,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             flexWrap: "wrap",
             columnGap: "4px",
             rowGap: "8px",
-            marginTop: { xs: "8px", sm: "8px" },
+            marginTop: { xs: "0px", sm: "0px" },
             marginBottom: { xs: "8px", sm: "8px" },
             pr: "40px",
           }}
@@ -339,7 +348,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
           <FilterListIcon
             onClick={() => setOpenSortOptions(!openSortOptions)}
             sx={{
-              display: window.innerWidth <= 400 ? "block" : "none",
+              display: theme => (innerWidth < theme.breakpoints.values.sm ? "block" : "none"),
               zIndex: 1,
               cursor: "pointer",
               color: "rgba(88, 88, 88,1)",
@@ -378,7 +387,14 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                         renderValue={() => "Types"}
                         onChange={onChangeNoteType}
                         sx={{
-                          height: "46.31px",
+                          padding: {
+                            xs: "2px 0px",
+                            sm: "0px",
+                          },
+                          height: {
+                            xs: "31px",
+                            sm: "46px",
+                          },
                           marginLeft: "-14px",
                           zIndex: "99",
                           borderRadius: "32px 0 0 32px ",
@@ -433,15 +449,38 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                       <IconButton
                         id="SearchIcon"
                         onClick={() => onSearch(1, search, sortOption, sortDirection, nodeTypes)}
+                        sx={{
+                          padding: {
+                            xs: "5px !important",
+                            sm: "10px",
+                          },
+                          marginRight: {
+                            xs: "-11px !important",
+                            sm: "-8px",
+                          },
+                        }}
                       >
-                        <SearchIcon />
+                        <SearchIcon
+                          sx={{
+                            width: {
+                              xs: "16px",
+                              sm: "1em",
+                            },
+                            height: {
+                              xs: "16px",
+                              sm: "1em",
+                            },
+                          }}
+                        />
                       </IconButton>
                     </InputAdornment>
                   ),
                   inputRef: onFocusSearcherInput,
                 }}
                 inputProps={{
-                  style: { paddingLeft: "0", paddingRight: "0" },
+                  style: {
+                    padding: innerWidth > theme.breakpoints.values.sm ? "9.5px 14px" : "2px 0px",
+                  },
                 }}
                 sx={{
                   "& fieldset": {
@@ -455,10 +494,10 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
             <div
               id="nodesUpdatedSinceContainer"
               style={{
-                display: window.innerWidth > 400 || openSortOptions ? "flex" : "none",
+                display: innerWidth > theme.breakpoints.values.sm || openSortOptions ? "flex" : "none",
                 justifyContent: "space-between",
                 alignItems: "center",
-                fontSize: "14px",
+                fontSize: innerWidth > 410 ? "14px" : "11px",
               }}
             >
               <RecentNodesList
@@ -539,6 +578,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
     sortOption,
     viewTagsInMovil,
     openSortOptions,
+    innerWidth,
   ]);
 
   return (
@@ -547,8 +587,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
       headerImage={searcherHeaderImage}
       open={open}
       onClose={onClose}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={innerWidth > theme.breakpoints.values.sm ? 430 : window.innerWidth}
+      height={innerWidth > theme.breakpoints.values.sm ? 100 : 25}
       innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={searcherOptionsMemoized}
@@ -564,43 +604,48 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight }: Searche
                   onClick={() => openLinkedNode(resNode.id, "Searcher")}
                   sx={{
                     listStyle: "none",
-                    padding: "10px",
+                    padding: {
+                      xs: "5px 10px",
+                      sm: "10px",
+                    },
                     borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
                     cursor: "pointer",
                   }}
                 >
-                  <div
-                    className="SidebarNodeTypeIcon"
-                    style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}
-                  >
-                    <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
-                    <div className="right" style={{ display: "flex", gap: "10px" }}>
-                      <MemoizedMetaButton>
-                        <>
-                          <EventAvailableIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
-                          <span>{dayjs(resNode.changedAt).fromNow()}</span>
-                        </>
-                      </MemoizedMetaButton>
-                      <MemoizedMetaButton>
-                        <>
-                          <CreateIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
-                          <span>{shortenNumber(resNode.versions, 2, false)}</span>
-                        </>
-                      </MemoizedMetaButton>
-                      <MemoizedMetaButton>
-                        <>
-                          <CloseIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
-                          <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
-                        </>
-                      </MemoizedMetaButton>
-                      <MemoizedMetaButton>
-                        <>
-                          <DoneIcon className="material-icons DoneIcon grey-text" sx={{ fontSize: "inherit" }} />
-                          <span>{shortenNumber(resNode.corrects, 2, false)}</span>
-                        </>
-                      </MemoizedMetaButton>
+                  {innerWidth > theme.breakpoints.values.sm && (
+                    <div
+                      className="SidebarNodeTypeIcon"
+                      style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}
+                    >
+                      <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
+                      <div className="right" style={{ display: "flex", gap: "10px" }}>
+                        <MemoizedMetaButton>
+                          <>
+                            <EventAvailableIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
+                            <span>{dayjs(resNode.changedAt).fromNow()}</span>
+                          </>
+                        </MemoizedMetaButton>
+                        <MemoizedMetaButton>
+                          <>
+                            <CreateIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
+                            <span>{shortenNumber(resNode.versions, 2, false)}</span>
+                          </>
+                        </MemoizedMetaButton>
+                        <MemoizedMetaButton>
+                          <>
+                            <CloseIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
+                            <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
+                          </>
+                        </MemoizedMetaButton>
+                        <MemoizedMetaButton>
+                          <>
+                            <DoneIcon className="material-icons DoneIcon grey-text" sx={{ fontSize: "inherit" }} />
+                            <span>{shortenNumber(resNode.corrects, 2, false)}</span>
+                          </>
+                        </MemoizedMetaButton>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="SearchResultTitle">
                     {/* CHECK: here is causing problems to hide scroll */}
                     <Editor

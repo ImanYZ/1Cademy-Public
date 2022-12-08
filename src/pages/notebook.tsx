@@ -45,6 +45,7 @@ import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -84,6 +85,7 @@ import {
   compareLinks,
   compareProperty,
   copyNode,
+  createActionTrack,
   createOrUpdateNode,
   generateReputationSignal,
   getSelectionText,
@@ -171,6 +173,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
+  const [showLivelinessBar, setShowLivelinessBar] = useState<boolean>(false);
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -283,7 +286,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
-  }, []);
+    const _window: any = window;
+    const internalId = setInterval(() => {
+      if (_window.google_optimize !== undefined) {
+        setShowLivelinessBar(!!_window.livelinessBar || ["1man"].includes(String(user?.uname)));
+        clearInterval(internalId);
+      }
+    }, 500);
+  }, [user?.uname]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
@@ -1429,6 +1439,8 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
+        createActionTrack(db, "NodeOpen", "", String(user?.uname), String(user?.imageUrl), linkedNodeID, []);
+
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
           lastNodeOperation.current = "Searcher";
@@ -1445,7 +1457,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, openNodeHandler]
+    [nodeBookState.choosingNode, openNodeHandler, user]
   );
 
   const getNodeUserNode = useCallback(
@@ -1522,6 +1534,8 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+
+          createActionTrack(db, "NodeHide", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
         }
 
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
@@ -1659,6 +1673,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
+
+          if (!thisNode.open) {
+            createActionTrack(db, "NodeCollapse", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          }
           return { nodes: oldNodes, edges };
         });
       }
@@ -1709,6 +1727,13 @@ const Dashboard = ({}: DashboardProps) => {
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, nodeBookState.choosingNode /*selectionType*/]
+  );
+
+  const onNodeShare = useCallback(
+    (nodeId: string, platform: string) => {
+      createActionTrack(db, "NodeShare", platform, String(user?.uname), String(user?.imageUrl), nodeId, []);
+    },
+    [user]
   );
 
   const referenceLabelChange = useCallback(
@@ -1773,6 +1798,11 @@ const Dashboard = ({}: DashboardProps) => {
           } else if ("closedHeight" in thisNode) {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
+
+          if (!thisNode.isStudied) {
+            createActionTrack(db, "NodeStudied", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          }
+
           setDoc(doc(userNodeLogRef), userNodeLogData);
           return { nodes: oldNodes, edges };
         });
@@ -1828,6 +1858,8 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
+
+          createActionTrack(db, "NodeBookmark", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
           return { nodes: oldNodes, edges };
         });
       }
@@ -2257,6 +2289,7 @@ const Dashboard = ({}: DashboardProps) => {
           newNode.content === oldNode.content &&
           newNode.nodeType === oldNode.nodeType;
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
+        isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
         isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
@@ -3051,6 +3084,7 @@ const Dashboard = ({}: DashboardProps) => {
         id="Map"
         sx={{
           overflow: "hidden",
+          position: "relative",
           background:
             settings.background === "Color"
               ? theme =>
@@ -3176,12 +3210,14 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "BOOKMARKS_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedSearcherSidebar
                 openLinkedNode={openLinkedNode}
                 open={openSidebar === "SEARCHER_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}
@@ -3190,6 +3226,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedPendingProposalSidebar
                 theme={settings.theme}
@@ -3199,6 +3236,7 @@ const Dashboard = ({}: DashboardProps) => {
                 open={openSidebar === "PENDING_PROPOSALS"}
                 onClose={() => onCloseSidebar()}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
               />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}
@@ -3222,6 +3260,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openProposal={openProposal}
                 db={db}
                 innerHeight={innerHeight}
+                innerWidth={windowWith}
                 username={user.uname}
               />
 
@@ -3244,6 +3283,7 @@ const Dashboard = ({}: DashboardProps) => {
                   openLinkedNode={openLinkedNode}
                   identifier={nodeBookState.selectedNode}
                   innerHeight={innerHeight}
+                  innerWidth={windowWith}
                 />
               )}
             </Box>
@@ -3256,7 +3296,11 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar ? "7px" : `${innerHeight * 0.35 + 7}px`,
+                  xs: !openSidebar
+                    ? "7px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 7}px`
+                    : `${innerHeight * 0.25 + 7}px`,
                   md: "7px",
                 },
 
@@ -3272,7 +3316,11 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar ? "10px" : `${innerHeight * 0.35 + 10}px`,
+                  xs: !openSidebar
+                    ? "10px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : `${innerHeight * 0.25 + 10}px`,
                   md: "10px",
                 },
                 right: "10px",
@@ -3295,7 +3343,11 @@ const Dashboard = ({}: DashboardProps) => {
             sx={{
               position: "fixed",
               top: {
-                xs: !openSidebar ? "60px" : `${innerHeight * 0.35 + 65}px`,
+                xs: !openSidebar
+                  ? "60px"
+                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  ? `${innerHeight * 0.35 + 65}px`
+                  : `${innerHeight * 0.25 + 65}px`,
                 md: "60px",
               },
               right: "10px",
@@ -3317,11 +3369,14 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
-                  xs: !openSidebar ? "110px" : `${innerHeight * 0.35 + 120}px`,
-
-                  md: "110px",
+                  xs: !openSidebar
+                    ? "10px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 120}px`
+                    : `${innerHeight * 0.25 + 120}px`,
+                  md: "10px",
                 },
-                right: "10px",
+                right: "60px",
                 zIndex: "1300",
                 transition: "all 1s ease",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
@@ -3337,6 +3392,8 @@ const Dashboard = ({}: DashboardProps) => {
             </Tooltip>
           )}
           {/* end Data from map */}
+
+          {showLivelinessBar ? <MemoizedLivelinessBar db={db} /> : <div />}
 
           {settings.view === "Graph" && (
             <Box
@@ -3369,6 +3426,7 @@ const Dashboard = ({}: DashboardProps) => {
                   hideOffsprings={hideOffsprings}
                   toggleNode={toggleNode}
                   openNodePart={openNodePart}
+                  onNodeShare={onNodeShare}
                   selectNode={selectNode}
                   nodeClicked={nodeClicked} // CHECK when is used
                   correctNode={correctNode}

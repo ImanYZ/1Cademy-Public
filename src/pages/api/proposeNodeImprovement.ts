@@ -20,6 +20,7 @@ import { IInstitution } from "src/types/IInstitution";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
 import { INodeVersion } from "src/types/INodeVersion";
+import { IActionTrack } from "src/types/IActionTrack";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -293,6 +294,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       writeCounts,
     });
     await commitBatch(batch);
+
+    // TODO: move these to queue
+    // action tracks
+    await detach(async () => {
+      const actionRef = db.collection("actionTracks").doc();
+      actionRef.create({
+        accepted: !!versionData.accepted,
+        type: "Improvement",
+        imageUrl: userData.imageUrl,
+        action: versionRef.id,
+        createdAt: currentTimestamp,
+        doer: versionData.proposer,
+        nodeId: versionData.node,
+        receivers: [userData.uname],
+      } as IActionTrack);
+
+      const rateActionRef = db.collection("actionTracks").doc();
+      rateActionRef.create({
+        accepted: !!versionData.accepted,
+        type: "RateVersion",
+        imageUrl: userData.imageUrl,
+        action: "Correct-" + versionRef.id,
+        createdAt: currentTimestamp,
+        doer: versionData.proposer,
+        nodeId: versionData.node,
+        receivers: [userData.uname],
+      } as IActionTrack);
+    });
 
     // update typesense record for node
     // we need update contributors, contribNames, institNames, institutions

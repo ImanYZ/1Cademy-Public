@@ -1,7 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { IActionTrack } from "src/types/IActionTrack";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
+import { IUser } from "src/types/IUser";
 import { detach, isVersionApproved } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
@@ -114,6 +116,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let nodeData: INode, nodeRef, versionData: INodeVersion, versionRef, correct: number, wrong: number, award;
     let accepted: boolean, isApproved: boolean;
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
+    let actionName: string = "";
 
     let newUpdates: any = {};
 
@@ -175,6 +178,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       award = nodeData.admin === uname && versionData.proposer !== uname && req.body.award ? 1 : 0;
+
+      if (correct === 1) {
+        actionName = "Correct";
+      } else if (correct === -1) {
+        actionName = "CorrectRM";
+      } else if (wrong === 1) {
+        actionName = "Wrong";
+      } else if (wrong === -1) {
+        actionName = "WrongRM";
+      } else if (award === 1) {
+        actionName = "Award";
+      } else if (award === -1) {
+        actionName = "AwardRM";
+      }
 
       // it version was previously approved
       accepted = versionData.accepted;
@@ -291,20 +308,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           notificationData.oType = "AccProposal";
         }
         // Action type
-        notificationData.aType = "";
-        if (correct === 1) {
-          notificationData.aType = "Correct";
-        } else if (correct === -1) {
-          notificationData.aType = "CorrectRM";
-        } else if (wrong === 1) {
-          notificationData.aType = "Wrong";
-        } else if (wrong === -1) {
-          notificationData.aType = "WrongRM";
-        } else if (award === 1) {
-          notificationData.aType = "Award";
-        } else if (award === -1) {
-          notificationData.aType = "AwardRM";
-        }
+        notificationData.aType = actionName;
       } else {
         // A proposal that is just getting accepted.
         notificationData.aType = "Accept";
@@ -358,6 +362,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       });
     }
+
+    // TODO: move these to queue
+    // action tracks
+    await detach(async () => {
+      const user = await db.collection("users").doc(uname).get();
+      const userData = user.data() as IUser;
+      const isAccepted = !!(accepted || isApproved);
+      const actionRef = db.collection("actionTracks").doc();
+      actionRef.create({
+        accepted: isAccepted,
+        type: "RateVersion",
+        action: actionName + "-" + req.body.versionId,
+        imageUrl: userData.imageUrl,
+        createdAt: currentTimestamp,
+        doer: userData.uname,
+        nodeId: versionData.childType && isAccepted ? newUpdates.nodeId : versionData.node,
+        receivers: [versionData.proposer],
+      } as IActionTrack);
+    });
 
     // we need update contributors, contribNames, institNames, institutions
     // TODO: move these to queue

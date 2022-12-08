@@ -19,6 +19,19 @@ export enum NodeType {
   "Tag" = "Tag",
 }
 
+export type ActionTrackType =
+  | "Correct"
+  | "Wrong"
+  | "Improvement"
+  | "ChildNode"
+  | "NodeOpen"
+  | "NodeHide"
+  | "NodeCollapse"
+  | "NodeStudied"
+  | "NodeBookmark"
+  | "NodeShare"
+  | "Search";
+
 export type KnowledgeNodeContributor = {
   fullname?: string;
   reputation?: number;

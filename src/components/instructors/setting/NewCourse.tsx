@@ -1,9 +1,10 @@
 import CreateIcon from "@mui/icons-material/Create";
 import { LoadingButton } from "@mui/lab";
-import { Autocomplete, createFilterOptions, Grid, TextField } from "@mui/material";
+import { Autocomplete, createFilterOptions, Grid, TextField, useTheme } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import { useFormik } from "formik";
+import moment from "moment";
 import { FC, HTMLAttributes, useState } from "react";
 import React from "react";
 import { Institution } from "src/knowledgeTypes";
@@ -16,6 +17,8 @@ type Props = {
   institutions: any;
 };
 const validationSchema = yup.object({
+  startDate: yup.date(),
+  endDate: yup.date().min(yup.ref("startDate"), "The end date should be greater than the start date"),
   courseCode: yup.string().required("Course is required"),
   semesterName: yup.string().required("Semester is required"),
   programName: yup.string().required("Program is required"),
@@ -25,6 +28,7 @@ const validationSchema = yup.object({
 
 const NewCourse: FC<Props> = ({ institutions }) => {
   const [{ user }] = useAuth();
+  const layoutTheme: any = useTheme();
   const [requestLoader, setRequestLoader] = useState(false);
   const getNameFromInstitutionSelected = () => {
     let instituteName: any = "";
@@ -42,6 +46,8 @@ const NewCourse: FC<Props> = ({ institutions }) => {
 
   const formik = useFormik({
     initialValues: {
+      startDate: moment(new Date()).format("YYYY-MM-DD"),
+      endDate: moment(new Date()).format("YYYY-MM-DD"),
       courseCode: "",
       semesterName: "",
       programName: "",
@@ -56,10 +62,44 @@ const NewCourse: FC<Props> = ({ institutions }) => {
     },
   });
   return (
-    <Box sx={{ marginTop: "50px", padding: "0 10px" }}>
+    <Box sx={{ marginTop: "20px", padding: "10px 10px" }}>
       <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Grid item xs={12} md={4}>
           <form style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "25px" }}>
+            <TextField
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+              id="date"
+              label="Start Date"
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              fullWidth
+              value={formik.values.startDate}
+              onChange={(event: any) =>
+                formik.setFieldValue("startDate", moment(new Date(event.target.value)).format("YYYY-MM-DD"))
+              }
+              error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+              helperText={formik.touched.startDate && formik.errors.startDate}
+            />
+
+            <TextField
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+              id="date"
+              label="End Date"
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              fullWidth
+              value={formik.values.endDate}
+              onChange={(event: any) =>
+                formik.setFieldValue("endDate", moment(new Date(event.target.value)).format("YYYY-MM-DD"))
+              }
+              error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              helperText={formik.touched.endDate && formik.errors.endDate}
+            />
+
             <TextField
               placeholder="i.e. SI691"
               fullWidth
@@ -151,7 +191,7 @@ const NewCourse: FC<Props> = ({ institutions }) => {
                 color: theme => theme.palette.common.white,
                 fontWeight: "bold",
                 padding: "15px 80px",
-                marginTop: "20px",
+
                 fontSize: "15px",
               }}
             >

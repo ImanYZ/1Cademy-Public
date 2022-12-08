@@ -1,6 +1,7 @@
 import dagre from "dagre";
-import { collection, Firestore, getDocs, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, Firestore, getDocs, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { ReputationSignal } from "src/knowledgeTypes";
+import { IActionTrackType } from "src/types/IActionTrack";
 import { INodeVersion } from "src/types/INodeVersion";
 import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
@@ -1335,6 +1336,28 @@ export const generateReputationSignal = (
       }
     });
   }
+};
+
+export const createActionTrack = (
+  db: Firestore,
+  type: IActionTrackType,
+  action: string,
+  uname: string,
+  imageUrl: string,
+  nodeId: string,
+  receivers: string[]
+) => {
+  const actionTracksCol = collection(db, "actionTracks");
+  return setDoc(doc(actionTracksCol), {
+    accepted: true,
+    type,
+    action,
+    imageUrl,
+    createdAt: Timestamp.now(),
+    doer: uname,
+    nodeId,
+    receivers,
+  });
 };
 
 {

@@ -12,7 +12,10 @@ import fbAuth from "src/middlewares/fbAuth";
 import { IUserNode } from "src/types/IUserNode";
 import { SearchParams } from "typesense/lib/Typesense/Documents";
 import { arrayToChunks } from "src/utils";
-import { QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { QueryDocumentSnapshot, Timestamp } from "firebase-admin/firestore";
+import { detach } from "src/utils/helpers";
+import { IUser } from "src/types/IUser";
+import { IActionTrack } from "src/types/IActionTrack";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const {
@@ -110,6 +113,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
     for (let postData of allPostsData) {
       postData.studied = userStudiedNodes.hasOwnProperty(postData.id) && userStudiedNodes[postData.id];
     }
+
+    // TODO: move these to queue
+    // action tracks
+    await detach(async () => {
+      const user = await db.collection("users").doc(uname).get();
+      const userData = user.data() as IUser;
+      const actionRef = db.collection("actionTracks").doc();
+      actionRef.create({
+        accepted: true,
+        type: "Search",
+        action: q,
+        imageUrl: userData.imageUrl,
+        createdAt: Timestamp.now(),
+        doer: uname,
+        nodeId: allPostsData.length ? allPostsData[0].id : "",
+        receivers: [],
+      } as IActionTrack);
+    });
 
     res.status(200).json({
       data: allPostsData || [],
