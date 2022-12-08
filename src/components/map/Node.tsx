@@ -3,13 +3,13 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button } from "@mui/material";
-import React, { useCallback, useDeferredValue, useEffect, useRef, useState, useTransition } from "react";
+import { Box, Button, InputLabel, TextField } from "@mui/material";
+import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
-import { findDiff } from "@/lib/utils/utils";
+import { findDiff, getVideoDataByUrl } from "@/lib/utils/utils";
 import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
@@ -20,6 +20,7 @@ import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
 import NewChildProposal from "./NewChildProposal";
+import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 import QuestionChoices from "./QuestionChoices";
@@ -48,6 +49,7 @@ type NodeProps = {
   title: string;
   content: string;
   nodeImage: string;
+  nodeVideo: string;
   viewers: number;
   correctNum: any;
   markedCorrect: any;
@@ -144,6 +146,7 @@ const Node = ({
   title,
   content,
   nodeImage,
+  nodeVideo,
   viewers,
   correctNum,
   markedCorrect,
@@ -218,6 +221,8 @@ const Node = ({
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [reason, setReason] = useState("");
+  const [addVideo, setAddVideo] = useState(!!nodeVideo);
+  const [videoUrl, setVideoUrl] = useState(nodeVideo);
 
   const nodeRef = useRef(null);
   const previousHeightRef = useRef<number>(0);
@@ -239,6 +244,16 @@ const Node = ({
     setTitleCopy(title);
     setContentCopy(content);
   }, [title, content]);
+
+  const videoData = useMemo(() => {
+    return getVideoDataByUrl(videoUrl);
+  }, [videoUrl]);
+
+  useEffect(() => {
+    if (!addVideo) {
+      setNodeParts(identifier, node => ({ ...node, nodeVideo: "" }));
+    }
+  }, [addVideo]);
 
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
@@ -646,8 +661,38 @@ const Node = ({
                   />
                 </>
               )}
+              {editable && addVideo && (
+                <>
+                  <Box sx={{ mb: "12px" }}></Box>
+                  <InputLabel sx={{ fontWeight: 490 }}>
+                    {"Please enter the video url below (Youtube and Vimeo are allowed):"}
+                  </InputLabel>
+                  <TextField
+                    onChange={e => setVideoUrl(e.target.value)}
+                    onBlur={() => {
+                      if (videoUrl !== nodeVideo) {
+                        setNodeParts(identifier, node => ({ ...node, nodeVideo: videoUrl }));
+                      }
+                    }}
+                    value={videoUrl}
+                    variant="standard"
+                    fullWidth
+                    sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+                  />
+                  <Box sx={{ mb: "12px" }}></Box>
+                  <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
+                </>
+              )}
+              {!editable && nodeVideo && (
+                <>
+                  <MemoizedNodeVideo addVideo={true} videoData={videoData} />
+                  <Box sx={{ mb: "12px" }}></Box>
+                </>
+              )}
               <MemoizedNodeFooter
                 open={true}
+                addVideo={addVideo}
+                setAddVideo={setAddVideo}
                 identifier={identifier}
                 activeNode={activeNode}
                 citationsSelected={citationsSelected}
@@ -791,6 +836,8 @@ const Node = ({
             <div className="footer">
               <MemoizedNodeFooter
                 open={false}
+                addVideo={addVideo}
+                setAddVideo={setAddVideo}
                 identifier={identifier}
                 activeNode={activeNode}
                 citationsSelected={citationsSelected}

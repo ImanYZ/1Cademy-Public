@@ -313,3 +313,31 @@ export const findDiff = (str1: String, str2: String) => {
   });
   return diff;
 };
+
+export const getVideoDataByUrl = (videoUrl: string) => {
+  let videoId = "";
+  let videoType = "";
+  let url: string = "";
+
+  if (videoUrl && videoUrl.match(/(youtu\.be|youtube\.com)/)) {
+    const results = videoUrl.match(/(youtu\.be\/|youtube\.com\/)(?:watch\?v=)?([^?&\n]+)/);
+    if (results) {
+      videoId = results[2];
+      videoType = "youtube";
+      url = `https://www.youtube.com/embed/${videoId}?rel=0`;
+    }
+  } else if (videoUrl && videoUrl.match(/vimeo\.com/)) {
+    const results = videoUrl.match(/(vimeo\.com\/|player\.vimeo\.com\/video\/)([^?&\n]+)/);
+    if (results) {
+      videoId = results[2];
+      videoType = "vimeo";
+      url = `https://player.vimeo.com/video/${videoId}`;
+    }
+  }
+
+  return {
+    url: url,
+    video_id: videoId,
+    video_type: videoType,
+  };
+};

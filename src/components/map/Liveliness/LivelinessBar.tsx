@@ -34,91 +34,111 @@ type UserInteractions = {
 const LivelinessBar = (props: ILivelinessBarProps) => {
   const { db } = props;
   const [open, setOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
   // const theme = useTheme();
 
   useEffect(() => {
+    if (window && window.innerWidth > 768 && window.innerHeight >= 797) {
+      setOpen(true);
+    }
     let t: any = null;
-    const ts = new Date().getTime() - 3600000;
-    const actionTracksCol = collection(db, "actionTracks");
-    const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
-    const unsubscribe = onSnapshot(q, async snapshot => {
-      setUsersInteractions(_usersInteractions => {
-        const usersInteractions = { ..._usersInteractions };
-        const docChanges = snapshot.docChanges();
-        for (const docChange of docChanges) {
-          const actionTrackData = docChange.doc.data() as IActionTrack;
-          if (docChange.type === "added") {
-            if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              usersInteractions[actionTrackData.doer] = {
-                imageUrl: actionTrackData.imageUrl,
-                count: 0,
-                actions: [],
-                reputation: null,
-              };
-            }
-            if (actionTrackData.type === "NodeVote") {
-              if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
-                usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
-                usersInteractions[actionTrackData.doer].count += 1;
-                for (const receiver of actionTrackData.receivers) {
-                  if (usersInteractions.hasOwnProperty(receiver)) {
-                    usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
-                  }
-                }
-              }
-            } else if (actionTrackData.type === "RateVersion") {
-              if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
-                const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
-                  ? "Correct"
-                  : "Wrong";
-                usersInteractions[actionTrackData.doer].actions.push(currentAction);
-                usersInteractions[actionTrackData.doer].count += 1;
-                for (const receiver of actionTrackData.receivers) {
-                  if (usersInteractions.hasOwnProperty(receiver)) {
-                    usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
-                  }
-                }
-              }
-            } else {
-              usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
-              usersInteractions[actionTrackData.doer].count += 1;
-            }
-          }
-          if (docChange.type === "removed") {
-            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              usersInteractions[actionTrackData.doer].count -= 1;
-              if (usersInteractions[actionTrackData.doer].count < 0) {
-                usersInteractions[actionTrackData.doer].count = 0;
-              }
-            }
-          }
-        }
+    const unsubscribe: {
+      finalizer: () => void;
+    } = {
+      finalizer: () => {},
+    };
 
-        setUsersInteractions(usersInteractions => {
+    const snapshotInitializer = () => {
+      setUsersInteractions({});
+      unsubscribe.finalizer();
+      const ts = new Date().getTime() - 86400000;
+      const actionTracksCol = collection(db, "actionTracks");
+      const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
+      unsubscribe.finalizer = onSnapshot(q, async snapshot => {
+        setUsersInteractions(_usersInteractions => {
+          const usersInteractions = { ..._usersInteractions };
+          const docChanges = snapshot.docChanges();
+          for (const docChange of docChanges) {
+            const actionTrackData = docChange.doc.data() as IActionTrack;
+            if (docChange.type === "added") {
+              if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                usersInteractions[actionTrackData.doer] = {
+                  imageUrl: actionTrackData.imageUrl,
+                  count: 0,
+                  actions: [],
+                  reputation: null,
+                };
+              }
+              if (actionTrackData.type === "NodeVote") {
+                if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
+                  usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
+                  usersInteractions[actionTrackData.doer].count += 1;
+                  for (const receiver of actionTrackData.receivers) {
+                    if (usersInteractions.hasOwnProperty(receiver)) {
+                      usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+                    }
+                  }
+                }
+              } else if (actionTrackData.type === "RateVersion") {
+                if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
+                  const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
+                    ? "Correct"
+                    : "Wrong";
+                  usersInteractions[actionTrackData.doer].actions.push(currentAction);
+                  usersInteractions[actionTrackData.doer].count += 1;
+                  for (const receiver of actionTrackData.receivers) {
+                    if (usersInteractions.hasOwnProperty(receiver)) {
+                      usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
+                    }
+                  }
+                }
+              } else {
+                usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
+                usersInteractions[actionTrackData.doer].count += 1;
+              }
+            }
+            if (docChange.type === "removed") {
+              if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                usersInteractions[actionTrackData.doer].count -= 1;
+                if (usersInteractions[actionTrackData.doer].count < 0) {
+                  usersInteractions[actionTrackData.doer].count = 0;
+                }
+              }
+            }
+          }
+
+          setUsersInteractions(usersInteractions => {
+            return usersInteractions;
+          });
+
+          if (t) {
+            clearTimeout(t);
+          }
+          t = setTimeout(() => {
+            setUsersInteractions(usersInteractions => {
+              let _usersInteractions = { ...usersInteractions } as UserInteractions;
+              for (let uname in _usersInteractions) {
+                _usersInteractions[uname].actions = [];
+                _usersInteractions[uname].reputation = null;
+              }
+              return _usersInteractions;
+            });
+            setIsInitialized(true);
+          }, 3000);
           return usersInteractions;
         });
-
-        if (t) {
-          clearTimeout(t);
-        }
-        t = setTimeout(() => {
-          setUsersInteractions(usersInteractions => {
-            let _usersInteractions = { ...usersInteractions } as UserInteractions;
-            for (let uname in _usersInteractions) {
-              _usersInteractions[uname].actions = [];
-              _usersInteractions[uname].reputation = null;
-            }
-            return _usersInteractions;
-          });
-        }, 3000);
-
-        return usersInteractions;
       });
-    });
+    };
 
-    return () => unsubscribe();
+    setInterval(() => {
+      snapshotInitializer();
+    }, 3600000);
+
+    snapshotInitializer();
+
+    return () => unsubscribe.finalizer();
   }, []);
 
   useEffect(() => {
@@ -145,7 +165,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
         <Box
           id="livebar"
           sx={{
-            width: "80px",
+            width: "56px",
             background: "#1f1f1f",
             borderRadius: "10px 0px 0px 10px",
             right: 0,
@@ -154,10 +174,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             height: "100%",
             transform: !open ? "translate(calc(100%), 0px)" : null,
             transition: "all 0.2s 0s ease",
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            alignItems: "center",
+            padding: "0px 0px 0px 32px",
           }}
         >
           <Box
@@ -167,6 +184,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               width: "1px",
               borderRight: "2px solid #ffffff",
               position: "relative",
+              marginTop: "10px",
             }}
           >
             <KeyboardArrowDownIcon
@@ -189,13 +207,6 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             >
               {unames.map((uname: string) => {
                 const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
-                console.log(
-                  barHeight,
-                  usersInteractions[uname].count,
-                  maxActions,
-                  uname,
-                  "barHeight, usersInteractions[uname].count, maxActions, uname"
-                );
                 return (
                   <Tooltip key={uname} title={uname}>
                     <Box
@@ -243,10 +254,10 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                     >
                       <Box
                         sx={{
+                          display: isInitialized ? "block" : "none",
                           position: "absolute",
-                          top: "-18px",
-                          left: "50%",
-                          transform: "translate(-50%, 0px)",
+                          bottom: "6px",
+                          left: "-16px",
                         }}
                       >
                         {usersInteractions[uname].actions.map((action, index) => {
@@ -268,8 +279,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               display: "flex",
               top: "50%",
               transform: "translate(0px, -50%)",
-              left: "-30px",
-              width: "30px",
+              left: "-22px",
+              width: "22px",
               height: "30px",
               color: "#ffffff",
               position: "absolute",

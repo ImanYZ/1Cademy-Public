@@ -15,11 +15,14 @@ import React, { useEffect, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 
 const slideInAnimation = keyframes`
-  from {
-    transform: translateY(0px);
+  0% {
+    opacity: 0;
+  }
+  10%, 70% {
+    opacity: 1;
   }
   to {
-    transform: translateY(-100px);
+    opacity: 0;
   }
 `;
 
@@ -51,6 +54,7 @@ const ActionBubble = ({ actionType }: ActionBubbleProps) => {
       setShowIcon(false);
     }, 3000);
   }, [actionType]);
+  const isVote = actionType === "Correct" || actionType === "Wrong";
   return showIcon ? (
     <Box
       sx={{
@@ -60,9 +64,10 @@ const ActionBubble = ({ actionType }: ActionBubbleProps) => {
         alignItems: "center",
         justifyContent: "center",
         borderRadius: "50%",
-        background: actionType === "Wrong" ? "#F45B2B" : "#3FAB51",
-        fontSize: "10px",
-        animation: `${slideInAnimation} 3s ease-out 0s normal forwards`,
+        color: isVote ? (actionType === "Wrong" ? "#F45B2B" : "#3FAB51") : "#ffffff",
+        fontSize: "20px",
+        marginBottom: "5px",
+        animation: `${slideInAnimation} 1.5s ease-out 0s normal forwards`,
       }}
     >
       <Icon

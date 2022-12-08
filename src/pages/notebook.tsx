@@ -291,11 +291,11 @@ const Dashboard = ({}: DashboardProps) => {
     const _window: any = window;
     const internalId = setInterval(() => {
       if (_window.google_optimize !== undefined) {
-        setShowLivelinessBar(!!_window.livelinessBar);
+        setShowLivelinessBar(!!_window.livelinessBar || ["1man"].includes(String(user?.uname)));
         clearInterval(internalId);
       }
     }, 500);
-  }, []);
+  }, [user?.uname]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
@@ -2304,6 +2304,7 @@ const Dashboard = ({}: DashboardProps) => {
           newNode.content === oldNode.content &&
           newNode.nodeType === oldNode.nodeType;
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
+        isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
         isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
@@ -3390,13 +3391,13 @@ const Dashboard = ({}: DashboardProps) => {
                 position: "fixed",
                 top: {
                   xs: !openSidebar
-                    ? "110px"
+                    ? "10px"
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
                     ? `${innerHeight * 0.35 + 120}px`
                     : `${innerHeight * 0.25 + 120}px`,
                   sm: "110px",
                 },
-                right: "10px",
+                right: "60px",
                 zIndex: "1300",
                 transition: "all 1s ease",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
