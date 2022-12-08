@@ -107,7 +107,7 @@ export const SidebarWrapper = ({
       {headerImage && (
         <Box sx={{ width }}>
           <Box>
-            {height > 50 ? (
+            {!innerHeight || (height > 50 && innerHeight > 600) ? (
               <Box sx={{ position: "relative", height: "127px", width }}>
                 <Image src={headerImage} alt="header image" width={width} height={127} />
                 <Typography
@@ -169,7 +169,16 @@ export const SidebarWrapper = ({
       </Box>
 
       {showCloseButton && (
-        <Box sx={{ position: "absolute", top: "10px", right: "10px" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: {
+              xs: "0px",
+              sm: "10px",
+            },
+            right: "10px",
+          }}
+        >
           <Tooltip title="Close the sidebar." placement="left">
             <IconButton
               onClick={onClose}

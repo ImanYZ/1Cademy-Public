@@ -28,7 +28,9 @@ type NotificationSidebarProps = {
   theme: UserTheme;
   openLinkedNode: any;
   username: string;
+  sidebarWidth: number;
   innerHeight?: number;
+  innerWidth: number;
 };
 type Notification = {
   id: string;
@@ -49,7 +51,9 @@ const NotificationSidebar = ({
   theme,
   openLinkedNode,
   username,
+  sidebarWidth,
   innerHeight,
+  innerWidth,
 }: NotificationSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
@@ -202,8 +206,8 @@ const NotificationSidebar = ({
       open={open}
       title="Notifications"
       headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={sidebarWidth}
+      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       onClose={onClose}

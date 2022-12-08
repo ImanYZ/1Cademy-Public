@@ -17,6 +17,7 @@ import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import RedditIcon from "@mui/icons-material/Reddit";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
 import { Badge, Button, ClickAwayListener, Divider, MenuItem, Paper, Tooltip } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
@@ -41,6 +42,8 @@ dayjs.extend(relativeTime);
 
 type NodeFooterProps = {
   open: boolean;
+  addVideo: boolean;
+  setAddVideo: (addVideo: boolean) => void;
   identifier: any;
   activeNode: any;
   citationsSelected: any;
@@ -77,6 +80,7 @@ type NodeFooterProps = {
   bookmarked: any;
   bookmarks: any;
   reloadPermanentGrpah: any;
+  onNodeShare: (nodeId: string, platform: string) => void;
   markStudied: any;
   bookmark: any;
   openNodePart: any;
@@ -94,6 +98,8 @@ type NodeFooterProps = {
 
 const NodeFooter = ({
   open,
+  addVideo,
+  setAddVideo,
   identifier,
   // activeNode,
   // proposalsSelected,
@@ -129,6 +135,7 @@ const NodeFooter = ({
   bookmarked,
   bookmarks,
   reloadPermanentGrpah,
+  onNodeShare,
   markStudied,
   bookmark,
   openNodePart,
@@ -178,6 +185,8 @@ const NodeFooter = ({
     let url: any = protocol + "//" + hostName + "/n/" + identifier;
     navigator.clipboard.writeText(url);
     setOpenMenu(false);
+
+    onNodeShare(identifier, "copy-link");
   };
 
   const selectReferences = useCallback(
@@ -563,6 +572,30 @@ const NodeFooter = ({
                       <ImageIcon sx={{ fontSize: "16px" }} />
                     )}
                   </>
+                </ContainedButton>
+
+                <ContainedButton
+                  title="Cite a video from Youtube or Vimeo."
+                  onClick={() => setAddVideo(!addVideo)}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
+                    color: addVideo ? "#ff8a33" : "inherit",
+                    fontWeight: 400,
+                    height: "28.7px",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                  }}
+                >
+                  <VideoCallIcon sx={{ fontSize: "16px" }} />
                 </ContainedButton>
               </Box>
             )}
@@ -1082,6 +1115,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "twitter")}
                             href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
                             sx={{
                               color: "#BDBDBD",
@@ -1120,6 +1154,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "reddit")}
                             href={`http://www.reddit.com/submit?url=${url}`}
                             sx={{
                               color: "#BDBDBD",
@@ -1158,6 +1193,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "facebook")}
                             href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
                             sx={{
                               color: "#BDBDBD",
@@ -1196,6 +1232,7 @@ const NodeFooter = ({
                       <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
+                            onClick={() => onNodeShare(identifier, "linkedin")}
                             href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
                             sx={{
                               color: "#BDBDBD",

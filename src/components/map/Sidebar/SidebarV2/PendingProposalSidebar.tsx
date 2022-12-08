@@ -18,7 +18,9 @@ type PendingProposalSidebarProps = {
   openLinkedNode: any;
   username: string;
   tagId: string | undefined;
+  sidebarWidth: number;
   innerHeight?: number;
+  innerWidth: number;
 };
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
@@ -29,7 +31,9 @@ const PendingProposalSidebar = ({
   openLinkedNode,
   username,
   tagId,
+  sidebarWidth,
   innerHeight,
+  innerWidth,
 }: PendingProposalSidebarProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
   const db = getFirestore();
@@ -119,8 +123,8 @@ const PendingProposalSidebar = ({
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
-      width={window.innerWidth > 899 ? 430 : window.innerWidth}
-      height={window.innerWidth > 899 ? 100 : 35}
+      width={sidebarWidth}
+      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       contentSignalState={proposals}
       SidebarContent={
