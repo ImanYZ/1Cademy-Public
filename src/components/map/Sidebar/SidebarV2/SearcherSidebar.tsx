@@ -52,6 +52,7 @@ type SearcherSidebarProps = {
   openLinkedNode: any;
   open: boolean;
   onClose: () => void;
+  sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
 };
@@ -66,7 +67,14 @@ type Pagination = {
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 const MAX_TAGS_IN_MOBILE = 2;
 
-const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidth }: SearcherSidebarProps) => {
+const SearcherSidebar = ({
+  openLinkedNode,
+  open,
+  onClose,
+  sidebarWidth,
+  innerHeight,
+  innerWidth,
+}: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
   const theme = useTheme();
@@ -279,7 +287,10 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
     return (
       <Box
         sx={{
-          p: "10px",
+          p: {
+            xs: "10px",
+            sm: "0px 10px 10px 10px",
+          },
           borderBottom: 1,
           borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
           width: "100%",
@@ -479,7 +490,7 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
                 }}
                 inputProps={{
                   style: {
-                    padding: innerWidth > theme.breakpoints.values.sm ? "9.5px 14px" : "2px 0px",
+                    padding: innerWidth >= theme.breakpoints.values.sm ? "9.5px 14px" : "2px 0px",
                   },
                 }}
                 sx={{
@@ -498,6 +509,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
                 justifyContent: "space-between",
                 alignItems: "center",
                 fontSize: innerWidth > 410 ? "14px" : "11px",
+                flexWrap: "wrap",
+                gap: "10px",
               }}
             >
               <RecentNodesList
@@ -534,7 +547,16 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
                 />
                 days
               </Box>
-              <div id="SearchResutlsNum">{shortenNumber(searchResults.totalResults, 2, false)} Results</div>
+              <div
+                style={{
+                  ...(sidebarWidth < 350 && {
+                    marginLeft: "auto",
+                  }),
+                }}
+                id="SearchResutlsNum"
+              >
+                {shortenNumber(searchResults.totalResults, 2, false)} Results
+              </div>
             </div>
           </>
         )}
@@ -587,8 +609,8 @@ const SearcherSidebar = ({ openLinkedNode, open, onClose, innerHeight, innerWidt
       headerImage={searcherHeaderImage}
       open={open}
       onClose={onClose}
-      width={innerWidth > theme.breakpoints.values.sm ? 430 : window.innerWidth}
-      height={innerWidth > theme.breakpoints.values.sm ? 100 : 25}
+      width={sidebarWidth}
+      height={innerWidth >= theme.breakpoints.values.sm ? 100 : 25}
       innerHeight={innerHeight}
       // anchor="right"
       SidebarOptions={searcherOptionsMemoized}

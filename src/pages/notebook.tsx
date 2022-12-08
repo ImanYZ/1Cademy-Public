@@ -14,6 +14,7 @@ import {
   Paper,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import {
@@ -154,6 +155,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
+  const theme = useTheme();
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -454,6 +456,19 @@ const Dashboard = ({}: DashboardProps) => {
    * scroll
    * update selectedNode
    */
+  const sidebarWidth = () => {
+    let width: number = 0;
+    if (openSidebar) {
+      if (windowWith >= theme.breakpoints.values.md) {
+        width = 480;
+      } else if (windowWith >= theme.breakpoints.values.sm) {
+        width = 300;
+      } else {
+        width = windowWith;
+      }
+    }
+    return width;
+  };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
       devLog("open_Node_Handler", nodeId);
@@ -3208,6 +3223,7 @@ const Dashboard = ({}: DashboardProps) => {
                 username={user.uname}
                 open={openSidebar === "BOOKMARKS_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
               />
@@ -3215,6 +3231,7 @@ const Dashboard = ({}: DashboardProps) => {
                 openLinkedNode={openLinkedNode}
                 open={openSidebar === "SEARCHER_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
               />
@@ -3224,6 +3241,7 @@ const Dashboard = ({}: DashboardProps) => {
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
               />
@@ -3234,6 +3252,7 @@ const Dashboard = ({}: DashboardProps) => {
                 tagId={user.tagId}
                 open={openSidebar === "PENDING_PROPOSALS"}
                 onClose={() => onCloseSidebar()}
+                sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
               />
@@ -3258,6 +3277,7 @@ const Dashboard = ({}: DashboardProps) => {
                 proposeNewChild={proposeNewChild}
                 openProposal={openProposal}
                 db={db}
+                sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
                 username={user.uname}
@@ -3281,6 +3301,7 @@ const Dashboard = ({}: DashboardProps) => {
                   onClose={() => setOpenSidebar(null)}
                   openLinkedNode={openLinkedNode}
                   identifier={nodeBookState.selectedNode}
+                  sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
                   innerWidth={windowWith}
                 />
@@ -3300,7 +3321,7 @@ const Dashboard = ({}: DashboardProps) => {
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
                     ? `${innerHeight * 0.35 + 7}px`
                     : `${innerHeight * 0.25 + 7}px`,
-                  md: "7px",
+                  sm: "7px",
                 },
 
                 right: "7px",
@@ -3320,7 +3341,7 @@ const Dashboard = ({}: DashboardProps) => {
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
                     ? `${innerHeight * 0.35 + 10}px`
                     : `${innerHeight * 0.25 + 10}px`,
-                  md: "10px",
+                  sm: "10px",
                 },
                 right: "10px",
                 zIndex: "1300",
@@ -3347,7 +3368,7 @@ const Dashboard = ({}: DashboardProps) => {
                   : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
                   ? `${innerHeight * 0.35 + 65}px`
                   : `${innerHeight * 0.25 + 65}px`,
-                md: "60px",
+                sm: "60px",
               },
               right: "10px",
               zIndex: "1300",
@@ -3373,7 +3394,7 @@ const Dashboard = ({}: DashboardProps) => {
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
                     ? `${innerHeight * 0.35 + 120}px`
                     : `${innerHeight * 0.25 + 120}px`,
-                  md: "110px",
+                  sm: "110px",
                 },
                 right: "10px",
                 zIndex: "1300",

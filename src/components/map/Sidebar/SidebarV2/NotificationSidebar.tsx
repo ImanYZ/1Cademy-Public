@@ -28,6 +28,7 @@ type NotificationSidebarProps = {
   theme: UserTheme;
   openLinkedNode: any;
   username: string;
+  sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
 };
@@ -50,6 +51,7 @@ const NotificationSidebar = ({
   theme,
   openLinkedNode,
   username,
+  sidebarWidth,
   innerHeight,
   innerWidth,
 }: NotificationSidebarProps) => {
@@ -204,7 +206,7 @@ const NotificationSidebar = ({
       open={open}
       title="Notifications"
       headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
-      width={innerWidth > 599 ? 430 : innerWidth}
+      width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"

@@ -16,6 +16,7 @@ type SearcherSidebarProps = {
   theme: UserTheme;
   openLinkedNode: any;
   username: string;
+  sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
 };
@@ -26,6 +27,7 @@ export const BookmarksSidebar = ({
   theme,
   username,
   openLinkedNode,
+  sidebarWidth,
   innerHeight,
   innerWidth,
 }: SearcherSidebarProps) => {
@@ -105,7 +107,7 @@ export const BookmarksSidebar = ({
       headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
       open={open}
       onClose={onClose}
-      width={innerWidth > 599 ? 430 : innerWidth}
+      width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"

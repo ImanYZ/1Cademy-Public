@@ -1,6 +1,6 @@
 import "katex/dist/katex.min.css";
 
-import { Link, Typography } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React, { FC } from "react";
 import ReactMarkdown from "react-markdown";
@@ -34,9 +34,15 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
               {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
           ) : (
-            <code className={className} {...props}>
-              {children || ""}
-            </code>
+            <Box
+              className="scroll-styled"
+              sx={{
+                paddingBottom: "5px",
+                overflow: "overlay",
+              }}
+            >
+              <code {...props}>{children || ""}</code>
+            </Box>
           );
         },
       }}
