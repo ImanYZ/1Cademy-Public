@@ -250,6 +250,12 @@ const Node = ({
   }, [videoUrl]);
 
   useEffect(() => {
+    if (!addVideo) {
+      setNodeParts(identifier, node => ({ ...node, nodeVideo: "" }));
+    }
+  }, [addVideo]);
+
+  useEffect(() => {
     observer.current = new ResizeObserver(entries => {
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
