@@ -17,6 +17,7 @@ import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import RedditIcon from "@mui/icons-material/Reddit";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
 import { Badge, Button, ClickAwayListener, Divider, MenuItem, Paper, Tooltip } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
@@ -41,6 +42,8 @@ dayjs.extend(relativeTime);
 
 type NodeFooterProps = {
   open: boolean;
+  addVideo: boolean;
+  setAddVideo: (addVideo: boolean) => void;
   identifier: any;
   activeNode: any;
   citationsSelected: any;
@@ -95,6 +98,8 @@ type NodeFooterProps = {
 
 const NodeFooter = ({
   open,
+  addVideo,
+  setAddVideo,
   identifier,
   // activeNode,
   // proposalsSelected,
@@ -567,6 +572,30 @@ const NodeFooter = ({
                       <ImageIcon sx={{ fontSize: "16px" }} />
                     )}
                   </>
+                </ContainedButton>
+
+                <ContainedButton
+                  title="Cite a video from Youtube or Vimeo."
+                  onClick={() => setAddVideo(!addVideo)}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
+                    color: addVideo ? "#ff8a33" : "inherit",
+                    fontWeight: 400,
+                    height: "28.7px",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                  }}
+                >
+                  <VideoCallIcon sx={{ fontSize: "16px" }} />
                 </ContainedButton>
               </Box>
             )}

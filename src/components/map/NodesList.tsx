@@ -154,6 +154,7 @@ const NodesList = ({
             title={nodes[nId].title}
             content={nodes[nId].content}
             nodeImage={nodes[nId].nodeImage}
+            nodeVideo={nodes[nId].nodeVideo || ""}
             viewers={nodes[nId].viewers}
             correctNum={nodes[nId].corrects}
             markedCorrect={nodes[nId].correct}
