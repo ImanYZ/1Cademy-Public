@@ -18,6 +18,7 @@ type PendingProposalSidebarProps = {
   openLinkedNode: any;
   username: string;
   tagId: string | undefined;
+  sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
 };
@@ -30,6 +31,7 @@ const PendingProposalSidebar = ({
   openLinkedNode,
   username,
   tagId,
+  sidebarWidth,
   innerHeight,
   innerWidth,
 }: PendingProposalSidebarProps) => {
@@ -121,7 +123,7 @@ const PendingProposalSidebar = ({
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
-      width={innerWidth > 599 ? 430 : innerWidth}
+      width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       contentSignalState={proposals}

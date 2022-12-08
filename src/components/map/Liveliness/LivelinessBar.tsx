@@ -182,7 +182,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             sx={{
               height: "calc(100% - 40px)",
               width: "1px",
-              borderRight: "2px solid #ffffff",
+              borderRight: "2px solid #bebebe",
               position: "relative",
               marginTop: "10px",
             }}
@@ -282,7 +282,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               left: "-22px",
               width: "22px",
               height: "30px",
-              color: "#ffffff",
+              color: "#bebebe",
               position: "absolute",
               alignItems: "center",
               justifyContent: "center",

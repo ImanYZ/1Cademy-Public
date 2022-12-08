@@ -22,6 +22,7 @@ type ProposalsSidebarProps = {
   openProposal: any;
   selectedNode: string | null;
   db: Firestore;
+  sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
   username: string;
@@ -39,6 +40,7 @@ const ProposalsSidebar = ({
   proposeNewChild,
   openProposal,
   db,
+  sidebarWidth,
   innerHeight,
   innerWidth,
   selectedNode,
@@ -80,7 +82,7 @@ const ProposalsSidebar = ({
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
-      width={innerWidth > 599 ? 430 : innerWidth}
+      width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       anchor="left"
