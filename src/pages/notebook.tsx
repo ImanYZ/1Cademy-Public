@@ -2289,6 +2289,7 @@ const Dashboard = ({}: DashboardProps) => {
           newNode.content === oldNode.content &&
           newNode.nodeType === oldNode.nodeType;
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
+        isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
         isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
