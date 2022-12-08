@@ -107,7 +107,7 @@ export const SidebarWrapper = ({
       {headerImage && (
         <Box sx={{ width }}>
           <Box>
-            {height > 50 ? (
+            {!innerHeight || (height > 50 && innerHeight > 600) ? (
               <Box sx={{ position: "relative", height: "127px", width }}>
                 <Image src={headerImage} alt="header image" width={width} height={127} />
                 <Typography
@@ -173,7 +173,7 @@ export const SidebarWrapper = ({
           sx={{
             position: "absolute",
             top: {
-              xs: "2px",
+              xs: "0px",
               sm: "10px",
             },
             right: "10px",

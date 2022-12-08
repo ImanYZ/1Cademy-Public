@@ -15,6 +15,7 @@ type CitationSidebarProps = {
   onClose: () => void;
   openLinkedNode: any;
   identifier: string;
+  sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
 };
@@ -29,6 +30,7 @@ export const CitationsSidebar = ({
   openLinkedNode,
   open,
   onClose,
+  sidebarWidth,
   innerHeight,
   innerWidth,
 }: CitationSidebarProps) => {
@@ -68,7 +70,7 @@ export const CitationsSidebar = ({
       headerImage={citation}
       open={open}
       onClose={onClose}
-      width={innerWidth > 599 ? 430 : innerWidth}
+      width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
