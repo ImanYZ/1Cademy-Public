@@ -96,11 +96,15 @@ type UsersStatusListProps = {
   reputationSignal: ReputationSignal[];
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   sx?: SxProps<Theme>;
+  onlineUsers: string[];
+  usersOnlineStatusLoaded: boolean;
 };
 
 const UsersStatusList = (props: UsersStatusListProps) => {
   const [{ user }] = useAuth();
   const db = getFirestore();
+
+  const { onlineUsers, usersOnlineStatusLoaded } = props;
 
   const [usersDict, setUsersDict] = useState<{ [key: string]: any }>({});
   const [usersDictLoaded, setUsersDictLoaded] = useState(false);
@@ -118,11 +122,10 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // flag for whether other' reputation data is downloaded from server
   const [reputationsOthersLoaded, setReputationsOthersLoaded] = useState(false);
   // flag for whether other' Monthly reputation data is downloaded from server
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [reputationsOthersMonthlyLoaded, setReputationsOthersMonthlyLoaded] = useState(false);
 
   // const [scaledHeight, setScaledHeight] = useState((window.innerHeight - 430) / scale);
-  const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [onlineUsersList, setOnlineUsersList] = useState<any[]>([]);
 
@@ -288,36 +291,6 @@ const UsersStatusList = (props: UsersStatusListProps) => {
       );
     }
   }, [db, reputationsOthersLoaded, user]);
-
-  // Load onlineUser after load otherMonthly reputation
-  useEffect(() => {
-    // console.log("In reputationsOthersMonthlyLoaded useEffect");
-    if (reputationsOthersMonthlyLoaded) {
-      const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
-      // const usersStatusQuery = firebase.db.collection("status").where("state", "==", "online");
-
-      const usersStatusSnapshot = onSnapshot(usersStatusQuery, snapshot => {
-        const docChanges = snapshot.docChanges();
-        if (docChanges.length > 0) {
-          setOnlineUsers(oOnlineUsers => {
-            const onlineUsersSet = new Set(oOnlineUsers);
-            for (let change of docChanges) {
-              const { user } = change.doc.data();
-              if (change.type === "removed") {
-                onlineUsersSet.delete(user);
-              } else if (change.type === "added" || change.type === "modified") {
-                onlineUsersSet.add(user);
-              }
-            }
-            // return [...onlineUsersSet];
-            return Array.from(onlineUsersSet);
-          });
-        }
-        setUsersOnlineStatusLoaded(true);
-      });
-      return () => usersStatusSnapshot();
-    }
-  }, [db, reputationsOthersMonthlyLoaded]);
 
   const loadReputationPoints = useCallback(
     (reputationsDict: any, usersStatus: string) => {

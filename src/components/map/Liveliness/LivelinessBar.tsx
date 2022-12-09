@@ -1,4 +1,3 @@
-import styled from "@emotion/styled";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
@@ -10,16 +9,9 @@ import { IActionTrack } from "src/types/IActionTrack";
 
 import { MemoizedActionBubble } from "./ActionBubble";
 
-const Livelinessbar = styled.div`
-  top: 120px;
-  right: 0px;
-  z-index: 1199;
-  position: absolute;
-  height: calc(100% - 220px);
-`;
-
 type ILivelinessBarProps = {
   db: Firestore;
+  onlineUsers: string[];
 };
 
 type UserInteractions = {
@@ -34,7 +26,7 @@ type UserInteractions = {
 };
 
 const LivelinessBar = (props: ILivelinessBarProps) => {
-  const { db } = props;
+  const { db, onlineUsers } = props;
   const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
@@ -171,7 +163,15 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
 
   return (
     <>
-      <Livelinessbar>
+      <Box
+        sx={{
+          top: "120px",
+          right: "0px",
+          zIndex: 1199,
+          position: "absolute",
+          height: "calc(100% - 220px)",
+        }}
+      >
         <Box
           id="livebar"
           sx={{
@@ -280,6 +280,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                       <Box className="user-image">
                         <Image src={usersInteractions[uname].imageUrl} width={28} height={28} />
                       </Box>
+                      <Box className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
                     </Box>
                   </Tooltip>
                 );
@@ -313,7 +314,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             />
           </Box>
         </Box>
-      </Livelinessbar>
+      </Box>
     </>
   );
 };

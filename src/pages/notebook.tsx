@@ -437,6 +437,9 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
   const [notebookChanged, setNotebookChanges] = useState({ updated: true });
 
+  const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -659,6 +662,28 @@ const Dashboard = ({}: DashboardProps) => {
         });
       }
     });
+  }, []);
+
+  // list of online users
+  useEffect(() => {
+    const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
+    const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setOnlineUsers(oldOnlineUsers => {
+        const onlineUsersSet = new Set(oldOnlineUsers);
+        for (let change of docChanges) {
+          const { user } = change.doc.data();
+          if (change.type === "removed") {
+            onlineUsersSet.delete(user);
+          } else if (change.type === "added" || change.type === "modified") {
+            onlineUsersSet.add(user);
+          }
+        }
+        return Array.from(onlineUsersSet);
+      });
+      setUsersOnlineStatusLoaded(true);
+    });
+    return () => unsubscribe();
   }, []);
 
   const snapshot = useCallback(
@@ -3244,6 +3269,8 @@ const Dashboard = ({}: DashboardProps) => {
                 pendingProposalsNum={pendingProposalsNum}
                 openSidebar={openSidebar}
                 windowHeight={windowHeight}
+                onlineUsers={onlineUsers}
+                usersOnlineStatusLoaded={usersOnlineStatusLoaded}
               />
 
               <MemoizedBookmarksSidebar
@@ -3442,7 +3469,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? <MemoizedLivelinessBar db={db} /> : <div />}
+          {showLivelinessBar ? <MemoizedLivelinessBar onlineUsers={onlineUsers} db={db} /> : <div />}
 
           {settings.view === "Graph" && (
             <Box
