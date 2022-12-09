@@ -1,5 +1,25 @@
+/* This file contain generic styles */
+/* Don't Modify this file only if is required */
+
+/* --------------------------- river animations */
 .rive-canvas {
   width: inherit;
   height: inherit;
   border: solid 2px pink;
+}
+
+/* --------------------------- embed animations */
+.video-responsive {
+  overflow: hidden;
+  padding-bottom: 56.25%;
+  position: relative;
+  height: 0;
+}
+
+.video-responsive iframe {
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  position: absolute;
 }

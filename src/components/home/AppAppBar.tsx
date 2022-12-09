@@ -1,4 +1,5 @@
 import { Box, Button, Tab, Tabs, Tooltip } from "@mui/material";
+import { useRouter } from "next/router";
 import React from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
@@ -22,9 +23,11 @@ const LinkTab = (props: any) => {
 };
 
 const AppAppBar = (props: any) => {
+  const router = useRouter();
   const signUpHandler = () => {
     // navigateTo("/auth");
     // TODO: redirect
+    router.push("https://1cademy.us/auth");
   };
 
   return (
@@ -70,7 +73,7 @@ const AppAppBar = (props: any) => {
               return (
                 <LinkTab
                   key={"Key" + idx}
-                  onClick={props.switchSection(idx)}
+                  onClick={() => props.switchSection(idx)}
                   label={sectionsOrder[idx + 1].label}
                   titl={sectionsOrder[idx + 1].title}
                 />
@@ -90,7 +93,7 @@ const AppAppBar = (props: any) => {
               <Tooltip title="Apply to join 1Cademy">
                 <Button
                   variant="contained"
-                  color="secondary"
+                  // color="secondary"
                   onClick={props.joinUsClick}
                   sx={{
                     fontSize: 16,
@@ -106,12 +109,17 @@ const AppAppBar = (props: any) => {
             <Tooltip title="SIGN IN/UP">
               <Button
                 variant="contained"
+                // color="secondary"
                 onClick={signUpHandler}
                 sx={{
                   fontSize: 16,
                   color: "common.white",
+                  backgroundColor: "rgb(40, 40, 42)",
                   ml: 2.5,
                   borderRadius: 40,
+                  ":hover": {
+                    backgroundColor: "rgb(30, 30, 31)",
+                  },
                 }}
               >
                 SIGN IN/UP
