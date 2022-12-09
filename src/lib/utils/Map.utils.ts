@@ -1,7 +1,7 @@
 import dagre from "dagre";
 import { collection, doc, Firestore, getDocs, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { ReputationSignal } from "src/knowledgeTypes";
-import { IActionTrackType } from "src/types/IActionTrack";
+import { IActionTrack, IActionTrackType } from "src/types/IActionTrack";
 import { INodeVersion } from "src/types/INodeVersion";
 import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
@@ -1342,8 +1342,12 @@ export const createActionTrack = (
   db: Firestore,
   type: IActionTrackType,
   action: string,
-  uname: string,
-  imageUrl: string,
+  userData: {
+    uname: string;
+    imageUrl: string;
+    chooseUname: boolean;
+    fullname: string;
+  },
   nodeId: string,
   receivers: string[]
 ) => {
@@ -1352,12 +1356,14 @@ export const createActionTrack = (
     accepted: true,
     type,
     action,
-    imageUrl,
+    imageUrl: userData.imageUrl,
     createdAt: Timestamp.now(),
-    doer: uname,
+    doer: userData.uname,
+    chooseUname: userData.chooseUname,
+    fullname: userData.fullname,
     nodeId,
     receivers,
-  });
+  } as IActionTrack);
 };
 
 {

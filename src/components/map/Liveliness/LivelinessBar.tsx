@@ -26,6 +26,8 @@ type UserInteractions = {
   [uname: string]: {
     reputation: "Gain" | "Loss" | null;
     imageUrl: string;
+    chooseUname: boolean;
+    fullname: string;
     count: number;
     actions: ActionTrackType[];
   };
@@ -66,6 +68,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
                 usersInteractions[actionTrackData.doer] = {
                   imageUrl: actionTrackData.imageUrl,
+                  chooseUname: actionTrackData.chooseUname,
+                  fullname: actionTrackData.fullname,
                   count: 0,
                   actions: [],
                   reputation: null,
@@ -97,6 +101,12 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               } else {
                 usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
                 usersInteractions[actionTrackData.doer].count += 1;
+              }
+            }
+            if (docChange.type === "modified") {
+              if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
+                usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
               }
             }
             if (docChange.type === "removed") {
@@ -208,7 +218,10 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               {unames.map((uname: string) => {
                 const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
                 return (
-                  <Tooltip key={uname} title={uname}>
+                  <Tooltip
+                    key={uname}
+                    title={usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
+                  >
                     <Box
                       className={
                         usersInteractions[uname].reputation === "Gain"
