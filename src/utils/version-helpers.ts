@@ -20,7 +20,6 @@ import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typ
 import { Timestamp } from "firebase-admin/firestore";
 import { INodeVersion } from "src/types/INodeVersion";
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
-import { IActionTrack } from "src/types/IActionTrack";
 
 export const comPointTypes = [
   "comPoints",

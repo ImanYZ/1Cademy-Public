@@ -1,4 +1,3 @@
-import styled from "@emotion/styled";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
@@ -10,29 +9,24 @@ import { IActionTrack } from "src/types/IActionTrack";
 
 import { MemoizedActionBubble } from "./ActionBubble";
 
-const Livelinessbar = styled.div`
-  top: 120px;
-  right: 0px;
-  z-index: 1199;
-  position: absolute;
-  height: calc(100% - 220px);
-`;
-
 type ILivelinessBarProps = {
   db: Firestore;
+  onlineUsers: string[];
 };
 
 type UserInteractions = {
   [uname: string]: {
     reputation: "Gain" | "Loss" | null;
     imageUrl: string;
+    chooseUname: boolean;
+    fullname: string;
     count: number;
     actions: ActionTrackType[];
   };
 };
 
 const LivelinessBar = (props: ILivelinessBarProps) => {
-  const { db } = props;
+  const { db, onlineUsers } = props;
   const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
@@ -66,6 +60,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
                 usersInteractions[actionTrackData.doer] = {
                   imageUrl: actionTrackData.imageUrl,
+                  chooseUname: actionTrackData.chooseUname,
+                  fullname: actionTrackData.fullname,
                   count: 0,
                   actions: [],
                   reputation: null,
@@ -97,6 +93,12 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               } else {
                 usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
                 usersInteractions[actionTrackData.doer].count += 1;
+              }
+            }
+            if (docChange.type === "modified") {
+              if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
+                usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
               }
             }
             if (docChange.type === "removed") {
@@ -161,7 +163,15 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
 
   return (
     <>
-      <Livelinessbar>
+      <Box
+        sx={{
+          top: "120px",
+          right: "0px",
+          zIndex: 1199,
+          position: "absolute",
+          height: "calc(100% - 220px)",
+        }}
+      >
         <Box
           id="livebar"
           sx={{
@@ -208,7 +218,10 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               {unames.map((uname: string) => {
                 const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
                 return (
-                  <Tooltip key={uname} title={uname}>
+                  <Tooltip
+                    key={uname}
+                    title={usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
+                  >
                     <Box
                       className={
                         usersInteractions[uname].reputation === "Gain"
@@ -267,6 +280,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                       <Box className="user-image">
                         <Image src={usersInteractions[uname].imageUrl} width={28} height={28} />
                       </Box>
+                      <Box className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
                     </Box>
                   </Tooltip>
                 );
@@ -300,7 +314,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             />
           </Box>
         </Box>
-      </Livelinessbar>
+      </Box>
     </>
   );
 };

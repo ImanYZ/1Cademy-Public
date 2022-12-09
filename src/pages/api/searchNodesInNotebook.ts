@@ -127,6 +127,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
         imageUrl: userData.imageUrl,
         createdAt: Timestamp.now(),
         doer: uname,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: allPostsData.length ? allPostsData[0].id : "",
         receivers: [],
       } as IActionTrack);
