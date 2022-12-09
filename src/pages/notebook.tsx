@@ -437,6 +437,9 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
   const [notebookChanged, setNotebookChanges] = useState({ updated: true });
 
+  const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -462,7 +465,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (windowWith >= theme.breakpoints.values.md) {
         width = 480;
       } else if (windowWith >= theme.breakpoints.values.sm) {
-        width = 300;
+        width = 320;
       } else {
         width = windowWith;
       }
@@ -659,6 +662,28 @@ const Dashboard = ({}: DashboardProps) => {
         });
       }
     });
+  }, []);
+
+  // list of online users
+  useEffect(() => {
+    const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
+    const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setOnlineUsers(oldOnlineUsers => {
+        const onlineUsersSet = new Set(oldOnlineUsers);
+        for (let change of docChanges) {
+          const { user } = change.doc.data();
+          if (change.type === "removed") {
+            onlineUsersSet.delete(user);
+          } else if (change.type === "added" || change.type === "modified") {
+            onlineUsersSet.add(user);
+          }
+        }
+        return Array.from(onlineUsersSet);
+      });
+      setUsersOnlineStatusLoaded(true);
+    });
+    return () => unsubscribe();
   }, []);
 
   const snapshot = useCallback(
@@ -1454,7 +1479,12 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
-        createActionTrack(db, "NodeOpen", "", String(user?.uname), String(user?.imageUrl), linkedNodeID, []);
+        createActionTrack(db, "NodeOpen", "", {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        }, linkedNodeID, []);
 
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
@@ -1550,7 +1580,12 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
-          createActionTrack(db, "NodeHide", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          createActionTrack(db, "NodeHide", "", {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          }, nodeId, []);
         }
 
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
@@ -1689,7 +1724,12 @@ const Dashboard = ({}: DashboardProps) => {
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
-          createActionTrack(db, "NodeCollapse", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          createActionTrack(db, "NodeCollapse", "", {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          }, nodeId, []);
           return { nodes: oldNodes, edges };
         });
       }
@@ -1744,7 +1784,12 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
-      createActionTrack(db, "NodeShare", platform, String(user?.uname), String(user?.imageUrl), nodeId, []);
+      createActionTrack(db, "NodeShare", platform, {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      }, nodeId, []);
     },
     [user]
   );
@@ -1813,7 +1858,12 @@ const Dashboard = ({}: DashboardProps) => {
           }
 
           if (!thisNode.isStudied) {
-            createActionTrack(db, "NodeStudied", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+            createActionTrack(db, "NodeStudied", "", {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            }, nodeId, []);
           }
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
@@ -1872,7 +1922,12 @@ const Dashboard = ({}: DashboardProps) => {
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
-          createActionTrack(db, "NodeBookmark", "", String(user?.uname), String(user?.imageUrl), nodeId, []);
+          createActionTrack(db, "NodeBookmark", "", {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          }, nodeId, []);
           return { nodes: oldNodes, edges };
         });
       }
@@ -3214,6 +3269,8 @@ const Dashboard = ({}: DashboardProps) => {
                 pendingProposalsNum={pendingProposalsNum}
                 openSidebar={openSidebar}
                 windowHeight={windowHeight}
+                onlineUsers={onlineUsers}
+                usersOnlineStatusLoaded={usersOnlineStatusLoaded}
               />
 
               <MemoizedBookmarksSidebar
@@ -3412,7 +3469,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? <MemoizedLivelinessBar db={db} /> : <div />}
+          {showLivelinessBar ? <MemoizedLivelinessBar onlineUsers={onlineUsers} db={db} /> : <div />}
 
           {settings.view === "Graph" && (
             <Box

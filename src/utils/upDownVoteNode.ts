@@ -408,6 +408,8 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
         action,
         createdAt: currentTimestamp,
         doer: uname,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         imageUrl: userData.imageUrl,
         nodeId,
         receivers,

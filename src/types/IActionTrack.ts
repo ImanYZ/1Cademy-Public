@@ -22,6 +22,8 @@ export type IActionTrack = {
   accepted: boolean;
   createdAt: Timestamp;
   doer: string; // proposer or voter
+  chooseUname: boolean;
+  fullname: string;
   imageUrl: string;
   receivers: string[]; // single for rateVersion and multiple for node vote
 };

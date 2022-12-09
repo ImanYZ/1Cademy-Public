@@ -377,6 +377,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         imageUrl: userData.imageUrl,
         createdAt: currentTimestamp,
         doer: userData.uname,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: versionData.childType && isAccepted ? newUpdates.nodeId : versionData.node,
         receivers: [versionData.proposer],
       } as IActionTrack);

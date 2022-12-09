@@ -34,6 +34,8 @@ type MainSidebarProps = {
   openSidebar?: OpenSidebar;
   windowHeight: number;
   reputationSignal: ReputationSignal[];
+  onlineUsers: string[];
+  usersOnlineStatusLoaded: boolean;
 };
 
 export const ToolbarSidebar = ({
@@ -51,6 +53,8 @@ export const ToolbarSidebar = ({
   openSidebar,
   windowHeight,
   reputationSignal,
+  onlineUsers,
+  usersOnlineStatusLoaded,
 }: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const isMenuOpen = nodeBookState.isMenuOpen;
@@ -549,6 +553,8 @@ export const ToolbarSidebar = ({
         >
           {user?.tag && leaderBoardType && (
             <UsersStatusList
+              onlineUsers={onlineUsers}
+              usersOnlineStatusLoaded={usersOnlineStatusLoaded}
               usersStatus={leaderBoardType}
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
@@ -585,6 +591,8 @@ export const ToolbarSidebar = ({
     user,
     windowHeight,
     reputationSignal,
+    onlineUsers,
+    usersOnlineStatusLoaded,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -600,6 +608,8 @@ export const ToolbarSidebar = ({
     windowHeight,
     anchorEl,
     reputationSignal,
+    onlineUsers,
+    usersOnlineStatusLoaded,
   ]);
 
   return (

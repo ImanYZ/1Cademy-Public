@@ -289,7 +289,7 @@ const SearcherSidebar = ({
         sx={{
           p: {
             xs: "10px",
-            sm: "0px 10px 10px 10px",
+            sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 10px 10px 10px",
           },
           borderBottom: 1,
           borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
