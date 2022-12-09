@@ -666,17 +666,18 @@ const Dashboard = ({}: DashboardProps) => {
 
   // list of online users
   useEffect(() => {
+    if (!user) return;
     const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
     const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
       const docChanges = snapshot.docChanges();
       setOnlineUsers(oldOnlineUsers => {
         const onlineUsersSet = new Set(oldOnlineUsers);
         for (let change of docChanges) {
-          const { user } = change.doc.data();
-          if (change.type === "removed") {
-            onlineUsersSet.delete(user);
+          const { user: statusUname } = change.doc.data();
+          if (change.type === "removed" && user.uname !== statusUname) {
+            onlineUsersSet.delete(statusUname);
           } else if (change.type === "added" || change.type === "modified") {
-            onlineUsersSet.add(user);
+            onlineUsersSet.add(statusUname);
           }
         }
         return Array.from(onlineUsersSet);
@@ -684,7 +685,7 @@ const Dashboard = ({}: DashboardProps) => {
       setUsersOnlineStatusLoaded(true);
     });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
@@ -1479,12 +1480,19 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
-        createActionTrack(db, "NodeOpen", "", {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        }, linkedNodeID, []);
+        createActionTrack(
+          db,
+          "NodeOpen",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          linkedNodeID,
+          []
+        );
 
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
@@ -1580,12 +1588,19 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
-          createActionTrack(db, "NodeHide", "", {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          }, nodeId, []);
+          createActionTrack(
+            db,
+            "NodeHide",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            []
+          );
         }
 
         nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
@@ -1724,12 +1739,19 @@ const Dashboard = ({}: DashboardProps) => {
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
-          createActionTrack(db, "NodeCollapse", "", {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          }, nodeId, []);
+          createActionTrack(
+            db,
+            "NodeCollapse",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            []
+          );
           return { nodes: oldNodes, edges };
         });
       }
@@ -1784,12 +1806,19 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
-      createActionTrack(db, "NodeShare", platform, {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      }, nodeId, []);
+      createActionTrack(
+        db,
+        "NodeShare",
+        platform,
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        []
+      );
     },
     [user]
   );
@@ -1858,12 +1887,19 @@ const Dashboard = ({}: DashboardProps) => {
           }
 
           if (!thisNode.isStudied) {
-            createActionTrack(db, "NodeStudied", "", {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            }, nodeId, []);
+            createActionTrack(
+              db,
+              "NodeStudied",
+              "",
+              {
+                fullname: `${user?.fName} ${user?.lName}`,
+                chooseUname: !!user?.chooseUname,
+                uname: String(user?.uname),
+                imageUrl: String(user?.imageUrl),
+              },
+              nodeId,
+              []
+            );
           }
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
@@ -1922,12 +1958,19 @@ const Dashboard = ({}: DashboardProps) => {
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
-          createActionTrack(db, "NodeBookmark", "", {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          }, nodeId, []);
+          createActionTrack(
+            db,
+            "NodeBookmark",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            []
+          );
           return { nodes: oldNodes, edges };
         });
       }
