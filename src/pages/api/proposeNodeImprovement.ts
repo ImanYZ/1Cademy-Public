@@ -306,6 +306,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         action: versionRef.id,
         createdAt: currentTimestamp,
         doer: versionData.proposer,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: versionData.node,
         receivers: [userData.uname],
       } as IActionTrack);
@@ -318,6 +320,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         action: "Correct-" + versionRef.id,
         createdAt: currentTimestamp,
         doer: versionData.proposer,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: versionData.node,
         receivers: [userData.uname],
       } as IActionTrack);

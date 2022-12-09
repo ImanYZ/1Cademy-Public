@@ -4,6 +4,7 @@ import { IActionTrack } from "src/types/IActionTrack";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
+import { IUser } from "src/types/IUser";
 import { detach } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
@@ -77,6 +78,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
   let writeCounts = 0;
   let batch = db.batch();
+
+  const userData = req.body.data.user.userData as IUser;
   try {
     const { versionNodeId } = req?.body?.data;
     ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.parentId }));
@@ -342,6 +345,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         action: versionRef.id,
         createdAt: currentTimestamp,
         doer: newVersion.proposer,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
       } as IActionTrack);
@@ -354,6 +359,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         action: "Correct-" + versionRef.id,
         createdAt: currentTimestamp,
         doer: newVersion.proposer,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
       } as IActionTrack);
