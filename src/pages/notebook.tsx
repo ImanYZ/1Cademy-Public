@@ -46,6 +46,7 @@ import { INotificationNum } from "src/types/INotification";
 
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
+import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
@@ -237,6 +238,13 @@ const Dashboard = ({}: DashboardProps) => {
   const windowInnerBottom = 50;
   const [showRegion, setShowRegion] = useState<boolean>(false);
   const [innerHeight, setInnerHeight] = useState<number>(0);
+  const [focusView, setFocusView] = useState<{
+    selectedNode: string;
+    isEnabled: boolean;
+  }>({
+    selectedNode: "",
+    isEnabled: false,
+  });
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -3414,6 +3422,8 @@ const Dashboard = ({}: DashboardProps) => {
 
           {showLivelinessBar ? <MemoizedLivelinessBar db={db} /> : <div />}
 
+          {focusView.isEnabled && <MemoizedFocusedNotebook db={db} graph={graph} setFocusView={setFocusView} focusedNode={focusView.selectedNode} openLinkedNode={openLinkedNode} />}
+
           {settings.view === "Graph" && (
             <Box
               id="MapContent"
@@ -3432,6 +3442,7 @@ const Dashboard = ({}: DashboardProps) => {
                 )}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
+                  setFocusView={setFocusView}
                   nodes={graph.nodes}
                   bookmark={bookmark}
                   markStudied={markStudied}

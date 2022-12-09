@@ -30,9 +30,10 @@ type Props = {
   contributors?: ReactNode;
   references?: ReactNode;
   tags?: ReactNode;
+  editable?: boolean;
 };
 
-export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }) => {
+export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags, editable = true }) => {
   const router = useRouter();
   const [imageFullScreen, setImageFullScreen] = useState(false);
   const [showShareButtons, setShowShareButtons] = useState(false);
@@ -61,7 +62,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
             color="text.secondary"
             component="div"
             sx={{
-              color: theme => theme.palette.common.black,
+              color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
               lineHeight: 2,
               fontSize: "19px",
             }}
@@ -145,9 +146,11 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags }
                 {!showShareButtons && <Typography py="2px">Share</Typography>}
               </Button>
               {showShareButtons && <ShareButtons />}
-              <IconButton onClick={() => router.push({ pathname: `${ROUTES.proposal}/${node.id}` })}>
-                <EditIcon />
-              </IconButton>
+              {editable && (
+                <IconButton onClick={() => router.push({ pathname: `${ROUTES.proposal}/${node.id}` })}>
+                  <EditIcon />
+                </IconButton>
+              )}
             </Box>
           </Box>
         </Box>
