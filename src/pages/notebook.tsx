@@ -3197,6 +3197,14 @@ const Dashboard = ({}: DashboardProps) => {
     }, 200);
   };
 
+  const setSelectedNode = useCallback(
+    (nodeId: string) => {
+      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+      scrollToNode(nodeId);
+    },
+    [nodeBookDispatch]
+  );
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       <Box
@@ -3522,7 +3530,16 @@ const Dashboard = ({}: DashboardProps) => {
 
           {showLivelinessBar ? <MemoizedLivelinessBar onlineUsers={onlineUsers} db={db} /> : <div />}
 
-          {focusView.isEnabled && <MemoizedFocusedNotebook db={db} graph={graph} setFocusView={setFocusView} focusedNode={focusView.selectedNode} openLinkedNode={openLinkedNode} />}
+          {focusView.isEnabled && (
+            <MemoizedFocusedNotebook
+              setSelectedNode={setSelectedNode}
+              db={db}
+              graph={graph}
+              setFocusView={setFocusView}
+              focusedNode={focusView.selectedNode}
+              openLinkedNode={openLinkedNode}
+            />
+          )}
 
           {settings.view === "Graph" && (
             <Box

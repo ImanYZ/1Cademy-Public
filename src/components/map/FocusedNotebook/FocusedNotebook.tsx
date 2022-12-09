@@ -1,5 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Tooltip } from "@mui/material";
 import { collection, Firestore, getDocs, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { EdgesData, FullNodesData } from "src/nodeBookTypes";
@@ -17,6 +17,7 @@ type FocusedNotebookProps = {
   db: Firestore;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   openLinkedNode: (linkedNodeID: string, typeOperation?: string) => void;
+  setSelectedNode: (nodeId: string) => void;
   graph: {
     nodes: FullNodesData;
     edges: EdgesData;
@@ -24,7 +25,14 @@ type FocusedNotebookProps = {
   focusedNode: string;
 };
 
-const FocusedNotebook = ({ openLinkedNode, graph, focusedNode, setFocusView, db }: FocusedNotebookProps) => {
+const FocusedNotebook = ({
+  openLinkedNode,
+  setSelectedNode,
+  graph,
+  focusedNode,
+  setFocusView,
+  db,
+}: FocusedNotebookProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState("");
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
@@ -34,7 +42,7 @@ const FocusedNotebook = ({ openLinkedNode, graph, focusedNode, setFocusView, db 
     setSelectedNodeId(focusedNode);
   }, [focusedNode]);
 
-  const fetchInstitution = useCallback(
+  const fetchInstitutionLogo = useCallback(
     async (institutionName: string) => {
       const institutionsQuery = query(collection(db, "institutions"), where("name", "==", institutionName));
 
@@ -58,6 +66,8 @@ const FocusedNotebook = ({ openLinkedNode, graph, focusedNode, setFocusView, db 
     (nodeId: string) => {
       if (!graph.nodes[nodeId]) {
         openLinkedNode(nodeId);
+      } else {
+        setSelectedNode(nodeId);
       }
       setSelectedNodeId(nodeId);
     },
@@ -73,11 +83,11 @@ const FocusedNotebook = ({ openLinkedNode, graph, focusedNode, setFocusView, db 
 
   const _institutions = useMemo(() => {
     return Object.keys(institutions || {}).map((name: string) => {
-      if (institutionLogos.hasOwnProperty(name)) {
-        fetchInstitution(name).then(institution => {
+      if (!institutionLogos.hasOwnProperty(name)) {
+        fetchInstitutionLogo(name).then(logoUrl => {
           setInstitutionLogos({
             ...institutionLogos,
-            [name]: institution.logoURL,
+            [name]: logoUrl,
           });
         });
       }
@@ -93,7 +103,7 @@ const FocusedNotebook = ({ openLinkedNode, graph, focusedNode, setFocusView, db 
     <>
       <Box
         sx={{
-          backgroundColor: "rgba(31,31,31, 0.8)",
+          backgroundColor: "rgba(31,31,31, 1)",
           position: "absolute",
           width: "100%",
           height: "100%",
@@ -102,10 +112,12 @@ const FocusedNotebook = ({ openLinkedNode, graph, focusedNode, setFocusView, db 
           overflow: "auto",
         }}
       >
-        <CloseIcon
-          sx={{ position: "absolute", top: "20px", right: "20px", zIndex: "99" }}
-          onClick={() => setFocusView({ isEnabled: false, selectedNode: "" })}
-        />
+        <Tooltip title={"hide expand view"} placement="bottom">
+          <CloseIcon
+            sx={{ position: "absolute", top: "20px", right: "20px", zIndex: "99" }}
+            onClick={() => setFocusView({ isEnabled: false, selectedNode: "" })}
+          />
+        </Tooltip>
         {currentNode.title ? (
           <Grid container spacing={3}>
             <Grid item sm={12} md={3}>
