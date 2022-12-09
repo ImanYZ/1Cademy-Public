@@ -218,7 +218,10 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               {unames.map((uname: string) => {
                 const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
                 return (
-                  <Tooltip key={uname} title={uname}>
+                  <Tooltip
+                    key={uname}
+                    title={usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
+                  >
                     <Box
                       className={
                         usersInteractions[uname].reputation === "Gain"
