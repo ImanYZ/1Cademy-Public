@@ -32,6 +32,7 @@ import QuestionChoices from "./QuestionChoices";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
+  setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
   citationsSelected: any;
   proposalsSelected: any;
@@ -129,6 +130,7 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 
 const Node = ({
   identifier,
+  setFocusView,
   activeNode,
   citationsSelected,
   proposalsSelected,
@@ -570,6 +572,7 @@ const Node = ({
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
                 <MemoizedNodeHeader
+                  setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
                   open={open}
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={hideOffspringsHandler}
@@ -826,6 +829,7 @@ const Node = ({
             </div>
             {!nodeBookState.choosingNode && (
               <MemoizedNodeHeader
+                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
                 open={open}
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
