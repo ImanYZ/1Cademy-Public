@@ -6,9 +6,9 @@ import { EdgesData, FullNodesData } from "src/nodeBookTypes";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
 
-import NodeItemContributors from "../../NodeItemContributors";
 import { NodeItemFull } from "../../NodeItemFull";
 import { MemoizedFocusedLinkedNodes } from "./FocusedLinkedNodes";
+import { MemoizedFocusedNodeContributors } from "./FocusedNodeContributors";
 import FocusedNodeSkeleton from "./FocusedNodeSkeleton";
 import { MemoizedFocusedReferencesList } from "./FocusedReferencesList";
 import { MemoizedFocusedTagsList } from "./FocusedTagsList";
@@ -133,9 +133,9 @@ const FocusedNotebook = ({
               <NodeItemFull
                 node={currentNode as any}
                 contributors={
-                  <NodeItemContributors
-                    contributors={(_contributors as any) || []}
-                    institutions={(_institutions as any) || []}
+                  <MemoizedFocusedNodeContributors
+                    contributors={_contributors || []}
+                    institutions={_institutions || []}
                   />
                 }
                 references={

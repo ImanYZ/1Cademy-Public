@@ -57,7 +57,10 @@ const FocusedReferencesList = ({ node, sx, navigateToNode }: ReferencesListProps
                             display: "flex",
                             direction: "row",
                             justifyContent: "center",
-                            color: theme => theme.palette.common.darkGrayBackground,
+                            color: theme =>
+                              theme.palette.mode === "light"
+                                ? theme.palette.common.darkGrayBackground
+                                : theme.palette.common.white,
                           }}
                         >
                           <LinkIcon />
