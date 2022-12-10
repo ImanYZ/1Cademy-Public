@@ -142,6 +142,7 @@ const FocusedNotebook = ({
             </Grid>
             <Grid item sm={12} md={6}>
               <NodeItemFull
+                nodeId={selectedNodeId}
                 node={currentNode as any}
                 contributors={
                   <MemoizedFocusedNodeContributors

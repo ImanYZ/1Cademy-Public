@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { FC, ReactNode, useState } from "react";
 
 import ROUTES from "@/lib/utils/routes";
+import { getNodePageWithDomain } from "@/lib/utils/utils";
 
 import { KnowledgeNode } from "../knowledgeTypes";
 import FullScreenImage from "./FullScreenImage";
@@ -26,6 +27,7 @@ import { ShareButtons } from "./ShareButtons";
 dayjs.extend(relativeTime);
 
 type Props = {
+  nodeId: string;
   node: KnowledgeNode;
   contributors?: ReactNode;
   references?: ReactNode;
@@ -33,7 +35,7 @@ type Props = {
   editable?: boolean;
 };
 
-export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags, editable = true }) => {
+export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references, tags, editable = true }) => {
   const router = useRouter();
   const [imageFullScreen, setImageFullScreen] = useState(false);
   const [showShareButtons, setShowShareButtons] = useState(false);
@@ -145,7 +147,7 @@ export const NodeItemFull: FC<Props> = ({ node, contributors, references, tags, 
                 <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} />
                 {!showShareButtons && <Typography py="2px">Share</Typography>}
               </Button>
-              {showShareButtons && <ShareButtons />}
+              {showShareButtons && <ShareButtons url={getNodePageWithDomain(String(node.title), nodeId)} />}
               {editable && (
                 <IconButton onClick={() => router.push({ pathname: `${ROUTES.proposal}/${node.id}` })}>
                   <EditIcon />
