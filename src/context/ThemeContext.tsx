@@ -1,8 +1,9 @@
+import { uuidv4 } from "@firebase/util";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
-import { getDatabase, onDisconnect, onValue, ref, serverTimestamp,set } from "firebase/database";
-import React, { FC, ReactNode, useEffect,useMemo } from "react";
+import { getDatabase, onDisconnect, onValue, ref, serverTimestamp, set } from "firebase/database";
+import React, { FC, ReactNode, useEffect, useMemo } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { getDesignTokens, getThemedComponents } from "@/lib/theme/brandingTheme";
@@ -20,6 +21,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
   useEffect(() => {
     // Fetch the current user's ID from Firebase Authentication.
     if (user) {
+      const sessionId = uuidv4();
       var uname = user?.uname;
       // Create a reference to this user's specific status node.
       // This is where we will store data about being online/offline.
@@ -30,10 +32,12 @@ const ThemeProvider: FC<Props> = ({ children }) => {
       // the Realtime database when this device is offline
       // or online.
       let isOfflineForDatabase = {
+        sessionId,
         state: "offline",
         last_changed: serverTimestamp(),
       };
       let isOnlineForDatabase = {
+        sessionId,
         state: "online",
         last_changed: serverTimestamp(),
       };
