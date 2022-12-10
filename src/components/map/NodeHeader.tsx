@@ -2,11 +2,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
 import RemoveIcon from "@mui/icons-material/Remove";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton, Tooltip } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
 
 type NodeHeaderProps = {
+  setFocusView: () => void;
   open: boolean;
   onToggleNode: any;
   onHideOffsprings: any;
@@ -14,9 +16,15 @@ type NodeHeaderProps = {
   sx?: SxProps<Theme>;
 };
 
-const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, sx }: NodeHeaderProps) => {
+const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, sx, setFocusView }: NodeHeaderProps) => {
   return (
     <Box sx={{ display: "flex", alignItems: "center", ...sx }}>
+      <Tooltip title="focus this node on your map.">
+        <IconButton onClick={() => setFocusView()} aria-label="focus-mode" size="small">
+          <UnfoldMoreIcon fontSize="inherit" sx={{ color: "#BEBEBE", transform: "rotate(45deg)" }} />
+        </IconButton>
+      </Tooltip>
+
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         {open ? (
           <IconButton onClick={onToggleNode} aria-label="Close the node" size="small">

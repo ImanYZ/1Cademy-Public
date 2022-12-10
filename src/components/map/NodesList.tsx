@@ -8,6 +8,7 @@ import { OpenSidebar } from "@/pages/notebook";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
+  setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
   bookmark: any;
   markStudied: any;
@@ -52,6 +53,7 @@ type NodeListProps = {
 };
 
 const NodesList = ({
+  setFocusView,
   nodes,
   bookmark,
   markStudied,
@@ -136,6 +138,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            setFocusView={setFocusView}
             activeNode={activeNode}
             citationsSelected={citationsSelected}
             proposalsSelected={proposalsSelected}
