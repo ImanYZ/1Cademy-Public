@@ -20,7 +20,7 @@ exports.onUserStatusChanged = functions.database.ref("/status/{uname}").onUpdate
   if (userStatusDoc.exists) {
     const userStatusData = userStatusDoc.data();
     if (Array.isArray(userStatusData?.sessionIds)) {
-      sessionIds.push(userStatusData?.sessionIds);
+      sessionIds.push(...userStatusData?.sessionIds);
     }
   }
 
