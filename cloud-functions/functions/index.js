@@ -14,6 +14,29 @@ exports.onUserStatusChanged = functions.database.ref("/status/{uname}").onUpdate
   // Then use other event data to create a reference to the
   // corresponding Firestore document.
   const userStatusFirestoreRef = firestore.doc(`status/${context.params.uname}`);
+  const userStatusDoc = await userStatusFirestoreRef.get();
+  const sessionIds = [];
+
+  if (userStatusDoc.exists) {
+    const userStatusData = userStatusDoc.data();
+    if (Array.isArray(userStatusData?.sessionIds)) {
+      sessionIds.push(userStatusData?.sessionIds);
+    }
+  }
+
+  if (eventStatus.sessionId) {
+    const sessIdx = sessionIds.indexOf(eventStatus.sessionId);
+    if (eventStatus?.state === "online" && sessIdx === -1) {
+      sessionIds.push(eventStatus.sessionId);
+    } else if (eventStatus?.state === "offline" && sessIdx !== -1) {
+      sessionIds.splice(sessIdx, 1);
+    }
+  }
+
+  let state = "online";
+  if (eventStatus.state === "offline" && !sessionIds.length) {
+    state = "offline";
+  }
 
   // It is likely that the Realtime Database change that triggered
   // this event has already been overwritten by a fast change in
@@ -33,5 +56,10 @@ exports.onUserStatusChanged = functions.database.ref("/status/{uname}").onUpdate
   eventStatus.user = context.params.uname;
 
   // ... and write it to Firestore.
-  return userStatusFirestoreRef.set(eventStatus);
+  return userStatusFirestoreRef.set({
+    user: eventStatus.user,
+    last_changed: eventStatus.last_changed,
+    sessionIds,
+    state,
+  });
 });
