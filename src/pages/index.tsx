@@ -1,6 +1,7 @@
 import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/system";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { ComponentType, ReactNode, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
@@ -8,6 +9,7 @@ import { useQuery } from "react-query";
 import HomeFilter, { HomeFilterRef } from "@/components/HomeFilter";
 import HomeSearch, { HomeSearchRef } from "@/components/HomeSearch";
 import { getSearchNodes } from "@/lib/knowledgeApi";
+import { APP_DOMAIN } from "@/lib/utils/1cademyConfig";
 import {
   getDefaultSortedByType,
   getQueryParameter,
@@ -136,6 +138,9 @@ const HomePage: NextPageWithLayout = () => {
   return (
     <ThemeProvider theme={brandingLightTheme}>
       <PagesNavbar showSearch={!isIntersecting}>
+        <Head>
+          <link rel="canonical" href={APP_DOMAIN} key="canonical" />
+        </Head>
         <HomeSearch
           sx={{ mt: "var(--navbar-height)" }}
           onSearch={handleSearch}
