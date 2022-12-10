@@ -158,7 +158,13 @@ const FocusedNotebook = ({
                   />
                 }
                 tags={
-                  <MemoizedFocusedTagsList navigateToNode={navigateToNode} node={currentNode as INode} sx={{ mt: 3 }} />
+                  <MemoizedFocusedTagsList
+                    loadNodeData={loadNodeData}
+                    nodes={graph.nodes}
+                    navigateToNode={navigateToNode}
+                    node={currentNode as INode}
+                    sx={{ mt: 3 }}
+                  />
                 }
                 editable={false}
               />
