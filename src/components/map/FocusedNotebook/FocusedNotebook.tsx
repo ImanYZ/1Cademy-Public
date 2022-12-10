@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Grid, Tooltip } from "@mui/material";
-import { collection, Firestore, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, Firestore, getDoc, getDocs, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { EdgesData, FullNodesData } from "src/nodeBookTypes";
 import { INode } from "src/types/INode";
@@ -52,6 +52,15 @@ const FocusedNotebook = ({
         const institutionData = institutionDoc.data();
         return institutionData.logoURL;
       }
+    },
+    [db]
+  );
+
+  const loadNodeData = useCallback(
+    async (nodeId: string) => {
+      const nodeRef = doc(db, "nodes", nodeId);
+      const nodeDoc = await getDoc(nodeRef);
+      return nodeDoc.data();
     },
     [db]
   );
@@ -123,6 +132,8 @@ const FocusedNotebook = ({
             <Grid item sm={12} md={3}>
               {parents && parents?.length > 0 && (
                 <MemoizedFocusedLinkedNodes
+                  loadNodeData={loadNodeData}
+                  nodes={graph.nodes}
                   navigateToNode={navigateToNode}
                   nodeLinks={(parents as INodeLink[]) || []}
                   header="Learn Before"
@@ -154,6 +165,8 @@ const FocusedNotebook = ({
             <Grid item sm={12} md={3}>
               {children && children?.length > 0 && (
                 <MemoizedFocusedLinkedNodes
+                  loadNodeData={loadNodeData}
+                  nodes={graph.nodes}
                   navigateToNode={navigateToNode}
                   nodeLinks={(children as INodeLink[]) || []}
                   header="Learn After"
