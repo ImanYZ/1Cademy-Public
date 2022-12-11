@@ -542,7 +542,7 @@ const NodeFooter = ({
                 }}
               >
                 <ContainedButton
-                  title="View tags and citations used in this node."
+                  title="Upload an image to better explain this node."
                   onClick={() => uploadImageClicked()}
                   tooltipPosition="top"
                   sx={{

@@ -19,7 +19,7 @@ type NodeHeaderProps = {
 const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, sx, setFocusView }: NodeHeaderProps) => {
   return (
     <Box sx={{ display: "flex", alignItems: "center", ...sx }}>
-      <Tooltip title="focus this node on your map.">
+      <Tooltip title="Focused mode">
         <IconButton onClick={() => setFocusView()} aria-label="focus-mode" size="small">
           <UnfoldMoreIcon fontSize="inherit" sx={{ color: "#BEBEBE", transform: "rotate(45deg)" }} />
         </IconButton>
