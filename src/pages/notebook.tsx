@@ -2834,6 +2834,11 @@ const Dashboard = ({}: DashboardProps) => {
         clearTimeout(proposalTimer.current);
       }
       proposalTimer.current = setTimeout(() => {
+        if (!proposal) {
+          setOpenProposal("");
+          reloadPermanentGraph();
+          return;
+        }
         devLog("SELECT PROPOSAL", { proposal });
         if (!user?.uname) return;
         event.preventDefault();
