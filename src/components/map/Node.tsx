@@ -326,7 +326,7 @@ const Node = ({
     if (newContent.trim().length > 0) {
       setAbleToPropose(true);
     } else {
-      if (!imageLoaded) {
+      if (!imageLoaded && !videoUrl) {
         setAbleToPropose(false);
       }
     }
@@ -340,7 +340,7 @@ const Node = ({
     [toggleNode, identifier, open]
   );
   const removeImageHandler = useCallback(() => {
-    if (contentCopy.trim().length == 0) {
+    if (contentCopy.trim().length == 0 && !videoUrl) {
       setAbleToPropose(false);
     }
     setImageLoaded(false);
