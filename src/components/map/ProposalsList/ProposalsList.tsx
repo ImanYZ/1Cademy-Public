@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { CircularProgress, Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -92,7 +93,40 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
             }
             return (
               <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
-                <Paper elevation={3} sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
+                <Paper
+                  elevation={3}
+                  sx={{
+                    display: "flex",
+                    padding: "10px 24px 10px 20px",
+                    flexDirection: "column",
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    onClick={(e: any) => props.selectProposal(e, "", null)}
+                    sx={{
+                      position: "absolute",
+                      top: "0px",
+                      right: "0px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "20px",
+                      background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.white
+                          : theme.palette.common.darkGrayBackground,
+                      fill: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.white
+                          : theme.palette.common.darkGrayBackground,
+                    }}
+                  >
+                    <KeyboardArrowUpIcon
+                      fontSize="inherit"
+                      sx={{ fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit" }}
+                    />
+                  </Box>
                   <Box
                     sx={{
                       display: "flex",
