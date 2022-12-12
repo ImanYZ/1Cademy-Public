@@ -278,7 +278,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                         })}
                       </Box>
                       <Box className="user-image">
-                        <Image src={usersInteractions[uname].imageUrl} width={28} height={28} />
+                        <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
                       </Box>
                       <Box className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
                     </Box>
