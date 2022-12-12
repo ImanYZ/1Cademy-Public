@@ -1,4 +1,5 @@
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import CloseIcon from "@mui/icons-material/Close";
@@ -15,6 +16,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import RedditIcon from "@mui/icons-material/Reddit";
+import ShareIcon from "@mui/icons-material/Share";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
@@ -157,6 +159,7 @@ const NodeFooter = ({
   const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
   const [openMenu, setOpenMenu] = useState(false);
+  const [openSocialMenu, setOpenSocialMenu] = useState(false);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -174,6 +177,10 @@ const NodeFooter = ({
 
   const handleClose = () => {
     setOpenMenu(false);
+  };
+
+  const handleSocialClose = () => {
+    setOpenSocialMenu(false);
   };
 
   const onShareByLink = () => {
@@ -1113,6 +1120,35 @@ const NodeFooter = ({
                     </MenuItem>
                     <MenuItem>
                       <MemoizedMetaButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={() => setOpenSocialMenu(true)}>
+                          <ShareIcon sx={{ fontSize: "16px" }} />
+                          <Box component="span" sx={{ marginLeft: "10px" }}>
+                            Share Node
+                          </Box>
+                          <ArrowForwardIosIcon sx={{ fontSize: "16px", marginLeft: "20px" }} />
+                        </Box>
+                      </MemoizedMetaButton>
+                    </MenuItem>
+                  </Paper>
+                </Box>
+              </ClickAwayListener>
+            )}
+
+            {openSocialMenu && (
+              <ClickAwayListener onClickAway={handleSocialClose}>
+                <Box sx={{ position: "relative" }}>
+                  <Paper
+                    sx={{
+                      p: "8px 4px",
+                      position: "absolute",
+                      width: "175px",
+                      zIndex: "9",
+                      top: "160px",
+                      left: "180px",
+                    }}
+                  >
+                    <MenuItem>
+                      <MemoizedMetaButton>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <IconButton
                             onClick={() => onNodeShare(identifier, "twitter")}
@@ -1261,7 +1297,7 @@ const NodeFooter = ({
                                   theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
                               }}
                             >
-                              Linkdein
+                              Linkedin
                             </Box>
                           </IconButton>
                         </Box>
