@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, InputLabel, TextField } from "@mui/material";
+import { Box, Button, InputLabel, Switch, TextField, Typography } from "@mui/material";
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
@@ -29,6 +29,7 @@ import QuestionChoices from "./QuestionChoices";
 // this Node need to become testeable
 // also split the in (Node and FormNode) to reduce the complexity
 
+type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
@@ -218,6 +219,7 @@ const Node = ({
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const [option, setOption] = useState<EditorOptions>("EDIT");
 
   const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
@@ -504,6 +506,19 @@ const Node = ({
     [ableToPropose]
   );
 
+  const onChangeOption = useCallback(
+    (newOption: boolean) => {
+      setOption(newOption ? "PREVIEW" : "EDIT");
+    },
+    [setOption]
+  );
+
+  const onKeyEnter = (e: any) => {
+    if (e.keyCode === 13) {
+      onChangeOption(option === "EDIT");
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -558,6 +573,38 @@ const Node = ({
                 </>
               )}
               {/* CHECK: I commented this */}
+
+              {editable && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "end",
+                    alignItems: "center",
+                    position: "relative",
+                    top: "-30px",
+                  }}
+                >
+                  <Typography
+                    onClick={() => setOption("PREVIEW")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Preview
+                  </Typography>
+                  <Switch
+                    checked={option === "EDIT"}
+                    onClick={() => onChangeOption(option === "EDIT")}
+                    size="small"
+                    onKeyDown={onKeyEnter}
+                  />
+                  <Typography
+                    onClick={() => setOption("EDIT")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Edit
+                  </Typography>
+                </Box>
+              )}
+
               <Editor
                 label="Please enter the node title below:"
                 value={titleCopy}
@@ -568,6 +615,8 @@ const Node = ({
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
                 error={error ? true : false}
                 helperText={error ? error : ""}
+                showEditPreviewSection={false}
+                editOption={option}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
@@ -589,6 +638,8 @@ const Node = ({
                 onBlurCallback={value => onBlurContent(value)}
                 readOnly={!editable}
                 sxPreview={{ marginTop: "13px" }}
+                showEditPreviewSection={false}
+                editOption={option}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 
@@ -661,6 +712,8 @@ const Node = ({
                     setValue={setReason}
                     readOnly={false}
                     onBlurCallback={onBlurExplainDesc}
+                    showEditPreviewSection={false}
+                    editOption={option}
                   />
                 </>
               )}
