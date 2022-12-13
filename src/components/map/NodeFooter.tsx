@@ -1,4 +1,5 @@
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import CloseIcon from "@mui/icons-material/Close";
@@ -15,6 +16,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import RedditIcon from "@mui/icons-material/Reddit";
+import ShareIcon from "@mui/icons-material/Share";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
@@ -157,6 +159,7 @@ const NodeFooter = ({
   const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
   const [openMenu, setOpenMenu] = useState(false);
+  const [openSocialMenu, setOpenSocialMenu] = useState(false);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -185,7 +188,7 @@ const NodeFooter = ({
     let url: any = protocol + "//" + hostName + "/n/" + identifier;
     navigator.clipboard.writeText(url);
     setOpenMenu(false);
-
+    setOpenSocialMenu(false);
     onNodeShare(identifier, "copy-link");
   };
 
@@ -1086,186 +1089,211 @@ const NodeFooter = ({
                         </Box>
                       </MemoizedMetaButton>
                     </MenuItem>
-
-                    <MenuItem>
+                    <MenuItem onMouseOver={() => setOpenSocialMenu(true)} onMouseOut={() => setOpenSocialMenu(false)}>
                       <MemoizedMetaButton>
-                        <Box sx={{ display: "flex", alignItems: "center" }} onClick={onShareByLink}>
-                          <IconButton
-                            sx={{
-                              color: "#BDBDBD",
-                              padding: "0",
-                            }}
-                            aria-label="Share on url"
-                          >
-                            <LinkIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            />
-                          </IconButton>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <ShareIcon sx={{ fontSize: "16px" }} />
                           <Box component="span" sx={{ marginLeft: "10px" }}>
-                            Copy Link
+                            Share Node
                           </Box>
+                          <ArrowForwardIosIcon sx={{ fontSize: "16px", marginLeft: "20px" }} />
                         </Box>
                       </MemoizedMetaButton>
-                    </MenuItem>
-                    <MenuItem>
-                      <MemoizedMetaButton>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <IconButton
-                            onClick={() => onNodeShare(identifier, "twitter")}
-                            href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
+                      {openSocialMenu && (
+                        <Box sx={{ position: "relative" }}>
+                          <Paper
                             sx={{
-                              color: "#BDBDBD",
-                              padding: "0",
-                              ":hover": {
-                                background: "none",
-                              },
+                              p: "8px 4px",
+                              position: "absolute",
+                              width: "175px",
+                              zIndex: "9",
+                              top: "-18px",
+                              left: "7px",
                             }}
-                            target="_blank"
-                            rel="noopener"
-                            aria-label="Share on Twitter"
                           >
-                            <TwitterIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            />
-                            <Box
-                              component="span"
-                              sx={{
-                                marginLeft: "10px",
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            >
-                              Twitter
-                            </Box>
-                          </IconButton>
+                            <MenuItem>
+                              <MemoizedMetaButton>
+                                <Box sx={{ display: "flex", alignItems: "center" }}>
+                                  <IconButton
+                                    onClick={() => onNodeShare(identifier, "twitter")}
+                                    href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
+                                    sx={{
+                                      color: "#BDBDBD",
+                                      padding: "0",
+                                      ":hover": {
+                                        background: "none",
+                                      },
+                                    }}
+                                    target="_blank"
+                                    rel="noopener"
+                                    aria-label="Share on Twitter"
+                                  >
+                                    <TwitterIcon
+                                      sx={{
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    />
+                                    <Box
+                                      component="span"
+                                      sx={{
+                                        marginLeft: "10px",
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    >
+                                      Twitter
+                                    </Box>
+                                  </IconButton>
+                                </Box>
+                              </MemoizedMetaButton>
+                            </MenuItem>
+                            <MenuItem>
+                              <MemoizedMetaButton>
+                                <Box sx={{ display: "flex", alignItems: "center" }}>
+                                  <IconButton
+                                    onClick={() => onNodeShare(identifier, "reddit")}
+                                    href={`http://www.reddit.com/submit?url=${url}`}
+                                    sx={{
+                                      color: "#BDBDBD",
+                                      padding: "0",
+                                      ":hover": {
+                                        background: "none",
+                                      },
+                                    }}
+                                    target="_blank"
+                                    rel="noopener"
+                                    aria-label="Share on Facebook"
+                                  >
+                                    <RedditIcon
+                                      sx={{
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    />
+                                    <Box
+                                      component="span"
+                                      sx={{
+                                        marginLeft: "10px",
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    >
+                                      Reddit
+                                    </Box>
+                                  </IconButton>
+                                </Box>
+                              </MemoizedMetaButton>
+                            </MenuItem>
+                            <MenuItem>
+                              <MemoizedMetaButton>
+                                <Box sx={{ display: "flex", alignItems: "center" }}>
+                                  <IconButton
+                                    onClick={() => onNodeShare(identifier, "facebook")}
+                                    href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
+                                    sx={{
+                                      color: "#BDBDBD",
+                                      padding: "0",
+                                      ":hover": {
+                                        background: "none",
+                                      },
+                                    }}
+                                    target="_blank"
+                                    rel="noopener"
+                                    aria-label="Share on Facebook"
+                                  >
+                                    <FacebookRoundedIcon
+                                      sx={{
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    />
+                                    <Box
+                                      component="span"
+                                      sx={{
+                                        marginLeft: "10px",
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    >
+                                      Facebook
+                                    </Box>
+                                  </IconButton>
+                                </Box>
+                              </MemoizedMetaButton>
+                            </MenuItem>
+                            <MenuItem>
+                              <MemoizedMetaButton>
+                                <Box sx={{ display: "flex", alignItems: "center" }}>
+                                  <IconButton
+                                    onClick={() => onNodeShare(identifier, "linkedin")}
+                                    href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
+                                    sx={{
+                                      color: "#BDBDBD",
+                                      padding: "0",
+                                      ":hover": {
+                                        background: "none",
+                                      },
+                                    }}
+                                    target="_blank"
+                                    rel="noopener"
+                                    aria-label="Share on Linkedin"
+                                  >
+                                    <LinkedInIcon
+                                      sx={{
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    />
+                                    <Box
+                                      component="span"
+                                      sx={{
+                                        marginLeft: "10px",
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    >
+                                      Linkedin
+                                    </Box>
+                                  </IconButton>
+                                </Box>
+                              </MemoizedMetaButton>
+                            </MenuItem>
+                            <MenuItem>
+                              <MemoizedMetaButton>
+                                <Box sx={{ display: "flex", alignItems: "center" }} onClick={onShareByLink}>
+                                  <IconButton
+                                    sx={{
+                                      color: "#BDBDBD",
+                                      padding: "0",
+                                    }}
+                                    aria-label="Share on url"
+                                  >
+                                    <LinkIcon
+                                      sx={{
+                                        fontSize: "16px",
+                                        color: theme =>
+                                          theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
+                                      }}
+                                    />
+                                  </IconButton>
+                                  <Box component="span" sx={{ marginLeft: "10px" }}>
+                                    Copy Link
+                                  </Box>
+                                </Box>
+                              </MemoizedMetaButton>
+                            </MenuItem>
+                          </Paper>
                         </Box>
-                      </MemoizedMetaButton>
-                    </MenuItem>
-                    <MenuItem>
-                      <MemoizedMetaButton>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <IconButton
-                            onClick={() => onNodeShare(identifier, "reddit")}
-                            href={`http://www.reddit.com/submit?url=${url}`}
-                            sx={{
-                              color: "#BDBDBD",
-                              padding: "0",
-                              ":hover": {
-                                background: "none",
-                              },
-                            }}
-                            target="_blank"
-                            rel="noopener"
-                            aria-label="Share on Facebook"
-                          >
-                            <RedditIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            />
-                            <Box
-                              component="span"
-                              sx={{
-                                marginLeft: "10px",
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            >
-                              Reddit
-                            </Box>
-                          </IconButton>
-                        </Box>
-                      </MemoizedMetaButton>
-                    </MenuItem>
-                    <MenuItem>
-                      <MemoizedMetaButton>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <IconButton
-                            onClick={() => onNodeShare(identifier, "facebook")}
-                            href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
-                            sx={{
-                              color: "#BDBDBD",
-                              padding: "0",
-                              ":hover": {
-                                background: "none",
-                              },
-                            }}
-                            target="_blank"
-                            rel="noopener"
-                            aria-label="Share on Facebook"
-                          >
-                            <FacebookRoundedIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            />
-                            <Box
-                              component="span"
-                              sx={{
-                                marginLeft: "10px",
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            >
-                              Facebook
-                            </Box>
-                          </IconButton>
-                        </Box>
-                      </MemoizedMetaButton>
-                    </MenuItem>
-                    <MenuItem>
-                      <MemoizedMetaButton>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <IconButton
-                            onClick={() => onNodeShare(identifier, "linkedin")}
-                            href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
-                            sx={{
-                              color: "#BDBDBD",
-                              padding: "0",
-                              ":hover": {
-                                background: "none",
-                              },
-                            }}
-                            target="_blank"
-                            rel="noopener"
-                            aria-label="Share on Linkedin"
-                          >
-                            <LinkedInIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            />
-                            <Box
-                              component="span"
-                              sx={{
-                                marginLeft: "10px",
-                                fontSize: "16px",
-                                color: theme =>
-                                  theme.palette.mode === "dark" ? "#BEBEBE!important" : "#606060!important",
-                              }}
-                            >
-                              Linkdein
-                            </Box>
-                          </IconButton>
-                        </Box>
-                      </MemoizedMetaButton>
+                      )}
                     </MenuItem>
                   </Paper>
                 </Box>
