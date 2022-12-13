@@ -179,9 +179,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // From here on, we specify the type of the changes that the user is proposing on this node
     // using some boolean fields to be added to the version.
     if (nodeType === "Question" && versionData.choices) {
-      if (versionData.choices.length > nodeData.choices.length) {
+      if (versionData?.choices?.length > nodeData?.choices?.length) {
         versionData.addedChoices = true;
-      } else if (versionData.choices.length < nodeData.choices.length) {
+      } else if (versionData?.choices?.length < nodeData?.choices?.length) {
         versionData.deletedChoices = true;
       }
       if (!compareChoices({ node1: data, node2: nodeData })) {
