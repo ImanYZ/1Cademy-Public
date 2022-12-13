@@ -20,30 +20,30 @@ const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, s
   return (
     <Box sx={{ display: "flex", alignItems: "center", ...sx }}>
       <Tooltip title="Focused mode">
-        <IconButton onClick={() => setFocusView()} aria-label="focus-mode" size="small">
-          <UnfoldMoreIcon fontSize="inherit" sx={{ color: "#BEBEBE", transform: "rotate(45deg)" }} />
+        <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
+          <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
         </IconButton>
       </Tooltip>
 
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         {open ? (
-          <IconButton onClick={onToggleNode} aria-label="Close the node" size="small">
+          <IconButton color="inherit" onClick={onToggleNode} aria-label="Close the node" size="small">
             <RemoveIcon fontSize="inherit" />
           </IconButton>
         ) : (
-          <IconButton onClick={onToggleNode} aria-label="open the node" size="small">
+          <IconButton color="inherit" onClick={onToggleNode} aria-label="open the node" size="small">
             <FullscreenIcon fontSize="inherit" />
           </IconButton>
         )}
       </Tooltip>
 
       <Tooltip title="Hide all the descendants of this node.">
-        <IconButton onClick={onHideOffsprings} aria-label="delete" size="small">
+        <IconButton color="inherit" onClick={onHideOffsprings} aria-label="delete" size="small">
           <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
         </IconButton>
       </Tooltip>
       <Tooltip title="Hide the node from your map.">
-        <IconButton onClick={e => onHideNodeHandler(e)} aria-label="delete" size="small">
+        <IconButton color="inherit" onClick={e => onHideNodeHandler(e)} aria-label="delete" size="small">
           <CloseIcon fontSize="inherit" />
         </IconButton>
       </Tooltip>
