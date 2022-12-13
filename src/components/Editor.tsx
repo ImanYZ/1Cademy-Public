@@ -1,10 +1,10 @@
 import { InputLabel, Switch, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import MarkdownRender from "./Markdown/MarkdownRender";
-
+type EditorOptions = "EDIT" | "PREVIEW";
 type EditorProps = {
   label: string;
   value: string;
@@ -15,9 +15,9 @@ type EditorProps = {
   onBlurCallback?: (value: string) => void;
   error?: boolean;
   helperText?: String;
+  editOption?: EditorOptions;
+  showEditPreviewSection?: boolean;
 };
-
-type EditorOptions = "EDIT" | "PREVIEW";
 
 export const Editor = ({
   label,
@@ -29,11 +29,13 @@ export const Editor = ({
   focus = false,
   error = false,
   helperText,
+  editOption = "EDIT",
+  showEditPreviewSection = true,
 }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
   // const inputRef = useRef<HTMLElement>(null);
-  const [option, setOption] = useState<EditorOptions>("EDIT");
+  const [option, setOption] = useState<EditorOptions>(editOption);
   const [focused, setFocused] = useState(false);
   // const inputRef = useRef(null);
   const onChangeOption = (newOption: boolean) => {
@@ -62,6 +64,9 @@ export const Editor = ({
   //     }, 700);
   //   }*/
   // }
+  useEffect(() => {
+    setOption(editOption);
+  }, [editOption]);
 
   const inputId = useMemo(
     () =>
@@ -123,7 +128,7 @@ export const Editor = ({
             </Box>
           )}
         </Box>
-        {!readOnly && (
+        {showEditPreviewSection && !readOnly && (
           <Box sx={{ display: "flex", justifyContent: "end", alignItems: "center" }}>
             <Typography
               onClick={() => setOption("PREVIEW")}
