@@ -581,7 +581,7 @@ const Node = ({
                     justifyContent: "end",
                     alignItems: "center",
                     position: "relative",
-                    top: "-30px",
+                    top: process.env.NODE_ENV === "development" ? "-30px" : "-10px",
                   }}
                 >
                   <Typography
