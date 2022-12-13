@@ -1,3 +1,6 @@
+import { INode } from "src/types/INode";
+import { INodeType } from "src/types/INodeType";
+
 export const firstWeekMonthDays = (thisDate?: any) => {
   let today = new Date();
   if (thisDate) {
@@ -26,6 +29,7 @@ export const detach = async (callback: DetachCallback) => {
 export const doNeedToDeleteNode = (corrects: number, wrongs: number, locked: boolean = false) => {
   return corrects < wrongs && !locked;
 };
+
 export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
   try {
     if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
@@ -39,4 +43,10 @@ export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
     console.error(err);
     return err;
   }
+};
+
+export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
+  const _nodeTypes: INodeType[] = nodeData.nodeTypes || [];
+  _nodeTypes.push(nodeData.nodeType);
+  return Array.from(new Set(_nodeTypes));
 };

@@ -188,6 +188,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         versionData.changedChoices = true;
       }
     }
+
+    if (nodeType !== nodeData.nodeType) {
+      versionData.changedNodeType = true;
+
+      const _nodeTypes: string[] = nodeData.nodeTypes || [];
+      _nodeTypes.push(nodeData.nodeType);
+      const nodeTypes = new Set<string>(_nodeTypes);
+      nodeTypes.add(nodeType);
+
+      batch.update(nodeRef, {
+        nodeTypes: Array.from(nodeTypes),
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+
     if (title !== nodeData.title) {
       versionData.changedTitle = true;
     }

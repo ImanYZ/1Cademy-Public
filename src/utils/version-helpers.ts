@@ -12,14 +12,22 @@ import {
 import { NodeType } from "src/types";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
-import { detach } from "./helpers";
+import { detach, getNodeTypesFromNode } from "./helpers";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { IInstitution } from "src/types/IInstitution";
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
-import { Timestamp } from "firebase-admin/firestore";
+import {
+  DocumentData,
+  DocumentReference,
+  DocumentSnapshot,
+  Timestamp,
+  Transaction,
+  WriteBatch,
+} from "firebase-admin/firestore";
 import { INodeVersion } from "src/types/INodeVersion";
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
+import { INodeType } from "src/types/INodeType";
 
 export const comPointTypes = [
   "comPoints",
@@ -85,14 +93,38 @@ export const improvementTypes = [
   "addedChildren",
   "removedParents",
   "removedChildren",
+  "changedNodeType",
 ];
 
-export const getVersion = async ({ versionId, nodeType, t = false }: any) => {
-  const { versionsColl }: any = getTypedCollections({ nodeType });
-  const versionRef = versionsColl.doc(versionId);
-  const versionDoc = t ? await t.get(versionRef) : await versionRef.get();
-  const versionData = { ...versionDoc.data(), id: versionId };
-  return { versionData, versionRef };
+type VersionParams = {
+  versionId: string;
+  nodeData: INode;
+  t?: any;
+};
+export const getVersion = async ({
+  versionId,
+  nodeData,
+  t = false,
+}: VersionParams): Promise<{
+  versionData: INodeVersion;
+  versionRef: DocumentReference<DocumentData>;
+  nodeType: INodeType;
+}> => {
+  const nodeTypes = getNodeTypesFromNode(nodeData);
+  let versionRef!: DocumentReference<DocumentData>;
+  let versionDoc!: DocumentSnapshot<DocumentData>;
+  let _nodeType!: INodeType;
+
+  for (const nodeType of nodeTypes) {
+    _nodeType = nodeType;
+    const { versionsColl }: any = getTypedCollections({ nodeType });
+    versionRef = versionsColl.doc(versionId);
+    versionDoc = t ? await t.get(versionRef) : await versionRef.get();
+    if (versionDoc.exists) {
+      break;
+    }
+  }
+  return { versionData: { ...versionDoc.data(), id: versionId } as any, versionRef, nodeType: _nodeType };
 };
 
 export const setOrIncrementNotificationNums = async ({ batch, proposer, writeCounts, t, tWriteOperations }: any) => {
@@ -1558,6 +1590,7 @@ export const versionCreateUpdate = async ({
         aFullname,
         aChooseUname,
         maxVersionRating: newMaxVersionRating,
+        nodeType,
         updatedAt: currentTimestamp,
       };
 
@@ -2077,7 +2110,7 @@ export const addToPendingPropsNumsExcludingVoters = async ({
   tWriteOperations,
 }: any) => {
   let newBatch = batch;
-  const { userVersionsColl }: any = getTypedCollections({ nodeType });
+  const { userVersionsColl }: any = getTypedCollections({ nodeType: nodeType as INodeType });
   const userVersionsDocs = await convertToTGet(userVersionsColl.where("version", "==", versionId), t);
   const voters = [];
   for (let userVersionDoc of userVersionsDocs.docs) {

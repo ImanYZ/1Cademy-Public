@@ -16,6 +16,7 @@ export type INode = {
   corrects: number;
   wrongs: number;
   nodeType: INodeType;
+  nodeTypes?: INodeType[];
   contribNames: string[];
   contributors: {
     [key: string]: INodeContributor;

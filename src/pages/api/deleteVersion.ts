@@ -27,13 +27,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let batch = db.batch();
     let writeCounts = 0;
     let nodeData, nodeRef, versionData, versionRef;
+    ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.nodeId }));
+
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     ({ versionData, versionRef } = await getVersion({
       versionId: req.body.data.versionId,
-      nodeType: req.body.data.nodeType,
+      nodeData,
     }));
     if (req.body.data.user.userData.uname === versionData.proposer && !versionData.accepted) {
-      ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.nodeId }));
       batch.update(versionRef, {
         deleted: true,
         updatedAt: currentTimestamp,

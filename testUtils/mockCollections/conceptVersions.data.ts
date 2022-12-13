@@ -5,7 +5,7 @@ const data: any[] = [
     documentId: "hZKNPML1D4FzV6etT6ZH",
     tags: ["Data Science"],
     wrongs: 0,
-    node: "VnXTRolBGyHF3q8EvxS3",
+    node: "GJfzAY1zbgQs9jU5XeEL",
     proposal: "",
     referenceLabels: [],
     updatedAt: new Date(),

@@ -5,6 +5,7 @@ import { INodeType } from "./INodeType";
 import { IQuestionChoice } from "./IQuestionChoice";
 
 export type INodeVersion = {
+  id?: string;
   documentId?: string;
   childType?: INodeType;
   choices?: IQuestionChoice[];
@@ -33,6 +34,7 @@ export type INodeVersion = {
   changedContent?: boolean;
   addedImage?: boolean;
   deletedImage?: boolean;
+  changedImage?: boolean;
   addedVideo?: boolean;
   deletedVideo?: boolean;
   changedVideo?: boolean;
@@ -42,12 +44,12 @@ export type INodeVersion = {
   addedReferences?: boolean;
   deletedReferences?: boolean;
   changedReferences?: boolean;
-  changedImage?: boolean;
   addedTags?: boolean;
   deletedTags?: boolean;
   changedTags?: boolean;
   addedChildren?: boolean;
   removedChildren?: boolean;
+  changedNodeType?: boolean;
   awards: number;
   summary: string;
   nodeImage?: string;
