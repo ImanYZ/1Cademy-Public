@@ -85,6 +85,7 @@ describe("POST /api/searchNodesInNotebook", () => {
       ],
       "reputations"
     ),
+    new MockData([], "actionTracks"),
   ];
 
   beforeEach(async () => {

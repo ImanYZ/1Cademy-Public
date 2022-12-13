@@ -32,10 +32,11 @@ import { OpenSidebar } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { OpenPart } from "../../nodeBookTypes";
+import { FullNodeData, OpenPart } from "../../nodeBookTypes";
 import NodeTypeIcon from "../NodeTypeIcon";
 import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
+import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedUserStatusIcon } from "./UserStatusIcon";
 
 dayjs.extend(relativeTime);
@@ -51,6 +52,7 @@ type NodeFooterProps = {
   acceptedProposalsSelected: any;
   commentsSelected: any;
   editable: any;
+  setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   title: any;
   content: any;
   unaccepted: any;
@@ -106,6 +108,7 @@ const NodeFooter = ({
   // acceptedProposalsSelected,
   // commentsSelected,
   editable,
+  setNodeParts,
   title,
   content,
   unaccepted,
@@ -321,7 +324,12 @@ const NodeFooter = ({
         >
           {/* <NodeTypeIcon nodeType={nodeType} /> */}
           {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
-          {!locked && <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />}
+          {!locked &&
+            (editable ? (
+              <MemoizedNodeTypeSelector nodeId={identifier} setNodeParts={setNodeParts} nodeType={nodeType} />
+            ) : (
+              <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+            ))}
 
           {open && (
             <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>

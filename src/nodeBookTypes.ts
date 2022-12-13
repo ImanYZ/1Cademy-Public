@@ -227,6 +227,7 @@ export type NodeFireStore = {
   maxVersionRating?: number;
   nodeImage?: string;
   nodeType: NodeType;
+  nodeTypes?: NodeType[];
   parents: {
     node: string;
     label: string;

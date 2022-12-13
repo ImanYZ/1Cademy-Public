@@ -113,7 +113,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
 
     let writeCounts = 0;
-    let nodeData: INode, nodeRef, versionData: INodeVersion, versionRef, correct: number, wrong: number, award;
+    let nodeData: INode,
+      nodeRef,
+      versionData: INodeVersion,
+      nodeType: string,
+      versionRef,
+      correct: number,
+      wrong: number,
+      award;
     let accepted: boolean, isApproved: boolean;
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let actionName: string = "";
@@ -127,9 +134,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const removedChildren = [];
 
       ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }));
-      ({ versionData, versionRef } = await getVersion({
+      ({ versionData, versionRef, nodeType } = await getVersion({
         versionId: req.body.versionId,
-        nodeType: req.body.nodeType,
+        nodeData,
         t,
       }));
 
@@ -164,7 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let { userVersionData, userVersionRef } = await getUserVersion({
         versionId: req.body.versionId,
-        nodeType: req.body.nodeType,
+        nodeType,
         uname,
         t,
       });
@@ -282,7 +289,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await createUpdateUserVersion({
         userVersionRef,
         userVersionData,
-        nodeType: req.body.nodeType,
+        nodeType,
         writeCounts,
         t,
         tWriteOperations,
@@ -314,7 +321,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         notificationData.aType = "Accept";
         // This was a pending proposal for a child/improvement that just got accepted. So, we need to decrement the number of pending proposals for all the members of this community.
         await addToPendingPropsNumsExcludingVoters({
-          nodeType: childType ? childType : req.body.nodeType,
+          nodeType: childType ? childType : nodeType,
           versionId: req.body.versionId,
           tagIds: versionData.tagIds,
           value: -1,
