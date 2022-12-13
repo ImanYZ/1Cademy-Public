@@ -2698,13 +2698,13 @@ const Dashboard = ({}: DashboardProps) => {
       const userVersionsRefs: Query<DocumentData>[] = [];
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
-      
-      for(const nodeType of nodeTypes) {
+
+      for (const nodeType of nodeTypes) {
         const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
           db,
           nodeType
         );
-  
+
         if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) continue;
 
         const versionsQuery = query(
@@ -2944,6 +2944,7 @@ const Dashboard = ({}: DashboardProps) => {
               proposal,
               edges
             );
+            thisNode.nodeType = proposal.nodeType || thisNode.nodeType;
             thisNode.title = proposal.title;
             thisNode.content = proposal.content;
             thisNode.nodeImage = proposal.nodeImage;
