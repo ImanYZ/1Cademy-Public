@@ -179,15 +179,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // From here on, we specify the type of the changes that the user is proposing on this node
     // using some boolean fields to be added to the version.
     if (nodeType === "Question" && versionData.choices) {
-      if (versionData.choices.length > nodeData.choices.length) {
+      if (versionData?.choices?.length > nodeData?.choices?.length) {
         versionData.addedChoices = true;
-      } else if (versionData.choices.length < nodeData.choices.length) {
+      } else if (versionData?.choices?.length < nodeData?.choices?.length) {
         versionData.deletedChoices = true;
       }
       if (!compareChoices({ node1: data, node2: nodeData })) {
         versionData.changedChoices = true;
       }
     }
+
+    if (nodeType !== nodeData.nodeType) {
+      versionData.changedNodeType = true;
+
+      const _nodeTypes: string[] = nodeData.nodeTypes || [];
+      _nodeTypes.push(nodeData.nodeType);
+      const nodeTypes = new Set<string>(_nodeTypes);
+      nodeTypes.add(nodeType);
+
+      batch.update(nodeRef, {
+        nodeTypes: Array.from(nodeTypes),
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+
     if (title !== nodeData.title) {
       versionData.changedTitle = true;
     }

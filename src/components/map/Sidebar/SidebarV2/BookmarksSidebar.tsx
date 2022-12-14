@@ -19,6 +19,7 @@ type SearcherSidebarProps = {
   sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
+  bookmark: any;
 };
 
 export const BookmarksSidebar = ({
@@ -30,6 +31,7 @@ export const BookmarksSidebar = ({
   sidebarWidth,
   innerHeight,
   innerWidth,
+  bookmark,
 }: SearcherSidebarProps) => {
   const db = getFirestore();
   const [bookmarks, setBookmarks] = useState<FullNodesData>({});
@@ -130,10 +132,20 @@ export const BookmarksSidebar = ({
       SidebarContent={
         <Box sx={{ p: "2px 4px" }}>
           {value === 0 && (
-            <BookmarksList openLinkedNode={openLinkedNode} updates={true} bookmarks={bookmarkedUserNodes} />
+            <BookmarksList
+              openLinkedNode={openLinkedNode}
+              updates={true}
+              bookmarks={bookmarkedUserNodes}
+              bookmark={bookmark}
+            />
           )}
           {value === 1 && (
-            <BookmarksList openLinkedNode={openLinkedNode} updates={false} bookmarks={bookmarkedUserNodes} />
+            <BookmarksList
+              openLinkedNode={openLinkedNode}
+              updates={false}
+              bookmarks={bookmarkedUserNodes}
+              bookmark={bookmark}
+            />
           )}
         </Box>
       }
