@@ -12,6 +12,7 @@ import { MemoizedActionBubble } from "./ActionBubble";
 type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 type UserInteractions = {
@@ -26,7 +27,7 @@ type UserInteractions = {
 };
 
 const LivelinessBar = (props: ILivelinessBarProps) => {
-  const { db, onlineUsers } = props;
+  const { db, onlineUsers, openUserInfoSidebar } = props;
   const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
@@ -225,6 +226,14 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                     title={usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
                   >
                     <Box
+                      onClick={() =>
+                        openUserInfoSidebar(
+                          uname,
+                          usersInteractions[uname].imageUrl,
+                          usersInteractions[uname].fullname,
+                          usersInteractions[uname].chooseUname ? "1" : ""
+                        )
+                      }
                       className={
                         usersInteractions[uname].reputation === "Gain"
                           ? "GainedPoint"
@@ -235,6 +244,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                       sx={{
                         width: "28px",
                         height: "28px",
+                        cursor: "pointer",
                         // display: "inline-block",
                         position: "absolute",
                         left: "0px",
