@@ -46,6 +46,7 @@ export interface NodeBookState {
   readonly choosingNode: ChoosingNode | null;
   readonly chosenNode: ChosenNode | null;
   readonly selectedNode: string | null;
+  readonly initialProposal: string | null;
   readonly selectionType: SelectionType;
   readonly selectedTags: string[];
   readonly openToolbar: boolean;
@@ -133,6 +134,11 @@ export type SetLastOperation = {
   payload: LastOperation;
 };
 
+export type SetInitialProposal = {
+  type: "setInitialProposal";
+  payload: string | null;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -148,7 +154,8 @@ export type DispatchNodeBookActions =
   | SetSearchByTitleOnly
   | SetOpenEditButtonAction
   | SetIsMenuOpen
-  | SetLastOperation;
+  | SetLastOperation
+  | SetInitialProposal;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
