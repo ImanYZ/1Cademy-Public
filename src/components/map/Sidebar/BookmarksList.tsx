@@ -1,3 +1,4 @@
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
@@ -20,11 +21,12 @@ type BookmarksListProps = {
   openLinkedNode: any;
   updates: boolean;
   bookmarks: any[];
+  bookmark: any;
 };
 
 const ELEMENTS_PER_PAGE = 13;
 
-export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksListProps) => {
+export const BookmarksList = ({ openLinkedNode, bookmarks, updates, bookmark }: BookmarksListProps) => {
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
 
   // useEffect(() => {
@@ -61,6 +63,8 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
   }, [getBookmarksProcessed, lastIndex]);
 
+  const bookmarkHandler = useCallback((event: any, identifier: string) => bookmark(event, identifier), [bookmark]);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       {getBookmarksProcessed()
@@ -84,6 +88,14 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates }: BookmarksL
             <div className="SidebarNodeTypeIcon" style={{ display: "flex", justifyContent: "space-between" }}>
               <NodeTypeIcon nodeType={node.nodeType} sx={{ fontSize: "16px" }} />
               <div className="right" style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <MemoizedMetaButton tooltip="Unbookmark this node." tooltipPosition="top" style={{ padding: "0" }}>
+                  <Box
+                    sx={{ display: "flex", alignItems: "center" }}
+                    onClick={event => bookmarkHandler(event, node.node)}
+                  >
+                    <BookmarkIcon color={"primary"} sx={{ fontSize: "16px" }} />
+                  </Box>
+                </MemoizedMetaButton>
                 <MemoizedMetaButton
                 // tooltip="Creation or the last update of this node."
                 // tooltipPosition="TopLeft"

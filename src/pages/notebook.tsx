@@ -2698,13 +2698,13 @@ const Dashboard = ({}: DashboardProps) => {
       const userVersionsRefs: Query<DocumentData>[] = [];
       const versionsCommentsRefs: Query<DocumentData>[] = [];
       const userVersionsCommentsRefs: Query<DocumentData>[] = [];
-      
-      for(const nodeType of nodeTypes) {
+
+      for (const nodeType of nodeTypes) {
         const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
           db,
           nodeType
         );
-  
+
         if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) continue;
 
         const versionsQuery = query(
@@ -3355,6 +3355,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
+                bookmark={bookmark}
               />
               <MemoizedSearcherSidebar
                 openLinkedNode={openLinkedNode}

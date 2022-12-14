@@ -14,7 +14,7 @@ import { MemoizedMetaButton } from "./MetaButton";
 // import MetaButton from "../../MetaButton/MetaButton"
 
 const doNothing = () => {};
-
+type EditorOptions = "EDIT" | "PREVIEW";
 type QuestionChoicesProps = {
   identifier: string;
   nodeRef: any;
@@ -27,6 +27,7 @@ type QuestionChoicesProps = {
   switchChoice: any;
   changeChoice: any;
   changeFeedback: any;
+  option?: EditorOptions;
   // nodeChanged: any;
 };
 
@@ -112,6 +113,8 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             readOnly={false}
             value={choiceCopy}
             setValue={onSetChoiseCopy}
+            showEditPreviewSection={false}
+            editOption={props.option}
             // onBlurCallback={changeChoiceHandler}
           />
           {props.choicesNum > 1 && (
@@ -129,6 +132,8 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             readOnly={false}
             setValue={onSetFeedbackCopy}
             value={feedbackCopy}
+            showEditPreviewSection={false}
+            editOption={props.option}
             // onBlurCallback={changeFeedbackHandler}
           />
         </div>
@@ -151,14 +156,28 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           ) : (
             <CheckBoxOutlineBlankIcon sx={{ marginRight: "8px" }} />
           )}
-          <Editor label="" readOnly={true} value={props.choice.choice} setValue={doNothing} />
+          <Editor
+            label=""
+            readOnly={true}
+            value={props.choice.choice}
+            setValue={doNothing}
+            showEditPreviewSection={false}
+            editOption={props.option}
+          />
         </div>
         {choicesOpen[props.idx] && (
           <div
             className="collapsible-body"
             style={{ display: "block", borderBottom: "solid 1px #fff", paddingLeft: "32px" }}
           >
-            <Editor label="" readOnly={true} value={props.choice.feedback} setValue={doNothing} />
+            <Editor
+              label=""
+              readOnly={true}
+              value={props.choice.feedback}
+              setValue={doNothing}
+              showEditPreviewSection={false}
+              editOption={props.option}
+            />
           </div>
         )}
       </li>
