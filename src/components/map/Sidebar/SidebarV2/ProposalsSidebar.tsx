@@ -12,6 +12,9 @@ import { SidebarWrapper } from "./SidebarWrapper";
 type ProposalsSidebarProps = {
   open: boolean;
   onClose: () => void;
+  clearInitialProposal: () => void;
+  initialProposal: string | null;
+  nodeLoaded: boolean;
   theme: UserTheme;
   proposeNodeImprovement: any;
   fetchProposals: any;
@@ -31,6 +34,9 @@ type ProposalsSidebarProps = {
 const ProposalsSidebar = ({
   open,
   onClose,
+  clearInitialProposal,
+  initialProposal,
+  nodeLoaded,
   theme,
   proposeNodeImprovement,
   fetchProposals,
@@ -56,14 +62,24 @@ const ProposalsSidebar = ({
   };
 
   useEffect(() => {
-    if (selectedNode && open) {
+    if (selectedNode && open && nodeLoaded) {
       fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
     }
-  }, [fetchProposals, selectedNode, open]);
+  }, [fetchProposals, selectedNode, open, nodeLoaded]);
 
   const proposalsWithId = useMemo(() => {
     return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));
   }, [db, proposals]);
+
+  useEffect(() => {
+    if (selectedNode && open && initialProposal && !isRetrieving) {
+      const proposal = proposalsWithId.find(_proposal => _proposal.id === initialProposal);
+      if (proposal) {
+        clearInitialProposal();
+        selectProposal({ preventDefault: () => {} }, proposal, proposal.newNodeId);
+      }
+    }
+  }, [isRetrieving, initialProposal, selectedNode, open, proposalsWithId, clearInitialProposal]);
 
   const a11yProps = (index: number) => {
     return {
@@ -74,7 +90,7 @@ const ProposalsSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [isRetrieving, proposals, openProposal, value]);
+  }, [isRetrieving, proposals, openProposal, initialProposal, value]);
 
   return (
     <SidebarWrapper

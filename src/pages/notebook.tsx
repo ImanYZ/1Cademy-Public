@@ -1534,19 +1534,24 @@ const Dashboard = ({}: DashboardProps) => {
         if (typeOperation) {
           lastNodeOperation.current = "Searcher";
         }
+        const isInitialProposal = String(typeOperation).startsWith("initialProposal-");
+        if(isInitialProposal) {
+          nodeBookDispatch({ type: "setInitialProposal", payload: String(typeOperation).replace("initialProposal-", "") });
+          setOpenSidebar("PROPOSALS");
+        }
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           setTimeout(() => {
             scrollToNode(linkedNodeID);
           }, 1500);
         } else {
-          openNodeHandler(linkedNodeID, "Searcher");
+          openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
         }
       }
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeBookState.choosingNode, openNodeHandler, user]
+    [nodeBookState.choosingNode, openNodeHandler, setOpenSidebar, user]
   );
 
   const getNodeUserNode = useCallback(
@@ -1556,6 +1561,13 @@ const Dashboard = ({}: DashboardProps) => {
       return { nodeRef, userNodeRef };
     },
     [db]
+  );
+  
+  const clearInitialProposal = useCallback(
+    () => {
+      nodeBookDispatch({ type: "setInitialProposal", payload: null });
+    },
+    [nodeBookDispatch]
   );
 
   const initNodeStatusChange = useCallback(
@@ -2707,157 +2719,163 @@ const Dashboard = ({}: DashboardProps) => {
     ) => {
       if (!user) return;
       if (!selectedNodeType) return;
-      setIsRetrieving(true);
+
       setGraph(({ nodes: oldNodes, edges }) => {
-        if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
-          setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
-        }
+        (async () => {
+          setIsRetrieving(true);
+          if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
+            setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
+          }
+
+          const currentNode = oldNodes[String(nodeBookState.selectedNode)];
+          if(!currentNode) return;
+
+          const nodeTypes: INodeType[] = getNodeTypesFromNode(currentNode as any);
+
+          const versions: any = {};
+          let versionId;
+          const versionIds: string[] = [];
+          const comments: any = {};
+          const userVersionsRefs: Query<DocumentData>[] = [];
+          const versionsCommentsRefs: Query<DocumentData>[] = [];
+          const userVersionsCommentsRefs: Query<DocumentData>[] = [];
+
+          for (const nodeType of nodeTypes) {
+            const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
+              db,
+              nodeType
+            );
+
+            if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) continue;
+
+            const versionsQuery = query(
+              versionsColl,
+              where("node", "==", nodeBookState.selectedNode),
+              where("deleted", "==", false)
+            );
+
+            const versionsData = await getDocs(versionsQuery);
+
+            // iterate version and push userVersion and versionComments
+            versionsData.forEach(versionDoc => {
+              versionIds.push(versionDoc.id);
+              const versionData = versionDoc.data();
+
+              versions[versionDoc.id] = {
+                ...versionData,
+                nodeType,
+                id: versionDoc.id,
+                createdAt: versionData.createdAt.toDate(),
+                award: false,
+                correct: false,
+                wrong: false,
+                comments: [],
+              };
+              delete versions[versionDoc.id].deleted;
+              delete versions[versionDoc.id].updatedAt;
+              delete versions[versionDoc.id].node;
+              const userVersionsQuery = query(
+                userVersionsColl,
+                where("version", "==", versionDoc.id),
+                where("user", "==", user.uname)
+              );
+              userVersionsRefs.push(userVersionsQuery);
+              const versionsCommentsQuery = query(
+                versionsCommentsColl,
+                where("version", "==", versionDoc.id),
+                where("deleted", "==", false)
+              );
+              versionsCommentsRefs.push(versionsCommentsQuery);
+            });
+
+            // merge version and userVersion: version[id] = {...version[id],userVersion}
+            if (userVersionsRefs.length > 0) {
+              await Promise.all(
+                userVersionsRefs.map(async userVersionsRef => {
+                  const userVersionsDocs = await getDocs(userVersionsRef);
+                  userVersionsDocs.forEach(userVersionsDoc => {
+                    const userVersion = userVersionsDoc.data();
+                    versionId = userVersion.version;
+                    delete userVersion.version;
+                    delete userVersion.updatedAt;
+                    delete userVersion.createdAt;
+                    delete userVersion.user;
+                    if (userVersion.hasOwnProperty("id")) {
+                      delete userVersion.id;
+                    }
+                    versions[versionId] = {
+                      ...versions[versionId],
+                      ...userVersion,
+                    };
+                  });
+                })
+              );
+            }
+
+            // build version comments {}
+            if (versionsCommentsRefs.length > 0) {
+              await Promise.all(
+                versionsCommentsRefs.map(async versionsCommentsRef => {
+                  const versionsCommentsDocs = await getDocs(versionsCommentsRef);
+                  versionsCommentsDocs.forEach(versionsCommentsDoc => {
+                    const versionsComment = versionsCommentsDoc.data();
+                    delete versionsComment.updatedAt;
+                    comments[versionsCommentsDoc.id] = {
+                      ...versionsComment,
+                      id: versionsCommentsDoc.id,
+                      createdAt: versionsComment.createdAt.toDate(),
+                    };
+                    const userVersionsCommentsQuery = query(
+                      userVersionsCommentsColl,
+                      where("versionComment", "==", versionsCommentsDoc.id),
+                      where("user", "==", user.uname)
+                    );
+
+                    userVersionsCommentsRefs.push(userVersionsCommentsQuery);
+                  });
+                })
+              );
+
+              // merge comments and userVersionComment
+              if (userVersionsCommentsRefs.length > 0) {
+                await Promise.all(
+                  userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
+                    const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef);
+                    userVersionsCommentsDocs.forEach(userVersionsCommentsDoc => {
+                      const userVersionsComment = userVersionsCommentsDoc.data();
+                      const versionCommentId = userVersionsComment.versionComment;
+                      delete userVersionsComment.versionComment;
+                      delete userVersionsComment.updatedAt;
+                      delete userVersionsComment.createdAt;
+                      delete userVersionsComment.user;
+                      comments[versionCommentId] = {
+                        ...comments[versionCommentId],
+                        ...userVersionsComment,
+                      };
+                    });
+                  })
+                );
+              }
+            }
+
+            // merge comments into versions
+            Object.values(comments).forEach((comment: any) => {
+              versionId = comment.version;
+              delete comment.version;
+              versions[versionId].comments.push(comment);
+            });
+          }
+
+          const proposalsTemp = Object.values(versions);
+          const orderedProposals = proposalsTemp.sort(
+            (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+          );
+          setProposals(orderedProposals);
+          setIsRetrieving(false);
+        })();
+
         return { nodes: oldNodes, edges };
       });
-
-      const currentNode = graph.nodes[String(nodeBookState.selectedNode)];
-      const nodeTypes: INodeType[] = getNodeTypesFromNode(currentNode as any);
-
-      const versions: any = {};
-      let versionId;
-      const versionIds: string[] = [];
-      const comments: any = {};
-      const userVersionsRefs: Query<DocumentData>[] = [];
-      const versionsCommentsRefs: Query<DocumentData>[] = [];
-      const userVersionsCommentsRefs: Query<DocumentData>[] = [];
-
-      for (const nodeType of nodeTypes) {
-        const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
-          db,
-          nodeType
-        );
-
-        if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) continue;
-
-        const versionsQuery = query(
-          versionsColl,
-          where("node", "==", nodeBookState.selectedNode),
-          where("deleted", "==", false)
-        );
-
-        const versionsData = await getDocs(versionsQuery);
-
-        // iterate version and push userVersion and versionComments
-        versionsData.forEach(versionDoc => {
-          versionIds.push(versionDoc.id);
-          const versionData = versionDoc.data();
-
-          versions[versionDoc.id] = {
-            ...versionData,
-            nodeType,
-            id: versionDoc.id,
-            createdAt: versionData.createdAt.toDate(),
-            award: false,
-            correct: false,
-            wrong: false,
-            comments: [],
-          };
-          delete versions[versionDoc.id].deleted;
-          delete versions[versionDoc.id].updatedAt;
-          delete versions[versionDoc.id].node;
-          const userVersionsQuery = query(
-            userVersionsColl,
-            where("version", "==", versionDoc.id),
-            where("user", "==", user.uname)
-          );
-          userVersionsRefs.push(userVersionsQuery);
-          const versionsCommentsQuery = query(
-            versionsCommentsColl,
-            where("version", "==", versionDoc.id),
-            where("deleted", "==", false)
-          );
-          versionsCommentsRefs.push(versionsCommentsQuery);
-        });
-
-        // merge version and userVersion: version[id] = {...version[id],userVersion}
-        if (userVersionsRefs.length > 0) {
-          await Promise.all(
-            userVersionsRefs.map(async userVersionsRef => {
-              const userVersionsDocs = await getDocs(userVersionsRef);
-              userVersionsDocs.forEach(userVersionsDoc => {
-                const userVersion = userVersionsDoc.data();
-                versionId = userVersion.version;
-                delete userVersion.version;
-                delete userVersion.updatedAt;
-                delete userVersion.createdAt;
-                delete userVersion.user;
-                if (userVersion.hasOwnProperty("id")) {
-                  delete userVersion.id;
-                }
-                versions[versionId] = {
-                  ...versions[versionId],
-                  ...userVersion,
-                };
-              });
-            })
-          );
-        }
-
-        // build version comments {}
-        if (versionsCommentsRefs.length > 0) {
-          await Promise.all(
-            versionsCommentsRefs.map(async versionsCommentsRef => {
-              const versionsCommentsDocs = await getDocs(versionsCommentsRef);
-              versionsCommentsDocs.forEach(versionsCommentsDoc => {
-                const versionsComment = versionsCommentsDoc.data();
-                delete versionsComment.updatedAt;
-                comments[versionsCommentsDoc.id] = {
-                  ...versionsComment,
-                  id: versionsCommentsDoc.id,
-                  createdAt: versionsComment.createdAt.toDate(),
-                };
-                const userVersionsCommentsQuery = query(
-                  userVersionsCommentsColl,
-                  where("versionComment", "==", versionsCommentsDoc.id),
-                  where("user", "==", user.uname)
-                );
-
-                userVersionsCommentsRefs.push(userVersionsCommentsQuery);
-              });
-            })
-          );
-
-          // merge comments and userVersionComment
-          if (userVersionsCommentsRefs.length > 0) {
-            await Promise.all(
-              userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
-                const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef);
-                userVersionsCommentsDocs.forEach(userVersionsCommentsDoc => {
-                  const userVersionsComment = userVersionsCommentsDoc.data();
-                  const versionCommentId = userVersionsComment.versionComment;
-                  delete userVersionsComment.versionComment;
-                  delete userVersionsComment.updatedAt;
-                  delete userVersionsComment.createdAt;
-                  delete userVersionsComment.user;
-                  comments[versionCommentId] = {
-                    ...comments[versionCommentId],
-                    ...userVersionsComment,
-                  };
-                });
-              })
-            );
-          }
-        }
-
-        // merge comments into versions
-        Object.values(comments).forEach((comment: any) => {
-          versionId = comment.version;
-          delete comment.version;
-          versions[versionId].comments.push(comment);
-        });
-      }
-
-      const proposalsTemp = Object.values(versions);
-      const orderedProposals = proposalsTemp.sort(
-        (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
-      );
-      setProposals(orderedProposals);
-      setIsRetrieving(false);
     },
     [user, selectedNodeType, db, nodeBookState.selectedNode]
   );
@@ -3427,6 +3445,9 @@ const Dashboard = ({}: DashboardProps) => {
                 theme={settings.theme}
                 open={openSidebar === "PROPOSALS"}
                 onClose={() => onCloseSidebar()}
+                clearInitialProposal={clearInitialProposal}
+                initialProposal={nodeBookState.initialProposal}
+                nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
                 proposeNodeImprovement={proposeNodeImprovement}
                 fetchProposals={fetchProposals}
                 selectedNode={nodeBookState.selectedNode}
