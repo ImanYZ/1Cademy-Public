@@ -1,4 +1,4 @@
-import { FormControl, MenuItem } from "@mui/material";
+import { Box, FormControl, MenuItem } from "@mui/material";
 import Select from "@mui/material/Select";
 import React, { useId } from "react";
 import { FullNodeData } from "src/nodeBookTypes";
@@ -15,7 +15,7 @@ const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType }: NodeTypeSelectorPr
   const currentId = useId();
 
   return (
-    <FormControl sx={{ width: 48 }}>
+    <FormControl sx={{ width: 120 }}>
       <Select
         sx={{
           m: 0,
@@ -58,6 +58,7 @@ const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType }: NodeTypeSelectorPr
           return (
             <MenuItem key={nodeType} value={nodeType}>
               <NodeTypeIcon nodeType={nodeType as any} tooltipPlacement={"top"} fontSize={"inherit"} />
+              <Box sx={{ marginLeft: "5px" }}>{nodeType}</Box>
             </MenuItem>
           );
         })}
