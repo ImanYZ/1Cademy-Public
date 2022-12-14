@@ -606,7 +606,7 @@ const NodeFooter = ({
                     },
                   }}
                 >
-                  <VideoCallIcon sx={{ fontSize: "16px" }} />
+                  <VideoCallIcon sx={{ fontSize: "20px" }} />
                 </ContainedButton>
               </Box>
             )}
