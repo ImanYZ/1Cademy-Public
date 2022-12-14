@@ -1141,6 +1141,33 @@ const Dashboard = ({}: DashboardProps) => {
     setGraph({ nodes: oldNodes, edges: oldEdges });
   }, [graph, allTags, settings.showClusterOptions]);
 
+  const openUserInfoSidebar = useCallback((uname: string, imageUrl: string, fullName: string, chooseUname: string) => {
+    const userUserInfoCollection = collection(db, "userUserInfoLog");
+
+    nodeBookDispatch({
+      type: "setSelectedUser",
+      payload: {
+        username: uname,
+        imageUrl,
+        fullName,
+        chooseUname,
+      },
+    });
+
+    nodeBookDispatch({
+      type: "setSelectionType",
+      payload: "UserInfo",
+    });
+    setOpenSidebar("USER_INFO");
+    reloadPermanentGraph();
+    addDoc(userUserInfoCollection, {
+      uname: user?.uname,
+      uInfo: uname,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+
+  }, [db, nodeBookDispatch, user?.uname, setOpenSidebar, reloadPermanentGraph]);
+
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
     // so we reduce the rerenders, also we can set only the empty array here
@@ -3544,7 +3571,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? <MemoizedLivelinessBar onlineUsers={onlineUsers} db={db} /> : <div />}
+          {showLivelinessBar ? <MemoizedLivelinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} /> : <div />}
 
           {focusView.isEnabled && (
             <MemoizedFocusedNotebook
