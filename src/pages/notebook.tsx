@@ -3087,7 +3087,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const rateProposal = useCallback(
     async (
-      event: any,
+      e: any,
       proposals: any,
       setProposals: any,
       proposalId: string,
