@@ -2876,6 +2876,7 @@ const Dashboard = ({}: DashboardProps) => {
               visible: true,
               deleted: false,
               wrong: false,
+              changedAt: proposal.createdAt,
               createdAt: proposal.createdAt,
               firstVisit: proposal.createdAt,
               lastVisit: proposal.createdAt,

@@ -546,7 +546,7 @@ const NodeFooter = ({
 
               <Box
                 sx={{
-                  display: "flex",
+                  display: editable ? "flex" : "none",
                   alignItems: "center",
                   gap: "5px",
                   marginRight: "10px",
