@@ -3357,6 +3357,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
+                bookmark={bookmark}
               />
               <MemoizedSearcherSidebar
                 openLinkedNode={openLinkedNode}

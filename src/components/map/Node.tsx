@@ -581,7 +581,7 @@ const Node = ({
                     justifyContent: "end",
                     alignItems: "center",
                     position: "relative",
-                    top: process.env.NODE_ENV === "development" ? "-30px" : "-10px",
+                    top: "-10px",
                   }}
                 >
                   <Typography
@@ -682,6 +682,7 @@ const Node = ({
                           switchChoice={switchChoice}
                           changeChoice={changeChoice}
                           changeFeedback={changeFeedback}
+                          option={option}
                         />
                       );
                     })}
