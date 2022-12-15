@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, InputLabel, Switch, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, InputLabel, Switch, TextField, Typography } from "@mui/material";
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
@@ -16,6 +16,7 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
+import LeaderboardChip from "../LeaderboardChip";
 import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -118,6 +119,8 @@ type NodeProps = {
   openSidebar: OpenSidebar;
   locked: boolean;
   setOperation: (operation: string) => void;
+  contributors: any;
+  institutions: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -216,6 +219,8 @@ const Node = ({
   openSidebar,
   locked,
   setOperation,
+  contributors,
+  institutions,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -801,6 +806,8 @@ const Node = ({
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
                 openSidebar={openSidebar}
+                contributors={contributors}
+                institutions={institutions}
               />
             </div>
           </div>
@@ -947,6 +954,8 @@ const Node = ({
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
                 openSidebar={openSidebar}
+                contributors={contributors}
+                institutions={institutions}
               />
             </div>
           </div>

@@ -57,6 +57,8 @@ export interface NodeBookState {
   readonly nodeId: any;
   readonly isMenuOpen: boolean;
   readonly lastOperation: LastOperation;
+  readonly contributorsNodeId: any;
+  readonly showContributors: any;
 }
 
 export type SetSNodeAction = {
@@ -133,6 +135,11 @@ export type SetLastOperation = {
   payload: LastOperation;
 };
 
+export type SetContributorsNodeId = {
+  type: "setContributorsNodeId";
+  payload: any;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -148,7 +155,8 @@ export type DispatchNodeBookActions =
   | SetSearchByTitleOnly
   | SetOpenEditButtonAction
   | SetIsMenuOpen
-  | SetLastOperation;
+  | SetLastOperation
+  | SetContributorsNodeId;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
