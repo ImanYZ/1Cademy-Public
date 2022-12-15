@@ -873,7 +873,8 @@ export default [
     ],
     allTime: [],
     weekly: [],
-    url: "/static/LibraryBackground.jpg",
+    // url: "/static/LibraryBackground.jpg",
+    url: "/darkModeLibraryBackground.jpg",
     title: "Liaison Librarians",
     width: "100%",
     leaders: [

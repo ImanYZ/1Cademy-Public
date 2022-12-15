@@ -4,10 +4,13 @@ import React, { useState } from "react";
 import { brandingLightTheme } from "@/lib/theme/brandingTheme";
 
 import AppAppBar from "../components/home/AppAppBar";
+// import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import { sectionsOrder } from "../components/home/sectionsOrder";
 import HowItWorks from "../components/home/views/HowItWorks";
 import Landing from "../components/home/views/Landing";
+import Values from "../components/home/views/Values";
 import What from "../components/home/views/What";
+// import WhoWeAre from "../components/home/views/WhoWeAre";
 
 /**
  * animations builded with: https://rive.app/
@@ -17,6 +20,8 @@ const Home = () => {
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
 
   const updatePosition = (event: any) => {
+    console.log("event", event, event.target.scrollTop);
+
     if (notSectionSwitching) {
       let cumulativeHeight = 0;
       for (let sIdx = 0; sIdx < sectionsOrder.length; sIdx++) {
@@ -88,6 +93,9 @@ const Home = () => {
         <Landing />
         <HowItWorks /* section={section}  */ />
         <What />
+        <Values />
+        {/* <UniversitiesMap theme={"Light"} /> */}
+        {/* <WhoWeAre /> */}
       </Box>
     </ThemeProvider>
   );

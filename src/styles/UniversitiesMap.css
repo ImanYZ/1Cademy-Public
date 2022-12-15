@@ -1,0 +1,54 @@
+.UniversitiesAndColleges {
+  /* padding-top: 3vh;
+  padding-bottom: 3vh; */
+}
+
+.UniversitiesAndColleges .gradientText {
+  padding-bottom: 3vh;
+}
+
+/* #googleMapDiv {
+  width: 91vw;
+  height: 70vh;
+  margin: auto;
+  border: 5px solid white;
+  border-radius: 15px;
+} */
+
+@media screen and (max-width: 900px) and (orientation: portrait) {
+  .UniversitiesAndColleges {
+    /* padding-top: 10vh; */
+  }
+  #googleMapDiv {
+    /* width: 90vw; */
+  }
+  .UniversitiesAndColleges .gradientText {
+    font-size: 6vw;
+    background: linear-gradient(to right, #ff9800, #ff9800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .UniversitiesAndColleges .headline {
+    font-size: 4vw;
+  }
+}
+
+@media screen and (max-width: 900px) and (orientation: landscape) {
+  .UniversitiesAndColleges {
+    /* padding-top: 1vh;
+    padding-bottom: 1vh; */
+  }
+
+  #googleMapDiv {
+    /* width: 70vw; */
+  }
+  .UniversitiesAndColleges .gradientText {
+    font-size: 6vh;
+    background: linear-gradient(to right, #ff9800, #ff9800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .UniversitiesAndColleges .headline {
+    font-size: 4vh;
+  }
+}

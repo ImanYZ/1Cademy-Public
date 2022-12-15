@@ -6,8 +6,8 @@ import CardMedia from "@mui/material/CardMedia";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import MUITypography from "@mui/material/Typography";
-import { useRive, useStateMachineInput } from "@rive-app/react-canvas";
-import React, { useCallback, useEffect, useRef } from "react";
+import { useRive } from "@rive-app/react-canvas";
+import React, { useRef } from "react";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
 // import { CardActionArea } from "@mui/material";
@@ -73,7 +73,7 @@ const HowItWorks = () => {
   const step4Ref = useRef(null);
   const step5Ref = useRef(null);
 
-  const { rive, RiveComponent } = useRive({
+  const { RiveComponent } = useRive({
     src: "rive/gg.riv",
     stateMachines: "State Machine 1",
     autoplay: true,
@@ -81,46 +81,48 @@ const HowItWorks = () => {
 
   const { height, width } = useWindowSize();
 
-  const scrollInput = useStateMachineInput(rive, "State Machine 1", "scroll");
+  // const scrollInput = useStateMachineInput(rive, "State Machine 1", "scroll");
 
-  const onChangeObserver = useCallback(
-    (e: IntersectionObserverEntry[]) => {
-      if (!scrollInput) return;
+  // const onChangeObserver = useCallback(
+  //   (e: IntersectionObserverEntry[]) => {
+  //     if (!scrollInput) return;
 
-      e.forEach(({ isIntersecting, target }) => {
-        let idx = null;
-        if (target.id === "step-1") idx = 0;
-        if (target.id === "step-2") idx = 1;
-        if (target.id === "step-3") idx = 2;
-        if (target.id === "step-4") idx = 3;
+  //     e.forEach(({ isIntersecting, target }) => {
+  //       let idx = null;
+  //       if (target.id === "step-1") idx = 0;
+  //       if (target.id === "step-2") idx = 1;
+  //       if (target.id === "step-3") idx = 2;
+  //       if (target.id === "step-4") idx = 3;
+  //       // rive?.activeArtboard
 
-        if (isIntersecting && idx !== null) {
-          scrollInput.value = 5 + idx * 10;
-          console.log("onChangeObserver:scrollInput.value", target.id, scrollInput.value);
-        }
-      });
-    },
-    [scrollInput]
-  );
+  //       // rive.
+  //       //         if (isIntersecting && idx !== null) {
+  //       //           scrollInput.value = 5 + idx * 10;
+  //       //           console.log("onChangeObserver:scrollInput.value", target.id, scrollInput.value);
+  //       //         }
+  //     });
+  //   },
+  //   [scrollInput]
+  // );
 
-  useEffect(() => {
-    if (!step1Ref.current || !step2Ref.current || !step3Ref.current || !step4Ref.current) return;
+  // useEffect(() => {
+  //   if (!step1Ref.current || !step2Ref.current || !step3Ref.current || !step4Ref.current) return;
 
-    let options = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 0.51,
-    };
-    const ob = new IntersectionObserver(onChangeObserver, options);
-    ob.observe(step1Ref.current);
-    ob.observe(step2Ref.current);
-    ob.observe(step3Ref.current);
-    ob.observe(step4Ref.current);
+  //   let options = {
+  //     root: null,
+  //     rootMargin: "0px",
+  //     threshold: 0.51,
+  //   };
+  //   const ob = new IntersectionObserver(onChangeObserver, options);
+  //   ob.observe(step1Ref.current);
+  //   ob.observe(step2Ref.current);
+  //   ob.observe(step3Ref.current);
+  //   ob.observe(step4Ref.current);
 
-    return () => {
-      ob.disconnect();
-    };
-  }, [onChangeObserver]);
+  //   return () => {
+  //     ob.disconnect();
+  //   };
+  // }, [onChangeObserver]);
 
   return (
     <Container
