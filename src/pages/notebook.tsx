@@ -3600,11 +3600,21 @@ const Dashboard = ({}: DashboardProps) => {
           {/* end Data from map */}
 
           {showLivelinessBar.enabled && showLivelinessBar.type === "full" && (
-            <MemoizedLivelinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} />
+            <MemoizedLivelinessBar
+              authUser={user}
+              openUserInfoSidebar={openUserInfoSidebar}
+              onlineUsers={onlineUsers}
+              db={db}
+            />
           )}
 
           {showLivelinessBar.enabled && showLivelinessBar.type === "minimal" && (
-            <MemoizedReputationlinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} />
+            <MemoizedReputationlinessBar
+              authUser={user}
+              openUserInfoSidebar={openUserInfoSidebar}
+              onlineUsers={onlineUsers}
+              db={db}
+            />
           )}
 
           {focusView.isEnabled && (

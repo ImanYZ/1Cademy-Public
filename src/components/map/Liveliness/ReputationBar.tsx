@@ -11,6 +11,7 @@ type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  authUser: any;
 };
 
 type UserInteractions = {
@@ -21,6 +22,7 @@ type UserInteractions = {
     fullname: string;
     count: number;
     actions: ActionTrackType[];
+    email: string;
   };
 };
 
@@ -69,6 +71,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                   count: 0,
                   actions: [],
                   reputation: null,
+                  email: user.email,
                 };
               }
               if (actionTrackData.type === "NodeVote") {
@@ -225,12 +228,17 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                   <Tooltip
                     key={uname}
                     title={
-                      <Box>
+                      <Box sx={{ textAlign: "center" }}>
                         <Box component={"span"}>
                           {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
                         </Box>
-                        <Box component={"p"} sx={{ my: 0, textAlign: "center" }}>
-                          {usersInteractions[uname].count}
+                        {props.authUser?.email === "oneweb@umich.edu" && (
+                          <Box component={"p"} sx={{ my: 0 }}>
+                            {usersInteractions[uname].email}
+                          </Box>
+                        )}
+                        <Box component={"p"} sx={{ my: 0 }}>
+                          {usersInteractions[uname].count.toFixed(2)} Points
                         </Box>
                       </Box>
                     }

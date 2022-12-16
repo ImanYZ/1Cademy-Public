@@ -1,7 +1,7 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
-import { collection, Firestore, onSnapshot, query, Timestamp, where } from "firebase/firestore";
+import { collection, Firestore, getDocs, limit, onSnapshot, query, Timestamp, where } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
@@ -13,6 +13,7 @@ type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  authUser: any;
 };
 
 type UserInteractions = {
@@ -23,6 +24,7 @@ type UserInteractions = {
     fullname: string;
     count: number;
     actions: ActionTrackType[];
+    email?: string;
   };
 };
 
@@ -52,82 +54,87 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
       const actionTracksCol = collection(db, "actionTracks");
       const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
-        setUsersInteractions(_usersInteractions => {
-          const usersInteractions = { ..._usersInteractions };
-          const docChanges = snapshot.docChanges();
-          for (const docChange of docChanges) {
-            const actionTrackData = docChange.doc.data() as IActionTrack;
-            if (docChange.type === "added") {
-              if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-                usersInteractions[actionTrackData.doer] = {
-                  imageUrl: actionTrackData.imageUrl,
-                  chooseUname: actionTrackData.chooseUname,
-                  fullname: actionTrackData.fullname,
-                  count: 0,
-                  actions: [],
-                  reputation: null,
-                };
+        const docChanges = snapshot.docChanges();
+        for (const docChange of docChanges) {
+          const actionTrackData = docChange.doc.data() as IActionTrack;
+          let doerEmail: string = "";
+          if (docChange.type === "added") {
+            if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+              if (props.authUser?.email === "oneweb@umich.edu") {
+                let userQuery = query(collection(db, "users"), where("uname", "==", actionTrackData.doer), limit(1));
+                let userDocs = await getDocs(userQuery);
+                if (userDocs.docs.length > 0) {
+                  doerEmail = userDocs.docs[0].data().email;
+                }
               }
-              if (actionTrackData.type === "NodeVote") {
-                if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
-                  usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
-                  usersInteractions[actionTrackData.doer].count += 1;
-                  for (const receiver of actionTrackData.receivers) {
-                    if (usersInteractions.hasOwnProperty(receiver)) {
-                      usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
-                    }
-                  }
-                }
-              } else if (actionTrackData.type === "RateVersion") {
-                if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
-                  const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
-                    ? "Correct"
-                    : "Wrong";
-                  usersInteractions[actionTrackData.doer].actions.push(currentAction);
-                  usersInteractions[actionTrackData.doer].count += 1;
-                  for (const receiver of actionTrackData.receivers) {
-                    if (usersInteractions.hasOwnProperty(receiver)) {
-                      usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
-                    }
-                  }
-                }
-              } else {
-                usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
+              usersInteractions[actionTrackData.doer] = {
+                imageUrl: actionTrackData.imageUrl,
+                chooseUname: actionTrackData.chooseUname,
+                fullname: actionTrackData.fullname,
+                count: 0,
+                actions: [],
+                reputation: null,
+                email: doerEmail,
+              };
+            }
+            if (actionTrackData.type === "NodeVote") {
+              if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
+                usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
                 usersInteractions[actionTrackData.doer].count += 1;
-              }
-            }
-            if (docChange.type === "modified") {
-              if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-                usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
-                usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
-              }
-            }
-            if (docChange.type === "removed") {
-              if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-                usersInteractions[actionTrackData.doer].count -= 1;
-                if (usersInteractions[actionTrackData.doer].count < 0) {
-                  usersInteractions[actionTrackData.doer].count = 0;
+                for (const receiver of actionTrackData.receivers) {
+                  if (usersInteractions.hasOwnProperty(receiver)) {
+                    usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+                  }
                 }
               }
+            } else if (actionTrackData.type === "RateVersion") {
+              if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
+                const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
+                  ? "Correct"
+                  : "Wrong";
+                usersInteractions[actionTrackData.doer].actions.push(currentAction);
+                usersInteractions[actionTrackData.doer].count += 1;
+                for (const receiver of actionTrackData.receivers) {
+                  if (usersInteractions.hasOwnProperty(receiver)) {
+                    usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
+                  }
+                }
+              }
+            } else {
+              usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
+              usersInteractions[actionTrackData.doer].count += 1;
             }
           }
-
-          if (t) {
-            clearTimeout(t);
+          if (docChange.type === "modified") {
+            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+              usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
+              usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
+            }
           }
-          t = setTimeout(() => {
-            setUsersInteractions(usersInteractions => {
-              let _usersInteractions = { ...usersInteractions } as UserInteractions;
-              for (let uname in _usersInteractions) {
-                _usersInteractions[uname].actions = [];
-                _usersInteractions[uname].reputation = null;
+          if (docChange.type === "removed") {
+            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+              usersInteractions[actionTrackData.doer].count -= 1;
+              if (usersInteractions[actionTrackData.doer].count < 0) {
+                usersInteractions[actionTrackData.doer].count = 0;
               }
-              return _usersInteractions;
-            });
-            setIsInitialized(true);
-          }, 3000);
-          return usersInteractions;
-        });
+            }
+          }
+        }
+        setUsersInteractions({ ...usersInteractions });
+        if (t) {
+          clearTimeout(t);
+        }
+        t = setTimeout(() => {
+          setUsersInteractions(usersInteractions => {
+            let _usersInteractions = { ...usersInteractions } as UserInteractions;
+            for (let uname in _usersInteractions) {
+              _usersInteractions[uname].actions = [];
+              _usersInteractions[uname].reputation = null;
+            }
+            return _usersInteractions;
+          });
+          setIsInitialized(true);
+        }, 3000);
       });
     };
 
@@ -220,12 +227,17 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                   <Tooltip
                     key={uname}
                     title={
-                      <Box>
+                      <Box sx={{ textAlign: "center" }}>
                         <Box component={"span"}>
                           {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
                         </Box>
-                        <Box component={"p"} sx={{ my: 0, textAlign: "center" }}>
-                          {usersInteractions[uname].count}
+                        {props.authUser?.email === "oneweb@umich.edu" && (
+                          <Box component={"p"} sx={{ my: 0 }}>
+                            {usersInteractions[uname].email}
+                          </Box>
+                        )}
+                        <Box component={"p"} sx={{ my: 0 }}>
+                          {usersInteractions[uname].count.toFixed(2)} Interactions
                         </Box>
                       </Box>
                     }
