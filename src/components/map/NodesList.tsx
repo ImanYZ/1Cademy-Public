@@ -230,6 +230,8 @@ const NodesList = ({
             locked={nodes[nId].locked}
             disableVotes={!!nodes[nId].disableVotes}
             setOperation={setOperation}
+            contributors={nodes[nId].contributors}
+            institutions={nodes[nId].institutions}
           />
         );
       })}
