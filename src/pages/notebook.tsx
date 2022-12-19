@@ -2953,6 +2953,7 @@ const Dashboard = ({}: DashboardProps) => {
               editable: false,
               width: NODE_WIDTH,
               node: newNodeId,
+              simulated: true,
             };
             if (proposal.childType === "Question") {
               newChildNode.choices = proposal.choices;
