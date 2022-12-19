@@ -305,7 +305,6 @@ const NodeFooter = ({
       </Grid>
     ));
   };
-
   const openContributorsSection = () => {
     if (nodeBookState.contributorsNodeId != identifier) {
       nodeBookDispatch({
@@ -319,7 +318,6 @@ const NodeFooter = ({
       });
     }
   };
-
   return (
     <>
       <Box
@@ -383,7 +381,6 @@ const NodeFooter = ({
                 />
               </Box>
             ))}
-
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
@@ -609,7 +606,7 @@ const NodeFooter = ({
 
                 <Box
                   sx={{
-                    display: "flex",
+                    display: editable ? "flex" : "none",
                     alignItems: "center",
                     gap: "5px",
                     marginRight: "10px",
@@ -669,7 +666,7 @@ const NodeFooter = ({
                       },
                     }}
                   >
-                    <VideoCallIcon sx={{ fontSize: "16px" }} />
+                    <VideoCallIcon sx={{ fontSize: "20px" }} />
                   </ContainedButton>
                 </Box>
               )}

@@ -80,6 +80,10 @@ const LeaderboardChip: FC<Props> = ({
         height: 60,
         borderRadius: 28,
         padding: "6px",
+        cursor: "pointer",
+        ":hover": {
+          background: "rgba(255, 255, 255, 0.08)",
+        },
       }}
       icon={<OptimizedAvatar name={name} imageUrl={imageUrl} renderAsAvatar={renderAsAvatar} />}
       variant="outlined"

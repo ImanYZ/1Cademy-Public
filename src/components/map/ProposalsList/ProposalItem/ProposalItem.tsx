@@ -49,6 +49,10 @@ const ProposalItem = (props: any) => {
       key={`Proposal${props.proposal.id}`}
       onClick={openLinkedNodeClick(props.proposal)}
       sx={{
+        ":hover": {
+          border: "2px solid #ff8a33",
+        },
+        border: "2px solid transparent",
         display: "flex",
         flexDirection: "column",
         padding: {

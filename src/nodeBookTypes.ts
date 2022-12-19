@@ -46,6 +46,7 @@ export interface NodeBookState {
   readonly choosingNode: ChoosingNode | null;
   readonly chosenNode: ChosenNode | null;
   readonly selectedNode: string | null;
+  readonly initialProposal: string | null;
   readonly selectionType: SelectionType;
   readonly selectedTags: string[];
   readonly openToolbar: boolean;
@@ -139,6 +140,10 @@ export type SetContributorsNodeId = {
   type: "setContributorsNodeId";
   payload: any;
 };
+export type SetInitialProposal = {
+  type: "setInitialProposal";
+  payload: string | null;
+};
 
 export type DispatchNodeBookActions =
   | SetSNodeAction
@@ -156,7 +161,8 @@ export type DispatchNodeBookActions =
   | SetOpenEditButtonAction
   | SetIsMenuOpen
   | SetLastOperation
-  | SetContributorsNodeId;
+  | SetContributorsNodeId
+  | SetInitialProposal;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;

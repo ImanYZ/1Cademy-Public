@@ -12,6 +12,7 @@ import { MemoizedActionBubble } from "./ActionBubble";
 type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 type UserInteractions = {
@@ -26,7 +27,7 @@ type UserInteractions = {
 };
 
 const LivelinessBar = (props: ILivelinessBarProps) => {
-  const { db, onlineUsers } = props;
+  const { db, onlineUsers, openUserInfoSidebar } = props;
   const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
@@ -176,7 +177,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           id="livebar"
           sx={{
             width: "56px",
-            background: "#1f1f1f",
+            background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
             borderRadius: "10px 0px 0px 10px",
             right: 0,
             top: 0,
@@ -192,7 +193,9 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             sx={{
               height: "calc(100% - 40px)",
               width: "1px",
-              borderRight: "2px solid #bebebe",
+              borderRight: theme =>
+                theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
+              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
               position: "relative",
               marginTop: "10px",
             }}
@@ -223,6 +226,14 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                     title={usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
                   >
                     <Box
+                      onClick={() =>
+                        openUserInfoSidebar(
+                          uname,
+                          usersInteractions[uname].imageUrl,
+                          usersInteractions[uname].fullname,
+                          usersInteractions[uname].chooseUname ? "1" : ""
+                        )
+                      }
                       className={
                         usersInteractions[uname].reputation === "Gain"
                           ? "GainedPoint"
@@ -233,6 +244,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                       sx={{
                         width: "28px",
                         height: "28px",
+                        cursor: "pointer",
                         // display: "inline-block",
                         position: "absolute",
                         left: "0px",
@@ -289,14 +301,14 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           </Box>
           <Box
             sx={{
-              background: "#1f1f1f",
+              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
               display: "flex",
               top: "50%",
               transform: "translate(0px, -50%)",
               left: "-22px",
               width: "22px",
               height: "30px",
-              color: "#bebebe",
+              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
               position: "absolute",
               alignItems: "center",
               justifyContent: "center",
