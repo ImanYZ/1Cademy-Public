@@ -49,6 +49,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
+import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/ReputationBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -105,7 +106,7 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
+import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
@@ -177,7 +178,13 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
-  const [showLivelinessBar, setShowLivelinessBar] = useState<boolean>(false);
+  const [showLivelinessBar, setShowLivelinessBar] = useState<{
+    enabled: boolean;
+    type: "minimal" | "full"
+  }>({
+    enabled: false,
+    type: "minimal",
+  });
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -300,7 +307,14 @@ const Dashboard = ({}: DashboardProps) => {
     const _window: any = window;
     const internalId = setInterval(() => {
       if (_window.google_optimize !== undefined) {
-        setShowLivelinessBar(!!_window.livelinessBar || ["1man"].includes(String(user?.uname)));
+        if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
+          setShowLivelinessBar({ ..._window.livelinessBar });
+        } else if(user?.uname === "1man") {
+          setShowLivelinessBar({
+            enabled: true,
+            type: "full",
+          });
+        }
         clearInterval(internalId);
       }
     }, 500);
@@ -2419,6 +2433,9 @@ const Dashboard = ({}: DashboardProps) => {
         referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
       }
       if (referencesOK) {
+        gtmEvent("Propose", {
+          customType: "improvement",
+        });
         const newNode = { ...graph.nodes[nodeBookState.selectedNode] };
         if (newNode.children.length > 0) {
           const newChildren = [];
@@ -2648,6 +2665,9 @@ const Dashboard = ({}: DashboardProps) => {
           referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
         }
         if (referencesOK) {
+          gtmEvent("Propose", {
+            customType: "newChild",
+          });
           if (newNode.title !== "" && newNode.title !== "Replace this new node title!" && newNode.tags.length !== 0) {
             const postData: any = {
               ...newNode,
@@ -2947,6 +2967,7 @@ const Dashboard = ({}: DashboardProps) => {
               editable: false,
               width: NODE_WIDTH,
               node: newNodeId,
+              simulated: true,
             };
             if (proposal.childType === "Question") {
               newChildNode.choices = proposal.choices;
@@ -3593,10 +3614,22 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? (
-            <MemoizedLivelinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} />
-          ) : (
-            <div />
+          {showLivelinessBar.enabled && showLivelinessBar.type === "full" && (
+            <MemoizedLivelinessBar
+              authEmail={user?.email}
+              openUserInfoSidebar={openUserInfoSidebar}
+              onlineUsers={onlineUsers}
+              db={db}
+            />
+          )}
+
+          {showLivelinessBar.enabled && showLivelinessBar.type === "minimal" && (
+            <MemoizedReputationlinessBar
+              authEmail={user?.email}
+              openUserInfoSidebar={openUserInfoSidebar}
+              onlineUsers={onlineUsers}
+              db={db}
+            />
           )}
 
           {focusView.isEnabled && (

@@ -341,3 +341,14 @@ export const getVideoDataByUrl = (videoUrl: string) => {
     video_type: videoType,
   };
 };
+
+export const gtmEvent = (eventName: string, eventData: any): void => {
+  const _window: any = typeof window === "undefined" ? {} : window;
+  const { dataLayer } = _window;
+  if (dataLayer) {
+    dataLayer.push({
+      ...eventData,
+      event: eventName,
+    });
+  }
+};

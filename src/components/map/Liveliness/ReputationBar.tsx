@@ -7,8 +7,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
-import { MemoizedActionBubble } from "./ActionBubble";
-
 type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
@@ -24,14 +22,13 @@ type UserInteractions = {
     fullname: string;
     count: number;
     actions: ActionTrackType[];
-    email?: string;
+    email: string;
   };
 };
 
-const LivelinessBar = (props: ILivelinessBarProps) => {
+const ReputationlinessBar = (props: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
   const [open, setOpen] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
   // const theme = useTheme();
@@ -57,65 +54,68 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const actionTrackData = docChange.doc.data() as IActionTrack;
-          let doerEmail: string = "";
-          if (docChange.type === "added") {
-            if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              if (authEmail === "oneweb@umich.edu") {
-                let userQuery = query(collection(db, "users"), where("uname", "==", actionTrackData.doer), limit(1));
-                let userDocs = await getDocs(userQuery);
-                if (userDocs.docs.length > 0) {
-                  doerEmail = userDocs.docs[0].data().email;
-                }
-              }
-              usersInteractions[actionTrackData.doer] = {
-                imageUrl: actionTrackData.imageUrl,
-                chooseUname: actionTrackData.chooseUname,
-                fullname: actionTrackData.fullname,
-                count: 0,
-                actions: [],
-                reputation: null,
-                email: doerEmail,
-              };
+          for (const receiverData of actionTrackData.receivers) {
+            const index = actionTrackData.receivers.indexOf(receiverData);
+            const userQuery = query(collection(db, "users"), where("uname", "==", receiverData), limit(1));
+            const userDocs = await getDocs(userQuery);
+            if (userDocs.docs.length === 0) {
+              continue;
             }
-            if (actionTrackData.type === "NodeVote") {
-              if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
-                usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
-                usersInteractions[actionTrackData.doer].count += 1;
-                for (const receiver of actionTrackData.receivers) {
-                  if (usersInteractions.hasOwnProperty(receiver)) {
-                    usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+            const user = userDocs.docs[0].data();
+            if (docChange.type === "added") {
+              if (!usersInteractions.hasOwnProperty(receiverData)) {
+                usersInteractions[receiverData] = {
+                  imageUrl: user.imageUrl,
+                  chooseUname: user.chooseUname,
+                  fullname: user.fName + " " + user.lName,
+                  count: 0,
+                  actions: [],
+                  reputation: null,
+                  email: user.email,
+                };
+              }
+              if (actionTrackData.type === "NodeVote") {
+                if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
+                  usersInteractions[receiverData].actions.push(actionTrackData.action as ActionTrackType);
+                  usersInteractions[receiverData].count += actionTrackData.receiverPoints
+                    ? Number(actionTrackData.receiverPoints[index])
+                    : 0;
+                  for (const receiver of actionTrackData.receivers) {
+                    if (usersInteractions.hasOwnProperty(receiver)) {
+                      usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+                    }
+                  }
+                }
+              } else if (actionTrackData.type === "RateVersion") {
+                if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
+                  const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
+                    ? "Correct"
+                    : "Wrong";
+                  usersInteractions[receiverData].actions.push(currentAction);
+                  usersInteractions[receiverData].count += actionTrackData.action.includes("Correct-") ? 1 : -1;
+                  if (usersInteractions[receiverData].count < 0) {
+                    usersInteractions[receiverData].count = 0;
+                  }
+                  for (const receiver of actionTrackData.receivers) {
+                    if (usersInteractions.hasOwnProperty(receiver)) {
+                      usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
+                    }
                   }
                 }
               }
-            } else if (actionTrackData.type === "RateVersion") {
-              if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
-                const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
-                  ? "Correct"
-                  : "Wrong";
-                usersInteractions[actionTrackData.doer].actions.push(currentAction);
-                usersInteractions[actionTrackData.doer].count += 1;
-                for (const receiver of actionTrackData.receivers) {
-                  if (usersInteractions.hasOwnProperty(receiver)) {
-                    usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
-                  }
-                }
+            }
+            if (docChange.type === "modified") {
+              if (usersInteractions.hasOwnProperty(receiverData)) {
+                usersInteractions[receiverData].imageUrl = user.imageUrl;
+                usersInteractions[receiverData].fullname = user.fullname;
               }
-            } else {
-              usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
-              usersInteractions[actionTrackData.doer].count += 1;
             }
-          }
-          if (docChange.type === "modified") {
-            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
-              usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
-            }
-          }
-          if (docChange.type === "removed") {
-            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              usersInteractions[actionTrackData.doer].count -= 1;
-              if (usersInteractions[actionTrackData.doer].count < 0) {
-                usersInteractions[actionTrackData.doer].count = 0;
+            if (docChange.type === "removed") {
+              if (usersInteractions.hasOwnProperty(receiverData)) {
+                usersInteractions[receiverData].count -= 1;
+                if (usersInteractions[receiverData].count < 0) {
+                  usersInteractions[receiverData].count = 0;
+                }
               }
             }
           }
@@ -133,7 +133,6 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             }
             return _usersInteractions;
           });
-          setIsInitialized(true);
         }, 3000);
       });
     };
@@ -155,15 +154,27 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
     return Object.keys(usersInteractions);
   }, [usersInteractions]);
 
-  const maxActions: number = useMemo(() => {
-    return Math.max(
-      10,
+  const minActions: number = useMemo(() => {
+    return Math.min(
+      0,
       unames.reduce(
-        (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+        (carry, uname: string) => (carry > usersInteractions[uname].count ? usersInteractions[uname].count : carry),
         0
       )
     );
   }, [usersInteractions]);
+
+  const maxActions: number = useMemo(() => {
+    return (
+      Math.max(
+        10,
+        unames.reduce(
+          (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+          0
+        )
+      ) + Math.abs(minActions)
+    );
+  }, [usersInteractions, minActions]);
 
   return (
     <>
@@ -222,7 +233,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
               }}
             >
               {unames.map((uname: string) => {
-                const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
+                const _count = usersInteractions[uname].count + Math.abs(minActions);
+                const seekPosition = -1 * ((_count / maxActions) * barHeight - (_count === 0 ? 0 : 32));
                 return (
                   <Tooltip
                     key={uname}
@@ -237,7 +249,8 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                           </Box>
                         )}
                         <Box component={"p"} sx={{ my: 0 }}>
-                          {usersInteractions[uname].count} Interaction{usersInteractions[uname].count > 1 ? "s" : ""}
+                          {usersInteractions[uname].count.toFixed(2)} Point
+                          {usersInteractions[uname].count > 1 ? "s" : ""}
                         </Box>
                       </Box>
                     }
@@ -294,18 +307,6 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                         },
                       }}
                     >
-                      <Box
-                        sx={{
-                          display: isInitialized ? "block" : "none",
-                          position: "absolute",
-                          bottom: "6px",
-                          left: "-16px",
-                        }}
-                      >
-                        {usersInteractions[uname].actions.map((action, index) => {
-                          return <MemoizedActionBubble key={index} actionType={action} />;
-                        })}
-                      </Box>
                       <Box className="user-image">
                         <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
                       </Box>
@@ -348,4 +349,4 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
   );
 };
 
-export const MemoizedLivelinessBar = React.memo(LivelinessBar);
+export const MemoizedReputationlinessBar = React.memo(ReputationlinessBar);

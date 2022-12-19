@@ -1062,19 +1062,20 @@ const NodeFooter = ({
                 aria-expanded={openMenu ? "true" : undefined}
                 aria-haspopup="true"
                 onClick={handleClick}
-                sx={{
-                  background: theme =>
+                 sx={{
+                display: simulated ? "none" : "flex",
+                background: theme =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.darkBackground1
+                    : theme.palette.common.lightBackground1,
+                padding: "3px",
+                ":hover": {
+                  background: (theme: any) =>
                     theme.palette.mode === "dark"
-                      ? theme.palette.common.darkBackground1
-                      : theme.palette.common.lightBackground1,
-                  padding: "3px",
-                  ":hover": {
-                    background: (theme: any) =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground2
-                        : theme.palette.common.lightBackground2,
-                  },
-                }}
+                      ? theme.palette.common.darkBackground2
+                      : theme.palette.common.lightBackground2,
+                },
+              }}
               >
                 <MoreHorizIcon
                   sx={{
