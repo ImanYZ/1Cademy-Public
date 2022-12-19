@@ -97,6 +97,10 @@ export const getDesignTokens = (mode: "light" | "dark") =>
       h2: { fontSize: "32px", color: mode === "dark" ? common.white : common.black },
       h3: { fontSize: "24px", color: mode === "dark" ? common.white : common.black },
       h4: { fontSize: "19px", color: mode === "dark" ? common.white : common.black },
+      h5: {
+        fontSize: "20px",
+        fontWeight: 300,
+      },
       body1: { fontSize: "16px", color: mode === "dark" ? common.white : common.black },
       body2: { fontSize: "19px", color: mode === "dark" ? common.white : common.black },
       caption: { fontSize: "14.5px", color: mode === "dark" ? common.white : common.black },

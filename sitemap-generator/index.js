@@ -123,10 +123,7 @@ async function main() {
     const contentNodes = await db
       .collection("nodes")
       .where("deleted", "==", false)
-      .where("tags", "array-contains", {
-        node: community.id,
-        title: community.title,
-      })
+      .where("tagIds", "array-contains", community.id)
       .get();
 
     // individual nodes in this community
@@ -153,10 +150,10 @@ async function main() {
   // apply sub indexes strategy for community tags
   // sitemap can have atmost 50000 entries and should not exceed 50MB in size
   // we are using 40000 to be safe in case of size per entry increases
-  if (_nodes.length > 40000) {
+  if (_nodes.length > 30000) {
     const subSitemaps = [];
     while (_nodes.length > 0) {
-      subSitemaps.push(_nodes.splice(0, 40000));
+      subSitemaps.push(_nodes.splice(0, 30000));
     }
 
     // building each sitemap with atmost 40k entries
