@@ -18,6 +18,8 @@ export const INITIAL_STATE: NodeBookState = {
   nodeId: null,
   isMenuOpen: false,
   lastOperation: "CancelProposals",
+  contributorsNodeId: null,
+  showContributors: false,
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {
@@ -52,6 +54,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, openEditButton: action.payload.status, nodeId: action.payload.nodeId };
     case "setIsMenuOpen":
       return { ...state, isMenuOpen: action.payload };
+    case "setContributorsNodeId":
+      return { ...state, contributorsNodeId: action.payload.nodeId, showContributors: action.payload.showContributors };
     default:
       return { ...state };
   }
