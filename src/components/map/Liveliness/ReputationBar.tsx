@@ -11,7 +11,7 @@ type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
-  authUser: any;
+  authEmail: string | undefined;
 };
 
 type UserInteractions = {
@@ -27,7 +27,7 @@ type UserInteractions = {
 };
 
 const ReputationlinessBar = (props: ILivelinessBarProps) => {
-  const { db, onlineUsers, openUserInfoSidebar } = props;
+  const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
   const [open, setOpen] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
@@ -78,10 +78,8 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                 if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
                   usersInteractions[receiverData].actions.push(actionTrackData.action as ActionTrackType);
                   usersInteractions[receiverData].count += actionTrackData.receiverPoints
-                    ? Number(actionTrackData.receiverPoints[index]) < 0
-                      ? 0
-                      : Number(actionTrackData.receiverPoints[index])
-                    : 1;
+                    ? Number(actionTrackData.receiverPoints[index])
+                    : 0;
                   for (const receiver of actionTrackData.receivers) {
                     if (usersInteractions.hasOwnProperty(receiver)) {
                       usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
@@ -156,15 +154,27 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     return Object.keys(usersInteractions);
   }, [usersInteractions]);
 
-  const maxActions: number = useMemo(() => {
-    return Math.max(
-      10,
+  const minActions: number = useMemo(() => {
+    return Math.min(
+      0,
       unames.reduce(
-        (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+        (carry, uname: string) => (carry > usersInteractions[uname].count ? usersInteractions[uname].count : carry),
         0
       )
     );
   }, [usersInteractions]);
+
+  const maxActions: number = useMemo(() => {
+    return (
+      Math.max(
+        10,
+        unames.reduce(
+          (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+          0
+        )
+      ) + Math.abs(minActions)
+    );
+  }, [usersInteractions, minActions]);
 
   return (
     <>
@@ -223,7 +233,8 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
               }}
             >
               {unames.map((uname: string) => {
-                const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
+                const _count = usersInteractions[uname].count + Math.abs(minActions);
+                const seekPosition = -1 * ((_count / maxActions) * barHeight - (_count === 0 ? 0 : 32));
                 return (
                   <Tooltip
                     key={uname}
@@ -232,13 +243,14 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                         <Box component={"span"}>
                           {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
                         </Box>
-                        {props.authUser?.email === "oneweb@umich.edu" && (
+                        {authEmail === "oneweb@umich.edu" && (
                           <Box component={"p"} sx={{ my: 0 }}>
                             {usersInteractions[uname].email}
                           </Box>
                         )}
                         <Box component={"p"} sx={{ my: 0 }}>
-                          {usersInteractions[uname].count.toFixed(2)} Points
+                          {usersInteractions[uname].count.toFixed(2)} Point
+                          {usersInteractions[uname].count > 1 ? "s" : ""}
                         </Box>
                       </Box>
                     }

@@ -106,7 +106,7 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
+import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
@@ -178,9 +178,12 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
-  const [showLivelinessBar, setShowLivelinessBar] = useState<any>({
+  const [showLivelinessBar, setShowLivelinessBar] = useState<{
+    enabled: boolean;
+    type: "minimal" | "full"
+  }>({
     enabled: false,
-    type: "",
+    type: "minimal",
   });
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
@@ -306,8 +309,13 @@ const Dashboard = ({}: DashboardProps) => {
       if (_window.google_optimize !== undefined) {
         if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
           setShowLivelinessBar({ ..._window.livelinessBar });
-          clearInterval(internalId);
+        } else if(user?.uname === "1man") {
+          setShowLivelinessBar({
+            enabled: true,
+            type: "full",
+          });
         }
+        clearInterval(internalId);
       }
     }, 500);
   }, [user?.uname]);
@@ -2425,6 +2433,9 @@ const Dashboard = ({}: DashboardProps) => {
         referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
       }
       if (referencesOK) {
+        gtmEvent("Propose", {
+          customType: "improvement",
+        });
         const newNode = { ...graph.nodes[nodeBookState.selectedNode] };
         if (newNode.children.length > 0) {
           const newChildren = [];
@@ -2654,6 +2665,9 @@ const Dashboard = ({}: DashboardProps) => {
           referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
         }
         if (referencesOK) {
+          gtmEvent("Propose", {
+            customType: "newChild",
+          });
           if (newNode.title !== "" && newNode.title !== "Replace this new node title!" && newNode.tags.length !== 0) {
             const postData: any = {
               ...newNode,
@@ -3602,7 +3616,7 @@ const Dashboard = ({}: DashboardProps) => {
 
           {showLivelinessBar.enabled && showLivelinessBar.type === "full" && (
             <MemoizedLivelinessBar
-              authUser={user}
+              authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
@@ -3611,7 +3625,7 @@ const Dashboard = ({}: DashboardProps) => {
 
           {showLivelinessBar.enabled && showLivelinessBar.type === "minimal" && (
             <MemoizedReputationlinessBar
-              authUser={user}
+              authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
