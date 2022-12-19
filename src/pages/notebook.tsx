@@ -106,7 +106,7 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
 import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
-import { imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
+import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import { ChoosingType, EdgesData, FullNodeData, FullNodesData, UserNodes, UserNodesData } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
@@ -2433,6 +2433,9 @@ const Dashboard = ({}: DashboardProps) => {
         referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
       }
       if (referencesOK) {
+        gtmEvent("Propose", {
+          customType: "improvement",
+        });
         const newNode = { ...graph.nodes[nodeBookState.selectedNode] };
         if (newNode.children.length > 0) {
           const newChildren = [];
@@ -2662,6 +2665,9 @@ const Dashboard = ({}: DashboardProps) => {
           referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
         }
         if (referencesOK) {
+          gtmEvent("Propose", {
+            customType: "newChild",
+          });
           if (newNode.title !== "" && newNode.title !== "Replace this new node title!" && newNode.tags.length !== 0) {
             const postData: any = {
               ...newNode,
