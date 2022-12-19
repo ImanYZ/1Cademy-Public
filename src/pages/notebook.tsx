@@ -178,9 +178,12 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
-  const [showLivelinessBar, setShowLivelinessBar] = useState<any>({
+  const [showLivelinessBar, setShowLivelinessBar] = useState<{
+    enabled: boolean;
+    type: "minimal" | "full"
+  }>({
     enabled: false,
-    type: "",
+    type: "minimal",
   });
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
@@ -306,8 +309,13 @@ const Dashboard = ({}: DashboardProps) => {
       if (_window.google_optimize !== undefined) {
         if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
           setShowLivelinessBar({ ..._window.livelinessBar });
-          clearInterval(internalId);
+        } else if(user?.uname === "1man") {
+          setShowLivelinessBar({
+            enabled: true,
+            type: "full",
+          });
         }
+        clearInterval(internalId);
       }
     }, 500);
   }, [user?.uname]);
@@ -3602,7 +3610,7 @@ const Dashboard = ({}: DashboardProps) => {
 
           {showLivelinessBar.enabled && showLivelinessBar.type === "full" && (
             <MemoizedLivelinessBar
-              authUser={user}
+              authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
@@ -3611,7 +3619,7 @@ const Dashboard = ({}: DashboardProps) => {
 
           {showLivelinessBar.enabled && showLivelinessBar.type === "minimal" && (
             <MemoizedReputationlinessBar
-              authUser={user}
+              authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}

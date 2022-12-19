@@ -13,7 +13,7 @@ type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
-  authUser: any;
+  authEmail: string | undefined;
 };
 
 type UserInteractions = {
@@ -29,7 +29,7 @@ type UserInteractions = {
 };
 
 const LivelinessBar = (props: ILivelinessBarProps) => {
-  const { db, onlineUsers, openUserInfoSidebar } = props;
+  const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
   const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
@@ -60,7 +60,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           let doerEmail: string = "";
           if (docChange.type === "added") {
             if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              if (props.authUser?.email === "oneweb@umich.edu") {
+              if (authEmail === "oneweb@umich.edu") {
                 let userQuery = query(collection(db, "users"), where("uname", "==", actionTrackData.doer), limit(1));
                 let userDocs = await getDocs(userQuery);
                 if (userDocs.docs.length > 0) {
@@ -231,13 +231,13 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                         <Box component={"span"}>
                           {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
                         </Box>
-                        {props.authUser?.email === "oneweb@umich.edu" && (
+                        {authEmail === "oneweb@umich.edu" && (
                           <Box component={"p"} sx={{ my: 0 }}>
                             {usersInteractions[uname].email}
                           </Box>
                         )}
                         <Box component={"p"} sx={{ my: 0 }}>
-                          {usersInteractions[uname].count.toFixed(2)} Interactions
+                          {usersInteractions[uname].count} Interaction{usersInteractions[uname].count > 1 ? "s" : ""}
                         </Box>
                       </Box>
                     }
