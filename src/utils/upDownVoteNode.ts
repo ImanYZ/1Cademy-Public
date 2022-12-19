@@ -435,6 +435,9 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
         imageUrl: userData.imageUrl,
         nodeId,
         receivers,
+        receiverPoints: receivers.map(
+          proposer => changedProposers[proposer].correctVal - changedProposers[proposer].wrongVal
+        ),
       } as IActionTrack);
     }
 

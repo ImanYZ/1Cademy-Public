@@ -506,7 +506,7 @@ const NodeFooter = ({
           </span> */}
         </div>
       </Box>
-      <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
+      <Box className="NodeFooter Right" sx={{ display: "flex", alignItems: "center" }}>
         {open ? (
           // REF: Node.css ln 122
           <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
@@ -994,6 +994,7 @@ const NodeFooter = ({
               aria-haspopup="true"
               onClick={handleClick}
               sx={{
+                display: simulated ? "none" : "flex",
                 background: theme =>
                   theme.palette.mode === "dark"
                     ? theme.palette.common.darkBackground1
