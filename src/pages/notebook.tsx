@@ -1141,32 +1141,34 @@ const Dashboard = ({}: DashboardProps) => {
     setGraph({ nodes: oldNodes, edges: oldEdges });
   }, [graph, allTags, settings.showClusterOptions]);
 
-  const openUserInfoSidebar = useCallback((uname: string, imageUrl: string, fullName: string, chooseUname: string) => {
-    const userUserInfoCollection = collection(db, "userUserInfoLog");
+  const openUserInfoSidebar = useCallback(
+    (uname: string, imageUrl: string, fullName: string, chooseUname: string) => {
+      const userUserInfoCollection = collection(db, "userUserInfoLog");
 
-    nodeBookDispatch({
-      type: "setSelectedUser",
-      payload: {
-        username: uname,
-        imageUrl,
-        fullName,
-        chooseUname,
-      },
-    });
+      nodeBookDispatch({
+        type: "setSelectedUser",
+        payload: {
+          username: uname,
+          imageUrl,
+          fullName,
+          chooseUname,
+        },
+      });
 
-    nodeBookDispatch({
-      type: "setSelectionType",
-      payload: "UserInfo",
-    });
-    setOpenSidebar("USER_INFO");
-    reloadPermanentGraph();
-    addDoc(userUserInfoCollection, {
-      uname: user?.uname,
-      uInfo: uname,
-      createdAt: Timestamp.fromDate(new Date()),
-    });
-
-  }, [db, nodeBookDispatch, user?.uname, setOpenSidebar, reloadPermanentGraph]);
+      nodeBookDispatch({
+        type: "setSelectionType",
+        payload: "UserInfo",
+      });
+      setOpenSidebar("USER_INFO");
+      reloadPermanentGraph();
+      addDoc(userUserInfoCollection, {
+        uname: user?.uname,
+        uInfo: uname,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+    },
+    [db, nodeBookDispatch, user?.uname, setOpenSidebar, reloadPermanentGraph]
+  );
 
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
@@ -1535,8 +1537,11 @@ const Dashboard = ({}: DashboardProps) => {
           lastNodeOperation.current = "Searcher";
         }
         const isInitialProposal = String(typeOperation).startsWith("initialProposal-");
-        if(isInitialProposal) {
-          nodeBookDispatch({ type: "setInitialProposal", payload: String(typeOperation).replace("initialProposal-", "") });
+        if (isInitialProposal) {
+          nodeBookDispatch({
+            type: "setInitialProposal",
+            payload: String(typeOperation).replace("initialProposal-", ""),
+          });
           setOpenSidebar("PROPOSALS");
         }
         if (linkedNode) {
@@ -1562,13 +1567,10 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [db]
   );
-  
-  const clearInitialProposal = useCallback(
-    () => {
-      nodeBookDispatch({ type: "setInitialProposal", payload: null });
-    },
-    [nodeBookDispatch]
-  );
+
+  const clearInitialProposal = useCallback(() => {
+    nodeBookDispatch({ type: "setInitialProposal", payload: null });
+  }, [nodeBookDispatch]);
 
   const initNodeStatusChange = useCallback(
     (nodeId: string, userNodeId: string) => {
@@ -2728,7 +2730,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
 
           const currentNode = oldNodes[String(nodeBookState.selectedNode)];
-          if(!currentNode) return;
+          if (!currentNode) return;
 
           const nodeTypes: INodeType[] = getNodeTypesFromNode(currentNode as any);
 
@@ -2741,10 +2743,8 @@ const Dashboard = ({}: DashboardProps) => {
           const userVersionsCommentsRefs: Query<DocumentData>[] = [];
 
           for (const nodeType of nodeTypes) {
-            const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections(
-              db,
-              nodeType
-            );
+            const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } =
+              getTypedCollections(db, nodeType);
 
             if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) continue;
 
@@ -2947,6 +2947,7 @@ const Dashboard = ({}: DashboardProps) => {
               editable: false,
               width: NODE_WIDTH,
               node: newNodeId,
+              simulated: true,
             };
             if (proposal.childType === "Question") {
               newChildNode.choices = proposal.choices;
@@ -3593,7 +3594,11 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? <MemoizedLivelinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} /> : <div />}
+          {showLivelinessBar ? (
+            <MemoizedLivelinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} />
+          ) : (
+            <div />
+          )}
 
           {focusView.isEnabled && (
             <MemoizedFocusedNotebook

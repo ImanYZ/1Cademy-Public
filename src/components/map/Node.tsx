@@ -952,7 +952,7 @@ const Node = ({
           </div>
         </div>
       )}
-      {openSidebar === "PROPOSALS" && !isNew && nodeBookState.selectedNode == identifier ? (
+      {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
         <>
           <Box
             sx={{
