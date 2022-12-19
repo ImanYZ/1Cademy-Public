@@ -1546,6 +1546,10 @@ const Dashboard = ({}: DashboardProps) => {
           []
         );
 
+        gtmEvent("Interaction", {
+          customType: "NodeOpen",
+        });
+
         let linkedNode = document.getElementById(linkedNodeID);
         if (typeOperation) {
           lastNodeOperation.current = "Searcher";
@@ -1651,6 +1655,10 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
+
+          gtmEvent("Interaction", {
+            customType: "NodeHide",
+          });
 
           createActionTrack(
             db,
@@ -1803,6 +1811,10 @@ const Dashboard = ({}: DashboardProps) => {
 
           setDoc(doc(userNodeLogRef), userNodeLogData);
 
+          gtmEvent("Interaction", {
+            customType: "NodeCollapse",
+          });
+
           createActionTrack(
             db,
             "NodeCollapse",
@@ -1870,6 +1882,10 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
+      gtmEvent("Interaction", {
+        customType: "NodeShare",
+      });
+
       createActionTrack(
         db,
         "NodeShare",
@@ -1951,6 +1967,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
 
           if (!thisNode.isStudied) {
+            gtmEvent("Interaction", {
+              customType: "NodeStudied",
+            });
+
             createActionTrack(
               db,
               "NodeStudied",
@@ -2021,6 +2041,10 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeLogData.closedHeight = thisNode.closedHeight;
           }
           setDoc(doc(userNodeLogRef), userNodeLogData);
+
+          gtmEvent("Interaction", {
+            customType: "NodeBookmark",
+          });
 
           createActionTrack(
             db,
@@ -2436,6 +2460,12 @@ const Dashboard = ({}: DashboardProps) => {
         gtmEvent("Propose", {
           customType: "improvement",
         });
+        gtmEvent("Interaction", {
+          customType: "improvement",
+        });
+        gtmEvent("Reputation", {
+          value: 1,
+        });
         const newNode = { ...graph.nodes[nodeBookState.selectedNode] };
         if (newNode.children.length > 0) {
           const newChildren = [];
@@ -2667,6 +2697,12 @@ const Dashboard = ({}: DashboardProps) => {
         if (referencesOK) {
           gtmEvent("Propose", {
             customType: "newChild",
+          });
+          gtmEvent("Interaction", {
+            customType: "newChild",
+          });
+          gtmEvent("Reputation", {
+            value: 1,
           });
           if (newNode.title !== "" && newNode.title !== "Replace this new node title!" && newNode.tags.length !== 0) {
             const postData: any = {
@@ -3171,19 +3207,46 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!nodeBookState.choosingNode) {
         const proposalsTemp = [...proposals];
+        let interactionValue = 0;
+        let voteType: string = "";
         if (correct) {
+          interactionValue += proposalsTemp[proposalIdx].correct ? -1 : 1;
+          if(!proposalsTemp[proposalIdx].correct) {
+            voteType = "Correct";
+          }
           proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 0;
           proposalsTemp[proposalIdx].wrong = false;
           proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 1;
           proposalsTemp[proposalIdx].correct = !proposalsTemp[proposalIdx].correct;
         } else if (wrong) {
+          if(!proposalsTemp[proposalIdx].wrong) {
+            voteType = "Wrong";
+          }
+          interactionValue += proposalsTemp[proposalIdx].wrong ? 1 : -1;
           proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 0;
           proposalsTemp[proposalIdx].correct = false;
           proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 1;
           proposalsTemp[proposalIdx].wrong = !proposalsTemp[proposalIdx].wrong;
         } else if (award) {
+          if(!proposalsTemp[proposalIdx].award) {
+            voteType = "Award";
+          }
+          interactionValue += proposalsTemp[proposalIdx].award ? -1 : 1;
           proposalsTemp[proposalIdx].awards += proposalsTemp[proposalIdx].award ? -1 : 1;
           proposalsTemp[proposalIdx].award = !proposalsTemp[proposalIdx].award;
+        }
+
+        if(voteType) {
+          gtmEvent("Interaction", {
+            customType: "RateVersion",
+            subType: voteType,
+          });
+        }
+
+        if(interactionValue) {
+          gtmEvent("Reputation", {
+            value: interactionValue,
+          });
         }
 
         const postData = {
