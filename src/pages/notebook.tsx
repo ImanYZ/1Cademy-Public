@@ -49,6 +49,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
+import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/ReputationBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -177,7 +178,10 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
-  const [showLivelinessBar, setShowLivelinessBar] = useState<boolean>(false);
+  const [showLivelinessBar, setShowLivelinessBar] = useState<any>({
+    enabled: false,
+    type: "",
+  });
 
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -300,8 +304,10 @@ const Dashboard = ({}: DashboardProps) => {
     const _window: any = window;
     const internalId = setInterval(() => {
       if (_window.google_optimize !== undefined) {
-        setShowLivelinessBar(!!_window.livelinessBar || ["1man"].includes(String(user?.uname)));
-        clearInterval(internalId);
+        if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
+          setShowLivelinessBar({ ..._window.livelinessBar });
+          clearInterval(internalId);
+        }
       }
     }, 500);
   }, [user?.uname]);
@@ -3594,10 +3600,22 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar ? (
-            <MemoizedLivelinessBar openUserInfoSidebar={openUserInfoSidebar} onlineUsers={onlineUsers} db={db} />
-          ) : (
-            <div />
+          {showLivelinessBar.enabled && showLivelinessBar.type === "full" && (
+            <MemoizedLivelinessBar
+              authUser={user}
+              openUserInfoSidebar={openUserInfoSidebar}
+              onlineUsers={onlineUsers}
+              db={db}
+            />
+          )}
+
+          {showLivelinessBar.enabled && showLivelinessBar.type === "minimal" && (
+            <MemoizedReputationlinessBar
+              authUser={user}
+              openUserInfoSidebar={openUserInfoSidebar}
+              onlineUsers={onlineUsers}
+              db={db}
+            />
           )}
 
           {focusView.isEnabled && (
