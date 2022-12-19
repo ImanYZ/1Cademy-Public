@@ -82,6 +82,9 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           //await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
 
           //Showing profile picture on frontend
+          alert(
+            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
+          );
           let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
           if (isValidHttpUrl(bucket)) {
             const { hostname } = new URL(bucket);

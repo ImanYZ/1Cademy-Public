@@ -180,7 +180,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
   const [showLivelinessBar, setShowLivelinessBar] = useState<{
     enabled: boolean;
-    type: "minimal" | "full"
+    type: "minimal" | "full";
   }>({
     enabled: false,
     type: "minimal",
@@ -309,7 +309,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (_window.google_optimize !== undefined) {
         if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
           setShowLivelinessBar({ ..._window.livelinessBar });
-        } else if(user?.uname === "1man") {
+        } else if (user?.uname === "1man") {
           setShowLivelinessBar({
             enabled: true,
             type: "full",
@@ -3097,7 +3097,9 @@ const Dashboard = ({}: DashboardProps) => {
           } else {
             setIsSubmitting(true);
             setIsUploading(true);
-
+            alert(
+              "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
+            );
             let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
             if (isValidHttpUrl(bucket)) {
               const { hostname } = new URL(bucket);
