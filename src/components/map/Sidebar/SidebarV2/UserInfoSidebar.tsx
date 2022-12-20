@@ -255,6 +255,16 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         ];
   }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme, username]);
 
+  const totalPoints = useMemo(() => {
+    if (!sUserObj) return 0;
+    const positives = ["cnCorrects", "mCorrects", "qCorrects", "iCorrects", "cdCorrects", "rfCorrects"];
+    const negatives = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+    const total =
+      positives.reduce((carry, pve) => carry + (sUserObj[pve] || 0), 0) -
+      negatives.reduce((carry, nve) => carry + (sUserObj[nve] || 0), 0);
+    return shortenNumber(total, 2, false);
+  }, [sUserObj]);
+
   const contentSignalState = useMemo(() => {
     return { updated: true };
   }, [isRetrieving, tabsItems, value]);
@@ -307,7 +317,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                   </Box>
                   <Box sx={{ display: "flex", gap: "8px" }}>
                     <DoneIcon className="material-icons DoneIcon green-text" />
-                    <span>{shortenNumber(sUserObj.totalPoints, 2, false)}</span>
+                    <span>{totalPoints}</span>
                   </Box>
                 </Box>
               )}
@@ -319,37 +329,37 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 <div className="MiniUserProfilePoints">
                   <LocalLibraryIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.cnCorrects || 0 - sUserObj.cnWrongs || 0, 2, false)}
+                    {shortenNumber((sUserObj.cnCorrects || 0) - (sUserObj.cnWrongs || 0), 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
                   <ShareIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.mCorrects || 0 - sUserObj.mWrongs || 0, 2, false)}
+                    {shortenNumber((sUserObj.mCorrects || 0) - (sUserObj.mWrongs || 0), 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
                   <HelpOutlineIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.qCorrects || 0 - sUserObj.qWrongs || 0, 2, false)}
+                    {shortenNumber((sUserObj.qCorrects || 0) - (sUserObj.qWrongs || 0), 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
                   <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
                   <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.iCorrects || 0 - sUserObj.iWrongs || 0, 2, false)}
+                    {shortenNumber(sUserObj.iCorrects || 0 - (sUserObj.iWrongs || 0), 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
                   <CodeIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.cdCorrects || 0 - sUserObj.cdWrongs || 0, 2, false)}
+                    {shortenNumber(sUserObj.cdCorrects || 0 - (sUserObj.cdWrongs || 0), 2, false)}
                   </span>
                 </div>
                 <div className="MiniUserProfilePoints">
                   <MenuBookIcon className="material-icons amber-text" />
                   <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.rfCorrects || 0 - sUserObj.rfWrongs || 0, 2, false)}
+                    {shortenNumber((sUserObj.rfCorrects || 0) - (sUserObj.rfWrongs || 0), 2, false)}
                   </span>
                 </div>
               </>
