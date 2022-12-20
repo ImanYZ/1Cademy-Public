@@ -50,6 +50,7 @@ type NodeListProps = {
   scrollToNode: any;
   openSidebar: OpenSidebar;
   setOperation: (operation: string) => void;
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 const NodesList = ({
@@ -95,6 +96,7 @@ const NodesList = ({
   scrollToNode,
   openSidebar,
   setOperation,
+  openUserInfoSidebar,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -232,6 +234,7 @@ const NodesList = ({
             setOperation={setOperation}
             contributors={nodes[nId].contributors}
             institutions={nodes[nId].institutions}
+            openUserInfoSidebar={openUserInfoSidebar}
           />
         );
       })}

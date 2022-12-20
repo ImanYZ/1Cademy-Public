@@ -3775,6 +3775,7 @@ const Dashboard = ({}: DashboardProps) => {
                   scrollToNode={scrollToNode}
                   openSidebar={openSidebar}
                   setOperation={setOperation}
+                  openUserInfoSidebar={openUserInfoSidebar}
                 />
               </MapInteractionCSS>
               {showRegion && (
