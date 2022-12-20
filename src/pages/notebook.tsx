@@ -3211,7 +3211,7 @@ const Dashboard = ({}: DashboardProps) => {
         let voteType: string = "";
         if (correct) {
           interactionValue += proposalsTemp[proposalIdx].correct ? -1 : 1;
-          if(!proposalsTemp[proposalIdx].correct) {
+          if (!proposalsTemp[proposalIdx].correct) {
             voteType = "Correct";
           }
           proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 0;
@@ -3219,7 +3219,7 @@ const Dashboard = ({}: DashboardProps) => {
           proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 1;
           proposalsTemp[proposalIdx].correct = !proposalsTemp[proposalIdx].correct;
         } else if (wrong) {
-          if(!proposalsTemp[proposalIdx].wrong) {
+          if (!proposalsTemp[proposalIdx].wrong) {
             voteType = "Wrong";
           }
           interactionValue += proposalsTemp[proposalIdx].wrong ? 1 : -1;
@@ -3228,7 +3228,7 @@ const Dashboard = ({}: DashboardProps) => {
           proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 1;
           proposalsTemp[proposalIdx].wrong = !proposalsTemp[proposalIdx].wrong;
         } else if (award) {
-          if(!proposalsTemp[proposalIdx].award) {
+          if (!proposalsTemp[proposalIdx].award) {
             voteType = "Award";
           }
           interactionValue += proposalsTemp[proposalIdx].award ? -1 : 1;
@@ -3236,14 +3236,14 @@ const Dashboard = ({}: DashboardProps) => {
           proposalsTemp[proposalIdx].award = !proposalsTemp[proposalIdx].award;
         }
 
-        if(voteType) {
+        if (voteType) {
           gtmEvent("Interaction", {
             customType: "RateVersion",
             subType: voteType,
           });
         }
 
-        if(interactionValue) {
+        if (interactionValue) {
           gtmEvent("Reputation", {
             value: interactionValue,
           });
@@ -3770,6 +3770,7 @@ const Dashboard = ({}: DashboardProps) => {
                   scrollToNode={scrollToNode}
                   openSidebar={openSidebar}
                   setOperation={setOperation}
+                  openUserInfoSidebar={openUserInfoSidebar}
                 />
               </MapInteractionCSS>
               {showRegion && (

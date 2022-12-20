@@ -26,7 +26,7 @@ import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { addDoc, collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -103,6 +103,7 @@ type NodeFooterProps = {
   openSidebar: any;
   contributors: any;
   institutions: any;
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 const NodeFooter = ({
@@ -160,6 +161,7 @@ const NodeFooter = ({
   openSidebar,
   contributors,
   institutions,
+  openUserInfoSidebar,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -276,33 +278,15 @@ const NodeFooter = ({
 
   const openUserInfo = useCallback(
     (idx: any) => {
-      if (!user) return;
-      const userUserInfoCollection = collection(db, "userUserInfoLog");
       const contributor = Object.keys(contributors)[idx];
-      nodeBookDispatch({
-        type: "setSelectedUser",
-        payload: {
-          username: contributor,
-          imageUrl: contributors[contributor].imageUrl,
-          fullName: contributors[contributor].fullname,
-          chooseUname: contributors[contributor].chooseUname,
-        },
-      });
-
-      nodeBookDispatch({
-        type: "setSelectionType",
-        payload: "UserInfo",
-      });
-
-      setOpenSideBar("USER_INFO");
-      reloadPermanentGrpah();
-      addDoc(userUserInfoCollection, {
-        uname: user.uname,
-        uInfo: contributor,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
+      openUserInfoSidebar(
+        contributor,
+        contributors[contributor].imageUrl,
+        contributors[contributor].fullname,
+        contributors[contributor].chooseUname
+      );
     },
-    [db, nodeBookDispatch, user]
+    [openUserInfoSidebar]
   );
 
   const fetchInstitutionLogo = useCallback(

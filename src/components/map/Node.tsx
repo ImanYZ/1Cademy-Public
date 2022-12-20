@@ -121,6 +121,7 @@ type NodeProps = {
   setOperation: (operation: string) => void;
   contributors: any;
   institutions: any;
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -221,6 +222,7 @@ const Node = ({
   setOperation,
   contributors,
   institutions,
+  openUserInfoSidebar,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -808,6 +810,7 @@ const Node = ({
                 openSidebar={openSidebar}
                 contributors={contributors}
                 institutions={institutions}
+                openUserInfoSidebar={openUserInfoSidebar}
               />
             </div>
           </div>
@@ -956,6 +959,7 @@ const Node = ({
                 openSidebar={openSidebar}
                 contributors={contributors}
                 institutions={institutions}
+                openUserInfoSidebar={openUserInfoSidebar}
               />
             </div>
           </div>
