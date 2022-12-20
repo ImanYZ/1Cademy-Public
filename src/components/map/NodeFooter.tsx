@@ -26,8 +26,9 @@ import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { addDoc, collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { OpenSidebar } from "@/pages/notebook";
@@ -36,6 +37,7 @@ import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { FullNodeData, OpenPart } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
+import { MemoizedHeadlessLeaderboardChip } from "../map/FocusedNotebook/HeadlessLeaderboardChip";
 import NodeTypeIcon from "../NodeTypeIcon";
 import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -160,6 +162,7 @@ const NodeFooter = ({
   institutions,
 }: NodeFooterProps) => {
   const router = useRouter();
+  const db = getFirestore();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -168,6 +171,9 @@ const NodeFooter = ({
   const inputEl = useRef<HTMLInputElement>(null);
   const [openMenu, setOpenMenu] = useState(false);
   const [openSocialMenu, setOpenSocialMenu] = useState(false);
+  const [institutionLogos, setInstitutionLogos] = useState<{
+    [institutionName: string]: string;
+  }>({});
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -268,44 +274,105 @@ const NodeFooter = ({
     [selectNode]
   );
 
-  const renderContributors = () => {
+  const openUserInfo = useCallback(
+    (idx: any) => {
+      if (!user) return;
+      const userUserInfoCollection = collection(db, "userUserInfoLog");
+      const contributor = Object.keys(contributors)[idx];
+      nodeBookDispatch({
+        type: "setSelectedUser",
+        payload: {
+          username: contributor,
+          imageUrl: contributors[contributor].imageUrl,
+          fullName: contributors[contributor].fullname,
+          chooseUname: contributors[contributor].chooseUname,
+        },
+      });
+
+      nodeBookDispatch({
+        type: "setSelectionType",
+        payload: "UserInfo",
+      });
+
+      setOpenSideBar("USER_INFO");
+      reloadPermanentGrpah();
+      addDoc(userUserInfoCollection, {
+        uname: user.uname,
+        uInfo: contributor,
+        createdAt: Timestamp.fromDate(new Date()),
+      });
+    },
+    [db, nodeBookDispatch, user]
+  );
+
+  const fetchInstitutionLogo = useCallback(
+    async (institutionName: string) => {
+      const institutionsQuery = query(collection(db, "institutions"), where("name", "==", institutionName));
+
+      const institutionsDocs = await getDocs(institutionsQuery);
+
+      for (let institutionDoc of institutionsDocs.docs) {
+        const institutionData = institutionDoc.data();
+        return institutionData.logoURL;
+      }
+    },
+    [db]
+  );
+
+  const _institutions = useMemo(() => {
+    return Object.keys(institutions || {}).map((name: string) => {
+      if (!institutionLogos.hasOwnProperty(name)) {
+        fetchInstitutionLogo(name).then(logoUrl => {
+          setInstitutionLogos({
+            ...institutionLogos,
+            [name]: logoUrl,
+          });
+        });
+      }
+      return {
+        name,
+        ...institutions[name],
+        logoURL: institutionLogos[name],
+      };
+    });
+  }, [institutions, institutionLogos]);
+
+  const renderContributors = useCallback(() => {
     if (contributors) {
       return Object.keys(contributors).map((el: any, idx: any) => (
         <Grid item key={idx}>
           <LeaderboardChip
             key={idx}
             name={contributors[el].chooseUname ? contributors[el].username : contributors[el].fullname}
-            uname={el}
-            fullname={contributors[el].fullname}
-            chooseUname={contributors[el].chooseUname}
             imageUrl={contributors[el].imageUrl}
             reputation={contributors[el].reputation || 0}
             isChamp={idx === 0}
-            reloadPermanentGrpah={reloadPermanentGrpah}
-            setOpenSideBar={setOpenSideBar}
+            href=""
+            openUserInfo={() => openUserInfo(idx)}
           />
         </Grid>
       ));
     } else {
       return <></>;
     }
-  };
-  const renderInstitutions = () => {
-    return Object.keys(institutions).map((el, idx) => (
+  }, [contributors]);
+
+  const renderInstitutions = useCallback(() => {
+    return _institutions.map((el: any, idx: number) => (
       <Grid item key={idx}>
-        <LeaderboardChip
+        <MemoizedHeadlessLeaderboardChip
           key={idx}
-          name={institutions[el].name}
-          imageUrl={institutions[el].logoURL}
-          reputation={institutions[el].reputation || 0}
+          name={el.name}
+          imageUrl={el.logoURL}
+          reputation={el.reputation || 0}
           isChamp={idx === 0}
           renderAsAvatar={false}
-          href={`institutions=${institutions[el].id}`}
         />
       </Grid>
     ));
-  };
-  const openContributorsSection = () => {
+  }, [_institutions]);
+
+  const openContributorsSection = useCallback(() => {
     if (nodeBookState.contributorsNodeId != identifier) {
       nodeBookDispatch({
         type: "setContributorsNodeId",
@@ -317,7 +384,7 @@ const NodeFooter = ({
         payload: { nodeId: identifier, showContributors: !nodeBookState.showContributors },
       });
     }
-  };
+  }, [nodeBookDispatch, nodeBookState.contributorsNodeId]);
 
   return (
     <>
