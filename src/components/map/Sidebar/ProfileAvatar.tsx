@@ -14,8 +14,13 @@ import PercentageLoader from "../PercentageLoader";
 // import { firebaseState, imageUrlState, uidState } from "../../../../store/AuthAtoms";
 // import PercentageLoader from "../../../PublicComps/PercentageLoader/PercentageLoader";
 // import MetaButton from "../../MetaButton/MetaButton";
-type ProfileAvatarType = { userId: string; userImage?: string; setUserImage: (newImage: string) => void };
-const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) => {
+type ProfileAvatarType = {
+  userId: string;
+  userImage?: string;
+  setUserImage: (newImage: string) => void;
+  userFullName: string;
+};
+const ProfileAvatar = ({ userId, userImage, setUserImage, userFullName }: ProfileAvatarType) => {
   // const firebase = useRecoilValue(firebaseState);
   // const uid = useRecoilValue(uidState);
   // const [imageUrl, setImageUrl] = useRecoilState(imageUrlState);
@@ -64,6 +69,13 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
         } else if (image.size > 1024 * 1024) {
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
         } else {
+          let fullName = prompt(
+            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
+          );
+          if (fullName != userFullName) {
+            alert("Entered full name is not correct");
+            return;
+          }
           setIsUploading(true);
           // Uploading image by calling this API
           // const formData = {
@@ -82,9 +94,6 @@ const ProfileAvatar = ({ userId, userImage, setUserImage }: ProfileAvatarType) =
           //await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
 
           //Showing profile picture on frontend
-          alert(
-            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
-          );
           let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
           if (isValidHttpUrl(bucket)) {
             const { hostname } = new URL(bucket);
