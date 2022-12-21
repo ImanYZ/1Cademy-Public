@@ -888,7 +888,12 @@ const UserSettigsSidebar = ({
         }}
       >
         <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-          <ProfileAvatar userId={user.userId} userImage={user.imageUrl} setUserImage={setUserImage} />
+          <ProfileAvatar
+            userId={user.userId}
+            userImage={user.imageUrl}
+            setUserImage={setUserImage}
+            userFullName={`${user?.fName} ${user?.lName}`}
+          />
 
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
             <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
