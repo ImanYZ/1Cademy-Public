@@ -215,7 +215,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: req.body.nodeId,
         nodeData,
         nodeRef,
-        nodeType: req.body.nodeType,
+        nodeType: nodeType,
         versionId: req.body.versionId,
         versionData,
         newVersion: false,
