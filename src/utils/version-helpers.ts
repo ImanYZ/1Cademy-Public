@@ -815,6 +815,12 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
             tagUpdates.updatedAt = currentTimestamp;
           }
         }
+
+        // when nothing needs to be done
+        if (Object.keys(tagUpdates).length === 0) {
+          return;
+        }
+
         if (t) {
           tWriteOperations.push({
             objRef: tagRef,
