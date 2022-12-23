@@ -314,6 +314,11 @@ const Dashboard = ({}: DashboardProps) => {
             enabled: true,
             type: "full",
           });
+        } else {
+          setShowLivelinessBar({
+            enabled: true,
+            type: "minimal",
+          });
         }
         clearInterval(internalId);
       }
