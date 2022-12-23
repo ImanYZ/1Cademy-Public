@@ -151,7 +151,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
   }, []);
 
   const unames = useMemo(() => {
-    return Object.keys(usersInteractions);
+    return Object.keys(usersInteractions); //.filter((uname) => usersInteractions[uname].count > 0);
   }, [usersInteractions]);
 
   const minActions: number = useMemo(() => {
