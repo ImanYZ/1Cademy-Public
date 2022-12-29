@@ -41,15 +41,18 @@ const variantMapping = {
 };
 
 function Typography(props: any) {
-  const { children, variant, classes, marked = "none", ...other } = props;
+  const { children, variant, marked = "none", ...other } = props;
 
   let markedClassName = "";
-  if (variant && variant in markStyleMapping[marked] && classes) {
-    markedClassName = classes[markStyleMapping[marked][variant]];
+  // if (variant && variant in markStyleMapping[marked] && classes) {
+  //   markedClassName = classes[markStyleMapping[marked][variant]];
+  // }
+  if (variant && marked) {
+    markedClassName = markStyleMapping[marked][variant];
   }
 
   return (
-    <StyledTypography variantMapping={variantMapping} variant={variant} {...other}>
+    <StyledTypography variantMapping={variantMapping} variant={variant} marked={marked} {...other}>
       {children}
       {markedClassName ? <span className={markedClassName} /> : null}
     </StyledTypography>
