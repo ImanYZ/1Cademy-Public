@@ -1,0 +1,48 @@
+.hide-content {
+  animation-name: hideContent;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes hideContent {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.show-blurred-text {
+  animation-name: showBlurredText;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes showBlurredText {
+  0% {
+    letter-spacing: -0.5;
+    opacity: 0;
+    filter: blur(12px);
+    /* will-change: filter; */
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    /* will-change: filter; */
+  }
+}
+
+.slide-left-to-right {
+  animation-name: slideLeftToTight;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes slideLeftToTight {
+  0% {
+    opacity: 0;
+    transform: translateX(-100);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
