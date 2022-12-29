@@ -357,6 +357,7 @@ const Home = () => {
 
       // setSelectedSection(sectionIdx);
       if (sectionIdx === 0) {
+        setShowLandingOptions(true);
         setIdxRiveComponent(animationIndex);
       }
       if (sectionIdx === SECTION_WITH_ANIMATION) {
