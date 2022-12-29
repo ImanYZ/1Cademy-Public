@@ -5,7 +5,13 @@
 .rive-canvas {
   width: inherit;
   height: inherit;
-  border: solid 2px pink;
+  position: absolute;
+}
+
+.rive-canvas-hidden {
+  opacity: 0;
+  /* display: none; */
+  /* transition: 1s; */
 }
 
 /* --------------------------- embed animations */

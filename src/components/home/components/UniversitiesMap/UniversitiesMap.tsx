@@ -53,11 +53,9 @@ const UniversitiesMap = (props: any) => {
           Our Researchers Are From
         </Typography> */}
         <div id="googleMapDiv">
-          {institutions.length > 0 ? (
-            <Suspense fallback={<div></div>}>
-              <GoogleMapCom institutions={institutions} />
-            </Suspense>
-          ) : null}
+          <Suspense fallback={<div></div>}>
+            <GoogleMapCom institutions={institutions} />
+          </Suspense>
         </div>
       </div>
     </Box>
