@@ -65,15 +65,26 @@ const Values = () => {
                       sx={{ padding: "10px 37px 0px 37px" }}
                     />
                   </Box>
-                  <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
+                  <CardContent
+                    sx={{
+                      "&": {
+                        padding: "16px",
+                      },
+                    }}
+                  >
+                    <Typography
+                      gutterBottom
+                      variant="h5"
+                      component="div"
+                      sx={{ fontSize: "20px", textAlign: "center" }}
+                    >
                       {value.name}
                     </Typography>
-                    <Collapse in={!stepChecked[idx]} timeout={1000}>
+                    <Collapse in={!stepChecked[idx]} timeout={1000} sx={{ textAlign: "center" }}>
                       Learn more ...
                     </Collapse>
                     <Collapse in={stepChecked[idx]} timeout={1000}>
-                      <Typography variant="body2" sx={{ textAlign: "left", color: "#AAAAAA" }}>
+                      <Typography variant="body2" sx={{ textAlign: "left", color: "#AAAAAA", fontSize: "14px" }}>
                         {value.body}
                       </Typography>
                     </Collapse>
