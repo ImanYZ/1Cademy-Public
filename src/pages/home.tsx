@@ -583,7 +583,7 @@ const Home = () => {
               // href="#JoinUsSection"
               target="_blank"
               href="https://1cademy.us/#JoinUsSection"
-              sx={{ minWidth: 200, zIndex: 13 }}
+              sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
               className={showLandingOptions ? "show-blurred-text" : "hide-content"}
             >
               Apply to Join Us!
@@ -612,7 +612,7 @@ const Home = () => {
                     href="https://1cademy.us/#JoinUsSection"
                     // href="#JoinUsSection"
                     target="_blank"
-                    sx={{ minWidth: 200 }}
+                    sx={{ minWidth: 200, textTransform: "uppercase" }}
                     className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
                   >
                     Apply to Join Us!
