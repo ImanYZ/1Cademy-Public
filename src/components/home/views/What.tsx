@@ -1,15 +1,15 @@
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import Container from "@mui/material/Container";
+// import Container from "@mui/material/Container";
 import { styled } from "@mui/material/styles";
 import React from "react";
 
 import Typography from "../components/Typography";
-import { sectionsOrder } from "../sectionsOrder";
+// import { sectionsOrder } from "../sectionsOrder";
 import communities from "./communitiesOrder";
 
 // import sectionsOrder from "./sectionsOrder";
-const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "CommunitiesSection");
+// const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "CommunitiesSection");
 
 const ImageBackdrop = styled("div")(({ theme }) => ({
   position: "absolute",
@@ -65,10 +65,10 @@ const goToCommPage = (commId: string) => {
 
 const What = () => {
   return (
-    <Container id="CommunitiesSection" component="section" sx={{ pt: 10, pb: 4 }}>
-      <Typography variant="h4" marked="center" align="center" sx={{ mb: 7 }}>
+    <Box id="CommunitiesSection" component="section" sx={{ pt: 10, pb: 4 }}>
+      {/* <Typography variant="h4" marked="center" align="center" sx={{ mb: 7 }}>
         {sectionsOrder[sectionIdx].title}
-      </Typography>
+      </Typography> */}
       <Box sx={{ mt: 7, display: "flex", flexWrap: "wrap" }}>
         {communities.map(communi => (
           <ImageIconButton
@@ -112,7 +112,7 @@ const What = () => {
           </ImageIconButton>
         ))}
       </Box>
-    </Container>
+    </Box>
   );
 };
 

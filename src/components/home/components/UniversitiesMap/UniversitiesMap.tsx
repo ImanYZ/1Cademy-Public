@@ -1,10 +1,9 @@
 // import "./UniversitiesMap.css";
 
-import Container from "@mui/material/Container";
-import { collection, getDocs, getFirestore, query } from "firebase/firestore";
+import { Box } from "@mui/material";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import React, { Suspense, useEffect, useState } from "react";
 
-import Typography from "../Typography";
 // import { useRecoilValue } from "recoil";
 
 // import { firebaseOneState } from "../../../../../store/OneCademyAtoms";
@@ -21,27 +20,38 @@ const UniversitiesMap = (props: any) => {
     if (!db) return;
 
     const fetchInstitutions = async () => {
-      const userNodesRef = collection(db, "institutions");
-      const q = query(userNodesRef);
+      // const userNodesRef = collection(db, "institutions");
+      // const q = query(userNodesRef);
 
-      const institutionsCollection = await getDocs(q);
-      let institutionsDataList: any[] = [];
-      institutionsCollection.docs.map(institution => {
-        const institutionInfo = institution.data();
-        institutionsDataList.push(institutionInfo);
-      });
-      setInstitutions(institutionsDataList);
+      const institutionsCollection = collection(db, "institutions");
+      const q = query(institutionsCollection, where("hasLogo", "==", true));
+      const institutionsDataList = await getDocs(q);
+      const tt = institutionsDataList.docs.map(inst => inst.data());
+
+      // const institutionsCollection = await getDocs(q);
+      // let institutionsDataList: any[] = [];
+      // institutionsCollection.docs.map(institution => {
+      //   const institutionInfo = institution.data();
+      //   institutionsDataList.push(institutionInfo);
+      // });
+      setInstitutions(tt);
     };
 
     fetchInstitutions();
   }, [db]);
 
   return (
-    <Container id="SchoolsSection" component="section" sx={{ mt: 8, mb: 4 }}>
+    <Box id="SchoolsSection" component="section" sx={{ mt: 8, mb: 4, minHeight: 400 }}>
       <div className="UniversitiesAndColleges" ref={props.schoolsRef}>
-        <Typography variant="h4" marked="center" align="center" component="h2" sx={{ mb: 7 }}>
+        {/* <Typography
+          variant="h4"
+          marked="center"
+          align="center"
+          component="h2"
+          sx={{ mb: 7, color: "#f8f8f8" }}
+        >
           Our Researchers Are From
-        </Typography>
+        </Typography> */}
         <div id="googleMapDiv">
           {institutions.length > 0 ? (
             <Suspense fallback={<div></div>}>
@@ -50,7 +60,7 @@ const UniversitiesMap = (props: any) => {
           ) : null}
         </div>
       </div>
-    </Container>
+    </Box>
   );
 };
 

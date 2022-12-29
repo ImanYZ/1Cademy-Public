@@ -13,7 +13,7 @@ import { sectionsOrder } from "../sectionsOrder";
 
 // const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "HowItWorksSection");
 
-const HowItWorks = props => {
+const HowItWorks = (props: any) => {
   const { height, width } = useWindowSize();
 
   const boxLarge = useMemo(() => {
@@ -24,11 +24,11 @@ const HowItWorks = props => {
 
   const topCenteredPosition = height / 2 - boxLarge / 2 + 35;
 
-  const getHeightSection = () => props.artboards.reduce((a, c) => a + c.getHeight(height), 0);
+  const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.getHeight(height), 0);
 
   const processedArtboard = useMemo(
     () =>
-      props.artboards.reduce((acu, cur) => {
+      props.artboards.reduce((acu: any[], cur: any) => {
         const newHeight = cur.getHeight(height);
         return [
           ...acu,
@@ -57,7 +57,7 @@ const HowItWorks = props => {
           top: 0,
           width: "100%",
           height: height - 70,
-          // borderRight: `dashed 6px #ff28c9`,
+          borderRight: `dashed 6px #ff28c9`,
           color: "white",
         }}
       >
@@ -71,7 +71,7 @@ const HowItWorks = props => {
       >
         {sectionsOrder[1].title}
       </Typography>
-      {processedArtboard.map((artboard, idx) => (
+      {processedArtboard.map((artboard: any, idx: number) => (
         <Box
           key={artboard.name}
           sx={{
@@ -79,7 +79,7 @@ const HowItWorks = props => {
             top: artboard.top,
             width: "100%",
             height: artboard.height,
-            // borderRight: `dashed 6px ${artboard.color}`,
+            borderRight: `dashed 6px ${artboard.color}`,
             color: "white",
           }}
         >
