@@ -102,7 +102,7 @@ const AppAppBar = (props: any) => {
                     borderRadius: 40,
                   }}
                 >
-                  Apply!
+                  Apply
                 </Button>
               </Tooltip>
             )}

@@ -490,7 +490,7 @@ const Home = () => {
                 <Tooltip title="Apply to join 1Cademy">
                   <Button
                     variant="contained"
-                    // color="secondary"
+                    color="primary"
                     // onClick={joinUsClick}
                     target="_blank"
                     href="https://1cademy.us/#JoinUsSection"
@@ -500,6 +500,7 @@ const Home = () => {
                       // color: "common.white",
                       ml: 2.5,
                       borderRadius: 40,
+                      textTransform: "uppercase",
                     }}
                   >
                     Apply!
@@ -518,6 +519,10 @@ const Home = () => {
                     color: "common.white",
                     ml: 2.5,
                     borderRadius: 40,
+                    backgroundColor: theme => theme.palette.common.darkBackground1,
+                    "&:hover": {
+                      backgroundColor: theme => theme.palette.common.darkGrayBackground,
+                    },
                   }}
                 >
                   SIGN IN/UP
