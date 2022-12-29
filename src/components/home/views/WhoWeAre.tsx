@@ -1,6 +1,16 @@
 // import Avatar from "@mui/material/Avatar";
 // import Box from "@mui/material/Box";
-import { Avatar, Box, Grid, List, ListItemAvatar, ListItemButton, ListItemText, Paper } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Grid,
+  List,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Typography,
+} from "@mui/material";
 // import Divider from "@mui/material/Divider";
 // import Grid from "@mui/material/Grid";
 // import List from "@mui/material/List";
@@ -16,7 +26,6 @@ import UMLogo from "../../../../public/logo-school-of-information.png";
 import ImanYeckehZaarePicture from "../../../../public/static/Iman_YeckehZaare.jpg";
 import PaulResnikPicture from "../../../../public/static/Paul_Resnick.jpg";
 import { gray02, gray03 } from "../../../pages/home";
-import Typography from "../components/Typography";
 
 const WhoWeAre = () => {
   return (
@@ -43,7 +52,13 @@ const WhoWeAre = () => {
               variant="h5"
               component="div"
               align="center"
-              sx={{ pt: "19px", pb: "19px", borderBottom: `1px solid ${gray03}` }}
+              sx={{
+                pt: "19px",
+                pb: "19px",
+                borderBottom: `1px solid ${gray03}`,
+                fontSize: "20px",
+                textAlign: "center",
+              }}
             >
               Recently Published Papers
             </Typography>
@@ -165,6 +180,8 @@ const WhoWeAre = () => {
                 pt: "19px",
                 pb: "19px",
                 borderBottom: `1px solid ${gray03}`,
+                fontSize: "20px",
+                textAlign: "center",
               }}
             >
               2022 Published Papers
