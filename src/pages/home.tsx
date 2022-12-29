@@ -1,6 +1,7 @@
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { Box, Button, Grid, Skeleton, Stack, ThemeProvider, Tooltip, Typography, useMediaQuery } from "@mui/material";
 // const Values = React.lazy(() => import("./modules/views/Values"));
+
 const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true });
 const What = dynamic(() => import("../components/home/views/What"), { suspense: true });
 const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
