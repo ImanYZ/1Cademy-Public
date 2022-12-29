@@ -95,7 +95,7 @@ const HowItWorks = (props: any) => {
         </Box>
       ))}
 
-      <Box sx={{ position: "absolute", bottom: "40px", zIndex: 13 }}>{props.animationOptions}</Box>
+      <Box sx={{ position: "absolute", bottom: "40px", zIndex: 11 }}>{props.animationOptions}</Box>
 
       <div
         style={{
