@@ -21,10 +21,12 @@ import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 
 import backgroundImage from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
+import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
 // import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import { sectionsOrder } from "../components/home/sectionsOrder";
 import HowItWorks from "../components/home/views/HowItWorks";
+import { AppFooter } from "../components/PagesNavbar";
 // import { useAuth } from "../context/AuthContext";
 /**
  * animations builded with: https://rive.app/
@@ -72,12 +74,12 @@ const Home = () => {
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
   const [idxRiveComponent, setIdxRiveComponent] = useState(0);
-  // const isLargeDesktop = useMediaQuery("(min-width:1350px)");
+  const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMovil = useMediaQuery("(max-width:600px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
-  const [, /* animationSelected */ setSelectedAnimation] = useState(0);
+  const [animationSelected, setSelectedAnimation] = useState(0);
 
   // const [{ isAuthenticated }] = useAuth();
   const router = useRouter();
@@ -228,7 +230,7 @@ const Home = () => {
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
-        console.log({ sectionsHeight });
+        // console.log({ sectionsHeight });
         if (!sectionsHeight) return;
 
         const { min, idx: idxSection } = sectionsHeight.reduce(
@@ -383,11 +385,6 @@ const Home = () => {
     [getAnimationsHeight, getSectionHeights, rive3, rive4, rive5, rive6]
   );
 
-  const joinUsClick = (event: any) => {
-    event.preventDefault();
-    switchSection(sectionsOrder.length - 1);
-  };
-
   const signUpHandler = () => {
     router.push("/signin");
   };
@@ -493,7 +490,9 @@ const Home = () => {
                   <Button
                     variant="contained"
                     // color="secondary"
-                    onClick={joinUsClick}
+                    // onClick={joinUsClick}
+                    target="_blank"
+                    href="https://1cademy.us/#JoinUsSection"
                     size={isMovil ? "small" : "medium"}
                     sx={{
                       fontSize: 16,
@@ -528,7 +527,7 @@ const Home = () => {
         </Box>
 
         <Box sx={{ position: "relative" }}>
-          {/* <Box
+          <Box
             sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
           >
             <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
@@ -540,7 +539,7 @@ const Home = () => {
                 animationSelected={animationSelected}
               />
             </Box>
-          </Box> */}
+          </Box>
 
           <Stack
             ref={HomeSectionRef}
@@ -574,8 +573,10 @@ const Home = () => {
               variant="contained"
               size={width < 900 ? "small" : "large"}
               component="a"
-              href="#JoinUsSection"
-              sx={{ minWidth: 200 }}
+              // href="#JoinUsSection"
+              target="_blank"
+              href="https://1cademy.us/#JoinUsSection"
+              sx={{ minWidth: 200, zIndex: 13 }}
               className={showLandingOptions ? "show-blurred-text" : "hide-content"}
             >
               Apply to Join Us!
@@ -597,12 +598,14 @@ const Home = () => {
                 artboards={[...section1ArtBoards, ...artboards]}
                 animationOptions={
                   <Button
-                    color="secondary"
+                    // color="secondary"
                     variant="contained"
                     size={width < 900 ? "small" : "large"}
                     component="a"
-                    href="#JoinUsSection"
-                    sx={{ minWidth: 200, color: "common.white" }}
+                    href="https://1cademy.us/#JoinUsSection"
+                    // href="#JoinUsSection"
+                    target="_blank"
+                    sx={{ minWidth: 200 }}
                     className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
                   >
                     Apply to Join Us!
@@ -738,7 +741,7 @@ const Home = () => {
           </Box>
         </Box>
 
-        {/* <AppFooter /> */}
+        <AppFooter sx={{ background: "rgba(0,0,0,.72)" }} />
       </Box>
     </ThemeProvider>
   );

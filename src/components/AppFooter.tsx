@@ -1,5 +1,5 @@
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { Container, Divider, IconButton, Typography } from "@mui/material";
+import { Container, Divider, IconButton, SxProps, Theme, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import NextImage from "next/image";
@@ -11,7 +11,11 @@ import logoGoogleCloud from "../../public/logo-google-cloud.svg";
 import logoHonor from "../../public/logo-honor.svg";
 import logoSchoolOfInformation from "../../public/logo-school-of-information.svg";
 
-export default function AppFooter() {
+type AppFooterProps = {
+  sx?: SxProps<Theme>;
+};
+
+export default function AppFooter({ sx }: AppFooterProps) {
   return (
     <Box
       component="footer"
@@ -24,6 +28,7 @@ export default function AppFooter() {
         justifyContent: { xs: "center", md: "space-between" },
         color: theme => theme.palette.common.white,
         background: theme => theme.palette.common.darkGrayBackground,
+        ...sx,
       }}
     >
       <Container
