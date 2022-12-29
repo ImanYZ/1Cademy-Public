@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import darkModeLibraryImage from "../../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../../public/lightModeLibraryBackground.jpg";
 import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
-import logoHonor from "../../../public/logo-honor.svg";
+import logoHonor from "../../../public/logo-honor.png";
 import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
 // import { use1AcademyTheme } from "../../context/ThemeContext";
 import { AppBackground, AuthLayoutActions } from "../../knowledgeTypes";

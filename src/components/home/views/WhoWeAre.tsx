@@ -1,7 +1,6 @@
 // import Avatar from "@mui/material/Avatar";
 // import Box from "@mui/material/Box";
 import { Avatar, Box, Grid, List, ListItemAvatar, ListItemButton, ListItemText, Paper } from "@mui/material";
-import Image from "next/image";
 // import Divider from "@mui/material/Divider";
 // import Grid from "@mui/material/Grid";
 // import List from "@mui/material/List";
@@ -12,8 +11,8 @@ import Image from "next/image";
 import React from "react";
 
 import GoogleCloud from "../../../../public/logo-google-cloud.svg";
-import HonorEducation from "../../../../public/logo-honor.svg";
-import UMLogo from "../../../../public/logo-school-of-information.svg";
+import HonorEducation from "../../../../public/logo-honor.jpeg";
+import UMLogo from "../../../../public/logo-school-of-information.png";
 import ImanYeckehZaarePicture from "../../../../public/static/Iman_YeckehZaare.jpg";
 import PaulResnikPicture from "../../../../public/static/Paul_Resnick.jpg";
 import { gray02, gray03 } from "../../../pages/home";
@@ -328,11 +327,7 @@ const WhoWeAre = () => {
               </ListItemButton>
               <ListItemButton alignItems="flex-start" component="a" target="_blank" href="https://www.honor.education/">
                 <ListItemAvatar>
-                  <Avatar
-                    alt="Honor Education"
-                    src={HonorEducation.src}
-                    sx={{ width: 100, height: 100, mr: 2.5, objectFit: "cover" }}
-                  />
+                  <Avatar alt="Honor Education" src={HonorEducation.src} sx={{ width: 100, height: 100, mr: 2.5 }} />
                 </ListItemAvatar>
                 <ListItemText
                   primary="Supported by Honor Education"
@@ -353,13 +348,10 @@ const WhoWeAre = () => {
               </ListItemButton>
               <ListItemButton alignItems="flex-start" component="a" target="_blank" href="https://www.si.umich.edu/">
                 <ListItemAvatar>
-                  <Image
+                  <Avatar
                     alt="University of Michigan School of Information Logo"
                     src={UMLogo.src}
-                    width={100}
-                    height={100}
-                    objectFit={"cover"}
-                    style={{ borderRadius: "100%" }}
+                    sx={{ width: 100, height: 100, mr: 2.5 }}
                   />
                 </ListItemAvatar>
                 <ListItemText
@@ -386,7 +378,7 @@ const WhoWeAre = () => {
                 href="https://cloud.google.com/edu/researchers"
               >
                 <ListItemAvatar>
-                  <Image alt="Google Cloud Logo" src={GoogleCloud.src} width={100} height={100} objectFit={"contain"} />
+                  <Avatar alt="Google Cloud Logo" src={GoogleCloud.src} sx={{ width: 100, height: 100, mr: 2.5 }} />
                 </ListItemAvatar>
                 <ListItemText
                   primary="Supported by Google"

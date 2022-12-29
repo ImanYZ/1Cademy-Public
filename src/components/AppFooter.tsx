@@ -8,8 +8,8 @@ import logo1cademy from "../../public/1cademy.svg";
 import iconEmail from "../../public/icon-email.svg";
 import iconYoutube from "../../public/icon-youtube.svg";
 import logoGoogleCloud from "../../public/logo-google-cloud.svg";
-import logoHonor from "../../public/logo-honor.svg";
-import logoSchoolOfInformation from "../../public/logo-school-of-information.svg";
+import logoHonor from "../../public/logo-honor.jpeg";
+import logoSchoolOfInformation from "../../public/logo-school-of-information.png";
 
 type AppFooterProps = {
   sx?: SxProps<Theme>;
@@ -133,7 +133,7 @@ export default function AppFooter({ sx }: AppFooterProps) {
                 href="https://cloud.google.com/edu/researchers"
                 aria-label="Go to Google Cloud"
               >
-                <NextImage src={logoGoogleCloud} alt="Google Cloud" height={41} width={49} />
+                <NextImage src={logoGoogleCloud} alt="Google Cloud" height={50} width={57} />
               </Link>
             </Box>
           </Box>
