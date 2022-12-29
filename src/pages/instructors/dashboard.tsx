@@ -278,6 +278,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         "semesterStudentSankeys",
         semesterStudentSankeys.docs.map(std => std.data())
       );
+
       if (semesterStudentSankeys.docs.length) {
         let _sankeyData: any[] = [];
         for (const semesterStudentSankey of semesterStudentSankeys.docs) {

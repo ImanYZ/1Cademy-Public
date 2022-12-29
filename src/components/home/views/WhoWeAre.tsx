@@ -1,6 +1,7 @@
 // import Avatar from "@mui/material/Avatar";
 // import Box from "@mui/material/Box";
-import { Avatar, Box, Divider, Grid, List, ListItemAvatar, ListItemButton, ListItemText, Paper } from "@mui/material";
+import { Avatar, Box, Grid, List, ListItemAvatar, ListItemButton, ListItemText, Paper } from "@mui/material";
+import Image from "next/image";
 // import Divider from "@mui/material/Divider";
 // import Grid from "@mui/material/Grid";
 // import List from "@mui/material/List";
@@ -13,6 +14,8 @@ import React from "react";
 import GoogleCloud from "../../../../public/logo-google-cloud.svg";
 import HonorEducation from "../../../../public/logo-honor.svg";
 import UMLogo from "../../../../public/logo-school-of-information.svg";
+import ImanYeckehZaarePicture from "../../../../public/static/Iman_YeckehZaare.jpg";
+import PaulResnikPicture from "../../../../public/static/Paul_Resnick.jpg";
 import { gray02, gray03 } from "../../../pages/home";
 import Typography from "../components/Typography";
 
@@ -55,7 +58,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM ICER 2021"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., Fox, E., Grot, G., Chen, S., Walkosak, C., Kwon, K., ... &amp; Silverstein, N.
                       (2021, August). Incentivized Spacing and Gender in Computer Science Education. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -75,7 +78,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM CHI 2020"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       Yeckehzaare, I., Barghi, T., &amp; Resnick, P. (2020, April). QMaps: Engaging Students in
                       Voluntary Question Generation and Linking. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -95,7 +98,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM ICER 2019"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., Resnick, P., &amp; Ericson, B. (2019, July). A spaced, interleaved retrieval
                       practice tool that is motivating and effective. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -115,7 +118,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM SIGCSE 2019"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., &amp; Resnick, P. (2019, February). Speed and Studying: Gendered Pathways to
                       Success. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -139,7 +142,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="SPLICE 2019"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       Ericson, B. J., YeckehZaare, I., &amp; Guzdial, M. J. (2019). Runestone Interactive Ebooks: A
                       Research Platform for On-line Computer Science Learning. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -177,7 +180,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM SIGCSE 2023"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., Chen, S., & Barghi, T. (2023). Reducing Procrastination Without Sacrificing
                       Students' Autonomy Through Optional Weekly Presentations of Student-Generated Content. In{" "}
                       <br></br>
@@ -198,7 +201,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM SIGCSE 2022"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., Grot, G., &amp; Aronoff, C. (2022). Retrieval-based Teaching Incentivizes Spacing
                       and Improves Grades in Computer Science Education. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -218,7 +221,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="ACM SIGCSE 2022"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., Grot, G., Dimovski, I., Pollock, K., &amp; Fox, E. (2022). Another Victim of
                       COVID-19: Computer Science Education. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -238,7 +241,7 @@ const WhoWeAre = () => {
                 <ListItemText
                   primary="Accepted by ACM LAK 2022"
                   secondary={
-                    <Typography variant="body2" sx={{ color: gray03 }}>
+                    <Typography variant="body2" sx={{ color: gray03, fontSize: "14px" }}>
                       YeckehZaare, I., Mulligan, V., Ramstad, G. V., &amp; Resnick, P. (2022). Semester-level Spacing
                       but Not Procrastination Affected Student Exam Performance. In{" "}
                       <Box component="span" sx={{ fontStyle: "italic" }}>
@@ -259,12 +262,12 @@ const WhoWeAre = () => {
                 alignItems="flex-start"
                 component="a"
                 target="_blank"
-                href="https://www.si.umich.edu/people/iman-yeckehzaare"
+                href="https://www.si.umichA.edu/people/iman-yeckehzaare"
               >
                 <ListItemAvatar>
                   <Avatar
                     alt="Iman YeckehZaare Picture"
-                    src="/static/Iman_YeckehZaare.jpg"
+                    src={ImanYeckehZaarePicture.src}
                     sx={{ width: 100, height: 130, mr: 2.5 }}
                   />
                 </ListItemAvatar>
@@ -273,14 +276,14 @@ const WhoWeAre = () => {
                   secondary={
                     <React.Fragment>
                       <Typography
-                        sx={{ display: "inline", color: "#f8f8f8" }}
+                        sx={{ display: "inline", color: "#f8f8f8", fontSize: "14px" }}
                         component="span"
                         variant="body2"
                         color="text.primary"
                       >
                         Iman YeckehZaare
                       </Typography>
-                      <Box sx={{ color: gray03 }}>
+                      <Box sx={{ color: gray03, fontSize: "14px" }}>
                         {
                           "Ph.D. Candidate, Awarded as the Best Graduate Student Instructor of the Year 2018-2019 at the University of Michigan, School of Information"
                         }
@@ -289,7 +292,6 @@ const WhoWeAre = () => {
                   }
                 />
               </ListItemButton>
-              <Divider variant="inset" component="li" />
               <ListItemButton
                 alignItems="flex-start"
                 component="a"
@@ -299,7 +301,7 @@ const WhoWeAre = () => {
                 <ListItemAvatar>
                   <Avatar
                     alt="Paul Resnick Picture"
-                    src="/static/Paul_Resnick.jpg"
+                    src={PaulResnikPicture.src}
                     sx={{ width: 100, height: 130, mr: 2.5 }}
                   />
                 </ListItemAvatar>
@@ -308,14 +310,14 @@ const WhoWeAre = () => {
                   secondary={
                     <React.Fragment>
                       <Typography
-                        sx={{ display: "inline", color: "#f8f8f8" }}
+                        sx={{ display: "inline", color: "#f8f8f8", fontSize: "14px" }}
                         component="span"
                         variant="body2"
                         // color="text.primary"
                       >
                         Paul Resnick
                       </Typography>
-                      <Box sx={{ color: gray03 }}>
+                      <Box sx={{ color: gray03, fontSize: "14px" }}>
                         {
                           "Michael D. Cohen Collegiate Professor of Information, Associate Dean for Research and Faculty Affairs and Professor of Information, University of Michigan, School of Information"
                         }
@@ -324,17 +326,20 @@ const WhoWeAre = () => {
                   }
                 />
               </ListItemButton>
-              <Divider variant="inset" component="li" />
               <ListItemButton alignItems="flex-start" component="a" target="_blank" href="https://www.honor.education/">
                 <ListItemAvatar>
-                  <Avatar alt="Honor Education" src={HonorEducation} sx={{ width: 100, height: 100, mr: 2.5 }} />
+                  <Avatar
+                    alt="Honor Education"
+                    src={HonorEducation.src}
+                    sx={{ width: 100, height: 100, mr: 2.5, objectFit: "cover" }}
+                  />
                 </ListItemAvatar>
                 <ListItemText
                   primary="Supported by Honor Education"
                   secondary={
                     <React.Fragment>
                       <Typography
-                        sx={{ display: "inline" }}
+                        sx={{ display: "inline", fontSize: "14px" }}
                         component="span"
                         variant="body2"
                         // color="text.primary"
@@ -346,13 +351,15 @@ const WhoWeAre = () => {
                   }
                 />
               </ListItemButton>
-              <Divider variant="inset" component="li" />
               <ListItemButton alignItems="flex-start" component="a" target="_blank" href="https://www.si.umich.edu/">
                 <ListItemAvatar>
-                  <Avatar
+                  <Image
                     alt="University of Michigan School of Information Logo"
-                    src={UMLogo}
-                    sx={{ width: 100, height: 100, mr: 2.5 }}
+                    src={UMLogo.src}
+                    width={100}
+                    height={100}
+                    objectFit={"cover"}
+                    style={{ borderRadius: "100%" }}
                   />
                 </ListItemAvatar>
                 <ListItemText
@@ -360,7 +367,7 @@ const WhoWeAre = () => {
                   secondary={
                     <React.Fragment>
                       <Typography
-                        sx={{ display: "inline" }}
+                        sx={{ display: "inline", fontSize: "14px" }}
                         component="span"
                         variant="body2"
                         // color="text.primary"
@@ -372,7 +379,6 @@ const WhoWeAre = () => {
                   }
                 />
               </ListItemButton>
-              <Divider variant="inset" component="li" />
               <ListItemButton
                 alignItems="flex-start"
                 component="a"
@@ -380,14 +386,14 @@ const WhoWeAre = () => {
                 href="https://cloud.google.com/edu/researchers"
               >
                 <ListItemAvatar>
-                  <Avatar alt="Google Cloud Logo" src={GoogleCloud} sx={{ width: 100, height: 100, mr: 2.5 }} />
+                  <Image alt="Google Cloud Logo" src={GoogleCloud.src} width={100} height={100} objectFit={"contain"} />
                 </ListItemAvatar>
                 <ListItemText
                   primary="Supported by Google"
                   secondary={
                     <React.Fragment>
                       <Typography
-                        sx={{ display: "inline" }}
+                        sx={{ display: "inline", fontSize: "14px" }}
                         component="span"
                         variant="body2"
                         // color="text.primary"
@@ -395,7 +401,7 @@ const WhoWeAre = () => {
                       >
                         Google Cloud
                       </Typography>
-                      <Box sx={{ color: gray03 }}>
+                      <Box sx={{ color: gray03, fontSize: "14px" }}>
                         {"awarded research credits to host 1Cademy on GCP services, under award number 205607640."}
                       </Box>
                     </React.Fragment>
