@@ -651,7 +651,7 @@ const Home = () => {
             </Box>
 
             <Box id={sectionsOrder[3].id} ref={whatSectionRef}>
-              <CustomTypography variant="h4" marked="center" sx={{ mb: 7, color: "#f8f8f8" }}>
+              <CustomTypography variant="h4" marked="center" align="center" sx={{ mb: 7, color: "#f8f8f8" }}>
                 {sectionsOrder[3].title}
               </CustomTypography>
               {!whatInViewOnce ? (
