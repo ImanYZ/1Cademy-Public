@@ -45,7 +45,7 @@ const artboards = [
   { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
   { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
   { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 5 * vh, color: "#e6f336" },
-  { name: "Improving", durationMs: 11000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
+  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
 ];
 
 export const SECTION_WITH_ANIMATION = 1;
@@ -67,7 +67,6 @@ const sectionsTmp = [
   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
-  { id: "JoinUsSection", title: "Apply to Join Us!", simpleTitle: "Apply", children: [] },
 ];
 
 const Home = () => {
