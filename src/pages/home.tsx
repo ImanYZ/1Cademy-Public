@@ -2,12 +2,13 @@ import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrow
 import { Box, Button, Grid, Skeleton, Stack, ThemeProvider, Tooltip, Typography, useMediaQuery } from "@mui/material";
 // const Values = React.lazy(() => import("./modules/views/Values"));
 
-const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true });
-const What = dynamic(() => import("../components/home/views/What"), { suspense: true });
+const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
+const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
 const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
   suspense: true,
+  ssr: false,
 });
-const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true });
+const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -80,6 +81,7 @@ const Home = () => {
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
+  // const [isSSR,setIsSSR]
 
   // const [{ isAuthenticated }] = useAuth();
   const router = useRouter();
@@ -90,7 +92,7 @@ const Home = () => {
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
   // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
 
-  const { height, width } = useWindowSize();
+  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -629,7 +631,7 @@ const Home = () => {
               </HowItWorks>
             </Box>
 
-            <Box id={sectionsOrder[2].id} ref={whySectionRef}>
+            <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ border: "solid 2px royalBlue" }}>
               <CustomTypography
                 component={"h2"}
                 variant="h1"
@@ -639,7 +641,7 @@ const Home = () => {
               >
                 {sectionsOrder[2].title}
               </CustomTypography>
-              {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
+              {!whyInViewOnce && <div style={{ height: 2 * height, background: "red" }}></div>}
               {whyInViewOnce && (
                 <Suspense
                   fallback={
@@ -673,7 +675,7 @@ const Home = () => {
                 {sectionsOrder[3].title}
               </CustomTypography>
               {!whatInViewOnce ? (
-                <div style={{ height: 2 * height /*  background: "yellow" */ }}></div>
+                <div style={{ height: 2 * height, background: "yellow" }}></div>
               ) : (
                 <Suspense
                   fallback={
@@ -707,7 +709,7 @@ const Home = () => {
                 {sectionsOrder[4].title}
               </CustomTypography>
               {!whereInViewOnce ? (
-                <div style={{ height: 2 * height /* background: "green" */ }}></div>
+                <div style={{ height: 2 * height, background: "green" }}></div>
               ) : (
                 <Suspense
                   fallback={
@@ -730,7 +732,7 @@ const Home = () => {
                 {sectionsOrder[5].title}
               </CustomTypography>
               {!whoInViewOnce ? (
-                <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+                <div style={{ height: 2 * height, background: "pink" }}></div>
               ) : (
                 <Suspense
                   fallback={
@@ -762,12 +764,6 @@ const Home = () => {
                 </Suspense>
               )}
             </Box>
-
-            {/* <Box id={sectionsOrder[6].id} ref={JoinSectionRef}>
-              <CustomTypography variant="h4" marked="center" align="center" sx={{ mb: 7, color: "#f8f8f8" }}>
-                {sectionsOrder[6].title}
-              </CustomTypography>
-            </Box> */}
           </Box>
         </Box>
 

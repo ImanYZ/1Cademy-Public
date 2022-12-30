@@ -16,7 +16,7 @@ import { sectionsOrder } from "../sectionsOrder";
 // const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "HowItWorksSection");
 
 const HowItWorks = (props: any) => {
-  const { height, width } = useWindowSize();
+  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
   const boxLarge = useMemo(() => {
     const offset = width < 600 ? 16 : width < 900 ? 70 : 100;

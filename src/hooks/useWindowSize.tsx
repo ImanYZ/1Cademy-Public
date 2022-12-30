@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 
-export const useWindowSize = () => {
-  // const isSSR = typeof window !== "undefined";
-  // console.log("isSSR", isSSR);
-  const [firstRender, setFirstRender] = useState(true);
+export const useWindowSize = ({ initialWidth, initialHeight } = { initialWidth: 0, initialHeight: 0 }) => {
+  const [isFirstRender, setIsFirstRender] = useState(true);
   const [windowSize, setWindowSize] = useState({
-    // width: isSSR ? 0 : window.innerWidth,
-    // height: isSSR ? 0 : window.innerHeight,
-    width: 0,
-    height: 0,
+    width: initialWidth,
+    height: initialHeight,
   });
 
   const onChangeWindowSize = () => {
@@ -16,13 +12,11 @@ export const useWindowSize = () => {
   };
 
   useEffect(() => {
-    // in first render we need to set default values
-    if (firstRender) {
-      console.log("isSSR:firstRender");
+    if (isFirstRender) {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      setFirstRender(false);
+      setIsFirstRender(false);
     }
-  }, [firstRender]);
+  }, [isFirstRender]);
 
   useEffect(() => {
     window.addEventListener("resize", onChangeWindowSize);
