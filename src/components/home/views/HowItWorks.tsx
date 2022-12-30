@@ -66,7 +66,7 @@ const HowItWorks = (props: any) => {
         {/* Landing section */}
       </Box>
       <CustomTypography
-        variant="h2"
+        variant="h1"
         marked="center"
         align="center"
         sx={{ mb: 7, fontWeight: 700, position: "absolute", top: height - 30 }}

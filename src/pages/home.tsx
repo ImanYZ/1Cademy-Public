@@ -630,7 +630,7 @@ const Home = () => {
             </Box>
 
             <Box id={sectionsOrder[2].id} ref={whySectionRef}>
-              <CustomTypography variant="h2" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
+              <CustomTypography variant="h1" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
                 {sectionsOrder[2].title}
               </CustomTypography>
               {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
@@ -657,7 +657,7 @@ const Home = () => {
             </Box>
 
             <Box id={sectionsOrder[3].id} ref={whatSectionRef}>
-              <CustomTypography variant="h2" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
+              <CustomTypography variant="h1" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
                 {sectionsOrder[3].title}
               </CustomTypography>
               {!whatInViewOnce ? (
@@ -685,7 +685,7 @@ const Home = () => {
             </Box>
 
             <Box id={sectionsOrder[4].id} ref={whereSectionRef}>
-              <CustomTypography variant="h2" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
+              <CustomTypography variant="h1" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
                 {sectionsOrder[4].title}
               </CustomTypography>
               {!whereInViewOnce ? (
@@ -702,7 +702,7 @@ const Home = () => {
             </Box>
 
             <Box id={sectionsOrder[5].id} ref={whoSectionRef}>
-              <CustomTypography variant="h2" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
+              <CustomTypography variant="h1" marked="center" align="center" sx={{ mb: 7, fontWeight: 700 }}>
                 {sectionsOrder[5].title}
               </CustomTypography>
               {!whoInViewOnce ? (
