@@ -5,6 +5,7 @@
 @import url("./styles/ComLeaderboard.css");
 @import url("./styles/ComLeaderboardChip.css");
 @import url("./styles/UniversitiesMap.css");
+
 :root {
   --navbar-height: 70px;
   --footer-height: 309px;

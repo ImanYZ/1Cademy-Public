@@ -769,6 +769,11 @@ const Home = () => {
 
         <AppFooter sx={{ background: "rgba(0,0,0,.72)" }} />
       </Box>
+      <style>{`
+        body{
+          overflow:hidden;
+        }
+      `}</style>
     </ThemeProvider>
   );
 };
