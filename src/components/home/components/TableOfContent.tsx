@@ -1,7 +1,7 @@
 import { Box, Tooltip, Typography } from "@mui/material";
 import React from "react";
 
-import { SECTION_WITH_ANIMATION } from "../../../pages/home";
+import { SECTION_WITH_ANIMATION } from "../../../pages";
 
 const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected, animationSelected }) => {
   return (

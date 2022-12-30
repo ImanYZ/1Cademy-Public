@@ -25,7 +25,7 @@ import HonorEducation from "../../../../public/logo-honor.jpeg";
 import UMLogo from "../../../../public/logo-school-of-information.png";
 import ImanYeckehZaarePicture from "../../../../public/static/Iman_YeckehZaare.jpg";
 import PaulResnikPicture from "../../../../public/static/Paul_Resnick.jpg";
-import { gray02, gray03 } from "../../../pages/home";
+import { gray02, gray03 } from "../../../pages";
 
 const WhoWeAre = () => {
   return (

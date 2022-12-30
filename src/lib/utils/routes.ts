@@ -5,7 +5,7 @@ const ROUTES = {
   signIn: "/signin",
   signUp: "/signup",
   forgotpassword: "/forgot-password",
-  dashboard: "/notebook",
+  notebook: "/notebook",
   instructorsDashboard: "/instructors/dashboard",
   instructorsSettings: "/instructors/settings",
   instructorsStudents: "/instructors/students",

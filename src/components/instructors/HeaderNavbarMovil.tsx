@@ -171,7 +171,7 @@ const HeaderNavbarMovil = ({ options, user, onNewCourse }: HeaderNavbarMovilProp
                 borderColor:
                   theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.darkGrayBackground,
               }}
-              onClick={() => window.open(ROUTES.dashboard, "_blank", "noopener,noreferrer")}
+              onClick={() => window.open(ROUTES.notebook, "_blank", "noopener,noreferrer")}
             >
               GO TO NOTEBOOK
             </Button>

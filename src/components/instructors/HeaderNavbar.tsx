@@ -113,7 +113,7 @@ const HeaderNavbar = ({ options, user, onNewCourse }: HeaderNavbarProps) => {
             />
           </FormGroup>
           <Button
-            onClick={() => window.open(ROUTES.dashboard, "_blank", "noopener,noreferrer")}
+            onClick={() => window.open(ROUTES.notebook, "_blank", "noopener,noreferrer")}
             // color="secondary"
             sx={{
               wordBreak: "normal",

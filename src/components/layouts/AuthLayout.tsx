@@ -31,7 +31,8 @@ const AuthLayout: FC<Props> = ({ children }) => {
   const isEqualOrBiggerThanMedium = useMediaQuery("(min-width:600px)");
 
   const redirectToApp = useCallback(() => {
-    const redirectTo = router.query.from && router.query.from.length > 0 ? (router.query.from as string) : ROUTES.home;
+    const redirectTo =
+      router.query.from && router.query.from.length > 0 ? (router.query.from as string) : ROUTES.notebook;
     router.replace(redirectTo);
   }, [router]);
 
