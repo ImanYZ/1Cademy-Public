@@ -66,6 +66,7 @@ const HowItWorks = (props: any) => {
         {/* Landing section */}
       </Box>
       <CustomTypography
+        component={"h2"}
         variant="h1"
         marked="center"
         align="center"

@@ -45,14 +45,15 @@ type CustomTypographyProps = {
   variant: TypographyTypeMap["props"]["variant"];
   children: string;
   marked: "none" | "center";
+  component: React.ElementType;
   sx?: SxProps<Theme>;
 };
 
 function CustomTypography(props: CustomTypographyProps) {
-  const { children, variant, align, marked = "none", sx } = props;
+  const { children, component, variant, align, marked = "none", sx } = props;
 
   return (
-    <Typography variant={variant} align={align} sx={{ ...sx }}>
+    <Typography component={component} variant={variant} align={align} sx={{ textTransform: "uppercase", ...sx }}>
       {children}
       {marked === "center" && (
         <Box
