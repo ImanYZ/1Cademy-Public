@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useMemo } from "react";
 
@@ -6,7 +7,8 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 // import { useWindowSize } from "../../hooks/useWindowSize";
 // import Collapse from "@mui/material/Collapse";
 // import { CardActionArea } from "@mui/material";
-import Typography from "../components/Typography";
+// import Typography from "../components/Typography";
+import CustomTypography from "../components/Typography";
 import { sectionsOrder } from "../sectionsOrder";
 // import { sectionsOrder } from "../sectionsOrder";
 // // import sectionsOrder from "./sectionsOrder";
@@ -63,14 +65,18 @@ const HowItWorks = (props: any) => {
       >
         {/* Landing section */}
       </Box>
-      <Typography
-        variant="h4"
+      <CustomTypography
+        variant="h2"
         marked="center"
         align="center"
-        sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
+        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: height - 30 }}
       >
         {sectionsOrder[1].title}
-      </Typography>
+      </CustomTypography>
+      {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
+      >
+        {sectionsOrder[1].title}
+      </Typography> */}
       {processedArtboard.map((artboard: any, idx: number) => (
         <Box
           key={artboard.name}

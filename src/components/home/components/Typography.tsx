@@ -1,5 +1,5 @@
-import { Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Theme, Typography, TypographyTypeMap } from "@mui/material";
+import { Box, SxProps } from "@mui/system";
 // import { withStyles } from "@mui/styles";
 import * as React from "react";
 
@@ -40,18 +40,19 @@ import * as React from "react";
 //   subtitle1: "h3",
 // };
 
-// type CustomTypographyProps = {
-//   align: TypographyTypeMap["props"]["align"];
-//   variant: TypographyTypeMap["props"]["variant"];
-//   children: string;
-//   sx?: SxProps<Theme>;
-// };
+type CustomTypographyProps = {
+  align: TypographyTypeMap["props"]["align"];
+  variant: TypographyTypeMap["props"]["variant"];
+  children: string;
+  marked: "none" | "center";
+  sx?: SxProps<Theme>;
+};
 
-function CustomTypography(props: any) {
-  const { children, variant, align, marked = "none" } = props;
+function CustomTypography(props: CustomTypographyProps) {
+  const { children, variant, align, marked = "none", sx } = props;
 
   return (
-    <Typography variant={variant} align={align}>
+    <Typography variant={variant} align={align} sx={{ ...sx }}>
       {children}
       {marked === "center" && (
         <Box
