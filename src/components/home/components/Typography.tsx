@@ -3,16 +3,16 @@ import { Box, SxProps } from "@mui/system";
 import * as React from "react";
 
 type CustomTypographyProps = {
-  align: TypographyTypeMap["props"]["align"];
   variant: TypographyTypeMap["props"]["variant"];
   children: string;
-  marked: "none" | "center";
   component: React.ElementType;
+  align?: TypographyTypeMap["props"]["align"];
+  marked?: "none" | "center";
   sx?: SxProps<Theme>;
 };
 
 function CustomTypography(props: CustomTypographyProps) {
-  const { children, component, variant, align, marked = "none", sx } = props;
+  const { children, component, variant, align = "center", marked = "none", sx } = props;
 
   return (
     <Typography component={component} variant={variant} align={align} sx={{ textTransform: "uppercase", ...sx }}>

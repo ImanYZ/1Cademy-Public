@@ -41,20 +41,26 @@ const ImageIconButton = styled(ButtonBase)(({ theme }) => ({
   "&:hover .imageMarked": {
     opacity: 0,
   },
-  "&:hover .imageTitle": {
+  "&:hover .imagepTitle": {
     border: "4px solid currentColor",
+    maxWidth: "100%",
+    padding: "10px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   "& .imageTitle": {
     position: "relative",
-    padding: `${theme.spacing(2)} ${theme.spacing(4)} 14px`,
+    padding: `10px 20px`,
   },
   "& .imageMarked": {
     height: 3,
     width: 18,
     background: theme.palette.common.white,
-    position: "absolute",
-    bottom: -2,
-    left: "calc(50% - 9px)",
+    // position: "absolute",
+    // bottom: -2,
+    // left: "calc(50% - 9px)",
+
     transition: theme.transitions.create("opacity"),
   },
 }));
@@ -99,15 +105,18 @@ const What = () => {
                 top: 0,
                 bottom: 0,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "common.white",
               }}
             >
-              <Typography component="h3" variant="h6" color="inherit" className="imageTitle">
-                {communi.title}
-                <div className="imageMarked" />
-              </Typography>
+              <Box className="imagepTitle">
+                <Typography component="h3" variant="h6" sx={{ color: "inherit" }}>
+                  {communi.title}
+                </Typography>
+              </Box>
+              <div className="imageMarked"></div>
             </Box>
           </ImageIconButton>
         ))}
