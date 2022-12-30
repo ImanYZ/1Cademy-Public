@@ -1,5 +1,17 @@
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import { Box, Button, Grid, Skeleton, Stack, ThemeProvider, Tooltip, Typography, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormGroup,
+  Grid,
+  Skeleton,
+  Stack,
+  /* ThemeProvider */
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 // const Values = React.lazy(() => import("./modules/views/Values"));
 
 const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
@@ -12,25 +24,24 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
-// import WhoWeAre from "../components/home/views/WhoWeAre";
+import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
-// import Typography from "@/components/home/components/Typography";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
+import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 
+// import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import backgroundImage from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-// import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import { sectionsOrder } from "../components/home/sectionsOrder";
 import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
 import { AppFooter } from "../components/PagesNavbar";
-// import { useAuth } from "../context/AuthContext";
+
 /**
  * animations builded with: https://rive.app/
  */
@@ -73,6 +84,8 @@ const sectionsTmp = [
 
 const Home = () => {
   // const [section, setSection] = useState(0);
+  const theme = useTheme();
+
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
   const [idxRiveComponent, setIdxRiveComponent] = useState(0);
@@ -82,6 +95,8 @@ const Home = () => {
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
+  const [handleThemeSwitch] = useThemeChange();
+
   // const [isSSR,setIsSSR]
 
   // const [{ isAuthenticated }] = useAuth();
@@ -394,408 +409,409 @@ const Home = () => {
   };
 
   return (
-    <ThemeProvider theme={brandingDarkTheme}>
+    // <ThemeProvider theme={brandingDarkTheme}>
+    <Box
+      id="ScrollableContainer"
+      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
+      sx={{
+        height: "100vh",
+        overflowY: "auto",
+        overflowX: "auto",
+        position: "relative",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
+        // zIndex: -3
+      }}
+    >
       <Box
-        id="ScrollableContainer"
-        onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
-        sx={{
-          height: "100vh",
-          overflowY: "auto",
-          overflowX: "auto",
-          position: "relative",
-          backgroundColor: "#28282a",
-          // zIndex: -3
-        }}
+        component={"header"}
+        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
       >
         <Box
-          component={"header"}
-          sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
+          sx={{
+            height: HEADER_HEIGTH,
+            width: "100%",
+            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
+            backdropFilter: "saturate(180%) blur(20px)",
+
+            // filter: "blur(1px)"
+          }}
+          // style={{willChange:"filter"}}
+        />
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "980px",
+            height: HEADER_HEIGTH,
+            px: isDesktop ? "0px" : "10px",
+            position: "absolute",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          <Box
-            sx={{
-              height: HEADER_HEIGTH,
-              width: "100%",
-              background: "rgba(0,0,0,.72)",
-              backdropFilter: "saturate(180%) blur(20px)",
-
-              // filter: "blur(1px)"
-            }}
-            // style={{willChange:"filter"}}
-          />
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: "980px",
-              height: HEADER_HEIGTH,
-              px: isDesktop ? "0px" : "10px",
-              position: "absolute",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Stack
-              spacing={"20px"}
-              alignItems={"center"}
-              justifyContent={"space-between"}
-              direction={"row"}
-              sx={{ color: "#f8f8f8" }}
-            >
-              <img src={LogoDarkMode.src} alt="logo" width="52px" height={"59px"} />
-
-              {!isMovil && (
-                <>
-                  <Tooltip title={sectionsOrder[1].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(1)}
-                    >
-                      {sectionsOrder[1].label}
-                    </Typography>
-                  </Tooltip>
-                  <Tooltip title={sectionsOrder[2].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(2)}
-                    >
-                      {sectionsOrder[2].label}
-                    </Typography>
-                  </Tooltip>
-                  <Tooltip title={sectionsOrder[3].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(3)}
-                    >
-                      {sectionsOrder[3].label}
-                    </Typography>
-                  </Tooltip>
-                  <Tooltip title={sectionsOrder[4].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(4)}
-                    >
-                      {sectionsOrder[4].label}
-                    </Typography>
-                  </Tooltip>
-                  <Tooltip title={sectionsOrder[5].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(5)}
-                    >
-                      {sectionsOrder[5].label}
-                    </Typography>
-                  </Tooltip>
-                </>
-              )}
-            </Stack>
-            <Box>
-              {
-                <Tooltip title="Apply to join 1Cademy">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    // onClick={joinUsClick}
-                    target="_blank"
-                    href="https://1cademy.us/#JoinUsSection"
-                    size={isMovil ? "small" : "medium"}
-                    sx={{
-                      fontSize: 16,
-                      // color: "common.white",
-                      ml: 2.5,
-                      borderRadius: 40,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Apply!
-                  </Button>
-                </Tooltip>
-              }
-              <Tooltip title="SIGN IN/UP">
-                <Button
-                  variant="contained"
-                  onClick={signUpHandler}
-                  size={isMovil ? "small" : "medium"}
-                  sx={{
-                    // display: showSignInorUp ? "inline-flex" : "none",
-                    display: "inline-flex",
-                    fontSize: 16,
-                    color: "common.white",
-                    ml: 2.5,
-                    borderRadius: 40,
-                    backgroundColor: theme => theme.palette.common.darkBackground1,
-                    "&:hover": {
-                      backgroundColor: theme => theme.palette.common.darkGrayBackground,
-                    },
-                  }}
-                >
-                  SIGN IN/UP
-                </Button>
-              </Tooltip>
-            </Box>
-          </Box>
-        </Box>
-
-        <Box sx={{ position: "relative" }}>
-          <Box
-            sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
-          >
-            <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
-              <MemoizedTableOfContent
-                menuItems={sectionsTmp}
-                viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
-                onChangeContent={switchSection}
-                sectionSelected={sectionSelected}
-                animationSelected={animationSelected}
-              />
-            </Box>
-          </Box>
-
           <Stack
-            ref={HomeSectionRef}
-            spacing={width < 900 ? "10px" : "20px"}
-            direction={"column"}
+            spacing={"20px"}
             alignItems={"center"}
-            justifyContent="flex-end"
-            sx={{
-              height: "calc(100vh - 70px)",
-              width: "100%",
-              position: "absolute",
-              top: 0,
-              padding: width < 900 ? "10px" : "20px",
-              backgroundColor: "#1d1102",
-              backgroundImage: `url(${backgroundImage.src})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
+            justifyContent={"space-between"}
+            direction={"row"}
+            sx={{ color: "#f8f8f8" }}
           >
-            <Typography
-              color="white"
-              variant="h5"
-              sx={{ textAlign: "center" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-            >
-              WHERE WE TAKE NOTES <b>TOGETHER</b>.
-            </Typography>
-            <Button
-              // color="secondary"
-              variant="contained"
-              size={width < 900 ? "small" : "large"}
-              component="a"
-              // href="#JoinUsSection"
-              target="_blank"
-              href="https://1cademy.us/#JoinUsSection"
-              sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-            >
-              Apply to Join Us!
-            </Button>
-            <Box
-              sx={{ display: "flex", flexDirection: "column", alignItems: "center", color: "common.white" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-            >
-              {height > 500 && "Scroll"}
-              <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
-            </Box>
+            <img src={LogoDarkMode.src} alt="logo" width="52px" height={"59px"} />
+
+            {!isMovil && (
+              <>
+                <Tooltip title={sectionsOrder[1].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(1)}
+                  >
+                    {sectionsOrder[1].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[2].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(2)}
+                  >
+                    {sectionsOrder[2].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[3].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(3)}
+                  >
+                    {sectionsOrder[3].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[4].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(4)}
+                  >
+                    {sectionsOrder[4].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[5].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(5)}
+                  >
+                    {sectionsOrder[5].label}
+                  </Typography>
+                </Tooltip>
+              </>
+            )}
           </Stack>
 
-          <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-            <Box id={sectionsOrder[1].id} ref={howSectionRef}>
-              <HowItWorks
-                section={sectionSelected}
-                // ref={sectionAnimationControllerRef}
-                artboards={[...section1ArtBoards, ...artboards]}
-                animationOptions={
-                  <Button
-                    // color="secondary"
-                    variant="contained"
-                    size={width < 900 ? "small" : "large"}
-                    component="a"
-                    href="https://1cademy.us/#JoinUsSection"
-                    // href="#JoinUsSection"
-                    target="_blank"
-                    sx={{ minWidth: 200, textTransform: "uppercase" }}
-                    className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
-                  >
-                    Apply to Join Us!
-                  </Button>
-                }
-              >
-                <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
-                  <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} />
-                </Box>
-              </HowItWorks>
-            </Box>
-
-            <Box id={sectionsOrder[2].id} ref={whySectionRef}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ mb: 7, fontWeight: 700 }}
-              >
-                {sectionsOrder[2].title}
-              </CustomTypography>
-              {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
-              {whyInViewOnce && (
-                <Suspense
-                  fallback={
-                    <Grid container spacing={2.5} alignItems="center">
-                      {new Array(8).fill(0).map((a, i) => (
-                        <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                          <Skeleton
-                            variant="rectangular"
-                            height={210}
-                            animation="wave"
-                            sx={{ background: "#72727263", maxWidth: 340 }}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  }
+          <Stack direction={"row"}>
+            <FormGroup>
+              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
+            </FormGroup>
+            {
+              <Tooltip title="Apply to join 1Cademy">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  // onClick={joinUsClick}
+                  target="_blank"
+                  href="https://1cademy.us/#JoinUsSection"
+                  size={isMovil ? "small" : "medium"}
+                  sx={{
+                    fontSize: 16,
+                    // color: "common.white",
+                    ml: 2.5,
+                    borderRadius: 40,
+                    textTransform: "uppercase",
+                  }}
                 >
-                  <Values />
-                </Suspense>
-              )}
-            </Box>
-
-            <Box id={sectionsOrder[3].id} ref={whatSectionRef}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ mb: 7, fontWeight: 700 }}
+                  Apply!
+                </Button>
+              </Tooltip>
+            }
+            <Tooltip title="SIGN IN/UP">
+              <Button
+                variant="contained"
+                onClick={signUpHandler}
+                size={isMovil ? "small" : "medium"}
+                sx={{
+                  // display: showSignInorUp ? "inline-flex" : "none",
+                  display: "inline-flex",
+                  fontSize: 16,
+                  color: "common.white",
+                  ml: 2.5,
+                  borderRadius: 40,
+                  backgroundColor: theme => theme.palette.common.darkBackground1,
+                  "&:hover": {
+                    backgroundColor: theme => theme.palette.common.darkGrayBackground,
+                  },
+                }}
               >
-                {sectionsOrder[3].title}
-              </CustomTypography>
-              {!whatInViewOnce ? (
-                <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
-              ) : (
-                <Suspense
-                  fallback={
-                    <Grid container spacing={1}>
-                      {new Array(8).fill(0).map((a, i) => (
-                        <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                          <Skeleton
-                            variant="rectangular"
-                            height={210}
-                            animation="wave"
-                            sx={{ background: "#72727263", maxWidth: 340 }}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  }
-                >
-                  <What />
-                </Suspense>
-              )}
-            </Box>
-
-            <Box id={sectionsOrder[4].id} ref={whereSectionRef}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ mb: 7, fontWeight: 700 }}
-              >
-                {sectionsOrder[4].title}
-              </CustomTypography>
-              {!whereInViewOnce ? (
-                <div style={{ height: 2 * height /* background: "green" */ }}></div>
-              ) : (
-                <Suspense
-                  fallback={
-                    <Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />
-                  }
-                >
-                  <UniversitiesMap theme={"Dark"} />
-                </Suspense>
-              )}
-            </Box>
-
-            <Box id={sectionsOrder[5].id} ref={whoSectionRef}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ mb: 7, fontWeight: 700 }}
-              >
-                {sectionsOrder[5].title}
-              </CustomTypography>
-              {!whoInViewOnce ? (
-                <div style={{ height: 2 * height /* background: "pink" */ }}></div>
-              ) : (
-                <Suspense
-                  fallback={
-                    <Box
-                      sx={{
-                        pt: 7,
-                        pb: 10,
-                        position: "relative",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Grid container spacing={2.5}>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  }
-                >
-                  <WhoWeAre />
-                </Suspense>
-              )}
-            </Box>
+                SIGN IN/UP
+              </Button>
+            </Tooltip>
+          </Stack>
+        </Box>
+      </Box>
+      <Box sx={{ position: "relative" }}>
+        <Box
+          sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
+        >
+          <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
+            <MemoizedTableOfContent
+              menuItems={sectionsTmp}
+              viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
+              onChangeContent={switchSection}
+              sectionSelected={sectionSelected}
+              animationSelected={animationSelected}
+            />
           </Box>
         </Box>
 
-        <AppFooter sx={{ background: "rgba(0,0,0,.72)" }} />
+        <Stack
+          ref={HomeSectionRef}
+          spacing={width < 900 ? "10px" : "20px"}
+          direction={"column"}
+          alignItems={"center"}
+          justifyContent="flex-end"
+          sx={{
+            height: "calc(100vh - 70px)",
+            width: "100%",
+            position: "absolute",
+            top: 0,
+            padding: width < 900 ? "10px" : "20px",
+            backgroundColor: "#1d1102",
+            backgroundImage: `url(${backgroundImage.src})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            WHERE WE TAKE NOTES <b>TOGETHER</b>.
+          </Typography>
+          <Button
+            // color="secondary"
+            variant="contained"
+            size={width < 900 ? "small" : "large"}
+            component="a"
+            // href="#JoinUsSection"
+            target="_blank"
+            href="https://1cademy.us/#JoinUsSection"
+            sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            Apply to Join Us!
+          </Button>
+          <Box
+            sx={{ display: "flex", flexDirection: "column", alignItems: "center", color: "common.white" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            {height > 500 && "Scroll"}
+            <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
+          </Box>
+        </Stack>
+
+        <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
+          <Box id={sectionsOrder[1].id} ref={howSectionRef}>
+            <HowItWorks
+              section={sectionSelected}
+              // ref={sectionAnimationControllerRef}
+              artboards={[...section1ArtBoards, ...artboards]}
+              animationOptions={
+                <Button
+                  // color="secondary"
+                  variant="contained"
+                  size={width < 900 ? "small" : "large"}
+                  component="a"
+                  href="https://1cademy.us/#JoinUsSection"
+                  // href="#JoinUsSection"
+                  target="_blank"
+                  sx={{ minWidth: 200, textTransform: "uppercase" }}
+                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
+                >
+                  Apply to Join Us!
+                </Button>
+              }
+            >
+              <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
+                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} />
+              </Box>
+            </HowItWorks>
+          </Box>
+
+          <Box id={sectionsOrder[2].id} ref={whySectionRef}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ mb: 7, fontWeight: 700 }}
+            >
+              {sectionsOrder[2].title}
+            </CustomTypography>
+            {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
+            {whyInViewOnce && (
+              <Suspense
+                fallback={
+                  <Grid container spacing={2.5} alignItems="center">
+                    {new Array(8).fill(0).map((a, i) => (
+                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                        <Skeleton
+                          variant="rectangular"
+                          height={210}
+                          animation="wave"
+                          sx={{ background: "#72727263", maxWidth: 340 }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                }
+              >
+                <Values />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[3].id} ref={whatSectionRef}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ mb: 7, fontWeight: 700 }}
+            >
+              {sectionsOrder[3].title}
+            </CustomTypography>
+            {!whatInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Grid container spacing={1}>
+                    {new Array(8).fill(0).map((a, i) => (
+                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                        <Skeleton
+                          variant="rectangular"
+                          height={210}
+                          animation="wave"
+                          sx={{ background: "#72727263", maxWidth: 340 }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                }
+              >
+                <What />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[4].id} ref={whereSectionRef}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ mb: 7, fontWeight: 700 }}
+            >
+              {sectionsOrder[4].title}
+            </CustomTypography>
+            {!whereInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "green" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
+              >
+                <UniversitiesMap theme={"Dark"} />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[5].id} ref={whoSectionRef}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ mb: 7, fontWeight: 700 }}
+            >
+              {sectionsOrder[5].title}
+            </CustomTypography>
+            {!whoInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <WhoWeAre />
+              </Suspense>
+            )}
+          </Box>
+        </Box>
       </Box>
+
+      <AppFooter sx={{ background: "rgba(0,0,0,.72)" }} />
       <style>{`
-        body{
-          overflow:hidden;
-        }
-      `}</style>
-    </ThemeProvider>
+          body{
+            overflow:hidden;
+          }
+        `}</style>
+    </Box>
+    // </ThemeProvider>
   );
 };
 
@@ -806,8 +822,9 @@ Home.getLayout = (page: ReactNode) => {
 export default Home;
 
 const advanceAnimationTo = (rive: Rive, timeInSeconds: number) => {
+  //@ts-ignore
   if (!rive?.animator?.animations[0]) return;
-
+  //@ts-ignore
   const Animator = rive.animator.animations[0];
   Animator.instance.time = 0;
   Animator.instance.advance(timeInSeconds);
