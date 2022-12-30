@@ -1,4 +1,4 @@
-import { CardActionArea } from "@mui/material";
+import { CardActionArea, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -7,7 +7,7 @@ import Collapse from "@mui/material/Collapse";
 import Grid from "@mui/material/Grid";
 import React, { useState } from "react";
 
-import Typography from "../components/Typography";
+// import Typography from "../components/Typography";
 // import { sectionsOrder } from "../sectionsOrder";
 import valuesItems from "./valuesItems";
 // import sectionsOrder from "./sectionsOrder";
@@ -47,7 +47,7 @@ const Values = () => {
         {valuesItems.map((value, idx) => {
           return (
             <Grid key={value.name} item xs={12} sm={6} md={4} lg={3}>
-              <Card sx={{ maxWidth: 340, background: "#202020", color: "#f8f8f8" }}>
+              <Card sx={{ maxWidth: 340 /* background: "#202020" */ /*  color: "#f8f8f8"  */ }}>
                 <CardActionArea onClick={() => flipCard(idx)}>
                   <Box
                     sx={{

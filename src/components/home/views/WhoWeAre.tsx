@@ -47,7 +47,9 @@ const WhoWeAre = () => {
       </Typography> */}
       <Grid container spacing={2.5}>
         <Grid item xs={12} sm={6} md={4}>
-          <Paper sx={{ backgroundColor: gray02, color: "#f8f8f8" }}>
+          <Paper
+            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined), color: "#f8f8f8" }}
+          >
             <Typography
               variant="h5"
               component="div"
@@ -172,7 +174,9 @@ const WhoWeAre = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <Paper sx={{ backgroundColor: gray02, color: "#f8f8f8" }}>
+          <Paper
+            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined), color: "#f8f8f8" }}
+          >
             <Typography
               variant="h5"
               component="div"
@@ -272,7 +276,9 @@ const WhoWeAre = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <Paper sx={{ backgroundColor: gray02, color: "#f8f8f8" }}>
+          <Paper
+            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined), color: "#f8f8f8" }}
+          >
             <List sx={{ width: "100%" }}>
               <ListItemButton
                 alignItems="flex-start"
