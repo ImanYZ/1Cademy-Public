@@ -1,9 +1,18 @@
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, PaletteMode, Tooltip, Typography, useTheme } from "@mui/material";
 import React from "react";
 
 import { SECTION_WITH_ANIMATION } from "../../../pages";
 
 const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected, animationSelected }) => {
+  const theme = useTheme();
+
+  const getTextColor = (mode: PaletteMode, selected: boolean) => {
+    if (mode === "dark" && selected) return "#f1f1f1";
+    if (mode === "dark" && !selected) return "#9c9c9c";
+    if (mode === "light" && selected) return theme.palette.common.darkGrayBackground;
+    return "#7e7e7e";
+  };
+
   return (
     <Box component={"nav"} sx={{ position: "sticky", top: "200px" }} style={{ mixBlendMode: "difference" }}>
       <Box
@@ -33,7 +42,8 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
                 onClick={() => onChangeContent(idx)}
                 sx={{
                   height: "56px",
-                  color: idx === sectionSelected ? "#f1f1f1" : "#9c9c9c",
+                  // border: "solid 2px pink",
+                  // color: getTextColor(theme.palette.mode, idx === sectionSelected),
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "flex-start",
@@ -49,7 +59,9 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
                     position: "absolute",
                     left: "-4px",
                     top: "22px",
-                    background: idx === sectionSelected ? "#f1f1f1" : "#9c9c9c",
+
+                    background: getTextColor(theme.palette.mode, idx === sectionSelected),
+                    //  idx === sectionSelected ? "#f1f1f1" : "#9c9c9c",
                     // outline: idx === sectionSelected ? "solid 4px #8d8d8d7a" : undefined
                   },
                   "&::after": {
@@ -72,6 +84,7 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
               >
                 <Typography
                   sx={{
+                    color: getTextColor(theme.palette.mode, idx === sectionSelected),
                     fontSize: "16px",
                     py: "15px",
                     cursor: "pointer",
@@ -118,10 +131,13 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
                           position: "absolute",
                           left: viewType === "SIMPLE" ? "-3px" : "-21px",
                           top: "16px",
-                          background:
+                          background: getTextColor(
+                            theme.palette.mode,
                             animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
-                              ? "#f1f1f1"
-                              : "#9c9c9c",
+                          ),
+                          // animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
+                          //   ? "#f1f1f1"
+                          //   : "#9c9c9c",
                           // outline: animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION ? "solid 3px #8d8d8d7a" : undefined
                         },
                         "&::after": {
@@ -147,10 +163,14 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
                     >
                       <Typography
                         sx={{
-                          color:
+                          // color:
+                          //   animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
+                          //     ? "#f1f1f1"
+                          //     : "#9c9c9c",
+                          color: getTextColor(
+                            theme.palette.mode,
                             animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
-                              ? "#f1f1f1"
-                              : "#9c9c9c",
+                          ),
                           fontSize: "14px",
                           cursor: "pointer",
                           py: "5px",
