@@ -1,4 +1,4 @@
-import { CardActionArea, Typography } from "@mui/material";
+import { CardActionArea, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -7,6 +7,7 @@ import Collapse from "@mui/material/Collapse";
 import Grid from "@mui/material/Grid";
 import React, { useState } from "react";
 
+import { gray03 } from "../../../pages";
 // import Typography from "../components/Typography";
 // import { sectionsOrder } from "../sectionsOrder";
 import valuesItems from "./valuesItems";
@@ -21,7 +22,10 @@ const iniStepChecked: any[] = [];
 // const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "ValuesSection");
 
 const Values = () => {
+  const theme = useTheme();
   const [stepChecked, setStepChecked] = useState(iniStepChecked);
+
+  const getGrayColorText = () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2);
 
   const flipCard = (idx: number) => {
     const sChecked = [...stepChecked];
@@ -84,7 +88,10 @@ const Values = () => {
                       Learn more ...
                     </Collapse>
                     <Collapse in={stepChecked[idx]} timeout={1000}>
-                      <Typography variant="body2" sx={{ textAlign: "left", color: "#AAAAAA", fontSize: "14px" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ textAlign: "left", color: getGrayColorText(), fontSize: "14px" }}
+                      >
                         {value.body}
                       </Typography>
                     </Collapse>

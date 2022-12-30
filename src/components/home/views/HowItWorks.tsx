@@ -59,7 +59,7 @@ const HowItWorks = (props: any) => {
           top: 0,
           width: "100%",
           height: height - 70,
-          borderRight: `dashed 6px #ff28c9`,
+          // borderRight: `dashed 6px #ff28c9`,
           color: "white",
         }}
       >
@@ -86,7 +86,7 @@ const HowItWorks = (props: any) => {
             top: artboard.top,
             width: "100%",
             height: artboard.height,
-            borderRight: `dashed 6px ${artboard.color}`,
+            // borderRight: `dashed 6px ${artboard.color}`,
             color: "white",
           }}
         >
