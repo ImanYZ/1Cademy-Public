@@ -25,7 +25,7 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Rive, useRive } from "rive-react";
+import { Rive, useRive, useStateMachineInput } from "rive-react";
 
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
@@ -149,10 +149,14 @@ const Home = () => {
 
   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
     src: "rive/artboard-6.riv",
+    stateMachines: ["State Machine 1"],
+    animations: ["Timeline 1", "light", "dark"],
     artboard: "artboard-6",
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
+
+  const themeAnimation6 = useStateMachineInput(rive6, "State Machine 1", "theme");
 
   useEffect(() => {
     if (!rive1) return;
@@ -408,6 +412,26 @@ const Home = () => {
     router.push("/signin");
   };
 
+  const onChangeTheme = e => {
+    if (!themeAnimation6 || !rive6) return;
+
+    console.log({ rive6 });
+    // themeAnimation6.value
+    // themeAnimation6.value = theme.palette.mode === "dark" ? -1 : 1;
+    // rive6.startRendering();
+    // rive6.play(theme.palette.mode === "dark" ? "light" : "dark", true);
+
+    // const Animator = rive6.animator.animations[theme.palette.mode === "dark" ? 1 : 2];
+    // Animator.instance.time = 0;
+    // Animator.instance.advance(10);
+    // Animator.instance.apply(1);
+    // rive6.startRendering();
+
+    rive6.scrub(theme.palette.mode === "dark" ? "light" : "dark", 1);
+
+    handleThemeSwitch(e);
+  };
+
   return (
     // <ThemeProvider theme={brandingDarkTheme}>
     <Box
@@ -526,7 +550,7 @@ const Home = () => {
 
           <Stack direction={"row"}>
             <FormGroup>
-              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
+              <ThemeSwitcher onClick={e => onChangeTheme(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
             {
               <Tooltip title="Apply to join 1Cademy">
@@ -824,6 +848,7 @@ export default Home;
 const advanceAnimationTo = (rive: Rive, timeInSeconds: number) => {
   //@ts-ignore
   if (!rive?.animator?.animations[0]) return;
+  console.log("rive", { rr: rive?.animator });
   //@ts-ignore
   const Animator = rive.animator.animations[0];
   Animator.instance.time = 0;
