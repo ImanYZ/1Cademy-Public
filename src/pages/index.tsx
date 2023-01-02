@@ -795,7 +795,7 @@ const Home = () => {
               variant="h1"
               marked="center"
               align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
+              sx={{ pb: 10, fontWeight: 700, position: "sticky", top: "80px", zIndex: 11 }}
             >
               {sectionsOrder[5].title}
             </CustomTypography>
