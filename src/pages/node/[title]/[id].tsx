@@ -106,6 +106,7 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
               <NodeItemFull
+                nodeId={node.id}
                 node={node}
                 contributors={
                   <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />

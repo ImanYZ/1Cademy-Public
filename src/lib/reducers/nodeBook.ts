@@ -5,6 +5,7 @@ export const INITIAL_STATE: NodeBookState = {
   isSubmitting: false,
   choosingNode: null,
   chosenNode: null,
+  initialProposal: null,
   selectedNode: null,
   selectionType: null,
   selectedTags: [],
@@ -17,6 +18,8 @@ export const INITIAL_STATE: NodeBookState = {
   nodeId: null,
   isMenuOpen: false,
   lastOperation: "CancelProposals",
+  contributorsNodeId: null,
+  showContributors: false,
 };
 
 function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions): NodeBookState {
@@ -31,6 +34,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, chosenNode: action.payload };
     case "setSelectedNode":
       return { ...state, selectedNode: action.payload };
+    case "setInitialProposal":
+      return { ...state, initialProposal: action.payload };
     case "setSelectionType":
       return { ...state, selectionType: action.payload };
     case "setSelectedTags":
@@ -49,6 +54,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, openEditButton: action.payload.status, nodeId: action.payload.nodeId };
     case "setIsMenuOpen":
       return { ...state, isMenuOpen: action.payload };
+    case "setContributorsNodeId":
+      return { ...state, contributorsNodeId: action.payload.nodeId, showContributors: action.payload.showContributors };
     default:
       return { ...state };
   }

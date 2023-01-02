@@ -8,6 +8,7 @@ import { OpenSidebar } from "@/pages/notebook";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
+  setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
   bookmark: any;
   markStudied: any;
@@ -49,9 +50,11 @@ type NodeListProps = {
   scrollToNode: any;
   openSidebar: OpenSidebar;
   setOperation: (operation: string) => void;
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 const NodesList = ({
+  setFocusView,
   nodes,
   bookmark,
   markStudied,
@@ -93,6 +96,7 @@ const NodesList = ({
   scrollToNode,
   openSidebar,
   setOperation,
+  openUserInfoSidebar,
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -136,6 +140,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            setFocusView={setFocusView}
             activeNode={activeNode}
             citationsSelected={citationsSelected}
             proposalsSelected={proposalsSelected}
@@ -155,6 +160,8 @@ const NodesList = ({
             content={nodes[nId].content}
             nodeImage={nodes[nId].nodeImage}
             nodeVideo={nodes[nId].nodeVideo || ""}
+            nodeVideoStartTime={nodes[nId].nodeVideoStartTime || 0}
+            nodeVideoEndTime={nodes[nId].nodeVideoEndTime || 0}
             viewers={nodes[nId].viewers}
             correctNum={nodes[nId].corrects}
             markedCorrect={nodes[nId].correct}
@@ -227,6 +234,9 @@ const NodesList = ({
             locked={nodes[nId].locked}
             disableVotes={!!nodes[nId].disableVotes}
             setOperation={setOperation}
+            contributors={nodes[nId].contributors}
+            institutions={nodes[nId].institutions}
+            openUserInfoSidebar={openUserInfoSidebar}
           />
         );
       })}

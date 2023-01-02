@@ -69,7 +69,7 @@ export const SidebarWrapper = ({
       PaperProps={{
         sx: {
           minWidth: { xs: "0px", sm: width },
-          width: { xs: isMenuOpen ? "100%" : "auto", md: width },
+          width: { xs: isMenuOpen ? "100%" : "auto", sm: width },
           maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",

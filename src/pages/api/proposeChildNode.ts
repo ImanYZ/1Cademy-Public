@@ -4,6 +4,7 @@ import { IActionTrack } from "src/types/IActionTrack";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
+import { IUser } from "src/types/IUser";
 import { detach } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
@@ -32,6 +33,8 @@ export type IProposeChildNodePayload = {
     content: string;
     nodeImage?: string;
     nodeVideo?: string;
+    nodeVideoStartTime?: string;
+    nodeVideoEndTime?: string;
     nodeAudio?: string;
     parents: INodeLink[];
     proposal: string;
@@ -77,8 +80,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
   let writeCounts = 0;
   let batch = db.batch();
+
+  const userData = req.body.data.user.userData as IUser;
   try {
-    const { versionNodeId } = req?.body?.data;
+    const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
     ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.parentId }));
     ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: req.body.data.parentId }));
     const newVersion: any = {
@@ -88,6 +93,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       content: req.body.data.content,
       nodeImage: req.body.data.nodeImage,
       nodeVideo: req.body.data.nodeVideo,
+      nodeVideoStartTime,
+      nodeVideoEndTime,
       nodeAudio: req.body.data.nodeAudio,
       corrects: 1,
       createdAt: currentTimestamp,
@@ -210,6 +217,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: 0,
         isTag: false,
       };
+
+      if (nodeVideoStartTime) {
+        newNode.nodeVideoStartTime = nodeVideoStartTime;
+      }
+      if (nodeVideoEndTime) {
+        newNode.nodeVideoEndTime = nodeVideoEndTime;
+      }
       // If a question node gets accepted, it should be added to the practice tool for all
       // users in the communities with the tags that are used on this node.
       // That's why we need to get the list of all members of each of these tags (communities).
@@ -342,6 +356,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         action: versionRef.id,
         createdAt: currentTimestamp,
         doer: newVersion.proposer,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
       } as IActionTrack);
@@ -354,6 +370,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         action: "Correct-" + versionRef.id,
         createdAt: currentTimestamp,
         doer: newVersion.proposer,
+        chooseUname: userData.chooseUname,
+        fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
       } as IActionTrack);

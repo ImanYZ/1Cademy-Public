@@ -24,12 +24,12 @@ describe("GET /api/contributorsAutocomplete", () => {
 
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
-  const nodesTSCollection = new TypesenseMock(
+  const usersTSCollection = new TypesenseMock(
     UserTSSchema,
     users.map(user => convertUserToTypeSchema(user)),
     "users"
   );
-  const collects = [usersCollection, nodesCollection, nodesTSCollection];
+  const collects = [usersCollection, nodesCollection, usersTSCollection];
 
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));

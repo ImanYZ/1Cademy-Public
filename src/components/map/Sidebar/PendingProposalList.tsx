@@ -161,7 +161,12 @@ const PendingProposalList = (props: PendingProposalListProps) => {
         >
           {props.proposals.slice(0, lastIndex).map((proposal, idx) => {
             return (
-              <ProposalItem key={idx} proposal={proposal} openLinkedNode={props.openLinkedNode} showTitle={true} />
+              <ProposalItem
+                key={idx}
+                proposal={proposal}
+                openLinkedNode={(nodeId: string) => props.openLinkedNode(nodeId, "initialProposal-" + proposal.id)}
+                showTitle={true}
+              />
             );
           })}
           {/* CHECK, I changes pendingProposals to proposal */}

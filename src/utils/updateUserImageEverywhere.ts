@@ -1,4 +1,4 @@
-import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import {
   comPointTypes,
   getTypedCollections,
@@ -7,6 +7,8 @@ import {
   schoolPointTypes,
   updateUserImageInCollection,
 } from ".";
+import { detach } from "./helpers";
+import { Timestamp } from "firebase-admin/firestore";
 
 export const updateUserImageEverywhere = async ({
   batch,
@@ -18,6 +20,31 @@ export const updateUserImageEverywhere = async ({
   writeCounts,
 }: any) => {
   let newBatch = batch;
+
+  // updating imageUrl, fullname and chooseUname
+  // TODO: move these to queue
+  await detach(async () => {
+    let batch = db.batch();
+    let writeCounts = 0;
+
+    const currentTime = new Date().getTime();
+    const actionTracks = await db
+      .collection("actionTracks")
+      .where("uname", "==", uname)
+      .where("createdAt", ">=", Timestamp.fromDate(new Date(currentTime - 93600000)))
+      .get();
+    for (const actionTrack of actionTracks.docs) {
+      const actionTrackRef = db.collection("actionTracks").doc(actionTrack.id);
+      batch.update(actionTrackRef, {
+        imageUrl,
+        chooseUname,
+        fullname,
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+
+    await commitBatch(batch);
+  });
 
   [newBatch, writeCounts] = await updateUserImageInCollection({
     batch: newBatch,

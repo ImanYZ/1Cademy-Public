@@ -1,12 +1,26 @@
 import dagre from "dagre";
-import { collection, doc, Firestore, getDocs, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  DocumentData,
+  Firestore,
+  getDocs,
+  onSnapshot,
+  query,
+  QueryDocumentSnapshot,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import { ReputationSignal } from "src/knowledgeTypes";
-import { IActionTrackType } from "src/types/IActionTrack";
+import { IActionTrack, IActionTrackType } from "src/types/IActionTrack";
+import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
-import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
+import { getNodeTypesFromNode, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
 import { EdgesData, FullNodeData, FullNodesData, NodeFireStore } from "../../nodeBookTypes";
 import { getTypedCollections } from "./getTypedCollections";
+import { gtmEvent } from "./utils";
 
 // import { FullNodeData } from "../../noteBookTypes";
 
@@ -1295,15 +1309,26 @@ export const generateReputationSignal = (
   nodeId: string,
   setReputationSignal: any
 ) => {
-  if (node.tagIds && node.tagIds.includes(String(user?.tagId))) {
-    let reputation: number = change * (changeType === "Wrong" ? -1 : 1);
-    setTimeout(async () => {
-      const { versionsColl } = getTypedCollections(db, node.nodeType);
+  gtmEvent("Interaction", {
+    customType: "NoteVote",
+    subType: changeType,
+  });
+  const signals: ReputationSignal[] = [];
+  const hasCurrentCommunity = node.tagIds && node.tagIds.includes(String(user?.tagId));
+  let reputation: number = change * (changeType === "Wrong" ? -1 : 1);
+  setTimeout(async () => {
+    const nodeTypes: INodeType[] = getNodeTypesFromNode(node as any);
+    let maxVersionRating: number = 1;
+    let versionsData: {
+      [nodeType: string]: QueryDocumentSnapshot<DocumentData>[];
+    } = {};
+    for (const nodeType of nodeTypes) {
+      const { versionsColl } = getTypedCollections(db, nodeType);
       if (versionsColl) {
         const versionsQuery = query(versionsColl, where("node", "==", nodeId), where("deleted", "==", false));
-        const versionsData = await getDocs(versionsQuery);
-        let maxVersionRating: number = 1;
-        for (const doc of versionsData.docs) {
+        const _versionsData = await getDocs(versionsQuery);
+        versionsData[nodeType as string] = _versionsData.docs;
+        for (const doc of _versionsData.docs) {
           const nodeVersion = doc.data() as INodeVersion;
           if (!nodeVersion.accepted) {
             continue;
@@ -1313,37 +1338,50 @@ export const generateReputationSignal = (
             maxVersionRating = netVote;
           }
         }
-        const signals: ReputationSignal[] = [];
-        for (const doc of versionsData.docs) {
-          const types: string[] = ["Weekly", "Monthly", "All Time"];
-          const nodeVersion = doc.data() as INodeVersion;
-          if (nodeVersion.proposer != user?.uname) {
-            types.push(...["Others Votes", "Others Monthly"]);
-          }
-          if (!nodeVersion.accepted) {
-            continue;
-          }
-          let versionRatingChange =
-            Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, nodeVersion.corrects - nodeVersion.wrongs) / maxVersionRating;
-          versionRatingChange *= reputation;
+      }
+    }
+    for (const nodeType of nodeTypes) {
+      if (!versionsData.hasOwnProperty(nodeType)) continue;
+      for (const doc of versionsData[nodeType]) {
+        const types: string[] = ["Weekly", "Monthly", "All Time"];
+        const nodeVersion = doc.data() as INodeVersion;
+        if (nodeVersion.proposer != user?.uname) {
+          types.push(...["Others Votes", "Others Monthly"]);
+        }
+        if (!nodeVersion.accepted) {
+          continue;
+        }
+        let versionRatingChange =
+          Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, nodeVersion.corrects - nodeVersion.wrongs) / maxVersionRating;
+        versionRatingChange *= reputation;
+        gtmEvent("Reputation", {
+          value: versionRatingChange,
+        });
+        if (hasCurrentCommunity) {
           signals.push({
             reputation: versionRatingChange,
             type: types as any,
             uname: String(nodeVersion.proposer),
           });
         }
+      }
+      if (hasCurrentCommunity) {
         setReputationSignal(signals);
       }
-    });
-  }
+    }
+  });
 };
 
 export const createActionTrack = (
   db: Firestore,
   type: IActionTrackType,
   action: string,
-  uname: string,
-  imageUrl: string,
+  userData: {
+    uname: string;
+    imageUrl: string;
+    chooseUname: boolean;
+    fullname: string;
+  },
   nodeId: string,
   receivers: string[]
 ) => {
@@ -1352,12 +1390,14 @@ export const createActionTrack = (
     accepted: true,
     type,
     action,
-    imageUrl,
+    imageUrl: userData.imageUrl,
     createdAt: Timestamp.now(),
-    doer: uname,
+    doer: userData.uname,
+    chooseUname: userData.chooseUname,
+    fullname: userData.fullname,
     nodeId,
     receivers,
-  });
+  } as IActionTrack);
 };
 
 {

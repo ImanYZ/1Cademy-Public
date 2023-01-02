@@ -8,18 +8,19 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 interface ShareButtonsProps {
+  url?: string;
   showHelp?: boolean;
   responsive?: boolean;
 }
 
-export const ShareButtons = ({ showHelp = false, responsive = false }: ShareButtonsProps) => {
+export const ShareButtons = ({ url, showHelp = false, responsive = false }: ShareButtonsProps) => {
   const router = useRouter();
-  const [url, setUrl] = useState("");
+  const [pageUrl, setPageUrl] = useState("");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const URL = window.location.href;
-    setUrl(URL);
+    setPageUrl(url ? url : URL);
   }, [router]);
 
   const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
@@ -29,11 +30,11 @@ export const ShareButtons = ({ showHelp = false, responsive = false }: ShareButt
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways 
-        ${encodeURIComponent(url)}`;
+        ${encodeURIComponent(pageUrl)}`;
   };
 
   const onShareByLink = () => {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(pageUrl);
     setOpen(true);
   };
 
@@ -51,7 +52,7 @@ export const ShareButtons = ({ showHelp = false, responsive = false }: ShareButt
         </IconButton>
         {/* this works with different urls from localhost */}
         <IconButton
-          href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
+          href={`https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`}
           sx={{ color: "#BDBDBD", transition: "1s", ":hover": { transform: "translate(0px, -5px)", color: "#3b5998" } }}
           target="_blank"
           rel="noopener"
@@ -61,7 +62,7 @@ export const ShareButtons = ({ showHelp = false, responsive = false }: ShareButt
         </IconButton>
         {/* this works with different urls from localhost */}
         <IconButton
-          href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=${pageUrl}`}
           sx={{ color: "#BDBDBD", transition: "1s", ":hover": { transform: "translate(0px, -5px)", color: "#0e76a8" } }}
           target="_blank"
           rel="noopener"

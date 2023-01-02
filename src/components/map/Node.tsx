@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, InputLabel, TextField } from "@mui/material";
+import { Box, Button, Grid, InputLabel, Switch, TextField, Typography } from "@mui/material";
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
@@ -16,6 +16,7 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
+import LeaderboardChip from "../LeaderboardChip";
 import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -29,9 +30,11 @@ import QuestionChoices from "./QuestionChoices";
 // this Node need to become testeable
 // also split the in (Node and FormNode) to reduce the complexity
 
+type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
+  setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
   citationsSelected: any;
   proposalsSelected: any;
@@ -50,6 +53,8 @@ type NodeProps = {
   content: string;
   nodeImage: string;
   nodeVideo: string;
+  nodeVideoStartTime: number;
+  nodeVideoEndTime: number;
   viewers: number;
   correctNum: any;
   markedCorrect: any;
@@ -116,6 +121,9 @@ type NodeProps = {
   openSidebar: OpenSidebar;
   locked: boolean;
   setOperation: (operation: string) => void;
+  contributors: any;
+  institutions: any;
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -129,6 +137,7 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 
 const Node = ({
   identifier,
+  setFocusView,
   activeNode,
   citationsSelected,
   proposalsSelected,
@@ -147,6 +156,8 @@ const Node = ({
   content,
   nodeImage,
   nodeVideo,
+  nodeVideoStartTime,
+  nodeVideoEndTime,
   viewers,
   correctNum,
   markedCorrect,
@@ -213,9 +224,13 @@ const Node = ({
   openSidebar,
   locked,
   setOperation,
+  contributors,
+  institutions,
+  openUserInfoSidebar,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const [option, setOption] = useState<EditorOptions>("EDIT");
 
   const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
@@ -223,6 +238,8 @@ const Node = ({
   const [reason, setReason] = useState("");
   const [addVideo, setAddVideo] = useState(!!nodeVideo);
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
+  const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
+  const [videoEndTime, setVideoEndTime] = useState<any>(nodeVideoEndTime ? nodeVideoEndTime : 0);
 
   const nodeRef = useRef(null);
   const previousHeightRef = useRef<number>(0);
@@ -245,9 +262,21 @@ const Node = ({
     setContentCopy(content);
   }, [title, content]);
 
+  useEffect(() => {
+    setVideoUrl(videoUrl => {
+      return videoUrl !== nodeVideo ? nodeVideo : videoUrl;
+    });
+    setVideoStartTime((videoStartTime: any) => {
+      return videoStartTime !== nodeVideoStartTime ? nodeVideoStartTime : videoStartTime;
+    });
+    setVideoEndTime((videoEndTime: any) => {
+      return videoEndTime !== nodeVideoEndTime ? nodeVideoEndTime : videoEndTime;
+    });
+  }, [nodeVideo, nodeVideoStartTime, nodeVideoEndTime]);
+
   const videoData = useMemo(() => {
-    return getVideoDataByUrl(videoUrl);
-  }, [videoUrl]);
+    return getVideoDataByUrl(videoUrl, parseInt(videoStartTime), parseInt(videoEndTime));
+  }, [videoUrl, videoStartTime, videoEndTime]);
 
   useEffect(() => {
     if (!addVideo) {
@@ -324,7 +353,7 @@ const Node = ({
     if (newContent.trim().length > 0) {
       setAbleToPropose(true);
     } else {
-      if (!imageLoaded) {
+      if (!imageLoaded && !videoUrl) {
         setAbleToPropose(false);
       }
     }
@@ -338,7 +367,7 @@ const Node = ({
     [toggleNode, identifier, open]
   );
   const removeImageHandler = useCallback(() => {
-    if (contentCopy.trim().length == 0) {
+    if (contentCopy.trim().length == 0 && !videoUrl) {
       setAbleToPropose(false);
     }
     setImageLoaded(false);
@@ -502,6 +531,19 @@ const Node = ({
     [ableToPropose]
   );
 
+  const onChangeOption = useCallback(
+    (newOption: boolean) => {
+      setOption(newOption ? "PREVIEW" : "EDIT");
+    },
+    [setOption]
+  );
+
+  const onKeyEnter = (e: any) => {
+    if (e.keyCode === 13) {
+      onChangeOption(option === "EDIT");
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -556,8 +598,40 @@ const Node = ({
                 </>
               )}
               {/* CHECK: I commented this */}
+
+              {editable && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "end",
+                    alignItems: "center",
+                    position: "relative",
+                    top: "-10px",
+                  }}
+                >
+                  <Typography
+                    onClick={() => setOption("PREVIEW")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Preview
+                  </Typography>
+                  <Switch
+                    checked={option === "EDIT"}
+                    onClick={() => onChangeOption(option === "EDIT")}
+                    size="small"
+                    onKeyDown={onKeyEnter}
+                  />
+                  <Typography
+                    onClick={() => setOption("EDIT")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Edit
+                  </Typography>
+                </Box>
+              )}
+
               <Editor
-                label="Please enter the node title below:"
+                label="Enter the node title:"
                 value={titleCopy}
                 setValue={onSetTitle}
                 onBlurCallback={onBlurNodeTitle}
@@ -566,10 +640,13 @@ const Node = ({
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
                 error={error ? true : false}
                 helperText={error ? error : ""}
+                showEditPreviewSection={false}
+                editOption={option}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
                 <MemoizedNodeHeader
+                  setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
                   open={open}
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={hideOffspringsHandler}
@@ -580,12 +657,14 @@ const Node = ({
             </div>
             <div className="NodeContent" data-hoverable={true}>
               <Editor
-                label="Please edit the node content below:"
+                label="Edit the node content:"
                 value={contentCopy}
                 setValue={onSetContent}
                 onBlurCallback={value => onBlurContent(value)}
                 readOnly={!editable}
                 sxPreview={{ marginTop: "13px" }}
+                showEditPreviewSection={false}
+                editOption={option}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 
@@ -628,6 +707,7 @@ const Node = ({
                           switchChoice={switchChoice}
                           changeChoice={changeChoice}
                           changeFeedback={changeFeedback}
+                          option={option}
                         />
                       );
                     })}
@@ -651,23 +731,24 @@ const Node = ({
                 <>
                   <Editor
                     label={
-                      "To expedite your proposal review, explain why you propose this " +
-                      (isNew ? nodeType + " child node:" : "new version:")
+                      "Explain why you propose this " +
+                      (isNew ? nodeType + " child node" : "new version") +
+                      " to expedite your proposal review:"
                     }
                     value={reason}
                     setValue={setReason}
                     readOnly={false}
                     onBlurCallback={onBlurExplainDesc}
+                    showEditPreviewSection={false}
+                    editOption={option}
                   />
                 </>
               )}
               {editable && addVideo && (
                 <>
                   <Box sx={{ mb: "12px" }}></Box>
-                  <InputLabel sx={{ fontWeight: 490 }}>
-                    {"Please enter the video url below (Youtube and Vimeo are allowed):"}
-                  </InputLabel>
                   <TextField
+                    label={"Enter a YouTube URL:"}
                     onChange={e => setVideoUrl(e.target.value)}
                     onBlur={() => {
                       if (videoUrl !== nodeVideo) {
@@ -675,10 +756,66 @@ const Node = ({
                       }
                     }}
                     value={videoUrl}
-                    variant="standard"
+                    variant="outlined"
                     fullWidth
                     sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
                   />
+                  <Box sx={{ mb: "12px" }}></Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "49.5%",
+                      }}
+                    >
+                      <TextField
+                        type={"number"}
+                        label={"Start time:"}
+                        onChange={e => {
+                          let startTime = parseInt(e.target.value);
+                          setVideoStartTime(!isNaN(startTime) ? startTime : "");
+                        }}
+                        onBlur={() => {
+                          if (nodeVideoStartTime !== videoStartTime) {
+                            setNodeParts(identifier, node => ({ ...node, nodeVideoStartTime: videoStartTime }));
+                          }
+                        }}
+                        value={videoStartTime}
+                        variant="outlined"
+                        fullWidth
+                        sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+                      />
+                    </Box>
+
+                    <Box
+                      sx={{
+                        width: "49.5%",
+                      }}
+                    >
+                      <TextField
+                        type={"number"}
+                        label={"End time:"}
+                        onChange={e => {
+                          let endTime = parseInt(e.target.value);
+                          setVideoEndTime(!isNaN(endTime) ? endTime : "");
+                        }}
+                        onBlur={() => {
+                          if (nodeVideoEndTime !== videoEndTime) {
+                            setNodeParts(identifier, node => ({ ...node, nodeVideoEndTime: videoEndTime }));
+                          }
+                        }}
+                        value={videoEndTime}
+                        variant="outlined"
+                        fullWidth
+                        sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+                      />
+                    </Box>
+                  </Box>
                   <Box sx={{ mb: "12px" }}></Box>
                   <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
                 </>
@@ -700,6 +837,7 @@ const Node = ({
                 acceptedProposalsSelected={acceptedProposalsSelected}
                 commentsSelected={commentsSelected}
                 editable={editable}
+                setNodeParts={setNodeParts}
                 title={title}
                 content={content}
                 unaccepted={unaccepted}
@@ -743,6 +881,9 @@ const Node = ({
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
                 openSidebar={openSidebar}
+                contributors={contributors}
+                institutions={institutions}
+                openUserInfoSidebar={openUserInfoSidebar}
               />
             </div>
           </div>
@@ -826,6 +967,7 @@ const Node = ({
             </div>
             {!nodeBookState.choosingNode && (
               <MemoizedNodeHeader
+                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
                 open={open}
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
@@ -845,6 +987,7 @@ const Node = ({
                 acceptedProposalsSelected={acceptedProposalsSelected}
                 commentsSelected={commentsSelected}
                 editable={editable}
+                setNodeParts={setNodeParts}
                 title={title}
                 content={content}
                 unaccepted={unaccepted}
@@ -887,12 +1030,15 @@ const Node = ({
                 setOpenSideBar={setOpenSideBar}
                 locked={locked}
                 openSidebar={openSidebar}
+                contributors={contributors}
+                institutions={institutions}
+                openUserInfoSidebar={openUserInfoSidebar}
               />
             </div>
           </div>
         </div>
       )}
-      {openSidebar === "PROPOSALS" && !isNew && nodeBookState.selectedNode == identifier ? (
+      {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
         <>
           <Box
             sx={{

@@ -46,6 +46,7 @@ export interface NodeBookState {
   readonly choosingNode: ChoosingNode | null;
   readonly chosenNode: ChosenNode | null;
   readonly selectedNode: string | null;
+  readonly initialProposal: string | null;
   readonly selectionType: SelectionType;
   readonly selectedTags: string[];
   readonly openToolbar: boolean;
@@ -57,6 +58,8 @@ export interface NodeBookState {
   readonly nodeId: any;
   readonly isMenuOpen: boolean;
   readonly lastOperation: LastOperation;
+  readonly contributorsNodeId: any;
+  readonly showContributors: any;
 }
 
 export type SetSNodeAction = {
@@ -133,6 +136,15 @@ export type SetLastOperation = {
   payload: LastOperation;
 };
 
+export type SetContributorsNodeId = {
+  type: "setContributorsNodeId";
+  payload: any;
+};
+export type SetInitialProposal = {
+  type: "setInitialProposal";
+  payload: string | null;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -148,7 +160,9 @@ export type DispatchNodeBookActions =
   | SetSearchByTitleOnly
   | SetOpenEditButtonAction
   | SetIsMenuOpen
-  | SetLastOperation;
+  | SetLastOperation
+  | SetContributorsNodeId
+  | SetInitialProposal;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
@@ -226,7 +240,11 @@ export type NodeFireStore = {
   isTag: boolean;
   maxVersionRating?: number;
   nodeImage?: string;
+  nodeVideo?: string;
+  nodeVideoEndTime?: number;
+  nodeVideoStartTime?: number;
   nodeType: NodeType;
+  nodeTypes?: NodeType[];
   parents: {
     node: string;
     label: string;

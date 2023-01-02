@@ -36,9 +36,9 @@ type ProposalsListProps = {
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const rateProposalClick = useCallback(
-    (proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
+    (e: any, proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       return props.rateProposal(
-        event,
+        e,
         props.proposals,
         props.setProposals,
         proposal.id,
@@ -92,7 +92,20 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
             }
             return (
               <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
-                <Paper elevation={3} sx={{ display: "flex", padding: "10px 20px", flexDirection: "column" }}>
+                <Paper
+                  onClick={(e: any) => props.selectProposal(e, "", null)}
+                  elevation={3}
+                  sx={{
+                    display: "flex",
+                    padding: "10px 20px",
+                    flexDirection: "column",
+                    position: "relative",
+                    border: "2px solid #ff8a33",
+                    ":hover": {
+                      boxShadow: "1px 0px 4px 2px rgb(190 190 190)",
+                    },
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
@@ -112,7 +125,10 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                     >
                       <ContainedButton
                         title="Click if you find this proposal Unhelpful."
-                        onClick={() => rateProposalClick(proposal, proposalIdx, false, true, false)}
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          rateProposalClick(e, proposal, proposalIdx, false, true, false);
+                        }}
                         disabled={isDeleting}
                       >
                         <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
@@ -126,7 +142,10 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
 
                       <ContainedButton
                         title="Click if you find this proposal helpful."
-                        onClick={() => rateProposalClick(proposal, proposalIdx, true, false, false)}
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          rateProposalClick(e, proposal, proposalIdx, true, false, false);
+                        }}
                         disabled={isDeleting}
                       >
                         <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
@@ -140,10 +159,11 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
 
                       <ContainedButton
                         title={adminTooltip}
-                        onClick={() => {
+                        onClick={(e: any) => {
+                          e.stopPropagation();
                           !props.isAdmin || proposal.proposer === username
                             ? false
-                            : rateProposalClick(proposal, proposalIdx, false, false, true);
+                            : rateProposalClick(e, proposal, proposalIdx, false, false, true);
                         }}
                         disabled={isDisabled}
                       >

@@ -22,7 +22,7 @@ describe("addTagCommunityAndTagsOfTags", () => {
 
   it("should perform addTagCommunityAndTagsOfTags action on tags collection", async () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-    let nodeDoc: any = await db.collection("nodes").doc("VnXTRolBGyHF3q8EvxS3").get();
+    let nodeDoc: any = await db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL").get();
     const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     const proposer = versionsDocs.docs[0].data().proposer;
