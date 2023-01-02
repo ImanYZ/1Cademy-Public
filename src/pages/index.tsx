@@ -116,6 +116,7 @@ const Home = () => {
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
     src: "rive/artboard-1.riv",
     artboard: "artboard-1",
+    animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
@@ -123,6 +124,7 @@ const Home = () => {
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
     src: "rive/artboard-2.riv",
     artboard: "artboard-2",
+    animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
@@ -130,6 +132,7 @@ const Home = () => {
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
     src: "rive/artboard-3.riv",
     artboard: "artboard-3",
+    animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
@@ -137,6 +140,7 @@ const Home = () => {
   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
     src: "rive/artboard-4.riv",
     artboard: "artboard-4",
+    animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
@@ -144,6 +148,7 @@ const Home = () => {
   const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
     src: "rive/artboard-5.riv",
     artboard: "artboard-5",
+    animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
@@ -416,7 +421,7 @@ const Home = () => {
     if (!rive6) return;
 
     advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
-  }, [rive6, theme, theme.palette.mode]);
+  }, [rive6, theme]);
 
   return (
     // <ThemeProvider theme={brandingDarkTheme}>
