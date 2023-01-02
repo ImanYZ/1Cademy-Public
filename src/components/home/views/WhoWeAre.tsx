@@ -306,8 +306,8 @@ const WhoWeAre = () => {
                     sx={{ width: 100, height: 130, mr: 2.5 }}
                   />
                 </ListItemAvatar>
-                <ListItemText
-                  primary="1Cademy Architect"
+                {/* <Box
+                  primary="1Cademy Architect"//p
                   secondary={
                     <React.Fragment>
                       <Typography
@@ -325,7 +325,19 @@ const WhoWeAre = () => {
                       </Box>
                     </React.Fragment>
                   }
-                />
+                > </Box> */}
+                <Box>
+                  <Typography variant="h4" sx={{ pb: "6px" }}>
+                    1Cademy Architect
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: "14px" }}>
+                    Iman YeckehZaare
+                  </Typography>
+                  <Typography component="p" sx={{ color: getGrayColorText(), fontSize: "14px" }}>
+                    Ph.D. Candidate, Awarded as the Best Graduate Student Instructor of the Year 2018-2019 at the
+                    University of Michigan, School of Information
+                  </Typography>
+                </Box>
               </ListItemButton>
               <ListItemButton
                 alignItems="flex-start"
@@ -340,7 +352,7 @@ const WhoWeAre = () => {
                     sx={{ width: 100, height: 130, mr: 2.5 }}
                   />
                 </ListItemAvatar>
-                <ListItemText
+                {/* <ListItemText
                   primary="1Cademy Advisor"
                   secondary={
                     <React.Fragment>
@@ -359,13 +371,25 @@ const WhoWeAre = () => {
                       </Box>
                     </React.Fragment>
                   }
-                />
+                /> */}
+                <Box>
+                  <Typography variant="h4" sx={{ pb: "6px" }}>
+                    1Cademy Advisor
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: "14px" }}>
+                    Paul Resnick
+                  </Typography>
+                  <Typography component="p" sx={{ color: getGrayColorText(), fontSize: "14px" }}>
+                    Michael D. Cohen Collegiate Professor of Information, Associate Dean for Research and Faculty
+                    Affairs and Professor of Information, University of Michigan, School of Information
+                  </Typography>
+                </Box>
               </ListItemButton>
               <ListItemButton alignItems="flex-start" component="a" target="_blank" href="https://www.honor.education/">
                 <ListItemAvatar>
                   <Avatar alt="Honor Education" src={HonorEducation.src} sx={{ width: 100, height: 100, mr: 2.5 }} />
                 </ListItemAvatar>
-                <ListItemText
+                {/* <ListItemText
                   primary="Supported by Honor Education"
                   secondary={
                     <React.Fragment>
@@ -380,7 +404,15 @@ const WhoWeAre = () => {
                       </Typography>
                     </React.Fragment>
                   }
-                />
+                /> */}
+                <Box>
+                  <Typography variant="h4" sx={{ pb: "6px" }}>
+                    Supported by Honor Education
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: "14px" }}>
+                    Honor Education
+                  </Typography>
+                </Box>
               </ListItemButton>
               <ListItemButton alignItems="flex-start" component="a" target="_blank" href="https://www.si.umich.edu/">
                 <ListItemAvatar>
@@ -390,7 +422,7 @@ const WhoWeAre = () => {
                     sx={{ width: 100, height: 100, mr: 2.5 }}
                   />
                 </ListItemAvatar>
-                <ListItemText
+                {/* <ListItemText
                   primary="Supported by University of Michigan"
                   secondary={
                     <React.Fragment>
@@ -405,7 +437,15 @@ const WhoWeAre = () => {
                       </Typography>
                     </React.Fragment>
                   }
-                />
+                /> */}
+                <Box>
+                  <Typography variant="h4" sx={{ pb: "6px" }}>
+                    Supported by University of Michigan
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: "14px" }}>
+                    School of Information
+                  </Typography>
+                </Box>
               </ListItemButton>
               <ListItemButton
                 alignItems="flex-start"
@@ -416,7 +456,7 @@ const WhoWeAre = () => {
                 <ListItemAvatar>
                   <Avatar alt="Google Cloud Logo" src={GoogleCloud.src} sx={{ width: 100, height: 100, mr: 2.5 }} />
                 </ListItemAvatar>
-                <ListItemText
+                {/* <ListItemText
                   primary="Supported by Google"
                   secondary={
                     <React.Fragment>
@@ -434,7 +474,18 @@ const WhoWeAre = () => {
                       </Box>
                     </React.Fragment>
                   }
-                />
+                /> */}
+                <Box>
+                  <Typography variant="h4" sx={{ pb: "6px" }}>
+                    Supported by Google
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: "14px" }}>
+                    Google Cloud
+                  </Typography>
+                  <Typography component="p" sx={{ color: getGrayColorText(), fontSize: "14px" }}>
+                    awarded research credits to host 1Cademy on GCP services, under award number 205607640.
+                  </Typography>
+                </Box>
               </ListItemButton>
             </List>
           </Paper>
