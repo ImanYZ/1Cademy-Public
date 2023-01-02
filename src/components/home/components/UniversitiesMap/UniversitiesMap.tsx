@@ -41,7 +41,7 @@ const UniversitiesMap = (props: any) => {
   }, [db]);
 
   return (
-    <Box id="SchoolsSection" component="section" sx={{ mt: 8, mb: 4, minHeight: 400 }}>
+    <Box component="section" sx={{ minHeight: 400 }}>
       <div className="UniversitiesAndColleges" ref={props.schoolsRef}>
         {/* <Typography
           variant="h4"

@@ -35,11 +35,11 @@ const WhoWeAre = () => {
 
   return (
     <Box
-      id="WhoWeAreSection"
+      // id="WhoWeAreSection"
       component="section"
       sx={{
-        pt: 7,
-        pb: 10,
+        // pt: 7,
+        // pb: 10,
         position: "relative",
         display: "flex",
         flexDirection: "column",

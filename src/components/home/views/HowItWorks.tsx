@@ -42,7 +42,7 @@ const HowItWorks = (props: any) => {
 
   return (
     <Box
-      id="HowItWorksSection"
+      // id="HowItWorksSection"
       component="section"
       sx={{
         height: getHeightSection(),

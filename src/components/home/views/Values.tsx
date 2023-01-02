@@ -35,11 +35,11 @@ const Values = () => {
 
   return (
     <Box
-      id="ValuesSection"
+      // id="ValuesSection"
       component="section"
       sx={{
-        pt: 7,
-        pb: 10,
+        // pt: 7,
+        // pb: 10,
         // bgcolor: "secondary.light",
         position: "relative",
         display: "flex",

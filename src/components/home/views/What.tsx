@@ -71,11 +71,14 @@ const goToCommPage = (commId: string) => {
 
 const What = () => {
   return (
-    <Box id="CommunitiesSection" component="section" sx={{ pt: 10, pb: 4 }}>
+    <Box
+      // id="CommunitiesSection"
+      component="section"
+    >
       {/* <Typography variant="h4" marked="center" align="center" sx={{ mb: 7 }}>
         {sectionsOrder[sectionIdx].title}
       </Typography> */}
-      <Box sx={{ mt: 7, display: "flex", flexWrap: "wrap" }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap" }}>
         {communities.map(communi => (
           <ImageIconButton
             key={communi.id}

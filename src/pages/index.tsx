@@ -663,7 +663,7 @@ const Home = () => {
         </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-          <Box id={sectionsOrder[1].id} ref={howSectionRef}>
+          <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
             <HowItWorks
               section={sectionSelected}
               // ref={sectionAnimationControllerRef}
@@ -695,13 +695,13 @@ const Home = () => {
             </HowItWorks>
           </Box>
 
-          <Box id={sectionsOrder[2].id} ref={whySectionRef}>
+          <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
               marked="center"
               align="center"
-              sx={{ mb: 7, fontWeight: 700 }}
+              sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[2].title}
             </CustomTypography>
@@ -728,13 +728,13 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[3].id} ref={whatSectionRef}>
+          <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
               marked="center"
               align="center"
-              sx={{ mb: 7, fontWeight: 700 }}
+              sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[3].title}
             </CustomTypography>
@@ -762,13 +762,13 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[4].id} ref={whereSectionRef}>
+          <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
               marked="center"
               align="center"
-              sx={{ mb: 7, fontWeight: 700 }}
+              sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[4].title}
             </CustomTypography>
@@ -783,13 +783,13 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[5].id} ref={whoSectionRef}>
+          <Box id={sectionsOrder[5].id} ref={whoSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
               marked="center"
               align="center"
-              sx={{ mb: 7, fontWeight: 700 }}
+              sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[5].title}
             </CustomTypography>
