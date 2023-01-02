@@ -54,6 +54,8 @@ export type INodeVersion = {
   summary: string;
   nodeImage?: string;
   nodeVideo?: string;
+  nodeVideoStartTime?: string;
+  nodeVideoEndTime?: string;
   nodeAudio?: string;
   subType?: string;
   referenceIds: string[];

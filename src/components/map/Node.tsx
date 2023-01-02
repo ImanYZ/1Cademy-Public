@@ -53,6 +53,8 @@ type NodeProps = {
   content: string;
   nodeImage: string;
   nodeVideo: string;
+  nodeVideoStartTime: number;
+  nodeVideoEndTime: number;
   viewers: number;
   correctNum: any;
   markedCorrect: any;
@@ -154,6 +156,8 @@ const Node = ({
   content,
   nodeImage,
   nodeVideo,
+  nodeVideoStartTime,
+  nodeVideoEndTime,
   viewers,
   correctNum,
   markedCorrect,
@@ -234,6 +238,8 @@ const Node = ({
   const [reason, setReason] = useState("");
   const [addVideo, setAddVideo] = useState(!!nodeVideo);
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
+  const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
+  const [videoEndTime, setVideoEndTime] = useState<any>(nodeVideoEndTime ? nodeVideoEndTime : 0);
 
   const nodeRef = useRef(null);
   const previousHeightRef = useRef<number>(0);
@@ -256,9 +262,21 @@ const Node = ({
     setContentCopy(content);
   }, [title, content]);
 
+  useEffect(() => {
+    setVideoUrl(videoUrl => {
+      return videoUrl !== nodeVideo ? nodeVideo : videoUrl;
+    });
+    setVideoStartTime((videoStartTime: any) => {
+      return videoStartTime !== nodeVideoStartTime ? nodeVideoStartTime : videoStartTime;
+    });
+    setVideoEndTime((videoEndTime: any) => {
+      return videoEndTime !== nodeVideoEndTime ? nodeVideoEndTime : videoEndTime;
+    });
+  }, [nodeVideo, nodeVideoStartTime, nodeVideoEndTime]);
+
   const videoData = useMemo(() => {
-    return getVideoDataByUrl(videoUrl);
-  }, [videoUrl]);
+    return getVideoDataByUrl(videoUrl, parseInt(videoStartTime), parseInt(videoEndTime));
+  }, [videoUrl, videoStartTime, videoEndTime]);
 
   useEffect(() => {
     if (!addVideo) {
@@ -613,7 +631,7 @@ const Node = ({
               )}
 
               <Editor
-                label="Please enter the node title below:"
+                label="Enter the node title:"
                 value={titleCopy}
                 setValue={onSetTitle}
                 onBlurCallback={onBlurNodeTitle}
@@ -639,7 +657,7 @@ const Node = ({
             </div>
             <div className="NodeContent" data-hoverable={true}>
               <Editor
-                label="Please edit the node content below:"
+                label="Edit the node content:"
                 value={contentCopy}
                 setValue={onSetContent}
                 onBlurCallback={value => onBlurContent(value)}
@@ -713,8 +731,9 @@ const Node = ({
                 <>
                   <Editor
                     label={
-                      "To expedite your proposal review, explain why you propose this " +
-                      (isNew ? nodeType + " child node:" : "new version:")
+                      "Explain why you propose this " +
+                      (isNew ? nodeType + " child node" : "new version") +
+                      " to expedite your proposal review:"
                     }
                     value={reason}
                     setValue={setReason}
@@ -728,10 +747,8 @@ const Node = ({
               {editable && addVideo && (
                 <>
                   <Box sx={{ mb: "12px" }}></Box>
-                  <InputLabel sx={{ fontWeight: 490 }}>
-                    {"Please enter the video url below (Youtube and Vimeo are allowed):"}
-                  </InputLabel>
                   <TextField
+                    label={"Enter a YouTube URL:"}
                     onChange={e => setVideoUrl(e.target.value)}
                     onBlur={() => {
                       if (videoUrl !== nodeVideo) {
@@ -739,10 +756,66 @@ const Node = ({
                       }
                     }}
                     value={videoUrl}
-                    variant="standard"
+                    variant="outlined"
                     fullWidth
                     sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
                   />
+                  <Box sx={{ mb: "12px" }}></Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "49.5%",
+                      }}
+                    >
+                      <TextField
+                        type={"number"}
+                        label={"Start time:"}
+                        onChange={e => {
+                          let startTime = parseInt(e.target.value);
+                          setVideoStartTime(!isNaN(startTime) ? startTime : "");
+                        }}
+                        onBlur={() => {
+                          if (nodeVideoStartTime !== videoStartTime) {
+                            setNodeParts(identifier, node => ({ ...node, nodeVideoStartTime: videoStartTime }));
+                          }
+                        }}
+                        value={videoStartTime}
+                        variant="outlined"
+                        fullWidth
+                        sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+                      />
+                    </Box>
+
+                    <Box
+                      sx={{
+                        width: "49.5%",
+                      }}
+                    >
+                      <TextField
+                        type={"number"}
+                        label={"End time:"}
+                        onChange={e => {
+                          let endTime = parseInt(e.target.value);
+                          setVideoEndTime(!isNaN(endTime) ? endTime : "");
+                        }}
+                        onBlur={() => {
+                          if (nodeVideoEndTime !== videoEndTime) {
+                            setNodeParts(identifier, node => ({ ...node, nodeVideoEndTime: videoEndTime }));
+                          }
+                        }}
+                        value={videoEndTime}
+                        variant="outlined"
+                        fullWidth
+                        sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+                      />
+                    </Box>
+                  </Box>
                   <Box sx={{ mb: "12px" }}></Box>
                   <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
                 </>

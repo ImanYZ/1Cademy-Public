@@ -240,6 +240,9 @@ export type NodeFireStore = {
   isTag: boolean;
   maxVersionRating?: number;
   nodeImage?: string;
+  nodeVideo?: string;
+  nodeVideoEndTime?: number;
+  nodeVideoStartTime?: number;
   nodeType: NodeType;
   nodeTypes?: NodeType[];
   parents: {

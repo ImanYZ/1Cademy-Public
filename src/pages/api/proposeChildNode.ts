@@ -33,6 +33,8 @@ export type IProposeChildNodePayload = {
     content: string;
     nodeImage?: string;
     nodeVideo?: string;
+    nodeVideoStartTime?: string;
+    nodeVideoEndTime?: string;
     nodeAudio?: string;
     parents: INodeLink[];
     proposal: string;
@@ -81,7 +83,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const userData = req.body.data.user.userData as IUser;
   try {
-    const { versionNodeId } = req?.body?.data;
+    const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
     ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.parentId }));
     ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: req.body.data.parentId }));
     const newVersion: any = {
@@ -91,6 +93,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       content: req.body.data.content,
       nodeImage: req.body.data.nodeImage,
       nodeVideo: req.body.data.nodeVideo,
+      nodeVideoStartTime,
+      nodeVideoEndTime,
       nodeAudio: req.body.data.nodeAudio,
       corrects: 1,
       createdAt: currentTimestamp,
@@ -213,6 +217,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: 0,
         isTag: false,
       };
+
+      if (nodeVideoStartTime) {
+        newNode.nodeVideoStartTime = nodeVideoStartTime;
+      }
+      if (nodeVideoEndTime) {
+        newNode.nodeVideoEndTime = nodeVideoEndTime;
+      }
       // If a question node gets accepted, it should be added to the practice tool for all
       // users in the communities with the tags that are used on this node.
       // That's why we need to get the list of all members of each of these tags (communities).
