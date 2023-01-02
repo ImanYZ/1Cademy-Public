@@ -37,6 +37,7 @@ import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg"
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
+import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
 import { sectionsOrder } from "../components/home/sectionsOrder";
@@ -93,6 +94,7 @@ const Home = () => {
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMovil = useMediaQuery("(max-width:600px)");
+  const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
@@ -485,7 +487,7 @@ const Home = () => {
           >
             <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
 
-            {!isMovil && (
+            {isTablet && (
               <>
                 <Tooltip title={sectionsOrder[1].title}>
                   <Typography
@@ -551,7 +553,12 @@ const Home = () => {
             )}
           </Stack>
 
-          <Stack direction={"row"}>
+          <Stack direction={"row"} alignItems="center">
+            {!isMovil && (
+              <Box sx={{ width: "150px" }}>
+                <AppHeaderSearchBar searcherUrl={"search"} />
+              </Box>
+            )}
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
@@ -583,12 +590,16 @@ const Home = () => {
                 onClick={signUpHandler}
                 size={isMovil ? "small" : "medium"}
                 sx={{
+                  // width: "150px",
                   // display: showSignInorUp ? "inline-flex" : "none",
-                  display: "inline-flex",
+                  // display: "inline-flex",
                   fontSize: 16,
                   // color: "common.white",
                   ml: 2.5,
                   borderRadius: 40,
+                  wordBreak: "normal",
+                  whiteSpace: "nowrap",
+
                   // backgroundColor: theme =>
                   //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
                   // "&:hover": {
