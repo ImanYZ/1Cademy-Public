@@ -170,6 +170,27 @@ const Home = () => {
     rive1.play();
   }, [rive1]);
 
+  useEffect(() => {
+    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
+
+    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
+  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
+
+  useEffect(() => {
+    const hash = window?.location?.hash;
+    console.log({ hash });
+    if (!hash) return;
+    // console.log({ router, location: window.location });
+    const selectedSectionByUrl = sectionsTmp.findIndex(cur => `#${cur.id}` === hash);
+    if (selectedSectionByUrl < 0) return;
+    setSelectedSection(selectedSectionByUrl);
+  }, []);
+
   // TODO: create useEffect to redirect when session is detected
 
   const getSectionHeights = useCallback(() => {
@@ -418,16 +439,6 @@ const Home = () => {
   const signUpHandler = () => {
     router.push("/signin");
   };
-  useEffect(() => {
-    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
-
-    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
-  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
 
   return (
     // <ThemeProvider theme={brandingDarkTheme}>
