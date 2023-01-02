@@ -183,15 +183,13 @@ const Home = () => {
 
   useEffect(() => {
     const hash = window?.location?.hash;
-    console.log({ hash });
     if (!hash) return;
-    // console.log({ router, location: window.location });
+
     const selectedSectionByUrl = sectionsTmp.findIndex(cur => `#${cur.id}` === hash);
     if (selectedSectionByUrl < 0) return;
+
     setSelectedSection(selectedSectionByUrl);
   }, []);
-
-  // TODO: create useEffect to redirect when session is detected
 
   const getSectionHeights = useCallback(() => {
     if (!HomeSectionRef?.current) return null;
@@ -289,8 +287,6 @@ const Home = () => {
           { max: 0, min: 0, idx: -1 }
         );
 
-        // console.log({ idxSection });
-
         if (idxSection < 0) return;
 
         let animationsHeight = [];
@@ -311,7 +307,6 @@ const Home = () => {
         const sectionSelected = sectionsTmp[idxSection];
 
         if (window.location.hash !== `#${sectionSelected.id}`) {
-          // console.log("repeeat");
           window.history.replaceState(null, sectionSelected.title, "#" + sectionSelected.id);
         }
         setSelectedSection(idxSection);
