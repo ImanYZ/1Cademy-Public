@@ -33,8 +33,9 @@ import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 // import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
-import backgroundImage from "../../public/darkModeLibraryBackground.jpg";
+import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
+import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
@@ -623,7 +624,9 @@ const Home = () => {
             top: 0,
             padding: width < 900 ? "10px" : "20px",
             backgroundColor: "#1d1102",
-            backgroundImage: `url(${backgroundImage.src})`,
+            backgroundImage: `url(${
+              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
+            })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
