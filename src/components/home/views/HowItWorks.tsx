@@ -19,7 +19,7 @@ const HowItWorks = (props: any) => {
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
   const boxLarge = useMemo(() => {
-    const offset = width < 600 ? 16 : width < 900 ? 70 : 100;
+    const offset = width < 600 ? 32 : width < 900 ? 70 : 100;
     if (height < width) return height - offset;
     return width - offset;
   }, [height, width]);
@@ -86,7 +86,7 @@ const HowItWorks = (props: any) => {
             top: artboard.top,
             width: "100%",
             height: artboard.height,
-            // borderRight: `dashed 6px ${artboard.color}`,
+            borderRight: `dashed 6px ${artboard.color}`,
             color: "white",
           }}
         >
@@ -94,7 +94,14 @@ const HowItWorks = (props: any) => {
             <Typography
               variant="h5"
               component="h3"
-              sx={{ mt: "100px", ml: "10px", color: "white", textTransform: "none" }}
+              sx={{
+                mt: "100px",
+                ml: "10px",
+                // position: "sticky",
+                // top: "100px",
+                color: "white",
+                textTransform: "none",
+              }}
             >
               {artboard.name}
             </Typography>
