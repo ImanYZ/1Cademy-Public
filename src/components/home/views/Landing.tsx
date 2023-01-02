@@ -26,10 +26,10 @@ export default function Landing() {
       {/* Increase the network loading priority of the background image. */}
       <img style={{ display: "none" }} src={backgroundImage.src} alt="increase priority" />
       <img src={AnimatediconLoop.src} alt="Animated Logo" width="190px" />
-      <Typography color="inherit" align="center" variant="h2" marked="center"></Typography>
+      {/* <Typography align="center" variant="h2" marked="center" sx={{ color: "inherit" }}></Typography> */}
       <Box sx={{ mb: 4, mt: 4 }}>
         <Collapse in={checked} timeout={1000}>
-          <Typography color="inherit" variant="h5">
+          <Typography variant="h5" sx={{ color: "inherit" }}>
             We Visualize Learning Pathways from Books &amp; Research Papers.
           </Typography>
         </Collapse>

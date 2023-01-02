@@ -12,14 +12,14 @@ const center = {
   lng: -98.408401,
 };
 
-function GoogleMapCom(props) {
+function GoogleMapCom(props: any) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyAl1Lfmndsmvax6PZVH48nwV0kEaBOVgDE",
   });
   const renderMap = () => {
     return (
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={4} options={{ mapId: "6422800f6b1b1ed4" }}>
-        {props.institutions.map(inst => {
+        {props.institutions.map((inst: any) => {
           return (
             <Marker
               key={inst.name}
