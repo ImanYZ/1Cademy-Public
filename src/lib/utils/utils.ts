@@ -314,7 +314,7 @@ export const findDiff = (str1: String, str2: String) => {
   return diff;
 };
 
-export const getVideoDataByUrl = (videoUrl: string) => {
+export const getVideoDataByUrl = (videoUrl: string, startTime?: number, endTime?: number) => {
   let videoId = "";
   let videoType = "";
   let url: string = "";
@@ -324,16 +324,18 @@ export const getVideoDataByUrl = (videoUrl: string) => {
     if (results) {
       videoId = results[2];
       videoType = "youtube";
-      url = `https://www.youtube.com/embed/${videoId}?rel=0`;
+      url = `https://www.youtube.com/embed/${videoId}?rel=0${
+        startTime && endTime && startTime < endTime ? "&start=" + startTime + "&end=" + endTime : ""
+      }`;
     }
-  } else if (videoUrl && videoUrl.match(/vimeo\.com/)) {
+  } /* else if (videoUrl && videoUrl.match(/vimeo\.com/)) {
     const results = videoUrl.match(/(vimeo\.com\/|player\.vimeo\.com\/video\/)([^?&\n]+)/);
     if (results) {
       videoId = results[2];
       videoType = "vimeo";
       url = `https://player.vimeo.com/video/${videoId}`;
     }
-  }
+  } */
 
   return {
     url: url,
