@@ -3,7 +3,21 @@ import React from "react";
 
 import { SECTION_WITH_ANIMATION } from "../../../pages";
 
-const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected, animationSelected }) => {
+type TableOfContentProps = {
+  menuItems: any[];
+  onChangeContent: any;
+  viewType: any;
+  sectionSelected: number;
+  animationSelected: number;
+};
+
+const TableOfContent = ({
+  menuItems,
+  onChangeContent,
+  viewType,
+  sectionSelected,
+  animationSelected,
+}: TableOfContentProps) => {
   const theme = useTheme();
 
   const getTextColor = (mode: PaletteMode, selected: boolean) => {
@@ -26,7 +40,7 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
           pl: viewType === "SIMPLE" ? "8px" : "15px",
         }}
       >
-        {menuItems.map((item, idx) => (
+        {menuItems.map((item: any, idx: number) => (
           <Box
             component={"li"}
             key={item.id}
@@ -112,7 +126,7 @@ const TableOfContent = ({ menuItems, onChangeContent, viewType, sectionSelected,
                   borderLeft: "solid 1px #9c9c9c",
                 }}
               >
-                {item.children.map((child, idx) => (
+                {item.children.map((child: any, idx: number) => (
                   <Tooltip key={child.id} title={child.title} placement="right" arrow disableInteractive>
                     <Box
                       component={"li"}
