@@ -3002,6 +3002,9 @@ const Dashboard = ({}: DashboardProps) => {
               corrects: 1,
               content: proposal.content,
               nodeImage: proposal.nodeImage,
+              nodeVideo: proposal.nodeVideo,
+              videoStartTime: proposal.nodeVideoStartTime,
+              videoEndTime: proposal.nodeVideoEndTime,
               studied: 1,
               choices: [],
               // If we define it as false, then the users will be able to up/down vote on unaccepted proposed nodes!
@@ -3055,6 +3058,9 @@ const Dashboard = ({}: DashboardProps) => {
             thisNode.nodeType = proposal.nodeType || thisNode.nodeType;
             thisNode.title = proposal.title;
             thisNode.content = proposal.content;
+            thisNode.nodeVideo = proposal.nodeVideo;
+            thisNode.nodeVideoStartTime = proposal.nodeVideoStartTime;
+            thisNode.nodeVideoEndTime = proposal.nodeVideoEndTime;
             thisNode.nodeImage = proposal.nodeImage;
             thisNode.references = proposal.references;
             thisNode.children = proposal.children;

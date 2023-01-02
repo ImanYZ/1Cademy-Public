@@ -1,4 +1,4 @@
-import { InputLabel, Switch, TextField, Typography } from "@mui/material";
+import { Switch, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { SxProps, Theme } from "@mui/system";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -96,16 +96,12 @@ export const Editor = ({
 
   return (
     <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
-      {!readOnly && (
-        <InputLabel htmlFor={inputId} sx={{ fontWeight: 490 }}>
-          {label}
-        </InputLabel>
-      )}
       <Box sx={{ display: "flex", flexDirection: "column-reverse" }}>
         <Box>
           {option === "EDIT" && !readOnly ? (
             <TextField
-              variant="standard"
+              label={!readOnly ? label : undefined}
+              variant="outlined"
               id={inputId}
               inputRef={titleFocus}
               fullWidth
