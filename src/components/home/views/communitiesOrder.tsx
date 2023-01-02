@@ -17,7 +17,7 @@ export default [
     weekly: [],
     url: "/static/Communities/Cognitive_Psychology.jpeg",
     title: "UX Research in Cognitive Psychology of Learning",
-    width: "34%",
+    width: "33%",
     leaders: [
       {
         name: "Iman YeckehZaare",
@@ -145,85 +145,85 @@ export default [
       `Co-author the final research paper to submit to reputable conferences/journals.`,
     ],
   },
-  {
-    id: "Educational_Organizational_Psychology",
-    tags: [
-      {
-        title: "Educational Psychology",
-        node: "L35Nac3iqGKuqGnn0xdD",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Educational_Organizational_Psychology.jpg",
-    title: "Educational/Organizational Psychology",
-    width: "33%",
-    leaders: [
-      // {
-      //   name: "Amelia Henriques",
-      //   image: "Amelia_Henriques.jpg",
-      //   about: `I am currently a fourth-year student at the University of Connecticut, working on my BA with a double major in the Psychological Sciences and Human Development & Family Sciences. I am specifically interested in the field of counseling and hope to go into a counseling therapy career where I can work hands-on with children and adolescents.`,
-      //   websites: [
-      //     {
-      //       name: "LinkedIn",
-      //       url: "https://www.linkedin.com/in/ameliahenriques/",
-      //     },
-      //   ],
-      // },
-      {
-        name: "Desiree Mayrie Comer",
-        image: "Desiree_Mayrie_Comer.jpeg",
-        about: `My name is Desiree Comer and I am a recent graduate of Albion College. I graduated with a double major in psychology and sociology. I am currently taking additional courses at Mott Community College to expand my understanding of the Criminal Justice system. I hope to one day work in the field of forensic psychology. I joined the organizational/educational psychology community with hopes of expanding my knowledge of the field of psychology as well as gaining experience in different types of research. When I am not working, studying, or doing research I am reading. I am an avid reader and most of the time I have my noise in a book.`,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/desireecomer/",
-          },
-        ],
-      },
-      // {
-      //   name: "Asia Luboyeski",
-      //   image: "Asia_Luboyeski.jpg",
-      //   about: `As the writer and director of a musical revue for kindergarteners during the coronavirus pandemic, I expanded my creativity, problem-solving skills, and my patience. The successful performance and smiles on the children's faces made everything worth it.
-      //   I am passionate about helping others, particularly children, in any way I can. Currently, I volunteer my time to give alto saxophone lessons to middle schoolers nearby.
-      //   Freshman year, I conducted my own research project investigating how teachers' beliefs about math development impacted their time teaching math. I became efficient at consolidating datasets and summarizing key variable statistics. I also gained experience in data collection, data imputation, and data organization.
-      //   I am excited for the opportunities that the future holds.`,
-      //   websites: [
-      //     {
-      //       name: "LinkedIn",
-      //       url: "https://www.linkedin.com/in/asia-luboyeski/",
-      //     },
-      //   ],
-      // },
-    ],
-    YouTube: "tmW31AEJRYg",
-    description: `The Organizational/Educational Psychology community explores research on both the study of psychology in academia and the psychology utilized in productivity and task management. By using 1Cademy, interns learn how to break down articles into granular concepts, connect them within a larger context of research, communicate their findings to other community interns, and utilize information to write research studies. We value collaborative learning, and expect interns to participate in group discussions both to dive deeper into the content and regularly improve their own content.`,
-    accomplishments: `We have explored topics such as: desirable difficulties, gender gap and Matthew effect in education, procrastination, collective intelligence, motivation, microtasking, and citizen science. We have summarized information from many academic research journals on our community topics, but we also allow interns to find specific topics that interest them, and encourage them to expand the map in that area.`,
-    gains: [
-      `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
-      `Make a difference by identifying educational problems in academia.`,
-      `Propose and collaboratively work on solutions to identified problems `,
-      `Work towards publishing research on education, learning science, industrial-organizational psychology, and cognitive psychology`,
-      `Work remotely with all interactions, task fulfillment, and communications with other interns.`,
-      `Have opportunities to take on leadership roles within the community.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
-    // coursera: "https://www.coursera.org/learn/academicinfoseek",
-    hasTest: true,
-    qualifications: [
-      `Academic background and knowledge in topics related to education, learning science, industrial-organizational psychology, or cognitive psychology.`,
-      `Fluency in writing and reading in English (will have to summarize research articles).`,
-      `Experience and willingness to work in collaborative environments.`,
-    ],
-    responsibilities: [
-      `Be enthusiastic to engage in critical thinking to collaborate and publish research on the topics currently being explored in the community.`,
-      `Be excited to engage in the peer-review process on research proposed by other community members.`,
-      `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
-      `Must be prepared and willing to collaborate with our team of computer scientists, web developers, UX researchers, UI designers, epidemiologists, and cognitive and behavioral scientists.`,
-      `Presenting the essence of what you learn in weekly meetings for further discussion, at least once a month.`,
-      `All interactions, task fulfillment, and communications will be remote.`,
-    ],
-  },
+  // {
+  //   id: "Educational_Organizational_Psychology",
+  //   tags: [
+  //     {
+  //       title: "Educational Psychology",
+  //       node: "L35Nac3iqGKuqGnn0xdD"
+  //     }
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Educational_Organizational_Psychology.jpg",
+  //   title: "Educational/Organizational Psychology",
+  //   width: "33%",
+  //   leaders: [
+  //     // {
+  //     //   name: "Amelia Henriques",
+  //     //   image: "Amelia_Henriques.jpg",
+  //     //   about: `I am currently a fourth-year student at the University of Connecticut, working on my BA with a double major in the Psychological Sciences and Human Development & Family Sciences. I am specifically interested in the field of counseling and hope to go into a counseling therapy career where I can work hands-on with children and adolescents.`,
+  //     //   websites: [
+  //     //     {
+  //     //       name: "LinkedIn",
+  //     //       url: "https://www.linkedin.com/in/ameliahenriques/",
+  //     //     },
+  //     //   ],
+  //     // },
+  //     {
+  //       name: "Desiree Mayrie Comer",
+  //       image: "Desiree_Mayrie_Comer.jpeg",
+  //       about: `My name is Desiree Comer and I am a recent graduate of Albion College. I graduated with a double major in psychology and sociology. I am currently taking additional courses at Mott Community College to expand my understanding of the Criminal Justice system. I hope to one day work in the field of forensic psychology. I joined the organizational/educational psychology community with hopes of expanding my knowledge of the field of psychology as well as gaining experience in different types of research. When I am not working, studying, or doing research I am reading. I am an avid reader and most of the time I have my noise in a book.`,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/desireecomer/"
+  //         }
+  //       ]
+  //     }
+  //     // {
+  //     //   name: "Asia Luboyeski",
+  //     //   image: "Asia_Luboyeski.jpg",
+  //     //   about: `As the writer and director of a musical revue for kindergarteners during the coronavirus pandemic, I expanded my creativity, problem-solving skills, and my patience. The successful performance and smiles on the children's faces made everything worth it.
+  //     //   I am passionate about helping others, particularly children, in any way I can. Currently, I volunteer my time to give alto saxophone lessons to middle schoolers nearby.
+  //     //   Freshman year, I conducted my own research project investigating how teachers' beliefs about math development impacted their time teaching math. I became efficient at consolidating datasets and summarizing key variable statistics. I also gained experience in data collection, data imputation, and data organization.
+  //     //   I am excited for the opportunities that the future holds.`,
+  //     //   websites: [
+  //     //     {
+  //     //       name: "LinkedIn",
+  //     //       url: "https://www.linkedin.com/in/asia-luboyeski/",
+  //     //     },
+  //     //   ],
+  //     // },
+  //   ],
+  //   YouTube: "tmW31AEJRYg",
+  //   description: `The Organizational/Educational Psychology community explores research on both the study of psychology in academia and the psychology utilized in productivity and task management. By using 1Cademy, interns learn how to break down articles into granular concepts, connect them within a larger context of research, communicate their findings to other community interns, and utilize information to write research studies. We value collaborative learning, and expect interns to participate in group discussions both to dive deeper into the content and regularly improve their own content.`,
+  //   accomplishments: `We have explored topics such as: desirable difficulties, gender gap and Matthew effect in education, procrastination, collective intelligence, motivation, microtasking, and citizen science. We have summarized information from many academic research journals on our community topics, but we also allow interns to find specific topics that interest them, and encourage them to expand the map in that area.`,
+  //   gains: [
+  //     `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
+  //     `Make a difference by identifying educational problems in academia.`,
+  //     `Propose and collaboratively work on solutions to identified problems `,
+  //     `Work towards publishing research on education, learning science, industrial-organizational psychology, and cognitive psychology`,
+  //     `Work remotely with all interactions, task fulfillment, and communications with other interns.`,
+  //     `Have opportunities to take on leadership roles within the community.`
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
+  //   // coursera: "https://www.coursera.org/learn/academicinfoseek",
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Academic background and knowledge in topics related to education, learning science, industrial-organizational psychology, or cognitive psychology.`,
+  //     `Fluency in writing and reading in English (will have to summarize research articles).`,
+  //     `Experience and willingness to work in collaborative environments.`
+  //   ],
+  //   responsibilities: [
+  //     `Be enthusiastic to engage in critical thinking to collaborate and publish research on the topics currently being explored in the community.`,
+  //     `Be excited to engage in the peer-review process on research proposed by other community members.`,
+  //     `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
+  //     `Must be prepared and willing to collaborate with our team of computer scientists, web developers, UX researchers, UI designers, epidemiologists, and cognitive and behavioral scientists.`,
+  //     `Presenting the essence of what you learn in weekly meetings for further discussion, at least once a month.`,
+  //     `All interactions, task fulfillment, and communications will be remote.`
+  //   ]
+  // },
   {
     id: "Clinical_Psychology",
     tags: [
@@ -565,7 +565,7 @@ export default [
     weekly: [],
     url: "/static/Communities/Deep_Learning.jpg",
     title: "Natural Language Processing",
-    width: "33%",
+    width: "50%",
     leaders: [
       {
         name: "Ge Zhang",
@@ -655,214 +655,214 @@ export default [
       `Enthusiastically participate in the research assignments if needed.`,
     ],
   },
-  {
-    id: "Graph_Neural_Network",
-    tags: [
-      {
-        title: "Graph Neural Networks (GNNs)",
-        node: "s59mYbhSxRdWscDBoAaN",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Graph_Neural_Network.jpg",
-    title: "Graph Neural Networks",
-    width: "33%",
-    leaders: [
-      {
-        name: "Tian Yan",
-        image: "Tian_Yan.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/tianyan2023/",
-          },
-        ],
-      },
-    ],
-    YouTube: "1J8xBUT1C7c",
-    description: `We are a group of people who are passionate about GNN and eager to learn about the newest developments. In this community, we consistently work on learning, presenting, and communicating the most up-to-date knowledge about GNN, honing our research skills, and conducting frontier research. Every week, each member will be assigned readings on GNN, and each member will summarize their readings in the form of nodes and connections on our platform 1cademy, and present their nodes at our weekly meeting. If the intern is dedicated and has demonstrated good research ability in this process, we'll further invite you to our research team and you will have the opportunity to co-author scientific papers.`,
-    accomplishments: ``,
-    gains: [
-      `You will improve your reading ability of scientific textbooks and papers.`,
-      `You will also learn how to quickly grasp important ideas in a research paper and describe it to others.`,
-      `You will improve your research skills by constantly paraphrasing important concepts in graph neural network, making connections between them, and learning most up-to-date progress in this area.`,
-      `You will improve your communication skills by making weekly presentations of your reading.`,
-      `You will have the opportunity to co-author research papers under the guidance of senior researchers and scientists.`,
-      `You can start at any time and all work will be remote, and you will have an valuable internship experience that you can write on your resume.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
-    hasTest: true,
-    qualifications: [
-      `Knowledge and interest in deep learning, especially Graph Neural Network.`,
-      `Proficiency in at least one programming language, such as R, Python, C++, or Java.`,
-      `Have completed coursework in linear algebra and calculus.`,
-      `Have experience in deep learning through course work, projects, or internships.`,
-      `(Prefered) Have demonstrated experience in Graph Neural Network through course work, projects, or internships.`,
-      `(Prefered) Have past research experience in deep learning, especially Graph Neural Network.`,
-    ],
-    responsibilities: [
-      `Finish your assigned weekly reading, and summarize your reading on our platform 1cademy. The book we are currently reading is Graph Representation Learning by William L. Hamilton, and we also read various survey papers on graph neural network. And if you have other reading materials on graph neural network that interest you more, you can also summarize the readings by your choice.`,
-      `Join our weekly meeting, and present your summarized nodes during meeting. You are also welcome to present any other summarization on graph neural network that interest you.`,
-      `If you're invited to our research team, you also need to collaborate with other team members and finished your part of research work on time.`,
-      `All interactions, task fulfillment, and communications will be remote.`,
-    ],
-  },
-  {
-    id: "Financial_Technology",
-    tags: [
-      {
-        title: "Financial Technology",
-        node: "s2hC6oeafzTAuEsFc4FC",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Cryptoeconomics.jpg",
-    title: "Financial Technology",
-    width: "34%",
-    leaders: [
-      {
-        name: "Xinrong Yao",
-        image: "Xinrong_Yao.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/xinrong-yao-07aa071b1/",
-          },
-        ],
-      },
-    ],
-    YouTube: "4p2QeiPVMzw",
-    description: `Welcome to the Financial Technology and Cryptocurrency Community! Our community predominantly contributes to the areas of fintech, cryptocurrencies, and micro-econometrics on 1Cademy, our collaborative research platform. We dive into the current textbook or research papers in these areas, break them down into granular knowledge pieces in the form of nodes, connect them to the larger context of research, and present our learnings to other community members. We also work on concrete research ideas and co-author research papers to submit to reputable journals and conferences.`,
-    accomplishments: ``,
-    gains: [
-      `Work remotely with an interdisciplinary community of talented students and researchers from different schools.`,
-      `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
-      `Work towards having the opportunity of co-authoring research papers in the field.`,
-      `Have opportunities to take on leadership roles within the community.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
-    hasTest: true,
-    qualifications: [
-      `Knowledge and enthusiasm for topics related to machine learning, finance, and/or cryptocurrency, displayed through research, projects, or coursework experiences`,
-      `Proficiency in Python (or R or some other common programming language)`,
-    ],
-    responsibilities: [
-      `Consistently study current textbook or research papers, summarize chapters or sections, and share the essence of what you learn with our large research team in a hierarchically organized fashion.`,
-      `Attend weekly team meetings to discuss the research and present your efforts throughout the week.`,
-      `Be prepared and excited to collaborate with our other team members from diverse backgrounds.`,
-      `All interactions, task fulfillment, and communications will be remote.`,
-    ],
-  },
-  {
-    id: "Responsible_AI",
-    tags: [
-      {
-        title: "Artifical Intelligence",
-        node: "s2hC6oeafzTAuEsFc4FC",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Responsible_AI.jpg",
-    title: "Responsible AI",
-    width: "33%",
-    leaders: [
-      {
-        name: "Lanjing Ye",
-        image: "Lanjing_Ye.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/lanjing-ye-320581232/",
-          },
-        ],
-      },
-    ],
-    YouTube: "nq0IehyU76Y",
-    description: `Welcome to the Responsible AI Team! Our community predominantly contributes to the Artificial Intelligence area on 1Cademy, our collaborative research platform. We will explore the existing literature and contributions already made in the field of Responsible Artificial Intelligence, including a prospect toward what is yet to be reached. We will learn approaches to making AI systems transparent, fair, secure, and inclusive in the research field. Our team members will dive into the Responsible AI textbooks, survey papers, and journals to gain a concrete understanding of the current state and techniques in the field. Team members will present what they've been learning each week by walking us through the nodes they designed during our weekly team meetings. After meeting certain requirements, you will be invited to join our small research group to work on concrete research ideas and projects.`,
-    accomplishments: ``,
-    gains: [
-      `You will spend the majority of the time going through the Responsible AI textbooks, research papers, and journals to deeply learn about the current progress in the field.`,
-      `You'll gain experience using crucial skills in research (paper analysis, summarization, making connections between disciplines).`,
-      `Top contributors to our community would have the opportunity to co-author research papers in the field.`,
-      `Experience a flexible and collaborative work environment, with all work being done remotely.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
-    hasTest: true,
-    qualifications: [
-      `Knowledge and enthusiasm for topics related to computer science and responsible AI.`,
-      `Displayed interest in computer science through university-level coursework.`,
-      `Proficiency in at least one programming language, such as R, Python, C++, or Java.`,
-      `(Preferred) Previous research experience, or other relevant involvement.`,
-      `(Preferred) Background in artificial intelligence.`,
-    ],
-    responsibilities: [
-      `Constantly study the previously mentioned textbook, research papers, and journals. Summarize chapters and sections, and share the essence of what you learn with our research team in a hierarchically organized fashion.`,
-      `Attend two-hour weekly team meetings to discuss the research and present your efforts throughout the week.`,
-      `Must be prepared and excited to collaborate with our already established team of computer scientists, information scientists, and statisticians.`,
-      `All interactions, task fulfillment, and communications will be remote. You are expected to fulfill the task assigned promptly.`,
-    ],
-  },
-  {
-    id: "Computer_Vision",
-    tags: [
-      {
-        title: "Computer Vision",
-        node: "xwHB94ALORWhaoDLr6yd",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Computer_Vision.jpg",
-    title: "Computer Vision",
-    width: "33%",
-    leaders: [
-      {
-        name: "Adam Nik",
-        image: "Adam_Nik.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/adam-nik-7a9436235/",
-          },
-        ],
-      },
-    ],
-    YouTube: "dDuYg9in7Bg",
-    description: `Welcome to the Computer Vision Community! We are a sub-community under the Deep Learning Community here at 1Cademy and work to explore various research topics and ideas in the field of computer vision. As part of the Computer Vision Community, team members will be tasked with reading and learning from various computer vision research papers and textbooks and will present what they learn to the rest of the community. Additionally, as part of the Computer Vision Community at 1Cademy, interns will be invited to join small research groups to work on concrete research ideas.`,
-    accomplishments: ``,
-    gains: [
-      `Develop key research skills, such as paper analysis, summarization, and making connections between disciplines`,
-      `Explore state-of-the-art computer vision literature and survey papers to gain a concrete understanding of the current state and techniques of the field`,
-      `Work towards publishing research papers within the field of computer vision`,
-      `Experience a flexible and collaborative work environment, with all work being done remotely`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
-    hasTest: true,
-    qualifications: [
-      `Knowledge and enthusiasm for topics related to machine learning and computer vision`,
-      `Proficiency in Python and background in linear algebra`,
-      `Displayed interest in machine learning or similar computer science topics through
-      university-level coursework.`,
-      `(Preferred) Previous research experience, or other relevant involvement.`,
-    ],
-    responsibilities: [
-      `Regularly study textbooks and research papers, summarize them, and add notes to the
-      1cademy collaborative platform.`,
-      `Must be prepared and excited to collaborate with our already established team of
-      computer scientists, information scientists, and statisticians.`,
-      `Attend two-hour weekly team meetings to discuss the research and present your efforts
-      throughout the week.`,
-      `Be flexible and able to meet and work in a small research group once placed.`,
-      `All interactions, task fulfillment, and communications will be remote.`,
-    ],
-  },
+  // {
+  //   id: "Graph_Neural_Network",
+  //   tags: [
+  //     {
+  //       title: "Graph Neural Networks (GNNs)",
+  //       node: "s59mYbhSxRdWscDBoAaN"
+  //     }
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Graph_Neural_Network.jpg",
+  //   title: "Graph Neural Networks",
+  //   width: "33%",
+  //   leaders: [
+  //     {
+  //       name: "Tian Yan",
+  //       image: "Tian_Yan.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/tianyan2023/"
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   YouTube: "1J8xBUT1C7c",
+  //   description: `We are a group of people who are passionate about GNN and eager to learn about the newest developments. In this community, we consistently work on learning, presenting, and communicating the most up-to-date knowledge about GNN, honing our research skills, and conducting frontier research. Every week, each member will be assigned readings on GNN, and each member will summarize their readings in the form of nodes and connections on our platform 1cademy, and present their nodes at our weekly meeting. If the intern is dedicated and has demonstrated good research ability in this process, we'll further invite you to our research team and you will have the opportunity to co-author scientific papers.`,
+  //   accomplishments: ``,
+  //   gains: [
+  //     `You will improve your reading ability of scientific textbooks and papers.`,
+  //     `You will also learn how to quickly grasp important ideas in a research paper and describe it to others.`,
+  //     `You will improve your research skills by constantly paraphrasing important concepts in graph neural network, making connections between them, and learning most up-to-date progress in this area.`,
+  //     `You will improve your communication skills by making weekly presentations of your reading.`,
+  //     `You will have the opportunity to co-author research papers under the guidance of senior researchers and scientists.`,
+  //     `You can start at any time and all work will be remote, and you will have an valuable internship experience that you can write on your resume.`
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Knowledge and interest in deep learning, especially Graph Neural Network.`,
+  //     `Proficiency in at least one programming language, such as R, Python, C++, or Java.`,
+  //     `Have completed coursework in linear algebra and calculus.`,
+  //     `Have experience in deep learning through course work, projects, or internships.`,
+  //     `(Prefered) Have demonstrated experience in Graph Neural Network through course work, projects, or internships.`,
+  //     `(Prefered) Have past research experience in deep learning, especially Graph Neural Network.`
+  //   ],
+  //   responsibilities: [
+  //     `Finish your assigned weekly reading, and summarize your reading on our platform 1cademy. The book we are currently reading is Graph Representation Learning by William L. Hamilton, and we also read various survey papers on graph neural network. And if you have other reading materials on graph neural network that interest you more, you can also summarize the readings by your choice.`,
+  //     `Join our weekly meeting, and present your summarized nodes during meeting. You are also welcome to present any other summarization on graph neural network that interest you.`,
+  //     `If you're invited to our research team, you also need to collaborate with other team members and finished your part of research work on time.`,
+  //     `All interactions, task fulfillment, and communications will be remote.`
+  //   ]
+  // },
+  // {
+  //   id: "Financial_Technology",
+  //   tags: [
+  //     {
+  //       title: "Financial Technology",
+  //       node: "s2hC6oeafzTAuEsFc4FC"
+  //     }
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Cryptoeconomics.jpg",
+  //   title: "Financial Technology",
+  //   width: "34%",
+  //   leaders: [
+  //     {
+  //       name: "Xinrong Yao",
+  //       image: "Xinrong_Yao.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/xinrong-yao-07aa071b1/"
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   YouTube: "4p2QeiPVMzw",
+  //   description: `Welcome to the Financial Technology and Cryptocurrency Community! Our community predominantly contributes to the areas of fintech, cryptocurrencies, and micro-econometrics on 1Cademy, our collaborative research platform. We dive into the current textbook or research papers in these areas, break them down into granular knowledge pieces in the form of nodes, connect them to the larger context of research, and present our learnings to other community members. We also work on concrete research ideas and co-author research papers to submit to reputable journals and conferences.`,
+  //   accomplishments: ``,
+  //   gains: [
+  //     `Work remotely with an interdisciplinary community of talented students and researchers from different schools.`,
+  //     `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
+  //     `Work towards having the opportunity of co-authoring research papers in the field.`,
+  //     `Have opportunities to take on leadership roles within the community.`
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Knowledge and enthusiasm for topics related to machine learning, finance, and/or cryptocurrency, displayed through research, projects, or coursework experiences`,
+  //     `Proficiency in Python (or R or some other common programming language)`
+  //   ],
+  //   responsibilities: [
+  //     `Consistently study current textbook or research papers, summarize chapters or sections, and share the essence of what you learn with our large research team in a hierarchically organized fashion.`,
+  //     `Attend weekly team meetings to discuss the research and present your efforts throughout the week.`,
+  //     `Be prepared and excited to collaborate with our other team members from diverse backgrounds.`,
+  //     `All interactions, task fulfillment, and communications will be remote.`
+  //   ]
+  // },
+  // {
+  //   id: "Responsible_AI",
+  //   tags: [
+  //     {
+  //       title: "Artifical Intelligence",
+  //       node: "s2hC6oeafzTAuEsFc4FC"
+  //     }
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Responsible_AI.jpg",
+  //   title: "Responsible AI",
+  //   width: "33%",
+  //   leaders: [
+  //     {
+  //       name: "Lanjing Ye",
+  //       image: "Lanjing_Ye.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/lanjing-ye-320581232/"
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   YouTube: "nq0IehyU76Y",
+  //   description: `Welcome to the Responsible AI Team! Our community predominantly contributes to the Artificial Intelligence area on 1Cademy, our collaborative research platform. We will explore the existing literature and contributions already made in the field of Responsible Artificial Intelligence, including a prospect toward what is yet to be reached. We will learn approaches to making AI systems transparent, fair, secure, and inclusive in the research field. Our team members will dive into the Responsible AI textbooks, survey papers, and journals to gain a concrete understanding of the current state and techniques in the field. Team members will present what they've been learning each week by walking us through the nodes they designed during our weekly team meetings. After meeting certain requirements, you will be invited to join our small research group to work on concrete research ideas and projects.`,
+  //   accomplishments: ``,
+  //   gains: [
+  //     `You will spend the majority of the time going through the Responsible AI textbooks, research papers, and journals to deeply learn about the current progress in the field.`,
+  //     `You'll gain experience using crucial skills in research (paper analysis, summarization, making connections between disciplines).`,
+  //     `Top contributors to our community would have the opportunity to co-author research papers in the field.`,
+  //     `Experience a flexible and collaborative work environment, with all work being done remotely.`
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Knowledge and enthusiasm for topics related to computer science and responsible AI.`,
+  //     `Displayed interest in computer science through university-level coursework.`,
+  //     `Proficiency in at least one programming language, such as R, Python, C++, or Java.`,
+  //     `(Preferred) Previous research experience, or other relevant involvement.`,
+  //     `(Preferred) Background in artificial intelligence.`
+  //   ],
+  //   responsibilities: [
+  //     `Constantly study the previously mentioned textbook, research papers, and journals. Summarize chapters and sections, and share the essence of what you learn with our research team in a hierarchically organized fashion.`,
+  //     `Attend two-hour weekly team meetings to discuss the research and present your efforts throughout the week.`,
+  //     `Must be prepared and excited to collaborate with our already established team of computer scientists, information scientists, and statisticians.`,
+  //     `All interactions, task fulfillment, and communications will be remote. You are expected to fulfill the task assigned promptly.`
+  //   ]
+  // },
+  // {
+  //   id: "Computer_Vision",
+  //   tags: [
+  //     {
+  //       title: "Computer Vision",
+  //       node: "xwHB94ALORWhaoDLr6yd"
+  //     }
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Computer_Vision.jpg",
+  //   title: "Computer Vision",
+  //   width: "33%",
+  //   leaders: [
+  //     {
+  //       name: "Adam Nik",
+  //       image: "Adam_Nik.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/adam-nik-7a9436235/"
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   YouTube: "dDuYg9in7Bg",
+  //   description: `Welcome to the Computer Vision Community! We are a sub-community under the Deep Learning Community here at 1Cademy and work to explore various research topics and ideas in the field of computer vision. As part of the Computer Vision Community, team members will be tasked with reading and learning from various computer vision research papers and textbooks and will present what they learn to the rest of the community. Additionally, as part of the Computer Vision Community at 1Cademy, interns will be invited to join small research groups to work on concrete research ideas.`,
+  //   accomplishments: ``,
+  //   gains: [
+  //     `Develop key research skills, such as paper analysis, summarization, and making connections between disciplines`,
+  //     `Explore state-of-the-art computer vision literature and survey papers to gain a concrete understanding of the current state and techniques of the field`,
+  //     `Work towards publishing research papers within the field of computer vision`,
+  //     `Experience a flexible and collaborative work environment, with all work being done remotely`
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Knowledge and enthusiasm for topics related to machine learning and computer vision`,
+  //     `Proficiency in Python and background in linear algebra`,
+  //     `Displayed interest in machine learning or similar computer science topics through
+  //     university-level coursework.`,
+  //     `(Preferred) Previous research experience, or other relevant involvement.`
+  //   ],
+  //   responsibilities: [
+  //     `Regularly study textbooks and research papers, summarize them, and add notes to the
+  //     1cademy collaborative platform.`,
+  //     `Must be prepared and excited to collaborate with our already established team of
+  //     computer scientists, information scientists, and statisticians.`,
+  //     `Attend two-hour weekly team meetings to discuss the research and present your efforts
+  //     throughout the week.`,
+  //     `Be flexible and able to meet and work in a small research group once placed.`,
+  //     `All interactions, task fulfillment, and communications will be remote.`
+  //   ]
+  // },
   {
     id: "Liaison_Librarians",
     tags: [
@@ -873,10 +873,9 @@ export default [
     ],
     allTime: [],
     weekly: [],
-    // url: "/static/LibraryBackground.jpg",
     url: "/LibraryBackground.jpg",
     title: "Liaison Librarians",
-    width: "100%",
+    width: "50%",
     leaders: [
       {
         name: "Ben Brown",
