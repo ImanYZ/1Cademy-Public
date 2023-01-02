@@ -25,7 +25,7 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Rive, useRive, useStateMachineInput } from "rive-react";
+import { Rive, useRive } from "rive-react";
 
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
@@ -111,6 +111,7 @@ const Home = () => {
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
+  const timeInSecondsRef = useRef<number>(0);
 
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
     src: "rive/artboard-1.riv",
@@ -149,14 +150,12 @@ const Home = () => {
 
   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
     src: "rive/artboard-6.riv",
-    stateMachines: ["State Machine 1"],
-    animations: ["Timeline 1", "light", "dark"],
+    animations: ["Timeline 1", "dark", "light"],
+    // animations: "Timeline 1",
     artboard: "artboard-6",
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
-
-  const themeAnimation6 = useStateMachineInput(rive6, "State Machine 1", "theme");
 
   useEffect(() => {
     if (!rive1) return;
@@ -309,7 +308,8 @@ const Home = () => {
             const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
             const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
             const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
-            advanceAnimationTo(rive2, timeInSeconds);
+            timeInSecondsRef.current = timeInSeconds;
+            advanceAnimationTo(rive2, timeInSeconds, theme);
 
             setIdxRiveComponent(1);
           }
@@ -329,18 +329,19 @@ const Home = () => {
           const percentageFrame = (positionFrame * 100) / rangeFrames;
 
           const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
+          timeInSecondsRef.current = timeInSeconds;
 
           if (idxAnimation === 0) {
-            advanceAnimationTo(rive3, timeInSeconds);
+            advanceAnimationTo(rive3, timeInSeconds, theme);
           }
           if (idxAnimation === 1) {
-            advanceAnimationTo(rive4, timeInSeconds);
+            advanceAnimationTo(rive4, timeInSeconds, theme);
           }
           if (idxAnimation === 2) {
-            advanceAnimationTo(rive5, timeInSeconds);
+            advanceAnimationTo(rive5, timeInSeconds, theme);
           }
           if (idxAnimation === 3) {
-            advanceAnimationTo(rive6, timeInSeconds);
+            advanceAnimationTo(rive6, timeInSeconds, theme);
             if (percentageFrame > 50) {
               showEndAnimationOptions = true;
             }
@@ -352,7 +353,7 @@ const Home = () => {
         setShowAnimationOptions(showEndAnimationOptions);
       }
     },
-    [getAnimationsPositions, getSectionPositions, height, setSelectedSection, notSectionSwitching]
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
   );
 
   const switchSection = useCallback(
@@ -411,26 +412,11 @@ const Home = () => {
   const signUpHandler = () => {
     router.push("/signin");
   };
+  useEffect(() => {
+    if (!rive6) return;
 
-  const onChangeTheme = e => {
-    if (!themeAnimation6 || !rive6) return;
-
-    console.log({ rive6 });
-    // themeAnimation6.value
-    // themeAnimation6.value = theme.palette.mode === "dark" ? -1 : 1;
-    // rive6.startRendering();
-    // rive6.play(theme.palette.mode === "dark" ? "light" : "dark", true);
-
-    // const Animator = rive6.animator.animations[theme.palette.mode === "dark" ? 1 : 2];
-    // Animator.instance.time = 0;
-    // Animator.instance.advance(10);
-    // Animator.instance.apply(1);
-    // rive6.startRendering();
-
-    rive6.scrub(theme.palette.mode === "dark" ? "light" : "dark", 1);
-
-    handleThemeSwitch(e);
-  };
+    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
+  }, [rive6, theme, theme.palette.mode]);
 
   return (
     // <ThemeProvider theme={brandingDarkTheme}>
@@ -550,7 +536,7 @@ const Home = () => {
 
           <Stack direction={"row"}>
             <FormGroup>
-              <ThemeSwitcher onClick={e => onChangeTheme(e)} checked={theme.palette.mode === "dark"} />
+              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
             {
               <Tooltip title="Apply to join 1Cademy">
@@ -845,10 +831,11 @@ Home.getLayout = (page: ReactNode) => {
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number) => {
+const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+
   //@ts-ignore
   if (!rive?.animator?.animations[0]) return;
-  console.log("rive", { rr: rive?.animator });
   //@ts-ignore
   const Animator = rive.animator.animations[0];
   Animator.instance.time = 0;
