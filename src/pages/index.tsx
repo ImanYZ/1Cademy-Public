@@ -418,10 +418,15 @@ const Home = () => {
     router.push("/signin");
   };
   useEffect(() => {
-    if (!rive6) return;
+    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
 
+    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
     advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
-  }, [rive6, theme]);
+  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
 
   return (
     // <ThemeProvider theme={brandingDarkTheme}>
