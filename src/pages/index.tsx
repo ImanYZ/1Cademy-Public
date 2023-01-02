@@ -35,12 +35,12 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 // import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import backgroundImage from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
+import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
 import { sectionsOrder } from "../components/home/sectionsOrder";
 import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
-import { AppFooter } from "../components/PagesNavbar";
 
 /**
  * animations builded with: https://rive.app/
@@ -466,7 +466,7 @@ const Home = () => {
             direction={"row"}
             sx={{ color: "#f8f8f8" }}
           >
-            <img src={LogoDarkMode.src} alt="logo" width="52px" height={"59px"} />
+            <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
 
             {!isMovil && (
               <>
@@ -561,20 +561,22 @@ const Home = () => {
             }
             <Tooltip title="SIGN IN/UP">
               <Button
-                variant="contained"
+                variant="outlined"
+                color="secondary"
                 onClick={signUpHandler}
                 size={isMovil ? "small" : "medium"}
                 sx={{
                   // display: showSignInorUp ? "inline-flex" : "none",
                   display: "inline-flex",
                   fontSize: 16,
-                  color: "common.white",
+                  // color: "common.white",
                   ml: 2.5,
                   borderRadius: 40,
-                  backgroundColor: theme => theme.palette.common.darkBackground1,
-                  "&:hover": {
-                    backgroundColor: theme => theme.palette.common.darkGrayBackground,
-                  },
+                  // backgroundColor: theme =>
+                  //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
+                  // "&:hover": {
+                  //   backgroundColor: theme => theme.palette.common.darkGrayBackground,
+                  // },
                 }}
               >
                 SIGN IN/UP
@@ -814,7 +816,13 @@ const Home = () => {
         </Box>
       </Box>
 
-      <AppFooter sx={{ background: "rgba(0,0,0,.72)" }} />
+      <AppFooter
+        sx={{
+          px: isDesktop ? "0px" : "10px",
+          background: theme =>
+            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+        }}
+      />
       <style>{`
           body{
             overflow:hidden;

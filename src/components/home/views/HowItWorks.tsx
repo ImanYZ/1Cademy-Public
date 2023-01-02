@@ -97,8 +97,8 @@ const HowItWorks = (props: any) => {
               sx={{
                 mt: "100px",
                 ml: "10px",
-                // position: "sticky",
-                // top: "100px",
+                position: "sticky",
+                top: "100px",
                 color: "white",
                 textTransform: "none",
               }}
