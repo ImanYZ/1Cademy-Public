@@ -8,9 +8,10 @@ import React, { MouseEvent, useEffect, useState } from "react";
 
 type AppHeaderSearchBarProps = {
   searcherUrl?: string;
+  sx?: SxProps<Theme>;
 };
 
-const AppHeaderSearchBar = ({ searcherUrl }: AppHeaderSearchBarProps) => {
+const AppHeaderSearchBar = ({ searcherUrl, sx }: AppHeaderSearchBarProps) => {
   const router = useRouter();
   const [searchText, setSearchText] = useState<string>((router.query.q as string) || "");
 
@@ -42,6 +43,7 @@ const AppHeaderSearchBar = ({ searcherUrl }: AppHeaderSearchBarProps) => {
           background: theme => theme.palette.common.white,
           color: theme => theme.palette.common.black,
         },
+        ...sx,
       }}
     >
       <StyledInputBase
