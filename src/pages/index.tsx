@@ -556,7 +556,13 @@ const Home = () => {
           <Stack direction={"row"} alignItems="center">
             {!isMovil && (
               <Box sx={{ width: "150px" }}>
-                <AppHeaderSearchBar searcherUrl={"search"} />
+                <AppHeaderSearchBar
+                  searcherUrl={"search"}
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                  }}
+                />
               </Box>
             )}
             <FormGroup>
