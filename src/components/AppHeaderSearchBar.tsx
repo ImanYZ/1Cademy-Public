@@ -2,7 +2,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import Paper from "@mui/material/Paper";
-import { alpha, styled } from "@mui/material/styles";
+import { alpha, styled, SxProps, Theme } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import React, { MouseEvent, useEffect, useState } from "react";
 
