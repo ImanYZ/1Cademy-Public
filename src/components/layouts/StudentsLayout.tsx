@@ -79,9 +79,9 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
 
       const role = user?.role;
 
-      if (!role) return router.push(ROUTES.dashboard);
+      if (!role) return router.push(ROUTES.notebook);
 
-      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
+      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.notebook);
 
       if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboardStudents) return router.back();
 

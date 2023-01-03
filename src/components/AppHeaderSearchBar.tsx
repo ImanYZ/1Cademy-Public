@@ -6,7 +6,11 @@ import { alpha, styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import React, { MouseEvent, useEffect, useState } from "react";
 
-const AppHeaderSearchBar = () => {
+type AppHeaderSearchBarProps = {
+  searcherUrl?: string;
+};
+
+const AppHeaderSearchBar = ({ searcherUrl }: AppHeaderSearchBarProps) => {
   const router = useRouter();
   const [searchText, setSearchText] = useState<string>((router.query.q as string) || "");
 
@@ -14,7 +18,7 @@ const AppHeaderSearchBar = () => {
 
   const handleSearch = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    router.push({ pathname: "/", query: { ...router.query, q: searchText, page: 1 } });
+    router.push({ pathname: searcherUrl ?? "/", query: { ...router.query, q: searchText, page: 1 } });
   };
 
   return (

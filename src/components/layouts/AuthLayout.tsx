@@ -10,8 +10,8 @@ import { useAuth } from "@/context/AuthContext";
 import darkModeLibraryImage from "../../../public/darkModeLibraryBackground.jpg";
 import lightModeLibraryImage from "../../../public/lightModeLibraryBackground.jpg";
 import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
-import logoHonor from "../../../public/logo-honor.svg";
-import logoSchoolOfInformation from "../../../public/logo-school-of-information.svg";
+import logoHonor from "../../../public/logo-honor.jpeg";
+import logoSchoolOfInformation from "../../../public/logo-school-of-information.png";
 // import { use1AcademyTheme } from "../../context/ThemeContext";
 import { AppBackground, AuthLayoutActions } from "../../knowledgeTypes";
 import ROUTES from "../../lib/utils/routes";
@@ -31,7 +31,8 @@ const AuthLayout: FC<Props> = ({ children }) => {
   const isEqualOrBiggerThanMedium = useMediaQuery("(min-width:600px)");
 
   const redirectToApp = useCallback(() => {
-    const redirectTo = router.query.from && router.query.from.length > 0 ? (router.query.from as string) : ROUTES.home;
+    const redirectTo =
+      router.query.from && router.query.from.length > 0 ? (router.query.from as string) : ROUTES.notebook;
     router.replace(redirectTo);
   }, [router]);
 
