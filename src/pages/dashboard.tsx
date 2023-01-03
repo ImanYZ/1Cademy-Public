@@ -8,7 +8,7 @@ const NodeBook = () => {
   let router = useRouter();
 
   useEffect(() => {
-    router.push(ROUTES.dashboard);
+    router.push(ROUTES.notebook);
   }, [router]);
 
   return <div></div>;

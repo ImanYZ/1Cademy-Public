@@ -33,7 +33,7 @@ import {
 import { LinkedKnowledgeNode, ProposalInput } from "../../knowledgeTypes";
 import { addProposal, getNodeData } from "../../lib/knowledgeApi";
 import { brandingLightTheme } from "../../lib/theme/brandingTheme";
-import { PagesNavbar } from "..";
+import { PagesNavbar } from "../search";
 
 const NodeProposal = () => {
   const router = useRouter();

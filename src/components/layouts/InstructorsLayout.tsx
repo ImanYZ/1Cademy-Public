@@ -70,9 +70,9 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       if (!user) return;
 
       const role = user?.role;
-      if (!role) return router.push(ROUTES.dashboard);
+      if (!role) return router.push(ROUTES.notebook);
 
-      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.dashboard);
+      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.notebook);
 
       if (role === "STUDENT") return router.push(`${ROUTES.instructorsDashboard}/${user.uname}`);
       // in this case is instructor he can see all

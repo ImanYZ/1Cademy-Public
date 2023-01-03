@@ -16,7 +16,7 @@ const PublicLayout: FC<Props> = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace(ROUTES.dashboard);
+      router.replace(ROUTES.notebook);
     }
   }, [isAuthenticated, router]);
 

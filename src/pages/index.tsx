@@ -1,178 +1,889 @@
-import Container from "@mui/material/Container";
-import { ThemeProvider } from "@mui/system";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import {
+  Box,
+  Button,
+  FormGroup,
+  Grid,
+  Skeleton,
+  Stack,
+  /* ThemeProvider */
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+// const Values = React.lazy(() => import("./modules/views/Values"));
+
+const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
+const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
+const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
+  suspense: true,
+  ssr: false,
+});
+const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
+
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { ComponentType, ReactNode, useEffect, useRef, useState } from "react";
-import { useQuery } from "react-query";
+import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Rive, useRive } from "rive-react";
 
-import HomeFilter, { HomeFilterRef } from "@/components/HomeFilter";
-import HomeSearch, { HomeSearchRef } from "@/components/HomeSearch";
-import { getSearchNodes } from "@/lib/knowledgeApi";
-import {
-  getDefaultSortedByType,
-  getQueryParameter,
-  getQueryParameterAsBoolean,
-  getQueryParameterAsNumber,
-  homePageSortByDefaults,
-} from "@/lib/utils/utils";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { useInView } from "@/hooks/useObserver";
+import useThemeChange from "@/hooks/useThemeChange";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
+// import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
+import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
+import LogoDarkMode from "../../public/DarkModeLogoMini.png";
+import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
+import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
+import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
+import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
+import CustomTypography from "../components/home/components/Typography";
+import { sectionsOrder } from "../components/home/sectionsOrder";
+import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
-import { useOnScreen } from "../hooks/useOnScreen";
-import { FilterValue, NextPageWithLayout, SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
-import { brandingLightTheme } from "../lib/theme/brandingTheme";
 
-export const PagesNavbar: ComponentType<any> = dynamic(() => import("@/components/PagesNavbar").then(m => m.default), {
-  ssr: false,
-});
+/**
+ * animations builded with: https://rive.app/
+ */
 
-export const SortByFilters: ComponentType<any> = dynamic(
-  () => import("@/components/SortByFilters").then(m => m.default),
+const HEADER_HEIGTH = 70;
+export const gray01 = "#28282a";
+export const gray02 = "#202020";
+export const gray03 = "#AAAAAA";
+
+const section1ArtBoards = [
+  { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
+];
+const artboards = [
+  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
+  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
+  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 5 * vh, color: "#e6f336" },
+  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
+];
+
+export const SECTION_WITH_ANIMATION = 1;
+
+const sectionsTmp = [
+  { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
   {
-    ssr: false,
-  }
-);
+    id: "HowItWorksSection",
+    title: "How We Work?",
+    simpleTitle: "How?",
+    children: [
+      { id: "animation1", title: "Summarizing", simpleTitle: "Summarizing" },
+      { id: "animation2", title: "Linking", simpleTitle: "Linking" },
+      { id: "animation3", title: "Evaluating", simpleTitle: "Evaluating" },
+      { id: "animation4", title: "Improving", simpleTitle: "Improving" },
+    ],
+  },
+  { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
+  { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
+  { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
+  { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
+];
 
-const MasonryNodes: ComponentType<any> = dynamic(() => import("@/components/MasonryNodes").then(m => m.MasonryNodes), {
-  ssr: false,
-});
+const Home = () => {
+  // const [section, setSection] = useState(0);
+  const theme = useTheme();
 
-const HomePage: NextPageWithLayout = () => {
+  const [sectionSelected, setSelectedSection] = useState(0);
+  const [notSectionSwitching, setNotSectionSwitching] = useState(true);
+  const [idxRiveComponent, setIdxRiveComponent] = useState(0);
+  const isLargeDesktop = useMediaQuery("(min-width:1350px)");
+  const isDesktop = useMediaQuery("(min-width:1200px)");
+  const isMovil = useMediaQuery("(max-width:600px)");
+  const isTablet = useMediaQuery("(min-width:900px)");
+  const [showLandingOptions, setShowLandingOptions] = useState(true);
+  const [showAnimationOptions, setShowAnimationOptions] = useState(false);
+  const [animationSelected, setSelectedAnimation] = useState(0);
+  const [handleThemeSwitch] = useThemeChange();
+
+  // const [isSSR,setIsSSR]
+
+  // const [{ isAuthenticated }] = useAuth();
   const router = useRouter();
-  const upvotes = getQueryParameterAsBoolean(router.query.upvotes || String(homePageSortByDefaults.upvotes));
-  const mostRecent = getQueryParameterAsBoolean(router.query.mostRecent || String(homePageSortByDefaults.mostRecent));
-  const [sortedByType, setSortedByType] = useState<SortTypeWindowOption>(
-    getDefaultSortedByType({ mostRecent, upvotes })
-  );
-  const [openAdvanceFilter, setOpenAdvanceFilter] = useState(false);
 
-  const homeSearchRef = useRef<HomeSearchRef>(null);
-  const homeFilterRef = useRef<HomeFilterRef>(null);
+  const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
+  const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
+  const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
+  const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
+  // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
 
-  const isIntersecting = useOnScreen(homeSearchRef.current?.containerRef, true);
+  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const HomeSectionRef = useRef<HTMLDivElement | null>(null);
+  const howSectionRef = useRef<HTMLDivElement | null>(null);
+  const timeInSecondsRef = useRef<number>(0);
 
-  const q = getQueryParameter(router.query.q) || "*";
+  const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
+    src: "rive/artboard-1.riv",
+    artboard: "artboard-1",
+    animations: ["Timeline 1", "dark", "light"],
+    autoplay: false,
+    // onLoad: () => console.log("load-finish")
+  });
 
-  const timeWindow: TimeWindowOption =
-    (getQueryParameter(router.query.timeWindow) as TimeWindowOption) || homePageSortByDefaults.timeWindow;
-  const tags = getQueryParameter(router.query.tags) || "";
-  const institutions = getQueryParameter(router.query.institutions) || "";
-  const contributors = getQueryParameter(router.query.contributors) || "";
+  const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
+    src: "rive/artboard-2.riv",
+    artboard: "artboard-2",
+    animations: ["Timeline 1", "dark", "light"],
+    autoplay: false,
+    // onLoad: () => console.log("load-finish")
+  });
 
-  const reference = getQueryParameter(router.query.reference) || "";
-  const label = getQueryParameter(router.query.label) || "";
-  const nodeTypes = getQueryParameter(router.query.nodeTypes) || "";
-  const page = getQueryParameterAsNumber(router.query.page) || 1;
-  const nodeSearchKeys = {
-    q,
-    upvotes,
-    mostRecent,
-    timeWindow,
-    tags,
-    institutions,
-    contributors,
-    reference,
-    label,
-    page,
-    nodeTypes,
-  };
+  const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
+    src: "rive/artboard-3.riv",
+    artboard: "artboard-3",
+    animations: ["Timeline 1", "dark", "light"],
+    autoplay: false,
+    // onLoad: () => console.log("load-finish")
+  });
 
-  const { data, isLoading } = useQuery(["nodesSearch", nodeSearchKeys], () => getSearchNodes(nodeSearchKeys));
+  const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
+    src: "rive/artboard-4.riv",
+    artboard: "artboard-4",
+    animations: ["Timeline 1", "dark", "light"],
+    autoplay: false,
+    // onLoad: () => console.log("load-finish")
+  });
+
+  const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
+    src: "rive/artboard-5.riv",
+    artboard: "artboard-5",
+    animations: ["Timeline 1", "dark", "light"],
+    autoplay: false,
+    // onLoad: () => console.log("load-finish")
+  });
+
+  const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
+    src: "rive/artboard-6.riv",
+    animations: ["Timeline 1", "dark", "light"],
+    // animations: "Timeline 1",
+    artboard: "artboard-6",
+    autoplay: false,
+    // onLoad: () => console.log("load-finish")
+  });
 
   useEffect(() => {
-    const qq = router.query.q || "";
-    const hasQueryValue = qq && qq !== "*";
-    if (router.isReady && data?.data && hasQueryValue) {
-      document.body.clientWidth >= 900 ? homeSearchRef.current?.scroll() : homeFilterRef.current?.scroll();
-    }
-  }, [router.isReady, data?.data, router.query.q]);
+    if (!rive1) return;
+    rive1.reset({ artboard: "artboard-1" });
+    rive1.scrub("Timeline 1", 0);
+    rive1.play();
+  }, [rive1]);
 
-  const handleSearch = (text: string) => {
-    router.push({ query: { ...router.query, q: text, page: 1 } });
+  useEffect(() => {
+    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
+
+    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
+  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
+
+  useEffect(() => {
+    const hash = window?.location?.hash;
+    if (!hash) return;
+
+    const selectedSectionByUrl = sectionsTmp.findIndex(cur => `#${cur.id}` === hash);
+    if (selectedSectionByUrl < 0) return;
+
+    setSelectedSection(selectedSectionByUrl);
+  }, []);
+
+  const getSectionHeights = useCallback(() => {
+    if (!HomeSectionRef?.current) return null;
+    if (!howSectionRef?.current) return null;
+    if (!whyEntry) return null;
+    if (!whatEntry) return null;
+    if (!whereEntry) return null;
+    if (!whoEntry) return null;
+    // if (!joinEntry) return null;
+
+    return [
+      { id: HomeSectionRef.current.id, height: 0 },
+      { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
+      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight },
+      { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
+      // { id: joinEntry.target.id, height: whoEntry.target.clientHeight },
+    ];
+  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+
+  const getSectionPositions = useCallback(() => {
+    if (!HomeSectionRef?.current) return null;
+    if (!howSectionRef?.current) return null;
+    if (!whyEntry) return null;
+    if (!whatEntry) return null;
+    if (!whereEntry) return null;
+    if (!whoEntry) return null;
+    // if (!joinEntry) return null;
+
+    return [
+      { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
+      {
+        id: howSectionRef.current.id,
+        height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight,
+      },
+      { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
+      { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
+      // { id: joinEntry.target.id, height: joinEntry.target.clientHeight },
+    ];
+  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+
+  const getAnimationsHeight = useCallback(() => {
+    const res = artboards.map(artboard => artboard.getHeight(height));
+    return [0, ...res.splice(0, res.length - 1)];
+  }, [height]);
+
+  const getAnimationsPositions = useCallback(() => {
+    return artboards.map(artboard => artboard.getHeight(height));
+  }, [height]);
+
+  const scrollToSection = ({ height, sectionSelected }: { height: number; sectionSelected: any }) => {
+    if (typeof window === "undefined") return;
+
+    const scrollableContainer = window.document.getElementById("ScrollableContainer");
+    if (!scrollableContainer) return;
+
+    scrollableContainer.scroll({ top: height, left: 0, behavior: "smooth" });
+    window.history.replaceState(null, sectionSelected.title, "#" + sectionSelected.id);
   };
 
-  const handleChangePage = (newPage: number) => {
-    router.push({ query: { ...router.query, page: newPage } });
-  };
+  const detectScrollPosition = useCallback(
+    (
+      event: any,
+      {
+        rive1,
+        rive2,
+        rive3,
+        rive4,
+        rive5,
+        rive6,
+      }: {
+        rive1: Rive | null;
+        rive2: Rive | null;
+        rive3: Rive | null;
+        rive4: Rive | null;
+        rive5: Rive | null;
+        rive6: Rive | null;
+      }
+    ) => {
+      if (!rive1 || !rive2 || !rive3 || !rive4 || !rive5 || !rive6) return;
+      if (notSectionSwitching) {
+        const currentScrollPosition = event.target.scrollTop;
+        const sectionsHeight = getSectionPositions();
+        // console.log({ sectionsHeight });
+        if (!sectionsHeight) return;
 
-  const handleByType = (val: SortTypeWindowOption) => {
-    if (val === SortTypeWindowOption.MOST_RECENT) {
-      router.push({ query: { ...router.query, mostRecent: true, upvotes: false, page: 1 } });
-      return setSortedByType(val);
-    }
-    if (val === SortTypeWindowOption.UPVOTES_DOWNVOTES) {
-      router.push({ query: { ...router.query, mostRecent: false, upvotes: true, page: 1 } });
-      return setSortedByType(val);
-    }
-    router.push({ query: { ...router.query, mostRecent: false, upvotes: false, page: 1 } });
-    setSortedByType(SortTypeWindowOption.NONE);
-  };
+        const { min, idx: idxSection } = sectionsHeight.reduce(
+          (acu, cur, idx) => {
+            if (acu.max > currentScrollPosition) return acu;
+            return { max: acu.max + cur.height, min: acu.max, idx };
+          },
+          { max: 0, min: 0, idx: -1 }
+        );
 
-  const handleChangeTimeWindow = (val: TimeWindowOption) => {
-    router.push({ query: { ...router.query, timeWindow: val, page: 1 } });
-  };
+        if (idxSection < 0) return;
 
-  const handleTagsChange = (tags: string[]) => {
-    router.push({ query: { ...router.query, tags: tags.join(","), page: 1 } });
-  };
+        let animationsHeight = [];
+        if (idxSection === 0) {
+          animationsHeight = [section1ArtBoards[0].getHeight(height)];
+        } else {
+          animationsHeight = getAnimationsPositions();
+        }
 
-  const handleInstitutionsChange = (newValue: FilterValue[]) => {
-    const institutions = newValue.map((el: FilterValue) => el.id);
-    router.push({ query: { ...router.query, institutions: institutions.join(","), page: 1 } });
-  };
+        const { maxAnimation, minAnimation, idxAnimation } = animationsHeight.reduce(
+          (acu, cur, idx) => {
+            if (acu.maxAnimation > currentScrollPosition) return acu;
+            return { maxAnimation: acu.maxAnimation + cur, minAnimation: acu.maxAnimation, idxAnimation: idx };
+          },
+          { maxAnimation: min, minAnimation: min, idxAnimation: -1 }
+        );
 
-  const handleContributorsChange = (newValue: FilterValue[]) => {
-    const contributors = newValue.map((el: FilterValue) => el.id);
-    router.push({ query: { ...router.query, contributors: contributors.join(","), page: 1 } });
-  };
+        const sectionSelected = sectionsTmp[idxSection];
 
-  const handleNodeTypesChange = (nodeTypes: string[]) => {
-    router.push({ query: { ...router.query, nodeTypes: nodeTypes.join(","), page: 1 } });
-  };
+        if (window.location.hash !== `#${sectionSelected.id}`) {
+          window.history.replaceState(null, sectionSelected.title, "#" + sectionSelected.id);
+        }
+        setSelectedSection(idxSection);
+        setSelectedAnimation(idxAnimation);
 
-  const handleReferencesChange = (title: string, label: string) => {
-    router.push({ query: { ...router.query, reference: title, label, page: 1 } });
+        let showLandingOptions = false;
+        let showEndAnimationOptions = false;
+
+        if (idxAnimation < 0) return;
+
+        if (idxSection === 0) {
+          const lowerAnimationLimit = minAnimation;
+          const upperAnimationLimit = maxAnimation;
+          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+          const positionFrame = currentScrollPosition - lowerAnimationLimit;
+          const percentageFrame = (positionFrame * 100) / rangeFrames;
+          if (percentageFrame < 50) {
+            setIdxRiveComponent(0);
+          } else {
+            const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
+            const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
+            const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
+            const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
+            timeInSecondsRef.current = timeInSeconds;
+            advanceAnimationTo(rive2, timeInSeconds, theme);
+
+            setIdxRiveComponent(1);
+          }
+
+          if (percentageFrame < 5) {
+            showLandingOptions = true;
+          }
+        }
+
+        if (idxSection === SECTION_WITH_ANIMATION) {
+          // console.log("section with aniomation");
+          setIdxRiveComponent(idxAnimation + 2);
+          const lowerAnimationLimit = minAnimation;
+          const upperAnimationLimit = maxAnimation;
+          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+          const positionFrame = currentScrollPosition - lowerAnimationLimit;
+          const percentageFrame = (positionFrame * 100) / rangeFrames;
+
+          const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
+          timeInSecondsRef.current = timeInSeconds;
+
+          if (idxAnimation === 0) {
+            advanceAnimationTo(rive3, timeInSeconds, theme);
+          }
+          if (idxAnimation === 1) {
+            advanceAnimationTo(rive4, timeInSeconds, theme);
+          }
+          if (idxAnimation === 2) {
+            advanceAnimationTo(rive5, timeInSeconds, theme);
+          }
+          if (idxAnimation === 3) {
+            advanceAnimationTo(rive6, timeInSeconds, theme);
+            if (percentageFrame > 50) {
+              showEndAnimationOptions = true;
+            }
+          }
+        }
+
+        // update options display
+        setShowLandingOptions(showLandingOptions);
+        setShowAnimationOptions(showEndAnimationOptions);
+      }
+    },
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
+  );
+
+  const switchSection = useCallback(
+    (sectionIdx: number, animationIndex = 0) => {
+      if (!rive3 || !rive4 || !rive5 || !rive6) return;
+
+      setNotSectionSwitching(false);
+      const sectionsHeight = getSectionHeights();
+      if (!sectionsHeight) return;
+
+      const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
+      const sectionResult = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
+
+      let cumulativeAnimationHeight = 0;
+
+      const animationsHeight = getAnimationsHeight();
+      if (animationsHeight) {
+        const previousAnimationHeight = animationsHeight.slice(0, animationIndex + 1);
+        cumulativeAnimationHeight = previousAnimationHeight.reduce((a, c) => a + c);
+      }
+      const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
+      scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
+
+      // setSelectedSection(sectionIdx);
+      if (sectionIdx === 0) {
+        setShowLandingOptions(true);
+        setIdxRiveComponent(animationIndex);
+      }
+      if (sectionIdx === SECTION_WITH_ANIMATION) {
+        setIdxRiveComponent(animationIndex + 2);
+        // reset animation when jump through sections
+        if (animationIndex === 0) {
+          rive3.scrub("Timeline 1", 0);
+        }
+        if (animationIndex === 1) {
+          rive4.scrub("Timeline 1", 0);
+        }
+        if (animationIndex === 2) {
+          rive5.scrub("Timeline 1", 0);
+        }
+        if (animationIndex === 3) {
+          rive6.scrub("Timeline 1", 0);
+        }
+      }
+
+      setSelectedSection(sectionIdx);
+      setSelectedAnimation(animationIndex);
+
+      setTimeout(() => {
+        setNotSectionSwitching(true);
+      }, 1000);
+    },
+    [getAnimationsHeight, getSectionHeights, rive3, rive4, rive5, rive6]
+  );
+
+  const signUpHandler = () => {
+    router.push("/signin");
   };
 
   return (
-    <ThemeProvider theme={brandingLightTheme}>
-      <PagesNavbar showSearch={!isIntersecting}>
-        <HomeSearch
-          sx={{ mt: "var(--navbar-height)" }}
-          onSearch={handleSearch}
-          ref={homeSearchRef}
-          setOpenAdvanceFilter={setOpenAdvanceFilter}
+    // <ThemeProvider theme={brandingDarkTheme}>
+    <Box
+      id="ScrollableContainer"
+      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
+      sx={{
+        height: "100vh",
+        overflowY: "auto",
+        overflowX: "auto",
+        position: "relative",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
+        // zIndex: -3
+      }}
+    >
+      <Box
+        component={"header"}
+        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
+      >
+        <Box
+          sx={{
+            height: HEADER_HEIGTH,
+            width: "100%",
+            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
+            backdropFilter: "saturate(180%) blur(20px)",
+
+            // filter: "blur(1px)"
+          }}
+          // style={{willChange:"filter"}}
         />
-        <Container sx={{ py: 10 }}>
-          {openAdvanceFilter && (
-            <HomeFilter
-              onTagsChange={handleTagsChange}
-              onInstitutionsChange={handleInstitutionsChange}
-              onContributorsChange={handleContributorsChange}
-              onNodeTypesChange={handleNodeTypesChange}
-              onReferencesChange={handleReferencesChange}
-              ref={homeFilterRef}
-            ></HomeFilter>
-          )}
-          <SortByFilters
-            sortedByType={sortedByType}
-            handleByType={handleByType}
-            timeWindow={timeWindow}
-            onTimeWindowChanged={handleChangeTimeWindow}
-          />
-          <MasonryNodes
-            nodes={data?.data || []}
-            page={page}
-            totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
-            onChangePage={handleChangePage}
-            isLoading={isLoading}
-          />
-        </Container>
-      </PagesNavbar>
-    </ThemeProvider>
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "980px",
+            height: HEADER_HEIGTH,
+            px: isDesktop ? "0px" : "10px",
+            position: "absolute",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Stack
+            spacing={"20px"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            direction={"row"}
+            sx={{ color: "#f8f8f8" }}
+          >
+            <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+
+            {isTablet && (
+              <>
+                <Tooltip title={sectionsOrder[1].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(1)}
+                  >
+                    {sectionsOrder[1].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[2].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(2)}
+                  >
+                    {sectionsOrder[2].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[3].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(3)}
+                  >
+                    {sectionsOrder[3].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[4].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(4)}
+                  >
+                    {sectionsOrder[4].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[5].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(5)}
+                  >
+                    {sectionsOrder[5].label}
+                  </Typography>
+                </Tooltip>
+              </>
+            )}
+          </Stack>
+
+          <Stack direction={"row"} alignItems="center">
+            {!isMovil && (
+              <Box sx={{ width: "150px" }}>
+                <AppHeaderSearchBar
+                  searcherUrl={"search"}
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                  }}
+                />
+              </Box>
+            )}
+            <FormGroup>
+              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
+            </FormGroup>
+            {
+              <Tooltip title="Apply to join 1Cademy">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  // onClick={joinUsClick}
+                  target="_blank"
+                  href="https://1cademy.us/#JoinUsSection"
+                  size={isMovil ? "small" : "medium"}
+                  sx={{
+                    fontSize: 16,
+                    // color: "common.white",
+                    ml: 2.5,
+                    borderRadius: 40,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Apply!
+                </Button>
+              </Tooltip>
+            }
+            <Tooltip title="SIGN IN/UP">
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={signUpHandler}
+                size={isMovil ? "small" : "medium"}
+                sx={{
+                  // width: "150px",
+                  // display: showSignInorUp ? "inline-flex" : "none",
+                  // display: "inline-flex",
+                  fontSize: 16,
+                  // color: "common.white",
+                  ml: 2.5,
+                  borderRadius: 40,
+                  wordBreak: "normal",
+                  whiteSpace: "nowrap",
+
+                  // backgroundColor: theme =>
+                  //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
+                  // "&:hover": {
+                  //   backgroundColor: theme => theme.palette.common.darkGrayBackground,
+                  // },
+                }}
+              >
+                SIGN IN/UP
+              </Button>
+            </Tooltip>
+          </Stack>
+        </Box>
+      </Box>
+      <Box sx={{ position: "relative" }}>
+        <Box
+          sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
+        >
+          <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
+            <MemoizedTableOfContent
+              menuItems={sectionsTmp}
+              viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
+              onChangeContent={switchSection}
+              sectionSelected={sectionSelected}
+              animationSelected={animationSelected}
+            />
+          </Box>
+        </Box>
+
+        <Stack
+          ref={HomeSectionRef}
+          spacing={width < 900 ? "10px" : "20px"}
+          direction={"column"}
+          alignItems={"center"}
+          justifyContent="flex-end"
+          sx={{
+            height: "calc(100vh - 70px)",
+            width: "100%",
+            position: "absolute",
+            top: 0,
+            padding: width < 900 ? "10px" : "20px",
+            backgroundColor: "#1d1102",
+            backgroundImage: `url(${
+              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
+            })`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            WHERE WE TAKE NOTES <b>TOGETHER</b>.
+          </Typography>
+          <Button
+            // color="secondary"
+            variant="contained"
+            size={width < 900 ? "small" : "large"}
+            component="a"
+            // href="#JoinUsSection"
+            target="_blank"
+            href="https://1cademy.us/#JoinUsSection"
+            sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            Apply to Join Us!
+          </Button>
+          <Box
+            sx={{ display: "flex", flexDirection: "column", alignItems: "center", color: "common.white" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            {height > 500 && "Scroll"}
+            <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
+          </Box>
+        </Stack>
+
+        <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
+          <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+            <HowItWorks
+              section={sectionSelected}
+              // ref={sectionAnimationControllerRef}
+              artboards={[...section1ArtBoards, ...artboards]}
+              animationOptions={
+                <Button
+                  // color="secondary"
+                  variant="contained"
+                  size={width < 900 ? "small" : "large"}
+                  component="a"
+                  href="https://1cademy.us/#JoinUsSection"
+                  // href="#JoinUsSection"
+                  target="_blank"
+                  sx={{ minWidth: 200, textTransform: "uppercase" }}
+                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
+                >
+                  Apply to Join Us!
+                </Button>
+              }
+            >
+              <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
+                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} />
+              </Box>
+            </HowItWorks>
+          </Box>
+
+          <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[2].title}
+            </CustomTypography>
+            {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
+            {whyInViewOnce && (
+              <Suspense
+                fallback={
+                  <Grid container spacing={2.5} alignItems="center">
+                    {new Array(8).fill(0).map((a, i) => (
+                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                        <Skeleton
+                          variant="rectangular"
+                          height={210}
+                          animation="wave"
+                          sx={{ background: "#72727263", maxWidth: 340 }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                }
+              >
+                <Values />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[3].title}
+            </CustomTypography>
+            {!whatInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Grid container spacing={1}>
+                    {new Array(8).fill(0).map((a, i) => (
+                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                        <Skeleton
+                          variant="rectangular"
+                          height={210}
+                          animation="wave"
+                          sx={{ background: "#72727263", maxWidth: 340 }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                }
+              >
+                <What />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[4].title}
+            </CustomTypography>
+            {!whereInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "green" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
+              >
+                <UniversitiesMap theme={"Dark"} />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[5].id} ref={whoSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[5].title}
+            </CustomTypography>
+            {!whoInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <WhoWeAre />
+              </Suspense>
+            )}
+          </Box>
+        </Box>
+      </Box>
+
+      <AppFooter
+        sx={{
+          px: isDesktop ? "0px" : "10px",
+          background: theme =>
+            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+        }}
+      />
+      <style>{`
+          body{
+            overflow:hidden;
+          }
+        `}</style>
+    </Box>
+    // </ThemeProvider>
   );
 };
 
-HomePage.getLayout = (page: ReactNode) => {
+Home.getLayout = (page: ReactNode) => {
   return <PublicLayout>{page}</PublicLayout>;
 };
-export default HomePage;
+
+export default Home;
+
+const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+
+  //@ts-ignore
+  if (!rive?.animator?.animations[0]) return;
+  //@ts-ignore
+  const Animator = rive.animator.animations[0];
+  Animator.instance.time = 0;
+  Animator.instance.advance(timeInSeconds);
+  Animator.instance.apply(1);
+  rive.startRendering();
+};

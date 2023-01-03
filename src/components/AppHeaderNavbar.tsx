@@ -7,6 +7,7 @@ import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import { styled } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC } from "react";
 
@@ -50,17 +51,12 @@ const AppAppBar: FC<Props> = ({
     <AppBar data-testid="app-nav-bar">
       <Toolbar sx={{ height: "var(--navbar-height)", justifyContent: "space-between" }}>
         <LightTooltip title="1Cademy's Landing Page">
-          <Box
-            color="inherit"
-            onClick={() => open("https://1cademy.us/home#LandingSection", "_blank")}
-            sx={{
-              fontSize: 24,
-              margin: "4px 0px 0px 0px",
-              cursor: "pointer",
-              mr: { xs: "20px", md: "0px" },
-            }}
-          >
-            <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
+          <Box>
+            <Link href={"/"} passHref>
+              <Box sx={{ cursor: "pointer", mr: { xs: "20px", md: "10px" } }}>
+                <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
+              </Box>
+            </Link>
           </Box>
         </LightTooltip>
         <Tabs
@@ -70,10 +66,10 @@ const AppAppBar: FC<Props> = ({
           // allowScrollButtonsMobile
           aria-label="scrollable auto tabs navigation bar"
           sx={{
-            px: "25px",
             marginLeft: "auto",
             fontWeight: 400,
             display: { xs: "none", md: "flex" },
+            mr: "10px",
             "& .MuiTab-root": {
               color: "#AAAAAA",
             },
@@ -95,9 +91,11 @@ const AppAppBar: FC<Props> = ({
                 color="inherit"
                 label={page.label}
                 aria-label={page.title}
+                wrapped
                 sx={{
                   fontFamily: "Work Sans,sans-serif",
                   fontSize: "15px",
+                  minWidth: "50px",
                   letterSpacing: "-1px",
                 }}
               />
@@ -106,7 +104,7 @@ const AppAppBar: FC<Props> = ({
         </Tabs>
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
           {(router.route !== "/" || (router.route === "/" && showSearch)) && (
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+            <Box sx={{ display: "flex", alignItems: "center", maxWidth: "300px", mr: "10px" }}>
               <AppHeaderSearchBar />
             </Box>
           )}
