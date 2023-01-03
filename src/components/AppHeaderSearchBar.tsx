@@ -2,15 +2,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import Paper from "@mui/material/Paper";
-import { alpha, styled } from "@mui/material/styles";
+import { alpha, styled, SxProps, Theme } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import React, { MouseEvent, useEffect, useState } from "react";
 
 type AppHeaderSearchBarProps = {
   searcherUrl?: string;
+  sx?: SxProps<Theme>;
 };
 
-const AppHeaderSearchBar = ({ searcherUrl }: AppHeaderSearchBarProps) => {
+const AppHeaderSearchBar = ({ searcherUrl, sx }: AppHeaderSearchBarProps) => {
   const router = useRouter();
   const [searchText, setSearchText] = useState<string>((router.query.q as string) || "");
 
@@ -42,6 +43,7 @@ const AppHeaderSearchBar = ({ searcherUrl }: AppHeaderSearchBarProps) => {
           background: theme => theme.palette.common.white,
           color: theme => theme.palette.common.black,
         },
+        ...sx,
       }}
     >
       <StyledInputBase
