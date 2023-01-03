@@ -14,7 +14,7 @@ const center = {
 
 function GoogleMapCom(props: any) {
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyAl1Lfmndsmvax6PZVH48nwV0kEaBOVgDE",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? "",
   });
   const renderMap = () => {
     return (
