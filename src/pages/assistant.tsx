@@ -1,8 +1,11 @@
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Button,
   FormGroup,
   Grid,
+  IconButton,
+  Modal,
   Skeleton,
   Stack,
   /* ThemeProvider */
@@ -13,7 +16,7 @@ import {
 } from "@mui/material";
 // const Values = React.lazy(() => import("./modules/views/Values"));
 
-const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
+const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
 // const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
 // const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
 //   suspense: true,
@@ -22,7 +25,7 @@ const Values = dynamic(() => import("../components/home/views/Values"), { suspen
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
+// import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
@@ -38,9 +41,10 @@ import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
+import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-import { sectionsOrder } from "../components/home/sectionsOrder";
+// import { sectionsOrder } from "../components/home/sectionsOrder";
 import PublicLayout from "../components/layouts/PublicLayout";
 
 /**
@@ -52,20 +56,20 @@ export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
-const section1ArtBoards = [
-  { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
-];
+// const section1ArtBoards = [
+//   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
+// ];
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 1 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 1 * vh, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 1 * vh, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
+  { name: "Summarizing", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
+  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
+  { name: "Evaluating", durationMs: 30000, getHeight: (vh: number) => 10 * vh, color: "#e6f336" },
+  //   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 
 export const SECTION_WITH_ANIMATION = 0;
 
 const sectionsTmp = [
-  { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
+  //   { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
   {
     id: "HowItWorksSection",
     title: "How We Work?",
@@ -74,7 +78,7 @@ const sectionsTmp = [
       { id: "animation1", title: "Summarizing", simpleTitle: "Summarizing" },
       { id: "animation2", title: "Linking", simpleTitle: "Linking" },
       { id: "animation3", title: "Evaluating", simpleTitle: "Evaluating" },
-      { id: "animation4", title: "Improving", simpleTitle: "Improving" },
+      //   { id: "animation4", title: "Improving", simpleTitle: "Improving" },
     ],
   },
   { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
@@ -99,10 +103,12 @@ const Home = () => {
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
 
+  const [open, setOpen] = useState(false);
+
   // const [isSSR,setIsSSR]
 
   // const [{ isAuthenticated }] = useAuth();
-  const router = useRouter();
+  //   const router = useRouter();
 
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   //   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
@@ -116,71 +122,76 @@ const Home = () => {
   const timeInSecondsRef = useRef<number>(0);
 
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
-    src: "rive/artboard-1.riv",
-    artboard: "artboard-1",
-    animations: ["Timeline 1", "dark", "light"],
+    src: "rive-assistant/primera.riv",
+    artboard: "New Artboard",
+    // animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
+    onLoad: () => console.log("load-finish"),
   });
 
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
-    src: "rive/artboard-2.riv",
-    artboard: "artboard-2",
-    animations: ["Timeline 1", "dark", "light"],
+    src: "rive-assistant/part2.riv",
+    artboard: "ss",
+    // animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
+    onLoad: () => console.log("load-finish"),
   });
 
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
-    src: "rive/artboard-3.riv",
-    artboard: "artboard-3",
-    animations: ["Timeline 1", "dark", "light"],
+    src: "rive-assistant/tercera.riv",
+    artboard: "Part2",
+    // animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
+    onLoad: () => console.log("load-finish"),
   });
 
-  const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
-    src: "rive/artboard-4.riv",
-    artboard: "artboard-4",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-    // onLoad: () => console.log("load-finish")
-  });
+  //   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
+  //     src: "rive/artboard-4.riv",
+  //     artboard: "artboard-4",
+  //     animations: ["Timeline 1", "dark", "light"],
+  //     autoplay: false,
+  //     // onLoad: () => console.log("load-finish")
+  //   });
 
-  const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
-    src: "rive/artboard-5.riv",
-    artboard: "artboard-5",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-    // onLoad: () => console.log("load-finish")
-  });
+  //   const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
+  //     src: "rive/artboard-5.riv",
+  //     artboard: "artboard-5",
+  //     animations: ["Timeline 1", "dark", "light"],
+  //     autoplay: false,
+  //     // onLoad: () => console.log("load-finish")
+  //   });
 
-  const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
-    src: "rive/artboard-6.riv",
-    animations: ["Timeline 1", "dark", "light"],
-    // animations: "Timeline 1",
-    artboard: "artboard-6",
-    autoplay: false,
-    // onLoad: () => console.log("load-finish")
-  });
+  //   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
+  //     src: "rive/artboard-6.riv",
+  //     animations: ["Timeline 1", "dark", "light"],
+  //     // animations: "Timeline 1",
+  //     artboard: "artboard-6",
+  //     autoplay: false,
+  //     // onLoad: () => console.log("load-finish")
+  //   });
 
+  console.log({ rive1, rive2, rive3 });
   useEffect(() => {
     if (!rive1) return;
-    rive1.reset({ artboard: "artboard-1" });
+    console.log({ rive1 });
+    rive1.reset({ artboard: "New Artboard" });
     rive1.scrub("Timeline 1", 0);
-    rive1.play();
+    // rive1.play();
+    console.log("play rive 1");
   }, [rive1]);
 
   useEffect(() => {
-    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
+    if (!rive1 || !rive2 || !rive3) return;
 
-    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
-  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
+    console.log({ rive1, rive2, rive3 });
+    advanceAnimationTo(rive1, timeInSecondsRef.current);
+    advanceAnimationTo(rive2, timeInSecondsRef.current);
+    advanceAnimationTo(rive3, timeInSecondsRef.current);
+    console.log("play rive 1 2 3");
+  }, [rive1, rive2, rive3, theme]);
 
   useEffect(() => {
     const hash = window?.location?.hash;
@@ -257,19 +268,19 @@ const Home = () => {
         rive1,
         rive2,
         rive3,
-        rive4,
-        rive5,
-        rive6,
-      }: {
+      }: // rive4,
+      // rive5,
+      // rive6,
+      {
         rive1: Rive | null;
         rive2: Rive | null;
         rive3: Rive | null;
-        rive4: Rive | null;
-        rive5: Rive | null;
-        rive6: Rive | null;
+        // rive4: Rive | null;
+        // rive5: Rive | null;
+        // rive6: Rive | null;
       }
     ) => {
-      if (!rive1 || !rive2 || !rive3 || !rive4 || !rive5 || !rive6) return;
+      if (!rive1 || !rive2 || !rive3) return;
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
@@ -312,7 +323,7 @@ const Home = () => {
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
 
-        console.log({ idxSection, idxAnimation });
+        console.log("-------------->>>", { idxSection, idxAnimation });
 
         let showLandingOptions = false;
         let showEndAnimationOptions = false;
@@ -355,21 +366,29 @@ const Home = () => {
           const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
           timeInSecondsRef.current = timeInSeconds;
 
+          console.log({ timeInSecondsRef: timeInSecondsRef.current.toFixed(2) });
+
           if (idxAnimation === 0) {
-            advanceAnimationTo(rive3, timeInSeconds, theme);
+            advanceAnimationTo(rive1, timeInSeconds);
           }
           if (idxAnimation === 1) {
-            advanceAnimationTo(rive4, timeInSeconds, theme);
+            advanceAnimationTo(rive2, timeInSeconds);
           }
           if (idxAnimation === 2) {
-            advanceAnimationTo(rive5, timeInSeconds, theme);
+            advanceAnimationTo(rive3, timeInSeconds);
           }
-          if (idxAnimation === 3) {
-            advanceAnimationTo(rive6, timeInSeconds, theme);
-            if (percentageFrame > 50) {
-              showEndAnimationOptions = true;
-            }
-          }
+          //   if (idxAnimation === 1) {
+          //     advanceAnimationTo(rive4, timeInSeconds, theme);
+          //   }
+          //   if (idxAnimation === 2) {
+          //     advanceAnimationTo(rive5, timeInSeconds, theme);
+          //   }
+          //   if (idxAnimation === 3) {
+          //     advanceAnimationTo(rive6, timeInSeconds, theme);
+          //     if (percentageFrame > 50) {
+          //       showEndAnimationOptions = true;
+          //     }
+          //   }
         }
 
         // update options display
@@ -377,12 +396,12 @@ const Home = () => {
         setShowAnimationOptions(showEndAnimationOptions);
       }
     },
-    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
+    [notSectionSwitching, getSectionPositions, getAnimationsPositions, theme]
   );
 
   const switchSection = useCallback(
     (sectionIdx: number, animationIndex = 0) => {
-      if (!rive3 || !rive4 || !rive5 || !rive6) return;
+      if (!rive1 || !rive2 || !rive3) return;
 
       setNotSectionSwitching(false);
       const sectionsHeight = getSectionHeights();
@@ -402,25 +421,28 @@ const Home = () => {
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
 
       // setSelectedSection(sectionIdx);
-      if (sectionIdx === 0) {
-        setShowLandingOptions(true);
-        setIdxRiveComponent(animationIndex);
-      }
+      //   if (sectionIdx === 0) {
+      //     setShowLandingOptions(true);
+      //     setIdxRiveComponent(animationIndex);
+      //   }
       if (sectionIdx === SECTION_WITH_ANIMATION) {
-        setIdxRiveComponent(animationIndex + 2);
+        setIdxRiveComponent(animationIndex);
         // reset animation when jump through sections
         if (animationIndex === 0) {
-          rive3.scrub("Timeline 1", 0);
+          rive1.scrub("Timeline 1", 0);
         }
         if (animationIndex === 1) {
-          rive4.scrub("Timeline 1", 0);
+          rive2.scrub("Timeline 1", 0);
         }
-        if (animationIndex === 2) {
-          rive5.scrub("Timeline 1", 0);
+        if (animationIndex === 1) {
+          rive3.scrub("Timeline 1", 0);
         }
-        if (animationIndex === 3) {
-          rive6.scrub("Timeline 1", 0);
-        }
+        // if (animationIndex === 2) {
+        //   rive5.scrub("Timeline 1", 0);
+        // }
+        // if (animationIndex === 3) {
+        //   rive6.scrub("Timeline 1", 0);
+        // }
       }
 
       setSelectedSection(sectionIdx);
@@ -430,18 +452,18 @@ const Home = () => {
         setNotSectionSwitching(true);
       }, 1000);
     },
-    [getAnimationsHeight, getSectionHeights, rive3, rive4, rive5, rive6]
+    [getAnimationsHeight, getSectionHeights, rive1, rive2, rive3]
   );
 
-  const signUpHandler = () => {
-    router.push("/signin");
-  };
+  //   const signUpHandler = () => {
+  //     router.push("/signin");
+  //   };
 
   return (
     // <ThemeProvider theme={brandingDarkTheme}>
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
+      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3 })}
       sx={{
         height: "100vh",
         overflowY: "auto",
@@ -489,6 +511,18 @@ const Home = () => {
 
             {isTablet && (
               <>
+                <Tooltip title={sectionsOrder[0].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 0 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(0)}
+                  >
+                    {sectionsOrder[0].label}
+                  </Typography>
+                </Tooltip>
                 <Tooltip title={sectionsOrder[1].title}>
                   <Typography
                     sx={{
@@ -511,42 +545,6 @@ const Home = () => {
                     onClick={() => switchSection(2)}
                   >
                     {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
-                    {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[4].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(4)}
-                  >
-                    {sectionsOrder[4].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[5].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(5)}
-                  >
-                    {sectionsOrder[5].label}
                   </Typography>
                 </Tooltip>
               </>
@@ -593,7 +591,7 @@ const Home = () => {
               <Button
                 variant="outlined"
                 color="secondary"
-                onClick={signUpHandler}
+                onClick={() => setOpen(true)}
                 size={isMovil ? "small" : "medium"}
                 sx={{
                   // width: "150px",
@@ -686,11 +684,12 @@ const Home = () => {
         </Stack> */}
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-          <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+          <Box id={sectionsOrder[0].id} ref={howSectionRef} sx={{ pb: 10 }}>
             <HowItWorks
               section={sectionSelected}
               // ref={sectionAnimationControllerRef}
-              artboards={[...section1ArtBoards, ...artboards]}
+              //   artboards={[...section1ArtBoards, ...artboards]}
+              artboards={artboards}
               animationOptions={
                 <Button
                   // color="secondary"
@@ -711,14 +710,11 @@ const Home = () => {
                 <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} />
               </Box>
             </HowItWorks>
           </Box>
 
-          <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder[1].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -726,7 +722,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[2].title}
+              {sectionsOrder[1].title}
             </CustomTypography>
             {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
             {whyInViewOnce && (
@@ -806,7 +802,7 @@ const Home = () => {
             )}
           </Box> */}
 
-          <Box id={sectionsOrder[5].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder[2].id} ref={whoSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -814,7 +810,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[5].title}
+              {sectionsOrder[2].title}
             </CustomTypography>
             {!whoInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
@@ -852,6 +848,42 @@ const Home = () => {
         </Box>
       </Box>
 
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        // aria-labelledby="modal-modal-title"
+        // aria-describedby="modal-modal-description"
+        sx={{ bgcolor: "#3131316e", backdropFilter: "blur(4px)" }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <IconButton onClick={() => setOpen(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+            <CloseIcon />
+          </IconButton>
+          <Box
+            sx={{
+              maxWidth: "500px",
+              p: "20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img src="assistant/robot.png" alt="" srcSet="" />
+            <Typography /* id="modal-modal-title" */ variant="h6" component="h2">
+              Coming Soon...
+            </Typography>
+          </Box>
+        </Box>
+      </Modal>
+
       <AppFooter
         sx={{
           px: isDesktop ? "0px" : "10px",
@@ -875,9 +907,8 @@ Home.getLayout = (page: ReactNode) => {
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
-  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
-
+const advanceAnimationTo = (rive: Rive, timeInSeconds: number) => {
+  //   rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
   //@ts-ignore
   if (!rive?.animator?.animations[0]) return;
   //@ts-ignore

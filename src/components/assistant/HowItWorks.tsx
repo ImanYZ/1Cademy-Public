@@ -9,7 +9,8 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 // import { CardActionArea } from "@mui/material";
 // import Typography from "../components/Typography";
 import CustomTypography from "../../components/home/components/Typography";
-import { sectionsOrder } from "../home/sectionsOrder";
+import { sectionsOrder } from "./sectionsOrder";
+// import { sectionsOrder } from "../home/sectionsOrder";
 // import { sectionsOrder } from "../sectionsOrder";
 // import { sectionsOrder } from "../sectionsOrder";
 // // import sectionsOrder from "./sectionsOrder";
@@ -53,7 +54,7 @@ const HowItWorks = (props: any) => {
         alignItems: "center",
       }}
     >
-      <Box
+      {/* <Box
         key={"artboard-1"}
         sx={{
           position: "absolute",
@@ -64,14 +65,13 @@ const HowItWorks = (props: any) => {
           color: "white",
         }}
       >
-        {/* Landing section */}
-      </Box>
+      </Box> */}
       <CustomTypography
         component={"h2"}
         variant="h1"
         marked="center"
         align="center"
-        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: height - 30 }}
+        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
       >
         {sectionsOrder[1].title}
       </CustomTypography>
