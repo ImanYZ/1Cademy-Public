@@ -128,8 +128,8 @@ const Home = () => {
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
     src: "rive-assistant/assistant-1.riv",
     artboard: "artboard-1",
-    // animations: ["Timeline 1", "dark", "light"],
-    animations: ["Timeline 1"],
+    animations: ["Timeline 1", "dark", "light"],
+    // animations: ["Timeline 1"],
     autoplay: false,
     // onLoad: () => console.log("load-finish"),
   });
@@ -146,8 +146,8 @@ const Home = () => {
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
     src: "rive-assistant/assistant-3.riv",
     artboard: "artboard-3",
-    // animations: ["Timeline 1", "dark", "light"],
-    animations: ["Timeline 1"],
+    animations: ["Timeline 1", "dark", "light"],
+    // animations: ["Timeline 1"],
     autoplay: false,
     // onLoad: () => console.log("load-finish"),
   });
@@ -191,9 +191,9 @@ const Home = () => {
     if (!rive1 || !rive2 || !rive3) return;
 
     // console.log({ rive1, rive2, rive3 });
-    advanceAnimationTo(rive1, timeInSecondsRef.current);
-    advanceAnimationTo(rive2, timeInSecondsRef.current);
-    advanceAnimationTo(rive3, timeInSecondsRef.current);
+    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
+    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
     // console.log("play rive 1 2 3");
   }, [rive1, rive2, rive3, theme]);
 
@@ -372,13 +372,13 @@ const Home = () => {
           //   console.log({ timeInSecondsRef: timeInSecondsRef.current.toFixed(2) });
 
           if (idxAnimation === 0) {
-            advanceAnimationTo(rive1, timeInSeconds);
+            advanceAnimationTo(rive1, timeInSeconds, theme);
           }
           if (idxAnimation === 1) {
-            advanceAnimationTo(rive2, timeInSeconds);
+            advanceAnimationTo(rive2, timeInSeconds, theme);
           }
           if (idxAnimation === 2) {
-            advanceAnimationTo(rive3, timeInSeconds);
+            advanceAnimationTo(rive3, timeInSeconds, theme);
           }
           //   if (idxAnimation === 1) {
           //     advanceAnimationTo(rive4, timeInSeconds, theme);
@@ -399,7 +399,7 @@ const Home = () => {
         setShowAnimationOptions(showEndAnimationOptions);
       }
     },
-    [notSectionSwitching, getSectionPositions, getAnimationsPositions]
+    [notSectionSwitching, getSectionPositions, getAnimationsPositions, theme]
   );
 
   const switchSection = useCallback(
@@ -917,8 +917,8 @@ Home.getLayout = (page: ReactNode) => {
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number) => {
-  //   rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
   //@ts-ignore
   if (!rive?.animator?.animations[0]) return;
   //@ts-ignore
