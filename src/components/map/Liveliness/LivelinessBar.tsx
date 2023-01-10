@@ -191,10 +191,11 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             padding: "0px 0px 0px 32px",
           }}
         >
+          <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
           <Box
             className="seekbar"
             sx={{
-              height: "calc(100% - 40px)",
+              height: "calc(100% - 55px)",
               width: "1px",
               borderRight: theme =>
                 theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
