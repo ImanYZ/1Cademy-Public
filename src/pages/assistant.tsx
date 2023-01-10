@@ -25,6 +25,7 @@ const Values = dynamic(() => import("../components/assistant/Why"), { suspense: 
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
@@ -104,6 +105,8 @@ const Home = () => {
   //   const [handleThemeSwitch] = useThemeChange();
 
   const [open, setOpen] = useState(false);
+
+  const router = useRouter();
 
   // const [isSSR,setIsSSR]
 
@@ -507,7 +510,9 @@ const Home = () => {
               direction={"row"}
               sx={{ color: "#f8f8f8" }}
             >
-              <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+              <Box onClick={() => router.push("/")} sx={{ cursor: "pointer" }}>
+                <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+              </Box>
 
               {isTablet && (
                 <>
@@ -553,7 +558,7 @@ const Home = () => {
 
             <Stack direction={"row"} alignItems="center">
               {!isMovil && (
-                <Box sx={{ width: "150px" }}>
+                <Box sx={{ maxWidth: "450px" }}>
                   <AppHeaderSearchBar
                     searcherUrl={"search"}
                     sx={{
