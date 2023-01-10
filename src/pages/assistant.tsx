@@ -199,7 +199,6 @@ const Home = () => {
 
     const selectedSectionByUrl = sectionsTmp.findIndex(cur => `#${cur.id}` === hash);
     if (selectedSectionByUrl < 0) return;
-
     setSelectedSection(selectedSectionByUrl);
   }, []);
 
@@ -686,7 +685,7 @@ const Home = () => {
         </Stack> */}
 
           <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-            <Box id={sectionsOrder[0].id} ref={howSectionRef} sx={{ pb: 10 }}>
+            <Box id={sectionsOrder[0].id} ref={howSectionRef} sx={{ pb: 10, scrollMarginTop: "70px" }}>
               <HowItWorks
                 section={sectionSelected}
                 // ref={sectionAnimationControllerRef}
