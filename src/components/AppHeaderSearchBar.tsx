@@ -67,7 +67,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
   "& .MuiInputBase-input::placeholder": {
     opacity: 1,
-    color: theme.palette.common.white,
+    color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
     fontWeight: "400",
   },
   "& .MuiInputBase-input:focus": {
