@@ -25,6 +25,7 @@ const Values = dynamic(() => import("../components/assistant/Why"), { suspense: 
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 // import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
@@ -61,8 +62,8 @@ export const gray03 = "#AAAAAA";
 // ];
 const artboards = [
   { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Meeting", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
-  { name: "Points", durationMs: 35000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
+  { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
+  { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
   //   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 
@@ -76,8 +77,8 @@ const sectionsTmp = [
     simpleTitle: "How?",
     children: [
       { id: "animation1", title: "Planning", simpleTitle: "Planning" },
-      { id: "animation2", title: "Meeting", simpleTitle: "Meeting" },
-      { id: "animation3", title: "Points", simpleTitle: "Points" },
+      { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
+      { id: "animation3", title: "Goals", simpleTitle: "Goals" },
       //   { id: "animation4", title: "Improving", simpleTitle: "Improving" },
     ],
   },
@@ -104,6 +105,8 @@ const Home = () => {
   //   const [handleThemeSwitch] = useThemeChange();
 
   const [open, setOpen] = useState(false);
+
+  const router = useRouter();
 
   // const [isSSR,setIsSSR]
 
@@ -508,7 +511,9 @@ const Home = () => {
               direction={"row"}
               sx={{ color: "#f8f8f8" }}
             >
-              <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+              <Box onClick={() => router.push("/")} sx={{ cursor: "pointer" }}>
+                <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+              </Box>
 
               {isTablet && (
                 <>
@@ -554,7 +559,7 @@ const Home = () => {
 
             <Stack direction={"row"} alignItems="center">
               {!isMovil && (
-                <Box sx={{ width: "150px" }}>
+                <Box sx={{ maxWidth: "450px" }}>
                   <AppHeaderSearchBar
                     searcherUrl={"search"}
                     sx={{
@@ -620,7 +625,7 @@ const Home = () => {
         </Box>
         <Box sx={{ position: "relative" }}>
           <Box
-            sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
+            sx={{ position: "absolute", top: "70px", bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
           >
             <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
               <MemoizedTableOfContent
