@@ -70,13 +70,7 @@ const Values = () => {
                       height: "250px",
                     }}
                   >
-                    <CardMedia
-                      component="img"
-                      width="100%"
-                      image={value.image}
-                      alt={value.name}
-                      sx={{ padding: "10px 37px 0px 37px" }}
-                    />
+                    <CardMedia component="img" width="100%" image={value.image} alt={value.name} sx={{ p: "16px" }} />
                   </Box>
                   <CardContent
                     sx={{
