@@ -102,10 +102,10 @@ const Values = () => {
                     >
                       {value.name}
                     </Typography>
-                    <Collapse in={!stepChecked[idx]} timeout={1000} sx={{ textAlign: "center" }}>
+                    <Collapse in={stepChecked[idx]} timeout={1000} sx={{ textAlign: "center" }}>
                       Learn more ...
                     </Collapse>
-                    <Collapse in={stepChecked[idx]} timeout={1000}>
+                    <Collapse in={!stepChecked[idx]} timeout={1000}>
                       <Typography
                         variant="body2"
                         sx={{ textAlign: "left", color: getGrayColorText(), fontSize: "14px" }}
