@@ -1,7 +1,7 @@
 export const sectionsOrder = [
   // { id: "LandingSection", label: "Landing", title: "1Cademy's Landing Page" },
-  { id: "HowItWorksSection", label: "How", title: "How We Work?" },
-  { id: "ValuesSection", label: "Why", title: "Why 1Cademy?" },
+  { id: "HowItWorksSection", label: "How", title: "How 1Cademy Assistant works?" },
+  { id: "ValuesSection", label: "Why", title: "Why 1Cademy Assistant?" },
   // {
   //   id: "CommunitiesSection",
   //   label: "What",
@@ -12,6 +12,6 @@ export const sectionsOrder = [
   //   label: "Where",
   //   title: "Where Are We?",
   // },
-  { id: "WhoWeAreSection", label: "Who", title: "Who Is Behind 1Cademy?" },
+  { id: "WhoWeAreSection", label: "Who", title: "Who's Behind 1Cademy Assistant?" },
   // { id: "JoinUsSection", label: "Apply", title: "Apply to Join Us!" },
 ];

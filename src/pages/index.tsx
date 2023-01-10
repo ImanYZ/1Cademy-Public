@@ -555,7 +555,7 @@ const Home = () => {
 
           <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "50px" : "30px"}>
             {!isMovil && (
-              <Box sx={{ width: isDesktop ? "250px" : "150px" }}>
+              <Box sx={{ maxWidth: isDesktop ? "350px" : "150px" }}>
                 <AppHeaderSearchBar
                   searcherUrl={"search"}
                   sx={{
