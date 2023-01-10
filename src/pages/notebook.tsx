@@ -569,9 +569,9 @@ const Dashboard = ({}: DashboardProps) => {
           await batch.commit();
 
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-          setTimeout(() => {
+          /* setTimeout(() => {
             scrollToNode(nodeId);
-          }, 1000);
+          }, 2000); */
         } catch (err) {
           console.error(err);
         }
