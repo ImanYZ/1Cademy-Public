@@ -73,7 +73,7 @@ const HowItWorks = (props: any) => {
         align="center"
         sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
       >
-        {sectionsOrder[1].title}
+        {sectionsOrder[0].title}
       </CustomTypography>
       {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
       >
