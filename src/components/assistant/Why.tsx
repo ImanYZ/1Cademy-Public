@@ -6,6 +6,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Collapse from "@mui/material/Collapse";
 import Grid from "@mui/material/Grid";
 import React, { useState } from "react";
+import { useRive } from "rive-react";
 
 import { gray03 } from "../../pages/assistant";
 // import { gray03 } from "../../../pages";
@@ -25,6 +26,15 @@ const iniStepChecked: any[] = [];
 const Values = () => {
   const theme = useTheme();
   const [stepChecked, setStepChecked] = useState(iniStepChecked);
+
+  const { RiveComponent: RiveComponentMeettings } = useRive({
+    src: "rive-assistant/meetings.riv",
+    artboard: "meetings",
+    // animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1"],
+    autoplay: true,
+    // onLoad: () => console.log("load-finish"),
+  });
 
   const getGrayColorText = () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2);
 
@@ -68,9 +78,14 @@ const Values = () => {
                       justify: "center",
                       alignItems: "center",
                       height: "250px",
+                      p: "16px",
                     }}
                   >
-                    <CardMedia component="img" width="100%" image={value.image} alt={value.name} sx={{ p: "16px" }} />
+                    {idx === 2 ? (
+                      <RiveComponentMeettings />
+                    ) : (
+                      <CardMedia component="img" width="100%" image={value.image} alt={value.name} />
+                    )}
                   </Box>
                   <CardContent
                     sx={{
