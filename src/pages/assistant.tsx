@@ -137,8 +137,8 @@ const Home = () => {
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
     src: "rive-assistant/assistant-2.riv",
     artboard: "artboard-2",
-    // animations: ["Timeline 1", "dark", "light"],
-    animations: ["Timeline 1"],
+    animations: ["Timeline 1", "dark", "light"],
+    // animations: ["Timeline 1"],
     autoplay: false,
     // onLoad: () => console.log("load-finish"),
   });
