@@ -409,6 +409,7 @@ const Home = () => {
 
       const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
       const sectionResult = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
+      //   console.log({ sectionIdx, animationIndex });
 
       let cumulativeAnimationHeight = 0;
 

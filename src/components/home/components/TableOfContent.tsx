@@ -132,7 +132,7 @@ const TableOfContent = ({
                   <Tooltip key={child.id} title={child.title} placement="right" arrow disableInteractive>
                     <Box
                       component={"li"}
-                      onClick={() => onChangeContent(1, idx)}
+                      onClick={() => onChangeContent(sectionWithAnimation, idx)}
                       sx={{
                         height: "36px",
                         position: "relative",

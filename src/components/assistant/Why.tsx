@@ -51,8 +51,16 @@ const Values = () => {
       <Grid container spacing={2.5}>
         {valuesItems.map((value, idx) => {
           return (
-            <Grid key={value.name} item xs={12} sm={6} md={4} lg={3}>
-              <Card sx={{ maxWidth: 340 /* background: "#202020" */ /*  color: "#f8f8f8"  */ }}>
+            <Grid key={value.name} item xs={12} sm={6} md={4}>
+              <Card
+                sx={
+                  {
+                    /* maxWidth: 340 */
+                    /* background: "#202020" */
+                    /*  color: "#f8f8f8"  */
+                  }
+                }
+              >
                 <CardActionArea onClick={() => flipCard(idx)}>
                   <Box
                     sx={{
@@ -65,7 +73,7 @@ const Values = () => {
                     <CardMedia
                       component="img"
                       width="100%"
-                      image={"/static/" + value.image}
+                      image={value.image}
                       alt={value.name}
                       sx={{ padding: "10px 37px 0px 37px" }}
                     />
