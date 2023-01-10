@@ -60,9 +60,9 @@ export const gray03 = "#AAAAAA";
 //   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 // ];
 const artboards = [
-  { name: "Summarizing", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 35000, getHeight: (vh: number) => 10 * vh, color: "#e6f336" },
+  { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
+  { name: "Meeting", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
+  { name: "Points", durationMs: 35000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
   //   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 
@@ -72,19 +72,19 @@ const sectionsTmp = [
   //   { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
   {
     id: "HowItWorksSection",
-    title: "How We Work?",
+    title: "How 1Cademy Assistant works?",
     simpleTitle: "How?",
     children: [
-      { id: "animation1", title: "Summarizing", simpleTitle: "Summarizing" },
-      { id: "animation2", title: "Linking", simpleTitle: "Linking" },
-      { id: "animation3", title: "Evaluating", simpleTitle: "Evaluating" },
+      { id: "animation1", title: "Planning", simpleTitle: "Planning" },
+      { id: "animation2", title: "Meeting", simpleTitle: "Meeting" },
+      { id: "animation3", title: "Points", simpleTitle: "Points" },
       //   { id: "animation4", title: "Improving", simpleTitle: "Improving" },
     ],
   },
-  { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
+  { id: "ValuesSection", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
   //   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
   //   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
-  { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
+  { id: "WhoWeAreSection", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
 
 const Home = () => {
@@ -122,30 +122,30 @@ const Home = () => {
   const timeInSecondsRef = useRef<number>(0);
 
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
-    src: "rive-assistant/primera.riv",
-    artboard: "New Artboard",
+    src: "rive-assistant/assistant-1.riv",
+    artboard: "artboard-1",
     // animations: ["Timeline 1", "dark", "light"],
     animations: ["Timeline 1"],
     autoplay: false,
-    onLoad: () => console.log("load-finish"),
+    // onLoad: () => console.log("load-finish"),
   });
 
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
-    src: "rive-assistant/part2.riv",
-    artboard: "ss",
+    src: "rive-assistant/assistant-2.riv",
+    artboard: "artboard-2",
     // animations: ["Timeline 1", "dark", "light"],
     animations: ["Timeline 1"],
     autoplay: false,
-    onLoad: () => console.log("load-finish"),
+    // onLoad: () => console.log("load-finish"),
   });
 
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
-    src: "rive-assistant/tercera.riv",
-    artboard: "Part3",
+    src: "rive-assistant/assistant-3.riv",
+    artboard: "artboard-3",
     // animations: ["Timeline 1", "dark", "light"],
     animations: ["Timeline 1"],
     autoplay: false,
-    onLoad: () => console.log("load-finish"),
+    // onLoad: () => console.log("load-finish"),
   });
 
   //   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
@@ -173,24 +173,24 @@ const Home = () => {
   //     // onLoad: () => console.log("load-finish")
   //   });
 
-  console.log({ rive1, rive2, rive3 });
-  useEffect(() => {
-    if (!rive1) return;
-    console.log({ rive1 });
-    rive1.reset({ artboard: "New Artboard" });
-    rive1.scrub("Timeline 1", 0);
-    // rive1.play();
-    console.log("play rive 1");
-  }, [rive1]);
+  //   console.log({ rive1, rive2, rive3 });
+  //   useEffect(() => {
+  //     if (!rive1) return;
+  //     // console.log({ rive1 });
+  //     rive1.reset({ artboard: "artboard-1" });
+  //     rive1.scrub("Timeline 1", 0);
+  //     // rive1.play();
+  //     // console.log("play rive 1");
+  //   }, [rive1]);
 
   useEffect(() => {
     if (!rive1 || !rive2 || !rive3) return;
 
-    console.log({ rive1, rive2, rive3 });
+    // console.log({ rive1, rive2, rive3 });
     advanceAnimationTo(rive1, timeInSecondsRef.current);
     advanceAnimationTo(rive2, timeInSecondsRef.current);
     advanceAnimationTo(rive3, timeInSecondsRef.current);
-    console.log("play rive 1 2 3");
+    // console.log("play rive 1 2 3");
   }, [rive1, rive2, rive3, theme]);
 
   useEffect(() => {
@@ -305,7 +305,7 @@ const Home = () => {
         // }
         animationsHeight = getAnimationsPositions();
 
-        console.log({ animationsHeight });
+        // console.log({ animationsHeight });
 
         const { maxAnimation, minAnimation, idxAnimation } = animationsHeight.reduce(
           (acu, cur, idx) => {
@@ -323,7 +323,7 @@ const Home = () => {
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
 
-        console.log("-------------->>>", { idxSection, idxAnimation });
+        // console.log("-------------->>>", { idxSection, idxAnimation });
 
         let showLandingOptions = false;
         let showEndAnimationOptions = false;
@@ -366,7 +366,7 @@ const Home = () => {
           const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
           timeInSecondsRef.current = timeInSeconds;
 
-          console.log({ timeInSecondsRef: timeInSecondsRef.current.toFixed(2) });
+          //   console.log({ timeInSecondsRef: timeInSecondsRef.current.toFixed(2) });
 
           if (idxAnimation === 0) {
             advanceAnimationTo(rive1, timeInSeconds);
@@ -409,6 +409,7 @@ const Home = () => {
 
       const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
       const sectionResult = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
+      //   console.log({ sectionIdx, animationIndex });
 
       let cumulativeAnimationHeight = 0;
 
@@ -628,6 +629,7 @@ const Home = () => {
                 onChangeContent={switchSection}
                 sectionSelected={sectionSelected}
                 animationSelected={animationSelected}
+                sectionWithAnimation={SECTION_WITH_ANIMATION}
               />
             </Box>
           </Box>
@@ -863,7 +865,10 @@ const Home = () => {
               transform: "translate(-50%, -50%)",
             }}
           >
-            <IconButton onClick={() => setOpen(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+            <IconButton
+              onClick={() => setOpen(false)}
+              sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
+            >
               <CloseIcon />
             </IconButton>
             <Box

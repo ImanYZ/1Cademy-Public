@@ -1,6 +1,6 @@
 export default [
   {
-    name: "An Intelligent Assistant for Free!!!",
+    name: "1Cademy intelligent assistant motivates the development of valuable habits.",
     body: "You can use all the capabilities of your intelligent assistant without paying a penny for as long as you wish.",
     image: "Learning_Like_Researchers.svg",
     padding: "4px 40px 0px 40px",

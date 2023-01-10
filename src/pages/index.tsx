@@ -630,6 +630,7 @@ const Home = () => {
               onChangeContent={switchSection}
               sectionSelected={sectionSelected}
               animationSelected={animationSelected}
+              sectionWithAnimation={SECTION_WITH_ANIMATION}
             />
           </Box>
         </Box>
