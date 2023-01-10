@@ -62,7 +62,7 @@ export const gray03 = "#AAAAAA";
 const artboards = [
   { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
   { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
-  { name: "Goals", durationMs: 35000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
+  { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
   //   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 
