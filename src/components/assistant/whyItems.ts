@@ -24,7 +24,7 @@ export default [
     padding: "4px 40px 0px 40px",
   },
   {
-    name: "An AI Assistant for Free!!!",
+    name: "An AI Assistant",
     body: "You can use all the capabilities of your AI assistant without paying a penny for as long as you wish. There is no trial period or ads. We are a research group at the University of Michigan and Honor Education. Our only intentions are to improve human life and education. Our research is done using anonymous data and we do not share your personal data with any third parties.",
     image: "assistant/5-ai-assistant.svg",
     padding: "4px 40px 0px 40px",
