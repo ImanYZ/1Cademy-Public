@@ -84,7 +84,12 @@ const Values = () => {
                     {idx === 2 ? (
                       <RiveComponentMeettings />
                     ) : (
-                      <CardMedia component="img" width="100%" image={value.image} alt={value.name} />
+                      <CardMedia
+                        component="img"
+                        width="100%"
+                        image={theme.palette.mode === "light" ? value.image : value.imageDark}
+                        alt={value.name}
+                      />
                     )}
                   </Box>
                   <CardContent
