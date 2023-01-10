@@ -5,7 +5,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Collapse from "@mui/material/Collapse";
 import Grid from "@mui/material/Grid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRive } from "rive-react";
 
 import { gray03 } from "../../pages/assistant";
@@ -27,14 +27,20 @@ const Values = () => {
   const theme = useTheme();
   const [stepChecked, setStepChecked] = useState(iniStepChecked);
 
-  const { RiveComponent: RiveComponentMeettings } = useRive({
+  const { rive, RiveComponent: RiveComponentMeettings } = useRive({
     src: "rive-assistant/meetings.riv",
     artboard: "meetings",
-    // animations: ["Timeline 1", "dark", "light"],
-    animations: ["Timeline 1"],
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+    // animations: ["Timeline 1"],
     autoplay: true,
     // onLoad: () => console.log("load-finish"),
   });
+
+  useEffect(() => {
+    if (!rive) return;
+
+    rive.play(["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"]);
+  }, [rive, theme.palette.mode]);
 
   const getGrayColorText = () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2);
 
