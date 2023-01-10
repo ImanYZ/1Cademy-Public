@@ -2,12 +2,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Button,
+  FormGroup,
   Grid,
   IconButton,
   Modal,
   Skeleton,
   Stack,
-  ThemeProvider,
   /* ThemeProvider */
   Tooltip,
   Typography,
@@ -46,7 +46,8 @@ import { MemoizedTableOfContent } from "../components/home/components/TableOfCon
 import CustomTypography from "../components/home/components/Typography";
 // import { sectionsOrder } from "../components/home/sectionsOrder";
 import PublicLayout from "../components/layouts/PublicLayout";
-import { brandingLightTheme } from "../lib/theme/brandingTheme";
+import { ThemeSwitcher } from "../components/ThemeSwitcher";
+import useThemeChange from "../hooks/useThemeChange";
 
 /**
  * animations builded with: https://rive.app/
@@ -102,7 +103,7 @@ const Home = () => {
   const [, /* showLandingOptions */ setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
-  //   const [handleThemeSwitch] = useThemeChange();
+  const [handleThemeSwitch] = useThemeChange();
 
   const [open, setOpen] = useState(false);
 
@@ -463,182 +464,182 @@ const Home = () => {
   //   };
 
   return (
-    <ThemeProvider theme={brandingLightTheme}>
+    // <ThemeProvider theme={brandingLightTheme}>
+    <Box
+      id="ScrollableContainer"
+      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3 })}
+      sx={{
+        height: "100vh",
+        overflowY: "auto",
+        overflowX: "auto",
+        position: "relative",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
+        // zIndex: -3
+      }}
+    >
       <Box
-        id="ScrollableContainer"
-        onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3 })}
-        sx={{
-          height: "100vh",
-          overflowY: "auto",
-          overflowX: "auto",
-          position: "relative",
-          backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
-          // zIndex: -3
-        }}
+        component={"header"}
+        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
       >
         <Box
-          component={"header"}
-          sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
+          sx={{
+            height: HEADER_HEIGTH,
+            width: "100%",
+            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
+            backdropFilter: "saturate(180%) blur(20px)",
+
+            // filter: "blur(1px)"
+          }}
+          // style={{willChange:"filter"}}
+        />
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "980px",
+            height: HEADER_HEIGTH,
+            px: isDesktop ? "0px" : "10px",
+            position: "absolute",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          <Box
-            sx={{
-              height: HEADER_HEIGTH,
-              width: "100%",
-              background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
-              backdropFilter: "saturate(180%) blur(20px)",
-
-              // filter: "blur(1px)"
-            }}
-            // style={{willChange:"filter"}}
-          />
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: "980px",
-              height: HEADER_HEIGTH,
-              px: isDesktop ? "0px" : "10px",
-              position: "absolute",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+          <Stack
+            spacing={"20px"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            direction={"row"}
+            sx={{ color: "#f8f8f8" }}
           >
-            <Stack
-              spacing={"20px"}
-              alignItems={"center"}
-              justifyContent={"space-between"}
-              direction={"row"}
-              sx={{ color: "#f8f8f8" }}
-            >
-              <Box onClick={() => router.push("/")} sx={{ cursor: "pointer" }}>
-                <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
-              </Box>
+            <Box onClick={() => router.push("/")} sx={{ cursor: "pointer" }}>
+              <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+            </Box>
 
-              {isTablet && (
-                <>
-                  <Tooltip title={sectionsOrder[0].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 0 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(0)}
-                    >
-                      {sectionsOrder[0].label}
-                    </Typography>
-                  </Tooltip>
-                  <Tooltip title={sectionsOrder[1].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(1)}
-                    >
-                      {sectionsOrder[1].label}
-                    </Typography>
-                  </Tooltip>
-                  <Tooltip title={sectionsOrder[2].title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(2)}
-                    >
-                      {sectionsOrder[2].label}
-                    </Typography>
-                  </Tooltip>
-                </>
-              )}
-            </Stack>
-
-            <Stack direction={"row"} alignItems="center">
-              {!isMovil && (
-                <Box sx={{ maxWidth: "450px" }}>
-                  <AppHeaderSearchBar
-                    searcherUrl={"search"}
+            {isTablet && (
+              <>
+                <Tooltip title={sectionsOrder[0].title}>
+                  <Typography
                     sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 0 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
-                  />
-                </Box>
-              )}
-              {/* <FormGroup>
-                <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
-              </FormGroup> */}
-              {
-                <Tooltip title="Apply to join 1Cademy">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    // onClick={joinUsClick}
-                    target="_blank"
-                    href="https://1cademy.us/#JoinUsSection"
-                    size={isMovil ? "small" : "medium"}
-                    sx={{
-                      fontSize: 16,
-                      // color: "common.white",
-                      ml: 2.5,
-                      borderRadius: 40,
-                      textTransform: "uppercase",
-                    }}
+                    onClick={() => switchSection(0)}
                   >
-                    Apply!
-                  </Button>
+                    {sectionsOrder[0].label}
+                  </Typography>
                 </Tooltip>
-              }
-              <Tooltip title="SIGN IN/UP">
+                <Tooltip title={sectionsOrder[1].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(1)}
+                  >
+                    {sectionsOrder[1].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[2].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(2)}
+                  >
+                    {sectionsOrder[2].label}
+                  </Typography>
+                </Tooltip>
+              </>
+            )}
+          </Stack>
+
+          <Stack direction={"row"} alignItems="center">
+            {!isMovil && (
+              <Box sx={{ maxWidth: "450px" }}>
+                <AppHeaderSearchBar
+                  searcherUrl={"search"}
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                  }}
+                />
+              </Box>
+            )}
+            <FormGroup>
+              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
+            </FormGroup>
+            {
+              <Tooltip title="Apply to join 1Cademy">
                 <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => setOpen(true)}
+                  variant="contained"
+                  color="primary"
+                  // onClick={joinUsClick}
+                  target="_blank"
+                  href="https://1cademy.us/#JoinUsSection"
                   size={isMovil ? "small" : "medium"}
                   sx={{
-                    // width: "150px",
-                    // display: showSignInorUp ? "inline-flex" : "none",
-                    // display: "inline-flex",
                     fontSize: 16,
                     // color: "common.white",
                     ml: 2.5,
                     borderRadius: 40,
-                    wordBreak: "normal",
-                    whiteSpace: "nowrap",
-
-                    // backgroundColor: theme =>
-                    //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
-                    // "&:hover": {
-                    //   backgroundColor: theme => theme.palette.common.darkGrayBackground,
-                    // },
+                    textTransform: "uppercase",
                   }}
                 >
-                  SIGN IN/UP
+                  Apply!
                 </Button>
               </Tooltip>
-            </Stack>
+            }
+            <Tooltip title="SIGN IN/UP">
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => setOpen(true)}
+                size={isMovil ? "small" : "medium"}
+                sx={{
+                  // width: "150px",
+                  // display: showSignInorUp ? "inline-flex" : "none",
+                  // display: "inline-flex",
+                  fontSize: 16,
+                  // color: "common.white",
+                  ml: 2.5,
+                  borderRadius: 40,
+                  wordBreak: "normal",
+                  whiteSpace: "nowrap",
+
+                  // backgroundColor: theme =>
+                  //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
+                  // "&:hover": {
+                  //   backgroundColor: theme => theme.palette.common.darkGrayBackground,
+                  // },
+                }}
+              >
+                SIGN IN/UP
+              </Button>
+            </Tooltip>
+          </Stack>
+        </Box>
+      </Box>
+      <Box sx={{ position: "relative" }}>
+        <Box
+          sx={{ position: "absolute", top: "70px", bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
+        >
+          <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
+            <MemoizedTableOfContent
+              menuItems={sectionsTmp}
+              viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
+              onChangeContent={switchSection}
+              sectionSelected={sectionSelected}
+              animationSelected={animationSelected}
+              sectionWithAnimation={SECTION_WITH_ANIMATION}
+            />
           </Box>
         </Box>
-        <Box sx={{ position: "relative" }}>
-          <Box
-            sx={{ position: "absolute", top: "70px", bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
-          >
-            <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
-              <MemoizedTableOfContent
-                menuItems={sectionsTmp}
-                viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
-                onChangeContent={switchSection}
-                sectionSelected={sectionSelected}
-                animationSelected={animationSelected}
-                sectionWithAnimation={SECTION_WITH_ANIMATION}
-              />
-            </Box>
-          </Box>
 
-          {/* <Stack
+        {/* <Stack
           ref={HomeSectionRef}
           spacing={width < 900 ? "10px" : "20px"}
           direction={"column"}
@@ -689,71 +690,71 @@ const Home = () => {
           </Box>
         </Stack> */}
 
-          <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-            <Box id={sectionsOrder[0].id} ref={howSectionRef} sx={{ pb: 10, scrollMarginTop: "70px" }}>
-              <HowItWorks
-                section={sectionSelected}
-                // ref={sectionAnimationControllerRef}
-                //   artboards={[...section1ArtBoards, ...artboards]}
-                artboards={artboards}
-                animationOptions={
-                  <Button
-                    // color="secondary"
-                    variant="contained"
-                    size={width < 900 ? "small" : "large"}
-                    component="a"
-                    href="https://1cademy.us/#JoinUsSection"
-                    // href="#JoinUsSection"
-                    target="_blank"
-                    sx={{ minWidth: 200, textTransform: "uppercase" }}
-                    className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
-                  >
-                    Apply to Join Us!
-                  </Button>
+        <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
+          <Box id={sectionsOrder[0].id} ref={howSectionRef} sx={{ pb: 10, scrollMarginTop: "70px" }}>
+            <HowItWorks
+              section={sectionSelected}
+              // ref={sectionAnimationControllerRef}
+              //   artboards={[...section1ArtBoards, ...artboards]}
+              artboards={artboards}
+              animationOptions={
+                <Button
+                  // color="secondary"
+                  variant="contained"
+                  size={width < 900 ? "small" : "large"}
+                  component="a"
+                  href="https://1cademy.us/#JoinUsSection"
+                  // href="#JoinUsSection"
+                  target="_blank"
+                  sx={{ minWidth: 200, textTransform: "uppercase" }}
+                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
+                >
+                  Apply to Join Us!
+                </Button>
+              }
+            >
+              <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
+                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
+              </Box>
+            </HowItWorks>
+          </Box>
+
+          <Box id={sectionsOrder[1].id} ref={whySectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[1].title}
+            </CustomTypography>
+            {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
+            {whyInViewOnce && (
+              <Suspense
+                fallback={
+                  <Grid container spacing={2.5} alignItems="center">
+                    {new Array(8).fill(0).map((a, i) => (
+                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                        <Skeleton
+                          variant="rectangular"
+                          height={210}
+                          animation="wave"
+                          sx={{ background: "#72727263", maxWidth: 340 }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
                 }
               >
-                <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
-                  <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
-                  <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
-                </Box>
-              </HowItWorks>
-            </Box>
+                <Values />
+              </Suspense>
+            )}
+          </Box>
 
-            <Box id={sectionsOrder[1].id} ref={whySectionRef} sx={{ py: 10 }}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ pb: 10, fontWeight: 700 }}
-              >
-                {sectionsOrder[1].title}
-              </CustomTypography>
-              {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
-              {whyInViewOnce && (
-                <Suspense
-                  fallback={
-                    <Grid container spacing={2.5} alignItems="center">
-                      {new Array(8).fill(0).map((a, i) => (
-                        <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                          <Skeleton
-                            variant="rectangular"
-                            height={210}
-                            animation="wave"
-                            sx={{ background: "#72727263", maxWidth: 340 }}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  }
-                >
-                  <Values />
-                </Suspense>
-              )}
-            </Box>
-
-            {/* <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
+          {/* <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -787,7 +788,7 @@ const Home = () => {
             )}
           </Box> */}
 
-            {/* <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
+          {/* <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -808,105 +809,105 @@ const Home = () => {
             )}
           </Box> */}
 
-            <Box id={sectionsOrder[2].id} ref={whoSectionRef} sx={{ py: 10 }}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ pb: 10, fontWeight: 700 }}
-              >
-                {sectionsOrder[2].title}
-              </CustomTypography>
-              {!whoInViewOnce ? (
-                <div style={{ height: 2 * height /* background: "pink" */ }}></div>
-              ) : (
-                <Suspense
-                  fallback={
-                    <Box
-                      sx={{
-                        pt: 7,
-                        pb: 10,
-                        position: "relative",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Grid container spacing={2.5}>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                        </Grid>
+          <Box id={sectionsOrder[2].id} ref={whoSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[2].title}
+            </CustomTypography>
+            {!whoInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
                       </Grid>
-                    </Box>
-                  }
-                >
-                  <WhoWeAre />
-                </Suspense>
-              )}
-            </Box>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <WhoWeAre />
+              </Suspense>
+            )}
           </Box>
         </Box>
+      </Box>
 
-        <Modal
-          open={open}
-          onClose={() => setOpen(false)}
-          // aria-labelledby="modal-modal-title"
-          // aria-describedby="modal-modal-description"
-          sx={{ bgcolor: "#3131316e", backdropFilter: "blur(4px)" }}
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        // aria-labelledby="modal-modal-title"
+        // aria-describedby="modal-modal-description"
+        sx={{ bgcolor: "#3131316e", backdropFilter: "blur(4px)" }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
         >
+          <IconButton
+            onClick={() => setOpen(false)}
+            sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
+          >
+            <CloseIcon />
+          </IconButton>
           <Box
             sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
+              maxWidth: "500px",
+              p: "20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <IconButton
-              onClick={() => setOpen(false)}
-              sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Box
-              sx={{
-                maxWidth: "500px",
-                p: "20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img src="assistant/robot.png" alt="" srcSet="" />
-              <Typography /* id="modal-modal-title" */ variant="h6" component="h2">
-                Coming Soon...
-              </Typography>
-            </Box>
+            <img src="assistant/robot.png" alt="" srcSet="" />
+            <Typography /* id="modal-modal-title" */ variant="h6" component="h2">
+              Coming Soon...
+            </Typography>
           </Box>
-        </Modal>
+        </Box>
+      </Modal>
 
-        <AppFooter
-          sx={{
-            px: isDesktop ? "0px" : "10px",
-            background: theme =>
-              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
-          }}
-        />
-        <style>{`
+      <AppFooter
+        sx={{
+          px: isDesktop ? "0px" : "10px",
+          background: theme =>
+            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+        }}
+      />
+      <style>{`
           body{
             overflow:hidden;
           }
         `}</style>
-      </Box>
-    </ThemeProvider>
+    </Box>
+    // </ThemeProvider>
   );
 };
 
