@@ -555,7 +555,7 @@ const Home = () => {
 
           <Stack direction={"row"} alignItems="center">
             {!isMovil && (
-              <Box sx={{ width: "150px" }}>
+              <Box sx={{ maxWidth: "450px" }}>
                 <AppHeaderSearchBar
                   searcherUrl={"search"}
                   sx={{
@@ -630,6 +630,7 @@ const Home = () => {
               onChangeContent={switchSection}
               sectionSelected={sectionSelected}
               animationSelected={animationSelected}
+              sectionWithAnimation={SECTION_WITH_ANIMATION}
             />
           </Box>
         </Box>
