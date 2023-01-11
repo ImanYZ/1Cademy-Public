@@ -469,7 +469,7 @@ const Home = () => {
         <Box
           sx={{
             width: "100%",
-            maxWidth: "980px",
+            maxWidth: "1500px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
@@ -479,7 +479,7 @@ const Home = () => {
           }}
         >
           <Stack
-            spacing={"20px"}
+            spacing={isDesktop ? "50px" : "30px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}
@@ -553,9 +553,9 @@ const Home = () => {
             )}
           </Stack>
 
-          <Stack direction={"row"} alignItems="center">
+          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "50px" : "30px"}>
             {!isMovil && (
-              <Box sx={{ maxWidth: "450px" }}>
+              <Box sx={{ maxWidth: isDesktop ? "350px" : "150px" }}>
                 <AppHeaderSearchBar
                   searcherUrl={"search"}
                   sx={{
