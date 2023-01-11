@@ -4,7 +4,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
-  ClickAwayListener,
   FormGroup,
   Grid,
   IconButton,
@@ -31,6 +30,7 @@ import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
+import SearcherPupUp from "@/components/SearcherPupUp";
 import { useInView } from "@/hooks/useObserver";
 // import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
@@ -871,39 +871,7 @@ const Home = () => {
         }}
       />
       {/* Mobile Searcher */}
-      {openSearch && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: theme => (theme.palette.mode === "dark" ? "#6464647e" : "#c9c9c985"),
-            backdropFilter: "blur(5px)",
-
-            p: "70px 16px",
-            zIndex: "12",
-          }}
-        >
-          <ClickAwayListener
-            onClickAway={() => {
-              setOpenSearch(false);
-              console.log("click away");
-            }}
-          >
-            <Box>
-              <AppHeaderSearchBar
-                searcherUrl={"search"}
-                sx={{
-                  color: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                }}
-              />
-            </Box>
-          </ClickAwayListener>
-        </Box>
-      )}
+      {openSearch && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
       <style>{`
           body{
             overflow:hidden;
