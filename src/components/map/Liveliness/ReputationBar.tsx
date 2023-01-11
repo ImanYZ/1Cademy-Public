@@ -12,6 +12,7 @@ type ILivelinessBarProps = {
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   authEmail: string | undefined;
+  user: any;
 };
 
 type UserInteractions = {
@@ -27,9 +28,19 @@ type UserInteractions = {
 };
 
 const ReputationlinessBar = (props: ILivelinessBarProps) => {
-  const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
+  const { db, onlineUsers, openUserInfoSidebar, authEmail, user } = props;
   const [open, setOpen] = useState(false);
-  const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
+  const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({
+    [user.uname]: {
+      reputation: "Gain",
+      imageUrl: user.imageUrl,
+      chooseUname: user.chooseUname,
+      fullname: user.fName + " " + user.lName,
+      count: 0,
+      actions: ["Correct"],
+      email: user.email,
+    },
+  });
   const [barHeight, setBarHeight] = useState<number>(0);
   // const theme = useTheme();
 
@@ -45,7 +56,6 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     };
 
     const snapshotInitializer = () => {
-      setUsersInteractions({});
       unsubscribe.finalizer();
       const ts = new Date().getTime() - 86400000;
       const actionTracksCol = collection(db, "actionTracks");
@@ -151,7 +161,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
   }, []);
 
   const unames = useMemo(() => {
-    return Object.keys(usersInteractions).filter(uname => usersInteractions[uname].count > 0);
+    return Object.keys(usersInteractions).filter(uname => user.uname === uname || usersInteractions[uname].count > 0);
   }, [usersInteractions]);
 
   const minActions: number = useMemo(() => {

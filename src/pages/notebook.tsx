@@ -3710,6 +3710,7 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
+              user={user}
             />
           )}
 
