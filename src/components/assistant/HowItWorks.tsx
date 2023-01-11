@@ -110,8 +110,6 @@ const HowItWorks = (props: any) => {
         </Box>
       ))}
 
-      <Box sx={{ position: "absolute", bottom: "20px", zIndex: 11 }}>{props.animationOptions}</Box>
-
       <div
         style={{
           position: "sticky",

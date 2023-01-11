@@ -101,7 +101,6 @@ const Home = () => {
   const isMovil = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [, /* showLandingOptions */ setShowLandingOptions] = useState(true);
-  const [showAnimationOptions, setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
 
@@ -120,7 +119,7 @@ const Home = () => {
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
   // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
 
-  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const { height } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   //   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
@@ -329,7 +328,6 @@ const Home = () => {
         // console.log("-------------->>>", { idxSection, idxAnimation });
 
         let showLandingOptions = false;
-        let showEndAnimationOptions = false;
 
         if (idxAnimation < 0) return;
 
@@ -396,7 +394,6 @@ const Home = () => {
 
         // update options display
         setShowLandingOptions(showLandingOptions);
-        setShowAnimationOptions(showEndAnimationOptions);
       }
     },
     [notSectionSwitching, getSectionPositions, getAnimationsPositions, theme]
@@ -572,27 +569,7 @@ const Home = () => {
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
-            {
-              <Tooltip title="Apply to join 1Cademy">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  // onClick={joinUsClick}
-                  target="_blank"
-                  href="https://1cademy.us/#JoinUsSection"
-                  size={isMovil ? "small" : "medium"}
-                  sx={{
-                    fontSize: 16,
-                    // color: "common.white",
-                    ml: 2.5,
-                    borderRadius: 40,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Apply!
-                </Button>
-              </Tooltip>
-            }
+
             <Tooltip title="SIGN IN/UP">
               <Button
                 variant="outlined"
@@ -697,21 +674,6 @@ const Home = () => {
               // ref={sectionAnimationControllerRef}
               //   artboards={[...section1ArtBoards, ...artboards]}
               artboards={artboards}
-              animationOptions={
-                <Button
-                  // color="secondary"
-                  variant="contained"
-                  size={width < 900 ? "small" : "large"}
-                  component="a"
-                  href="https://1cademy.us/#JoinUsSection"
-                  // href="#JoinUsSection"
-                  target="_blank"
-                  sx={{ minWidth: 200, textTransform: "uppercase" }}
-                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
-                >
-                  Apply to Join Us!
-                </Button>
-              }
             >
               <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
                 <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
