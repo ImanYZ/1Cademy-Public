@@ -1,7 +1,10 @@
 import CloseIcon from "@mui/icons-material/Close";
+// const Values = React.lazy(() => import("./modules/views/Values"));
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
+  ClickAwayListener,
   FormGroup,
   Grid,
   IconButton,
@@ -14,8 +17,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-// const Values = React.lazy(() => import("./modules/views/Values"));
-
 const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
 // const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
 // const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
@@ -105,7 +106,7 @@ const Home = () => {
   const [handleThemeSwitch] = useThemeChange();
 
   const [open, setOpen] = useState(false);
-
+  const [openSearch, setOpenSearch] = useState(false);
   const router = useRouter();
 
   // const [isSSR,setIsSSR]
@@ -554,6 +555,7 @@ const Home = () => {
               </>
             )}
           </Stack>
+
           {!isMovil && (
             <AppHeaderSearchBar
               searcherUrl={"search"}
@@ -564,6 +566,13 @@ const Home = () => {
             />
           )}
           <Stack direction={"row"} alignItems="center">
+            {isMovil && (
+              <Tooltip title="Open Searcher">
+                <IconButton onClick={() => setOpenSearch(true)}>
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
+            )}
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
@@ -861,6 +870,40 @@ const Home = () => {
             theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
         }}
       />
+      {/* Mobile Searcher */}
+      {openSearch && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: theme => (theme.palette.mode === "dark" ? "#6464647e" : "#c9c9c985"),
+            backdropFilter: "blur(5px)",
+
+            p: "70px 16px",
+            zIndex: "12",
+          }}
+        >
+          <ClickAwayListener
+            onClickAway={() => {
+              setOpenSearch(false);
+              console.log("click away");
+            }}
+          >
+            <Box>
+              <AppHeaderSearchBar
+                searcherUrl={"search"}
+                sx={{
+                  color: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                }}
+              />
+            </Box>
+          </ClickAwayListener>
+        </Box>
+      )}
       <style>{`
           body{
             overflow:hidden;
