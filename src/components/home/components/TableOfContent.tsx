@@ -1,7 +1,7 @@
 import { Box, PaletteMode, Tooltip, Typography, useTheme } from "@mui/material";
 import React from "react";
 
-import { SECTION_WITH_ANIMATION } from "../../../pages";
+// import { SECTION_WITH_ANIMATION } from "../../../pages";
 
 type TableOfContentProps = {
   menuItems: any[];
@@ -9,6 +9,7 @@ type TableOfContentProps = {
   viewType: any;
   sectionSelected: number;
   animationSelected: number;
+  sectionWithAnimation: number;
 };
 
 const TableOfContent = ({
@@ -17,6 +18,7 @@ const TableOfContent = ({
   viewType,
   sectionSelected,
   animationSelected,
+  sectionWithAnimation,
 }: TableOfContentProps) => {
   const theme = useTheme();
 
@@ -130,7 +132,7 @@ const TableOfContent = ({
                   <Tooltip key={child.id} title={child.title} placement="right" arrow disableInteractive>
                     <Box
                       component={"li"}
-                      onClick={() => onChangeContent(1, idx)}
+                      onClick={() => onChangeContent(sectionWithAnimation, idx)}
                       sx={{
                         height: "36px",
                         position: "relative",
@@ -147,7 +149,7 @@ const TableOfContent = ({
                           top: "16px",
                           background: getTextColor(
                             theme.palette.mode,
-                            animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
+                            animationSelected === idx && sectionSelected === sectionWithAnimation
                           ),
                           // animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
                           //   ? "#f1f1f1"
@@ -163,7 +165,7 @@ const TableOfContent = ({
                           left: viewType === "SIMPLE" ? "-7px" : "-25px",
                           top: "12px",
                           background:
-                            animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
+                            animationSelected === idx && sectionSelected === sectionWithAnimation
                               ? "#8d8d8d7a"
                               : "transparent",
                         },
@@ -183,7 +185,7 @@ const TableOfContent = ({
                           //     : "#9c9c9c",
                           color: getTextColor(
                             theme.palette.mode,
-                            animationSelected === idx && sectionSelected === SECTION_WITH_ANIMATION
+                            animationSelected === idx && sectionSelected === sectionWithAnimation
                           ),
                           fontSize: "14px",
                           cursor: "pointer",
