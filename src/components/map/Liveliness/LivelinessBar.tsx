@@ -191,6 +191,9 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
             padding: "0px 0px 0px 32px",
           }}
         >
+          <Tooltip title={"24-hour Interactions Leaderboard."} placement="left">
+            <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
+          </Tooltip>
           <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
           <Box
             className="seekbar"
