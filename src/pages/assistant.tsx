@@ -489,16 +489,17 @@ const Home = () => {
           }}
           // style={{willChange:"filter"}}
         />
-        <Box
+        <Stack
+          direction={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+          spacing={"20px"}
           sx={{
             width: "100%",
             maxWidth: "980px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
           }}
         >
           <Stack
@@ -553,19 +554,16 @@ const Home = () => {
               </>
             )}
           </Stack>
-
+          {!isMovil && (
+            <AppHeaderSearchBar
+              searcherUrl={"search"}
+              sx={{
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+              }}
+            />
+          )}
           <Stack direction={"row"} alignItems="center">
-            {!isMovil && (
-              <Box sx={{ maxWidth: "450px" }}>
-                <AppHeaderSearchBar
-                  searcherUrl={"search"}
-                  sx={{
-                    color: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                  }}
-                />
-              </Box>
-            )}
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
@@ -598,7 +596,7 @@ const Home = () => {
               </Button>
             </Tooltip>
           </Stack>
-        </Box>
+        </Stack>
       </Box>
       <Box sx={{ position: "relative" }}>
         <Box
