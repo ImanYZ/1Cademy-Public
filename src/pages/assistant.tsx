@@ -1,5 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
-// const Values = React.lazy(() => import("./modules/views/Values"));
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
@@ -10,43 +10,32 @@ import {
   Modal,
   Skeleton,
   Stack,
-  /* ThemeProvider */
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
-// const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
-// const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
-//   suspense: true,
-//   ssr: false,
-// });
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-// import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
+import PublicLayout from "@/components/layouts/PublicLayout";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { useInView } from "@/hooks/useObserver";
 // import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-// import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
-// import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-// import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
-import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
+import AppFooter from "../components/AppFooter2";
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-// import { sectionsOrder } from "../components/home/sectionsOrder";
-import PublicLayout from "../components/layouts/PublicLayout";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import useThemeChange from "../hooks/useThemeChange";
 
@@ -59,20 +48,15 @@ export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
-// const section1ArtBoards = [
-//   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
-// ];
 const artboards = [
   { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
   { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
   { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
-  //   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 
 export const SECTION_WITH_ANIMATION = 0;
 
 const sectionsTmp = [
-  //   { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
   {
     id: "HowItWorksSection",
     title: "How 1Cademy Assistant works?",
@@ -81,17 +65,13 @@ const sectionsTmp = [
       { id: "animation1", title: "Planning", simpleTitle: "Planning" },
       { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
-      //   { id: "animation4", title: "Improving", simpleTitle: "Improving" },
     ],
   },
   { id: "ValuesSection", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
-  //   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
-  //   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
 
 const Home = () => {
-  // const [section, setSection] = useState(0);
   const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
@@ -101,7 +81,7 @@ const Home = () => {
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMovil = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
-  const [, /* showLandingOptions */ setShowLandingOptions] = useState(true);
+  const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
 
@@ -109,18 +89,13 @@ const Home = () => {
   const [openSearch, setOpenSearch] = useState(false);
   const router = useRouter();
 
-  // const [isSSR,setIsSSR]
-
-  // const [{ isAuthenticated }] = useAuth();
-  //   const router = useRouter();
-
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   //   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   //   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
   // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
 
-  const { height } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   //   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
@@ -332,29 +307,29 @@ const Home = () => {
 
         if (idxAnimation < 0) return;
 
-        // if (idxSection === 0) {
-        //   const lowerAnimationLimit = minAnimation;
-        //   const upperAnimationLimit = maxAnimation;
-        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
-        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
-        //   if (percentageFrame < 50) {
-        //     setIdxRiveComponent(0);
-        //   } else {
-        //     const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
-        //     const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
-        //     const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
-        //     const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
-        //     timeInSecondsRef.current = timeInSeconds;
-        //     advanceAnimationTo(rive2, timeInSeconds, theme);
+        if (idxSection === 0) {
+          const lowerAnimationLimit = minAnimation;
+          const upperAnimationLimit = maxAnimation;
+          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+          const positionFrame = currentScrollPosition - lowerAnimationLimit;
+          const percentageFrame = (positionFrame * 100) / rangeFrames;
+          // if (percentageFrame < 50) {
+          //   setIdxRiveComponent(0);
+          // } else {
+          //   const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
+          //   const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
+          //   const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
+          //   const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
+          //   timeInSecondsRef.current = timeInSeconds;
+          //   advanceAnimationTo(rive2, timeInSeconds, theme);
 
-        //     setIdxRiveComponent(1);
-        //   }
+          //   setIdxRiveComponent(1);
+          // }
 
-        //   if (percentageFrame < 5) {
-        //     showLandingOptions = true;
-        //   }
-        // }
+          if (percentageFrame < 2) {
+            showLandingOptions = true;
+          }
+        }
 
         if (idxSection === SECTION_WITH_ANIMATION) {
           // console.log("section with aniomation");
@@ -394,6 +369,7 @@ const Home = () => {
         }
 
         // update options display
+
         setShowLandingOptions(showLandingOptions);
       }
     },
@@ -423,10 +399,9 @@ const Home = () => {
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
 
       // setSelectedSection(sectionIdx);
-      //   if (sectionIdx === 0) {
-      //     setShowLandingOptions(true);
-      //     setIdxRiveComponent(animationIndex);
-      //   }
+      if (sectionIdx === 0) {
+        setShowLandingOptions(true);
+      }
       if (sectionIdx === SECTION_WITH_ANIMATION) {
         setIdxRiveComponent(animationIndex);
         // reset animation when jump through sections
@@ -606,6 +581,24 @@ const Home = () => {
             </Tooltip>
           </Stack>
         </Stack>
+      </Box>
+      <Box sx={{ height, width: "100%", position: "absolute", top: "0px" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            width: "100%",
+
+            bottom: "0px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            color: "common.white",
+          }}
+          className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+        >
+          {height > 500 && "Scroll"}
+          <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
+        </Box>
       </Box>
       <Box sx={{ position: "relative" }}>
         <Box
