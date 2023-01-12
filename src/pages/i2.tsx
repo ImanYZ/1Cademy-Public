@@ -543,11 +543,16 @@ const Home = () => {
             width: "100%",
             position: "absolute",
             top: 0,
-            background: "#123",
           }}
         >
           <Box
-            sx={{ display: "flex", flexDirection: "column", alignItems: "center", color: "common.white" }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              fontWeight: "700",
+              color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
+            }}
             className={showLandingOptions ? "show-blurred-text" : "hide-content"}
           >
             {height > 500 && "Scroll"}
