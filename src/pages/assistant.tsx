@@ -1,4 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -8,44 +10,32 @@ import {
   Modal,
   Skeleton,
   Stack,
-  /* ThemeProvider */
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-// const Values = React.lazy(() => import("./modules/views/Values"));
-
 const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
-// const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
-// const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
-//   suspense: true,
-//   ssr: false,
-// });
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-// import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
+import PublicLayout from "@/components/layouts/PublicLayout";
+import SearcherPupUp from "@/components/SearcherPupUp";
 import { useInView } from "@/hooks/useObserver";
 // import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-// import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
-// import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-// import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
-import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
+import AppFooter from "../components/AppFooter2";
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-// import { sectionsOrder } from "../components/home/sectionsOrder";
-import PublicLayout from "../components/layouts/PublicLayout";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import useThemeChange from "../hooks/useThemeChange";
 
@@ -58,20 +48,15 @@ export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
-// const section1ArtBoards = [
-//   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
-// ];
 const artboards = [
   { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
   { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
   { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
-  //   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 
 export const SECTION_WITH_ANIMATION = 0;
 
 const sectionsTmp = [
-  //   { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
   {
     id: "HowItWorksSection",
     title: "How 1Cademy Assistant works?",
@@ -80,17 +65,13 @@ const sectionsTmp = [
       { id: "animation1", title: "Planning", simpleTitle: "Planning" },
       { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
-      //   { id: "animation4", title: "Improving", simpleTitle: "Improving" },
     ],
   },
   { id: "ValuesSection", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
-  //   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
-  //   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
 
 const Home = () => {
-  // const [section, setSection] = useState(0);
   const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
@@ -100,19 +81,13 @@ const Home = () => {
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMovil = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
-  const [, /* showLandingOptions */ setShowLandingOptions] = useState(true);
-  const [showAnimationOptions, setShowAnimationOptions] = useState(false);
+  const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
 
   const [open, setOpen] = useState(false);
-
+  const [openSearch, setOpenSearch] = useState(false);
   const router = useRouter();
-
-  // const [isSSR,setIsSSR]
-
-  // const [{ isAuthenticated }] = useAuth();
-  //   const router = useRouter();
 
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   //   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
@@ -329,33 +304,32 @@ const Home = () => {
         // console.log("-------------->>>", { idxSection, idxAnimation });
 
         let showLandingOptions = false;
-        let showEndAnimationOptions = false;
 
         if (idxAnimation < 0) return;
 
-        // if (idxSection === 0) {
-        //   const lowerAnimationLimit = minAnimation;
-        //   const upperAnimationLimit = maxAnimation;
-        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
-        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
-        //   if (percentageFrame < 50) {
-        //     setIdxRiveComponent(0);
-        //   } else {
-        //     const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
-        //     const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
-        //     const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
-        //     const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
-        //     timeInSecondsRef.current = timeInSeconds;
-        //     advanceAnimationTo(rive2, timeInSeconds, theme);
+        if (idxSection === 0) {
+          const lowerAnimationLimit = minAnimation;
+          const upperAnimationLimit = maxAnimation;
+          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+          const positionFrame = currentScrollPosition - lowerAnimationLimit;
+          const percentageFrame = (positionFrame * 100) / rangeFrames;
+          // if (percentageFrame < 50) {
+          //   setIdxRiveComponent(0);
+          // } else {
+          //   const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
+          //   const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
+          //   const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
+          //   const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
+          //   timeInSecondsRef.current = timeInSeconds;
+          //   advanceAnimationTo(rive2, timeInSeconds, theme);
 
-        //     setIdxRiveComponent(1);
-        //   }
+          //   setIdxRiveComponent(1);
+          // }
 
-        //   if (percentageFrame < 5) {
-        //     showLandingOptions = true;
-        //   }
-        // }
+          if (percentageFrame < 2) {
+            showLandingOptions = true;
+          }
+        }
 
         if (idxSection === SECTION_WITH_ANIMATION) {
           // console.log("section with aniomation");
@@ -395,8 +369,8 @@ const Home = () => {
         }
 
         // update options display
+
         setShowLandingOptions(showLandingOptions);
-        setShowAnimationOptions(showEndAnimationOptions);
       }
     },
     [notSectionSwitching, getSectionPositions, getAnimationsPositions, theme]
@@ -425,10 +399,9 @@ const Home = () => {
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
 
       // setSelectedSection(sectionIdx);
-      //   if (sectionIdx === 0) {
-      //     setShowLandingOptions(true);
-      //     setIdxRiveComponent(animationIndex);
-      //   }
+      if (sectionIdx === 0) {
+        setShowLandingOptions(true);
+      }
       if (sectionIdx === SECTION_WITH_ANIMATION) {
         setIdxRiveComponent(animationIndex);
         // reset animation when jump through sections
@@ -492,16 +465,17 @@ const Home = () => {
           }}
           // style={{willChange:"filter"}}
         />
-        <Box
+        <Stack
+          direction={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+          spacing={"20px"}
           sx={{
             width: "100%",
             maxWidth: "980px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
           }}
         >
           <Stack
@@ -557,42 +531,27 @@ const Home = () => {
             )}
           </Stack>
 
+          {!isMovil && (
+            <AppHeaderSearchBar
+              searcherUrl={"search"}
+              sx={{
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+              }}
+            />
+          )}
           <Stack direction={"row"} alignItems="center">
-            {!isMovil && (
-              <Box sx={{ maxWidth: "450px" }}>
-                <AppHeaderSearchBar
-                  searcherUrl={"search"}
-                  sx={{
-                    color: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                  }}
-                />
-              </Box>
+            {isMovil && (
+              <Tooltip title="Open Searcher">
+                <IconButton onClick={() => setOpenSearch(true)}>
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
             )}
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
-            {
-              <Tooltip title="Apply to join 1Cademy">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  // onClick={joinUsClick}
-                  target="_blank"
-                  href="https://1cademy.us/#JoinUsSection"
-                  size={isMovil ? "small" : "medium"}
-                  sx={{
-                    fontSize: 16,
-                    // color: "common.white",
-                    ml: 2.5,
-                    borderRadius: 40,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Apply!
-                </Button>
-              </Tooltip>
-            }
+
             <Tooltip title="SIGN IN/UP">
               <Button
                 variant="outlined"
@@ -621,6 +580,24 @@ const Home = () => {
               </Button>
             </Tooltip>
           </Stack>
+        </Stack>
+      </Box>
+      <Box sx={{ height, width: "100%", position: "absolute", top: "0px" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            width: "100%",
+
+            bottom: "0px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            color: "common.white",
+          }}
+          className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+        >
+          {height > 500 && "Scroll"}
+          <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
         </Box>
       </Box>
       <Box sx={{ position: "relative" }}>
@@ -697,21 +674,6 @@ const Home = () => {
               // ref={sectionAnimationControllerRef}
               //   artboards={[...section1ArtBoards, ...artboards]}
               artboards={artboards}
-              animationOptions={
-                <Button
-                  // color="secondary"
-                  variant="contained"
-                  size={width < 900 ? "small" : "large"}
-                  component="a"
-                  href="https://1cademy.us/#JoinUsSection"
-                  // href="#JoinUsSection"
-                  target="_blank"
-                  sx={{ minWidth: 200, textTransform: "uppercase" }}
-                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
-                >
-                  Apply to Join Us!
-                </Button>
-              }
             >
               <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
                 <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
@@ -901,6 +863,8 @@ const Home = () => {
             theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
         }}
       />
+      {/* Mobile Searcher */}
+      {openSearch && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
       <style>{`
           body{
             overflow:hidden;

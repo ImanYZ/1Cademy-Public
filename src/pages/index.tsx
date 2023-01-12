@@ -1,9 +1,11 @@
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
   FormGroup,
   Grid,
+  IconButton,
   Skeleton,
   Stack,
   /* ThemeProvider */
@@ -27,6 +29,7 @@ import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
+import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
 import useThemeChange from "@/hooks/useThemeChange";
@@ -99,6 +102,7 @@ const Home = () => {
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
+  const [openSearch, setOpenSearch] = useState(false);
 
   // const [isSSR,setIsSSR]
 
@@ -164,7 +168,6 @@ const Home = () => {
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
-
   useEffect(() => {
     if (!rive1) return;
     rive1.reset({ artboard: "artboard-1" });
@@ -466,20 +469,21 @@ const Home = () => {
           }}
           // style={{willChange:"filter"}}
         />
-        <Box
+        <Stack
+          direction={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+          spacing={isMovil ? "10px" : "20px"}
           sx={{
             width: "100%",
-            maxWidth: "980px",
+            maxWidth: "1500px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
           }}
         >
           <Stack
-            spacing={"20px"}
+            spacing={isDesktop ? "50px" : "30px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}
@@ -552,18 +556,22 @@ const Home = () => {
               </>
             )}
           </Stack>
-
+          {!isMovil && (
+            <AppHeaderSearchBar
+              searcherUrl={"search"}
+              sx={{
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+              }}
+            />
+          )}
           <Stack direction={"row"} alignItems="center">
-            {!isMovil && (
-              <Box sx={{ maxWidth: "450px" }}>
-                <AppHeaderSearchBar
-                  searcherUrl={"search"}
-                  sx={{
-                    color: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                  }}
-                />
-              </Box>
+            {isMovil && (
+              <Tooltip title="Open Searcher">
+                <IconButton onClick={() => setOpenSearch(true)}>
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
             )}
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
@@ -617,7 +625,7 @@ const Home = () => {
               </Button>
             </Tooltip>
           </Stack>
-        </Box>
+        </Stack>
       </Box>
       <Box sx={{ position: "relative" }}>
         <Box
@@ -860,6 +868,8 @@ const Home = () => {
             theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
         }}
       />
+      {openSearch && isMovil && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+
       <style>{`
           body{
             overflow:hidden;
