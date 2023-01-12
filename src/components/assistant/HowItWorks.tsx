@@ -36,11 +36,17 @@ const HowItWorks = (props: any) => {
         const newHeight = cur.getHeight(height);
         return [
           ...acu,
-          { ...cur, top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : 0, height: newHeight },
+          {
+            ...cur,
+            top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : height - 70,
+            height: newHeight,
+          },
         ];
       }, []),
     [props.artboards, height]
   );
+
+  console.log({ processedArtboard });
 
   return (
     <Box
@@ -64,8 +70,9 @@ const HowItWorks = (props: any) => {
           borderRight: `dashed 6px #ff28c9`,
           color: "white",
         }}
-      ></Box> */}
-      {/* <CustomTypography
+      >
+      </Box> */}
+      <CustomTypography
         component={"h2"}
         variant="h1"
         marked="center"
@@ -73,12 +80,12 @@ const HowItWorks = (props: any) => {
         sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
       >
         {sectionsOrder[0].title}
-      </CustomTypography> */}
+      </CustomTypography>
       {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
       >
         {sectionsOrder[1].title}
       </Typography> */}
-      {processedArtboard.map((artboard: any, idx: number) => (
+      {processedArtboard.map((artboard: any) => (
         <Box
           key={artboard.name}
           sx={{
@@ -90,7 +97,7 @@ const HowItWorks = (props: any) => {
             color: "white",
           }}
         >
-          {idx === 1 && (
+          {/* {idx === 1 && (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
               <CustomTypography
                 component={"h2"}
@@ -102,8 +109,8 @@ const HowItWorks = (props: any) => {
                 {sectionsOrder[0].title}
               </CustomTypography>
             </Box>
-          )}
-          {idx > 0 && (
+          )} */}
+          {
             <Typography
               variant="h5"
               component="h3"
@@ -118,7 +125,7 @@ const HowItWorks = (props: any) => {
             >
               {artboard.name}
             </Typography>
-          )}
+          }
         </Box>
       ))}
 
@@ -131,7 +138,7 @@ const HowItWorks = (props: any) => {
           display: "flex",
           flexDirection: "column",
           zIndex: 10,
-          // border: "solid 2px pink",
+          border: "solid 2px pink",
         }}
       >
         {props.children}

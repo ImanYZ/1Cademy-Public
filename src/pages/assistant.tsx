@@ -48,21 +48,33 @@ export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
+const section1ArtBoards = [
+  { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
+];
+
 const artboards = [
-  { name: "Hero", durationMs: 1000, getHeight: (vh: number) => vh, color: "#4eb8f5" },
+  // { name: "Hero", durationMs: 1000, getHeight: (vh: number) => vh, color: "#4eb8f5" },
   { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
   { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
   { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
 ];
 
-export const SECTION_WITH_ANIMATION = 0;
+export const SECTION_WITH_ANIMATION = 1;
 
 const sectionsTmp = [
+  {
+    id: "Hero Section",
+    title: "Hero Section",
+    simpleTitle: "Hero",
+    children: [],
+    hidden: true,
+  },
   {
     id: "HowItWorksSection",
     title: "How 1Cademy Assistant works?",
     simpleTitle: "How?",
     children: [
+      // { id: "animation1", title: "Planning", simpleTitle: "Planning" },
       { id: "animation1", title: "Planning", simpleTitle: "Planning" },
       { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
@@ -94,6 +106,7 @@ const Home = () => {
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
   const { rive: rive0, RiveComponent: RiveComponent0 } = useRive({
@@ -142,23 +155,29 @@ const Home = () => {
 
   const getSectionHeights = useCallback(() => {
     if (!howSectionRef?.current) return null;
+    if (!HomeSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whoEntry) return null;
 
     return [
-      { id: howSectionRef.current.id, height: 0 },
-
+      { id: HomeSectionRef.current.id, height: 0 },
+      { id: howSectionRef.current.id, height },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
       { id: whoEntry.target.id, height: whyEntry.target.clientHeight },
     ];
-  }, [whoEntry, whyEntry]);
+  }, [height, whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
+    if (!HomeSectionRef?.current) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whoEntry) return null;
 
     return [
+      {
+        id: HomeSectionRef.current.id,
+        height: HomeSectionRef.current.clientHeight,
+      },
       {
         id: howSectionRef.current.id,
         height: howSectionRef.current.clientHeight,
@@ -191,20 +210,25 @@ const Home = () => {
     (
       event: any,
       {
+        rive0,
         rive1,
         rive2,
         rive3,
       }: {
+        rive0: Rive | null;
         rive1: Rive | null;
         rive2: Rive | null;
         rive3: Rive | null;
       }
     ) => {
-      if (!rive1 || !rive2 || !rive3) return;
+      console.log("detect");
+      if (!rive1 || !rive2 || !rive3 || !rive0) return;
+      console.log("detect 1");
       if (notSectionSwitching) {
+        console.log("detect 2");
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
-        // console.log({ sectionsHeight });
+        console.log({ sectionsHeight });
         if (!sectionsHeight) return;
 
         const { min, idx: idxSection } = sectionsHeight.reduce(
@@ -214,16 +238,16 @@ const Home = () => {
           },
           { max: 0, min: 0, idx: -1 }
         );
-
+        console.log(1);
         if (idxSection < 0) return;
-
+        console.log(2);
         let animationsHeight = [];
-        // if (idxSection === 0) {
-        //   animationsHeight = [section1ArtBoards[0].getHeight(height)];
-        // } else {
-        //   animationsHeight = getAnimationsPositions();
-        // }
-        animationsHeight = getAnimationsPositions();
+        if (idxSection === 0) {
+          animationsHeight = [section1ArtBoards[0].getHeight(height)];
+        } else {
+          animationsHeight = getAnimationsPositions();
+        }
+        // animationsHeight = getAnimationsPositions();
 
         // console.log({ animationsHeight });
 
@@ -242,12 +266,13 @@ const Home = () => {
         }
 
         setSelectedSection(idxSection);
-        setSelectedAnimation(idxAnimation - 1);
+        setSelectedAnimation(idxAnimation);
 
         let showLandingOptions = false;
 
         if (idxAnimation < 0) return;
 
+        console.log({ idxSection });
         if (idxSection === 0) {
           const lowerAnimationLimit = minAnimation;
           const upperAnimationLimit = maxAnimation;
@@ -270,11 +295,12 @@ const Home = () => {
           if (percentageFrame < 2) {
             showLandingOptions = true;
           }
+          setIdxRiveComponent(0);
         }
 
         if (idxSection === SECTION_WITH_ANIMATION) {
           // console.log("section with aniomation");
-          setIdxRiveComponent(idxAnimation);
+          setIdxRiveComponent(idxAnimation + 1);
           const lowerAnimationLimit = minAnimation;
           const upperAnimationLimit = maxAnimation;
           const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
@@ -286,13 +312,13 @@ const Home = () => {
 
           //   console.log({ timeInSecondsRef: timeInSecondsRef.current.toFixed(2) });
 
-          if (idxAnimation === 1) {
+          if (idxAnimation === 0) {
             advanceAnimationTo(rive1, timeInSeconds, theme);
           }
-          if (idxAnimation === 2) {
+          if (idxAnimation === 1) {
             advanceAnimationTo(rive2, timeInSeconds, theme);
           }
-          if (idxAnimation === 3) {
+          if (idxAnimation === 2) {
             advanceAnimationTo(rive3, timeInSeconds, theme);
           }
           //   if (idxAnimation === 1) {
@@ -314,24 +340,27 @@ const Home = () => {
         setShowLandingOptions(showLandingOptions);
       }
     },
-    [notSectionSwitching, getSectionPositions, getAnimationsPositions, theme]
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
   );
 
   const switchSection = useCallback(
     (sectionIdx: number, animationIndex = 0) => {
       if (!rive1 || !rive2 || !rive3 || !rive0) return;
 
+      console.log("---->", { sectionIdx, animationIndex });
       setNotSectionSwitching(false);
       const sectionsHeight = getSectionHeights();
       if (!sectionsHeight) return;
+
+      console.log({ sectionsHeight });
 
       const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
       const sectionResult = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
       //   console.log({ sectionIdx, animationIndex });
 
       let cumulativeAnimationHeight = 0;
-
       const animationsHeight = getAnimationsHeight();
+      console.log({ sectionIdx, animationIndex, animationsHeight });
       if (animationsHeight) {
         const previousAnimationHeight = animationsHeight.slice(0, animationIndex + 1);
         cumulativeAnimationHeight = previousAnimationHeight.reduce((a, c) => a + c);
@@ -384,7 +413,7 @@ const Home = () => {
     // <ThemeProvider theme={brandingLightTheme}>
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3 })}
+      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive0 })}
       sx={{
         height: "100vh",
         overflowY: "auto",
@@ -560,7 +589,7 @@ const Home = () => {
           </Box>
         </Box>
 
-        {/* <Stack
+        <Stack
           ref={HomeSectionRef}
           spacing={width < 900 ? "10px" : "20px"}
           direction={"column"}
@@ -571,17 +600,10 @@ const Home = () => {
             width: "100%",
             position: "absolute",
             top: 0,
-            padding: width < 900 ? "10px" : "20px",
-            backgroundColor: "#1d1102",
-            backgroundImage: `url(${
-              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
-            })`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
+            background: "#123",
           }}
         >
-          <Typography
+          {/* <Typography
             color="white"
             variant="h5"
             sx={{ textAlign: "center" }}
@@ -608,8 +630,8 @@ const Home = () => {
           >
             {height > 500 && "Scroll"}
             <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
-          </Box>
-        </Stack> */}
+          </Box> */}
+        </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
           <Box id={sectionsOrder[0].id} ref={howSectionRef} sx={{ pb: 10, scrollMarginTop: "70px" }}>
@@ -618,7 +640,6 @@ const Home = () => {
               // ref={sectionAnimationControllerRef}
               //   artboards={[...section1ArtBoards, ...artboards]}
               artboards={artboards}
-              // hero={<RiveComponent0 className={`rive-canvas ${idxRiveComponent !== -1 ? "rive-canvas-hidden" : ""}`} />}
             >
               <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
                 <RiveComponent0 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
