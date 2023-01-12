@@ -49,6 +49,7 @@ export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
 const artboards = [
+  { name: "Hero", durationMs: 1000, getHeight: (vh: number) => vh, color: "#4eb8f5" },
   { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
   { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
   { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
@@ -82,7 +83,7 @@ const Home = () => {
   const isMovil = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
-  const [animationSelected, setSelectedAnimation] = useState(0);
+  const [animationSelected, setSelectedAnimation] = useState(-1);
   const [handleThemeSwitch] = useThemeChange();
 
   const [open, setOpen] = useState(false);
@@ -95,7 +96,12 @@ const Home = () => {
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
-
+  const { rive: rive0, RiveComponent: RiveComponent0 } = useRive({
+    src: "rive-assistant/assistant-0.riv",
+    artboard: "New Artboard",
+    animations: ["Timeline 1", "eyes"],
+    autoplay: true,
+  });
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
     src: "rive-assistant/assistant-1.riv",
     artboard: "artboard-1",
@@ -141,6 +147,7 @@ const Home = () => {
 
     return [
       { id: howSectionRef.current.id, height: 0 },
+
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
       { id: whoEntry.target.id, height: whyEntry.target.clientHeight },
     ];
@@ -233,8 +240,9 @@ const Home = () => {
         if (window.location.hash !== `#${sectionSelected.id}`) {
           window.history.replaceState(null, sectionSelected.title, "#" + sectionSelected.id);
         }
+
         setSelectedSection(idxSection);
-        setSelectedAnimation(idxAnimation);
+        setSelectedAnimation(idxAnimation - 1);
 
         let showLandingOptions = false;
 
@@ -278,13 +286,13 @@ const Home = () => {
 
           //   console.log({ timeInSecondsRef: timeInSecondsRef.current.toFixed(2) });
 
-          if (idxAnimation === 0) {
+          if (idxAnimation === 1) {
             advanceAnimationTo(rive1, timeInSeconds, theme);
           }
-          if (idxAnimation === 1) {
+          if (idxAnimation === 2) {
             advanceAnimationTo(rive2, timeInSeconds, theme);
           }
-          if (idxAnimation === 2) {
+          if (idxAnimation === 3) {
             advanceAnimationTo(rive3, timeInSeconds, theme);
           }
           //   if (idxAnimation === 1) {
@@ -311,7 +319,7 @@ const Home = () => {
 
   const switchSection = useCallback(
     (sectionIdx: number, animationIndex = 0) => {
-      if (!rive1 || !rive2 || !rive3) return;
+      if (!rive1 || !rive2 || !rive3 || !rive0) return;
 
       setNotSectionSwitching(false);
       const sectionsHeight = getSectionHeights();
@@ -339,12 +347,15 @@ const Home = () => {
         setIdxRiveComponent(animationIndex);
         // reset animation when jump through sections
         if (animationIndex === 0) {
+          rive0.scrub("Timeline 1", 0);
+        }
+        if (animationIndex === 1) {
           rive1.scrub("Timeline 1", 0);
         }
-        if (animationIndex === 1) {
+        if (animationIndex === 2) {
           rive2.scrub("Timeline 1", 0);
         }
-        if (animationIndex === 1) {
+        if (animationIndex === 3) {
           rive3.scrub("Timeline 1", 0);
         }
         // if (animationIndex === 2) {
@@ -362,7 +373,7 @@ const Home = () => {
         setNotSectionSwitching(true);
       }, 1000);
     },
-    [getAnimationsHeight, getSectionHeights, rive1, rive2, rive3]
+    [getAnimationsHeight, getSectionHeights, rive0, rive1, rive2, rive3]
   );
 
   //   const signUpHandler = () => {
@@ -607,11 +618,13 @@ const Home = () => {
               // ref={sectionAnimationControllerRef}
               //   artboards={[...section1ArtBoards, ...artboards]}
               artboards={artboards}
+              // hero={<RiveComponent0 className={`rive-canvas ${idxRiveComponent !== -1 ? "rive-canvas-hidden" : ""}`} />}
             >
               <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
-                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent0 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
               </Box>
             </HowItWorks>
           </Box>
