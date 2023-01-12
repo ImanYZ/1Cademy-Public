@@ -37,9 +37,9 @@ import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
+import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-import { sectionsOrder } from "../components/home/sectionsOrder";
 import PublicLayout from "../components/layouts/PublicLayout";
 
 /**
@@ -63,9 +63,9 @@ const artboards = [
 export const SECTION_WITH_ANIMATION = 1;
 
 const sectionsTmp = [
-  { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
+  { id: "Landing", title: "Home", simpleTitle: "Home", children: [] },
   {
-    id: "HowItWorksSection",
+    id: "How1CademyAssistantWorks",
     title: "How 1Cademy Assistant works?",
     simpleTitle: "How?",
     children: [
@@ -74,8 +74,8 @@ const sectionsTmp = [
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
     ],
   },
-  { id: "ValuesSection", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
-  { id: "WhoWeAreSection", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
+  { id: "Why1CademyAssistant", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
+  { id: "WhoIsBehind1CademyAssistant", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
 
 const Home = () => {
@@ -162,6 +162,7 @@ const Home = () => {
       { id: HomeSectionRef.current.id, height: 0 },
       { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight },
+      { id: whoEntry.target.id, height: whyEntry.target.clientHeight },
     ];
   }, [whoEntry, whyEntry]);
 
@@ -603,7 +604,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[5].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder[3].id} ref={whoSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -611,7 +612,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[5].title}
+              {sectionsOrder[3].title}
             </CustomTypography>
             {!whoInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
