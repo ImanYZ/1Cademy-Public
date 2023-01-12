@@ -38,7 +38,7 @@ const HowItWorks = (props: any) => {
           ...acu,
           {
             ...cur,
-            top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : height - 70,
+            top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : 0,
             height: newHeight,
           },
         ];
@@ -70,8 +70,7 @@ const HowItWorks = (props: any) => {
           borderRight: `dashed 6px #ff28c9`,
           color: "white",
         }}
-      >
-      </Box> */}
+      ></Box> */}
       <CustomTypography
         component={"h2"}
         variant="h1"
@@ -79,7 +78,7 @@ const HowItWorks = (props: any) => {
         align="center"
         sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
       >
-        {sectionsOrder[0].title}
+        {sectionsOrder[1].title}
       </CustomTypography>
       {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
       >

@@ -1,5 +1,6 @@
 export const sectionsOrder = [
   // { id: "LandingSection", label: "Landing", title: "1Cademy's Landing Page" },
+  { id: "HeroSection", label: "Hero", title: "Hero" },
   { id: "HowItWorksSection", label: "How", title: "How 1Cademy Assistant works?" },
   { id: "ValuesSection", label: "Why", title: "Why 1Cademy Assistant?" },
   // {
