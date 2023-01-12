@@ -1,3 +1,4 @@
+import CloseIcon from "@mui/icons-material/Close";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -6,9 +7,10 @@ import {
   FormGroup,
   Grid,
   IconButton,
+  /* ThemeProvider */
+  Modal,
   Skeleton,
   Stack,
-  /* ThemeProvider */
   Tooltip,
   Typography,
   useMediaQuery,
@@ -16,16 +18,11 @@ import {
 } from "@mui/material";
 // const Values = React.lazy(() => import("./modules/views/Values"));
 
-const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
-const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
-const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
-  suspense: true,
-  ssr: false,
-});
+const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
+
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
@@ -69,7 +66,7 @@ const sectionsTmp = [
   { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
   {
     id: "HowItWorksSection",
-    title: "How We Work?",
+    title: "How 1Cademy Assistant works?",
     simpleTitle: "How?",
     children: [
       { id: "animation1", title: "Planning", simpleTitle: "Planning" },
@@ -77,10 +74,8 @@ const sectionsTmp = [
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
     ],
   },
-  { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
-  { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
-  { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
-  { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
+  { id: "ValuesSection", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
+  { id: "WhoWeAreSection", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
 
 const Home = () => {
@@ -95,21 +90,15 @@ const Home = () => {
   const isMovil = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
-  const [showAnimationOptions, setShowAnimationOptions] = useState(false);
+  // const [/* showAnimationOptions, */ setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
+
+  const [open, setOpen] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
-  // const [isSSR,setIsSSR]
-
-  // const [{ isAuthenticated }] = useAuth();
-  const router = useRouter();
-
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
-  const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
-  const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
-  // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -121,7 +110,6 @@ const Home = () => {
     artboard: "New Artboard",
     animations: ["Timeline 1", "eyes"],
     autoplay: true,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
@@ -129,7 +117,6 @@ const Home = () => {
     artboard: "artboard-1",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
@@ -137,7 +124,6 @@ const Home = () => {
     artboard: "artboard-2",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
@@ -145,15 +131,7 @@ const Home = () => {
     artboard: "artboard-3",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
-
-  // useEffect(() => {
-  //   if (!rive1) return;
-  //   rive1.reset({ artboard: "artboard-1" });
-  //   rive1.scrub("Timeline 1", 0);
-  //   rive1.play();
-  // }, [rive1]);
 
   useEffect(() => {
     if (!rive1 || !rive2 || !rive3 || !rive4) return;
@@ -178,30 +156,20 @@ const Home = () => {
     if (!HomeSectionRef?.current) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
-    if (!whatEntry) return null;
-    if (!whereEntry) return null;
     if (!whoEntry) return null;
-    // if (!joinEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: 0 },
       { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight },
-      { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
-      { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
-      { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
-      // { id: joinEntry.target.id, height: whoEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+  }, [whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
     if (!HomeSectionRef?.current) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
-    if (!whatEntry) return null;
-    if (!whereEntry) return null;
     if (!whoEntry) return null;
-    // if (!joinEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
@@ -210,12 +178,9 @@ const Home = () => {
         height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight,
       },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
-      { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
-      { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
-      // { id: joinEntry.target.id, height: joinEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+  }, [whoEntry, whyEntry]);
 
   const getAnimationsHeight = useCallback(() => {
     const res = artboards.map(artboard => artboard.getHeight(height));
@@ -292,7 +257,7 @@ const Home = () => {
         setSelectedAnimation(idxAnimation);
 
         let showLandingOptions = false;
-        let showEndAnimationOptions = false;
+        // let showEndAnimationOptions = false;
 
         if (idxAnimation < 0) return;
 
@@ -341,9 +306,9 @@ const Home = () => {
           }
           if (idxAnimation === 2) {
             advanceAnimationTo(rive4, timeInSeconds, theme);
-            if (percentageFrame > 50) {
-              showEndAnimationOptions = true;
-            }
+            // if (percentageFrame > 50) {
+            //   showEndAnimationOptions = true;
+            // }
           }
           // if (idxAnimation === 3) {
           //   advanceAnimationTo(rive5, timeInSeconds, theme);
@@ -353,7 +318,6 @@ const Home = () => {
 
         // update options display
         setShowLandingOptions(showLandingOptions);
-        setShowAnimationOptions(showEndAnimationOptions);
       }
     },
     [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
@@ -412,12 +376,7 @@ const Home = () => {
     [getAnimationsHeight, getSectionHeights, rive2, rive3, rive4]
   );
 
-  const signUpHandler = () => {
-    router.push("/signin");
-  };
-
   return (
-    // <ThemeProvider theme={brandingDarkTheme}>
     <Box
       id="ScrollableContainer"
       onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4 })}
@@ -440,10 +399,7 @@ const Home = () => {
             width: "100%",
             background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
             backdropFilter: "saturate(180%) blur(20px)",
-
-            // filter: "blur(1px)"
           }}
-          // style={{willChange:"filter"}}
         />
         <Stack
           direction={"row"}
@@ -469,16 +425,28 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[1].title}>
+                <Tooltip title={sectionsOrder[0].title}>
                   <Typography
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
                         sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
-                    onClick={() => switchSection(1)}
+                    onClick={() => switchSection(0)}
                   >
                     {sectionsOrder[1].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[1].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(1)}
+                  >
+                    {sectionsOrder[2].label}
                   </Typography>
                 </Tooltip>
                 <Tooltip title={sectionsOrder[2].title}>
@@ -486,47 +454,11 @@ const Home = () => {
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
                     onClick={() => switchSection(2)}
                   >
-                    {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
                     {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[4].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(4)}
-                  >
-                    {sectionsOrder[4].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[5].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(5)}
-                  >
-                    {sectionsOrder[5].label}
                   </Typography>
                 </Tooltip>
               </>
@@ -552,32 +484,12 @@ const Home = () => {
             <FormGroup>
               <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
             </FormGroup>
-            {
-              <Tooltip title="Apply to join 1Cademy">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  // onClick={joinUsClick}
-                  target="_blank"
-                  href="https://1cademy.us/#JoinUsSection"
-                  size={isMovil ? "small" : "medium"}
-                  sx={{
-                    fontSize: 16,
-                    // color: "common.white",
-                    ml: 2.5,
-                    borderRadius: 40,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Apply!
-                </Button>
-              </Tooltip>
-            }
+
             <Tooltip title="SIGN IN/UP">
               <Button
                 variant="outlined"
                 color="secondary"
-                onClick={signUpHandler}
+                onClick={() => setOpen(true)}
                 size={isMovil ? "small" : "medium"}
                 sx={{
                   // width: "150px",
@@ -630,8 +542,7 @@ const Home = () => {
             width: "100%",
             position: "absolute",
             top: 0,
-            padding: width < 900 ? "10px" : "20px",
-            backgroundColor: "#1d1102",
+            background: "#123",
           }}
         >
           <Box
@@ -649,21 +560,6 @@ const Home = () => {
               section={sectionSelected}
               // ref={sectionAnimationControllerRef}
               artboards={[...section1ArtBoards, ...artboards]}
-              animationOptions={
-                <Button
-                  // color="secondary"
-                  variant="contained"
-                  size={width < 900 ? "small" : "large"}
-                  component="a"
-                  href="https://1cademy.us/#JoinUsSection"
-                  // href="#JoinUsSection"
-                  target="_blank"
-                  sx={{ minWidth: 200, textTransform: "uppercase" }}
-                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
-                >
-                  Apply to Join Us!
-                </Button>
-              }
             >
               <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
                 <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
@@ -703,61 +599,6 @@ const Home = () => {
                 }
               >
                 <Values />
-              </Suspense>
-            )}
-          </Box>
-
-          <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder[3].title}
-            </CustomTypography>
-            {!whatInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Grid container spacing={1}>
-                    {new Array(8).fill(0).map((a, i) => (
-                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                        <Skeleton
-                          variant="rectangular"
-                          height={210}
-                          animation="wave"
-                          sx={{ background: "#72727263", maxWidth: 340 }}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                }
-              >
-                <What />
-              </Suspense>
-            )}
-          </Box>
-
-          <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder[4].title}
-            </CustomTypography>
-            {!whereInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "green" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
-              >
-                <UniversitiesMap theme={"Dark"} />
               </Suspense>
             )}
           </Box>
@@ -807,6 +648,44 @@ const Home = () => {
           </Box>
         </Box>
       </Box>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        // aria-labelledby="modal-modal-title"
+        // aria-describedby="modal-modal-description"
+        sx={{ bgcolor: "#3131316e", backdropFilter: "blur(4px)" }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <IconButton
+            onClick={() => setOpen(false)}
+            sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <Box
+            sx={{
+              maxWidth: "500px",
+              p: "20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img src="assistant/robot.png" alt="" srcSet="" />
+            <Typography /* id="modal-modal-title" */ variant="h6" component="h2">
+              Coming Soon...
+            </Typography>
+          </Box>
+        </Box>
+      </Modal>
 
       <AppFooter
         sx={{
