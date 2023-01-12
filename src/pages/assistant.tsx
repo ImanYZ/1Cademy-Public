@@ -90,13 +90,9 @@ const Home = () => {
   const router = useRouter();
 
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
-  //   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
-  //   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
-  // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
-  //   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
 
@@ -104,72 +100,29 @@ const Home = () => {
     src: "rive-assistant/assistant-1.riv",
     artboard: "artboard-1",
     animations: ["Timeline 1", "dark", "light"],
-    // animations: ["Timeline 1"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish"),
   });
 
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
     src: "rive-assistant/assistant-2.riv",
     artboard: "artboard-2",
     animations: ["Timeline 1", "dark", "light"],
-    // animations: ["Timeline 1"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish"),
   });
 
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
     src: "rive-assistant/assistant-3.riv",
     artboard: "artboard-3",
     animations: ["Timeline 1", "dark", "light"],
-    // animations: ["Timeline 1"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish"),
   });
-
-  //   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
-  //     src: "rive/artboard-4.riv",
-  //     artboard: "artboard-4",
-  //     animations: ["Timeline 1", "dark", "light"],
-  //     autoplay: false,
-  //     // onLoad: () => console.log("load-finish")
-  //   });
-
-  //   const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
-  //     src: "rive/artboard-5.riv",
-  //     artboard: "artboard-5",
-  //     animations: ["Timeline 1", "dark", "light"],
-  //     autoplay: false,
-  //     // onLoad: () => console.log("load-finish")
-  //   });
-
-  //   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
-  //     src: "rive/artboard-6.riv",
-  //     animations: ["Timeline 1", "dark", "light"],
-  //     // animations: "Timeline 1",
-  //     artboard: "artboard-6",
-  //     autoplay: false,
-  //     // onLoad: () => console.log("load-finish")
-  //   });
-
-  //   console.log({ rive1, rive2, rive3 });
-  //   useEffect(() => {
-  //     if (!rive1) return;
-  //     // console.log({ rive1 });
-  //     rive1.reset({ artboard: "artboard-1" });
-  //     rive1.scrub("Timeline 1", 0);
-  //     // rive1.play();
-  //     // console.log("play rive 1");
-  //   }, [rive1]);
 
   useEffect(() => {
     if (!rive1 || !rive2 || !rive3) return;
 
-    // console.log({ rive1, rive2, rive3 });
     advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
     advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
     advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
-    // console.log("play rive 1 2 3");
   }, [rive1, rive2, rive3, theme]);
 
   useEffect(() => {
@@ -182,40 +135,28 @@ const Home = () => {
   }, []);
 
   const getSectionHeights = useCallback(() => {
-    // if (!HomeSectionRef?.current) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
-    // if (!whatEntry) return null;
-    // if (!whereEntry) return null;
     if (!whoEntry) return null;
 
     return [
-      //   { id: HomeSectionRef.current.id, height: 0 },
       { id: howSectionRef.current.id, height: 0 },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
-      //   { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
-      //   { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whyEntry.target.clientHeight },
     ];
   }, [whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
-    // if (!HomeSectionRef?.current) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
-    // if (!whatEntry) return null;
-    // if (!whereEntry) return null;
     if (!whoEntry) return null;
 
     return [
-      //   { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
       {
         id: howSectionRef.current.id,
         height: howSectionRef.current.clientHeight,
       },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
-      //   { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
-      //   { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
   }, [whoEntry, whyEntry]);
@@ -246,16 +187,10 @@ const Home = () => {
         rive1,
         rive2,
         rive3,
-      }: // rive4,
-      // rive5,
-      // rive6,
-      {
+      }: {
         rive1: Rive | null;
         rive2: Rive | null;
         rive3: Rive | null;
-        // rive4: Rive | null;
-        // rive5: Rive | null;
-        // rive6: Rive | null;
       }
     ) => {
       if (!rive1 || !rive2 || !rive3) return;
@@ -300,8 +235,6 @@ const Home = () => {
         }
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
-
-        // console.log("-------------->>>", { idxSection, idxAnimation });
 
         let showLandingOptions = false;
 
@@ -592,7 +525,7 @@ const Home = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            color: "common.white",
+            color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
           }}
           className={showLandingOptions ? "show-blurred-text" : "hide-content"}
         >
