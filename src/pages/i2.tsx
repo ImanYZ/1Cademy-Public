@@ -39,10 +39,10 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
+import HowItWorks from "../components/assistant/HowItWorks";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
 import { sectionsOrder } from "../components/home/sectionsOrder";
-import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
 
 /**

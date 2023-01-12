@@ -4,13 +4,14 @@ import React, { useMemo } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
 
+import CustomTypography from "../home/components/Typography";
+import { sectionsOrder } from "./sectionsOrder";
+
 // import { useWindowSize } from "../../hooks/useWindowSize";
 // import Collapse from "@mui/material/Collapse";
 // import { CardActionArea } from "@mui/material";
 // import Typography from "../components/Typography";
-import CustomTypography from "../../components/home/components/Typography";
-import { sectionsOrder } from "./sectionsOrder";
-// import { sectionsOrder } from "../home/sectionsOrder";
+// import CustomTypography from "../components/Typography";
 // import { sectionsOrder } from "../sectionsOrder";
 // import { sectionsOrder } from "../sectionsOrder";
 // // import sectionsOrder from "./sectionsOrder";
@@ -36,17 +37,11 @@ const HowItWorks = (props: any) => {
         const newHeight = cur.getHeight(height);
         return [
           ...acu,
-          {
-            ...cur,
-            top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : 0,
-            height: newHeight,
-          },
+          { ...cur, top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : 0, height: newHeight },
         ];
       }, []),
     [props.artboards, height]
   );
-
-  console.log({ processedArtboard });
 
   return (
     <Box
@@ -60,23 +55,25 @@ const HowItWorks = (props: any) => {
         alignItems: "center",
       }}
     >
-      {/* <Box
+      <Box
         key={"artboard-1"}
         sx={{
           position: "absolute",
           top: 0,
           width: "100%",
           height: height - 70,
-          borderRight: `dashed 6px #ff28c9`,
+          // borderRight: `dashed 6px #ff28c9`,
           color: "white",
         }}
-      ></Box> */}
+      >
+        {/* Landing section */}
+      </Box>
       <CustomTypography
         component={"h2"}
         variant="h1"
         marked="center"
         align="center"
-        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
+        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: height - 30 }}
       >
         {sectionsOrder[1].title}
       </CustomTypography>
@@ -84,7 +81,7 @@ const HowItWorks = (props: any) => {
       >
         {sectionsOrder[1].title}
       </Typography> */}
-      {processedArtboard.map((artboard: any) => (
+      {processedArtboard.map((artboard: any, idx: number) => (
         <Box
           key={artboard.name}
           sx={{
@@ -92,24 +89,11 @@ const HowItWorks = (props: any) => {
             top: artboard.top,
             width: "100%",
             height: artboard.height,
-            borderRight: `dashed 6px ${artboard.color}`,
+            // borderRight: `dashed 6px ${artboard.color}`,
             color: "white",
           }}
         >
-          {/* {idx === 1 && (
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
-              <CustomTypography
-                component={"h2"}
-                variant="h1"
-                marked="center"
-                align="center"
-                sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
-              >
-                {sectionsOrder[0].title}
-              </CustomTypography>
-            </Box>
-          )} */}
-          {
+          {idx > 0 && (
             <Typography
               variant="h5"
               component="h3"
@@ -118,15 +102,17 @@ const HowItWorks = (props: any) => {
                 ml: "10px",
                 position: "sticky",
                 top: "100px",
-                color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                color: "white",
                 textTransform: "none",
               }}
             >
               {artboard.name}
             </Typography>
-          }
+          )}
         </Box>
       ))}
+
+      <Box sx={{ position: "absolute", bottom: "20px", zIndex: 11 }}>{props.animationOptions}</Box>
 
       <div
         style={{
@@ -137,7 +123,7 @@ const HowItWorks = (props: any) => {
           display: "flex",
           flexDirection: "column",
           zIndex: 10,
-          border: "solid 2px pink",
+          // border: "solid 2px pink"
         }}
       >
         {props.children}
