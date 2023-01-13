@@ -110,7 +110,7 @@ const Home = () => {
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
     src: "rive-assistant/assistant-0.riv",
     artboard: "New Artboard",
-    animations: ["Timeline 1", "eyes"],
+    animations: ["Timeline 1", "eyes", "1cademy"],
     autoplay: true,
   });
 
