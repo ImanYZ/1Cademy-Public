@@ -475,14 +475,14 @@ const Home = () => {
           spacing={isMovil ? "10px" : "20px"}
           sx={{
             width: "100%",
-            maxWidth: "980px",
+            maxWidth: "1500px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
           }}
         >
           <Stack
-            spacing={"20px"}
+            spacing={isDesktop ? "50px" : "30px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}

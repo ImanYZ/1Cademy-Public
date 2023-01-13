@@ -576,7 +576,12 @@ const Node = ({
       {process.env.NODE_ENV === "development" && identifier}
       {open ? (
         <>
-          <div className="card-content">
+          <div
+            className="card-content"
+            style={{
+              marginTop: "10px",
+            }}
+          >
             <div className="card-title" data-hoverable={true}>
               {editable && isNew && (
                 <>
