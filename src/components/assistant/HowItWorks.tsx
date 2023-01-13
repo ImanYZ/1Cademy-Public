@@ -4,13 +4,14 @@ import React, { useMemo } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
 
+import CustomTypography from "../home/components/Typography";
+import { sectionsOrder } from "./sectionsOrder";
+
 // import { useWindowSize } from "../../hooks/useWindowSize";
 // import Collapse from "@mui/material/Collapse";
 // import { CardActionArea } from "@mui/material";
 // import Typography from "../components/Typography";
-import CustomTypography from "../../components/home/components/Typography";
-import { sectionsOrder } from "./sectionsOrder";
-// import { sectionsOrder } from "../home/sectionsOrder";
+// import CustomTypography from "../components/Typography";
 // import { sectionsOrder } from "../sectionsOrder";
 // import { sectionsOrder } from "../sectionsOrder";
 // // import sectionsOrder from "./sectionsOrder";
@@ -54,7 +55,7 @@ const HowItWorks = (props: any) => {
         alignItems: "center",
       }}
     >
-      {/* <Box
+      <Box
         key={"artboard-1"}
         sx={{
           position: "absolute",
@@ -65,15 +66,16 @@ const HowItWorks = (props: any) => {
           color: "white",
         }}
       >
-      </Box> */}
+        {/* Landing section */}
+      </Box>
       <CustomTypography
         component={"h2"}
         variant="h1"
         marked="center"
         align="center"
-        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: 30 }}
+        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: height - 30 }}
       >
-        {sectionsOrder[0].title}
+        {sectionsOrder[1].title}
       </CustomTypography>
       {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
       >
@@ -100,7 +102,7 @@ const HowItWorks = (props: any) => {
                 ml: "10px",
                 position: "sticky",
                 top: "100px",
-                color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                color: "white",
                 textTransform: "none",
               }}
             >
@@ -109,6 +111,8 @@ const HowItWorks = (props: any) => {
           )}
         </Box>
       ))}
+
+      <Box sx={{ position: "absolute", bottom: "20px", zIndex: 11 }}>{props.animationOptions}</Box>
 
       <div
         style={{
@@ -119,7 +123,7 @@ const HowItWorks = (props: any) => {
           display: "flex",
           flexDirection: "column",
           zIndex: 10,
-          // border: "solid 2px pink",
+          // border: "solid 2px pink"
         }}
       >
         {props.children}

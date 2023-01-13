@@ -60,10 +60,9 @@ const section1ArtBoards = [
   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 ];
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 5 * vh, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
+  { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
+  { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
+  { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
 ];
 
 export const SECTION_WITH_ANIMATION = 1;
@@ -473,17 +472,17 @@ const Home = () => {
           direction={"row"}
           justifyContent={"space-between"}
           alignItems={"center"}
-          spacing={isMovil ? "10px" : "20px"}
+          spacing={isDesktop ? "30px" : "20px"}
           sx={{
             width: "100%",
-            maxWidth: "1500px",
+            maxWidth: "1200px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
           }}
         >
           <Stack
-            spacing={isDesktop ? "50px" : "30px"}
+            spacing={isDesktop ? "30px" : "20px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}
@@ -565,7 +564,7 @@ const Home = () => {
               }}
             />
           )}
-          <Stack direction={"row"} alignItems="center">
+          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "10px"}>
             {isMovil && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
