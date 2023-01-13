@@ -469,9 +469,9 @@ const Home = () => {
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
-                        sectionSelected === 0 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
-                    onClick={() => switchSection(0)}
+                    onClick={() => switchSection(1)}
                   >
                     {sectionsOrder[0].label}
                   </Typography>
@@ -481,9 +481,9 @@ const Home = () => {
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
-                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
-                    onClick={() => switchSection(1)}
+                    onClick={() => switchSection(2)}
                   >
                     {sectionsOrder[1].label}
                   </Typography>
@@ -493,9 +493,9 @@ const Home = () => {
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
-                    onClick={() => switchSection(2)}
+                    onClick={() => switchSection(3)}
                   >
                     {sectionsOrder[2].label}
                   </Typography>

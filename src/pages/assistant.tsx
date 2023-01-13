@@ -426,28 +426,16 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[0].title}>
+                <Tooltip title={sectionsOrder[1].title}>
                   <Typography
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
                         sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
-                    onClick={() => switchSection(0)}
-                  >
-                    {sectionsOrder[1].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[1].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
                     onClick={() => switchSection(1)}
                   >
-                    {sectionsOrder[2].label}
+                    {sectionsOrder[1].label}
                   </Typography>
                 </Tooltip>
                 <Tooltip title={sectionsOrder[2].title}>
@@ -455,9 +443,21 @@ const Home = () => {
                     sx={{
                       cursor: "pointer",
                       borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
                     }}
                     onClick={() => switchSection(2)}
+                  >
+                    {sectionsOrder[2].label}
+                  </Typography>
+                </Tooltip>
+                <Tooltip title={sectionsOrder[3].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(3)}
                   >
                     {sectionsOrder[3].label}
                   </Typography>
