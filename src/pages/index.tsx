@@ -472,17 +472,17 @@ const Home = () => {
           direction={"row"}
           justifyContent={"space-between"}
           alignItems={"center"}
-          spacing={isMovil ? "10px" : "20px"}
+          spacing={isDesktop ? "30px" : "20px"}
           sx={{
             width: "100%",
-            maxWidth: "1500px",
+            maxWidth: "1200px",
             height: HEADER_HEIGTH,
             px: isDesktop ? "0px" : "10px",
             position: "absolute",
           }}
         >
           <Stack
-            spacing={isDesktop ? "50px" : "30px"}
+            spacing={isDesktop ? "30px" : "20px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}
@@ -564,7 +564,7 @@ const Home = () => {
               }}
             />
           )}
-          <Stack direction={"row"} alignItems="center">
+          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "10px"}>
             {isMovil && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
