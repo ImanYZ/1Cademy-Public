@@ -90,7 +90,6 @@ const HowItWorks = (props: any) => {
             width: "100%",
             height: artboard.height,
             // borderRight: `dashed 6px ${artboard.color}`,
-            color: "white",
           }}
         >
           {idx > 0 && (
@@ -102,7 +101,6 @@ const HowItWorks = (props: any) => {
                 ml: "10px",
                 position: "sticky",
                 top: "100px",
-                color: "white",
                 textTransform: "none",
               }}
             >
