@@ -568,7 +568,7 @@ const Home = () => {
               flexDirection: "column",
               alignItems: "center",
               fontWeight: "700",
-              color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
+              color: "#fff",
             }}
             className={showLandingOptions ? "show-blurred-text" : "hide-content"}
           >
