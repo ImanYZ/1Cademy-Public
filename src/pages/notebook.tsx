@@ -307,13 +307,13 @@ const Dashboard = ({}: DashboardProps) => {
     const _window: any = window;
     const internalId = setInterval(() => {
       if (_window.google_optimize !== undefined) {
-        if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
-          setShowLivelinessBar({ ..._window.livelinessBar });
-        } else if (user?.uname === "1man") {
+        if (user?.uname === "1man") {
           setShowLivelinessBar({
             enabled: true,
             type: "full",
           });
+        } else if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
+          setShowLivelinessBar({ ..._window.livelinessBar });
         } else {
           setShowLivelinessBar({
             enabled: true,
