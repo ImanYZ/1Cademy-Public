@@ -8,7 +8,7 @@ import Grid from "@mui/material/Grid";
 import React, { useEffect, useState } from "react";
 import { useRive } from "rive-react";
 
-import { gray03 } from "../../pages/assistant-beta";
+import { gray03 } from "../../pages/assistant";
 // import { gray03 } from "../../../pages";
 // import Typography from "../components/Typography";
 // import { sectionsOrder } from "../sectionsOrder";
