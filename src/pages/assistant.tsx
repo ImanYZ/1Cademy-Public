@@ -32,8 +32,10 @@ import { useInView } from "@/hooks/useObserver";
 import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
+import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 // import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
+import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
@@ -543,15 +545,30 @@ const Home = () => {
             width: "100%",
             position: "absolute",
             top: 0,
+            backgroundColor: "#1d1102",
+            backgroundImage: `url(${
+              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
+            })`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
         >
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center" }}
+            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          >
+            HELPS YOU OPTIMIZE YOUR LIFE.
+          </Typography>
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               fontWeight: "700",
-              color: theme => (theme.palette.mode === "dark" ? "#fff" : "#000"),
+              color: "#fff",
             }}
             className={showLandingOptions ? "show-blurred-text" : "hide-content"}
           >
