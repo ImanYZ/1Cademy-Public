@@ -87,7 +87,7 @@ const HowItWorks = (props: any) => {
             width: "100%",
             height: artboard.height,
             // borderRight: `dashed 6px ${artboard.color}`,
-            color: "white",
+            // color: "white",
           }}
         >
           {idx > 0 && (

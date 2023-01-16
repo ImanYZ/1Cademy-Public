@@ -62,7 +62,7 @@ const Values = () => {
                     }}
                   >
                     <Typography
-                      onClick={() => (stepChecked[idx] = !stepChecked[idx])}
+                      // onClick={() => (stepChecked[idx] = !stepChecked[idx])}
                       gutterBottom
                       variant="h5"
                       component="div"
@@ -72,13 +72,13 @@ const Values = () => {
                     </Typography>
 
                     <Collapse in={!stepChecked[idx]} timeout={1000} sx={{ textAlign: "center" }}>
-                      <Typography
+                      {/* <Typography
                         variant="body2"
                         sx={{ textAlign: "left", color: getGrayColorText(), fontSize: "14px" }}
                       >
                         {value.body.substring(0, 100)}
                       </Typography>
-                      <br />
+                      <br /> */}
                       Learn more ...
                     </Collapse>
                     <Collapse in={stepChecked[idx]} timeout={1000}>
