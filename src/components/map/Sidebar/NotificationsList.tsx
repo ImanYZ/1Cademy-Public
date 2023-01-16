@@ -7,7 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LinkIcon from "@mui/icons-material/Link";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Box, IconButton, Paper } from "@mui/material";
+import { Box, IconButton, Paper, Tooltip } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
@@ -97,14 +97,10 @@ const NotificationsList = (props: NotificationsListProps) => {
   const checkNotification = useCallback(
     async (nId: string, value: boolean) => {
       if (!user) return;
-      // update checked value from notifications
       const notificationRef = doc(db, "notifications", nId);
-      // const notificationRef = firebase.db.collection("notifications").doc(nId);
+
       const batch = writeBatch(db);
       batch.update(notificationRef, { checked: value });
-      // await firebase.batchUpdate(notificationRef, { checked: value });
-
-      // // update notificationNums
       const notificationNumsQuery = query(
         collection(db, "notificationNums"),
         where("uname", "==", user?.uname),
@@ -113,20 +109,9 @@ const NotificationsList = (props: NotificationsListProps) => {
       const notificationNumsDocs = await getDocs(notificationNumsQuery);
       if (notificationNumsDocs.docs.length) {
         const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
-        // const nNum = value ? increment(1) : increment(-1);
         const incrementValue = value ? -1 : 1;
-        // // let nNum = firestore.FieldValue.increment(1);
-        // // if (!value) {
-        // //   nNum = firebase.firestore.FieldValue.increment(-1);
-        // // }
         batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
       }
-      // // const notificationNumsRef = firebase.db.collection("notificationNums").doc(username);
-
-      // // await firebase.batchUpdate(notificationNumsRef, { nNum });
-      // // await firebase.commitBatch();
-
-      // TODO: Important update notificationNumsRef
       await batch.commit();
     },
     [db, user]
@@ -227,12 +212,10 @@ const NotificationsList = (props: NotificationsListProps) => {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
                 <MemoizedMetaButton
                   onClick={() => openLinkedNodeClick(notification)}
-                  // tooltip={
-                  //   notification.aType === "Delete"
-                  //     ? "The node is deleted."
-                  //     : "Click to go to the corresponding node."
-                  // }
-                  // tooltipPosition="Right"
+                  tooltip={
+                    notification.aType === "Delete" ? "The node is deleted." : "Click to go to the corresponding node."
+                  }
+                  tooltipPosition="right"
                 >
                   <Box
                     className="NotificationNodeLink"
@@ -247,40 +230,17 @@ const NotificationsList = (props: NotificationsListProps) => {
                     />
                   </Box>
                 </MemoizedMetaButton>
-                <IconButton
-                  onClick={() => checkNotification(notification.id, !props.checked)}
-                  // tooltip={
-                  //   "Click to " +
-                  //   (props.checked ? "check" : "uncheck") +
-                  //   " this notification."
-                  // }
-                  // tooltipPosition="Right"
-                >
-                  {/* <i className={(!props.checked && "DoneIcon") + " grey-text"}>
-
-                </i> */}
-                  {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
-                </IconButton>
+                <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
+                  <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
+                    {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
+                  </IconButton>
+                </Tooltip>
               </Box>
             </div>
           </Paper>
         );
       })}
-      {props.notifications.length > lastIndex && (
-        <Box id="ContinueButton" ref={refInfinityLoaderTrigger} sx={{ background: "red" }}>
-          {/* <MemoizedMetaButton
-            onClick={loadOlderNotificationsClick}
-            // tooltip={"Load older " + (props.checked ? "read" : "unread") + " notifications."}
-            // tooltipPosition="Right"
-          >
-            <>
-              <ExpandMoreIcon className="grey-text" />
-              Older Notifications
-              <ExpandMoreIcon className="grey-text" />
-            </>
-          </MemoizedMetaButton> */}
-        </Box>
-      )}
+      {props.notifications.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
     </>
   );
 };
