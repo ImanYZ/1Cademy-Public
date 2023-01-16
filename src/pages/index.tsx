@@ -1,4 +1,3 @@
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
@@ -38,7 +37,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 // import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
+import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
@@ -167,6 +166,14 @@ const Home = () => {
     autoplay: false,
     // onLoad: () => console.log("load-finish")
   });
+
+  const { RiveComponent: RiveScrollActionComponent } = useRive({
+    src: "rive/scroll.riv",
+    animations: ["Timeline 1", "dark"],
+    artboard: "New Artboard",
+    autoplay: true,
+  });
+
   useEffect(() => {
     if (!rive1) return;
     rive1.reset({ artboard: "artboard-1" });
@@ -472,7 +479,7 @@ const Home = () => {
           direction={"row"}
           justifyContent={"space-between"}
           alignItems={"center"}
-          spacing={isDesktop ? "30px" : "20px"}
+          spacing={isDesktop ? "30px" : "8px"}
           sx={{
             width: "100%",
             maxWidth: "1200px",
@@ -482,7 +489,7 @@ const Home = () => {
           }}
         >
           <Stack
-            spacing={isDesktop ? "30px" : "20px"}
+            spacing={isDesktop ? "30px" : "8px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}
@@ -564,7 +571,7 @@ const Home = () => {
               }}
             />
           )}
-          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "10px"}>
+          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "8px"}>
             {isMovil && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
@@ -657,16 +664,32 @@ const Home = () => {
             backgroundColor: "#1d1102",
             backgroundImage: `url(${
               theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
+              // backgroundImageDarkMode.src
             })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
         >
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: " 0px",
+              right: "0px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Typography color="white">Scroll</Typography>
+            <Box sx={{ width: isMovil ? "70px" : "100px", height: isMovil ? "70px" : "100px" }}>
+              <RiveScrollActionComponent className={`rive-canvas`} />
+            </Box>
+          </Box>
           <Typography
             color="white"
             variant="h5"
-            sx={{ textAlign: "center" }}
+            sx={{ textAlign: "center", width: isMovil ? "300px" : "auto" }}
             className={showLandingOptions ? "show-blurred-text" : "hide-content"}
           >
             WHERE WE TAKE NOTES <b>TOGETHER</b>.
@@ -684,13 +707,6 @@ const Home = () => {
           >
             Apply to Join Us!
           </Button>
-          <Box
-            sx={{ display: "flex", flexDirection: "column", alignItems: "center", color: "common.white" }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            {height > 500 && "Scroll"}
-            <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
-          </Box>
         </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>

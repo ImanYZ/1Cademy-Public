@@ -35,7 +35,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 // import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
+import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
@@ -133,6 +133,13 @@ const Home = () => {
     artboard: "artboard-3",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
+  });
+
+  const { RiveComponent: RiveScrollActionComponent } = useRive({
+    src: "rive/scroll.riv",
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+    artboard: "New Artboard",
+    autoplay: true,
   });
 
   useEffect(() => {
@@ -554,6 +561,23 @@ const Home = () => {
             backgroundRepeat: "no-repeat",
           }}
         >
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "0px",
+              right: "0px",
+              // border: "solid 2px red",
+
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            Scroll
+            <Box sx={{ width: "100px", height: "100px" }}>
+              <RiveScrollActionComponent className={`rive-canvas`} />
+            </Box>
+          </Box>
           <Typography
             color="white"
             variant="h5"
