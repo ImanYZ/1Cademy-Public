@@ -198,10 +198,14 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
             padding: "0px 0px 0px 32px",
           }}
         >
+          <Tooltip title={"24-hour Points Leaderboard."} placement="left">
+            <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
+          </Tooltip>
+          <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
           <Box
             className="seekbar"
             sx={{
-              height: "calc(100% - 40px)",
+              height: "calc(100% - 55px)",
               width: "1px",
               borderRight: theme =>
                 theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
