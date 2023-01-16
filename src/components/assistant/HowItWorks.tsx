@@ -102,7 +102,7 @@ const HowItWorks = (props: any) => {
                 ml: "10px",
                 position: "sticky",
                 top: "100px",
-                color: "white",
+                // color: "white",
                 textTransform: "none",
               }}
             >
