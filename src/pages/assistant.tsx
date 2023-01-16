@@ -6,7 +6,6 @@ import {
   FormGroup,
   Grid,
   IconButton,
-  /* ThemeProvider */
   Modal,
   Skeleton,
   Stack,
@@ -15,7 +14,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-// const Values = React.lazy(() => import("./modules/views/Values"));
 
 const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
 
@@ -32,7 +30,6 @@ import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
-// import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
@@ -80,7 +77,6 @@ const sectionsTmp = [
 ];
 
 const Home = () => {
-  // const [section, setSection] = useState(0);
   const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
@@ -229,7 +225,6 @@ const Home = () => {
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
-        // console.log({ sectionsHeight });
         if (!sectionsHeight) return;
 
         const { min, idx: idxSection } = sectionsHeight.reduce(
@@ -266,7 +261,6 @@ const Home = () => {
         setSelectedAnimation(idxAnimation);
 
         let showLandingOptions = false;
-        // let showEndAnimationOptions = false;
 
         if (idxAnimation < 0) return;
 
@@ -277,18 +271,6 @@ const Home = () => {
           const positionFrame = currentScrollPosition - lowerAnimationLimit;
           const percentageFrame = (positionFrame * 100) / rangeFrames;
           setIdxRiveComponent(0);
-          // if (percentageFrame < 50) {
-          //  setIdxRiveComponent(0);
-          // } else {
-          //   const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
-          //   const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
-          //   const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
-          //   const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
-          //   timeInSecondsRef.current = timeInSeconds;
-          //   advanceAnimationTo(rive2, timeInSeconds, theme);
-
-          //   setIdxRiveComponent(1);
-          // }
 
           if (percentageFrame < 5) {
             showLandingOptions = true;
@@ -315,17 +297,8 @@ const Home = () => {
           }
           if (idxAnimation === 2) {
             advanceAnimationTo(rive4, timeInSeconds, theme);
-            // if (percentageFrame > 50) {
-            //   showEndAnimationOptions = true;
-            // }
           }
-          // if (idxAnimation === 3) {
-          //   advanceAnimationTo(rive5, timeInSeconds, theme);
-
-          // }
         }
-
-        // update options display
         setShowLandingOptions(showLandingOptions);
       }
     },
@@ -353,7 +326,6 @@ const Home = () => {
       const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
 
-      // setSelectedSection(sectionIdx);
       if (sectionIdx === 0) {
         setShowLandingOptions(true);
         setIdxRiveComponent(animationIndex);
@@ -370,9 +342,6 @@ const Home = () => {
         if (animationIndex === 2) {
           rive4.scrub("Timeline 1", 0);
         }
-        // if (animationIndex === 3) {
-        //   rive6.scrub("Timeline 1", 0);
-        // }
       }
 
       setSelectedSection(sectionIdx);
@@ -395,7 +364,6 @@ const Home = () => {
         overflowX: "auto",
         position: "relative",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
-        // zIndex: -3
       }}
     >
       <Box
@@ -501,21 +469,11 @@ const Home = () => {
                 onClick={() => setOpen(true)}
                 size={isMovil ? "small" : "medium"}
                 sx={{
-                  // width: "150px",
-                  // display: showSignInorUp ? "inline-flex" : "none",
-                  // display: "inline-flex",
                   fontSize: 16,
-                  // color: "common.white",
                   ml: 2.5,
                   borderRadius: 40,
                   wordBreak: "normal",
                   whiteSpace: "nowrap",
-
-                  // backgroundColor: theme =>
-                  //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
-                  // "&:hover": {
-                  //   backgroundColor: theme => theme.palette.common.darkGrayBackground,
-                  // },
                 }}
               >
                 SIGN IN/UP
