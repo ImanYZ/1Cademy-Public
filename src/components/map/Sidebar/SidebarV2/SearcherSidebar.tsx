@@ -148,7 +148,6 @@ const SearcherSidebar = ({
     if (!inViewInfinityLoaderTrigger) return;
     if (isRetrieving) return;
 
-    console.log("onsearcher", { inViewInfinityLoaderTrigger, isRetrieving });
     onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
   }, [
     inViewInfinityLoaderTrigger,

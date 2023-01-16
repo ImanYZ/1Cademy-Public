@@ -5,7 +5,6 @@ import DoneIcon from "@mui/icons-material/Done";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import EditIcon from "@mui/icons-material/Edit";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Box, IconButton, Paper } from "@mui/material";
@@ -15,6 +14,7 @@ import { collection, doc, getDocs, getFirestore, increment, limit, query, where,
 import React, { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
+import { useInView } from "../../../hooks/useObserver";
 import { Editor } from "../../Editor";
 import { MemoizedMetaButton } from "../MetaButton";
 
@@ -64,6 +64,29 @@ const NotificationsList = (props: NotificationsListProps) => {
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(NOTIFICATIONS_PER_PAGE);
+  const [isRetrieving, setIsRetrieving] = useState(false);
+
+  const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
+
+  const loadOlderNotificationsClick = useCallback(() => {
+    setIsRetrieving(true);
+    setLastIndex(oldLastIndex => {
+      if (lastIndex < props.notifications.length) {
+        return oldLastIndex + NOTIFICATIONS_PER_PAGE;
+      }
+      return oldLastIndex;
+    });
+    setTimeout(() => {
+      setIsRetrieving(false);
+    }, 500);
+  }, [lastIndex, props.notifications.length]);
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isRetrieving) return;
+
+    loadOlderNotificationsClick();
+  }, [inViewInfinityLoaderTrigger, isRetrieving, loadOlderNotificationsClick]);
 
   useEffect(() => {
     const displayableNs = [...props.notifications];
@@ -112,17 +135,6 @@ const NotificationsList = (props: NotificationsListProps) => {
   const openLinkedNodeClick = useCallback(
     (notification: any) => notification.aType !== "Delete" && props.openLinkedNode(notification.nodeId),
     [props.openLinkedNode]
-  );
-
-  const loadOlderNotificationsClick = useCallback(
-    () =>
-      setLastIndex(oldLastIndex => {
-        if (lastIndex < props.notifications.length) {
-          return oldLastIndex + NOTIFICATIONS_PER_PAGE;
-        }
-        return oldLastIndex;
-      }),
-    [lastIndex, props.notifications.length]
   );
 
   const YOUR_NODE_TEXT = (notification: any) => {
@@ -255,8 +267,8 @@ const NotificationsList = (props: NotificationsListProps) => {
         );
       })}
       {props.notifications.length > lastIndex && (
-        <div id="ContinueButton">
-          <MemoizedMetaButton
+        <Box id="ContinueButton" ref={refInfinityLoaderTrigger} sx={{ background: "red" }}>
+          {/* <MemoizedMetaButton
             onClick={loadOlderNotificationsClick}
             // tooltip={"Load older " + (props.checked ? "read" : "unread") + " notifications."}
             // tooltipPosition="Right"
@@ -266,8 +278,8 @@ const NotificationsList = (props: NotificationsListProps) => {
               Older Notifications
               <ExpandMoreIcon className="grey-text" />
             </>
-          </MemoizedMetaButton>
-        </div>
+          </MemoizedMetaButton> */}
+        </Box>
       )}
     </>
   );
