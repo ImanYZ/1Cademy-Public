@@ -18,29 +18,16 @@ type ILivelinessBarProps = {
 type UserInteractions = {
   [uname: string]: {
     reputation: "Gain" | "Loss" | null;
-    imageUrl: string;
-    chooseUname: boolean;
-    fullname: string;
     count: number;
     actions: ActionTrackType[];
-    email: string;
   };
 };
 
 const ReputationlinessBar = (props: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user } = props;
   const [open, setOpen] = useState(false);
-  const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({
-    [user.uname]: {
-      reputation: "Gain",
-      imageUrl: user.imageUrl,
-      chooseUname: user.chooseUname,
-      fullname: user.fName + " " + user.lName,
-      count: 0,
-      actions: ["Correct"],
-      email: user.email,
-    },
-  });
+  const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
+  const [users, setUsers] = useState<any>({});
   const [barHeight, setBarHeight] = useState<number>(0);
   // const theme = useTheme();
 
@@ -67,21 +54,25 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
           for (const receiverData of actionTrackData.receivers) {
             const index = actionTrackData.receivers.indexOf(receiverData);
             const userQuery = query(collection(db, "users"), where("uname", "==", receiverData), limit(1));
-            const userDocs = await getDocs(userQuery);
-            if (userDocs.docs.length === 0) {
-              continue;
-            }
-            const user = userDocs.docs[0].data();
+            getDocs(userQuery).then(userData => {
+              const user = userData.docs[0].data();
+              setUsers({
+                ...users,
+                [user.uname]: {
+                  imageUrl: user.imageUrl,
+                  chooseUname: user.chooseUname,
+                  email: user.email,
+                  fullname: user.fName + " " + user.lName,
+                },
+              });
+            });
+
             if (docChange.type === "added") {
               if (!usersInteractions.hasOwnProperty(receiverData)) {
                 usersInteractions[receiverData] = {
-                  imageUrl: user.imageUrl,
-                  chooseUname: user.chooseUname,
-                  fullname: user.fName + " " + user.lName,
                   count: 0,
                   actions: [],
                   reputation: null,
-                  email: user.email,
                 };
               }
               if (actionTrackData.type === "NodeVote") {
@@ -114,12 +105,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                 }
               }
             }
-            if (docChange.type === "modified") {
-              if (usersInteractions.hasOwnProperty(receiverData)) {
-                usersInteractions[receiverData].imageUrl = user.imageUrl;
-                usersInteractions[receiverData].fullname = user.fullname;
-              }
-            }
+
             if (docChange.type === "removed") {
               if (usersInteractions.hasOwnProperty(receiverData)) {
                 usersInteractions[receiverData].count -= 1;
@@ -243,6 +229,9 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
               }}
             >
               {unames.map((uname: string) => {
+                if (!users[uname]) {
+                  return <></>;
+                }
                 const _count = usersInteractions[uname].count + Math.abs(minActions);
                 const seekPosition = -1 * ((_count / maxActions) * barHeight - (_count === 0 ? 0 : 32));
                 return (
@@ -250,12 +239,10 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                     key={uname}
                     title={
                       <Box sx={{ textAlign: "center" }}>
-                        <Box component={"span"}>
-                          {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
-                        </Box>
+                        <Box component={"span"}>{users[uname].chooseUname ? uname : users[uname].fullname}</Box>
                         {authEmail === "oneweb@umich.edu" && (
                           <Box component={"p"} sx={{ my: 0 }}>
-                            {usersInteractions[uname].email}
+                            {users[uname].email}
                           </Box>
                         )}
                         <Box component={"p"} sx={{ my: 0 }}>
@@ -269,9 +256,9 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                       onClick={() =>
                         openUserInfoSidebar(
                           uname,
-                          usersInteractions[uname].imageUrl,
-                          usersInteractions[uname].fullname,
-                          usersInteractions[uname].chooseUname ? "1" : ""
+                          users[uname].imageUrl,
+                          users[uname].fullname,
+                          users[uname].chooseUname ? "1" : ""
                         )
                       }
                       className={
@@ -318,7 +305,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                       }}
                     >
                       <Box className="user-image">
-                        <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                        <Image src={users[uname].imageUrl} width={28} height={28} objectFit="cover" />
                       </Box>
                       <Box className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
                     </Box>
