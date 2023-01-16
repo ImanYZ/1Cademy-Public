@@ -686,27 +686,29 @@ const Home = () => {
               <RiveScrollActionComponent className={`rive-canvas`} />
             </Box>
           </Box>
-          <Typography
-            color="white"
-            variant="h5"
-            sx={{ textAlign: "center", width: isMovil ? "300px" : "auto" }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            WHERE WE TAKE NOTES <b>TOGETHER</b>.
-          </Typography>
-          <Button
-            // color="secondary"
-            variant="contained"
-            size={width < 900 ? "small" : "large"}
-            component="a"
-            // href="#JoinUsSection"
-            target="_blank"
-            href="https://1cademy.us/#JoinUsSection"
-            sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            Apply to Join Us!
-          </Button>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
+            <Typography
+              color="white"
+              variant="h5"
+              sx={{ textAlign: "center", width: isMovil ? "300px" : "auto" }}
+              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+            >
+              WHERE WE TAKE NOTES <b>TOGETHER</b>.
+            </Typography>
+            <Button
+              // color="secondary"
+              variant="contained"
+              size={width < 900 ? "small" : "large"}
+              component="a"
+              // href="#JoinUsSection"
+              target="_blank"
+              href="https://1cademy.us/#JoinUsSection"
+              sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
+              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+            >
+              Apply to Join Us!
+            </Button>
+          </Box>
         </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>

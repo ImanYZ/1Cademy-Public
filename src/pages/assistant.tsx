@@ -1,5 +1,4 @@
 import CloseIcon from "@mui/icons-material/Close";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
@@ -137,7 +136,7 @@ const Home = () => {
 
   const { RiveComponent: RiveScrollActionComponent } = useRive({
     src: "rive/scroll.riv",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+    animations: ["Timeline 1", "dark"],
     artboard: "New Artboard",
     autoplay: true,
   });
@@ -566,39 +565,24 @@ const Home = () => {
               position: "absolute",
               bottom: "0px",
               right: "0px",
-              // border: "solid 2px red",
-
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
             }}
           >
-            Scroll
-            <Box sx={{ width: "100px", height: "100px" }}>
+            <Typography color="white">Scroll</Typography>
+            <Box sx={{ width: isMovil ? "70px" : "100px", height: isMovil ? "70px" : "100px" }}>
               <RiveScrollActionComponent className={`rive-canvas`} />
             </Box>
           </Box>
           <Typography
             color="white"
             variant="h5"
-            sx={{ textAlign: "center" }}
+            sx={{ textAlign: "center", pb: "30px", width: isMovil ? "300px" : "auto" }}
             className={showLandingOptions ? "show-blurred-text" : "hide-content"}
           >
             HELPS YOU OPTIMIZE YOUR LIFE.
           </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              fontWeight: "700",
-              color: "#fff",
-            }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            {height > 500 && "Scroll"}
-            <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
-          </Box>
         </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
