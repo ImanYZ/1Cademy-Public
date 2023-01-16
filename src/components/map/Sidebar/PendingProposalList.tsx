@@ -1,14 +1,9 @@
-// import "./PendingProposalList.css";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Box } from "@mui/material";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-// import { NodeType } from "../../../types";
-// import { NODE_TYPES } from "../../../utils";
-import { MemoizedMetaButton } from "../MetaButton";
+import { useInView } from "@/hooks/useObserver";
+
 import ProposalItem from "../ProposalsList/ProposalItem/ProposalItem";
-
-// const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 const ELEMENTS_PER_PAGE = 13;
 
@@ -21,6 +16,9 @@ type PendingProposalListProps = {
 const PendingProposalList = (props: PendingProposalListProps) => {
   // const [{ user }] = useAuth();
   // const db = getFirestore();
+  const [isRetrieving, setIsRetrieving] = useState(false);
+
+  const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
 
   // TODO: the pendingProposalsNum, state is shared between button and sidebar, find a way to improve that
   // const [, setPendingProposalsNum] = useState(0);
@@ -136,8 +134,20 @@ const PendingProposalList = (props: PendingProposalListProps) => {
 
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= props.proposals.length) return;
+
+    setIsRetrieving(true);
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
+    setTimeout(() => {
+      setIsRetrieving(false);
+    }, 500);
   }, [lastIndex, props.proposals.length]);
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isRetrieving) return;
+
+    loadOlderProposalsClick();
+  }, [inViewInfinityLoaderTrigger, isRetrieving, loadOlderProposalsClick]);
 
   return (
     <div id="PendingProposalsContainer">
@@ -169,18 +179,7 @@ const PendingProposalList = (props: PendingProposalListProps) => {
               />
             );
           })}
-          {/* CHECK, I changes pendingProposals to proposal */}
-          {props.proposals.length > lastIndex && (
-            <div id="ContinueButton">
-              <MemoizedMetaButton onClick={loadOlderProposalsClick}>
-                <>
-                  <ExpandMoreIcon className="material-icons grey-text" />
-                  Older Pending Proposals
-                  <ExpandMoreIcon className="material-icons grey-text" />
-                </>
-              </MemoizedMetaButton>
-            </div>
-          )}
+          {props.proposals.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
         </ul>
       )}
     </div>
