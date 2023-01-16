@@ -37,7 +37,10 @@ export function useInView(props = useInViewInitialValue) {
   // callback.current = onChange;
 
   React.useEffect(() => {
-    if (!ref) return;
+    if (!ref) {
+      setState(prev => ({ inView: false, entry: undefined, inViewOnce: prev.inViewOnce }));
+      return;
+    }
 
     const observe = new IntersectionObserver(entries => {
       entries.forEach(entry => {
