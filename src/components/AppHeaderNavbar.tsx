@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, Button, IconButton, Tab, Tabs } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tab, Tabs } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
@@ -50,65 +50,66 @@ const AppAppBar: FC<Props> = ({
   return (
     <AppBar data-testid="app-nav-bar">
       <Toolbar sx={{ height: "var(--navbar-height)", justifyContent: "space-between" }}>
-        <LightTooltip title="1Cademy's Landing Page">
-          <Box>
-            <Link href={"/"} passHref>
-              <Box sx={{ cursor: "pointer", mr: { xs: "20px", md: "10px" } }}>
-                <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
-              </Box>
-            </Link>
-          </Box>
-        </LightTooltip>
-        <Tabs
-          value={getTabSelected()}
-          variant="scrollable"
-          scrollButtons="auto"
-          // allowScrollButtonsMobile
-          aria-label="scrollable auto tabs navigation bar"
-          sx={{
-            marginLeft: "auto",
-            fontWeight: 400,
-            display: { xs: "none", md: "flex" },
-            mr: "10px",
-            "& .MuiTab-root": {
-              color: "#AAAAAA",
-            },
-            "& .MuiTab-root.Mui-selected": {
-              color: "common.white",
-            },
-            "& .MuiTabs-indicator": {
-              backgroundColor: "common.orange",
-            },
-          }}
-        >
-          {SECTIONS.map((page, idx) => (
-            <LightTooltip key={idx} title={page.title}>
-              <Tab
-                onClick={event => {
-                  event.preventDefault();
-                  page.label === "NODE" ? router.push(page.route) : open(page.route, "_blank");
-                }}
-                color="inherit"
-                label={page.label}
-                aria-label={page.title}
-                wrapped
-                sx={{
-                  fontFamily: "Work Sans,sans-serif",
-                  fontSize: "15px",
-                  minWidth: "50px",
-                  letterSpacing: "-1px",
-                }}
-              />
-            </LightTooltip>
-          ))}
-        </Tabs>
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
-          {(router.route !== "/" || (router.route === "/" && showSearch)) && (
-            <Box sx={{ display: "flex", alignItems: "center", maxWidth: "300px", mr: "10px" }}>
-              <AppHeaderSearchBar />
+        <Stack direction={"row"} alignItems={"center"}>
+          <LightTooltip title="1Cademy's Landing Page">
+            <Box>
+              <Link href={"/"} passHref>
+                <Box sx={{ cursor: "pointer", mr: { xs: "20px", md: "10px" } }}>
+                  <Image src={LogoDarkMode.src} alt="logo" width="52px" height="70px" />
+                </Box>
+              </Link>
             </Box>
-          )}
+          </LightTooltip>
+          <Tabs
+            value={getTabSelected()}
+            variant="scrollable"
+            scrollButtons="auto"
+            // allowScrollButtonsMobile
+            aria-label="scrollable auto tabs navigation bar"
+            sx={{
+              fontWeight: 400,
+              display: { xs: "none", md: "flex" },
+              mr: "10px",
+              "& .MuiTab-root": {
+                color: "#AAAAAA",
+              },
+              "& .MuiTab-root.Mui-selected": {
+                color: "common.white",
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: "common.orange",
+              },
+            }}
+          >
+            {SECTIONS.map((page, idx) => (
+              <LightTooltip key={idx} title={page.title}>
+                <Tab
+                  onClick={event => {
+                    event.preventDefault();
+                    page.label === "NODE" ? router.push(page.route) : open(page.route, "_blank");
+                  }}
+                  color="inherit"
+                  label={page.label}
+                  aria-label={page.title}
+                  wrapped
+                  sx={{
+                    fontFamily: "Work Sans,sans-serif",
+                    fontSize: "15px",
+                    minWidth: "50px",
+                    letterSpacing: "-1px",
+                  }}
+                />
+              </LightTooltip>
+            ))}
+          </Tabs>
+        </Stack>
+        {(router.route !== "/" || (router.route === "/" && showSearch)) && (
+          <Box sx={{ mr: "10px" }}>
+            <AppHeaderSearchBar />
+          </Box>
+        )}
 
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           {showApply && (
             <LightTooltip title="Apply to join 1Cademy">
               <Button
