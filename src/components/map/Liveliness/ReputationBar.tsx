@@ -56,14 +56,16 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
             const userQuery = query(collection(db, "users"), where("uname", "==", receiverData), limit(1));
             getDocs(userQuery).then(userData => {
               const user = userData.docs[0].data();
-              setUsers({
-                ...users,
-                [user.uname]: {
-                  imageUrl: user.imageUrl,
-                  chooseUname: user.chooseUname,
-                  email: user.email,
-                  fullname: user.fName + " " + user.lName,
-                },
+              setUsers((prevState: any) => {
+                return {
+                  ...prevState,
+                  [user.uname]: {
+                    imageUrl: user.imageUrl,
+                    chooseUname: user.chooseUname,
+                    email: user.email,
+                    fullname: user.fName + " " + user.lName,
+                  },
+                };
               });
             });
 
@@ -180,7 +182,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: "calc(100% - 220px)",
+          height: "calc(100% - 240px)",
         }}
       >
         <Box
@@ -205,7 +207,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
           <Box
             className="seekbar"
             sx={{
-              height: "calc(100% - 55px)",
+              height: "calc(100% - 70px)",
               width: "1px",
               borderRight: theme =>
                 theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",

@@ -173,7 +173,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: "calc(100% - 220px)",
+          height: "calc(100% - 240px)",
         }}
       >
         <Box
@@ -198,7 +198,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           <Box
             className="seekbar"
             sx={{
-              height: "calc(100% - 55px)",
+              height: "calc(100% - 70px)",
               width: "1px",
               borderRight: theme =>
                 theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
