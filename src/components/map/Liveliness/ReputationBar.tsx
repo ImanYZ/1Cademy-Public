@@ -43,6 +43,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     };
 
     const snapshotInitializer = () => {
+      setUsersInteractions({});
       unsubscribe.finalizer();
       const ts = new Date().getTime() - 86400000;
       const actionTracksCol = collection(db, "actionTracks");
@@ -137,7 +138,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
 
     setInterval(() => {
       snapshotInitializer();
-    }, 3600000);
+    }, 1440000);
 
     snapshotInitializer();
 
