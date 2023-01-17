@@ -23,7 +23,7 @@ const useInViewInitialValue: UseInViewProps = {
 
 export function useInView(props = useInViewInitialValue) {
   const { options } = props;
-  const [ref, setRef] = React.useState(null);
+  const [ref, setRef] = React.useState<any>(null);
   // const callback = React.useRef < IntersectionOptions['onChange'] > ();
   const [state, setState] = React.useState<{
     inView: boolean;

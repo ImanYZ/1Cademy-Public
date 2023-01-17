@@ -429,8 +429,6 @@ const Home = () => {
     router.push("/signin");
   };
 
-  console.log({ tableOfContentInView: tableOfContentInViewOnce });
-
   return (
     <Box
       id="ScrollableContainer"

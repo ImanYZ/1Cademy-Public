@@ -17,7 +17,7 @@ const UniversitiesMap = (props: any) => {
   const db = getFirestore();
   // const firebase = useRecoilValue(firebaseOneState);
   const [institutions, setInstitutions] = useState<any[]>([]);
-  const { inViewOnce: universityMapInViewOnce, ref: univesityMapRef } = useInView();
+  const { inViewOnce: universityMapInViewOnce, ref: universityMapRef } = useInView();
 
   useEffect(() => {
     if (!db) return;
@@ -45,7 +45,7 @@ const UniversitiesMap = (props: any) => {
 
   return (
     <Box
-      ref={univesityMapRef}
+      ref={universityMapRef}
       component="section"
       sx={{ minHeight: 400 }}
       className={universityMapInViewOnce ? "slide-bottom-top" : "hide"}
