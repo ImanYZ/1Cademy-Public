@@ -105,6 +105,7 @@ const Home = () => {
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
+  const { inView: tableOfContentInView, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -602,7 +603,11 @@ const Home = () => {
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
         >
-          <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
+          <Box
+            ref={TableOfContentRef}
+            sx={{ position: "sticky", top: "100px", zIndex: 11 }}
+            className={tableOfContentInView ? "slide-left-to-right" : "hide"}
+          >
             <MemoizedTableOfContent
               menuItems={sectionsTmp}
               viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
