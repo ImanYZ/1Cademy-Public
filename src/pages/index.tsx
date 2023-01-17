@@ -81,7 +81,7 @@ const sectionsTmp = [
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
 ];
-
+const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 const Home = () => {
   // const [section, setSection] = useState(0);
   const theme = useTheme();
@@ -91,7 +91,7 @@ const Home = () => {
   const [idxRiveComponent, setIdxRiveComponent] = useState(0);
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
-  const isMovil = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
@@ -105,6 +105,9 @@ const Home = () => {
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
+  const { inView: footerInView, ref: footerSectionRef } = useInView({
+    options: footerOptions,
+  });
   const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
@@ -540,7 +543,7 @@ const Home = () => {
               </>
             )}
           </Stack>
-          {!isMovil && (
+          {!isMobile && (
             <AppHeaderSearchBar
               searcherUrl={"search"}
               sx={{
@@ -550,7 +553,7 @@ const Home = () => {
             />
           )}
           <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "8px"}>
-            {isMovil && (
+            {isMobile && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
                   <SearchIcon />
@@ -568,7 +571,7 @@ const Home = () => {
                   // onClick={joinUsClick}
                   target="_blank"
                   href="https://1cademy.us/#JoinUsSection"
-                  size={isMovil ? "small" : "medium"}
+                  size={isMobile ? "small" : "medium"}
                   sx={{
                     fontSize: 16,
                     // color: "common.white",
@@ -586,7 +589,7 @@ const Home = () => {
                 variant="outlined"
                 color="secondary"
                 onClick={signUpHandler}
-                size={isMovil ? "small" : "medium"}
+                size={isMobile ? "small" : "medium"}
                 sx={{
                   fontSize: 16,
                   ml: 2.5,
@@ -642,26 +645,11 @@ const Home = () => {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: " 0px",
-              right: "0px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography color="white">Scroll</Typography>
-            <Box sx={{ width: isMovil ? "70px" : "100px", height: isMovil ? "70px" : "100px" }}>
-              <RiveScrollActionComponent className={`rive-canvas`} />
-            </Box>
-          </Box>
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
             <Typography
               color="white"
               variant="h5"
-              sx={{ textAlign: "center", width: isMovil ? "300px" : "auto" }}
+              sx={{ textAlign: "center", width: isMobile ? "300px" : "auto" }}
               className={showLandingOptions ? "show-blurred-text" : "hide-content"}
             >
               WHERE WE TAKE NOTES <b>TOGETHER</b>.
@@ -843,16 +831,33 @@ const Home = () => {
           </Box>
         </Box>
       </Box>
+      <Box ref={footerSectionRef}>
+        <AppFooter
+          sx={{
+            px: isDesktop ? "0px" : "10px",
+            background: theme =>
+              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+          }}
+        />
+      </Box>
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
-      <AppFooter
+      <Box
         sx={{
-          px: isDesktop ? "0px" : "10px",
-          background: theme =>
-            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
-      />
-      {openSearch && isMovil && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
-
+        className={footerInView ? "hide" : "undefined"}
+      >
+        <Typography color="white">Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveScrollActionComponent className={`rive-canvas`} />
+        </Box>
+      </Box>
       <style>{`
           body{
             overflow:hidden;
