@@ -66,6 +66,7 @@ const Values = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        overflowX: "hidden",
       }}
     >
       <Stack direction={"column"} spacing={isMobile ? "60px" : "100px"}>
