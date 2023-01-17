@@ -739,59 +739,43 @@ const NodeFooter = ({
               )}
               {!editable && !unaccepted && nodeType === "Reference" ? (
                 <>
-                  {openSidebar === "CITATIONS" ? (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    <ContainedButton
+                      title="View nodes that have cited this node."
                       onClick={selectCitations}
-                      className={"select-tab-button-node-footer"}
+                      tooltipPosition="top"
                       sx={{
-                        background: theme =>
-                          theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <>
-                        <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                        <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                      </>
-                    </Box>
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      <ContainedButton
-                        title="View nodes that have cited this node."
-                        onClick={selectCitations}
-                        tooltipPosition="top"
-                        sx={{
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
+                        color:
+                          openSidebar === "CITATIONS" && nodeBookState.selectedNode === identifier
+                            ? theme => theme.palette.common.orange
+                            : "inherit",
+                        fontWeight: 400,
+                        ":hover": {
+                          borderWidth: "0px",
                           background: (theme: any) =>
                             theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
-                          color: "inherit",
-                          fontWeight: 400,
-                          ":hover": {
-                            borderWidth: "0px",
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.darkBackground2
-                                : theme.palette.common.lightBackground2,
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
-                        >
-                          <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                          <MenuBookIcon sx={{ fontSize: "16px" }} />
-                        </Box>
-                      </ContainedButton>
-                    </Box>
-                  )}
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
+                        <ArrowForwardIcon sx={{ fontSize: "16px" }} />
+                        <MenuBookIcon sx={{ fontSize: "16px" }} />
+                      </Box>
+                    </ContainedButton>
+                  </Box>
 
                   {openPart === "Tags" ? (
                     <Box
