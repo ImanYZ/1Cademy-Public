@@ -5,7 +5,7 @@ type ObserverOptions = {
   rootMargin: string;
   threshold: number | number[];
 };
-type UseInViewProps = {
+export type UseInViewProps = {
   options: ObserverOptions;
 };
 const useInViewInitialValue: UseInViewProps = {
@@ -17,6 +17,9 @@ const useInViewInitialValue: UseInViewProps = {
 };
 
 // export function useInViewS({ options } = { options: useInViewInitialValue }) {}
+
+// create props in a constant out of the component to not rebuild again
+// in other case that will generate an infinity loop
 
 export function useInView(props = useInViewInitialValue) {
   const { options } = props;
