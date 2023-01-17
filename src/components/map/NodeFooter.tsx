@@ -445,7 +445,20 @@ const NodeFooter = ({
               ) : (
                 <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
               ))}
-
+            <Tooltip
+              title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
+                new Date(changedAt)
+              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day()}/${dayjs(
+                new Date(changedAt)
+              ).month()}/${dayjs(new Date(changedAt)).year()}`}
+              placement={"top"}
+            >
+              <span
+                style={{
+                  marginLeft: "10px",
+                }}
+              >{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
+            </Tooltip>
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 {openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier ? (
@@ -462,7 +475,6 @@ const NodeFooter = ({
                     }}
                   >
                     <CreateIcon sx={{ fontSize: "16px" }} />
-                    <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
                   </Box>
                 ) : (
                   <ContainedButton
@@ -483,11 +495,11 @@ const NodeFooter = ({
                             ? theme.palette.common.darkBackground2
                             : theme.palette.common.lightBackground2,
                       },
+                      padding: "7px 0px",
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                       <CreateIcon sx={{ fontSize: "16px" }} />
-                      <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
                     </Box>
                   </ContainedButton>
                 )}
