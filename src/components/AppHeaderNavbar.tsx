@@ -50,7 +50,7 @@ const AppAppBar: FC<Props> = ({
   return (
     <AppBar data-testid="app-nav-bar">
       <Toolbar sx={{ height: "var(--navbar-height)", justifyContent: "space-between" }}>
-        <Stack direction={"row"} alignItems={"center"}>
+        <Stack direction={"row"} alignItems={"center"} flexWrap={"nowrap"} flexShrink={1}>
           <LightTooltip title="1Cademy's Landing Page">
             <Box>
               <Link href={"/"} passHref>
@@ -62,7 +62,7 @@ const AppAppBar: FC<Props> = ({
           </LightTooltip>
           <Tabs
             value={getTabSelected()}
-            variant="scrollable"
+            variant="fullWidth"
             scrollButtons="auto"
             // allowScrollButtonsMobile
             aria-label="scrollable auto tabs navigation bar"
@@ -103,13 +103,8 @@ const AppAppBar: FC<Props> = ({
             ))}
           </Tabs>
         </Stack>
-        {(router.route !== "/" || (router.route === "/" && showSearch)) && (
-          <Box sx={{ mr: "10px" }}>
-            <AppHeaderSearchBar />
-          </Box>
-        )}
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        {(router.route !== "/" || (router.route === "/" && showSearch)) && <AppHeaderSearchBar />}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", ml: "10px" }}>
           {showApply && (
             <LightTooltip title="Apply to join 1Cademy">
               <Button
