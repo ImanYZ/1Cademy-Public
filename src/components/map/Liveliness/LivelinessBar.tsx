@@ -140,7 +140,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
 
     setInterval(() => {
       snapshotInitializer();
-    }, 3600000);
+    }, 1440000);
 
     snapshotInitializer();
 
