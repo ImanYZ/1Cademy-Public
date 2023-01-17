@@ -1,6 +1,6 @@
-import { Box } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { FilterValue } from "../knowledgeTypes";
@@ -8,7 +8,7 @@ import ContributorsAutocomplete from "./ContributorsAutocomplete";
 import InstitutionsAutocomplete from "./InstitutionsAutocomplete";
 import NodeTypesAutocomplete from "./NodeTypesAutocomplete";
 import { ReferencesAutocomplete } from "./ReferencesAutocomplete";
-import { ChosenTag, MemoizedTagsSearcher } from "./TagsSearcher";
+import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "./TagsSearcher";
 
 export type HomeFilterRef = {
   scroll: () => void;
@@ -76,10 +76,35 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
       onReferencesChange(title, label);
     };
 
+    const deleteChip = useCallback(
+      (nodeId: string) => {
+        setChosenTags(oldChosenTags => {
+          const r = oldChosenTags.filter(tag => tag.id !== nodeId);
+          return r;
+        });
+        setAllTags(oldAllTags => {
+          return { ...oldAllTags, [nodeId]: { ...oldAllTags[nodeId], checked: false } };
+        });
+      },
+      [setAllTags]
+    );
+
+    const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
+
     return (
       <>
         <Box ref={toScrollRef} display="flex" flexDirection={{ xs: "column", sm: "row" }} mb={"16px"} gap="16px">
           <Box width={{ xs: "100%" }}>
+            {selectedTags.map(tag => (
+              <Chip
+                key={"tag" + tag.nodeId}
+                variant="outlined"
+                label={tag.title}
+                onDelete={() => deleteChip(tag.nodeId)} //
+                size="small"
+                sx={{ mr: "2px" }}
+              />
+            ))}
             <MemoizedTagsSearcher
               allTags={allTags}
               setAllTags={setAllTags}

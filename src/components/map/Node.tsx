@@ -1067,7 +1067,11 @@ const Node = ({
               />
               <div
                 id="ProposalButtonsRow"
-                style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+                style={{
+                  border: "solid 0px pink",
+                  display: nodeType !== "Reference" ? "flex" : "none",
+                  justifyContent: "space-around",
+                }}
               >
                 {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
                   (childNodeType: ProposedChildTypesIcons) => {

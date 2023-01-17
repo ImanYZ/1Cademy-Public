@@ -2,13 +2,13 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
+import { useInView } from "../../../hooks/useObserver";
 import shortenNumber from "../../../lib/utils/shortenNumber";
 import { Editor } from "../../Editor";
 import NodeTypeIcon from "../../NodeTypeIcon2";
@@ -28,27 +28,11 @@ const ELEMENTS_PER_PAGE = 13;
 
 export const BookmarksList = ({ openLinkedNode, bookmarks, updates, bookmark }: BookmarksListProps) => {
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
+  const [isRetrieving, setIsRetrieving] = useState(false);
 
-  // useEffect(() => {
-  //   // filter bookmarks from allNodes, then save the value
-  //   let displayableNs = Object.keys(allNodes).map(nodeId => {
-  //     if (
-  //       nodeId in allUserNodes &&
-  //       "bookmarked" in allUserNodes[nodeId] &&
-  //       allUserNodes[nodeId].bookmarked &&
-  //       ((!props.updates && !allUserNodes[nodeId].changed && allUserNodes[nodeId].isStudied) ||
-  //         (props.updates && (allUserNodes[nodeId].changed || !allUserNodes[nodeId].isStudied)))
-  //     ) {
-  //       return { ...allNodes[nodeId], id: nodeId };
-  //     }
-  //   });
-  //   displayableNs = displayableNs.filter(dN => dN);
-  //   displayableNs.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-  //   setBookmarks(displayableNs);
-  // }, [lastIndex, allNodes, allUserNodes]);
+  const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
 
-  // TODO: change to memo to not recalculate the function
-  // with memo will reuse the value recalculated
+  // TODO: improve with memo to not recalculate in every render
   const getBookmarksProcessed = useCallback(() => {
     const bookmarksFiltered = bookmarks.filter(cur => {
       if (updates) return cur.changed || !cur.isStudied;
@@ -60,8 +44,19 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates, bookmark }: 
 
   const loadOlderNotificationsClick = useCallback(() => {
     if (lastIndex >= getBookmarksProcessed().length) return;
+    setIsRetrieving(true);
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
+    setTimeout(() => {
+      setIsRetrieving(false);
+    }, 500);
   }, [getBookmarksProcessed, lastIndex]);
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isRetrieving) return;
+
+    loadOlderNotificationsClick();
+  }, [inViewInfinityLoaderTrigger, isRetrieving, loadOlderNotificationsClick]);
 
   const bookmarkHandler = useCallback((event: any, identifier: string) => bookmark(event, identifier), [bookmark]);
 
@@ -96,12 +91,9 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates, bookmark }: 
                     <BookmarkIcon color={"primary"} sx={{ fontSize: "16px" }} />
                   </Box>
                 </MemoizedMetaButton>
-                <MemoizedMetaButton
-                // tooltip="Creation or the last update of this node."
-                // tooltipPosition="TopLeft"
-                >
+                <MemoizedMetaButton tooltip="Creation or the last update of this node." tooltipPosition="top-start">
                   <Box sx={{ fontSize: "15px" }}>
-                    <CreateIcon className="material-icons grey-text" sx={{ fontSize: "16px" }} />
+                    <CreateIcon className=" grey-text" sx={{ fontSize: "16px" }} />
                     {dayjs(node.changedAt).fromNow()}
                   </Box>
                   {/* </MetaButton>
@@ -112,20 +104,20 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates, bookmark }: 
                   {/* <span>{shortenNumber(node.versions, 2, false)}</span> */}
                 </MemoizedMetaButton>
                 <MemoizedMetaButton
-                // tooltip="# of 1Cademists who have found this node unhelpful."
-                // tooltipPosition="TopLeft"
+                  tooltip="# of 1Cademists who have found this node unhelpful."
+                  tooltipPosition="top-start"
                 >
                   <>
-                    <CloseIcon className="material-icons grey-text" />
+                    <CloseIcon className="grey-text" sx={{ fontSize: "16px" }} />
                     <span>{shortenNumber(node.wrongs, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
                 <MemoizedMetaButton
-                // tooltip="# of 1Cademists who have found this node helpful."
-                // tooltipPosition="TopLeft"
+                  tooltip="# of 1Cademists who have found this node helpful."
+                  tooltipPosition="top-start"
                 >
                   <>
-                    <DoneIcon className="material-icons DoneIcon grey-text" />
+                    <DoneIcon className=" grey-text" sx={{ fontSize: "16px" }} />
                     <span>{shortenNumber(node.corrects, 2, false)}</span>
                   </>
                 </MemoizedMetaButton>
@@ -136,21 +128,7 @@ export const BookmarksList = ({ openLinkedNode, bookmarks, updates, bookmark }: 
             </div>
           </Paper>
         ))}
-      {getBookmarksProcessed().length > lastIndex && (
-        <div id="ContinueButton">
-          <MemoizedMetaButton
-            onClick={loadOlderNotificationsClick}
-            // tooltip={"Load older " + (props.updates ? "updated" : "studied") + " bookmarks."}
-            // tooltipPosition="Right"
-          >
-            <>
-              <ExpandMoreIcon className="material-icons grey-text" />
-              Older Bookmarks
-              <ExpandMoreIcon className="material-icons grey-text" />
-            </>
-          </MemoizedMetaButton>
-        </div>
-      )}
+      {getBookmarksProcessed().length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger} />}
     </Box>
   );
 };

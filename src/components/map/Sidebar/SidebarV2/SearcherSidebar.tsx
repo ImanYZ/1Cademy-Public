@@ -3,7 +3,6 @@ import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -29,6 +28,7 @@ import React, { useCallback, useEffect, useMemo, useState, useTransition } from 
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
+import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
 import { SearchNodesResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
@@ -100,17 +100,9 @@ const SearcherSidebar = ({
     totalResults: 0,
   });
 
-  const onFocusSearcherInput = useCallback(
-    (inputTitle: HTMLElement) => {
-      if (!open) return;
-      if (!inputTitle) return;
-      inputTitle.focus();
-    },
-    [open]
-  );
+  const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
-  const viewTagsInMovil = useMemo<TagTreeView[]>(() => selectedTags.slice(0, MAX_TAGS_IN_MOBILE), [selectedTags]);
 
   const onSearch = useCallback(
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
@@ -151,6 +143,34 @@ const SearcherSidebar = ({
     },
     [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data]
   );
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isRetrieving) return;
+
+    onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
+  }, [
+    inViewInfinityLoaderTrigger,
+    isRetrieving,
+    nodeTypes,
+    onSearch,
+    refInfinityLoaderTrigger,
+    search,
+    searchResults.lastPageLoaded,
+    sortDirection,
+    sortOption,
+  ]);
+
+  const onFocusSearcherInput = useCallback(
+    (inputTitle: HTMLElement) => {
+      if (!open) return;
+      if (!inputTitle) return;
+      inputTitle.focus();
+    },
+    [open]
+  );
+
+  const viewTagsInMovil = useMemo<TagTreeView[]>(() => selectedTags.slice(0, MAX_TAGS_IN_MOBILE), [selectedTags]);
 
   useEffect(() => {
     if (nodeBookState.searchQuery && nodeBookState.nodeTitleBlured) {
@@ -574,33 +594,36 @@ const SearcherSidebar = ({
       </Box>
     );
   }, [
-    allTags,
-    chosenTags,
-    deleteChip,
-    handleChange,
+    innerHeight,
     isMovil,
-    nodeTypes,
-    nodesUpdatedSince,
-    onChangeNoteType,
-    onChangeSortDirection,
-    onChangeSortOptions,
-    onFocusSearcherInput,
-    onSearch,
-    onSearchEnter,
-    onlyTags,
-    search,
-    searchResults,
-    selectedTags,
-    setAllTags,
-    setChosenTagsCallback,
-    setNodesUpdatedSinceClick,
-    setShowTagSelectorClick,
     showTagSelector,
-    sortDirection,
-    sortOption,
+    setShowTagSelectorClick,
+    allTags,
+    setAllTags,
+    chosenTags,
+    setChosenTagsCallback,
     viewTagsInMovil,
-    openSortOptions,
+    selectedTags,
+    handleChange,
+    search,
+    onSearchEnter,
+    nodeTypes,
+    onChangeNoteType,
+    onFocusSearcherInput,
     innerWidth,
+    theme.breakpoints.values.sm,
+    openSortOptions,
+    searchResults,
+    onlyTags,
+    sortOption,
+    onChangeSortOptions,
+    sortDirection,
+    onChangeSortDirection,
+    nodesUpdatedSince,
+    setNodesUpdatedSinceClick,
+    sidebarWidth,
+    deleteChip,
+    onSearch,
   ]);
 
   return (
@@ -693,17 +716,7 @@ const SearcherSidebar = ({
             </Box>
           )}
           {!isRetrieving && searchResults.lastPageLoaded < searchResults.totalPage && (
-            <Box id="ContinueButton" sx={{ display: "flex", justifyContent: "center" }}>
-              <MemoizedMetaButton
-                onClick={() => onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes)}
-              >
-                <>
-                  <ExpandMoreIcon className="material-icons grey-text" />
-                  <span>Older search results</span>
-                  <ExpandMoreIcon className="material-icons grey-text" />
-                </>
-              </MemoizedMetaButton>
-            </Box>
+            <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
           )}
         </Box>
       }

@@ -32,17 +32,61 @@
 }
 
 .slide-left-to-right {
-  animation-name: slideLeftToTight;
+  animation-name: slideLeftToRight;
   animation-duration: 1s;
   animation-fill-mode: both;
 }
-@keyframes slideLeftToTight {
+@keyframes slideLeftToRight {
   0% {
     opacity: 0;
-    transform: translateX(-100);
+    transform: translateX(-100px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0px);
   }
+}
+
+.slide-right-to-left {
+  animation-name: slideRightToLeft;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes slideRightToLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+
+.slide-bottom-top {
+  animation-name: slideBottomToTop;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes slideBottomToTop {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.hide {
+  opacity: 0;
+}
+
+.delay-300ms {
+  animation-delay: 300ms;
+}
+
+.delay-600ms {
+  animation-delay: 600ms;
 }

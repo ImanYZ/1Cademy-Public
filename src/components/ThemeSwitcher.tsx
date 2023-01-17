@@ -7,6 +7,7 @@ export const ThemeSwitcher = styled(Switch)(() => ({
   "& .Mui-checked": {
     color: "#fff",
     transform: "translateX(22px)",
+    // p: "0px",
     "& + .MuiSwitch-track": {
       opacity: 1,
       backgroundColor: "#4D4D4D",
@@ -48,5 +49,8 @@ export const ThemeSwitcher = styled(Switch)(() => ({
     width: 21,
     height: 21,
     margin: 1,
+  },
+  "& .MuiSwitch-input": {
+    width: "100%",
   },
 }));

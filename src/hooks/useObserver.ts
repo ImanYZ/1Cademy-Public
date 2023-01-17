@@ -5,7 +5,7 @@ type ObserverOptions = {
   rootMargin: string;
   threshold: number | number[];
 };
-type UseInViewProps = {
+export type UseInViewProps = {
   options: ObserverOptions;
 };
 const useInViewInitialValue: UseInViewProps = {
@@ -18,9 +18,12 @@ const useInViewInitialValue: UseInViewProps = {
 
 // export function useInViewS({ options } = { options: useInViewInitialValue }) {}
 
+// create props in a constant out of the component to not rebuild again
+// in other case that will generate an infinity loop
+
 export function useInView(props = useInViewInitialValue) {
   const { options } = props;
-  const [ref, setRef] = React.useState(null);
+  const [ref, setRef] = React.useState<any>(null);
   // const callback = React.useRef < IntersectionOptions['onChange'] > ();
   const [state, setState] = React.useState<{
     inView: boolean;
@@ -37,7 +40,10 @@ export function useInView(props = useInViewInitialValue) {
   // callback.current = onChange;
 
   React.useEffect(() => {
-    if (!ref) return;
+    if (!ref) {
+      setState(prev => ({ inView: false, entry: undefined, inViewOnce: prev.inViewOnce }));
+      return;
+    }
 
     const observe = new IntersectionObserver(entries => {
       entries.forEach(entry => {

@@ -1,4 +1,3 @@
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
@@ -8,13 +7,11 @@ import {
   IconButton,
   Skeleton,
   Stack,
-  /* ThemeProvider */
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-// const Values = React.lazy(() => import("./modules/views/Values"));
 
 const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
 const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
@@ -35,10 +32,9 @@ import { useInView } from "@/hooks/useObserver";
 import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-// import { brandingDarkTheme } from "@/lib/theme/brandingTheme";
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackground.jpg";
+import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
@@ -85,7 +81,7 @@ const sectionsTmp = [
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
 ];
-
+const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 const Home = () => {
   // const [section, setSection] = useState(0);
   const theme = useTheme();
@@ -95,7 +91,7 @@ const Home = () => {
   const [idxRiveComponent, setIdxRiveComponent] = useState(0);
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
-  const isMovil = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   const [showAnimationOptions, setShowAnimationOptions] = useState(false);
@@ -103,16 +99,16 @@ const Home = () => {
   const [handleThemeSwitch] = useThemeChange();
   const [openSearch, setOpenSearch] = useState(false);
 
-  // const [isSSR,setIsSSR]
-
-  // const [{ isAuthenticated }] = useAuth();
   const router = useRouter();
 
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
-  // const { entry: joinEntry, inViewOnce: joinInViewOnce, ref: JoinSectionRef } = useInView();
+  const { inView: footerInView, ref: footerSectionRef } = useInView({
+    options: footerOptions,
+  });
+  const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -124,7 +120,6 @@ const Home = () => {
     artboard: "artboard-1",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
@@ -132,7 +127,6 @@ const Home = () => {
     artboard: "artboard-2",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
@@ -140,7 +134,6 @@ const Home = () => {
     artboard: "artboard-3",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
@@ -148,7 +141,6 @@ const Home = () => {
     artboard: "artboard-4",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
@@ -156,17 +148,22 @@ const Home = () => {
     artboard: "artboard-5",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
 
   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
     src: "rive/artboard-6.riv",
     animations: ["Timeline 1", "dark", "light"],
-    // animations: "Timeline 1",
     artboard: "artboard-6",
     autoplay: false,
-    // onLoad: () => console.log("load-finish")
   });
+
+  const { RiveComponent: RiveScrollActionComponent } = useRive({
+    src: "rive/scroll.riv",
+    animations: ["Timeline 1", "dark"],
+    artboard: "New Artboard",
+    autoplay: true,
+  });
+
   useEffect(() => {
     if (!rive1) return;
     rive1.reset({ artboard: "artboard-1" });
@@ -202,7 +199,6 @@ const Home = () => {
     if (!whatEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
-    // if (!joinEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: 0 },
@@ -211,7 +207,6 @@ const Home = () => {
       { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
-      // { id: joinEntry.target.id, height: whoEntry.target.clientHeight },
     ];
   }, [whatEntry, whereEntry, whoEntry, whyEntry]);
 
@@ -222,7 +217,6 @@ const Home = () => {
     if (!whatEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
-    // if (!joinEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
@@ -234,7 +228,6 @@ const Home = () => {
       { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
-      // { id: joinEntry.target.id, height: joinEntry.target.clientHeight },
     ];
   }, [whatEntry, whereEntry, whoEntry, whyEntry]);
 
@@ -280,7 +273,6 @@ const Home = () => {
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
-        // console.log({ sectionsHeight });
         if (!sectionsHeight) return;
 
         const { min, idx: idxSection } = sectionsHeight.reduce(
@@ -346,7 +338,6 @@ const Home = () => {
         }
 
         if (idxSection === SECTION_WITH_ANIMATION) {
-          // console.log("section with aniomation");
           setIdxRiveComponent(idxAnimation + 2);
           const lowerAnimationLimit = minAnimation;
           const upperAnimationLimit = maxAnimation;
@@ -403,7 +394,6 @@ const Home = () => {
       const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
 
-      // setSelectedSection(sectionIdx);
       if (sectionIdx === 0) {
         setShowLandingOptions(true);
         setIdxRiveComponent(animationIndex);
@@ -440,7 +430,6 @@ const Home = () => {
   };
 
   return (
-    // <ThemeProvider theme={brandingDarkTheme}>
     <Box
       id="ScrollableContainer"
       onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
@@ -463,16 +452,13 @@ const Home = () => {
             width: "100%",
             background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
             backdropFilter: "saturate(180%) blur(20px)",
-
-            // filter: "blur(1px)"
           }}
-          // style={{willChange:"filter"}}
         />
         <Stack
           direction={"row"}
           justifyContent={"space-between"}
           alignItems={"center"}
-          spacing={isDesktop ? "30px" : "20px"}
+          spacing={isDesktop ? "30px" : "8px"}
           sx={{
             width: "100%",
             maxWidth: "1200px",
@@ -482,7 +468,7 @@ const Home = () => {
           }}
         >
           <Stack
-            spacing={isDesktop ? "30px" : "20px"}
+            spacing={isDesktop ? "30px" : "8px"}
             alignItems={"center"}
             justifyContent={"space-between"}
             direction={"row"}
@@ -555,7 +541,7 @@ const Home = () => {
               </>
             )}
           </Stack>
-          {!isMovil && (
+          {!isMobile && (
             <AppHeaderSearchBar
               searcherUrl={"search"}
               sx={{
@@ -564,8 +550,8 @@ const Home = () => {
               }}
             />
           )}
-          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "10px"}>
-            {isMovil && (
+          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "8px"}>
+            {isMobile && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
                   <SearchIcon />
@@ -583,7 +569,7 @@ const Home = () => {
                   // onClick={joinUsClick}
                   target="_blank"
                   href="https://1cademy.us/#JoinUsSection"
-                  size={isMovil ? "small" : "medium"}
+                  size={isMobile ? "small" : "medium"}
                   sx={{
                     fontSize: 16,
                     // color: "common.white",
@@ -601,23 +587,13 @@ const Home = () => {
                 variant="outlined"
                 color="secondary"
                 onClick={signUpHandler}
-                size={isMovil ? "small" : "medium"}
+                size={isMobile ? "small" : "medium"}
                 sx={{
-                  // width: "150px",
-                  // display: showSignInorUp ? "inline-flex" : "none",
-                  // display: "inline-flex",
                   fontSize: 16,
-                  // color: "common.white",
                   ml: 2.5,
                   borderRadius: 40,
                   wordBreak: "normal",
                   whiteSpace: "nowrap",
-
-                  // backgroundColor: theme =>
-                  //   theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : theme.palette.grey[500],
-                  // "&:hover": {
-                  //   backgroundColor: theme => theme.palette.common.darkGrayBackground,
-                  // },
                 }}
               >
                 SIGN IN/UP
@@ -630,7 +606,11 @@ const Home = () => {
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
         >
-          <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
+          <Box
+            ref={TableOfContentRef}
+            sx={{ position: "sticky", top: "100px", zIndex: 11 }}
+            className={tableOfContentInViewOnce ? "slide-left-to-right" : "hide"}
+          >
             <MemoizedTableOfContent
               menuItems={sectionsTmp}
               viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
@@ -663,33 +643,26 @@ const Home = () => {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <Typography
-            color="white"
-            variant="h5"
-            sx={{ textAlign: "center" }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            WHERE WE TAKE NOTES <b>TOGETHER</b>.
-          </Typography>
-          <Button
-            // color="secondary"
-            variant="contained"
-            size={width < 900 ? "small" : "large"}
-            component="a"
-            // href="#JoinUsSection"
-            target="_blank"
-            href="https://1cademy.us/#JoinUsSection"
-            sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            Apply to Join Us!
-          </Button>
-          <Box
-            sx={{ display: "flex", flexDirection: "column", alignItems: "center", color: "common.white" }}
-            className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-          >
-            {height > 500 && "Scroll"}
-            <KeyboardDoubleArrowDownIcon fontSize={width < 900 ? "small" : "medium"} />
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
+            <Typography
+              color="white"
+              variant="h5"
+              sx={{ textAlign: "center", width: isMobile ? "300px" : "auto" }}
+              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+            >
+              WHERE WE TAKE NOTES <b>TOGETHER</b>.
+            </Typography>
+            <Button
+              variant="contained"
+              size={width < 900 ? "small" : "large"}
+              component="a"
+              target="_blank"
+              href="https://1cademy.us/#JoinUsSection"
+              sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
+              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+            >
+              Apply to Join Us!
+            </Button>
           </Box>
         </Stack>
 
@@ -697,16 +670,13 @@ const Home = () => {
           <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
             <HowItWorks
               section={sectionSelected}
-              // ref={sectionAnimationControllerRef}
               artboards={[...section1ArtBoards, ...artboards]}
               animationOptions={
                 <Button
-                  // color="secondary"
                   variant="contained"
                   size={width < 900 ? "small" : "large"}
                   component="a"
                   href="https://1cademy.us/#JoinUsSection"
-                  // href="#JoinUsSection"
                   target="_blank"
                   sx={{ minWidth: 200, textTransform: "uppercase" }}
                   className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
@@ -859,23 +829,39 @@ const Home = () => {
           </Box>
         </Box>
       </Box>
+      <Box ref={footerSectionRef}>
+        <AppFooter
+          sx={{
+            px: isDesktop ? "0px" : "10px",
+            background: theme =>
+              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+          }}
+        />
+      </Box>
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
-      <AppFooter
+      <Box
         sx={{
-          px: isDesktop ? "0px" : "10px",
-          background: theme =>
-            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
-      />
-      {openSearch && isMovil && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
-
+        className={footerInView ? "hide" : "undefined"}
+      >
+        <Typography color="white">Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveScrollActionComponent className={`rive-canvas`} />
+        </Box>
+      </Box>
       <style>{`
           body{
             overflow:hidden;
           }
         `}</style>
     </Box>
-    // </ThemeProvider>
   );
 };
 
