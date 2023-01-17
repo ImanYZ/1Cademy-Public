@@ -4,6 +4,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import { styled } from "@mui/material/styles";
 import React from "react";
 
+import { useInView, UseInViewProps } from "../../../hooks/useObserver";
 import Typography from "../components/Typography";
 // import { sectionsOrder } from "../sectionsOrder";
 import communities from "./communitiesOrder";
@@ -69,7 +70,40 @@ const goToCommPage = (commId: string) => {
   window.open("https://1cademy.us/community/" + commId, "_blank");
 };
 
+const observerOption: UseInViewProps = { options: { root: null, rootMargin: "0px", threshold: 0.3 } };
+
 const What = () => {
+  const { inViewOnce: whatItem01InViewOnce, ref: whatItem01Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem02InViewOnce, ref: whatItem02Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem03InViewOnce, ref: whatItem03Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem04InViewOnce, ref: whatItem04Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem05InViewOnce, ref: whatItem05Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem06InViewOnce, ref: whatItem06Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem07InViewOnce, ref: whatItem07Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem08InViewOnce, ref: whatItem08Ref } = useInView(observerOption);
+
+  const refs = [
+    whatItem01Ref,
+    whatItem02Ref,
+    whatItem03Ref,
+    whatItem04Ref,
+    whatItem05Ref,
+    whatItem06Ref,
+    whatItem07Ref,
+    whatItem08Ref,
+  ];
+
+  const inViewOnces = [
+    whatItem01InViewOnce,
+    whatItem02InViewOnce,
+    whatItem03InViewOnce,
+    whatItem04InViewOnce,
+    whatItem05InViewOnce,
+    whatItem06InViewOnce,
+    whatItem07InViewOnce,
+    whatItem08InViewOnce,
+  ];
+
   return (
     <Box
       // id="CommunitiesSection"
@@ -79,12 +113,19 @@ const What = () => {
         {sectionsOrder[sectionIdx].title}
       </Typography> */}
       <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-        {communities.map(communi => (
+        {communities.map((community, idx) => (
+          // <Box >
           <ImageIconButton
-            key={communi.id}
-            onClick={() => goToCommPage(communi.id)}
+            key={community.id}
+            ref={refs[idx]}
+            className={
+              inViewOnces[idx]
+                ? `slide-bottom-top ${idx % 3 === 1 ? "delay-300ms" : idx % 3 === 2 ? "delay-600ms" : ""}`
+                : "hide"
+            }
+            onClick={() => goToCommPage(community.id)}
             style={{
-              width: communi.width,
+              width: community.width,
             }}
           >
             <Box
@@ -96,7 +137,7 @@ const What = () => {
                 bottom: 0,
                 backgroundSize: "cover",
                 backgroundPosition: "center 40%",
-                backgroundImage: `url(${communi.url})`,
+                backgroundImage: `url(${community.url})`,
               }}
             />
             <ImageBackdrop className="imageBackdrop" />
@@ -116,12 +157,13 @@ const What = () => {
             >
               <Box className="imagepTitle">
                 <Typography component="h3" variant="h6" sx={{ color: "inherit" }}>
-                  {communi.title}
+                  {community.title}
                 </Typography>
               </Box>
               <div className="imageMarked"></div>
             </Box>
           </ImageIconButton>
+          // </Box>
         ))}
       </Box>
     </Box>

@@ -8,7 +8,8 @@ export default [
   {
     name: "Research Communities",
     body: "1Cademy has fostered the development of communities of enthusiasts for various scientific subjects, comprising individuals from diverse educational institutions and research organizations. These enthusiasts share their discoveries and insights on 1Cademy and come together on a weekly basis to delve deeper into their areas of interest. Through these interactions, we gain insight into the cutting-edge research and learning taking place at our collaborators' institutions and are able to draw connections that inspire new research ideas.",
-    image: "Research_Communities.png",
+    // image: "Research_Communities.png",
+    image: "Research_Communities.svg",
   },
   {
     name: "Learning Deeply",
@@ -36,16 +37,19 @@ export default [
   {
     name: "Learning Through Teaching",
     body: "Ample research in cognitive psychology has demonstrated that the act of learning with the intention of teaching others is more effective than learning for the sole purpose of being tested. On 1Cademy, we condense and depict our learning pathways with the objective of enhancing the learning experience for our collaborators. In the process, our understanding of the topics deepens as we contemplate ways to make them more accessible for others to learn.",
-    image: "Learning_Through_Teaching.png",
+    // image: "Learning_Through_Teaching.png",
+    image: "Learning_Through_Teaching.svg",
   },
   {
     name: "Searching as Learning",
     body: "Have you ever encountered difficulty finding relevant content to learn something, because you're not sure what the appropriate keywords are? For instance, what would you search for to learn how to create the web animations featured on a particular website? Simply searching a phrase might not yield the most helpful results. 1Cademy offers a solution to this challenge by providing both a factual search engine and a mechanism for creating a personalized view of the shared knowledge graph to facilitate exploratory search. This way, even without having the exact keywords, one can navigate through the hierarchical structure of concepts and their prerequisite links to facilitate learning.",
-    image: "Search_for_Learning.png",
+    // image: "Search_for_Learning.png",
+    image: "Search_for_Learning.svg",
   },
   {
     name: "Balanced Perspectives",
     body: "These days, we see political, sexual, ethnic, or even scientific polarization everywhere on the Internet. Echo chambers are formed where a group of people only accept thoughts and ideas that are aligned with their perspectives, ignoring alternatives views. 1Cademy provides us with a consensus-based collaboration mechanism where alternative or even competing perspectives are placed side-by-side so that one can easily compare and contrast them to learn and rationalize each topic in different contexts.",
-    image: "Balanced_Perspectives.png",
+    // image: "Balanced_Perspectives.png",
+    image: "Balanced_Perspectives.svg",
   },
 ];

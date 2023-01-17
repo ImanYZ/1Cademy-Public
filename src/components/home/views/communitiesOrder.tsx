@@ -428,7 +428,7 @@ export default [
     allTime: [],
     weekly: [],
     url: "/static/Communities/Social_Political_Psychology.jpg",
-    title: "Social & Political Psychology",
+    title: "Social Psychology",
     width: "33%",
     leaders: [
       {
