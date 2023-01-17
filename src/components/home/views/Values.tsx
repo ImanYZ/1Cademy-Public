@@ -1,26 +1,15 @@
-import { CardActionArea, Typography, useTheme } from "@mui/material";
+import { Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Collapse from "@mui/material/Collapse";
-import Grid from "@mui/material/Grid";
-import React, { useState } from "react";
+import React from "react";
 
 import { gray03 } from "../../../pages";
 import valuesItems from "./valuesItems";
-const iniStepChecked: any[] = [];
 const Values = () => {
   const theme = useTheme();
-  const [stepChecked, setStepChecked] = useState(iniStepChecked);
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const isTablet = useMediaQuery("(min-width:900px)");
 
   const getGrayColorText = () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2);
-
-  const flipCard = (idx: number) => {
-    const sChecked = [...stepChecked];
-    sChecked[idx] = !sChecked[idx];
-    setStepChecked(sChecked);
-  };
 
   return (
     <Box
@@ -32,70 +21,48 @@ const Values = () => {
         alignItems: "center",
       }}
     >
-      <Grid container spacing={2.5}>
-        {valuesItems.map((value, idx) => {
-          return (
-            <Grid key={value.name} item xs={12} sm={6} md={4} lg={4}>
-              <Card sx={{ width: "100%" }}>
-                <CardActionArea onClick={() => flipCard(idx)}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justify: "center",
-                      alignItems: "center",
-                      height: "250px",
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      width="100%"
-                      image={"/static/" + value.image}
-                      alt={value.name}
-                      sx={{ padding: "30px" }}
-                    />
-                  </Box>
-                  <CardContent
-                    sx={{
-                      "&": {
-                        padding: "16px",
-                      },
-                    }}
-                  >
-                    <Typography
-                      // onClick={() => (stepChecked[idx] = !stepChecked[idx])}
-                      gutterBottom
-                      variant="h5"
-                      component="div"
-                      sx={{ fontSize: "20px", textAlign: "center" }}
-                    >
-                      {value.name}
-                    </Typography>
-
-                    <Collapse in={!stepChecked[idx]} timeout={1000} sx={{ textAlign: "center" }}>
-                      {/* <Typography
-                        variant="body2"
-                        sx={{ textAlign: "left", color: getGrayColorText(), fontSize: "14px" }}
-                      >
-                        {value.body.substring(0, 100)}
-                      </Typography>
-                      <br /> */}
-                      Learn more ...
-                    </Collapse>
-                    <Collapse in={stepChecked[idx]} timeout={1000}>
-                      <Typography
-                        variant="body2"
-                        sx={{ textAlign: "left", color: getGrayColorText(), fontSize: "14px" }}
-                      >
-                        {value.body}
-                      </Typography>
-                    </Collapse>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
+      <Stack direction={"column"} spacing={isMobile ? "60px" : "100px"}>
+        {valuesItems.map((value, idx) => (
+          <Stack
+            key={idx}
+            direction={isMobile ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
+            spacing={isMobile ? "0px" : "40px"}
+            // alignItems={"center"}
+            alignItems={"stretch"}
+            // alignSelf={"stretch"}
+          >
+            <Box
+              component={"picture"}
+              sx={{
+                // border: "solid 2px orange",
+                minWidth: isTablet ? "500px" : "300px",
+                height: "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: isMobile ? "center" : idx % 2 === 0 ? "flex-start" : "flex-end",
+              }}
+            >
+              <img alt={value.name} src={"/static/" + value.image} style={{ flex: 1, width: "100%" }} />
+            </Box>
+            <Box sx={{ p: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "24px", textAlign: isMobile ? "center" : "start" }}
+              >
+                {value.name}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ textAlign: "left", color: getGrayColorText(), fontSize: isMobile ? "16px" : "20px" }}
+              >
+                {value.body}
+              </Typography>
+            </Box>
+          </Stack>
+        ))}
+      </Stack>
     </Box>
   );
 };
