@@ -66,7 +66,7 @@ const ImageIconButton = styled(ButtonBase)(({ theme }) => ({
 }));
 
 const goToCommPage = (commId: string) => {
-  window.open("/community/" + commId, "_blank");
+  window.open("https://1cademy.us/community/" + commId, "_blank");
 };
 
 const What = () => {
