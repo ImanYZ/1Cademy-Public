@@ -105,7 +105,7 @@ const Home = () => {
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
-  const { inView: tableOfContentInView, ref: TableOfContentRef } = useInView();
+  const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -426,6 +426,8 @@ const Home = () => {
     router.push("/signin");
   };
 
+  console.log({ tableOfContentInView: tableOfContentInViewOnce });
+
   return (
     <Box
       id="ScrollableContainer"
@@ -606,7 +608,7 @@ const Home = () => {
           <Box
             ref={TableOfContentRef}
             sx={{ position: "sticky", top: "100px", zIndex: 11 }}
-            className={tableOfContentInView ? "slide-left-to-right" : "hide"}
+            className={tableOfContentInViewOnce ? "slide-left-to-right" : "hide"}
           >
             <MemoizedTableOfContent
               menuItems={sectionsTmp}
