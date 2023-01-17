@@ -12,7 +12,8 @@ const Values = () => {
   const theme = useTheme();
   // const [stepChecked, setStepChecked] = useState(iniStepChecked);
 
-  const isMovil = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const isTablet = useMediaQuery("(min-width:900px)");
 
   const { rive, RiveComponent: RiveComponentMeettings } = useRive({
     src: "rive-assistant/meetings.riv",
@@ -45,43 +46,52 @@ const Values = () => {
         alignItems: "center",
       }}
     >
-      <Stack direction={"column"} spacing={isMovil ? "40px" : "100px"}>
+      <Stack direction={"column"} spacing={isMobile ? "60px" : "100px"}>
         {valuesItems.map((value, idx) => (
           <Stack
             key={idx}
-            direction={isMovil ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
-            spacing={isMovil ? "0px" : "40px"}
-            alignItems={"center"}
+            direction={isMobile ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
+            spacing={isMobile ? "0px" : "40px"}
+            // alignItems={"center"}
+            alignItems={"stretch"}
             // alignSelf={"stretch"}
           >
             <Box
               component={"picture"}
               sx={{
                 // border: "solid 2px orange",
-                minWidth: "500px",
+                minWidth: isTablet ? "500px" : "300px",
                 height: "inherit",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: idx % 2 === 0 ? "flex-start" : "flex-end",
+                justifyContent: isMobile ? "center" : idx % 2 === 0 ? "flex-start" : "flex-end",
               }}
             >
               {idx === 2 ? (
-                <Box sx={{ width: "200px", height: "200px" }}>
+                <Box sx={{ width: "300px", height: "200px" }}>
                   <RiveComponentMeettings />
                 </Box>
               ) : (
                 <img
                   alt={value.name}
                   src={theme.palette.mode === "light" ? value.image : value.imageDark}
-                  style={{ objectFit: "cover" }}
+                  style={{ flex: 1 }}
                 />
               )}
             </Box>
-            <Box sx={{ p: "10px" }}>
-              <Typography gutterBottom variant="h3" component="h3" sx={{ fontSize: "24px", textAlign: "start" }}>
+            <Box sx={{ p: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "24px", textAlign: isMobile ? "center" : "start" }}
+              >
                 {value.name}
               </Typography>
-              <Typography variant="body2" sx={{ textAlign: "left", color: getGrayColorText(), fontSize: "20px" }}>
+              <Typography
+                variant="body2"
+                sx={{ textAlign: "left", color: getGrayColorText(), fontSize: isMobile ? "16px" : "20px" }}
+              >
                 {value.body}
               </Typography>
             </Box>
