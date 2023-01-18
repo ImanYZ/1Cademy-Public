@@ -29,7 +29,7 @@ export default [
   },
   {
     name: "An AI Assistant for Free!!!",
-    body: "You can use all the capabilities of your AI assistant without paying a penny for as long as you wish. We are a research group at the University of Michigan and Honor Education. Our only intentions are to improve human life and education. Our research is done using anonymous data and we do not share your personal data with any third parties.",
+    body: "You can use all the capabilities of your AI assistant without paying a penny for as long as you wish. We are a research group at the University of Michigan and Honor Education. \nOur only intentions are to improve human life and education. Our research is done using anonymous data and we do not share your personal data with any third parties.",
     image: "assistant/5-ai-assistant.svg",
     imageDark: "assistant/5-ai-assistant-dark.svg",
     padding: "4px 40px 0px 40px",
@@ -57,7 +57,7 @@ export default [
   },
   {
     name: "Allows you to easily modify your schedule.",
-    body: "You can easily drag your tasks and events around, directly in your Google Calendar or your Personal Assistant page. 1Cademy assistant will seamlessly assist you even if you are not in the app. It is aware of the adjustments in your schedule whenever and wherever you change them, so it can adapt your future plans accordingly.",
+    body: "You can easily drag your tasks and events around, directly in your Google Calendar or your Personal Assistant page. \n1Cademy assistant will seamlessly assist you even if you are not in the app. It is aware of the adjustments in your schedule whenever and wherever you change them, so it can adapt your future plans accordingly.",
     image: "assistant/9-allows-you-to-easily-modify.svg",
     imageDark: "assistant/9-allows-you-to-easily-modify.svg",
     padding: "4px 40px 0px 40px",
@@ -78,7 +78,7 @@ export default [
   },
   {
     name: "Leverages the psychology of motivation.",
-    body: "Prospect theory explains that humans are more sensitive to incremental gains (and losses) compared to the same total value gained (lost) at once. Loss aversion explains that humans are more sensitive to losing than gaining the same value. 1Cademy assistant helps you break your tasks/habits into small pieces to perceive more success than accomplishing the entire goal at once. It also makes your losses as prominent as your gains to motivate you to learn from your losses.",
+    body: "Prospect theory explains that humans are more sensitive to incremental gains (and losses) compared to the same total value gained (lost) at once. Loss aversion explains that humans are more sensitive to losing than gaining the same value. \n1Cademy assistant helps you break your tasks/habits into small pieces to perceive more success than accomplishing the entire goal at once. It also makes your losses as prominent as your gains to motivate you to learn from your losses.",
     image: "assistant/12-prospect-therory.svg",
     imageDark: "assistant/12-prospect-therory-dark.svg",
     padding: "4px 40px 0px 40px",

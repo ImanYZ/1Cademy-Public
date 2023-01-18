@@ -85,7 +85,7 @@ const Values = () => {
                 flexDirection: "column",
                 justifyContent: "center",
                 "& > *:not(:last-child)": {
-                  mb: "16px",
+                  mb: "12px",
                 },
               }}
               className={inViewOnces[idx] ? (idx % 2 !== 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
@@ -105,7 +105,7 @@ const Values = () => {
                   sx={{
                     textAlign: "left",
                     color: getGrayColorText(),
-                    fontSize: isMobile ? "16px" : "16px",
+                    fontSize: "16px",
                   }}
                 >
                   {paragraph}
