@@ -29,33 +29,29 @@ const useInViewInitialValue: UseInViewMultipleProps = {
   },
 };
 
-// export function useInViewS({ options } = { options: useInViewInitialValue }) {}
-
 // create props in a constant out of the component to not rebuild again
 // in other case that will generate an infinity loop
 
-// TODO: this hook is incomplete is generating infinity loop so memory is filled
-// this hook return an array to pass as ref and save the element
-// we need to observe array elements with one observer
+const generateInitialStatusValue = (observerKeys: string[]) => {
+  return observerKeys.reduce((a, c) => {
+    return { ...a, [c]: { inView: false, inViewOnce: false, entry: undefined } };
+  }, {});
+};
 
+const generateInitialRefs = (observerKeys: string[]) => observerKeys.reduce((a, c) => ({ ...a, [c]: null }), {});
+
+/**
+ * pass observer Ids and get ref and status, objects you can access using Ids
+ */
 export function useInViewMultiple(props = useInViewInitialValue) {
   const { options, observerKeys } = props;
 
-  const [refs, setRefs] = React.useState<{ [key: string]: any }>(
-    observerKeys.reduce((a, c) => ({ ...a, [c]: null }), {})
-  );
+  const [refs, setRefs] = React.useState<{ [key: string]: any }>(generateInitialRefs(observerKeys));
+  const [status, setStatus] = useState<ObserverStatus>(generateInitialStatusValue(observerKeys));
 
-  const setRefByKeyMemoized = useCallback((key: string, element: any) => setRefs(p => ({ ...p, [key]: element })), []);
-
-  const [status, setStatus] = useState<ObserverStatus>(
-    observerKeys.reduce((a, c) => {
-      return { ...a, [c]: { inView: false, inViewOnce: false, entry: undefined } };
-    }, {})
-  );
+  const setRefByKey = useCallback((key: string, element: any) => setRefs(p => ({ ...p, [key]: element })), []);
 
   useEffect(() => {
-    console.log("useEffect", refs);
-
     // reset value from unmounted elements
     setStatus(prev =>
       Object.keys(prev).reduce(
@@ -68,7 +64,6 @@ export function useInViewMultiple(props = useInViewInitialValue) {
     );
 
     const observe = new IntersectionObserver(entries => {
-      console.log("😃", { entries });
       entries.forEach(entry => {
         // While it would be nice if you could just look at isIntersecting to determine if the component is inside the viewport, browsers can't agree on how to use it.
         // -Firefox ignores `threshold` when considering `isIntersecting`, so it will never be false again if `threshold` is > 0
@@ -91,9 +86,6 @@ export function useInViewMultiple(props = useInViewInitialValue) {
         //     entry.isVisible = inView;
         // }
 
-        // setStates(prev=>)
-        // setState(prev => ({ inView, entry, inViewOnce: prev.inViewOnce || inView }));
-
         setStatus(p => ({ ...p, [name]: { inView, inViewOnce: p[name].inViewOnce || inView, entry } }));
       });
     }, options);
@@ -101,16 +93,10 @@ export function useInViewMultiple(props = useInViewInitialValue) {
     // observe.observe(ref);
     Object.keys(refs).forEach(keys => {
       const htmlElement = refs[keys];
-      console.log({ htmlElement });
       if (!htmlElement) return;
 
       observe.observe(htmlElement);
     });
-
-    // refArray.forEach(cur => {
-    //   if (!cur) return;
-    //   observe.observe(cur);
-    // });
 
     return () => {
       if (!observe) return;
@@ -121,13 +107,9 @@ export function useInViewMultiple(props = useInViewInitialValue) {
 
         observe.unobserve(htmlElement);
       });
-      // refArray.forEach(cur => {
-      //   if (!cur) return;
-      //   observe.unobserve(cur);
-      // });
       observe.disconnect();
     };
   }, [options, refs]);
 
-  return { states: status, t: setRefByKeyMemoized };
+  return { status, setRefByKey };
 }
