@@ -2,6 +2,7 @@ import "../global.css";
 
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
+import { getAuth } from "firebase/auth";
 // import axios from "axios";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
@@ -20,6 +21,18 @@ const clientSideEmotionCache = createEmotionCache();
 // axios.defaults.baseURL = "/api";
 
 initFirebaseClientSDK();
+
+// worker for sending uname to assitant helper
+(async () => {
+  if (typeof chrome !== "undefined") {
+    const auth = getAuth();
+    auth.onAuthStateChanged(user => {
+      if (user && chrome?.runtime?.sendMessage) {
+        chrome.runtime.sendMessage("onecademy-user-" + user?.displayName);
+      }
+    });
+  }
+})();
 
 const App = (props: AppPropsWithLayout) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
