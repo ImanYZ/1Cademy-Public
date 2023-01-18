@@ -72,7 +72,11 @@ const Values = () => {
               }}
               className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
             >
-              <img alt={value.name} src={"/static/" + value.image} style={{ flex: 1, width: "100%" }} />
+              <img
+                alt={value.name}
+                src={theme.palette.mode === "light" ? "/static/" + value.imageDark : "/static/" + value.image}
+                style={{ flex: 1, width: "100%" }}
+              />
             </Box>
             <Box
               sx={{ p: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}
