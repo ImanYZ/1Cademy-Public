@@ -114,6 +114,7 @@ const Home = () => {
   const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
+  const scrollTimer = useRef<any>(null);
 
   const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
     src: "rive/artboard-1.riv",
@@ -270,6 +271,7 @@ const Home = () => {
       }
     ) => {
       if (!rive1 || !rive2 || !rive3 || !rive4 || !rive5 || !rive6) return;
+
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
@@ -373,6 +375,44 @@ const Home = () => {
     [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
   );
 
+  const onScroll = useCallback(
+    (
+      event: any,
+      {
+        rive1,
+        rive2,
+        rive3,
+        rive4,
+        rive5,
+        rive6,
+      }: {
+        rive1: Rive | null;
+        rive2: Rive | null;
+        rive3: Rive | null;
+        rive4: Rive | null;
+        rive5: Rive | null;
+        rive6: Rive | null;
+      }
+    ) => {
+      if (scrollTimer.current) {
+        clearTimeout(scrollTimer.current);
+      }
+
+      scrollTimer.current = setTimeout(() => {
+        detectScrollPosition(event, {
+          rive1,
+          rive2,
+          rive3,
+          rive4,
+          rive5,
+          rive6,
+        });
+        scrollTimer.current = null;
+      }, 70);
+    },
+    [detectScrollPosition]
+  );
+
   const switchSection = useCallback(
     (sectionIdx: number, animationIndex = 0) => {
       if (!rive3 || !rive4 || !rive5 || !rive6) return;
@@ -432,7 +472,7 @@ const Home = () => {
   return (
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
+      onScroll={e => onScroll(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
       sx={{
         height: "100vh",
         overflowY: "auto",
