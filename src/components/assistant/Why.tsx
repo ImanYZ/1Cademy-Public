@@ -51,8 +51,7 @@ const Values = () => {
   });
 
   useEffect(() => {
-    if (!rive) return;
-
+    if (!rive || !rive.play) return;
     rive.play(["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"]);
   }, [rive, theme.palette.mode]);
 
@@ -90,7 +89,7 @@ const Values = () => {
               className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
             >
               {idx === 2 ? (
-                <Box sx={{ width: "300px", height: "200px" }}>
+                <Box sx={{ width: "300px", height: "200px", flex: 1 }}>
                   <RiveComponentMeettings />
                 </Box>
               ) : (
