@@ -3382,7 +3382,20 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
-        {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
+        {nodeBookState.choosingNode && (
+          <div id="ChoosingNodeMessage">
+            Click the node you'd like to link to...{" "}
+            <Button
+              onClick={() => {
+                nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                nodeBookDispatch({ type: "setSelectedNode", payload: null });
+                nodeBookDispatch({ type: "setChosenNode", payload: null });
+              }}
+            >
+              <CloseIcon fontSize="large" />
+            </Button>
+          </div>
+        )}
         <Box sx={{ width: "100vw", height: "100vh" }}>
           {
             <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
