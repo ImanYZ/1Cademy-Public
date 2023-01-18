@@ -573,15 +573,10 @@ const Node = ({
       }}
     >
       {/* INFO: uncomment this only on develope */}
-      {process.env.NODE_ENV === "development" && identifier}
+
       {open ? (
         <>
-          <div
-            className="card-content"
-            style={{
-              marginTop: "10px",
-            }}
-          >
+          <div className="card-content">
             <div className="card-title" data-hoverable={true}>
               {editable && isNew && (
                 <>
@@ -611,7 +606,7 @@ const Node = ({
                     justifyContent: "end",
                     alignItems: "center",
                     position: "relative",
-                    top: "-10px",
+                    top: "-5px",
                   }}
                 >
                   <Typography
