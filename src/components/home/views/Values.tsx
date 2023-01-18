@@ -74,7 +74,7 @@ const Values = () => {
             >
               <img
                 alt={value.name}
-                src={theme.palette.mode === "light" ? "/static/" + value.imageDark : "/static/" + value.image}
+                src={theme.palette.mode === "light" ? "/static/" + value.image : "/static/" + value.imageDark}
                 style={{ flex: 1, width: "100%" }}
               />
             </Box>
