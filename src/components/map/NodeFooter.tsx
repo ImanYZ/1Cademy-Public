@@ -456,8 +456,14 @@ const NodeFooter = ({
               <span
                 style={{
                   marginLeft: "10px",
+                  display: editable ? "none" : "block",
+                  lineHeight: "normal",
                 }}
-              >{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
+              >
+                {dayjs(new Date(changedAt)).fromNow().includes("NaN")
+                  ? "a few minutes ago"
+                  : `${dayjs(new Date(changedAt)).fromNow()}`}
+              </span>
             </Tooltip>
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
