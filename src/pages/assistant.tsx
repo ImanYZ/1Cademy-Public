@@ -136,7 +136,7 @@ const Home = () => {
 
   const { RiveComponent: RiveScrollActionComponent } = useRive({
     src: "rive/scroll.riv",
-    animations: ["Timeline 1", "dark"],
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     artboard: "New Artboard",
     autoplay: true,
   });
@@ -689,7 +689,7 @@ const Home = () => {
         }}
         className={footerInView ? "hide" : "undefined"}
       >
-        <Typography color="white">Scroll</Typography>
+        <Typography>Scroll</Typography>
         <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
           <RiveScrollActionComponent className={`rive-canvas`} />
         </Box>

@@ -64,7 +64,7 @@ const Values = () => {
               component={"picture"}
               sx={{
                 // border: "solid 2px orange",
-                minWidth: isTablet ? "500px" : "300px",
+                minWidth: isTablet ? "350px" : "300px",
                 height: "auto",
                 display: "flex",
                 alignItems: "center",
@@ -79,7 +79,15 @@ const Values = () => {
               />
             </Box>
             <Box
-              sx={{ p: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}
+              sx={{
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
               className={inViewOnces[idx] ? (idx % 2 !== 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
             >
               <Typography
@@ -90,12 +98,19 @@ const Values = () => {
               >
                 {value.name}
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{ textAlign: "left", color: getGrayColorText(), fontSize: isMobile ? "16px" : "20px" }}
-              >
-                {value.body}
-              </Typography>
+              {value.body.split("\n").map((paragraph, idx) => (
+                <Typography
+                  key={idx}
+                  variant="body2"
+                  sx={{
+                    textAlign: "left",
+                    color: getGrayColorText(),
+                    fontSize: "16px",
+                  }}
+                >
+                  {paragraph}
+                </Typography>
+              ))}
             </Box>
           </Stack>
         ))}
