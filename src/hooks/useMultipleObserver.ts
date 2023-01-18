@@ -8,11 +8,11 @@ type ObserverOptions = {
   threshold: number | number[];
 };
 export type UseInViewMultipleProps = {
-  numberOfObserver: number;
-  options: ObserverOptions;
+  numberOfObserver: string[];
+  options?: ObserverOptions;
 };
 const useInViewInitialValue: UseInViewMultipleProps = {
-  numberOfObserver: 1,
+  numberOfObserver: [],
   options: {
     root: null,
     rootMargin: "0px",
@@ -31,40 +31,53 @@ const useInViewInitialValue: UseInViewMultipleProps = {
 
 export function useInViewMultiple(props = useInViewInitialValue) {
   const { options, numberOfObserver } = props;
-  const [ref, setRef] = React.useState(new Array(numberOfObserver).fill(null));
+  console.log(
+    "dd",
+    Object.keys(numberOfObserver).reduce((a, c) => {
+      return { ...a, [c]: { inView: false, inViewOnce: false, entry: undefined } };
+    }, {})
+  );
+  const [tt, setTT] = React.useState<any | null>(null);
+  const [refArray, setRefArray] = React.useState(new Array(numberOfObserver.length).fill(null));
 
-  const setRefIdx = React.useCallback((n: number) => {
-    return (e: any) => setRef(p => p.map((c, i) => (i === n ? e : c)));
+  const tmpSetState = React.useCallback((n: number) => {
+    return (e: any) => setRefArray(p => p.map((c, i) => (i === n ? e : c)));
   }, []);
 
-  // const callback = React.useRef < IntersectionOptions['onChange'] > ();
-  const [state, setState] = React.useState<
-    {
+  const [states, setStates] = React.useState<{
+    [key: string]: {
       inView: boolean;
       inViewOnce: boolean;
       entry: IntersectionObserverEntry | undefined;
-    }[]
-  >(
-    new Array(numberOfObserver).fill({
-      inView: false,
-      inViewOnce: false,
-      entry: undefined,
-    })
+    };
+  }>(
+    Object.keys(numberOfObserver).reduce((a, c) => {
+      return { ...a, [c]: { inView: false, inViewOnce: false, entry: undefined } };
+    }, {})
   );
 
   React.useEffect(() => {
-    setState(prev =>
-      prev.map((cur, idx) => {
-        if (ref[idx]) return cur;
-        return { inView: false, entry: undefined, inViewOnce: prev[idx].inViewOnce };
-      })
-    );
+    // setStates(prev =>
+    //   prev.map((cur, idx) => {
+    //     if (refArray[idx]) return cur;
+    //     return { inView: false, entry: undefined, inViewOnce: prev[idx].inViewOnce };
+    //   })
+    // );
 
     const observe = new IntersectionObserver(entries => {
       console.log("😃", { entries });
       entries.forEach(entry => {
         // While it would be nice if you could just look at isIntersecting to determine if the component is inside the viewport, browsers can't agree on how to use it.
         // -Firefox ignores `threshold` when considering `isIntersecting`, so it will never be false again if `threshold` is > 0
+
+        const name = entry.target.getAttribute("data-observer-id");
+        if (!name) {
+          console.warn(
+            "Encountered entry with no name. You should add data-observer-id to every element passed to the isInView hook."
+          );
+          return;
+        }
+
         const inView = entry.isIntersecting; /* &&
                         thresholds.some((threshold) => entry.intersectionRatio >= threshold); */
 
@@ -75,29 +88,29 @@ export function useInViewMultiple(props = useInViewInitialValue) {
         //     entry.isVisible = inView;
         // }
 
+        // setStates(prev=>)
         // setState(prev => ({ inView, entry, inViewOnce: prev.inViewOnce || inView }));
+
+        setStates(p => ({ ...p, [name]: { inView, inViewOnce: p[name].inViewOnce || inView, entry } }));
       });
     }, options);
 
     // observe.observe(ref);
-    ref.forEach(cur => {
-      if (cur) {
-        observe.observe(cur);
-      }
+    refArray.forEach(cur => {
+      if (!cur) return;
+      observe.observe(cur);
     });
 
     return () => {
-      if (observe) {
-        ref.forEach(cur => {
-          if (cur) {
-            observe.unobserve(cur);
-          }
-        });
-        // observe.unobserve(ref);
-        observe.disconnect();
-      }
-    };
-  }, [options, ref]);
+      if (!observe) return;
 
-  return { ref: setRefIdx };
+      refArray.forEach(cur => {
+        if (!cur) return;
+        observe.unobserve(cur);
+      });
+      observe.disconnect();
+    };
+  }, [options, refArray]);
+
+  return { ref: tmpSetState, tt: setTT, states };
 }
