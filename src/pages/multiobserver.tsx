@@ -1,32 +1,41 @@
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
+
+import { DivRefs, useObserveMultipleDivs } from "@/hooks/useObservers";
 
 import PublicLayout from "../components/layouts/PublicLayout";
-import { useInViewMultiple } from "../hooks/useMultipleObserver";
+// import { useInViewMultiple } from "../hooks/useMultipleObserver";
 
-const OBSERVER_IDS = {
-  tableOfContent: "01",
-  section02: "02",
-  card100: "03",
-};
-const OBSERVER_IDS_ARRAY = [OBSERVER_IDS.tableOfContent, OBSERVER_IDS.section02, OBSERVER_IDS.card100];
+// const OBSERVER_IDS = {
+//   tableOfContent: "01",
+//   section02: "02",
+//   card100: "03",
+// };
+// const OBSERVER_IDS_ARRAY = [OBSERVER_IDS.tableOfContent, OBSERVER_IDS.section02, OBSERVER_IDS.card100];
 
 const Home = () => {
   const [show, setShow] = useState(true);
-  const { status, setRefByKey } = useInViewMultiple({ observerKeys: OBSERVER_IDS_ARRAY });
+  // const { status, setRefByKey } = useInViewMultiple({ observerKeys: OBSERVER_IDS_ARRAY });
 
-  const refTableOfContent = useMemo(() => (e: any) => setRefByKey(OBSERVER_IDS.tableOfContent, e), [setRefByKey]);
-  const refSection = useMemo(() => (e: any) => setRefByKey(OBSERVER_IDS.section02, e), [setRefByKey]);
-  const refCard = useMemo(() => (e: any) => setRefByKey(OBSERVER_IDS.card100, e), [setRefByKey]);
+  const divRefs: DivRefs = {
+    div1: useRef(null),
+    div2: useRef(null),
+    div3: useRef(null),
+  };
+  const visibility = useObserveMultipleDivs(divRefs);
+
+  // const refTableOfContent = useMemo(() => (e: any) => setRefByKey(OBSERVER_IDS.tableOfContent, e), [setRefByKey]);
+  // const refSection = useMemo(() => (e: any) => setRefByKey(OBSERVER_IDS.section02, e), [setRefByKey]);
+  // const refCard = useMemo(() => (e: any) => setRefByKey(OBSERVER_IDS.card100, e), [setRefByKey]);
 
   return (
     <div style={{ maxWidth: "900px", margin: "auto" }}>
       <div style={{ position: "sticky", top: "0px", background: "black" }}>
         <button onClick={() => setShow(!show)}>hide 2</button>
-        <h2>Obs1:{status[OBSERVER_IDS.tableOfContent].inView ? "T" : "F"}</h2>
-        <h2>Obs2:{status[OBSERVER_IDS.section02].inView ? "T" : "F"}</h2>
-        <h2>Obs3:{status[OBSERVER_IDS.card100].inView ? "T" : "F"}</h2>
+        <h2>Obs1:{visibility["div1"]?.isVisible ? "T" : "F"}</h2>
+        <h2>Obs2:{visibility["div2"]?.isVisible ? "T" : "F"}</h2>
+        <h2>Obs3:{visibility["div3"]?.isVisible ? "T" : "F"}</h2>
       </div>
-      <div ref={refTableOfContent} data-observer-id={OBSERVER_IDS.tableOfContent} style={{ border: "solid 2px red" }}>
+      <div ref={divRefs["div1"]} data-observer-id={"div1"} style={{ border: "solid 2px red" }}>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt aliquid nemo laboriosam voluptatum, illum sunt
         cum totam? Quibusdam repellendus deserunt nulla doloremque nobis minus sed, iure consectetur quisquam ex
         veritatis a itaque exercitationem laboriosam labore saepe quasi porro eligendi facilis, dolor laudantium
@@ -88,7 +97,7 @@ const Home = () => {
         animi.
       </div>
       {show && (
-        <div ref={refSection} data-observer-id={OBSERVER_IDS.section02} style={{ border: "solid 2px blue" }}>
+        <div ref={divRefs["div2"]} data-observer-id={"div1"} style={{ border: "solid 2px blue" }}>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt aliquid nemo laboriosam voluptatum, illum
           sunt cum totam? Quibusdam repellendus deserunt nulla doloremque nobis minus sed, iure consectetur quisquam ex
           veritatis a itaque exercitationem laboriosam labore saepe quasi porro eligendi facilis, dolor laudantium
@@ -164,7 +173,7 @@ const Home = () => {
           animi.
         </div>
       )}
-      <div ref={refCard} data-observer-id={OBSERVER_IDS.card100} style={{ border: "solid 2px yellow" }}>
+      <div ref={divRefs["div2"]} data-observer-id={"div1"} style={{ border: "solid 2px yellow" }}>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt aliquid nemo laboriosam voluptatum, illum sunt
         cum totam? Quibusdam repellendus deserunt nulla doloremque nobis minus sed, iure consectetur quisquam ex
         veritatis a itaque exercitationem laboriosam labore saepe quasi porro eligendi facilis, dolor laudantium
