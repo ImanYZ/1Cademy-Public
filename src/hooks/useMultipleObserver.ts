@@ -1,18 +1,27 @@
 /* eslint-disable */
 
-import * as React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 type ObserverOptions = {
   root: any;
   rootMargin: string;
   threshold: number | number[];
 };
+
+type ObserverStatus = {
+  [key: string]: {
+    inView: boolean;
+    inViewOnce: boolean;
+    entry: IntersectionObserverEntry | undefined;
+  };
+};
+
 export type UseInViewMultipleProps = {
-  numberOfObserver: string[];
+  observerKeys: string[];
   options?: ObserverOptions;
 };
 const useInViewInitialValue: UseInViewMultipleProps = {
-  numberOfObserver: [],
+  observerKeys: [],
   options: {
     root: null,
     rootMargin: "0px",
@@ -30,39 +39,33 @@ const useInViewInitialValue: UseInViewMultipleProps = {
 // we need to observe array elements with one observer
 
 export function useInViewMultiple(props = useInViewInitialValue) {
-  const { options, numberOfObserver } = props;
-  console.log(
-    "dd",
-    Object.keys(numberOfObserver).reduce((a, c) => {
-      return { ...a, [c]: { inView: false, inViewOnce: false, entry: undefined } };
-    }, {})
+  const { options, observerKeys } = props;
+
+  const [refs, setRefs] = React.useState<{ [key: string]: any }>(
+    observerKeys.reduce((a, c) => ({ ...a, [c]: null }), {})
   );
-  const [tt, setTT] = React.useState<any | null>(null);
-  const [refArray, setRefArray] = React.useState(new Array(numberOfObserver.length).fill(null));
 
-  const tmpSetState = React.useCallback((n: number) => {
-    return (e: any) => setRefArray(p => p.map((c, i) => (i === n ? e : c)));
-  }, []);
+  const setRefByKeyMemoized = useCallback((key: string, element: any) => setRefs(p => ({ ...p, [key]: element })), []);
 
-  const [states, setStates] = React.useState<{
-    [key: string]: {
-      inView: boolean;
-      inViewOnce: boolean;
-      entry: IntersectionObserverEntry | undefined;
-    };
-  }>(
-    Object.keys(numberOfObserver).reduce((a, c) => {
+  const [status, setStatus] = useState<ObserverStatus>(
+    observerKeys.reduce((a, c) => {
       return { ...a, [c]: { inView: false, inViewOnce: false, entry: undefined } };
     }, {})
   );
 
-  React.useEffect(() => {
-    // setStates(prev =>
-    //   prev.map((cur, idx) => {
-    //     if (refArray[idx]) return cur;
-    //     return { inView: false, entry: undefined, inViewOnce: prev[idx].inViewOnce };
-    //   })
-    // );
+  useEffect(() => {
+    console.log("useEffect", refs);
+
+    // reset value from unmounted elements
+    setStatus(prev =>
+      Object.keys(prev).reduce(
+        (a, key) => ({
+          ...a,
+          [key]: refs[key] ? prev[key] : { inView: false, inViewOnce: false, entry: undefined },
+        }),
+        {}
+      )
+    );
 
     const observe = new IntersectionObserver(entries => {
       console.log("😃", { entries });
@@ -91,26 +94,40 @@ export function useInViewMultiple(props = useInViewInitialValue) {
         // setStates(prev=>)
         // setState(prev => ({ inView, entry, inViewOnce: prev.inViewOnce || inView }));
 
-        setStates(p => ({ ...p, [name]: { inView, inViewOnce: p[name].inViewOnce || inView, entry } }));
+        setStatus(p => ({ ...p, [name]: { inView, inViewOnce: p[name].inViewOnce || inView, entry } }));
       });
     }, options);
 
     // observe.observe(ref);
-    refArray.forEach(cur => {
-      if (!cur) return;
-      observe.observe(cur);
+    Object.keys(refs).forEach(keys => {
+      const htmlElement = refs[keys];
+      console.log({ htmlElement });
+      if (!htmlElement) return;
+
+      observe.observe(htmlElement);
     });
+
+    // refArray.forEach(cur => {
+    //   if (!cur) return;
+    //   observe.observe(cur);
+    // });
 
     return () => {
       if (!observe) return;
 
-      refArray.forEach(cur => {
-        if (!cur) return;
-        observe.unobserve(cur);
+      Object.keys(refs).forEach(keys => {
+        const htmlElement = refs[keys];
+        if (!htmlElement) return;
+
+        observe.unobserve(htmlElement);
       });
+      // refArray.forEach(cur => {
+      //   if (!cur) return;
+      //   observe.unobserve(cur);
+      // });
       observe.disconnect();
     };
-  }, [options, refArray]);
+  }, [options, refs]);
 
-  return { ref: tmpSetState, tt: setTT, states };
+  return { states: status, t: setRefByKeyMemoized };
 }
