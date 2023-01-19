@@ -16,15 +16,15 @@ import { sectionsOrder } from "../sectionsOrder";
 // const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "HowItWorksSection");
 
 const HowItWorks = (props: any) => {
-  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const { height /* width */ } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
-  const boxLarge = useMemo(() => {
-    const offset = width < 600 ? 32 : width < 900 ? 70 : 100;
-    if (height < width) return height - offset;
-    return width - offset;
-  }, [height, width]);
+  // const boxLarge = useMemo(() => {
+  //   const offset = width < 600 ? 32 : width < 900 ? 70 : 100;
+  //   if (height < width) return height - offset;
+  //   return width - offset;
+  // }, [height, width]);
 
-  const topCenteredPosition = height / 2 - boxLarge / 2 + 35;
+  // const topCenteredPosition = height / 2 - boxLarge / 2 + 35;
 
   const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.getHeight(height), 0);
 
@@ -70,7 +70,7 @@ const HowItWorks = (props: any) => {
         variant="h1"
         marked="center"
         align="center"
-        sx={{ mb: 7, fontWeight: 700, position: "absolute", top: height - 30 }}
+        sx={{ mb: 7, fontWeight: 700, mt: "40px" }}
       >
         {sectionsOrder[1].title}
       </CustomTypography>
@@ -78,7 +78,7 @@ const HowItWorks = (props: any) => {
       >
         {sectionsOrder[1].title}
       </Typography> */}
-      {processedArtboard.map((artboard: any, idx: number) => (
+      {processedArtboard.map((artboard: any /*  idx: number */) => (
         <Box
           key={artboard.name}
           sx={{
@@ -87,31 +87,32 @@ const HowItWorks = (props: any) => {
             width: "100%",
             height: artboard.height,
             // borderRight: `dashed 6px ${artboard.color}`,
+            border: `dashed 2px ${artboard.color}`,
             // color: "white",
           }}
         >
-          {idx > 0 && (
-            <Typography
-              variant="h5"
-              component="h3"
-              sx={{
-                mt: "100px",
-                ml: "10px",
-                position: "sticky",
-                top: "100px",
-                color: "white",
-                textTransform: "none",
-              }}
-            >
-              {artboard.name}
-            </Typography>
-          )}
+          <Typography
+            variant="h5"
+            component="h3"
+            sx={{
+              mt: "100px",
+              ml: "10px",
+              position: "absolute",
+              top: "100px",
+              color: "white",
+              textTransform: "none",
+            }}
+          >
+            {artboard.name}
+          </Typography>
+
+          {artboard.riveComponent}
         </Box>
       ))}
 
       <Box sx={{ position: "absolute", bottom: "20px", zIndex: 11 }}>{props.animationOptions}</Box>
 
-      <div
+      {/* <div
         style={{
           position: "sticky",
           top: topCenteredPosition,
@@ -124,7 +125,7 @@ const HowItWorks = (props: any) => {
         }}
       >
         {props.children}
-      </div>
+      </div> */}
     </Box>
   );
 };

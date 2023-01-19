@@ -56,10 +56,10 @@ const section1ArtBoards = [
   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 ];
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 26000, getHeight: (vh: number) => 9 * vh, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 5 * vh, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
+  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 1 * vh, color: "#f33636" },
+  { name: "Linking", durationMs: 26000, getHeight: (vh: number) => 1 * vh, color: "#f38b36" },
+  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 1 * vh, color: "#e6f336" },
+  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
 ];
 export const SECTION_WITH_ANIMATION = 1;
 
@@ -88,7 +88,7 @@ const Home = () => {
 
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
-  const [idxRiveComponent, setIdxRiveComponent] = useState(0);
+  const [, /* idxRiveComponent */ setIdxRiveComponent] = useState(0);
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -115,14 +115,16 @@ const Home = () => {
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
 
-  const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
+  const { ref: rive3Ref, inView: rive3InView } = useInView();
+
+  const { rive: rive1 /* , RiveComponent: RiveComponent1 */ } = useRive({
     src: "rive/artboard-1.riv",
     artboard: "artboard-1",
     animations: ["Timeline 1", "dark", "light"],
     autoplay: false,
   });
 
-  const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
+  const { rive: rive2 /* , RiveComponent: RiveComponent2 */ } = useRive({
     src: "rive/artboard-2.riv",
     artboard: "artboard-2",
     animations: ["Timeline 1", "dark", "light"],
@@ -132,7 +134,7 @@ const Home = () => {
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
     src: "rive/artboard-3.riv",
     artboard: "artboard-3",
-    animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     autoplay: false,
   });
 
@@ -161,26 +163,56 @@ const Home = () => {
     src: "rive/scroll.riv",
     animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     artboard: "New Artboard",
-    autoplay: true,
+    autoplay: false,
   });
 
   useEffect(() => {
-    if (!rive1) return;
-    rive1.reset({ artboard: "artboard-1" });
-    rive1.scrub("Timeline 1", 0);
-    rive1.play();
-  }, [rive1]);
+    if (!rive3InView) return;
+    if (!rive3) return;
 
-  useEffect(() => {
-    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
+    rive3.play();
+  }, [rive3, rive3InView, theme.palette.mode]);
 
-    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
-  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
+  // useEffect(() => {
+  //   if (!rive1) return;
+  //   rive1.reset({ artboard: "artboard-1" });
+  //   rive1.scrub("Timeline 1", 0);
+  //   rive1.play();
+  // }, [rive1]);
+
+  const tt = [
+    {
+      ...artboards[0],
+      riveComponent: (
+        <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+          <RiveComponent3 className={`rive-canvas `} />
+        </Box>
+      ),
+    },
+    {
+      ...artboards[1],
+      riveComponent: <RiveComponent4 className={`rive-canvas `} />,
+    },
+    {
+      ...artboards[2],
+      riveComponent: <RiveComponent5 className={`rive-canvas `} />,
+    },
+    {
+      ...artboards[3],
+      riveComponent: <RiveComponent6 className={`rive-canvas `} />,
+    },
+  ];
+
+  // useEffect(() => {
+  //   if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
+
+  //   advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
+  // }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
 
   useEffect(() => {
     const hash = window?.location?.hash;
@@ -313,29 +345,29 @@ const Home = () => {
 
         if (idxAnimation < 0) return;
 
-        if (idxSection === 0) {
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
-          if (percentageFrame < 50) {
-            setIdxRiveComponent(0);
-          } else {
-            const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
-            const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
-            const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
-            const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
-            timeInSecondsRef.current = timeInSeconds;
-            advanceAnimationTo(rive2, timeInSeconds, theme);
+        // if (idxSection === 0) {
+        //   const lowerAnimationLimit = minAnimation;
+        //   const upperAnimationLimit = maxAnimation;
+        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
+        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
+        //   if (percentageFrame < 50) {
+        //     setIdxRiveComponent(0);
+        //   } else {
+        //     const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
+        //     const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
+        //     const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
+        //     const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
+        //     timeInSecondsRef.current = timeInSeconds;
+        //     advanceAnimationTo(rive2, timeInSeconds, theme);
 
-            setIdxRiveComponent(1);
-          }
+        //     setIdxRiveComponent(1);
+        //   }
 
-          if (percentageFrame < 5) {
-            showLandingOptions = true;
-          }
-        }
+        //   if (percentageFrame < 5) {
+        //     showLandingOptions = true;
+        //   }
+        // }
 
         if (idxSection === SECTION_WITH_ANIMATION) {
           setIdxRiveComponent(idxAnimation + 2);
@@ -348,21 +380,42 @@ const Home = () => {
           const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
           timeInSecondsRef.current = timeInSeconds;
 
-          if (idxAnimation === 0) {
-            advanceAnimationTo(rive3, timeInSeconds, theme);
-          }
-          if (idxAnimation === 1) {
-            advanceAnimationTo(rive4, timeInSeconds, theme);
-          }
-          if (idxAnimation === 2) {
-            advanceAnimationTo(rive5, timeInSeconds, theme);
-          }
-          if (idxAnimation === 3) {
-            advanceAnimationTo(rive6, timeInSeconds, theme);
-            if (percentageFrame > 50) {
-              showEndAnimationOptions = true;
-            }
-          }
+          // rive1.pause();
+          // rive2.pause();
+          // rive3.pause();
+          // rive4.pause();
+          // rive5.pause();
+          // rive6.pause();
+          // console.log({ idxAnimation });
+
+          // if (idxAnimation === 0) {
+          //   if (!rive3.isPlaying) {
+          //     rive3.play(["Timeline 1", "dark"]);
+          //   }
+
+          //   // advanceAnimationTo(rive3, timeInSeconds, theme);
+          // }
+          // if (idxAnimation === 1) {
+          //   // advanceAnimationTo(rive4, timeInSeconds, theme);
+          //   if (!rive4.isPlaying) {
+          //     rive4.play(["Timeline 1", "dark"]);
+          //   }
+          // }
+          // if (idxAnimation === 2) {
+          //   // advanceAnimationTo(rive5, timeInSeconds, theme);
+          //   if (!rive5.isPlaying) {
+          //     rive5.play(["Timeline 1", "dark"]);
+          //   }
+          // }
+          // if (idxAnimation === 3) {
+          //   // advanceAnimationTo(rive6, timeInSeconds, theme);
+          //   if (!rive6.isPlaying) {
+          //     rive6.play(["Timeline 1", "dark"]);
+          //   }
+          //   if (percentageFrame > 50) {
+          //     showEndAnimationOptions = true;
+          //   }
+          // }
         }
 
         // update options display
@@ -538,6 +591,7 @@ const Home = () => {
                     {sectionsOrder[5].label}
                   </Typography>
                 </Tooltip>
+                <h6>{rive3InView ? "T" : "F"}</h6>
               </>
             )}
           </Stack>
@@ -631,8 +685,8 @@ const Home = () => {
           sx={{
             height: "calc(100vh - 70px)",
             width: "100%",
-            position: "absolute",
-            top: 0,
+            // position: "absolute",
+            // top: 0,
             padding: width < 900 ? "10px" : "20px",
             backgroundColor: "#1d1102",
             backgroundImage: `url(${
@@ -644,6 +698,7 @@ const Home = () => {
           }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
+            {/* <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} /> */}
             <Typography
               color="white"
               variant="h5"
@@ -670,7 +725,8 @@ const Home = () => {
           <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
             <HowItWorks
               section={sectionSelected}
-              artboards={[...section1ArtBoards, ...artboards]}
+              // artboards={[...section1ArtBoards, ...artboards]}
+              artboards={tt}
               animationOptions={
                 <Button
                   variant="contained"
@@ -686,12 +742,12 @@ const Home = () => {
               }
             >
               <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
-                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
+                {/* <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} /> */}
+                {/* <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} />
+                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} /> */}
               </Box>
             </HowItWorks>
           </Box>
@@ -871,15 +927,15 @@ Home.getLayout = (page: ReactNode) => {
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
-  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+// const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+//   rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
 
-  //@ts-ignore
-  if (!rive?.animator?.animations[0]) return;
-  //@ts-ignore
-  const Animator = rive.animator.animations[0];
-  Animator.instance.time = 0;
-  Animator.instance.advance(timeInSeconds);
-  Animator.instance.apply(1);
-  rive.startRendering();
-};
+//   //@ts-ignore
+//   if (!rive?.animator?.animations[0]) return;
+//   //@ts-ignore
+//   const Animator = rive.animator.animations[0];
+//   Animator.instance.time = 0;
+//   Animator.instance.advance(timeInSeconds);
+//   Animator.instance.apply(1);
+//   rive.startRendering();
+// };
