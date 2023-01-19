@@ -223,9 +223,8 @@
   margin: 0px;
 }
 .card .card-content {
-  padding: 13px 13px 0px 13px !important;
+  margin: -8px 13px 0px 13px !important;
 }
-
 .card-title .CodeMirror {
   font-size: 25px;
   font-weight: 400;

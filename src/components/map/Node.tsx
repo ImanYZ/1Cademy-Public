@@ -17,6 +17,7 @@ import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LeaderboardChip from "../LeaderboardChip";
+import NodeTypeIcon from "../NodeTypeIcon";
 import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
@@ -576,6 +577,12 @@ const Node = ({
 
       {open ? (
         <>
+          {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+          {!locked && (
+            <Box sx={{ margin: "5px 0px 0px 13px", padding: "0px" }}>
+              <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+            </Box>
+          )}
           <div className="card-content">
             <div className="card-title" data-hoverable={true}>
               {editable && isNew && (
