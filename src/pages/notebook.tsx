@@ -1567,6 +1567,7 @@ const Dashboard = ({}: DashboardProps) => {
           });
           setOpenSidebar("PROPOSALS");
         }
+
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           setTimeout(() => {
@@ -1574,6 +1575,10 @@ const Dashboard = ({}: DashboardProps) => {
           }, 1500);
         } else {
           openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
+        }
+
+        if (typeOperation === "CitationSidebar") {
+          setOpenSidebar(null);
         }
       }
     },
