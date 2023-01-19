@@ -580,7 +580,7 @@ const Node = ({
         <>
           {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
           {!locked && (
-            <Box sx={{ margin: "5px 0px 0px 13px", padding: "0" }}>
+            <Box sx={{ margin: "5px 0px 0px 13px", padding: "0px" }}>
               <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
             </Box>
           )}
