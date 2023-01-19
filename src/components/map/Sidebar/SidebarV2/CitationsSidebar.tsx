@@ -59,7 +59,7 @@ export const CitationsSidebar = ({
 
   const openLinkedNodeClick = useCallback(
     (nodeId: string) => {
-      openLinkedNode(nodeId);
+      openLinkedNode(nodeId, "CitationSidebar");
     },
     [openLinkedNode]
   );
