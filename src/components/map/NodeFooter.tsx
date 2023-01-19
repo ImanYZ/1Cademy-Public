@@ -448,9 +448,9 @@ const NodeFooter = ({
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
                 new Date(changedAt)
-              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day()}/${dayjs(
-                new Date(changedAt)
-              ).month()}/${dayjs(new Date(changedAt)).year()}`}
+              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day()}/${
+                dayjs(new Date(changedAt)).month() + 1
+              }/${dayjs(new Date(changedAt)).year()}`}
               placement={"top"}
             >
               <span
