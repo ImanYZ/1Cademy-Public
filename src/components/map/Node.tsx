@@ -47,7 +47,7 @@ type NodeProps = {
   width: number;
   editable: boolean;
   unaccepted: any;
-  nodeType: string;
+  nodeType: any;
   isTag: boolean;
   isNew: any;
   title: string;
