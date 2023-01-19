@@ -57,7 +57,7 @@ const section1ArtBoards = [
 ];
 const artboards = [
   { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
+  { name: "Linking", durationMs: 26000, getHeight: (vh: number) => 9 * vh, color: "#f38b36" },
   { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 5 * vh, color: "#e6f336" },
   { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
 ];
