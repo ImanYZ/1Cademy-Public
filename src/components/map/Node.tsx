@@ -22,6 +22,7 @@ import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
 import NewChildProposal from "./NewChildProposal";
+import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
