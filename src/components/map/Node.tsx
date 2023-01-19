@@ -17,10 +17,12 @@ import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LeaderboardChip from "../LeaderboardChip";
+import NodeTypeIcon from "../NodeTypeIcon";
 import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
 import NewChildProposal from "./NewChildProposal";
+import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -46,7 +48,7 @@ type NodeProps = {
   width: number;
   editable: boolean;
   unaccepted: any;
-  nodeType: string;
+  nodeType: any;
   isTag: boolean;
   isNew: any;
   title: string;
@@ -576,6 +578,12 @@ const Node = ({
 
       {open ? (
         <>
+          {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+          {!locked && (
+            <Box sx={{ margin: "5px 0px 0px 13px", padding: "0" }}>
+              <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+            </Box>
+          )}
           <div className="card-content">
             <div className="card-title" data-hoverable={true}>
               {editable && isNew && (
