@@ -1,8 +1,6 @@
-import { Typography } from "@mui/material";
+import { Stack, Typography, useMediaQuery } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useMemo } from "react";
-
-import { useWindowSize } from "@/hooks/useWindowSize";
 
 // import { useWindowSize } from "../../hooks/useWindowSize";
 // import Collapse from "@mui/material/Collapse";
@@ -16,7 +14,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 // const sectionIdx = sectionsOrder.findIndex(sect => sect.id === "HowItWorksSection");
 
 const HowItWorks = (props: any) => {
-  const { height /* width */ } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   // const boxLarge = useMemo(() => {
   //   const offset = width < 600 ? 32 : width < 900 ? 70 : 100;
@@ -26,18 +24,18 @@ const HowItWorks = (props: any) => {
 
   // const topCenteredPosition = height / 2 - boxLarge / 2 + 35;
 
-  const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.getHeight(height), 0);
+  const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.getHeight(), 0);
 
   const processedArtboard = useMemo(
     () =>
       props.artboards.reduce((acu: any[], cur: any) => {
-        const newHeight = cur.getHeight(height);
+        const newHeight = cur.getHeight();
         return [
           ...acu,
           { ...cur, top: acu.length ? acu[acu.length - 1].top + acu[acu.length - 1].height : 0, height: newHeight },
         ];
       }, []),
-    [props.artboards, height]
+    [props.artboards]
   );
 
   return (
@@ -52,80 +50,97 @@ const HowItWorks = (props: any) => {
         alignItems: "center",
       }}
     >
-      <Box
-        key={"artboard-1"}
-        sx={{
-          position: "absolute",
-          top: 0,
-          width: "100%",
-          height: height - 70,
-          // borderRight: `dashed 6px #ff28c9`,
-          color: "white",
-        }}
-      >
-        {/* Landing section */}
-      </Box>
-      {/* <CustomTypography
-        component={"h2"}
-        variant="h1"
-        marked="center"
-        align="center"
-        sx={{ mb: 7, fontWeight: 700, mt: "40px" }}
-      >
-        {sectionsOrder[1].title}
-      </CustomTypography> */}
-      {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
-      >
-        {sectionsOrder[1].title}
-      </Typography> */}
-      {processedArtboard.map((artboard: any /*  idx: number */) => (
-        <Box
+      {processedArtboard.map((artboard: any, idx: number) => (
+        <Stack
+          // ref={refs[idx]}
           key={artboard.name}
-          sx={{
-            position: "absolute",
-            top: artboard.top,
-            width: "100%",
-            height: artboard.height,
-            // borderRight: `dashed 6px ${artboard.color}`,
-            border: `dashed 2px ${artboard.color}`,
-            // color: "white",
-          }}
+          direction={isMobile ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
+          spacing={isMobile ? "0px" : "40px"}
+          alignItems={"stretch"}
+          alignSelf={idx % 2 === 0 ? "flex-end" : "flex-start"}
+          sx={{ position: "relative", height: artboard.height /* , border: `2px dashed ${artboard.color}` */ }}
         >
-          <Typography
-            variant="h5"
-            component="h3"
+          {/* <img src="random.jpg" style={{ position: "absolute", top: 0, left: "100px" }} /> */}
+          <Box sx={{ position: "relative" }}>
+            {/* <img
+              src="random.jpg"
+              style={{
+                position: "absolute",
+                top: "calc((50% - 100px))",
+                left: idx % 2 === 0 ? undefined : "0",
+                right: idx % 2 === 1 ? undefined : "0",
+              }}
+            /> */}
+            <Box
+              sx={{
+                width: "800px",
+                height: "800px",
+                position: "absolute",
+                top: "calc(50% - 400px)",
+                left: idx % 2 === 0 ? undefined : "0",
+                right: idx % 2 === 1 ? undefined : "0",
+              }}
+            >
+              {artboard.riveComponent}
+            </Box>
+          </Box>
+          {/* <Box
+            component={"picture"}
             sx={{
-              mt: "100px",
-              ml: "10px",
-              position: "absolute",
-              top: "100px",
-              color: "white",
-              textTransform: "none",
+              minWidth: isTablet ? "500px" : "300px",
+              height: "inherit",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: isMobile ? "center" : idx % 2 === 0 ? "flex-start" : "flex-end",
             }}
+            // className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
           >
-            {artboard.name}
-          </Typography>
-
-          {artboard.riveComponent}
-        </Box>
+            <Box sx={{ width: "300px", height: "200px" }}>{artboard.riveComponent}</Box>
+          </Box> */}
+          <Box
+            sx={{
+              maxWidth: "400px",
+              p: "10px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              "& > *:not(:last-child)": {
+                mb: "12px",
+              },
+            }}
+            // className={inViewOnces[idx] ? (idx % 2 !== 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
+          >
+            <Typography
+              gutterBottom
+              variant="h3"
+              component="h3"
+              sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
+            >
+              {artboard.name}
+            </Typography>
+            <Typography fontSize={"20px"} fontWeight={300}>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
+              tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
+              fugit odit?
+            </Typography>
+            {/* {value.body.split("\n").map((paragraph, idx) => (
+              <Typography
+                key={idx}
+                variant="body2"
+                sx={{
+                  textAlign: "left",
+                  color: getGrayColorText(),
+                  fontSize: "16px",
+                }}
+              >
+                {paragraph}
+              </Typography>
+            ))} */}
+          </Box>
+        </Stack>
       ))}
 
-      <Box sx={{ position: "absolute", bottom: "20px", zIndex: 11 }}>{props.animationOptions}</Box>
-
-      {/* <div
-        style={{
-          position: "sticky",
-          top: topCenteredPosition,
-          width: boxLarge,
-          height: boxLarge,
-          display: "flex",
-          flexDirection: "column",
-          zIndex: 10,
-          // border: "solid 2px pink"
-        }}
-      >
-        {props.children}
-      </div> */}
+      {/* <Box sx={{ position: "absolute", bottom: "20px", zIndex: 11 }}>{props.animationOptions}</Box> */}
     </Box>
   );
 };

@@ -56,10 +56,11 @@ const section1ArtBoards = [
   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 ];
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 1 * vh - 70, color: "#f33636" },
-  { name: "Linking", durationMs: 26000, getHeight: (vh: number) => 1 * vh - 70, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 1 * vh - 70, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh - 70, color: "#62f336" },
+  { name: "Summarizing", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
+  { name: "Building", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
+  { name: "Linking", durationMs: 26000, getHeight: () => 900, color: "#f38b36" },
+  { name: "Evaluating", durationMs: 4000, getHeight: () => 900, color: "#e6f336" },
+  { name: "Improving", durationMs: 14000, getHeight: () => 900, color: "#62f336" },
 ];
 export const SECTION_WITH_ANIMATION = 1;
 
@@ -71,9 +72,10 @@ const sectionsTmp = [
     simpleTitle: "How?",
     children: [
       { id: "animation1", title: "Summarizing", simpleTitle: "Summarizing" },
-      { id: "animation2", title: "Linking", simpleTitle: "Linking" },
-      { id: "animation3", title: "Evaluating", simpleTitle: "Evaluating" },
-      { id: "animation4", title: "Improving", simpleTitle: "Improving" },
+      { id: "animation2", title: "Building", simpleTitle: "Building" },
+      { id: "animation3", title: "Linking", simpleTitle: "Linking" },
+      { id: "animation4", title: "Evaluating", simpleTitle: "Evaluating" },
+      { id: "animation5", title: "Improving", simpleTitle: "Improving" },
     ],
   },
   { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
@@ -82,6 +84,7 @@ const sectionsTmp = [
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
+const AnimationObserverOptions = { options: { threshold: 0.5, root: null, rootMargin: "0px" } };
 const Home = () => {
   // const [section, setSection] = useState(0);
   const theme = useTheme();
@@ -115,10 +118,11 @@ const Home = () => {
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
 
-  const { ref: rive3Ref, inView: rive3InView } = useInView();
-  const { ref: rive4Ref, inView: rive4InView } = useInView();
-  const { ref: rive5Ref, inView: rive5InView } = useInView();
-  const { ref: rive6Ref, inView: rive6InView } = useInView();
+  const { ref: rive3Ref, inView: rive3InView } = useInView(AnimationObserverOptions);
+  const { ref: rive4Ref, inView: rive4InView } = useInView(AnimationObserverOptions);
+  const { ref: rive5Ref, inView: rive5InView } = useInView(AnimationObserverOptions);
+  const { ref: rive6Ref, inView: rive6InView } = useInView(AnimationObserverOptions);
+  const { ref: rive7Ref, inView: rive7InView } = useInView(AnimationObserverOptions);
 
   const { rive: rive1 /* , RiveComponent: RiveComponent1 */ } = useRive({
     src: "rive/artboard-1.riv",
@@ -135,30 +139,35 @@ const Home = () => {
   });
 
   const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
-    src: "rive/artboard-3.riv",
+    src: "rive/notebook.riv",
     artboard: "artboard-3",
     animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     autoplay: false,
   });
 
   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
-    src: "rive/artboard-4.riv",
+    src: "rive/notebook.riv",
     artboard: "artboard-4",
     animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     autoplay: false,
   });
-
   const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
-    src: "rive/artboard-5.riv",
+    src: "rive/notebook.riv",
     artboard: "artboard-5",
     animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     autoplay: false,
   });
-
   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
-    src: "rive/artboard-6.riv",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+    src: "rive/notebook.riv",
     artboard: "artboard-6",
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+    autoplay: false,
+  });
+
+  const { rive: rive7, RiveComponent: RiveComponent7 } = useRive({
+    src: "rive/notebook.riv",
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+    artboard: "artboard-7",
     autoplay: false,
   });
 
@@ -170,38 +179,46 @@ const Home = () => {
   });
 
   useEffect(() => {
-    if (!rive3InView) return;
     if (!rive3) return;
-
+    if (!rive3InView) {
+      rive3.pause();
+      // setIsPlayingAnimation3(false);
+      // clearTimeout(timerId3.current);
+      return;
+    }
     console.log("play3", rive3.isStopped);
-    // rive3.stop();
+
     rive3.play();
+    // setIsPlayingAnimation3(true);
+    // timerId3.current = setTimeout(() => {
+    //   setIsPlayingAnimation3(false);
+    // }, 7000);
+    console.log({ rive3 });
   }, [rive3, rive3InView]);
 
   useEffect(() => {
-    if (!rive4InView) return;
     if (!rive4) return;
 
-    console.log("play4");
-    rive4.play();
+    rive4InView ? rive4.play() : rive4.pause();
   }, [rive4, rive4InView]);
 
   useEffect(() => {
-    if (!rive5InView) return;
     if (!rive5) return;
 
-    console.log("play5");
-    rive5.play();
+    rive5InView ? rive5.play() : rive5.pause();
   }, [rive5, rive5InView]);
 
   useEffect(() => {
-    if (!rive6InView) return;
     if (!rive6) return;
 
-    console.log("play6");
-    rive6.play();
+    rive6InView ? rive6.play() : rive6.pause();
   }, [rive6, rive6InView]);
 
+  useEffect(() => {
+    if (!rive7) return;
+
+    rive7InView ? rive7.play() : rive7.pause();
+  }, [rive7, rive7InView]);
   // useEffect(() => {
   //   if (!rive1) return;
   //   rive1.reset({ artboard: "artboard-1" });
@@ -213,13 +230,13 @@ const Home = () => {
     {
       ...artboards[0],
       riveComponent: (
-        <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+        <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
           <RiveComponent3 className={`rive-canvas `} />
           <Box>
             <Button onClick={() => console.log(rive3)}>Info</Button>
-            {rive3 && Boolean(rive3.isPaused) && <Button>play</Button>}
-            {rive3 && Boolean(rive3.isPlaying) && <Button>pause</Button>}
-            {rive3 && Boolean(rive3.isStopped) && <Button>replay</Button>}
+            {/* {rive3 && Boolean(rive3.isPaused) && <Button>play</Button>} */}
+            {rive3 && <Button onClick={() => rive3.pause()}>pause</Button>}
+            {rive3 && <Button onClick={() => rive3.play()}>play</Button>}
           </Box>
         </Box>
       ),
@@ -227,7 +244,7 @@ const Home = () => {
     {
       ...artboards[1],
       riveComponent: (
-        <Box ref={rive4Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+        <Box ref={rive4Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue"  */ }}>
           <RiveComponent4 className={`rive-canvas `} />,
         </Box>
       ),
@@ -235,7 +252,7 @@ const Home = () => {
     {
       ...artboards[2],
       riveComponent: (
-        <Box ref={rive5Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+        <Box ref={rive5Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue"  */ }}>
           <RiveComponent5 className={`rive-canvas `} />,
         </Box>
       ),
@@ -243,8 +260,16 @@ const Home = () => {
     {
       ...artboards[3],
       riveComponent: (
-        <Box ref={rive6Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+        <Box ref={rive6Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
           <RiveComponent6 className={`rive-canvas `} />,
+        </Box>
+      ),
+    },
+    {
+      ...artboards[4],
+      riveComponent: (
+        <Box ref={rive7Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
+          <RiveComponent7 className={`rive-canvas `} />,
         </Box>
       ),
     },
@@ -311,13 +336,13 @@ const Home = () => {
   }, [whatEntry, whereEntry, whoEntry, whyEntry]);
 
   const getAnimationsHeight = useCallback(() => {
-    const res = artboards.map(artboard => artboard.getHeight(height));
+    const res = artboards.map(artboard => artboard.getHeight());
     return [0, ...res.splice(0, res.length - 1)];
-  }, [height]);
+  }, []);
 
   const getAnimationsPositions = useCallback(() => {
-    return artboards.map(artboard => artboard.getHeight(height));
-  }, [height]);
+    return artboards.map(artboard => artboard.getHeight());
+  }, []);
 
   const scrollToSection = ({ height, sectionSelected }: { height: number; sectionSelected: any }) => {
     if (typeof window === "undefined") return;
@@ -536,7 +561,7 @@ const Home = () => {
       sx={{
         height: "100vh",
         overflowY: "auto",
-        overflowX: "auto",
+        overflowX: "hidden",
         position: "relative",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
         // zIndex: -3
@@ -706,7 +731,7 @@ const Home = () => {
           </Stack>
         </Stack>
       </Box>
-      <Box sx={{ position: "relative" }}>
+      <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
         >
@@ -771,7 +796,16 @@ const Home = () => {
           </Box>
         </Stack>
 
-        <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "980px",
+            px: isDesktop ? "0px" : "10px",
+            margin: "auto",
+            /* border: "3px solid white", */
+            position: "relative",
+          }}
+        >
           <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
             <CustomTypography
               component={"h2"}
@@ -810,7 +844,6 @@ const Home = () => {
               </Box>
             </HowItWorks>
           </Box>
-
           <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
