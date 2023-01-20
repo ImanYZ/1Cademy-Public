@@ -56,10 +56,10 @@ const section1ArtBoards = [
   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 ];
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 1 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 26000, getHeight: (vh: number) => 1 * vh, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 1 * vh, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh, color: "#62f336" },
+  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 1 * vh - 70, color: "#f33636" },
+  { name: "Linking", durationMs: 26000, getHeight: (vh: number) => 1 * vh - 70, color: "#f38b36" },
+  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 1 * vh - 70, color: "#e6f336" },
+  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 1 * vh - 70, color: "#62f336" },
 ];
 export const SECTION_WITH_ANIMATION = 1;
 
@@ -116,6 +116,9 @@ const Home = () => {
   const timeInSecondsRef = useRef<number>(0);
 
   const { ref: rive3Ref, inView: rive3InView } = useInView();
+  const { ref: rive4Ref, inView: rive4InView } = useInView();
+  const { ref: rive5Ref, inView: rive5InView } = useInView();
+  const { ref: rive6Ref, inView: rive6InView } = useInView();
 
   const { rive: rive1 /* , RiveComponent: RiveComponent1 */ } = useRive({
     src: "rive/artboard-1.riv",
@@ -141,20 +144,20 @@ const Home = () => {
   const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
     src: "rive/artboard-4.riv",
     artboard: "artboard-4",
-    animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     autoplay: false,
   });
 
   const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
     src: "rive/artboard-5.riv",
     artboard: "artboard-5",
-    animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     autoplay: false,
   });
 
   const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
     src: "rive/artboard-6.riv",
-    animations: ["Timeline 1", "dark", "light"],
+    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     artboard: "artboard-6",
     autoplay: false,
   });
@@ -170,8 +173,34 @@ const Home = () => {
     if (!rive3InView) return;
     if (!rive3) return;
 
+    console.log("play3", rive3.isStopped);
+    // rive3.stop();
     rive3.play();
-  }, [rive3, rive3InView, theme.palette.mode]);
+  }, [rive3, rive3InView]);
+
+  useEffect(() => {
+    if (!rive4InView) return;
+    if (!rive4) return;
+
+    console.log("play4");
+    rive4.play();
+  }, [rive4, rive4InView]);
+
+  useEffect(() => {
+    if (!rive5InView) return;
+    if (!rive5) return;
+
+    console.log("play5");
+    rive5.play();
+  }, [rive5, rive5InView]);
+
+  useEffect(() => {
+    if (!rive6InView) return;
+    if (!rive6) return;
+
+    console.log("play6");
+    rive6.play();
+  }, [rive6, rive6InView]);
 
   // useEffect(() => {
   //   if (!rive1) return;
@@ -186,20 +215,38 @@ const Home = () => {
       riveComponent: (
         <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
           <RiveComponent3 className={`rive-canvas `} />
+          <Box>
+            <Button onClick={() => console.log(rive3)}>Info</Button>
+            {rive3 && Boolean(rive3.isPaused) && <Button>play</Button>}
+            {rive3 && Boolean(rive3.isPlaying) && <Button>pause</Button>}
+            {rive3 && Boolean(rive3.isStopped) && <Button>replay</Button>}
+          </Box>
         </Box>
       ),
     },
     {
       ...artboards[1],
-      riveComponent: <RiveComponent4 className={`rive-canvas `} />,
+      riveComponent: (
+        <Box ref={rive4Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+          <RiveComponent4 className={`rive-canvas `} />,
+        </Box>
+      ),
     },
     {
       ...artboards[2],
-      riveComponent: <RiveComponent5 className={`rive-canvas `} />,
+      riveComponent: (
+        <Box ref={rive5Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+          <RiveComponent5 className={`rive-canvas `} />,
+        </Box>
+      ),
     },
     {
       ...artboards[3],
-      riveComponent: <RiveComponent6 className={`rive-canvas `} />,
+      riveComponent: (
+        <Box ref={rive6Ref} sx={{ height: "inherit", width: "inherit", border: "solid 2px royalBlue" }}>
+          <RiveComponent6 className={`rive-canvas `} />,
+        </Box>
+      ),
     },
   ];
 
@@ -592,6 +639,9 @@ const Home = () => {
                   </Typography>
                 </Tooltip>
                 <h6>{rive3InView ? "T" : "F"}</h6>
+                <h6>{rive4InView ? "T" : "F"}</h6>
+                <h6>{rive5InView ? "T" : "F"}</h6>
+                <h6>{rive6InView ? "T" : "F"}</h6>
               </>
             )}
           </Stack>
@@ -723,6 +773,15 @@ const Home = () => {
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
           <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
+            >
+              {sectionsOrder[1].title}
+            </CustomTypography>
             <HowItWorks
               section={sectionSelected}
               // artboards={[...section1ArtBoards, ...artboards]}

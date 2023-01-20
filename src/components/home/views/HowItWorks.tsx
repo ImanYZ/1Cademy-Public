@@ -8,8 +8,8 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 // import Collapse from "@mui/material/Collapse";
 // import { CardActionArea } from "@mui/material";
 // import Typography from "../components/Typography";
-import CustomTypography from "../components/Typography";
-import { sectionsOrder } from "../sectionsOrder";
+// import CustomTypography from "../components/Typography";
+// import { sectionsOrder } from "../sectionsOrder";
 // import { sectionsOrder } from "../sectionsOrder";
 // // import sectionsOrder from "./sectionsOrder";
 
@@ -65,7 +65,7 @@ const HowItWorks = (props: any) => {
       >
         {/* Landing section */}
       </Box>
-      <CustomTypography
+      {/* <CustomTypography
         component={"h2"}
         variant="h1"
         marked="center"
@@ -73,7 +73,7 @@ const HowItWorks = (props: any) => {
         sx={{ mb: 7, fontWeight: 700, mt: "40px" }}
       >
         {sectionsOrder[1].title}
-      </CustomTypography>
+      </CustomTypography> */}
       {/* <Typography variant="h4" marked="center" align="center" sx={{ color: "#f8f8f8", position: "absolute", top: height - 30 }}
       >
         {sectionsOrder[1].title}
