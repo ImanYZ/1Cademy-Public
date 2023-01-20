@@ -23,9 +23,10 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Rive, useRive } from "rive-react";
+import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRive } from "rive-react";
 
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
@@ -55,6 +56,7 @@ export const gray03 = "#AAAAAA";
 const section1ArtBoards = [
   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 ];
+
 const artboards = [
   { name: "Summarizing", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
   { name: "Building", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
@@ -84,7 +86,7 @@ const sectionsTmp = [
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
-const AnimationObserverOptions = { options: { threshold: 0.5, root: null, rootMargin: "0px" } };
+// const AnimationObserverOptions = { options: { threshold: 0.35, root: null, rootMargin: "0px" } };
 const Home = () => {
   // const [section, setSection] = useState(0);
   const theme = useTheme();
@@ -97,11 +99,11 @@ const Home = () => {
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
-  const [showAnimationOptions, setShowAnimationOptions] = useState(false);
+  const [showAnimationOptions /* setShowAnimationOptions */] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
   const [openSearch, setOpenSearch] = useState(false);
-
+  const [, /* render */ setRender] = useState(false);
   const router = useRouter();
 
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
@@ -118,58 +120,52 @@ const Home = () => {
   const howSectionRef = useRef<HTMLDivElement | null>(null);
   const timeInSecondsRef = useRef<number>(0);
 
-  const { ref: rive3Ref, inView: rive3InView } = useInView(AnimationObserverOptions);
-  const { ref: rive4Ref, inView: rive4InView } = useInView(AnimationObserverOptions);
-  const { ref: rive5Ref, inView: rive5InView } = useInView(AnimationObserverOptions);
-  const { ref: rive6Ref, inView: rive6InView } = useInView(AnimationObserverOptions);
-  const { ref: rive7Ref, inView: rive7InView } = useInView(AnimationObserverOptions);
+  // const { rive: rive1 /* , RiveComponent: RiveComponent1 */ } = useRive({
+  // src: "rive/artboard-1.riv",
+  // artboard: "artboard-1",
+  // animations: ["Timeline 1", "dark", "light"],
+  // autoplay: false,
+  // });
 
-  const { rive: rive1 /* , RiveComponent: RiveComponent1 */ } = useRive({
-    src: "rive/artboard-1.riv",
-    artboard: "artboard-1",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive2 /* , RiveComponent: RiveComponent2 */ } = useRive({
+  //   src: "rive/artboard-2.riv",
+  //   artboard: "artboard-2",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
-  const { rive: rive2 /* , RiveComponent: RiveComponent2 */ } = useRive({
-    src: "rive/artboard-2.riv",
-    artboard: "artboard-2",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
+  //   src: "rive/notebook.riv",
+  //   artboard: "artboard-3",
+  //   animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+  //   autoplay: true,
+  // });
 
-  const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
-    src: "rive/notebook.riv",
-    artboard: "artboard-3",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    autoplay: false,
-  });
+  // const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
+  //   src: "rive/notebook.riv",
+  //   artboard: "artboard-4",
+  //   animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+  //   autoplay: true,
+  // });
+  // const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
+  //   src: "rive/notebook.riv",
+  //   artboard: "artboard-5",
+  //   animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+  //   autoplay: true,
+  // });
+  // const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
+  //   src: "rive/notebook.riv",
+  //   artboard: "artboard-6",
+  //   animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+  //   autoplay: true,
+  // });
 
-  const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
-    src: "rive/notebook.riv",
-    artboard: "artboard-4",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    autoplay: false,
-  });
-  const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
-    src: "rive/notebook.riv",
-    artboard: "artboard-5",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    autoplay: false,
-  });
-  const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
-    src: "rive/notebook.riv",
-    artboard: "artboard-6",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    autoplay: false,
-  });
-
-  const { rive: rive7, RiveComponent: RiveComponent7 } = useRive({
-    src: "rive/notebook.riv",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    artboard: "artboard-7",
-    autoplay: false,
-  });
+  // const { rive: rive7, RiveComponent: RiveComponent7 } = useRive({
+  //   src: "rive/notebook.riv",
+  //   animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
+  //   artboard: "artboard-7",
+  //   autoplay: true,
+  // });
 
   const { RiveComponent: RiveScrollActionComponent } = useRive({
     src: "rive/scroll.riv",
@@ -178,47 +174,37 @@ const Home = () => {
     autoplay: false,
   });
 
-  useEffect(() => {
-    if (!rive3) return;
-    if (!rive3InView) {
-      rive3.pause();
-      // setIsPlayingAnimation3(false);
-      // clearTimeout(timerId3.current);
-      return;
-    }
-    console.log("play3", rive3.isStopped);
+  // useEffect(() => {
+  //   console.log({ entry1: entry3, entry2: entry4, entry3: entry5, entry4: entry6, entry5: entry7 });
+  //   let max = -1;
+  //   let animationIdxSelected = -1;
+  //   [entry3, entry4, entry5, entry6, entry7].forEach((cur, idx) => {
+  //     if (!cur?.intersectionRatio) return;
+  //     if (max <= cur.intersectionRatio) {
+  //       max = cur.intersectionRatio;
+  //       animationIdxSelected = idx;
+  //     }
+  //   });
+  //   if (animationIdxSelected >= 0) {
+  //     rive3?.pause();
+  //     rive4?.pause();
+  //     rive5?.pause();
+  //     rive6?.pause();
+  //     rive7?.pause();
+  //   }
+  //   if (animationIdxSelected === 0) rive3?.play();
+  //   if (animationIdxSelected === 1) rive4?.play();
+  //   if (animationIdxSelected === 2) rive5?.play();
+  //   if (animationIdxSelected === 3) rive6?.play();
+  //   if (animationIdxSelected === 4) rive7?.play();
 
-    rive3.play();
-    // setIsPlayingAnimation3(true);
-    // timerId3.current = setTimeout(() => {
-    //   setIsPlayingAnimation3(false);
-    // }, 7000);
-    console.log({ rive3 });
-  }, [rive3, rive3InView]);
+  //   setSelectedAnimation(animationIdxSelected);
+  // }, [entry3, entry4, entry5, entry6, entry7, rive3, rive4, rive5, rive6, rive7]);
 
-  useEffect(() => {
-    if (!rive4) return;
+  // useEffect(()=>{
+  //   if(rive4InView)
 
-    rive4InView ? rive4.play() : rive4.pause();
-  }, [rive4, rive4InView]);
-
-  useEffect(() => {
-    if (!rive5) return;
-
-    rive5InView ? rive5.play() : rive5.pause();
-  }, [rive5, rive5InView]);
-
-  useEffect(() => {
-    if (!rive6) return;
-
-    rive6InView ? rive6.play() : rive6.pause();
-  }, [rive6, rive6InView]);
-
-  useEffect(() => {
-    if (!rive7) return;
-
-    rive7InView ? rive7.play() : rive7.pause();
-  }, [rive7, rive7InView]);
+  // },[rive4InView,rive5InView,rive6InView,rive7InView])
   // useEffect(() => {
   //   if (!rive1) return;
   //   rive1.reset({ artboard: "artboard-1" });
@@ -226,55 +212,345 @@ const Home = () => {
   //   rive1.play();
   // }, [rive1]);
 
-  const tt = [
-    {
-      ...artboards[0],
-      riveComponent: (
-        <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
-          <RiveComponent3 className={`rive-canvas `} />
-          <Box>
-            <Button onClick={() => console.log(rive3)}>Info</Button>
-            {/* {rive3 && Boolean(rive3.isPaused) && <Button>play</Button>} */}
-            {rive3 && <Button onClick={() => rive3.pause()}>pause</Button>}
-            {rive3 && <Button onClick={() => rive3.play()}>play</Button>}
-          </Box>
-        </Box>
-      ),
-    },
-    {
-      ...artboards[1],
-      riveComponent: (
-        <Box ref={rive4Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue"  */ }}>
-          <RiveComponent4 className={`rive-canvas `} />,
-        </Box>
-      ),
-    },
-    {
-      ...artboards[2],
-      riveComponent: (
-        <Box ref={rive5Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue"  */ }}>
-          <RiveComponent5 className={`rive-canvas `} />,
-        </Box>
-      ),
-    },
-    {
-      ...artboards[3],
-      riveComponent: (
-        <Box ref={rive6Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
-          <RiveComponent6 className={`rive-canvas `} />,
-        </Box>
-      ),
-    },
-    {
-      ...artboards[4],
-      riveComponent: (
-        <Box ref={rive7Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
-          <RiveComponent7 className={`rive-canvas `} />,
-        </Box>
-      ),
-    },
-  ];
+  const tt = useMemo(() => {
+    return [
+      {
+        ...artboards[0],
+        riveComponent: (
+          <RiveComponentMemoized
+            src="rive/notebook.riv"
+            artboard="artboard-3"
+            animations={["Timeline 1", theme.palette.mode]}
+            autoplay={true}
+          />
+          // <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
+          // </Box>
+        ),
+      },
+      {
+        ...artboards[1],
+        riveComponent: (
+          <RiveComponentMemoized
+            src="rive/notebook.riv"
+            artboard="artboard-4"
+            animations={["Timeline 1", theme.palette.mode]}
+            autoplay={true}
+          />
+          // <Box ref={rive4Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue"  */ }}>
+          // </Box>
+        ),
+      },
+      {
+        ...artboards[2],
+        riveComponent: (
+          <RiveComponentMemoized
+            src="rive/notebook.riv"
+            artboard="artboard-5"
+            animations={["Timeline 1", theme.palette.mode]}
+            autoplay={true}
+          />
+        ),
+      },
+      {
+        ...artboards[3],
+        riveComponent: (
+          <RiveComponentMemoized
+            src="rive/notebook.riv"
+            artboard="artboard-6"
+            animations={["Timeline 1", theme.palette.mode]}
+            autoplay={true}
+          />
+        ),
+      },
+      {
+        ...artboards[4],
+        riveComponent: (
+          <RiveComponentMemoized
+            src="rive/notebook.riv"
+            artboard="artboard-7"
+            animations={["Timeline 1", theme.palette.mode]}
+            autoplay={true}
+          />
+        ),
+      },
+    ];
+  }, [theme.palette.mode]);
 
+  const dd = useMemo(() => {
+    return [
+      {
+        animationSubsection: (
+          <Stack
+            key={artboards[0].name}
+            direction={isMobile ? "column" : "row"}
+            spacing={isMobile ? "0px" : "40px"}
+            alignItems={"stretch"}
+            alignSelf={"flex-end"}
+            sx={{ position: "relative", height: "900px", border: `2px dashed red` }}
+          >
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  width: "800px",
+                  height: "800px",
+                  position: "absolute",
+                  top: "calc(50% - 400px)",
+                  right: "0",
+                }}
+              >
+                {tt[0].riveComponent}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                maxWidth: "400px",
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
+            >
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
+              >
+                {artboards[0].name}
+              </Typography>
+              <Typography fontSize={"20px"} fontWeight={300}>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
+                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
+                fugit odit?
+              </Typography>
+            </Box>
+          </Stack>
+        ),
+      },
+      {
+        animationSubsection: (
+          <Stack
+            key={artboards[1].name}
+            direction={isMobile ? "column" : "row-reverse"}
+            spacing={isMobile ? "0px" : "40px"}
+            alignItems={"stretch"}
+            alignSelf={"flex-start"}
+            sx={{ position: "relative", height: "900px", border: `2px dashed blue` }}
+          >
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  width: "800px",
+                  height: "800px",
+                  position: "absolute",
+                  top: "calc(50% - 400px)",
+                  left: "0px",
+                }}
+              >
+                {tt[1].riveComponent}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                maxWidth: "400px",
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
+            >
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
+              >
+                {artboards[1].name}
+              </Typography>
+              <Typography fontSize={"20px"} fontWeight={300}>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
+                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
+                fugit odit?
+              </Typography>
+            </Box>
+          </Stack>
+        ),
+      },
+      {
+        animationSubsection: (
+          <Stack
+            key={artboards[2].name}
+            direction={isMobile ? "column" : "row"}
+            spacing={isMobile ? "0px" : "40px"}
+            alignItems={"stretch"}
+            alignSelf={"flex-end"}
+            sx={{ position: "relative", height: "900px", border: `2px dashed yellow` }}
+          >
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  width: "800px",
+                  height: "800px",
+                  position: "absolute",
+                  top: "calc(50% - 400px)",
+                  right: "0",
+                }}
+              >
+                {tt[2].riveComponent}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                maxWidth: "400px",
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
+            >
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
+              >
+                {artboards[2].name}
+              </Typography>
+              <Typography fontSize={"20px"} fontWeight={300}>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
+                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
+                fugit odit?
+              </Typography>
+            </Box>
+          </Stack>
+        ),
+      },
+      {
+        animationSubsection: (
+          <Stack
+            key={artboards[3].name}
+            direction={isMobile ? "column" : "row-reverse"}
+            spacing={isMobile ? "0px" : "40px"}
+            alignItems={"stretch"}
+            alignSelf={"flex-start"}
+            sx={{ position: "relative", height: "900px", border: `2px dashed pink` }}
+          >
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  width: "800px",
+                  height: "800px",
+                  position: "absolute",
+                  top: "calc(50% - 400px)",
+                  left: "0px",
+                }}
+              >
+                {tt[3].riveComponent}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                maxWidth: "400px",
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
+            >
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
+              >
+                {artboards[3].name}
+              </Typography>
+              <Typography fontSize={"20px"} fontWeight={300}>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
+                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
+                fugit odit?
+              </Typography>
+            </Box>
+          </Stack>
+        ),
+      },
+      {
+        animationSubsection: (
+          <Stack
+            key={artboards[4].name}
+            direction={isMobile ? "column" : "row"}
+            spacing={isMobile ? "0px" : "40px"}
+            alignItems={"stretch"}
+            alignSelf={"flex-end"}
+            sx={{ position: "relative", height: "900px", border: `2px dashed skyblue` }}
+          >
+            <Box sx={{ position: "relative" }}>
+              <Box
+                sx={{
+                  width: "800px",
+                  height: "800px",
+                  position: "absolute",
+                  top: "calc(50% - 400px)",
+                  right: "0",
+                }}
+              >
+                {tt[4].riveComponent}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                maxWidth: "400px",
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
+            >
+              <Typography
+                gutterBottom
+                variant="h3"
+                component="h3"
+                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
+              >
+                {artboards[4].name}
+              </Typography>
+              <Typography fontSize={"20px"} fontWeight={300}>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
+                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
+                fugit odit?
+              </Typography>
+            </Box>
+          </Stack>
+        ),
+      },
+    ];
+  }, [isMobile, tt]);
+
+  const www = useMemo(
+    () => <>{dd.map(e => e.animationSubsection)}</>,
+
+    [dd]
+  );
   // useEffect(() => {
   //   if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
 
@@ -355,25 +631,7 @@ const Home = () => {
   };
 
   const detectScrollPosition = useCallback(
-    (
-      event: any,
-      {
-        rive1,
-        rive2,
-        rive3,
-        rive4,
-        rive5,
-        rive6,
-      }: {
-        rive1: Rive | null;
-        rive2: Rive | null;
-        rive3: Rive | null;
-        rive4: Rive | null;
-        rive5: Rive | null;
-        rive6: Rive | null;
-      }
-    ) => {
-      if (!rive1 || !rive2 || !rive3 || !rive4 || !rive5 || !rive6) return;
+    (event: any) => {
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
@@ -412,8 +670,8 @@ const Home = () => {
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
 
-        let showLandingOptions = false;
-        let showEndAnimationOptions = false;
+        // let showLandingOptions = false;
+        // let showEndAnimationOptions = false;
 
         if (idxAnimation < 0) return;
 
@@ -491,16 +749,16 @@ const Home = () => {
         }
 
         // update options display
-        setShowLandingOptions(showLandingOptions);
-        setShowAnimationOptions(showEndAnimationOptions);
+        // setShowLandingOptions(showLandingOptions);
+        // setShowAnimationOptions(showEndAnimationOptions);
       }
     },
-    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions]
   );
 
   const switchSection = useCallback(
     (sectionIdx: number, animationIndex = 0) => {
-      if (!rive3 || !rive4 || !rive5 || !rive6) return;
+      // if (!rive3 || !rive4 || !rive5 || !rive6) return;
 
       setNotSectionSwitching(false);
       const sectionsHeight = getSectionHeights();
@@ -523,22 +781,22 @@ const Home = () => {
         setShowLandingOptions(true);
         setIdxRiveComponent(animationIndex);
       }
-      if (sectionIdx === SECTION_WITH_ANIMATION) {
-        setIdxRiveComponent(animationIndex + 2);
-        // reset animation when jump through sections
-        if (animationIndex === 0) {
-          rive3.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 1) {
-          rive4.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 2) {
-          rive5.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 3) {
-          rive6.scrub("Timeline 1", 0);
-        }
-      }
+      // if (sectionIdx === SECTION_WITH_ANIMATION) {
+      //   setIdxRiveComponent(animationIndex + 2);
+      //   // reset animation when jump through sections
+      //   if (animationIndex === 0) {
+      //     rive3.scrub("Timeline 1", 0);
+      //   }
+      //   if (animationIndex === 1) {
+      //     rive4.scrub("Timeline 1", 0);
+      //   }
+      //   if (animationIndex === 2) {
+      //     rive5.scrub("Timeline 1", 0);
+      //   }
+      //   if (animationIndex === 3) {
+      //     rive6.scrub("Timeline 1", 0);
+      //   }
+      // }
 
       setSelectedSection(sectionIdx);
       setSelectedAnimation(animationIndex);
@@ -547,7 +805,7 @@ const Home = () => {
         setNotSectionSwitching(true);
       }, 1000);
     },
-    [getAnimationsHeight, getSectionHeights, rive3, rive4, rive5, rive6]
+    [getAnimationsHeight, getSectionHeights]
   );
 
   const signUpHandler = () => {
@@ -557,7 +815,7 @@ const Home = () => {
   return (
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
+      onScroll={e => detectScrollPosition(e)}
       sx={{
         height: "100vh",
         overflowY: "auto",
@@ -663,10 +921,8 @@ const Home = () => {
                     {sectionsOrder[5].label}
                   </Typography>
                 </Tooltip>
-                <h6>{rive3InView ? "T" : "F"}</h6>
-                <h6>{rive4InView ? "T" : "F"}</h6>
-                <h6>{rive5InView ? "T" : "F"}</h6>
-                <h6>{rive6InView ? "T" : "F"}</h6>
+
+                <button onClick={() => setRender(prev => !prev)}>render</button>
               </>
             )}
           </Stack>
@@ -834,14 +1090,7 @@ const Home = () => {
                 </Button>
               }
             >
-              <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
-                {/* <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} /> */}
-                {/* <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} /> */}
-              </Box>
+              {www}
             </HowItWorks>
           </Box>
           <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
