@@ -286,7 +286,7 @@ const Home = () => {
             spacing={isMobile ? "0px" : "40px"}
             alignItems={"stretch"}
             alignSelf={"flex-end"}
-            sx={{ position: "relative", height: "900px", border: `2px dashed red` }}
+            sx={{ position: "relative", height: "900px" /* , border: `2px dashed red` */ }}
           >
             <Box sx={{ position: "relative" }}>
               <Box
@@ -339,7 +339,7 @@ const Home = () => {
             spacing={isMobile ? "0px" : "40px"}
             alignItems={"stretch"}
             alignSelf={"flex-start"}
-            sx={{ position: "relative", height: "900px", border: `2px dashed blue` }}
+            sx={{ position: "relative", height: "900px" /* , border: `2px dashed blue` */ }}
           >
             <Box sx={{ position: "relative" }}>
               <Box
@@ -392,7 +392,7 @@ const Home = () => {
             spacing={isMobile ? "0px" : "40px"}
             alignItems={"stretch"}
             alignSelf={"flex-end"}
-            sx={{ position: "relative", height: "900px", border: `2px dashed yellow` }}
+            sx={{ position: "relative", height: "900px" /* , border: `2px dashed yellow`  */ }}
           >
             <Box sx={{ position: "relative" }}>
               <Box
@@ -445,7 +445,7 @@ const Home = () => {
             spacing={isMobile ? "0px" : "40px"}
             alignItems={"stretch"}
             alignSelf={"flex-start"}
-            sx={{ position: "relative", height: "900px", border: `2px dashed pink` }}
+            sx={{ position: "relative", height: "900px" /* , border: `2px dashed pink` */ }}
           >
             <Box sx={{ position: "relative" }}>
               <Box
@@ -498,7 +498,7 @@ const Home = () => {
             spacing={isMobile ? "0px" : "40px"}
             alignItems={"stretch"}
             alignSelf={"flex-end"}
-            sx={{ position: "relative", height: "900px", border: `2px dashed skyblue` }}
+            sx={{ position: "relative", height: "900px" /* , border: `2px dashed skyblue` */ }}
           >
             <Box sx={{ position: "relative" }}>
               <Box
