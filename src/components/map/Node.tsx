@@ -17,10 +17,12 @@ import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LeaderboardChip from "../LeaderboardChip";
+import NodeTypeIcon from "../NodeTypeIcon";
 import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
 import NewChildProposal from "./NewChildProposal";
+import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -46,7 +48,7 @@ type NodeProps = {
   width: number;
   editable: boolean;
   unaccepted: any;
-  nodeType: string;
+  nodeType: any;
   isTag: boolean;
   isNew: any;
   title: string;
@@ -573,15 +575,10 @@ const Node = ({
       }}
     >
       {/* INFO: uncomment this only on develope */}
-      {process.env.NODE_ENV === "development" && identifier}
+
       {open ? (
         <>
-          <div
-            className="card-content"
-            style={{
-              marginTop: "10px",
-            }}
-          >
+          <div className="card-content">
             <div className="card-title" data-hoverable={true}>
               {editable && isNew && (
                 <>
@@ -611,7 +608,7 @@ const Node = ({
                     justifyContent: "end",
                     alignItems: "center",
                     position: "relative",
-                    top: "-10px",
+                    top: "-5px",
                   }}
                 >
                   <Typography

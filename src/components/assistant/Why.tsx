@@ -51,8 +51,7 @@ const Values = () => {
   });
 
   useEffect(() => {
-    if (!rive) return;
-
+    if (!rive || !rive.play) return;
     rive.play(["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"]);
   }, [rive, theme.palette.mode]);
 
@@ -90,7 +89,7 @@ const Values = () => {
               className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
             >
               {idx === 2 ? (
-                <Box sx={{ width: "300px", height: "200px" }}>
+                <Box sx={{ width: "300px", height: "200px", flex: 1 }}>
                   <RiveComponentMeettings />
                 </Box>
               ) : (
@@ -102,7 +101,15 @@ const Values = () => {
               )}
             </Box>
             <Box
-              sx={{ p: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}
+              sx={{
+                p: "10px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                "& > *:not(:last-child)": {
+                  mb: "12px",
+                },
+              }}
               className={inViewOnces[idx] ? (idx % 2 !== 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
             >
               <Typography
@@ -113,12 +120,19 @@ const Values = () => {
               >
                 {value.name}
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{ textAlign: "left", color: getGrayColorText(), fontSize: isMobile ? "16px" : "20px" }}
-              >
-                {value.body}
-              </Typography>
+              {value.body.split("\n").map((paragraph, idx) => (
+                <Typography
+                  key={idx}
+                  variant="body2"
+                  sx={{
+                    textAlign: "left",
+                    color: getGrayColorText(),
+                    fontSize: "16px",
+                  }}
+                >
+                  {paragraph}
+                </Typography>
+              ))}
             </Box>
           </Stack>
         ))}

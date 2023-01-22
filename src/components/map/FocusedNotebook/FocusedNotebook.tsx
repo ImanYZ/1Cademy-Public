@@ -123,7 +123,13 @@ const FocusedNotebook = ({
       >
         <Tooltip title={"hide expand view"} placement="bottom">
           <CloseIcon
-            sx={{ position: "absolute", top: "20px", right: "20px", zIndex: "99" }}
+            sx={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              zIndex: "99",
+              color: theme => theme.palette.common.white,
+            }}
             onClick={() => setFocusView({ isEnabled: false, selectedNode: "" })}
           />
         </Tooltip>
