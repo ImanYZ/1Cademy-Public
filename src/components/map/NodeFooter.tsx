@@ -38,6 +38,7 @@ import shortenNumber from "../../lib/utils/shortenNumber";
 import { FullNodeData, OpenPart } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
 import { MemoizedHeadlessLeaderboardChip } from "../map/FocusedNotebook/HeadlessLeaderboardChip";
+import NodeTypeIcon from "../NodeTypeIcon";
 import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
 import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
@@ -438,13 +439,17 @@ const NodeFooter = ({
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
 
-            {!locked && editable && (
-              <MemoizedNodeTypeSelector nodeId={identifier} setNodeParts={setNodeParts} nodeType={nodeType} />
-            )}
+            {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+            {!locked &&
+              (editable ? (
+                <MemoizedNodeTypeSelector nodeId={identifier} setNodeParts={setNodeParts} nodeType={nodeType} />
+              ) : (
+                <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+              ))}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
                 new Date(changedAt)
-              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day()}/${
+              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
                 dayjs(new Date(changedAt)).month() + 1
               }/${dayjs(new Date(changedAt)).year()}`}
               placement={"top"}
@@ -497,7 +502,9 @@ const NodeFooter = ({
                             ? theme.palette.common.darkBackground2
                             : theme.palette.common.lightBackground2,
                       },
-                      padding: "7px 0px",
+                      padding: "7px 7px",
+                      minWidth: "30px",
+                      height: "30px",
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>

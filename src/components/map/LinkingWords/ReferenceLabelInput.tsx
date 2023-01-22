@@ -35,6 +35,7 @@ export const ReferenceLabelInput = ({
         fullWidth
         size="small"
         sx={sx}
+        autoFocus={true}
       />
     </>
   );
