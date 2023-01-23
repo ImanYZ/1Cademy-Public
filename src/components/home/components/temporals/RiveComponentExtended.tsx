@@ -16,11 +16,7 @@ const RiveComponentExtended = ({ src, artboard, animations, autoplay }: RiveProp
     animations,
     autoplay,
   });
-  // useEffect(() => {
-  //   if (!rive) return;
-  //   inView ? rive.play() : rive.pause();
-  //   console.log(inView);
-  // }, [inView, rive]);
+
   return (
     <div style={{ width: "700px", height: "700px" }}>
       <RiveComponent className={`rive-canvas `} />
