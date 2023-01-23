@@ -6,15 +6,21 @@ export type RiveProps = {
   artboard: string;
   animations: string | string[];
   autoplay: boolean;
+  inView?: boolean;
 };
 
 const RiveComponentExtended = ({ src, artboard, animations, autoplay }: RiveProps) => {
-  const { RiveComponent: RiveComponent } = useRive({
+  const { RiveComponent } = useRive({
     src,
     artboard,
     animations,
     autoplay,
   });
+  // useEffect(() => {
+  //   if (!rive) return;
+  //   inView ? rive.play() : rive.pause();
+  //   console.log(inView);
+  // }, [inView, rive]);
   return (
     <div style={{ width: "700px", height: "700px" }}>
       <RiveComponent className={`rive-canvas `} />

@@ -23,10 +23,9 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRive } from "rive-react";
 
-import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
@@ -58,11 +57,11 @@ const section1ArtBoards = [
 ];
 
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
-  { name: "Building", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
-  { name: "Linking", durationMs: 26000, getHeight: () => 900, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: () => 900, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: () => 900, color: "#62f336" },
+  { name: "Summarizing", artoboard: "artboard-3", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
+  { name: "Building", artoboard: "artboard-4", durationMs: 7000, getHeight: () => 900, color: "#f33636" },
+  { name: "Linking", artoboard: "artboard-5", durationMs: 26000, getHeight: () => 900, color: "#f38b36" },
+  { name: "Evaluating", artoboard: "artboard-6", durationMs: 4000, getHeight: () => 900, color: "#e6f336" },
+  { name: "Improving", artoboard: "artboard-7", durationMs: 14000, getHeight: () => 900, color: "#62f336" },
 ];
 export const SECTION_WITH_ANIMATION = 1;
 
@@ -212,345 +211,6 @@ const Home = () => {
   //   rive1.play();
   // }, [rive1]);
 
-  const tt = useMemo(() => {
-    return [
-      {
-        ...artboards[0],
-        riveComponent: (
-          <RiveComponentMemoized
-            src="rive/notebook.riv"
-            artboard="artboard-3"
-            animations={["Timeline 1", theme.palette.mode]}
-            autoplay={true}
-          />
-          // <Box ref={rive3Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue" */ }}>
-          // </Box>
-        ),
-      },
-      {
-        ...artboards[1],
-        riveComponent: (
-          <RiveComponentMemoized
-            src="rive/notebook.riv"
-            artboard="artboard-4"
-            animations={["Timeline 1", theme.palette.mode]}
-            autoplay={true}
-          />
-          // <Box ref={rive4Ref} sx={{ height: "inherit", width: "inherit" /* , border: "solid 2px royalBlue"  */ }}>
-          // </Box>
-        ),
-      },
-      {
-        ...artboards[2],
-        riveComponent: (
-          <RiveComponentMemoized
-            src="rive/notebook.riv"
-            artboard="artboard-5"
-            animations={["Timeline 1", theme.palette.mode]}
-            autoplay={true}
-          />
-        ),
-      },
-      {
-        ...artboards[3],
-        riveComponent: (
-          <RiveComponentMemoized
-            src="rive/notebook.riv"
-            artboard="artboard-6"
-            animations={["Timeline 1", theme.palette.mode]}
-            autoplay={true}
-          />
-        ),
-      },
-      {
-        ...artboards[4],
-        riveComponent: (
-          <RiveComponentMemoized
-            src="rive/notebook.riv"
-            artboard="artboard-7"
-            animations={["Timeline 1", theme.palette.mode]}
-            autoplay={true}
-          />
-        ),
-      },
-    ];
-  }, [theme.palette.mode]);
-
-  const dd = useMemo(() => {
-    return [
-      {
-        animationSubsection: (
-          <Stack
-            key={artboards[0].name}
-            direction={isMobile ? "column" : "row"}
-            spacing={isMobile ? "0px" : "40px"}
-            alignItems={"stretch"}
-            alignSelf={"flex-end"}
-            sx={{ position: "relative", height: "900px" /* , border: `2px dashed red` */ }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <Box
-                sx={{
-                  width: "800px",
-                  height: "800px",
-                  position: "absolute",
-                  top: "calc(50% - 400px)",
-                  right: "0",
-                }}
-              >
-                {tt[0].riveComponent}
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                maxWidth: "400px",
-                p: "10px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                "& > *:not(:last-child)": {
-                  mb: "12px",
-                },
-              }}
-            >
-              <Typography
-                gutterBottom
-                variant="h3"
-                component="h3"
-                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
-              >
-                {artboards[0].name}
-              </Typography>
-              <Typography fontSize={"20px"} fontWeight={300}>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
-                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
-                fugit odit?
-              </Typography>
-            </Box>
-          </Stack>
-        ),
-      },
-      {
-        animationSubsection: (
-          <Stack
-            key={artboards[1].name}
-            direction={isMobile ? "column" : "row-reverse"}
-            spacing={isMobile ? "0px" : "40px"}
-            alignItems={"stretch"}
-            alignSelf={"flex-start"}
-            sx={{ position: "relative", height: "900px" /* , border: `2px dashed blue` */ }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <Box
-                sx={{
-                  width: "800px",
-                  height: "800px",
-                  position: "absolute",
-                  top: "calc(50% - 400px)",
-                  left: "0px",
-                }}
-              >
-                {tt[1].riveComponent}
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                maxWidth: "400px",
-                p: "10px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                "& > *:not(:last-child)": {
-                  mb: "12px",
-                },
-              }}
-            >
-              <Typography
-                gutterBottom
-                variant="h3"
-                component="h3"
-                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
-              >
-                {artboards[1].name}
-              </Typography>
-              <Typography fontSize={"20px"} fontWeight={300}>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
-                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
-                fugit odit?
-              </Typography>
-            </Box>
-          </Stack>
-        ),
-      },
-      {
-        animationSubsection: (
-          <Stack
-            key={artboards[2].name}
-            direction={isMobile ? "column" : "row"}
-            spacing={isMobile ? "0px" : "40px"}
-            alignItems={"stretch"}
-            alignSelf={"flex-end"}
-            sx={{ position: "relative", height: "900px" /* , border: `2px dashed yellow`  */ }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <Box
-                sx={{
-                  width: "800px",
-                  height: "800px",
-                  position: "absolute",
-                  top: "calc(50% - 400px)",
-                  right: "0",
-                }}
-              >
-                {tt[2].riveComponent}
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                maxWidth: "400px",
-                p: "10px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                "& > *:not(:last-child)": {
-                  mb: "12px",
-                },
-              }}
-            >
-              <Typography
-                gutterBottom
-                variant="h3"
-                component="h3"
-                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
-              >
-                {artboards[2].name}
-              </Typography>
-              <Typography fontSize={"20px"} fontWeight={300}>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
-                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
-                fugit odit?
-              </Typography>
-            </Box>
-          </Stack>
-        ),
-      },
-      {
-        animationSubsection: (
-          <Stack
-            key={artboards[3].name}
-            direction={isMobile ? "column" : "row-reverse"}
-            spacing={isMobile ? "0px" : "40px"}
-            alignItems={"stretch"}
-            alignSelf={"flex-start"}
-            sx={{ position: "relative", height: "900px" /* , border: `2px dashed pink` */ }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <Box
-                sx={{
-                  width: "800px",
-                  height: "800px",
-                  position: "absolute",
-                  top: "calc(50% - 400px)",
-                  left: "0px",
-                }}
-              >
-                {tt[3].riveComponent}
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                maxWidth: "400px",
-                p: "10px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                "& > *:not(:last-child)": {
-                  mb: "12px",
-                },
-              }}
-            >
-              <Typography
-                gutterBottom
-                variant="h3"
-                component="h3"
-                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
-              >
-                {artboards[3].name}
-              </Typography>
-              <Typography fontSize={"20px"} fontWeight={300}>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
-                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
-                fugit odit?
-              </Typography>
-            </Box>
-          </Stack>
-        ),
-      },
-      {
-        animationSubsection: (
-          <Stack
-            key={artboards[4].name}
-            direction={isMobile ? "column" : "row"}
-            spacing={isMobile ? "0px" : "40px"}
-            alignItems={"stretch"}
-            alignSelf={"flex-end"}
-            sx={{ position: "relative", height: "900px" /* , border: `2px dashed skyblue` */ }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <Box
-                sx={{
-                  width: "800px",
-                  height: "800px",
-                  position: "absolute",
-                  top: "calc(50% - 400px)",
-                  right: "0",
-                }}
-              >
-                {tt[4].riveComponent}
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                maxWidth: "400px",
-                p: "10px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                "& > *:not(:last-child)": {
-                  mb: "12px",
-                },
-              }}
-            >
-              <Typography
-                gutterBottom
-                variant="h3"
-                component="h3"
-                sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
-              >
-                {artboards[4].name}
-              </Typography>
-              <Typography fontSize={"20px"} fontWeight={300}>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae dolor, laboriosam temporibus impedit qui
-                tempora, necessitatibus dolorum sit rem, enim reiciendis optio voluptatum culpa eos quas magni libero
-                fugit odit?
-              </Typography>
-            </Box>
-          </Stack>
-        ),
-      },
-    ];
-  }, [isMobile, tt]);
-
-  const www = useMemo(
-    () => <>{dd.map(e => e.animationSubsection)}</>,
-
-    [dd]
-  );
   // useEffect(() => {
   //   if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
 
@@ -1075,7 +735,7 @@ const Home = () => {
             <HowItWorks
               section={sectionSelected}
               // artboards={[...section1ArtBoards, ...artboards]}
-              artboards={tt}
+              artboards={artboards}
               animationOptions={
                 <Button
                   variant="contained"
@@ -1089,9 +749,7 @@ const Home = () => {
                   Apply to Join Us!
                 </Button>
               }
-            >
-              {www}
-            </HowItWorks>
+            />
           </Box>
           <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
