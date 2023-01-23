@@ -281,7 +281,7 @@ const Home = () => {
     return [
       { id: HomeSectionRef.current.id, height: 0 },
       { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
-      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight },
+      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
       { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
@@ -480,6 +480,7 @@ const Home = () => {
       const sectionsHeight = getSectionHeights();
       if (!sectionsHeight) return;
 
+      console.log({ sectionsHeight });
       const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
       const sectionResult = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
 
