@@ -118,9 +118,9 @@ const sectionsTmp = [
   },
   { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
+  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
-  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 // const AnimationObserverOptions = { options: { threshold: 0.35, root: null, rootMargin: "0px" } };
@@ -278,16 +278,17 @@ const Home = () => {
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whatEntry) return null;
+    if (!whichEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
-    if (!whichEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: 0 },
       { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
       { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
-      { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whereEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
     ];
   }, [whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
@@ -306,6 +307,7 @@ const Home = () => {
       { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
@@ -345,7 +347,6 @@ const Home = () => {
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
-        console.log({ sectionsHeight });
         if (!sectionsHeight) return;
 
         const { min, idx: idxSection } = sectionsHeight.reduce(
@@ -370,7 +371,6 @@ const Home = () => {
             animationRefs.current.getHeight5(),
           ];
           animationsHeight = getAnimationsPositions(animationsHeightsArray);
-          console.log({ animationsHeight });
         }
 
         const { /* maxAnimation, minAnimation, */ idxAnimation } = animationsHeight.reduce(
@@ -484,7 +484,6 @@ const Home = () => {
       const sectionsHeight = getSectionHeights();
       if (!sectionsHeight) return;
 
-      console.log({ sectionsHeight });
       const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
       const sectionResult = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
 
@@ -499,7 +498,7 @@ const Home = () => {
         animationRefs.current.getHeight5(),
       ];
       const animationsHeight = getAnimationsHeight(animationsHeights);
-      console.log({ animationsHeight });
+
       if (animationsHeight) {
         if (animationIndex >= 0) {
           const animationSectionTitleHeight = 121;
@@ -906,7 +905,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder[4].id} ref={whichSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -915,71 +914,6 @@ const Home = () => {
               sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[4].title}
-            </CustomTypography>
-            {!whereInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "green" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
-              >
-                <UniversitiesMap theme={"Dark"} />
-              </Suspense>
-            )}
-          </Box>
-
-          <Box id={sectionsOrder[5].id} ref={whoSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder[5].title}
-            </CustomTypography>
-            {!whoInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Box
-                    sx={{
-                      pt: 7,
-                      pb: 10,
-                      position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Grid container spacing={2.5}>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                }
-              >
-                <WhoWeAre />
-              </Suspense>
-            )}
-          </Box>
-
-          <Box id={sectionsOrder[6].id} ref={whichSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder[6].title}
             </CustomTypography>
             {!whichInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
@@ -1011,6 +945,71 @@ const Home = () => {
                 }
               >
                 <Which />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[5].id} ref={whereSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[5].title}
+            </CustomTypography>
+            {!whereInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "green" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
+              >
+                <UniversitiesMap theme={"Dark"} />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[6].id} ref={whoSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[6].title}
+            </CustomTypography>
+            {!whoInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <WhoWeAre />
               </Suspense>
             )}
           </Box>

@@ -8,7 +8,7 @@ import { useWindowSize } from "../../../hooks/useWindowSize";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import Typography from "../components/Typography copy";
 
-const HowItWorks = (props: any, ref) => {
+const HowItWorks = (props: any, ref: any) => {
   // const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -23,7 +23,7 @@ const HowItWorks = (props: any, ref) => {
 
   useImperativeHandle(ref, () => ({
     getHeight1: () => {
-      console.log("h1:", ref1.current.clientHeight);
+      // console.log("h1:", ref1.current.clientHeight);
       return ref1?.current ? ref1.current.clientHeight : 0;
     },
     getHeight2: () => (ref2?.current ? ref2.current.clientHeight : 0),
@@ -103,7 +103,7 @@ const HowItWorks = (props: any, ref) => {
   //   window.addEventListener("resize", () => {});
   // }, []);
 
-  console.log(canvasDimension);
+  // console.log(canvasDimension);
 
   const AnimationSections = useMemo(() => {
     return props.artboards.map((artboard: any, idx: number, src: any[]) => (
@@ -179,7 +179,16 @@ const HowItWorks = (props: any, ref) => {
         </Box>
       </Stack>
     ));
-  }, [canvasDimension.width, getGrayColorText, isMobile, props.artboards, refs, theme.palette.mode]);
+  }, [
+    canvasDimension.height,
+    canvasDimension.width,
+    getGrayColorText,
+    isMobile,
+    props.artboards,
+    refs,
+    theme.palette.mode,
+    width,
+  ]);
 
   return (
     <Box
