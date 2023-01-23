@@ -157,12 +157,12 @@ const Home = () => {
 
   const animationRefs = useRef<any | null>(null);
 
-  // const { rive: rive1 /* , RiveComponent: RiveComponent1 */ } = useRive({
-  // src: "rive/artboard-1.riv",
-  // artboard: "artboard-1",
-  // animations: ["Timeline 1", "dark", "light"],
-  // autoplay: false,
-  // });
+  const { RiveComponent: RiveComponent1 } = useRive({
+    src: "rive/artboard-1.riv",
+    artboard: "artboard-1",
+    animations: ["Timeline 1", "dark", "light"],
+    autoplay: true,
+  });
 
   // const { rive: rive2 /* , RiveComponent: RiveComponent2 */ } = useRive({
   //   src: "rive/artboard-2.riv",
@@ -757,7 +757,11 @@ const Home = () => {
           }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
-            {/* <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} /> */}
+            <Box
+              sx={{ width: width > height / 2 ? width / 2 : height, height: width > height ? width / 2 : height / 2 }}
+            >
+              <RiveComponent1 className={`rive-canvas`} />
+            </Box>
             <Typography
               color="white"
               variant="h5"
