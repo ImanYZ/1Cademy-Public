@@ -1,6 +1,6 @@
 import { Stack, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import { gray03 } from "@/pages/index";
 
@@ -12,6 +12,7 @@ const HowItWorks = (props: any, ref) => {
   // const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isMobile = useMediaQuery("(max-width:600px)");
 
+  const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
   const ref1 = useRef<any | null>(null);
   const ref2 = useRef<any | null>(null);
   const ref3 = useRef<any | null>(null);
@@ -42,40 +43,77 @@ const HowItWorks = (props: any, ref) => {
     [theme.palette.common.darkBackground2, theme.palette.mode]
   );
 
-  const containerResponsiveProps = useMemo(() => {
-    const getHeight = (width: number) => (300 * width) / 500;
+  // const containerResponsiveProps = useMemo(() => {
+  //   console.log(width);
+  //   if (width > 1350) return { width: "800px", height: getHeight(800), top: "calc(50% - 400px)" };
+  //   if (width > 1200) return { width: "700px", height: getHeight(700), top: "calc(50% - 350px)" };
+  //   if (width > 900) return { width: "550px", height: getHeight(550), top: "calc(50% - 275px)" };
+  //   if (width > 600) return { width: "500px", height: getHeight(500), top: "calc(50% - 225px)" };
+  //   return { width: "450px", height: getHeight(450), top: "0px" };
+  // }, [width]);
 
-    console.log(width);
-    if (width > 1350) return { width: "800px", height: getHeight(800), top: "calc(50% - 400px)" };
-    if (width > 1200) return { width: "700px", height: getHeight(700), top: "calc(50% - 350px)" };
-    if (width > 900) return { width: "550px", height: getHeight(550), top: "calc(50% - 275px)" };
-    if (width > 600) return { width: "500px", height: getHeight(500), top: "calc(50% - 225px)" };
-    return { width: "450px", height: getHeight(450), top: "0px" };
+  useEffect(() => {
+    let newCanvasDimension = { width: 0, height: 0 };
+    if (width > 1200) {
+      newCanvasDimension = { width: 800, height: getHeight(800) };
+    } else if (width > 900) {
+      newCanvasDimension = { width: 600, height: getHeight(600) };
+    } else if (width > 600) {
+      newCanvasDimension = { width: 400, height: getHeight(400) };
+    } else {
+      newCanvasDimension = { width: 300, height: getHeight(300) };
+    }
+    setCanvasDimension(newCanvasDimension);
   }, [width]);
 
+  // const resize = useCallback(() => {
+  //   if (!document) return;
+  //   const canvas = document.getElementById("animation") as HTMLCanvasElement;
+  //   if (!canvas) return;
+
+  //   console.log("container.clientWidth");
+  //   const ratio = canvas.width / canvas.height;
+
+  //   const widthCanvas = (width / 2) * ratio;
+  //   const heightCanvas = width * ratio;
+  //   // console.log({ height, width, ratio });
+
+  //   if (window.innerWidth < 1200 && width > 600) {
+  //     if (canvasDimension.width - width > 100) {
+  //       canvas.style.width = `${widthCanvas}px`;
+  //       canvas.style.height = `${heightCanvas}px`;
+  //       setCanvasDimension({ width: widthCanvas, height: heightCanvas });
+  //     }
+  //   }
+  // }, [canvasDimension, width]);
+
+  console.log(canvasDimension);
+
   const AnimationSections = useMemo(() => {
-    return props.artboards.map((artboard: any, idx: number) => (
+    return props.artboards.map((artboard: any, idx: number, src: any[]) => (
       <Stack
         // ref={idx === 0 ? ref4 : undefined}
         ref={refs[idx]}
         key={artboard.name}
-        direction={isMobile ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
-        spacing={isMobile ? "20px" : "40px"}
-        alignItems={isMobile ? "center" : "stretch"}
-        alignSelf={isMobile ? "center" : idx % 2 === 0 ? "flex-end" : "flex-start"}
+        direction={width < 900 ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
+        spacing={width < 900 ? "20px" : "40px"}
+        alignItems={width < 900 ? "center" : "stretch"}
+        alignSelf={width < 900 ? "center" : idx % 2 === 0 ? "flex-end" : "flex-start"}
         sx={{ position: "relative", minHeight: "500px", border: `2px dashed red` }}
       >
         <Box sx={{ position: "relative" }}>
           <Box
             sx={{
-              position: isMobile ? "relative" : "absolute",
-              // width: isLargeDesktop ? "800px" : "600px",
-              // height: isLargeDesktop ? "800px" : "600px",
-              // top: "calc(50% - 400px)",
+              position: width < 900 ? "relative" : "absolute",
+              width: `${canvasDimension.width}px`,
+              height: `${canvasDimension.height}px`,
               left: idx % 2 === 0 ? undefined : "0",
               right: idx % 2 === 1 ? undefined : "0",
-              ...containerResponsiveProps,
               border: "solid 1px royalBlue",
+              top: 0,
+              bottom: 0,
+              display: "grid",
+              placeItems: "center",
             }}
           >
             <RiveComponentMemoized
@@ -89,7 +127,7 @@ const HowItWorks = (props: any, ref) => {
 
         <Box
           sx={{
-            maxWidth: "400px",
+            maxWidth: width < 900 ? "600px" : "400px",
             p: "10px",
             display: "flex",
             flexDirection: "column",
@@ -97,6 +135,7 @@ const HowItWorks = (props: any, ref) => {
             "& > *:not(:last-child)": {
               mb: "12px",
             },
+            pb: idx < src.length - 1 ? "100px" : "0px",
           }}
         >
           <Typography
@@ -123,7 +162,7 @@ const HowItWorks = (props: any, ref) => {
         </Box>
       </Stack>
     ));
-  }, [containerResponsiveProps, getGrayColorText, isMobile, props.artboards, refs, theme.palette.mode]);
+  }, [canvasDimension.width, getGrayColorText, isMobile, props.artboards, refs, theme.palette.mode]);
 
   return (
     <Box
@@ -140,6 +179,8 @@ const HowItWorks = (props: any, ref) => {
     </Box>
   );
 };
+
+const getHeight = (width: number) => (300 * width) / 500;
 
 const FancyInputFordwarded = forwardRef(HowItWorks);
 
