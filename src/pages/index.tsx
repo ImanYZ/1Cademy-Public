@@ -20,6 +20,7 @@ const UniversitiesMap = dynamic(() => import("../components/home/components/Univ
   ssr: false,
 });
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
+const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -119,6 +120,7 @@ const sectionsTmp = [
   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
+  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 // const AnimationObserverOptions = { options: { threshold: 0.35, root: null, rootMargin: "0px" } };
@@ -138,13 +140,14 @@ const Home = () => {
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
   const [openSearch, setOpenSearch] = useState(false);
-  const [, /* render */ setRender] = useState(false);
+  // const [, /* render */ setRender] = useState(false);
   const router = useRouter();
 
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
+  const { entry: whichEntry, inViewOnce: whichInViewOnce, ref: whichSectionRef } = useInView();
   const { inView: footerInView, ref: footerSectionRef } = useInView({
     options: footerOptions,
   });
@@ -277,6 +280,7 @@ const Home = () => {
     if (!whatEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
+    if (!whichEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: 0 },
@@ -286,7 +290,7 @@ const Home = () => {
       { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+  }, [whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
     if (!HomeSectionRef?.current) return null;
@@ -295,6 +299,7 @@ const Home = () => {
     if (!whatEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
+    if (!whichEntry) return null;
 
     return [
       { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
@@ -304,7 +309,7 @@ const Home = () => {
       { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+  }, [whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
   // const getAnimationsHeight = useCallback(() => {
   //   const res = artboards.map(artboard => artboard.getHeight(isMobile));
@@ -649,8 +654,18 @@ const Home = () => {
                     {sectionsOrder[5].label}
                   </Typography>
                 </Tooltip>
-
-                <button onClick={() => setRender(prev => !prev)}>render</button>
+                <Tooltip title={sectionsOrder[6].title}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      borderBottom: theme =>
+                        sectionSelected === 6 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                    }}
+                    onClick={() => switchSection(6)}
+                  >
+                    {sectionsOrder[6].label}
+                  </Typography>
+                </Tooltip>
               </>
             )}
           </Stack>
@@ -955,8 +970,53 @@ const Home = () => {
               </Suspense>
             )}
           </Box>
+
+          <Box id={sectionsOrder[6].id} ref={whichSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[6].title}
+            </CustomTypography>
+            {!whichInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <Which />
+              </Suspense>
+            )}
+          </Box>
         </Box>
       </Box>
+
       <Box ref={footerSectionRef}>
         <AppFooter
           sx={{
