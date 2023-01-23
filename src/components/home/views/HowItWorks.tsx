@@ -52,22 +52,9 @@ const HowItWorks = (props: any, ref) => {
   //   return { width: "450px", height: getHeight(450), top: "0px" };
   // }, [width]);
 
-  useEffect(() => {
-    let newCanvasDimension = { width: 0, height: 0 };
-    if (width > 1200) {
-      newCanvasDimension = { width: 800, height: getHeight(800) };
-    } else if (width > 900) {
-      newCanvasDimension = { width: 600, height: getHeight(600) };
-    } else if (width > 600) {
-      newCanvasDimension = { width: 400, height: getHeight(400) };
-    } else {
-      newCanvasDimension = { width: 300, height: getHeight(300) };
-    }
-    setCanvasDimension(newCanvasDimension);
-  }, [width]);
-
   // const resize = useCallback(() => {
   //   if (!document) return;
+
   //   const canvas = document.getElementById("animation") as HTMLCanvasElement;
   //   if (!canvas) return;
 
@@ -78,14 +65,43 @@ const HowItWorks = (props: any, ref) => {
   //   const heightCanvas = width * ratio;
   //   // console.log({ height, width, ratio });
 
-  //   if (window.innerWidth < 1200 && width > 600) {
+  //   if (width < 1200 && width > 900) {
   //     if (canvasDimension.width - width > 100) {
-  //       canvas.style.width = `${widthCanvas}px`;
-  //       canvas.style.height = `${heightCanvas}px`;
+  //       // canvas.style.width = `${widthCanvas}px`;
+  //       // canvas.style.height = `${heightCanvas}px`;
   //       setCanvasDimension({ width: widthCanvas, height: heightCanvas });
   //     }
   //   }
   // }, [canvasDimension, width]);
+
+  useEffect(() => {
+    // let newCanvasDimension = { width: 0, height: 0 };
+    // if (width > 1200) {
+    //   newCanvasDimension = { width: 800, height: getHeight(800) };
+    // } else if (width > 900) {
+    //   newCanvasDimension = { width: 600, height: getHeight(600) };
+    // } else if (width > 600) {
+    //   newCanvasDimension = { width: 400, height: getHeight(400) };
+    // } else {
+    //   newCanvasDimension = { width: 300, height: getHeight(300) };
+    // }
+    // setCanvasDimension(newCanvasDimension);
+
+    let newWidth = width / 2;
+    if (width > 1536) newWidth = 700;
+    else if (width > 1200) newWidth = 500;
+    else if (width > 900) newWidth = width / 2;
+    else if (width > 600) newWidth = width - 60;
+    else if (width > 0) newWidth = width - 40;
+
+    const newHeight = getHeight(newWidth);
+    setCanvasDimension({ width: newWidth, height: newHeight });
+  }, [width]);
+
+  // useEffect(() => {
+  //   if (!window) return;
+  //   window.addEventListener("resize", () => {});
+  // }, []);
 
   console.log(canvasDimension);
 
@@ -99,29 +115,30 @@ const HowItWorks = (props: any, ref) => {
         spacing={width < 900 ? "20px" : "40px"}
         alignItems={width < 900 ? "center" : "stretch"}
         alignSelf={width < 900 ? "center" : idx % 2 === 0 ? "flex-end" : "flex-start"}
-        sx={{ position: "relative", minHeight: "500px", border: `2px dashed red` }}
+        sx={{ position: "relative", minHeight: "500px" /* , border: `2px dashed red` */ }}
       >
         <Box sx={{ position: "relative" }}>
           <Box
             sx={{
               position: width < 900 ? "relative" : "absolute",
-              width: `${canvasDimension.width}px`,
-              height: `${canvasDimension.height}px`,
+
               left: idx % 2 === 0 ? undefined : "0",
               right: idx % 2 === 1 ? undefined : "0",
-              border: "solid 1px royalBlue",
+              /* border: "solid 1px royalBlue", */
               top: 0,
               bottom: 0,
-              display: "grid",
-              placeItems: "center",
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            <RiveComponentMemoized
-              src="rive/notebook.riv"
-              artboard={artboard.artoboard}
-              animations={["Timeline 1", theme.palette.mode]}
-              autoplay={true}
-            />
+            <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+              <RiveComponentMemoized
+                src="rive/notebook.riv"
+                artboard={artboard.artoboard}
+                animations={["Timeline 1", theme.palette.mode]}
+                autoplay={true}
+              />
+            </Box>
           </Box>
         </Box>
 
