@@ -142,9 +142,7 @@ const Home = () => {
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
   const { entry: whichEntry, inViewOnce: whichInViewOnce, ref: whichSectionRef } = useInView();
-  const { inView: footerInView, ref: footerSectionRef } = useInView({
-    options: footerOptions,
-  });
+  const { inView: footerInView, ref: footerSectionRef } = useInView({ options: footerOptions });
   const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });

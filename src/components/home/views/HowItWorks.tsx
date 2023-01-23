@@ -21,9 +21,7 @@ const HowItWorks = (props: any, ref: any) => {
   const refs = useMemo(() => [ref1, ref2, ref3, ref4, ref5], []);
 
   useImperativeHandle(ref, () => ({
-    getHeight1: () => {
-      return ref1?.current ? ref1.current.clientHeight : 0;
-    },
+    getHeight1: () => (ref1?.current ? ref1.current.clientHeight : 0),
     getHeight2: () => (ref2?.current ? ref2.current.clientHeight : 0),
     getHeight3: () => (ref3?.current ? ref3.current.clientHeight : 0),
     getHeight4: () => (ref4?.current ? ref4.current.clientHeight : 0),

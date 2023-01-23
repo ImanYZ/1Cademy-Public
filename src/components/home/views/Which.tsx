@@ -1,7 +1,9 @@
 import { Box, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
+import { useWindowSize } from "../../../hooks/useWindowSize";
 import { gray03 } from "../../../pages";
+import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import whichItems from "./whichValues";
 
 const Which = () => {
@@ -9,6 +11,21 @@ const Which = () => {
 
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
+  const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
+  const { width } = useWindowSize();
+
+  useEffect(() => {
+    let newWidth = width / 2;
+    if (width > 1536) newWidth = 400;
+    else if (width > 1200) newWidth = 400;
+    else if (width > 900) newWidth = width / 2 - 100;
+    else if (width > 600) newWidth = width / 2 - 60;
+    else if (width > 0) newWidth = width - 40;
+
+    const newHeight = getHeight(newWidth);
+    console.log({ width, newWidth });
+    setCanvasDimension({ width: newWidth, height: newHeight });
+  }, [width]);
 
   // const { inViewOnce: paper1ViewOnce, ref: paper1Ref } = useInView();
   // const { inViewOnce: paper2ViewOnce, ref: paper2Ref } = useInView();
@@ -49,11 +66,23 @@ const Which = () => {
               }}
               // className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
             >
-              <img
-                alt={value.name}
-                src={theme.palette.mode === "light" ? "/static/" + value.image : "/static/" + value.imageDark}
-                style={{ flex: 1, width: "100%" }}
-              />
+              {idx === 0 && (
+                <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+                  <RiveComponentMemoized
+                    src="rive/notebook.riv"
+                    artboard={"artboard-6"}
+                    animations={["Timeline 1", theme.palette.mode]}
+                    autoplay={true}
+                  />
+                </Box>
+              )}
+              {idx !== 0 && (
+                <img
+                  alt={value.name}
+                  src={theme.palette.mode === "light" ? "/static/" + value.image : "/static/" + value.imageDark}
+                  style={{ flex: 1, width: "100%" }}
+                />
+              )}
             </Box>
             <Box
               sx={{
@@ -95,5 +124,7 @@ const Which = () => {
     </Box>
   );
 };
+
+const getHeight = (width: number) => (300 * width) / 500;
 
 export default Which;
