@@ -13,5 +13,5 @@ export const sectionsOrder = [
     title: "Where Are We?",
   },
   { id: "WhoWeAreSection", label: "Who", title: "Who Is Behind 1Cademy?" },
-  { id: "JoinUsSection", label: "Apply", title: "Apply to Join Us!" },
+  { id: "WhichSection", label: "Which", title: "Which systems?" },
 ];
