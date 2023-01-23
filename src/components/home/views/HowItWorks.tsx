@@ -9,7 +9,6 @@ import { RiveComponentMemoized } from "../components/temporals/RiveComponentExte
 import Typography from "../components/Typography copy";
 
 const HowItWorks = (props: any, ref: any) => {
-  // const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
@@ -23,7 +22,6 @@ const HowItWorks = (props: any, ref: any) => {
 
   useImperativeHandle(ref, () => ({
     getHeight1: () => {
-      // console.log("h1:", ref1.current.clientHeight);
       return ref1?.current ? ref1.current.clientHeight : 0;
     },
     getHeight2: () => (ref2?.current ? ref2.current.clientHeight : 0),
@@ -36,57 +34,12 @@ const HowItWorks = (props: any, ref: any) => {
 
   const theme = useTheme();
 
-  // const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.getHeight(isMobile), 0);
-
   const getGrayColorText = useCallback(
     () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2),
     [theme.palette.common.darkBackground2, theme.palette.mode]
   );
 
-  // const containerResponsiveProps = useMemo(() => {
-  //   console.log(width);
-  //   if (width > 1350) return { width: "800px", height: getHeight(800), top: "calc(50% - 400px)" };
-  //   if (width > 1200) return { width: "700px", height: getHeight(700), top: "calc(50% - 350px)" };
-  //   if (width > 900) return { width: "550px", height: getHeight(550), top: "calc(50% - 275px)" };
-  //   if (width > 600) return { width: "500px", height: getHeight(500), top: "calc(50% - 225px)" };
-  //   return { width: "450px", height: getHeight(450), top: "0px" };
-  // }, [width]);
-
-  // const resize = useCallback(() => {
-  //   if (!document) return;
-
-  //   const canvas = document.getElementById("animation") as HTMLCanvasElement;
-  //   if (!canvas) return;
-
-  //   console.log("container.clientWidth");
-  //   const ratio = canvas.width / canvas.height;
-
-  //   const widthCanvas = (width / 2) * ratio;
-  //   const heightCanvas = width * ratio;
-  //   // console.log({ height, width, ratio });
-
-  //   if (width < 1200 && width > 900) {
-  //     if (canvasDimension.width - width > 100) {
-  //       // canvas.style.width = `${widthCanvas}px`;
-  //       // canvas.style.height = `${heightCanvas}px`;
-  //       setCanvasDimension({ width: widthCanvas, height: heightCanvas });
-  //     }
-  //   }
-  // }, [canvasDimension, width]);
-
   useEffect(() => {
-    // let newCanvasDimension = { width: 0, height: 0 };
-    // if (width > 1200) {
-    //   newCanvasDimension = { width: 800, height: getHeight(800) };
-    // } else if (width > 900) {
-    //   newCanvasDimension = { width: 600, height: getHeight(600) };
-    // } else if (width > 600) {
-    //   newCanvasDimension = { width: 400, height: getHeight(400) };
-    // } else {
-    //   newCanvasDimension = { width: 300, height: getHeight(300) };
-    // }
-    // setCanvasDimension(newCanvasDimension);
-
     let newWidth = width / 2;
     if (width > 1536) newWidth = 700;
     else if (width > 1200) newWidth = 500;
@@ -98,17 +51,9 @@ const HowItWorks = (props: any, ref: any) => {
     setCanvasDimension({ width: newWidth, height: newHeight });
   }, [width]);
 
-  // useEffect(() => {
-  //   if (!window) return;
-  //   window.addEventListener("resize", () => {});
-  // }, []);
-
-  // console.log(canvasDimension);
-
   const AnimationSections = useMemo(() => {
     return props.artboards.map((artboard: any, idx: number, src: any[]) => (
       <Stack
-        // ref={idx === 0 ? ref4 : undefined}
         ref={refs[idx]}
         key={artboard.name}
         direction={width < 900 ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
@@ -194,7 +139,6 @@ const HowItWorks = (props: any, ref: any) => {
     <Box
       component="section"
       sx={{
-        // height: getHeightSection(),
         position: "relative",
         display: "flex",
         flexDirection: "column",
