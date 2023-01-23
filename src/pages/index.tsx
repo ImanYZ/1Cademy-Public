@@ -298,10 +298,7 @@ const Home = () => {
 
     return [
       { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
-      {
-        id: howSectionRef.current.id,
-        height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight,
-      },
+      { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
@@ -343,6 +340,7 @@ const Home = () => {
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
+        console.log({ sectionsHeight });
         if (!sectionsHeight) return;
 
         const { min, idx: idxSection } = sectionsHeight.reduce(
@@ -359,14 +357,15 @@ const Home = () => {
         if (idxSection === 0) {
           animationsHeight = [section1ArtBoards[0].getHeight(height)];
         } else {
-          const animationsHeights = [
+          const animationsHeightsArray = [
             animationRefs.current.getHeight1(),
             animationRefs.current.getHeight2(),
             animationRefs.current.getHeight3(),
             animationRefs.current.getHeight4(),
             animationRefs.current.getHeight5(),
           ];
-          animationsHeight = getAnimationsPositions(animationsHeights);
+          animationsHeight = getAnimationsPositions(animationsHeightsArray);
+          console.log({ animationsHeight });
         }
 
         const { /* maxAnimation, minAnimation, */ idxAnimation } = animationsHeight.reduce(
