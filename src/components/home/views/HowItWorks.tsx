@@ -11,7 +11,7 @@ const HowItWorks = (props: any) => {
   const isMobile = useMediaQuery("(max-width:600px)");
   const theme = useTheme();
 
-  const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.getHeight(), 0);
+  const getHeightSection = () => props.artboards.reduce((a: number, c: any) => a + c.height, 0);
   const getGrayColorText = useCallback(
     () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2),
     [theme.palette.common.darkBackground2, theme.palette.mode]
@@ -25,7 +25,7 @@ const HowItWorks = (props: any) => {
         spacing={isMobile ? "0px" : "40px"}
         alignItems={"stretch"}
         alignSelf={idx % 2 === 0 ? "flex-end" : "flex-start"}
-        sx={{ position: "relative", height: "900px" /* , border: `2px dashed red` */ }}
+        sx={{ position: "relative", height: artboard.height, border: `2px dashed red` }}
       >
         <Box sx={{ position: "relative" }}>
           <Box
