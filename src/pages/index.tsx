@@ -475,6 +475,7 @@ const Home = () => {
           </Stack>
         </Stack>
       </Box>
+
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
