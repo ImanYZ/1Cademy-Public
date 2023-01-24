@@ -32,9 +32,7 @@ import { useInView } from "@/hooks/useObserver";
 import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-// import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-// import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
@@ -360,12 +358,11 @@ const Home = () => {
         overflowX: "hidden",
         position: "relative",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
-        // zIndex: -3
       }}
     >
       <Box
         component={"header"}
-        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
+        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 20, display: "flex", justifyContent: "center" }}
       >
         <Box
           sx={{

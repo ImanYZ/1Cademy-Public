@@ -10,7 +10,6 @@ const Which = () => {
   const theme = useTheme();
 
   const isMobile = useMediaQuery("(max-width:600px)");
-  // const isTablet = useMediaQuery("(min-width:900px)");
   const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
   const { width } = useWindowSize();
 

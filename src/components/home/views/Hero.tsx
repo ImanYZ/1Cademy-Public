@@ -1,16 +1,14 @@
-import { Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Stack, Typography, useMediaQuery } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useMemo } from "react";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
-import backgroundImageLightMode from "../../../../public/LibraryBackgroundLighter.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import Button from "../components/Button";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
 const Hero = () => {
   const isMobile = useMediaQuery("(max-width:600px)");
-  const theme = useTheme();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
@@ -32,9 +30,7 @@ const Hero = () => {
         width: "100%",
         padding: width < 900 ? "10px" : "20px",
         backgroundColor: "#1d1102",
-        backgroundImage: `url(${
-          theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
-        })`,
+        backgroundImage: `url(${backgroundImageDarkMode.src})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

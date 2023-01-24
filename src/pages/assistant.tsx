@@ -31,7 +31,6 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import HowItWorks from "../components/assistant/HowItWorks";
@@ -564,12 +563,8 @@ const Home = () => {
           sx={{
             height: "calc(100vh - 70px)",
             width: "100%",
-            // position: "absolute",
-            // top: 0,
             backgroundColor: "#1d1102",
-            backgroundImage: `url(${
-              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
-            })`,
+            backgroundImage: `url(${backgroundImageDarkMode.src})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
