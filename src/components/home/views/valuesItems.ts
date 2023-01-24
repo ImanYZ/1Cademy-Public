@@ -45,7 +45,7 @@ export default [
     body: "Ample research in cognitive psychology has demonstrated that the act of learning with the intention of teaching others is more effective than learning for the sole purpose of being tested. On 1Cademy, we condense and depict our learning pathways with the objective of enhancing the learning experience for our collaborators. In the process, our understanding of the topics deepens as we contemplate ways to make them more accessible for others to learn.",
     // image: "Learning_Through_Teaching.png",
     image: "Learning_Through_Teaching.svg",
-    imageDark: "Learning_Through_Teaching-dark.svg",
+    imageDark: "Learning_Through_Teaching.svg",
   },
   {
     name: "Searching as Learning",
