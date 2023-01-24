@@ -40,7 +40,7 @@ import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
-import { sectionsOrder } from "../components/home/sectionsOrder";
+import { sectionsOrder1Cademy } from "../components/home/sectionsOrder";
 import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
 
@@ -307,7 +307,7 @@ const Home = () => {
         }
       }
       const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
-      scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
+      scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder1Cademy[sectionIdx] });
 
       setSelectedSection(sectionIdx);
       setSelectedAnimation(animationIndex);
@@ -372,78 +372,20 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[1].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(1)}
-                  >
-                    {sectionsOrder[1].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[2].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(2)}
-                  >
-                    {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
-                    {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[4].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(4)}
-                  >
-                    {sectionsOrder[4].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[5].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(5)}
-                  >
-                    {sectionsOrder[5].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[6].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 6 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(6)}
-                  >
-                    {sectionsOrder[6].label}
-                  </Typography>
-                </Tooltip>
+                {sectionsOrder1Cademy.slice(1).map((cur, idx) => (
+                  <Tooltip key={cur.id} title={cur.title}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        borderBottom: theme =>
+                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                      }}
+                      onClick={() => switchSection(idx + 1)}
+                    >
+                      {sectionsOrder1Cademy[idx + 1].label}
+                    </Typography>
+                  </Tooltip>
+                ))}
               </>
             )}
           </Stack>
@@ -606,7 +548,7 @@ const Home = () => {
             position: "relative",
           }}
         >
-          <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+          <Box id={sectionsOrder1Cademy[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -614,7 +556,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
             >
-              {sectionsOrder[1].title}
+              {sectionsOrder1Cademy[1].title}
             </CustomTypography>
             <HowItWorks
               ref={animationRefs}
@@ -634,7 +576,7 @@ const Home = () => {
               }
             />
           </Box>
-          <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[2].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -642,7 +584,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[2].title}
+              {sectionsOrder1Cademy[2].title}
             </CustomTypography>
             {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
             {whyInViewOnce && (
@@ -667,7 +609,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -675,7 +617,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[3].title}
+              {sectionsOrder1Cademy[3].title}
             </CustomTypography>
             {!whatInViewOnce ? (
               <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
@@ -701,7 +643,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[4].id} ref={whichSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[4].id} ref={whichSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -709,7 +651,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[4].title}
+              {sectionsOrder1Cademy[4].title}
             </CustomTypography>
             {!whichInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
@@ -745,7 +687,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[5].id} ref={whereSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[5].id} ref={whereSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -753,7 +695,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[5].title}
+              {sectionsOrder1Cademy[5].title}
             </CustomTypography>
             {!whereInViewOnce ? (
               <div style={{ height: 2 * height /* background: "green" */ }}></div>
@@ -766,7 +708,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[6].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[6].id} ref={whoSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -774,7 +716,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[6].title}
+              {sectionsOrder1Cademy[6].title}
             </CustomTypography>
             {!whoInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>

@@ -4,7 +4,7 @@ import React from "react";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
 import AppBar from "./AppBar";
-import { sectionsOrder } from "./sectionsOrder";
+import { sectionsOrder1Cademy } from "./sectionsOrder";
 import Toolbar from "./Toolbar";
 
 const LinkTab = (props: any) => {
@@ -74,8 +74,8 @@ const AppAppBar = (props: any) => {
                 <LinkTab
                   key={"Key" + idx}
                   onClick={() => props.switchSection(idx)}
-                  label={sectionsOrder[idx + 1].label}
-                  titl={sectionsOrder[idx + 1].title}
+                  label={sectionsOrder1Cademy[idx + 1].label}
+                  titl={sectionsOrder1Cademy[idx + 1].title}
                 />
               );
             })}
