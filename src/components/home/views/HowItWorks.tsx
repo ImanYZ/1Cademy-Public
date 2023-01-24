@@ -150,6 +150,6 @@ const HowItWorks = (props: any, ref: any) => {
 
 const getHeight = (width: number) => (300 * width) / 500;
 
-const FancyInputFordwarded = forwardRef(HowItWorks);
+const HowItWorksFordwarded = forwardRef(HowItWorks);
 
-export default FancyInputFordwarded;
+export default HowItWorksFordwarded;
