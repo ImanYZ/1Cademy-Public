@@ -20,7 +20,7 @@ const Values = dynamic(() => import("../components/assistant/Why"), { suspense: 
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
-import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Rive, useRive } from "rive-react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
@@ -38,7 +38,6 @@ import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-import PublicLayout from "../components/layouts/PublicLayout";
 
 /**
  * animations builded with: https://rive.app/
@@ -704,9 +703,9 @@ const Home = () => {
   );
 };
 
-Home.getLayout = (page: ReactNode) => {
-  return <PublicLayout>{page}</PublicLayout>;
-};
+// Home.getLayout = (page: ReactNode) => {
+//   return <PublicLayout>{page}</PublicLayout>;
+// };
 
 export default Home;
 

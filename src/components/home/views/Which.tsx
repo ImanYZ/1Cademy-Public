@@ -24,7 +24,7 @@ const Which = () => {
     else if (width > 0) newWidth = width - 40;
 
     const newHeight = getHeight(newWidth);
-    console.log({ width, newWidth });
+
     setCanvasDimension({ width: newWidth, height: newHeight });
   }, [width]);
 
@@ -77,7 +77,27 @@ const Which = () => {
                   />
                 </Box>
               )}
-              {idx !== 0 && (
+              {idx === 1 && (
+                <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+                  <RiveComponentMemoized
+                    src="rive-assistant/assistant-1.riv"
+                    artboard={"artboard-1"}
+                    animations={["Timeline 1", theme.palette.mode]}
+                    autoplay={true}
+                  />
+                </Box>
+              )}
+              {idx === 2 && (
+                <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+                  <RiveComponentMemoized
+                    src="rive/notebook.riv"
+                    artboard={"artboard-6"}
+                    animations={["Timeline 1", theme.palette.mode]}
+                    autoplay={true}
+                  />
+                </Box>
+              )}
+              {/* {idx !== 0 && (
                 <img
                   alt={whichSubsection.name}
                   src={
@@ -87,7 +107,7 @@ const Which = () => {
                   }
                   style={{ flex: 1, width: "100%" }}
                 />
-              )}
+              )} */}
             </Box>
             <Box
               sx={{
