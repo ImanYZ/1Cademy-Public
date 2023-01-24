@@ -1,4 +1,5 @@
-import { Box, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import LaunchIcon from "@mui/icons-material/Launch";
+import { Box, Button, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
@@ -23,7 +24,7 @@ const Which = () => {
     else if (width > 0) newWidth = width - 40;
 
     const newHeight = getHeight(newWidth);
-    console.log({ width, newWidth });
+
     setCanvasDimension({ width: newWidth, height: newHeight });
   }, [width]);
 
@@ -44,7 +45,7 @@ const Which = () => {
       }}
     >
       <Stack direction={"column"} spacing={isMobile ? "60px" : "100px"}>
-        {whichItems.map((value, idx) => (
+        {whichItems.map((whichSubsection, idx) => (
           <Stack
             // ref={refs[idx]}
             key={idx}
@@ -76,13 +77,37 @@ const Which = () => {
                   />
                 </Box>
               )}
-              {idx !== 0 && (
+              {idx === 1 && (
+                <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+                  <RiveComponentMemoized
+                    src="rive-assistant/assistant-1.riv"
+                    artboard={"artboard-1"}
+                    animations={["Timeline 1", theme.palette.mode]}
+                    autoplay={true}
+                  />
+                </Box>
+              )}
+              {idx === 2 && (
+                <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+                  <RiveComponentMemoized
+                    src="rive/notebook.riv"
+                    artboard={"artboard-6"}
+                    animations={["Timeline 1", theme.palette.mode]}
+                    autoplay={true}
+                  />
+                </Box>
+              )}
+              {/* {idx !== 0 && (
                 <img
-                  alt={value.name}
-                  src={theme.palette.mode === "light" ? "/static/" + value.image : "/static/" + value.imageDark}
+                  alt={whichSubsection.name}
+                  src={
+                    theme.palette.mode === "light"
+                      ? "/static/" + whichSubsection.image
+                      : "/static/" + whichSubsection.imageDark
+                  }
                   style={{ flex: 1, width: "100%" }}
                 />
-              )}
+              )} */}
             </Box>
             <Box
               sx={{
@@ -102,9 +127,9 @@ const Which = () => {
                 component="h3"
                 sx={{ fontSize: "24px", textAlign: isMobile ? "center" : "start" }}
               >
-                {value.name}
+                {whichSubsection.name}
               </Typography>
-              {value.body.split("\n").map((paragraph, idx) => (
+              {whichSubsection.body.split("\n").map((paragraph, idx) => (
                 <Typography
                   key={idx}
                   variant="body2"
@@ -117,6 +142,21 @@ const Which = () => {
                   {paragraph}
                 </Typography>
               ))}
+              <Box>
+                {/* <Link>Visit</Link> */}
+                {whichSubsection.link && (
+                  <Button variant="outlined" href={whichSubsection.link} target="_blank" rel="noreferrer">
+                    Visit
+                    <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
+                  </Button>
+                )}
+                {!whichSubsection.link && (
+                  <Button variant="outlined" disabled>
+                    Coming Soon
+                    <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
+                  </Button>
+                )}
+              </Box>
             </Box>
           </Stack>
         ))}
