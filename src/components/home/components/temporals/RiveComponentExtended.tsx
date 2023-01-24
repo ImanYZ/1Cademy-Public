@@ -17,10 +17,6 @@ const RiveComponentExtended = ({ src, artboard, animations, autoplay }: RiveProp
     autoplay,
   });
 
-  return (
-    // <div style={{ width: "700px", height: "700px" }}>
-    <RiveComponent className={`rive-canvas `} />
-    // </div>
-  );
+  return <RiveComponent className={`rive-canvas `} />;
 };
 export const RiveComponentMemoized = React.memo(RiveComponentExtended);
