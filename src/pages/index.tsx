@@ -611,7 +611,6 @@ const Home = () => {
             >
               Apply to Join Us!
             </Button>
-
             {/* scroll animation */}
             <Box
               sx={{
@@ -622,7 +621,7 @@ const Home = () => {
                 flexDirection: "column",
                 alignItems: "center",
               }}
-              className={footerInView ? "hide" : "undefined"}
+              className={homeInView ? "undefined" : "hide"}
             >
               <Typography color={"white"}>Scroll</Typography>
               <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
@@ -848,7 +847,6 @@ const Home = () => {
           </Box>
         </Box>
       </Box>
-
       <Box ref={footerSectionRef}>
         <AppFooter
           sx={{
@@ -859,25 +857,23 @@ const Home = () => {
         />
       </Box>
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
-
-      {!homeInView && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-            right: "0px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-          className={footerInView ? "hide" : "undefined"}
-        >
-          <Typography>Scroll</Typography>
-          <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-            <RiveScrollActionComponent className={`rive-canvas`} />
-          </Box>
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={footerInView || homeInView ? "hide" : "undefined"}
+      >
+        <Typography>Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveScrollActionComponent className={`rive-canvas`} />
         </Box>
-      )}
+      </Box>
+
       <style>{`
           body{
             overflow:hidden;
