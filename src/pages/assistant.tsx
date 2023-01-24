@@ -121,7 +121,7 @@ const Home = () => {
   const [open, setOpen] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
-  const { entry: homeEntry, ref: homeSectionRef } = useInView();
+  const { entry: homeEntry, inView: homeInView, ref: homeSectionRef } = useInView();
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
   const { inView: footerInView, ref: footerSectionRef } = useInView({
@@ -162,6 +162,13 @@ const Home = () => {
   //   animations: ["Timeline 1", "dark", "light"],
   //   autoplay: false,
   // });
+
+  const { RiveComponent: RiveScrollActionInHeroComponent } = useRive({
+    src: "rive/scroll.riv",
+    animations: ["Timeline 1", "dark"],
+    artboard: "New Artboard",
+    autoplay: true,
+  });
 
   const { RiveComponent: RiveScrollActionComponent } = useRive({
     src: "rive/scroll.riv",
@@ -579,6 +586,23 @@ const Home = () => {
           >
             HELPS YOU OPTIMIZE YOUR LIFE.
           </Typography>
+
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+              right: "0px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+            className={homeInView ? "undefined" : "hide"}
+          >
+            <Typography color={"white"}>Scroll</Typography>
+            <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+              <RiveScrollActionInHeroComponent className={`rive-canvas`} />
+            </Box>
+          </Box>
         </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
@@ -740,7 +764,7 @@ const Home = () => {
           flexDirection: "column",
           alignItems: "center",
         }}
-        className={footerInView ? "hide" : "undefined"}
+        className={footerInView || homeInView ? "hide" : "undefined"}
       >
         <Typography>Scroll</Typography>
         <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
