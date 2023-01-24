@@ -49,7 +49,7 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
 
   useEffect(() => {
     let newWidth = width / 2;
-    if (width > 1536) newWidth = 700;
+    if (width > 1536) newWidth = 500;
     else if (width > 1200) newWidth = 500;
     else if (width > 900) newWidth = width / 2;
     else if (width > 600) newWidth = width - 60;
@@ -248,21 +248,25 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
   ]);
 
   return (
-    <Box
+    <Stack
       component="section"
+      direction={"column"}
+      alignItems={"center"}
+      spacing={width < 900 ? "0px" : "100px"}
       sx={{
-        position: "relative",
+        // position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
       }}
     >
       {AnimationSections}
-    </Box>
+    </Stack>
   );
 };
 
-const getHeight = (width: number) => (300 * width) / 500;
+// const getHeight = (width: number) => (300 * width) / 500;
+const getHeight = (width: number) => width;
 
 const HowItWorksFordwarded = forwardRef(HowItWorks);
 

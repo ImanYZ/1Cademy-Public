@@ -411,7 +411,7 @@ const Home = () => {
       sx={{
         height: "100vh",
         overflowY: "auto",
-        overflowX: "auto",
+        overflowX: "hidden",
         position: "relative",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
