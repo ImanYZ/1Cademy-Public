@@ -24,7 +24,7 @@ const Which = dynamic(() => import("../components/home/views/Which"), { suspense
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -323,6 +323,32 @@ const Home = () => {
   const signUpHandler = () => {
     router.push("/signin");
   };
+
+  const scrollAnimationMemoized = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={footerInView ? "hide" : "undefined"}
+      >
+        <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveComponentMemoized
+            src="rive/scroll.riv"
+            animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
+            artboard={"New Artboard"}
+            autoplay={true}
+          />
+        </Box>
+      </Box>
+    );
+  }, [footerInView, homeInView, isMobile, theme.palette.mode]);
 
   return (
     <Box
@@ -703,49 +729,7 @@ const Home = () => {
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
       {/* scroll animation */}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-          right: "0px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-        className={homeInView ? "undefined" : "hide"}
-      >
-        <Typography color={"white"}>Scroll</Typography>
-        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-          <RiveComponentMemoized
-            src="rive/scroll.riv"
-            animations={["Timeline 1", "dark"]}
-            artboard={"New Artboard"}
-            autoplay={true}
-          />
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-          right: "0px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-        className={footerInView || homeInView ? "hide" : "undefined"}
-      >
-        <Typography>Scroll</Typography>
-        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-          <RiveComponentMemoized
-            src="rive/scroll.riv"
-            animations={["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"]}
-            artboard={"New Artboard"}
-            autoplay={true}
-          />
-        </Box>
-      </Box>
+      {scrollAnimationMemoized}
 
       <style>{`
           body{
