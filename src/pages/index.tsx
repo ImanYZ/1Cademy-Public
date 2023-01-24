@@ -590,10 +590,10 @@ const Home = () => {
             <Typography
               color="white"
               variant="h5"
-              sx={{ textAlign: "center", width: isMobile ? "300px" : "auto" }}
+              sx={{ textAlign: "center", width: isMobile ? "300px" : "auto", mb: "20px" }}
               className={showLandingOptions ? "show-blurred-text" : "hide-content"}
             >
-              WHERE WE TAKE NOTES <b>TOGETHER</b>.
+              WE TAKE NOTES <b>TOGETHER</b>.
             </Typography>
             <Button
               variant="contained"
