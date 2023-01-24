@@ -137,6 +137,7 @@ const Home = () => {
   const [openSearch, setOpenSearch] = useState(false);
   const router = useRouter();
 
+  const { entry: homeEntry, inView: homeInView, ref: HomeSectionRef } = useInView();
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
@@ -146,7 +147,7 @@ const Home = () => {
   const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
-  const HomeSectionRef = useRef<HTMLDivElement | null>(null);
+  // const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
 
   const animationRefs = useRef<any | null>(null);
@@ -158,11 +159,18 @@ const Home = () => {
     autoplay: true,
   });
 
+  const { RiveComponent: RiveScrollActionInHeroComponent } = useRive({
+    src: "rive/scroll.riv",
+    animations: ["Timeline 1", "dark"],
+    artboard: "New Artboard",
+    autoplay: true,
+  });
+
   const { RiveComponent: RiveScrollActionComponent } = useRive({
     src: "rive/scroll.riv",
     animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
     artboard: "New Artboard",
-    autoplay: false,
+    autoplay: true,
   });
 
   useEffect(() => {
@@ -176,7 +184,7 @@ const Home = () => {
   }, []);
 
   const getSectionHeights = useCallback(() => {
-    if (!HomeSectionRef?.current) return null;
+    if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whatEntry) return null;
@@ -185,18 +193,18 @@ const Home = () => {
     if (!whoEntry) return null;
 
     return [
-      { id: HomeSectionRef.current.id, height: 0 },
-      { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
+      { id: homeEntry.target.id, height: 0 },
+      { id: howSectionRef.current.id, height: homeEntry.target.clientHeight },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
       { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whichEntry.target.id, height: whatEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
+  }, [homeEntry, whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
-    if (!HomeSectionRef?.current) return null;
+    if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whatEntry) return null;
@@ -205,7 +213,7 @@ const Home = () => {
     if (!whichEntry) return null;
 
     return [
-      { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
+      { id: homeEntry.target.id, height: homeEntry.target.clientHeight },
       { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
@@ -213,7 +221,7 @@ const Home = () => {
       { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
+  }, [homeEntry, whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
   // const getAnimationsHeight = useCallback(() => {
   //   const res = artboards.map(artboard => artboard.getHeight(isMobile));
@@ -598,6 +606,24 @@ const Home = () => {
             >
               Apply to Join Us!
             </Button>
+
+            {/* scroll animation */}
+            <Box
+              sx={{
+                position: "fixed",
+                bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+                right: "0px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+              className={footerInView ? "hide" : "undefined"}
+            >
+              <Typography color={"white"}>Scroll</Typography>
+              <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+                <RiveScrollActionInHeroComponent className={`rive-canvas`} />
+              </Box>
+            </Box>
           </Box>
         </Stack>
 
@@ -829,22 +855,24 @@ const Home = () => {
       </Box>
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-          right: "0px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-        className={footerInView ? "hide" : "undefined"}
-      >
-        <Typography>Scroll</Typography>
-        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-          <RiveScrollActionComponent className={`rive-canvas`} />
+      {!homeInView && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+            right: "0px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+          className={footerInView ? "hide" : "undefined"}
+        >
+          <Typography>Scroll</Typography>
+          <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+            <RiveScrollActionComponent className={`rive-canvas`} />
+          </Box>
         </Box>
-      </Box>
+      )}
       <style>{`
           body{
             overflow:hidden;
