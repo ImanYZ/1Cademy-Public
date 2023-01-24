@@ -165,7 +165,7 @@ const SearcherSidebar = ({
     (inputTitle: HTMLElement) => {
       if (!open) return;
       if (!inputTitle) return;
-      inputTitle.focus();
+      //inputTitle.focus();
     },
     [open]
   );
