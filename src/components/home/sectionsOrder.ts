@@ -7,11 +7,11 @@ export const sectionsOrder = [
     label: "What",
     title: "What we study?",
   },
+  { id: "WhichSection", label: "Which", title: "Which systems?" },
   {
     id: "SchoolsSection",
     label: "Where",
     title: "Where Are We?",
   },
   { id: "WhoWeAreSection", label: "Who", title: "Who Is Behind 1Cademy?" },
-  { id: "JoinUsSection", label: "Apply", title: "Apply to Join Us!" },
 ];

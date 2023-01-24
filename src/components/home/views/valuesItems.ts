@@ -24,7 +24,7 @@ export default [
     name: "Effective Ways to Learn",
     body: "1Cademy members are constantly evaluating the efficacy of the content and learning pathways. If a member discovers a more straightforward method for defining or explaining a concept, they can propose it on 1Cademy for community review.\nThrough this process, the community collectively decides which approach is most effective for learning that particular concept. As a result, the learning experience through 1Cademy continually improves, becoming both more efficient and enjoyable over time.",
     image: "Evaluating.svg",
-    imageDark: "Evaluating.svg",
+    imageDark: "Evaluating-dark.svg",
     padding: "4px 37px 0px 37px",
   },
   {
