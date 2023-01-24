@@ -438,6 +438,7 @@ const NodeFooter = ({
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
+
             {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
             {!locked &&
               (editable ? (
@@ -448,9 +449,9 @@ const NodeFooter = ({
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
                 new Date(changedAt)
-              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day()}/${dayjs(
-                new Date(changedAt)
-              ).month()}/${dayjs(new Date(changedAt)).year()}`}
+              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
+                dayjs(new Date(changedAt)).month() + 1
+              }/${dayjs(new Date(changedAt)).year()}`}
               placement={"top"}
             >
               <span
@@ -501,7 +502,9 @@ const NodeFooter = ({
                             ? theme.palette.common.darkBackground2
                             : theme.palette.common.lightBackground2,
                       },
-                      padding: "7px 0px",
+                      padding: "7px 7px",
+                      minWidth: "30px",
+                      height: "30px",
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>

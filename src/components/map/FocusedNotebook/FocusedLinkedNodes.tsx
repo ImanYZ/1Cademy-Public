@@ -59,7 +59,13 @@ const FocusedLinkedNodes = ({ header, nodeLinks, nodes, navigateToNode, loadNode
         }}
         title={
           <Box sx={{ textAlign: "center" }}>
-            <TypographyUnderlined variant="h6" fontWeight="300" gutterBottom align="center">
+            <TypographyUnderlined
+              variant="h6"
+              fontWeight="300"
+              gutterBottom
+              align="center"
+              sx={{ color: theme => theme.palette.common.white }}
+            >
               {header}
             </TypographyUnderlined>
           </Box>
