@@ -82,8 +82,8 @@ const Which = () => {
           {idx === 2 && (
             <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
               <RiveComponentMemoized
-                src="rive/notebook.riv"
-                artboard={"artboard-6"}
+                src="rive/extension.riv"
+                artboard={"extension"}
                 animations={["Timeline 1", theme.palette.mode]}
                 autoplay={true}
               />
