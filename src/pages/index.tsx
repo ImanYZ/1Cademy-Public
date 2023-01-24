@@ -25,7 +25,6 @@ const Which = dynamic(() => import("../components/home/views/Which"), { suspense
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRive } from "rive-react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -39,6 +38,7 @@ import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg"
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
+import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
 import { sectionsOrder } from "../components/home/sectionsOrder";
 import HowItWorks from "../components/home/views/HowItWorks";
@@ -117,21 +117,18 @@ const sectionsTmp = [
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
 ];
+
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
-// const AnimationObserverOptions = { options: { threshold: 0.35, root: null, rootMargin: "0px" } };
+
 const Home = () => {
-  // const [section, setSection] = useState(0);
   const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
-  const [, /* idxRiveComponent */ setIdxRiveComponent] = useState(0);
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
-  const [showLandingOptions, setShowLandingOptions] = useState(true);
-  const [showAnimationOptions /* setShowAnimationOptions */] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
   const [openSearch, setOpenSearch] = useState(false);
@@ -147,31 +144,9 @@ const Home = () => {
   const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
-  // const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
 
   const animationRefs = useRef<any | null>(null);
-
-  const { RiveComponent: RiveComponent1 } = useRive({
-    src: "rive/artboard-1.riv",
-    artboard: "artboard-1",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: true,
-  });
-
-  const { RiveComponent: RiveScrollActionInHeroComponent } = useRive({
-    src: "rive/scroll.riv",
-    animations: ["Timeline 1", "dark"],
-    artboard: "New Artboard",
-    autoplay: true,
-  });
-
-  const { RiveComponent: RiveScrollActionComponent } = useRive({
-    src: "rive/scroll.riv",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    artboard: "New Artboard",
-    autoplay: true,
-  });
 
   const heroCanvasDimensions = useMemo(() => {
     const min = width > height ? height : width;
@@ -230,19 +205,10 @@ const Home = () => {
     ];
   }, [homeEntry, whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
-  // const getAnimationsHeight = useCallback(() => {
-  //   const res = artboards.map(artboard => artboard.getHeight(isMobile));
-  //   return [0, ...res.splice(0, res.length - 1)];
-  // }, []);
-
   const getAnimationsHeight = useCallback((heights: number[]) => {
     // const res = artboards.map(artboard => artboard.getHeight(isMobile));
     return [0, ...heights.splice(0, heights.length - 1)];
   }, []);
-
-  // const getAnimationsPositions = useCallback(() => {
-  //   return artboards.map(artboard => artboard.getHeight(isMobile));
-  // }, [isMobile]);
 
   const getAnimationsPositions = useCallback((heights: number[]) => {
     return heights;
@@ -342,11 +308,6 @@ const Home = () => {
       }
       const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
-
-      if (sectionIdx === 0) {
-        setShowLandingOptions(true);
-        setIdxRiveComponent(animationIndex);
-      }
 
       setSelectedSection(sectionIdx);
       setSelectedAnimation(animationIndex);
@@ -511,13 +472,11 @@ const Home = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  // onClick={joinUsClick}
                   target="_blank"
                   href="https://1cademy.us/#JoinUsSection"
                   size={isMobile ? "small" : "medium"}
                   sx={{
                     fontSize: 16,
-                    // color: "common.white",
                     ml: 2.5,
                     borderRadius: 40,
                     textTransform: "uppercase",
@@ -576,8 +535,6 @@ const Home = () => {
           sx={{
             height: "calc(100vh - 70px)",
             width: "100%",
-            // position: "absolute",
-            // top: 0,
             padding: width < 900 ? "10px" : "20px",
             backgroundColor: "#1d1102",
             backgroundImage: `url(${
@@ -590,13 +547,17 @@ const Home = () => {
         >
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
             <Box sx={{ width: heroCanvasDimensions, height: heroCanvasDimensions }}>
-              <RiveComponent1 className={`rive-canvas`} />
+              <RiveComponentMemoized
+                src="rive/artboard-1.riv"
+                animations={["Timeline 1", "dark", "light"]}
+                artboard={"artboard-1"}
+                autoplay={true}
+              />
             </Box>
             <Typography
               color="white"
               variant="h5"
               sx={{ textAlign: "center", width: isMobile ? "300px" : "auto", mb: "20px" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
             >
               WE TAKE NOTES <b>TOGETHER</b>.
             </Typography>
@@ -607,7 +568,6 @@ const Home = () => {
               target="_blank"
               href="https://1cademy.us/#JoinUsSection"
               sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
             >
               Apply to Join Us!
             </Button>
@@ -625,7 +585,12 @@ const Home = () => {
             >
               <Typography color={"white"}>Scroll</Typography>
               <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-                <RiveScrollActionInHeroComponent className={`rive-canvas`} />
+                <RiveComponentMemoized
+                  src="rive/scroll.riv"
+                  animations={["Timeline 1", "dark"]}
+                  artboard={"New Artboard"}
+                  autoplay={true}
+                />
               </Box>
             </Box>
           </Box>
@@ -663,7 +628,6 @@ const Home = () => {
                   href="https://1cademy.us/#JoinUsSection"
                   target="_blank"
                   sx={{ minWidth: 200, textTransform: "uppercase" }}
-                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
                 >
                   Apply to Join Us!
                 </Button>
@@ -870,7 +834,12 @@ const Home = () => {
       >
         <Typography>Scroll</Typography>
         <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-          <RiveScrollActionComponent className={`rive-canvas`} />
+          <RiveComponentMemoized
+            src="rive/scroll.riv"
+            animations={["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"]}
+            artboard={"New Artboard"}
+            autoplay={true}
+          />
         </Box>
       </Box>
 
