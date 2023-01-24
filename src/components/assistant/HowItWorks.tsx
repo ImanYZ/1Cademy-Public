@@ -190,7 +190,7 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
           >
             <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
               <RiveComponentMemoized
-                src="rive/notebook.riv"
+                src={artboard.src}
                 artboard={artboard.artoboard}
                 animations={["Timeline 1", theme.palette.mode]}
                 autoplay={true}

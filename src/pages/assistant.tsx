@@ -21,7 +21,7 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Rive, useRive } from "rive-react";
+import { useRive } from "rive-react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -51,30 +51,33 @@ export const gray03 = "#AAAAAA";
 const section1ArtBoards = [
   {
     name: "artboard-1",
-    durationMs: 1000,
+    // artoboard: "artboard-1",
     getHeight: (vh: number) => vh - HEADER_HEIGTH,
-    color: "#ff28c9",
-    description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
+    // color: "#ff28c9",
+    // description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
   },
 ];
 const artboards = [
   {
     name: "Planning",
-    durationMs: 17000,
+    src: "rive-assistant/assistant-1.riv",
+    artoboard: "artboard-1",
     getHeight: (vh: number) => 6 * vh,
     color: "#f33636",
     description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
   },
   {
     name: "Meetings",
-    durationMs: 24000,
+    src: "rive-assistant/assistant-2.riv",
+    artoboard: "artboard-2",
     getHeight: (vh: number) => 8 * vh,
     color: "#f38b36",
     description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
   },
   {
     name: "Goals",
-    durationMs: 40000,
+    src: "rive-assistant/assistant-3.riv",
+    artoboard: "artboard-3",
     getHeight: (vh: number) => 15 * vh,
     color: "#e6f336",
     description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
@@ -128,37 +131,37 @@ const Home = () => {
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
   // const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
-  const timeInSecondsRef = useRef<number>(0);
+  // const timeInSecondsRef = useRef<number>(0);
 
   const animationRefs = useRef<any | null>(null);
 
-  const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
+  const { RiveComponent: RiveComponent1 } = useRive({
     src: "rive-assistant/assistant-0.riv",
     artboard: "New Artboard",
     animations: ["Timeline 1", "eyes", "1cademy"],
     autoplay: true,
   });
 
-  const { rive: rive2 } = useRive({
-    src: "rive-assistant/assistant-1.riv",
-    artboard: "artboard-1",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive2 } = useRive({
+  //   src: "rive-assistant/assistant-1.riv",
+  //   artboard: "artboard-1",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
-  const { rive: rive3 } = useRive({
-    src: "rive-assistant/assistant-2.riv",
-    artboard: "artboard-2",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive3 } = useRive({
+  //   src: "rive-assistant/assistant-2.riv",
+  //   artboard: "artboard-2",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
-  const { rive: rive4 } = useRive({
-    src: "rive-assistant/assistant-3.riv",
-    artboard: "artboard-3",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive4 } = useRive({
+  //   src: "rive-assistant/assistant-3.riv",
+  //   artboard: "artboard-3",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
   const { RiveComponent: RiveScrollActionComponent } = useRive({
     src: "rive/scroll.riv",
@@ -215,10 +218,7 @@ const Home = () => {
 
     return [
       { id: homeEntry.target.id, height: homeEntry.target.clientHeight },
-      {
-        id: howSectionRef.current.id,
-        height: howSectionRef.current.clientHeight - homeEntry.target.clientHeight,
-      },
+      { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
@@ -234,9 +234,13 @@ const Home = () => {
     return [0, ...heights.splice(0, heights.length - 1)];
   }, []);
 
-  const getAnimationsPositions = useCallback(() => {
-    return artboards.map(artboard => artboard.getHeight(height));
-  }, [height]);
+  // const getAnimationsPositions = useCallback(() => {
+  //   return artboards.map(artboard => artboard.getHeight(height));
+  // }, [height]);
+
+  const getAnimationsPositions = useCallback((heights: number[]) => {
+    return heights;
+  }, []);
 
   const scrollToSection = ({ height, sectionSelected }: { height: number; sectionSelected: any }) => {
     if (typeof window === "undefined") return;
@@ -249,21 +253,8 @@ const Home = () => {
   };
 
   const detectScrollPosition = useCallback(
-    (
-      event: any,
-      {
-        rive1,
-        rive2,
-        rive3,
-        rive4,
-      }: {
-        rive1: Rive | null;
-        rive2: Rive | null;
-        rive3: Rive | null;
-        rive4: Rive | null;
-      }
-    ) => {
-      if (!rive1 || !rive2 || !rive3 || !rive4) return;
+    (event: any) => {
+      if (!animationRefs.current) return;
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
@@ -283,10 +274,15 @@ const Home = () => {
         if (idxSection === 0) {
           animationsHeight = [section1ArtBoards[0].getHeight(height)];
         } else {
-          animationsHeight = getAnimationsPositions();
+          const animationsHeightsArray = [
+            animationRefs.current.getHeight1(),
+            animationRefs.current.getHeight2(),
+            animationRefs.current.getHeight3(),
+          ];
+          animationsHeight = getAnimationsPositions(animationsHeightsArray);
         }
 
-        const { maxAnimation, minAnimation, idxAnimation } = animationsHeight.reduce(
+        const { /* maxAnimation, minAnimation, */ idxAnimation } = animationsHeight.reduce(
           (acu, cur, idx) => {
             if (acu.maxAnimation > currentScrollPosition) return acu;
             return { maxAnimation: acu.maxAnimation + cur, minAnimation: acu.maxAnimation, idxAnimation: idx };
@@ -302,49 +298,49 @@ const Home = () => {
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
 
-        let showLandingOptions = false;
+        // let showLandingOptions = false;
 
-        if (idxAnimation < 0) return;
+        // if (idxAnimation < 0) return;
 
-        if (idxSection === 0) {
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
-          setIdxRiveComponent(0);
+        // if (idxSection === 0) {
+        //   const lowerAnimationLimit = minAnimation;
+        //   const upperAnimationLimit = maxAnimation;
+        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
+        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
+        //   setIdxRiveComponent(0);
 
-          if (percentageFrame < 5) {
-            showLandingOptions = true;
-          }
-        }
+        //   if (percentageFrame < 5) {
+        //     showLandingOptions = true;
+        //   }
+        // }
 
-        if (idxSection === SECTION_WITH_ANIMATION) {
-          // console.log("section with aniomation");
-          setIdxRiveComponent(idxAnimation + 1);
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
+        // if (idxSection === SECTION_WITH_ANIMATION) {
+        //   // console.log("section with aniomation");
+        //   setIdxRiveComponent(idxAnimation + 1);
+        //   const lowerAnimationLimit = minAnimation;
+        //   const upperAnimationLimit = maxAnimation;
+        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
+        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
 
-          const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
-          timeInSecondsRef.current = timeInSeconds;
+        //   const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
+        //   timeInSecondsRef.current = timeInSeconds;
 
-          if (idxAnimation === 0) {
-            advanceAnimationTo(rive2, timeInSeconds, theme);
-          }
-          if (idxAnimation === 1) {
-            advanceAnimationTo(rive3, timeInSeconds, theme);
-          }
-          if (idxAnimation === 2) {
-            advanceAnimationTo(rive4, timeInSeconds, theme);
-          }
-        }
-        setShowLandingOptions(showLandingOptions);
+        //   if (idxAnimation === 0) {
+        //     advanceAnimationTo(rive2, timeInSeconds, theme);
+        //   }
+        //   if (idxAnimation === 1) {
+        //     advanceAnimationTo(rive3, timeInSeconds, theme);
+        //   }
+        //   if (idxAnimation === 2) {
+        //     advanceAnimationTo(rive4, timeInSeconds, theme);
+        //   }
       }
+      // setShowLandingOptions(showLandingOptions);
+      // }
     },
-    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions]
   );
 
   const switchSection = useCallback(
@@ -411,7 +407,7 @@ const Home = () => {
   return (
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4 })}
+      onScroll={e => detectScrollPosition(e)}
       sx={{
         height: "100vh",
         overflowY: "auto",
@@ -767,15 +763,15 @@ const Home = () => {
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
-  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+// const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+//   rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
 
-  //@ts-ignore
-  if (!rive?.animator?.animations[0]) return;
-  //@ts-ignore
-  const Animator = rive.animator.animations[0];
-  Animator.instance.time = 0;
-  Animator.instance.advance(timeInSeconds);
-  Animator.instance.apply(1);
-  rive.startRendering();
-};
+//   //@ts-ignore
+//   if (!rive?.animator?.animations[0]) return;
+//   //@ts-ignore
+//   const Animator = rive.animator.animations[0];
+//   Animator.instance.time = 0;
+//   Animator.instance.advance(timeInSeconds);
+//   Animator.instance.apply(1);
+//   rive.startRendering();
+// };
