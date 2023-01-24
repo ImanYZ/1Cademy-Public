@@ -24,7 +24,7 @@ const Which = dynamic(() => import("../components/home/views/Which"), { suspense
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -32,15 +32,16 @@ import { useInView } from "@/hooks/useObserver";
 import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
+// import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
+// import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
 import { sectionsOrder1Cademy } from "../components/home/sectionsOrder";
+import { HeroMemoized } from "../components/home/views/Hero";
 import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
 
@@ -148,12 +149,12 @@ const Home = () => {
 
   const animationRefs = useRef<any | null>(null);
 
-  const heroCanvasDimensions = useMemo(() => {
-    const min = width > height ? height : width;
-    if (width < 600) return min - 20;
-    if (width < 900) return min - 40;
-    return min - 100;
-  }, [width, height]);
+  // const heroCanvasDimensions = useMemo(() => {
+  //   const min = width > height ? height : width;
+  //   if (width < 600) return min - 20;
+  //   if (width < 900) return min - 40;
+  //   return min - 100;
+  // }, [width, height]);
 
   useEffect(() => {
     const hash = window?.location?.hash;
@@ -468,75 +469,9 @@ const Home = () => {
           </Box>
         </Box>
 
-        <Stack
-          ref={HomeSectionRef}
-          spacing={width < 900 ? "10px" : "20px"}
-          direction={"column"}
-          alignItems={"center"}
-          justifyContent="flex-end"
-          sx={{
-            height: "calc(100vh - 70px)",
-            width: "100%",
-            padding: width < 900 ? "10px" : "20px",
-            backgroundColor: "#1d1102",
-            backgroundImage: `url(${
-              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
-            })`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
-            <Box sx={{ width: heroCanvasDimensions, height: heroCanvasDimensions }}>
-              <RiveComponentMemoized
-                src="rive/artboard-1.riv"
-                animations={["Timeline 1", "dark", "light"]}
-                artboard={"artboard-1"}
-                autoplay={true}
-              />
-            </Box>
-            <Typography
-              color="white"
-              variant="h5"
-              sx={{ textAlign: "center", width: isMobile ? "300px" : "auto", mb: "20px" }}
-            >
-              WE TAKE NOTES <b>TOGETHER</b>.
-            </Typography>
-            <Button
-              variant="contained"
-              size={width < 900 ? "small" : "large"}
-              component="a"
-              target="_blank"
-              href="https://1cademy.us/#JoinUsSection"
-              sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-            >
-              Apply to Join Us!
-            </Button>
-            {/* scroll animation */}
-            <Box
-              sx={{
-                position: "fixed",
-                bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-                right: "0px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-              className={homeInView ? "undefined" : "hide"}
-            >
-              <Typography color={"white"}>Scroll</Typography>
-              <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-                <RiveComponentMemoized
-                  src="rive/scroll.riv"
-                  animations={["Timeline 1", "dark"]}
-                  artboard={"New Artboard"}
-                  autoplay={true}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Stack>
+        <Box ref={HomeSectionRef} component="section">
+          <HeroMemoized />
+        </Box>
 
         <Box
           sx={{
@@ -576,6 +511,7 @@ const Home = () => {
               }
             />
           </Box>
+
           <Box id={sectionsOrder1Cademy[2].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
@@ -753,6 +689,7 @@ const Home = () => {
           </Box>
         </Box>
       </Box>
+
       <Box ref={footerSectionRef}>
         <AppFooter
           sx={{
@@ -762,7 +699,32 @@ const Home = () => {
           }}
         />
       </Box>
+
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+
+      {/* scroll animation */}
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={homeInView ? "undefined" : "hide"}
+      >
+        <Typography color={"white"}>Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveComponentMemoized
+            src="rive/scroll.riv"
+            animations={["Timeline 1", "dark"]}
+            artboard={"New Artboard"}
+            autoplay={true}
+          />
+        </Box>
+      </Box>
+
       <Box
         sx={{
           position: "fixed",
