@@ -24,7 +24,7 @@ const Which = dynamic(() => import("../components/home/views/Which"), { suspense
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRive } from "rive-react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
@@ -172,6 +172,13 @@ const Home = () => {
     artboard: "New Artboard",
     autoplay: true,
   });
+
+  const heroCanvasDimensions = useMemo(() => {
+    const min = width > height ? height : width;
+    if (width < 600) return min - 20;
+    if (width < 900) return min - 40;
+    return min - 100;
+  }, [width, height]);
 
   useEffect(() => {
     const hash = window?.location?.hash;
@@ -582,9 +589,7 @@ const Home = () => {
           }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
-            <Box
-              sx={{ width: width > height / 2 ? width / 2 : height, height: width > height ? width / 2 : height / 2 }}
-            >
+            <Box sx={{ width: heroCanvasDimensions, height: heroCanvasDimensions }}>
               <RiveComponent1 className={`rive-canvas`} />
             </Box>
             <Typography
