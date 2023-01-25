@@ -1,12 +1,17 @@
 import { Stack, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useQuery } from "react-query";
 
 import { gray03 } from "@/pages/index";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
+import { getStats } from "../../../lib/knowledgeApi";
+import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import Typography from "../components/Typography copy";
+
+// Example: some text [22,333.23] other text
 
 const HowItWorks = (props: any, ref: any) => {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -32,6 +37,8 @@ const HowItWorks = (props: any, ref: any) => {
 
   const theme = useTheme();
 
+  const { data: stats } = useQuery("stats", getStats);
+
   const getGrayColorText = useCallback(
     () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2),
     [theme.palette.common.darkBackground2, theme.palette.mode]
@@ -48,6 +55,16 @@ const HowItWorks = (props: any, ref: any) => {
     const newHeight = getHeight(newWidth);
     setCanvasDimension({ width: newWidth, height: newHeight });
   }, [width]);
+
+  const getDescription = useCallback(
+    (artboard: any) => {
+      if (!artboard.getDescription) return artboard.description;
+      if (!stats) return artboard.description;
+
+      return artboard.getDescription(stats);
+    },
+    [stats]
+  );
 
   const AnimationSections = useMemo(() => {
     return props.artboards.map((artboard: any, idx: number, src: any[]) => (
@@ -106,33 +123,29 @@ const HowItWorks = (props: any, ref: any) => {
           >
             {artboard.name}
           </Typography>
-          {artboard.description.split("\n").map((paragraph: string, idx: number) => (
-            <Typography
-              key={idx}
-              variant="body2"
-              sx={{
-                textAlign: "left",
-                color: getGrayColorText(),
-                fontSize: "16px",
-              }}
-            >
-              {paragraph
-                .split(" ")
-                .map(str =>
-                  str.match(/(\[)(0|([1-9](\d*|\d{0,2}(,\d{3})*)))?(\.\d*[1-9])?(\])/) ? (
-                    <b>{`${str.substring(1, str.length - 1)} `}</b>
-                  ) : (
-                    `${str} `
-                  )
-                )}
-            </Typography>
-          ))}
+
+          {getDescription(artboard)
+            .split("\n")
+            .map((paragraph: string, idx: number) => (
+              <Typography
+                key={idx}
+                variant="body2"
+                sx={{
+                  textAlign: "left",
+                  color: getGrayColorText(),
+                  fontSize: "16px",
+                }}
+              >
+                {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+              </Typography>
+            ))}
         </Box>
       </Stack>
     ));
   }, [
     canvasDimension.height,
     canvasDimension.width,
+    getDescription,
     getGrayColorText,
     isMobile,
     props.artboards,
@@ -157,6 +170,16 @@ const HowItWorks = (props: any, ref: any) => {
 };
 
 const getHeight = (width: number) => (300 * width) / 500;
+
+export const wrapStringWithBoldTag = (paragraph: string, RE: RegExp) => {
+  return paragraph
+    .split(" ")
+    .map((str, idx) => (
+      <React.Fragment key={idx}>
+        {str.match(RE) ? <b>{`${str.substring(1, str.length - 1)} `}</b> : `${str} `}
+      </React.Fragment>
+    ));
+};
 
 const HowItWorksFordwarded = forwardRef(HowItWorks);
 

@@ -1,9 +1,13 @@
 import { Box, Stack, Typography, useTheme } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "react-query";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
+import { getStats } from "../../../lib/knowledgeApi";
+import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
 import { gray03 } from "../../../pages";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
+import { wrapStringWithBoldTag } from "./HowItWorks";
 import whichItems from "./whichValues";
 
 const GoalsAnimationWidth = 950;
@@ -13,6 +17,8 @@ const Which = () => {
 
   const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
   const { width } = useWindowSize();
+
+  const { data: stats } = useQuery("stats", getStats);
 
   useEffect(() => {
     let newWidth = width / 2;
@@ -33,107 +39,6 @@ const Which = () => {
     () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2),
     [theme.palette.common.darkBackground2, theme.palette.mode]
   );
-
-  // const WhichSections = useMemo(() => {
-  //   return whichItems.map((whichSubsection, idx) => (
-  //     <Stack
-  //       key={idx}
-  //       direction={isMobile ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
-  //       spacing={isMobile ? "0px" : "40px"}
-  //       alignItems={"stretch"}
-  //     >
-  //       <Box
-  //         component={"picture"}
-  //         sx={{
-  //           // border: "solid 2px orange",
-  //           minWidth: isTablet ? "350px" : "300px",
-  //           height: "auto",
-  //           display: "flex",
-  //           alignItems: "center",
-  //           justifyContent: isMobile ? "center" : idx % 2 === 0 ? "flex-start" : "flex-end",
-  //         }}
-  //       >
-  //         {idx === 0 && (
-  //           <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
-  //             <RiveComponentMemoized
-  //               src="rive/notebook.riv"
-  //               artboard={"artboard-6"}
-  //               animations={["Timeline 1", theme.palette.mode]}
-  //               autoplay={true}
-  //             />
-  //           </Box>
-  //         )}
-  //         {idx === 1 && (
-  //           <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
-  //             <RiveComponentMemoized
-  //               src="rive-assistant/goals.riv"
-  //               artboard={"artboard-3"}
-  //               animations={["Timeline 1", theme.palette.mode]}
-  //               autoplay={true}
-  //             />
-  //           </Box>
-  //         )}
-  //         {idx === 2 && (
-  //           <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
-  //             <RiveComponentMemoized
-  //               src="rive/extension.riv"
-  //               artboard={"extension"}
-  //               animations={["Timeline 1", theme.palette.mode]}
-  //               autoplay={true}
-  //             />
-  //           </Box>
-  //         )}
-  //       </Box>
-  //       <Box
-  //         sx={{
-  //           p: "10px",
-  //           display: "flex",
-  //           flexDirection: "column",
-  //           justifyContent: "center",
-  //           "& > *:not(:last-child)": {
-  //             mb: "12px",
-  //           },
-  //         }}
-  //       >
-  //         <Typography
-  //           gutterBottom
-  //           variant="h3"
-  //           component="h3"
-  //           sx={{ fontSize: "24px", textAlign: isMobile ? "center" : "start" }}
-  //         >
-  //           {whichSubsection.name}
-  //         </Typography>
-  //         {whichSubsection.body.split("\n").map((paragraph, idx) => (
-  //           <Typography
-  //             key={idx}
-  //             variant="body2"
-  //             sx={{
-  //               textAlign: "left",
-  //               color: getGrayColorText(),
-  //               fontSize: "16px",
-  //             }}
-  //           >
-  //             {paragraph}
-  //           </Typography>
-  //         ))}
-  //         <Box>
-  //           {whichSubsection.link && (
-  //             <Button variant="outlined" href={whichSubsection.link} target="_blank" rel="noreferrer">
-  //               Visit
-  //               <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
-  //             </Button>
-  //           )}
-  //           {!whichSubsection.link && (
-  //             <Button variant="outlined" disabled>
-  //               Coming Soon
-  //               <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
-  //             </Button>
-  //           )}
-  //         </Box>
-  //       </Box>
-  //     </Stack>
-  //   ));
-  // }, [canvasDimension.height, canvasDimension.width, getGrayColorText, isMobile, isTablet, theme.palette.mode]);
 
   const AnimationSections = useMemo(() => {
     return whichItems.map((whichItem, idx: number, src: any[]) => (
@@ -206,23 +111,26 @@ const Which = () => {
             pb: idx < src.length - 1 ? "100px" : "0px",
           }}
         >
-          {whichItem.body.split("\n").map((paragraph: string, idx: number) => (
-            <Typography
-              key={idx}
-              variant="body2"
-              sx={{
-                textAlign: "left",
-                color: getGrayColorText(),
-                fontSize: "16px",
-              }}
-            >
-              {paragraph}
-            </Typography>
-          ))}
+          {(whichItem.getBody && stats ? whichItem.getBody(stats) : whichItem.body)
+            .split("\n")
+            .map((paragraph: string, idx: number) => (
+              <Typography
+                key={idx}
+                variant="body2"
+                sx={{
+                  textAlign: "left",
+                  color: getGrayColorText(),
+                  fontSize: "16px",
+                }}
+              >
+                {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+                {/* {paragraph} */}
+              </Typography>
+            ))}
         </Box>
       </Stack>
     ));
-  }, [canvasDimension.height, canvasDimension.width, getGrayColorText, theme.palette.mode, width]);
+  }, [canvasDimension.height, canvasDimension.width, getGrayColorText, stats, theme.palette.mode, width]);
 
   return (
     <Box

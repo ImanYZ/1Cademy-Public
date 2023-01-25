@@ -304,6 +304,7 @@ export type StatsSchema = {
   proposals: string;
   nodes: string;
   links: string;
+  communities?: string;
 };
 
 export type SearchNodesResponse = {
