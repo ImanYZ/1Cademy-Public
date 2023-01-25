@@ -49,7 +49,7 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
 
   useEffect(() => {
     let newWidth = width / 2;
-    if (width > 1536) newWidth = 500;
+    if (width > 1536) newWidth = 700;
     else if (width > 1200) newWidth = 500;
     else if (width > 900) newWidth = width / 2;
     else if (width > 600) newWidth = width - 60;
@@ -252,12 +252,13 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
       component="section"
       direction={"column"}
       alignItems={"center"}
-      spacing={width < 900 ? "0px" : "100px"}
+      spacing={width < 900 ? "0px" : "245px"}
       sx={{
         // position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        py: "100px",
       }}
     >
       {AnimationSections}

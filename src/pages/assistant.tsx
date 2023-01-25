@@ -15,14 +15,15 @@ import {
   useTheme,
 } from "@mui/material";
 
-const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
-
+const ValuesMemoized = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
+const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRive } from "rive-react";
 
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
@@ -98,6 +99,7 @@ const sectionsTmp = [
     ],
   },
   { id: "Why1CademyAssistant", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
+  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
   { id: "WhoIsBehind1CademyAssistant", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
@@ -122,6 +124,8 @@ const Home = () => {
 
   const { entry: homeEntry, inView: homeInView, ref: homeSectionRef } = useInView();
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
+  const { entry: whichEntry, inViewOnce: whichInViewOnce, ref: whichSectionRef } = useInView();
+
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
   const { inView: footerInView, ref: footerSectionRef } = useInView({
     options: footerOptions,
@@ -162,20 +166,6 @@ const Home = () => {
   //   autoplay: false,
   // });
 
-  const { RiveComponent: RiveScrollActionInHeroComponent } = useRive({
-    src: "rive/scroll.riv",
-    animations: ["Timeline 1", "dark"],
-    artboard: "New Artboard",
-    autoplay: true,
-  });
-
-  const { RiveComponent: RiveScrollActionComponent } = useRive({
-    src: "rive/scroll.riv",
-    animations: ["Timeline 1", theme.palette.mode === "dark" ? "dark" : "light"],
-    artboard: "New Artboard",
-    autoplay: true,
-  });
-
   const heroCanvasDimensions = useMemo(() => {
     const min = width > height ? height : width;
     if (width < 600) return min - 20;
@@ -206,29 +196,33 @@ const Home = () => {
     if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
+    if (!whichEntry) return null;
     if (!whoEntry) return null;
 
     return [
       { id: homeEntry.target.id, height: 0 },
       { id: howSectionRef.current.id, height: homeEntry.target.clientHeight },
       { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
-      { id: whoEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whoEntry.target.id, height: whichEntry.target.clientHeight },
     ];
-  }, [homeEntry, whoEntry, whyEntry]);
+  }, [homeEntry, whichEntry, whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
     if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
+    if (!whichEntry) return null;
     if (!whoEntry) return null;
 
     return [
       { id: homeEntry.target.id, height: homeEntry.target.clientHeight },
       { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
-  }, [homeEntry, whoEntry, whyEntry]);
+  }, [homeEntry, whichEntry, whoEntry, whyEntry]);
 
   // const getAnimationsHeight = useCallback(() => {
   //   const res = artboards.map(artboard => artboard.getHeight(height));
@@ -410,6 +404,32 @@ const Home = () => {
     [getAnimationsHeight, getSectionHeights]
   );
 
+  const scrollAnimationMemoized = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={footerInView ? "hide" : "undefined"}
+      >
+        <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveComponentMemoized
+            src="rive/scroll.riv"
+            animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
+            artboard={"New Artboard"}
+            autoplay={true}
+          />
+        </Box>
+      </Box>
+    );
+  }, [footerInView, homeInView, isMobile, theme.palette.mode]);
+
   return (
     <Box
       id="ScrollableContainer"
@@ -458,42 +478,20 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[1].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(1)}
-                  >
-                    {sectionsOrder[1].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[2].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(2)}
-                  >
-                    {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
-                    {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
+                {sectionsOrder.slice(1).map((cur, idx) => (
+                  <Tooltip key={cur.id} title={cur.title}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        borderBottom: theme =>
+                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                      }}
+                      onClick={() => switchSection(idx + 1)}
+                    >
+                      {sectionsOrder[idx + 1].label}
+                    </Typography>
+                  </Tooltip>
+                ))}
               </>
             )}
           </Stack>
@@ -581,23 +579,6 @@ const Home = () => {
           >
             HELPS YOU OPTIMIZE YOUR LIFE.
           </Typography>
-
-          <Box
-            sx={{
-              position: "fixed",
-              bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-              right: "0px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-            className={homeInView ? "undefined" : "hide"}
-          >
-            <Typography color={"white"}>Scroll</Typography>
-            <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-              <RiveScrollActionInHeroComponent className={`rive-canvas`} />
-            </Box>
-          </Box>
         </Stack>
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
@@ -648,12 +629,11 @@ const Home = () => {
                   </Grid>
                 }
               >
-                <Values />
+                <ValuesMemoized />
               </Suspense>
             )}
           </Box>
-
-          <Box id={sectionsOrder[3].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder[3].id} ref={whichSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -662,6 +642,50 @@ const Home = () => {
               sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[3].title}
+            </CustomTypography>
+            {!whichInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <Which />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[4].id} ref={whoSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[4].title}
             </CustomTypography>
             {!whoInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
@@ -749,23 +773,8 @@ const Home = () => {
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+      {scrollAnimationMemoized}
 
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-          right: "0px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-        className={footerInView || homeInView ? "hide" : "undefined"}
-      >
-        <Typography>Scroll</Typography>
-        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
-          <RiveScrollActionComponent className={`rive-canvas`} />
-        </Box>
-      </Box>
       <style>{`
           body{
             overflow:hidden;

@@ -1,12 +1,28 @@
 import { Stack, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useQuery } from "react-query";
 
 import { gray03 } from "@/pages/index";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
+import { StatsSchema } from "../../../knowledgeTypes";
+import { getStats } from "../../../lib/knowledgeApi";
+import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
+import { Magnitude } from "../components/Magnitude";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import Typography from "../components/Typography copy";
+
+const statsInit: StatsSchema = {
+  institutions: "0",
+  links: "0",
+  nodes: "0",
+  proposals: "0",
+  users: "0",
+  communities: "0",
+};
+
+// Example: some text [22,333.23] other text
 
 const HowItWorks = (props: any, ref: any) => {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -32,6 +48,8 @@ const HowItWorks = (props: any, ref: any) => {
 
   const theme = useTheme();
 
+  const { data: stats } = useQuery("stats", getStats);
+
   const getGrayColorText = useCallback(
     () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2),
     [theme.palette.common.darkBackground2, theme.palette.mode]
@@ -48,6 +66,16 @@ const HowItWorks = (props: any, ref: any) => {
     const newHeight = getHeight(newWidth);
     setCanvasDimension({ width: newWidth, height: newHeight });
   }, [width]);
+
+  const getDescription = useCallback(
+    (artboard: any) => {
+      if (!artboard.getDescription) return artboard.description;
+      if (!stats) return artboard.description;
+
+      return artboard.getDescription(stats);
+    },
+    [stats]
+  );
 
   const AnimationSections = useMemo(() => {
     return props.artboards.map((artboard: any, idx: number, src: any[]) => (
@@ -74,14 +102,21 @@ const HowItWorks = (props: any, ref: any) => {
               alignItems: "center",
             }}
           >
-            <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
-              <RiveComponentMemoized
-                src="rive/notebook.riv"
-                artboard={artboard.artoboard}
-                animations={["Timeline 1", theme.palette.mode]}
-                autoplay={true}
-              />
-            </Box>
+            {idx < src.length - 1 && (
+              <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+                <RiveComponentMemoized
+                  src="rive/notebook.riv"
+                  artboard={artboard.artoboard}
+                  animations={["Timeline 1", theme.palette.mode]}
+                  autoplay={true}
+                />
+              </Box>
+            )}
+            {idx === src.length - 1 && (
+              <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+                <Magnitude stats={stats ?? statsInit} width={canvasDimension.width} />
+              </Box>
+            )}
           </Box>
         </Box>
 
@@ -106,25 +141,29 @@ const HowItWorks = (props: any, ref: any) => {
           >
             {artboard.name}
           </Typography>
-          {artboard.description.split("\n").map((paragraph: string, idx: number) => (
-            <Typography
-              key={idx}
-              variant="body2"
-              sx={{
-                textAlign: "left",
-                color: getGrayColorText(),
-                fontSize: "16px",
-              }}
-            >
-              {paragraph}
-            </Typography>
-          ))}
+
+          {getDescription(artboard)
+            .split("\n")
+            .map((paragraph: string, idx: number) => (
+              <Typography
+                key={idx}
+                variant="body2"
+                sx={{
+                  textAlign: "left",
+                  color: getGrayColorText(),
+                  fontSize: "16px",
+                }}
+              >
+                {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+              </Typography>
+            ))}
         </Box>
       </Stack>
     ));
   }, [
     canvasDimension.height,
     canvasDimension.width,
+    getDescription,
     getGrayColorText,
     isMobile,
     props.artboards,
@@ -149,6 +188,16 @@ const HowItWorks = (props: any, ref: any) => {
 };
 
 const getHeight = (width: number) => (300 * width) / 500;
+
+export const wrapStringWithBoldTag = (paragraph: string, RE: RegExp) => {
+  return paragraph
+    .split(" ")
+    .map((str, idx) => (
+      <React.Fragment key={idx}>
+        {str.match(RE) ? <b>{`${str.substring(1, str.length - 1)} `}</b> : `${str} `}
+      </React.Fragment>
+    ));
+};
 
 const HowItWorksFordwarded = forwardRef(HowItWorks);
 

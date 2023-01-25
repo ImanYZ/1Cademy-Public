@@ -1,17 +1,24 @@
-import { Box, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Stack, Typography, useTheme } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "react-query";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
+import { getStats } from "../../../lib/knowledgeApi";
+import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
 import { gray03 } from "../../../pages";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
+import { wrapStringWithBoldTag } from "./HowItWorks";
 import whichItems from "./whichValues";
 
+const GoalsAnimationWidth = 950;
+const GoalsAnimationHeight = 380;
 const Which = () => {
   const theme = useTheme();
 
-  const isMobile = useMediaQuery("(max-width:600px)");
   const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
   const { width } = useWindowSize();
+
+  const { data: stats } = useQuery("stats", getStats);
 
   useEffect(() => {
     let newWidth = width / 2;
@@ -33,140 +40,27 @@ const Which = () => {
     [theme.palette.common.darkBackground2, theme.palette.mode]
   );
 
-  // const WhichSections = useMemo(() => {
-  //   return whichItems.map((whichSubsection, idx) => (
-  //     <Stack
-  //       key={idx}
-  //       direction={isMobile ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
-  //       spacing={isMobile ? "0px" : "40px"}
-  //       alignItems={"stretch"}
-  //     >
-  //       <Box
-  //         component={"picture"}
-  //         sx={{
-  //           // border: "solid 2px orange",
-  //           minWidth: isTablet ? "350px" : "300px",
-  //           height: "auto",
-  //           display: "flex",
-  //           alignItems: "center",
-  //           justifyContent: isMobile ? "center" : idx % 2 === 0 ? "flex-start" : "flex-end",
-  //         }}
-  //       >
-  //         {idx === 0 && (
-  //           <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
-  //             <RiveComponentMemoized
-  //               src="rive/notebook.riv"
-  //               artboard={"artboard-6"}
-  //               animations={["Timeline 1", theme.palette.mode]}
-  //               autoplay={true}
-  //             />
-  //           </Box>
-  //         )}
-  //         {idx === 1 && (
-  //           <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
-  //             <RiveComponentMemoized
-  //               src="rive-assistant/goals.riv"
-  //               artboard={"artboard-3"}
-  //               animations={["Timeline 1", theme.palette.mode]}
-  //               autoplay={true}
-  //             />
-  //           </Box>
-  //         )}
-  //         {idx === 2 && (
-  //           <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
-  //             <RiveComponentMemoized
-  //               src="rive/extension.riv"
-  //               artboard={"extension"}
-  //               animations={["Timeline 1", theme.palette.mode]}
-  //               autoplay={true}
-  //             />
-  //           </Box>
-  //         )}
-  //       </Box>
-  //       <Box
-  //         sx={{
-  //           p: "10px",
-  //           display: "flex",
-  //           flexDirection: "column",
-  //           justifyContent: "center",
-  //           "& > *:not(:last-child)": {
-  //             mb: "12px",
-  //           },
-  //         }}
-  //       >
-  //         <Typography
-  //           gutterBottom
-  //           variant="h3"
-  //           component="h3"
-  //           sx={{ fontSize: "24px", textAlign: isMobile ? "center" : "start" }}
-  //         >
-  //           {whichSubsection.name}
-  //         </Typography>
-  //         {whichSubsection.body.split("\n").map((paragraph, idx) => (
-  //           <Typography
-  //             key={idx}
-  //             variant="body2"
-  //             sx={{
-  //               textAlign: "left",
-  //               color: getGrayColorText(),
-  //               fontSize: "16px",
-  //             }}
-  //           >
-  //             {paragraph}
-  //           </Typography>
-  //         ))}
-  //         <Box>
-  //           {whichSubsection.link && (
-  //             <Button variant="outlined" href={whichSubsection.link} target="_blank" rel="noreferrer">
-  //               Visit
-  //               <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
-  //             </Button>
-  //           )}
-  //           {!whichSubsection.link && (
-  //             <Button variant="outlined" disabled>
-  //               Coming Soon
-  //               <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
-  //             </Button>
-  //           )}
-  //         </Box>
-  //       </Box>
-  //     </Stack>
-  //   ));
-  // }, [canvasDimension.height, canvasDimension.width, getGrayColorText, isMobile, isTablet, theme.palette.mode]);
-
   const AnimationSections = useMemo(() => {
     return whichItems.map((whichItem, idx: number, src: any[]) => (
       <Stack
         // ref={refs[idx]}
         key={whichItem.id}
-        direction={width < 900 ? "column" : idx % 2 === 0 ? "row" : "row-reverse"}
-        spacing={width < 900 ? "20px" : "40px"}
+        direction={"column"}
+        spacing={"20px"}
         alignItems={width < 900 ? "center" : "stretch"}
-        alignSelf={width < 900 ? "center" : idx % 2 === 0 ? "flex-end" : "flex-start"}
         sx={{ position: "relative", minHeight: "500px" /* , border: `2px dashed red` */ }}
       >
-        <Box sx={{ position: "relative" }}>
+        <Typography gutterBottom variant="h3" component="h3" sx={{ fontSize: "32px", textAlign: "center" }}>
+          {whichItem.name}
+        </Typography>
+        <Box sx={{ position: "relative", alignSelf: "center" }}>
           <Box
             sx={{
-              position: width < 900 ? "relative" : "absolute",
-
-              left: idx % 2 === 0 ? undefined : "0",
-              right: idx % 2 === 1 ? undefined : "0",
-              /* border: "solid 1px royalBlue", */
-              top: 0,
-              bottom: 0,
+              position: "relative",
               display: "flex",
               alignItems: "center",
             }}
           >
-            {/* <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
-              <RiveComponentMemoized
-                src="rive/notebook.riv"
-                artboard={artboard.artoboard}
-                animations={["Timeline 1", theme.palette.mode]}
-                autoplay={true}
-              />
-            </Box> */}
             {idx === 0 && (
               <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
                 <RiveComponentMemoized
@@ -178,7 +72,12 @@ const Which = () => {
               </Box>
             )}
             {idx === 1 && (
-              <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+              <Box
+                sx={{
+                  width: width < 900 ? canvasDimension.width : GoalsAnimationWidth,
+                  height: width < 900 ? canvasDimension.height : GoalsAnimationHeight,
+                }}
+              >
                 <RiveComponentMemoized
                   src="rive-assistant/goals.riv"
                   artboard={"artboard-3"}
@@ -202,7 +101,6 @@ const Which = () => {
 
         <Box
           sx={{
-            maxWidth: width < 900 ? "600px" : "400px",
             p: "10px",
             display: "flex",
             flexDirection: "column",
@@ -213,31 +111,26 @@ const Which = () => {
             pb: idx < src.length - 1 ? "100px" : "0px",
           }}
         >
-          <Typography
-            gutterBottom
-            variant="h3"
-            component="h3"
-            sx={{ fontSize: "32px", textAlign: isMobile ? "center" : "start" }}
-          >
-            {whichItem.name}
-          </Typography>
-          {whichItem.body.split("\n").map((paragraph: string, idx: number) => (
-            <Typography
-              key={idx}
-              variant="body2"
-              sx={{
-                textAlign: "left",
-                color: getGrayColorText(),
-                fontSize: "16px",
-              }}
-            >
-              {paragraph}
-            </Typography>
-          ))}
+          {(whichItem.getBody && stats ? whichItem.getBody(stats) : whichItem.body)
+            .split("\n")
+            .map((paragraph: string, idx: number) => (
+              <Typography
+                key={idx}
+                variant="body2"
+                sx={{
+                  textAlign: "left",
+                  color: getGrayColorText(),
+                  fontSize: "16px",
+                }}
+              >
+                {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+                {/* {paragraph} */}
+              </Typography>
+            ))}
         </Box>
       </Stack>
     ));
-  }, [canvasDimension.height, canvasDimension.width, getGrayColorText, isMobile, theme.palette.mode, width]);
+  }, [canvasDimension.height, canvasDimension.width, getGrayColorText, stats, theme.palette.mode, width]);
 
   return (
     <Box
