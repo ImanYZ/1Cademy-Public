@@ -2356,31 +2356,31 @@ const Dashboard = ({}: DashboardProps) => {
   // Proposals Functions
 
   const proposeNodeImprovement = useCallback(
-    (event: any) => {
+    (event: any, nodeId: any = "") => {
       devLog("PROPOSE_NODE_IMPROVEMENT");
       event.preventDefault();
-      if (!nodeBookState.selectedNode) return;
-
-      setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
+      const selectedNode = nodeId || nodeBookState.selectedNode;
+      if (!selectedNode) return;
+      setOpenProposal("ProposeEditTo" + selectedNode);
       reloadPermanentGraph();
 
       setGraph(({ nodes: oldNodes, edges }) => {
-        if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
+        if (!selectedNode) return { nodes: oldNodes, edges };
 
-        if (!(nodeBookState.selectedNode in changedNodes)) {
-          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+        if (!(selectedNode in changedNodes)) {
+          changedNodes[selectedNode] = copyNode(oldNodes[selectedNode]);
         }
-        const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
+        const thisNode = { ...oldNodes[selectedNode] };
         thisNode.editable = true;
         const newNodes = {
           ...oldNodes,
-          [nodeBookState.selectedNode]: thisNode,
+          [selectedNode]: thisNode,
         };
 
         return { nodes: newNodes, edges };
       });
       setOpenSidebar(null);
-      scrollToNode(nodeBookState.selectedNode);
+      scrollToNode(selectedNode);
     },
     [nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode]
   );
