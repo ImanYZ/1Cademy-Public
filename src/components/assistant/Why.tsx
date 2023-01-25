@@ -2,6 +2,8 @@ import { Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useCallback, useMemo } from "react";
 
+import { useWindowSize } from "@/hooks/useWindowSize";
+
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
 import { gray03 } from "../../pages/assistant";
 import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
@@ -11,6 +13,7 @@ const observerOption: UseInViewProps = { options: { root: null, rootMargin: "0px
 
 const Values = () => {
   const theme = useTheme();
+  const { width } = useWindowSize();
 
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
@@ -100,7 +103,13 @@ const Values = () => {
           className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
         >
           {idx === 2 ? (
-            <Box sx={{ width: "300px", height: "200px", flex: 1 }}>
+            <Box
+              sx={{
+                width: width > 600 && width < 900 ? "300px" : "450px",
+                height: width > 600 && width < 900 ? "200px" : "300px",
+                flex: 1,
+              }}
+            >
               <RiveComponentMemoized
                 src="rive-assistant/meetings.riv"
                 artboard="meetings"
@@ -152,7 +161,7 @@ const Values = () => {
         </Box>
       </Stack>
     ));
-  }, [getGrayColorText, inViewOnces, isMobile, isTablet, refs, theme.palette.mode]);
+  }, [getGrayColorText, inViewOnces, isMobile, isTablet, refs, theme.palette.mode, width]);
   return (
     <Box
       component="section"
