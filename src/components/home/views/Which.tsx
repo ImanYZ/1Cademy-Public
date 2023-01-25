@@ -63,7 +63,13 @@ const Which = () => {
             }}
           >
             {idx === 0 && (
-              <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+              <Box
+                component={"a"}
+                href={whichItem.link}
+                target="_blank"
+                rel="noreferrer"
+                sx={{ width: canvasDimension.width, height: canvasDimension.height }}
+              >
                 <RiveComponentMemoized
                   src="rive/notebook.riv"
                   artboard={"artboard-6"}

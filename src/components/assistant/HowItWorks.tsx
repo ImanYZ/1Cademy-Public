@@ -1,4 +1,4 @@
-import { Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Stack, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
@@ -20,8 +20,6 @@ import { RiveComponentMemoized } from "../home/components/temporals/RiveComponen
 type HowItWorksProps = { artboards: any[] };
 
 const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
-  const isMobile = useMediaQuery("(max-width:600px)");
-
   const [canvasDimension, setCanvasDimension] = useState({ width: 0, height: 0 });
   const ref1 = useRef<any | null>(null);
   const ref2 = useRef<any | null>(null);
@@ -49,9 +47,9 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
 
   useEffect(() => {
     let newWidth = width / 2;
-    if (width > 1536) newWidth = 700;
-    else if (width > 1200) newWidth = 600;
-    else if (width > 900) newWidth = width / 2;
+    if (width > 1536) newWidth = 980;
+    else if (width > 1200) newWidth = 900;
+    else if (width > 900) newWidth = width - 120;
     else if (width > 600) newWidth = width - 60;
     else if (width > 0) newWidth = width - 40;
 
@@ -185,7 +183,12 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
               alignItems: "center",
             }}
           >
-            <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+            <Box
+              sx={{
+                width: `${canvasDimension.width}px`,
+                height: idx === 2 ? `${canvasDimension.height - 100}px` : `${canvasDimension.height}px`,
+              }}
+            >
               <RiveComponentMemoized
                 src={artboard.src}
                 artboard={artboard.artoboard}
@@ -224,29 +227,19 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
         </Box>
       </Stack>
     ));
-  }, [
-    artboards,
-    refs,
-    width,
-    canvasDimension.width,
-    canvasDimension.height,
-    theme.palette.mode,
-    isMobile,
-    getGrayColorText,
-  ]);
+  }, [artboards, refs, width, canvasDimension.width, canvasDimension.height, theme.palette.mode, getGrayColorText]);
 
   return (
     <Stack
       component="section"
       direction={"column"}
       alignItems={"center"}
-      spacing={width < 900 ? "0px" : "245px"}
+      spacing={width < 900 ? "0px" : "20px"}
       sx={{
         // position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        py: "100px",
       }}
     >
       {AnimationSections}
