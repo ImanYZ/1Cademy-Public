@@ -478,42 +478,20 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[1].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(1)}
-                  >
-                    {sectionsOrder[1].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[2].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(2)}
-                  >
-                    {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
-                    {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
+                {sectionsOrder.slice(1).map((cur, idx) => (
+                  <Tooltip key={cur.id} title={cur.title}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        borderBottom: theme =>
+                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                      }}
+                      onClick={() => switchSection(idx + 1)}
+                    >
+                      {sectionsOrder[idx + 1].label}
+                    </Typography>
+                  </Tooltip>
+                ))}
               </>
             )}
           </Stack>
