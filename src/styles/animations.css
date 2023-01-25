@@ -91,31 +91,30 @@
   animation-delay: 600ms;
 }
 
-/* .infinity {
-  animation-iteration-count: infinite;
-} */
+/* ------------------------------------ */
+/* magnitude subsection animations */
 
 .magnitude-text-one {
-  animation-name: slideBottomToTopWait;
+  animation-name: slideBottomToTopWaitOne;
   animation-duration: 10s;
   animation-fill-mode: both;
   animation-iteration-count: infinite;
 }
 
-@keyframes slideBottomToTopWait {
+@keyframes slideBottomToTopWaitOne {
   0% {
     opacity: 0;
     transform: translateY(100px);
   }
-  /* 25% {
+  25% {
     opacity: 0;
     transform: translateY(100px);
-  } */
-  30% {
+  }
+  35% {
     opacity: 1;
     transform: translateY(0px);
   }
-  80% {
+  65% {
     opacity: 1;
     transform: translateY(0px);
   }
@@ -125,7 +124,67 @@
   }
 }
 
-.scale {
+.magnitude-text-two {
+  animation-name: slideBottomToTopWaitTwo;
+  animation-duration: 10s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+}
+
+@keyframes slideBottomToTopWaitTwo {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  35% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0px);
+  }
+}
+
+.magnitude-text-three {
+  animation-name: slideBottomToTopWaitThree;
+  animation-duration: 10s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+}
+
+@keyframes slideBottomToTopWaitThree {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0px);
+  }
+}
+
+.magnitude-logo-scale {
   animation-name: scale;
   animation-duration: 10s;
   animation-fill-mode: both;
@@ -142,14 +201,6 @@
     opacity: 1;
     transform: scale(1);
   }
-  /* 25% {
-    opacity: 0;
-    transform: translateY(100px);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(0px);
-  } */
   90% {
     opacity: 1;
     transform: scale(1);

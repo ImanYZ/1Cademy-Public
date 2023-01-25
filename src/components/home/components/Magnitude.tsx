@@ -39,7 +39,7 @@ export const Magnitude = ({ stats, width }: MagnitudeProps) => {
 
   return (
     <Stack direction={"column"} gap={width > 900 ? "30px" : "4px"} alignItems={"center"}>
-      <Box sx={{ width: logoWidth }} className="scale">
+      <Box sx={{ width: logoWidth }} className="magnitude-logo-scale">
         <img src="DarkModeLogo_o.svg" alt="" />
       </Box>
 
@@ -54,7 +54,7 @@ export const Magnitude = ({ stats, width }: MagnitudeProps) => {
         links have been
       </Typography>
 
-      <Typography fontSize={fontSize} className="magnitude-text-one delay-300ms">
+      <Typography fontSize={fontSize} className="magnitude-text-two">
         contributed through{" "}
         <Typography fontSize={fontSize} component={"span"} color={"primary"} fontWeight={700}>
           {stats.proposals}
@@ -62,7 +62,7 @@ export const Magnitude = ({ stats, width }: MagnitudeProps) => {
         proposals from{" "}
       </Typography>
 
-      <Typography fontSize={fontSize} className="magnitude-text-one delay-600ms">
+      <Typography fontSize={fontSize} className="magnitude-text-three">
         <Typography fontSize={fontSize} component={"span"} color={"primary"} fontWeight={700}>
           {stats.users}{" "}
         </Typography>
