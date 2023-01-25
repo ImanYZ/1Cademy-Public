@@ -37,8 +37,8 @@ export default [
   {
     name: "Crowdsourced",
     body: "Similar to Wikipedia, 1Cademy is built through a collaborative effort on a large scale. However, while Wikipedia is the most comprehensive encyclopedia, 1Cademy's goal is to tap into the collective intelligence of its users to uncover the most efficient learning pathways for any given topic by identifying the most effective prerequisite connections.",
-    image: "Crowdsourcing.png",
-    imageDark: "Crowdsourcing.png",
+    image: "Crowdsourcing.svg",
+    imageDark: "Crowdsourcing.svg",
   },
   {
     name: "Learning Through Teaching",
