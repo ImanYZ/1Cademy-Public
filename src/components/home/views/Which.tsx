@@ -1,4 +1,5 @@
-import { Box, Stack, Typography, useTheme } from "@mui/material";
+import LaunchIcon from "@mui/icons-material/Launch";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "react-query";
 
@@ -127,6 +128,20 @@ const Which = () => {
                 {/* {paragraph} */}
               </Typography>
             ))}
+          <Box>
+            {whichItem.link && (
+              <Button variant="outlined" href={whichItem.link} target="_blank" rel="noreferrer">
+                Visit
+                <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
+              </Button>
+            )}
+            {!whichItem.link && (
+              <Button variant="outlined" disabled>
+                Coming Soon
+                <LaunchIcon fontSize={"small"} sx={{ ml: "10px" }} />
+              </Button>
+            )}
+          </Box>
         </Box>
       </Stack>
     ));
