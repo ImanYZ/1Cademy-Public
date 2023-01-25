@@ -886,6 +886,8 @@ const Node = ({
                 contributors={contributors}
                 institutions={institutions}
                 openUserInfoSidebar={openUserInfoSidebar}
+                proposeNodeImprovement={proposeNodeImprovement}
+                setOperation={setOperation}
               />
             </div>
           </div>
@@ -930,8 +932,14 @@ const Node = ({
                 sx={{
                   textAlign: "center",
                   display: "flex",
-                  justifyContent: "space-between",
                   margin: "10px",
+                  ...(isNew
+                    ? {
+                        justifyContent: "space-between",
+                      }
+                    : {
+                        alignItems: "center",
+                      }),
                 }}
               >
                 <Button
@@ -939,6 +947,9 @@ const Node = ({
                   variant="contained"
                   className="btn waves-effect waves-light hoverable red"
                   onClick={onCancelProposal}
+                  sx={{
+                    padding: "6px",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -948,9 +959,35 @@ const Node = ({
                   className="btn waves-effect waves-light hoverable green"
                   onClick={proposalSubmit}
                   disabled={!ableToPropose ?? false}
+                  sx={{
+                    padding: "6px",
+                  }}
                 >
                   Propose
                 </Button>
+                <div
+                  id="ProposalButtonsRow"
+                  style={{
+                    border: "solid 0px pink",
+                    display: !isNew && nodeType !== "Reference" ? "flex" : "none",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                    (childNodeType: ProposedChildTypesIcons) => {
+                      return (
+                        <NewChildProposal
+                          key={childNodeType}
+                          childNodeType={childNodeType}
+                          icon={proposedChildTypesIcons[childNodeType]}
+                          openProposal={openProposal}
+                          setOpenProposal={setOpenProposal}
+                          proposeNewChild={proposeNewChild}
+                        />
+                      );
+                    }
+                  )}
+                </div>
               </Box>
             </>
           )}
@@ -1035,12 +1072,14 @@ const Node = ({
                 contributors={contributors}
                 institutions={institutions}
                 openUserInfoSidebar={openUserInfoSidebar}
+                proposeNodeImprovement={proposeNodeImprovement}
+                setOperation={setOperation}
               />
             </div>
           </div>
         </div>
       )}
-      {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
+      {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
         <>
           <Box
             sx={{
@@ -1088,7 +1127,7 @@ const Node = ({
             </Box>
           </Box>
         </>
-      ) : null}
+      ) : null} */}
     </div>
   );
 };
