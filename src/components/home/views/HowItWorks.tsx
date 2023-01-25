@@ -116,7 +116,15 @@ const HowItWorks = (props: any, ref: any) => {
                 fontSize: "16px",
               }}
             >
-              {paragraph}
+              {paragraph
+                .split(" ")
+                .map(str =>
+                  str.match(/(\[)(0|([1-9](\d*|\d{0,2}(,\d{3})*)))?(\.\d*[1-9])?(\])/) ? (
+                    <b>{`${str.substring(1, str.length - 1)} `}</b>
+                  ) : (
+                    `${str} `
+                  )
+                )}
             </Typography>
           ))}
         </Box>
