@@ -90,3 +90,71 @@
 .delay-600ms {
   animation-delay: 600ms;
 }
+
+/* .infinity {
+  animation-iteration-count: infinite;
+} */
+
+.magnitude-text-one {
+  animation-name: slideBottomToTopWait;
+  animation-duration: 10s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+}
+
+@keyframes slideBottomToTopWait {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  /* 25% {
+    opacity: 0;
+    transform: translateY(100px);
+  } */
+  30% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0px);
+  }
+}
+
+.scale {
+  animation-name: scale;
+  animation-duration: 10s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+  transform-origin: center;
+}
+
+@keyframes scale {
+  0% {
+    opacity: 1;
+    transform: scale(0);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  /* 25% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0px);
+  } */
+  90% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+  }
+}

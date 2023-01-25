@@ -6,10 +6,21 @@ import { useQuery } from "react-query";
 import { gray03 } from "@/pages/index";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
+import { StatsSchema } from "../../../knowledgeTypes";
 import { getStats } from "../../../lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
+import { Magnitude } from "../components/Magnitude";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import Typography from "../components/Typography copy";
+
+const statsInit: StatsSchema = {
+  institutions: "0",
+  links: "0",
+  nodes: "0",
+  proposals: "0",
+  users: "0",
+  communities: "0",
+};
 
 // Example: some text [22,333.23] other text
 
@@ -91,14 +102,21 @@ const HowItWorks = (props: any, ref: any) => {
               alignItems: "center",
             }}
           >
-            <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
-              <RiveComponentMemoized
-                src="rive/notebook.riv"
-                artboard={artboard.artoboard}
-                animations={["Timeline 1", theme.palette.mode]}
-                autoplay={true}
-              />
-            </Box>
+            {idx < src.length - 1 && (
+              <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+                <RiveComponentMemoized
+                  src="rive/notebook.riv"
+                  artboard={artboard.artoboard}
+                  animations={["Timeline 1", theme.palette.mode]}
+                  autoplay={true}
+                />
+              </Box>
+            )}
+            {idx === src.length - 1 && (
+              <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+                <Magnitude stats={stats ?? statsInit} width={canvasDimension.width} />
+              </Box>
+            )}
           </Box>
         </Box>
 
