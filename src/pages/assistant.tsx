@@ -738,7 +738,8 @@ const Home = () => {
           sx={{
             width: "100%",
             height: "100%",
-            bgcolor: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F8F8F8"),
+            bgcolor: theme => (theme.palette.mode === "dark" ? "#28282ad3" : "#f8f8f8e3"),
+            backdropFilter: "blur(4px)",
             display: "flex",
             justifyContent: "center",
             alignItems: width < 600 ? "flex-start" : "center",

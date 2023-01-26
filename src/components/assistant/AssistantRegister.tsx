@@ -207,10 +207,12 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
               }}
             />
 
-            <LoadingButton type="submit" color="primary" variant="contained" fullWidth loading={isLoading}>
-              Submit
-              <ArrowForwardIcon sx={{ ml: "10px" }} />
-            </LoadingButton>
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              <LoadingButton type="submit" color="primary" variant="contained" loading={isLoading}>
+                Submit
+                <ArrowForwardIcon sx={{ ml: "10px" }} />
+              </LoadingButton>
+            </Box>
           </Stack>
 
           <Typography component="p">
