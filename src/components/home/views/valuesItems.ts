@@ -30,8 +30,8 @@ export default [
   {
     name: "Developing Learning Pathways",
     body: "While information on any topic is readily available on the internet, many people still choose to invest in textbooks and courses. The reason for this is that these resources provide structured learning pathways - step-by-step procedures to achieve one's learning objectives. However, traditional textbooks and courses are limited by the perspectives of a few authors and are infrequently updated or improved. \n1Cademy offers a solution to this by providing a collaborative platform for students, instructors, and researchers to design and share learning pathways on any topic, all within the framework of a shared knowledge graph.",
-    image: "Improving.svg",
-    imageDark: "Improving.svg",
+    image: "Developing_Learning_Pathways_light.svg",
+    imageDark: "Developing_Learning_Pathways_dark.svg",
     padding: "4px 37px 0px 37px",
   },
   {
