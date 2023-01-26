@@ -2,7 +2,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Autocomplete, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 
@@ -20,6 +20,8 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
 
   const { data, isLoading } = useQuery(["searchAutocomplete", searchText], () => getSearchAutocomplete(searchText));
 
+  const autcompleteRef = useRef<any | null>(null);
+
   useEffect(() => {
     setText((router.query.q as string) || "");
   }, [router.query]);
@@ -33,6 +35,9 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
     (document.activeElement as HTMLElement).blur();
     e.preventDefault();
     onSearch(text);
+    // if (!autcompleteRef.current) return;
+
+    // autcompleteRef.current.blur();
   };
 
   const handleChangeOption = (value: string) => {
@@ -41,10 +46,18 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
     onSearch(value);
   };
 
+  const onHandleEnter = (e: any) => {
+    if (e.key !== "Enter") return;
+    if (!autcompleteRef.current) return;
+
+    autcompleteRef.current.blur();
+  };
+
   return (
     <Box component="form" onSubmit={handleSearch} sx={{ width: "100%" }}>
       <Autocomplete
         id="custom-input-demo"
+        ref={autcompleteRef}
         fullWidth
         options={suggestions}
         freeSolo={true}
@@ -98,6 +111,7 @@ const SearchInput: FC<Props> = ({ onSearch }) => {
             </IconButton>
           </Box>
         )}
+        onKeyDown={onHandleEnter}
       />
     </Box>
   );
