@@ -104,6 +104,8 @@ type NodeFooterProps = {
   contributors: any;
   institutions: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  proposeNodeImprovement: any;
+  setOperation: any;
 };
 
 const NodeFooter = ({
@@ -162,6 +164,8 @@ const NodeFooter = ({
   contributors,
   institutions,
   openUserInfoSidebar,
+  proposeNodeImprovement,
+  setOperation,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -220,28 +224,28 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-  const selectPendingProposals = useCallback(
-    (event: any) => {
-      // if (nodeBookState.selectedNode === identifier) {
-      //   console.log("this is selected");
-      // }
-      // TODO: remove openEditButton and nodeId global states
-      // openNodePart(event, "PendingProposals");
-      // if (nodeBookState.nodeId != identifier) {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: true, nodeId: identifier },
-      //   });
-      // } else {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
-      //   });
-      // }
-      selectNode(event, "Proposals"); // Pass correct data
-    },
-    [selectNode]
-  );
+  // const selectPendingProposals = useCallback(
+  //   (event: any) => {
+  //     // if (nodeBookState.selectedNode === identifier) {
+  //     //   console.log("this is selected");
+  //     // }
+  //     // TODO: remove openEditButton and nodeId global states
+  //     // openNodePart(event, "PendingProposals");
+  //     // if (nodeBookState.nodeId != identifier) {
+  //     //   nodeBookDispatch({
+  //     //     type: "setOpenEditButton",
+  //     //     payload: { status: true, nodeId: identifier },
+  //     //   });
+  //     // } else {
+  //     //   nodeBookDispatch({
+  //     //     type: "setOpenEditButton",
+  //     //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
+  //     //   });
+  //     // }
+  //     selectNode(event, "Proposals"); // Pass correct data
+  //   },
+  //   [selectNode]
+  // );
   const uploadNodeImageHandler = useCallback(
     (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
     [uploadNodeImage, isUploading]
@@ -370,6 +374,14 @@ const NodeFooter = ({
     }
   }, [nodeBookDispatch, nodeBookState.contributorsNodeId]);
 
+  const proposeNodeImprovementClick = useCallback(
+    (event: any) => {
+      setOperation("CancelProposals");
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+      proposeNodeImprovement(event, identifier);
+    },
+    [proposeNodeImprovement]
+  );
   return (
     <>
       <Box
@@ -470,7 +482,7 @@ const NodeFooter = ({
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 {openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier ? (
                   <Box
-                    onClick={selectPendingProposals}
+                    onClick={proposeNodeImprovementClick}
                     className={"select-tab-button-node-footer"}
                     sx={{
                       "& > span": {
@@ -486,7 +498,7 @@ const NodeFooter = ({
                 ) : (
                   <ContainedButton
                     title="Propose/evaluate versions of this node."
-                    onClick={selectPendingProposals}
+                    onClick={proposeNodeImprovementClick}
                     tooltipPosition="top"
                     sx={{
                       background: (theme: any) =>
