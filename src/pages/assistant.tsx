@@ -34,6 +34,7 @@ import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg"
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
+import AssistantForm from "../components/assistant/AssistantRegister";
 import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
@@ -119,7 +120,7 @@ const Home = () => {
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
 
-  const [open, setOpen] = useState(false);
+  const [openForm, setOpenForm] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
   const { entry: homeEntry, inView: homeInView, ref: homeSectionRef } = useInView();
@@ -520,7 +521,7 @@ const Home = () => {
               <Button
                 variant="outlined"
                 color="secondary"
-                onClick={() => setOpen(true)}
+                onClick={() => setOpenForm(true)}
                 size={isMobile ? "small" : "medium"}
                 sx={{
                   fontSize: 16,
@@ -723,40 +724,58 @@ const Home = () => {
         </Box>
       </Box>
       <Modal
-        open={open}
-        onClose={() => setOpen(false)}
+        open={openForm}
+        onClose={() => setOpenForm(false)}
         // aria-labelledby="modal-modal-title"
         // aria-describedby="modal-modal-description"
-        sx={{ bgcolor: "#3131316e", backdropFilter: "blur(4px)" }}
+        sx={
+          {
+            // backdropFilter: "blur(4px)",
+          }
+        }
       >
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
+            width: "100%",
+            height: "100%",
+            bgcolor: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F8F8F8"),
+            display: "flex",
+            justifyContent: "center",
+            alignItems: width < 600 ? "flex-start" : "center",
           }}
         >
-          <IconButton
-            onClick={() => setOpen(false)}
-            sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
-          >
-            <CloseIcon />
-          </IconButton>
           <Box
             sx={{
-              maxWidth: "500px",
-              p: "20px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              position: "relative",
+              maxWidth: "900px",
+              overflowY: "auto",
+
+              // position: "absolute",
+              // top: "0px",
+              // left: "0px",
+              // right:"0px",
+              // bottom:"0px",
+              // transform: "translate(-50%, -50%)",
             }}
           >
-            <img src="assistant/robot.png" alt="" srcSet="" />
-            <Typography /* id="modal-modal-title" */ variant="h6" component="h2">
-              Coming Soon...
-            </Typography>
+            <IconButton onClick={() => setOpenForm(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+              <CloseIcon />
+            </IconButton>
+            <Stack spacing={"20px"} /* direction={width < 1200 ? "column" : "row"} */ sx={{ p: "20px" }}>
+              {/* <Box
+              sx={{
+                maxWidth: "500px",
+                p: "20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img src="assistant/robot.png" alt="" srcSet="" />
+            </Box> */}
+              <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
+            </Stack>
           </Box>
         </Box>
       </Modal>
