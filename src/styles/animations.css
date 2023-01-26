@@ -32,17 +32,158 @@
 }
 
 .slide-left-to-right {
-  animation-name: slideLeftToTight;
+  animation-name: slideLeftToRight;
   animation-duration: 1s;
   animation-fill-mode: both;
 }
-@keyframes slideLeftToTight {
+@keyframes slideLeftToRight {
   0% {
     opacity: 0;
-    transform: translateX(-100);
+    transform: translateX(-100px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0px);
+  }
+}
+
+.slide-right-to-left {
+  animation-name: slideRightToLeft;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes slideRightToLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+
+.slide-bottom-top {
+  animation-name: slideBottomToTop;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@keyframes slideBottomToTop {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.hide {
+  opacity: 0;
+}
+
+.delay-300ms {
+  animation-delay: 300ms;
+}
+
+.delay-600ms {
+  animation-delay: 600ms;
+}
+
+/* ------------------------------------ */
+/* magnitude subsection animations */
+
+.magnitude-text-one {
+  animation: slideBottomToTopWaitOne 10s 1;
+}
+
+@keyframes slideBottomToTopWaitOne {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  25% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.magnitude-text-two {
+  animation: slideBottomToTopWaitTwo 10s 1;
+}
+
+@keyframes slideBottomToTopWaitTwo {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  35% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.magnitude-text-three {
+  animation: slideBottomToTopWaitThree 10s 1;
+}
+
+@keyframes slideBottomToTopWaitThree {
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.magnitude-logo-scale {
+  animation: scale 10s 1;
+}
+
+@keyframes scale {
+  0% {
+    opacity: 1;
+    transform: scale(0);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
   }
 }

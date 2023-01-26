@@ -1567,6 +1567,7 @@ const Dashboard = ({}: DashboardProps) => {
           });
           setOpenSidebar("PROPOSALS");
         }
+
         if (linkedNode) {
           nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
           setTimeout(() => {
@@ -1574,6 +1575,10 @@ const Dashboard = ({}: DashboardProps) => {
           }, 1500);
         } else {
           openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
+        }
+
+        if (typeOperation === "CitationSidebar") {
+          setOpenSidebar(null);
         }
       }
     },
@@ -2351,31 +2356,31 @@ const Dashboard = ({}: DashboardProps) => {
   // Proposals Functions
 
   const proposeNodeImprovement = useCallback(
-    (event: any) => {
+    (event: any, nodeId: any = "") => {
       devLog("PROPOSE_NODE_IMPROVEMENT");
       event.preventDefault();
-      if (!nodeBookState.selectedNode) return;
-
-      setOpenProposal("ProposeEditTo" + nodeBookState.selectedNode);
+      const selectedNode = nodeId || nodeBookState.selectedNode;
+      if (!selectedNode) return;
+      setOpenProposal("ProposeEditTo" + selectedNode);
       reloadPermanentGraph();
 
       setGraph(({ nodes: oldNodes, edges }) => {
-        if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
+        if (!selectedNode) return { nodes: oldNodes, edges };
 
-        if (!(nodeBookState.selectedNode in changedNodes)) {
-          changedNodes[nodeBookState.selectedNode] = copyNode(oldNodes[nodeBookState.selectedNode]);
+        if (!(selectedNode in changedNodes)) {
+          changedNodes[selectedNode] = copyNode(oldNodes[selectedNode]);
         }
-        const thisNode = { ...oldNodes[nodeBookState.selectedNode] };
+        const thisNode = { ...oldNodes[selectedNode] };
         thisNode.editable = true;
         const newNodes = {
           ...oldNodes,
-          [nodeBookState.selectedNode]: thisNode,
+          [selectedNode]: thisNode,
         };
 
         return { nodes: newNodes, edges };
       });
       setOpenSidebar(null);
-      scrollToNode(nodeBookState.selectedNode);
+      scrollToNode(selectedNode);
     },
     [nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode]
   );
@@ -3382,7 +3387,20 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
-        {nodeBookState.choosingNode && <div id="ChoosingNodeMessage">Click the node you'd like to link to...</div>}
+        {nodeBookState.choosingNode && (
+          <div id="ChoosingNodeMessage">
+            Click the node you'd like to link to...{" "}
+            <Button
+              onClick={() => {
+                nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                nodeBookDispatch({ type: "setSelectedNode", payload: null });
+                nodeBookDispatch({ type: "setChosenNode", payload: null });
+              }}
+            >
+              <CloseIcon fontSize="large" />
+            </Button>
+          </div>
+        )}
         <Box sx={{ width: "100vw", height: "100vh" }}>
           {
             <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>

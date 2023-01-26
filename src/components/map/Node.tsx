@@ -17,10 +17,12 @@ import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import LeaderboardChip from "../LeaderboardChip";
+import NodeTypeIcon from "../NodeTypeIcon";
 import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
 import NewChildProposal from "./NewChildProposal";
+import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -46,7 +48,7 @@ type NodeProps = {
   width: number;
   editable: boolean;
   unaccepted: any;
-  nodeType: string;
+  nodeType: any;
   isTag: boolean;
   isNew: any;
   title: string;
@@ -573,15 +575,10 @@ const Node = ({
       }}
     >
       {/* INFO: uncomment this only on develope */}
-      {process.env.NODE_ENV === "development" && identifier}
+
       {open ? (
         <>
-          <div
-            className="card-content"
-            style={{
-              marginTop: "10px",
-            }}
-          >
+          <div className="card-content">
             <div className="card-title" data-hoverable={true}>
               {editable && isNew && (
                 <>
@@ -611,7 +608,7 @@ const Node = ({
                     justifyContent: "end",
                     alignItems: "center",
                     position: "relative",
-                    top: "-10px",
+                    top: "-5px",
                   }}
                 >
                   <Typography
@@ -889,6 +886,8 @@ const Node = ({
                 contributors={contributors}
                 institutions={institutions}
                 openUserInfoSidebar={openUserInfoSidebar}
+                proposeNodeImprovement={proposeNodeImprovement}
+                setOperation={setOperation}
               />
             </div>
           </div>
@@ -933,8 +932,14 @@ const Node = ({
                 sx={{
                   textAlign: "center",
                   display: "flex",
-                  justifyContent: "space-between",
                   margin: "10px",
+                  ...(isNew
+                    ? {
+                        justifyContent: "space-between",
+                      }
+                    : {
+                        alignItems: "center",
+                      }),
                 }}
               >
                 <Button
@@ -942,6 +947,9 @@ const Node = ({
                   variant="contained"
                   className="btn waves-effect waves-light hoverable red"
                   onClick={onCancelProposal}
+                  sx={{
+                    padding: "6px",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -951,9 +959,35 @@ const Node = ({
                   className="btn waves-effect waves-light hoverable green"
                   onClick={proposalSubmit}
                   disabled={!ableToPropose ?? false}
+                  sx={{
+                    padding: "6px",
+                  }}
                 >
                   Propose
                 </Button>
+                <div
+                  id="ProposalButtonsRow"
+                  style={{
+                    border: "solid 0px pink",
+                    display: !isNew && nodeType !== "Reference" ? "flex" : "none",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                    (childNodeType: ProposedChildTypesIcons) => {
+                      return (
+                        <NewChildProposal
+                          key={childNodeType}
+                          childNodeType={childNodeType}
+                          icon={proposedChildTypesIcons[childNodeType]}
+                          openProposal={openProposal}
+                          setOpenProposal={setOpenProposal}
+                          proposeNewChild={proposeNewChild}
+                        />
+                      );
+                    }
+                  )}
+                </div>
               </Box>
             </>
           )}
@@ -1038,12 +1072,14 @@ const Node = ({
                 contributors={contributors}
                 institutions={institutions}
                 openUserInfoSidebar={openUserInfoSidebar}
+                proposeNodeImprovement={proposeNodeImprovement}
+                setOperation={setOperation}
               />
             </div>
           </div>
         </div>
       )}
-      {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
+      {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
         <>
           <Box
             sx={{
@@ -1067,7 +1103,11 @@ const Node = ({
               />
               <div
                 id="ProposalButtonsRow"
-                style={{ border: "solid 0px pink", display: "flex", justifyContent: "space-around" }}
+                style={{
+                  border: "solid 0px pink",
+                  display: nodeType !== "Reference" ? "flex" : "none",
+                  justifyContent: "space-around",
+                }}
               >
                 {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
                   (childNodeType: ProposedChildTypesIcons) => {
@@ -1087,7 +1127,7 @@ const Node = ({
             </Box>
           </Box>
         </>
-      ) : null}
+      ) : null} */}
     </div>
   );
 };

@@ -26,11 +26,15 @@ import HonorEducation from "../../../../public/logo-honor.jpeg";
 import UMLogo from "../../../../public/logo-school-of-information.png";
 import ImanYeckehZaarePicture from "../../../../public/static/Iman_YeckehZaare.jpg";
 import PaulResnikPicture from "../../../../public/static/Paul_Resnick.jpg";
+import { useInView } from "../../../hooks/useObserver";
 import { gray02, gray03 } from "../../../pages";
 
 const WhoWeAre = () => {
   const theme = useTheme();
 
+  const { inViewOnce: paper1ViewOnce, ref: paper1Ref } = useInView();
+  const { inViewOnce: paper2ViewOnce, ref: paper2Ref } = useInView();
+  const { inViewOnce: paper3ViewOnce, ref: paper3Ref } = useInView();
   const getGrayColorText = () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2);
 
   return (
@@ -52,7 +56,11 @@ const WhoWeAre = () => {
       </Typography> */}
       <Grid container spacing={2.5}>
         <Grid item xs={12} sm={6} md={4}>
-          <Paper sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined) }}>
+          <Paper
+            ref={paper1Ref}
+            className={paper1ViewOnce ? "slide-bottom-top" : "hide"}
+            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined) }}
+          >
             <Typography
               variant="h5"
               component="div"
@@ -189,7 +197,11 @@ const WhoWeAre = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <Paper sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined) }}>
+          <Paper
+            ref={paper2Ref}
+            className={paper2ViewOnce ? "slide-bottom-top" : "hide"}
+            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined) }}
+          >
             <Typography
               variant="h5"
               component="div"
@@ -290,6 +302,8 @@ const WhoWeAre = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <Paper
+            ref={paper3Ref}
+            className={paper3ViewOnce ? "slide-bottom-top" : "hide"}
             sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? gray02 : undefined), color: "#f8f8f8" }}
           >
             <List sx={{ width: "100%" }}>

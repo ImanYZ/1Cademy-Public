@@ -15,14 +15,15 @@ import {
   useTheme,
 } from "@mui/material";
 
-const Values = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
-
+const ValuesMemoized = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
+const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
-import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Rive, useRive } from "rive-react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRive } from "rive-react";
 
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
@@ -31,14 +32,13 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
+import AssistantForm from "../components/assistant/AssistantRegister";
 import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import CustomTypography from "../components/home/components/Typography";
-import PublicLayout from "../components/layouts/PublicLayout";
 
 /**
  * animations builded with: https://rive.app/
@@ -50,12 +50,39 @@ export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
 const section1ArtBoards = [
-  { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
+  {
+    name: "artboard-1",
+    // artoboard: "artboard-1",
+    getHeight: (vh: number) => vh - HEADER_HEIGTH,
+    // color: "#ff28c9",
+    // description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
+  },
 ];
 const artboards = [
-  { name: "Planning", durationMs: 17000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Meetings", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
-  { name: "Goals", durationMs: 40000, getHeight: (vh: number) => 15 * vh, color: "#e6f336" },
+  {
+    name: "Planning",
+    src: "rive-assistant/assistant-1.riv",
+    artoboard: "artboard-1",
+    getHeight: (vh: number) => 6 * vh,
+    color: "#f33636",
+    description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
+  },
+  {
+    name: "Meetings",
+    src: "rive-assistant/assistant-2.riv",
+    artoboard: "artboard-2",
+    getHeight: (vh: number) => 8 * vh,
+    color: "#f38b36",
+    description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
+  },
+  {
+    name: "Goals",
+    src: "rive-assistant/assistant-3.riv",
+    artoboard: "artboard-3",
+    getHeight: (vh: number) => 15 * vh,
+    color: "#e6f336",
+    description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
+  },
 ];
 
 export const SECTION_WITH_ANIMATION = 1;
@@ -73,78 +100,88 @@ const sectionsTmp = [
     ],
   },
   { id: "Why1CademyAssistant", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
+  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
   { id: "WhoIsBehind1CademyAssistant", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
 ];
+const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 
 const Home = () => {
   const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
-  const [idxRiveComponent, setIdxRiveComponent] = useState(0);
+  const [, /* idxRiveComponent */ setIdxRiveComponent] = useState(0);
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
-  const isMovil = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const [showLandingOptions, setShowLandingOptions] = useState(true);
   // const [/* showAnimationOptions, */ setShowAnimationOptions] = useState(false);
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
 
-  const [open, setOpen] = useState(false);
+  const [openForm, setOpenForm] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
+  const { entry: homeEntry, inView: homeInView, ref: homeSectionRef } = useInView();
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
+  const { entry: whichEntry, inViewOnce: whichInViewOnce, ref: whichSectionRef } = useInView();
+
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
+  const { inView: footerInView, ref: footerSectionRef } = useInView({
+    options: footerOptions,
+  });
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
-  const HomeSectionRef = useRef<HTMLDivElement | null>(null);
+  // const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
-  const timeInSecondsRef = useRef<number>(0);
+  // const timeInSecondsRef = useRef<number>(0);
 
-  const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
+  const animationRefs = useRef<any | null>(null);
+
+  const { RiveComponent: RiveComponent1 } = useRive({
     src: "rive-assistant/assistant-0.riv",
     artboard: "New Artboard",
     animations: ["Timeline 1", "eyes", "1cademy"],
     autoplay: true,
   });
 
-  const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
-    src: "rive-assistant/assistant-1.riv",
-    artboard: "artboard-1",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive2 } = useRive({
+  //   src: "rive-assistant/assistant-1.riv",
+  //   artboard: "artboard-1",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
-  const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
-    src: "rive-assistant/assistant-2.riv",
-    artboard: "artboard-2",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive3 } = useRive({
+  //   src: "rive-assistant/assistant-2.riv",
+  //   artboard: "artboard-2",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
-  const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
-    src: "rive-assistant/assistant-3.riv",
-    artboard: "artboard-3",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  // const { rive: rive4 } = useRive({
+  //   src: "rive-assistant/assistant-3.riv",
+  //   artboard: "artboard-3",
+  //   animations: ["Timeline 1", "dark", "light"],
+  //   autoplay: false,
+  // });
 
-  const { RiveComponent: RiveScrollActionComponent } = useRive({
-    src: "rive/scroll.riv",
-    animations: ["Timeline 1", "dark"],
-    artboard: "New Artboard",
-    autoplay: true,
-  });
+  const heroCanvasDimensions = useMemo(() => {
+    const min = width > height ? height : width;
+    if (width < 600) return min - 20;
+    if (width < 900) return min - 40;
+    return min - 100;
+  }, [width, height]);
 
-  useEffect(() => {
-    if (!rive1 || !rive2 || !rive3 || !rive4) return;
+  // useEffect(() => {
+  //   if (!rive1 || !rive2 || !rive3 || !rive4) return;
 
-    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
-  }, [rive1, rive2, rive3, rive4, theme]);
+  //   advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
+  //   advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
+  // }, [rive1, rive2, rive3, rive4, theme]);
 
   useEffect(() => {
     const hash = window?.location?.hash;
@@ -157,44 +194,54 @@ const Home = () => {
   }, []);
 
   const getSectionHeights = useCallback(() => {
-    if (!HomeSectionRef?.current) return null;
+    if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
+    if (!whichEntry) return null;
     if (!whoEntry) return null;
 
     return [
-      { id: HomeSectionRef.current.id, height: 0 },
-      { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
-      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight },
-      { id: whoEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: homeEntry.target.id, height: 0 },
+      { id: howSectionRef.current.id, height: homeEntry.target.clientHeight },
+      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
+      { id: whichEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whoEntry.target.id, height: whichEntry.target.clientHeight },
     ];
-  }, [whoEntry, whyEntry]);
+  }, [homeEntry, whichEntry, whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
-    if (!HomeSectionRef?.current) return null;
+    if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
+    if (!whichEntry) return null;
     if (!whoEntry) return null;
 
     return [
-      { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
-      {
-        id: howSectionRef.current.id,
-        height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight,
-      },
+      { id: homeEntry.target.id, height: homeEntry.target.clientHeight },
+      { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
-  }, [whoEntry, whyEntry]);
+  }, [homeEntry, whichEntry, whoEntry, whyEntry]);
 
-  const getAnimationsHeight = useCallback(() => {
-    const res = artboards.map(artboard => artboard.getHeight(height));
-    return [0, ...res.splice(0, res.length - 1)];
-  }, [height]);
+  // const getAnimationsHeight = useCallback(() => {
+  //   const res = artboards.map(artboard => artboard.getHeight(height));
+  //   return [0, ...res.splice(0, res.length - 1)];
+  // }, [height]);
 
-  const getAnimationsPositions = useCallback(() => {
-    return artboards.map(artboard => artboard.getHeight(height));
-  }, [height]);
+  const getAnimationsHeight = useCallback((heights: number[]) => {
+    // const res = artboards.map(artboard => artboard.getHeight(height));
+    return [0, ...heights.splice(0, heights.length - 1)];
+  }, []);
+
+  // const getAnimationsPositions = useCallback(() => {
+  //   return artboards.map(artboard => artboard.getHeight(height));
+  // }, [height]);
+
+  const getAnimationsPositions = useCallback((heights: number[]) => {
+    return heights;
+  }, []);
 
   const scrollToSection = ({ height, sectionSelected }: { height: number; sectionSelected: any }) => {
     if (typeof window === "undefined") return;
@@ -207,21 +254,8 @@ const Home = () => {
   };
 
   const detectScrollPosition = useCallback(
-    (
-      event: any,
-      {
-        rive1,
-        rive2,
-        rive3,
-        rive4,
-      }: {
-        rive1: Rive | null;
-        rive2: Rive | null;
-        rive3: Rive | null;
-        rive4: Rive | null;
-      }
-    ) => {
-      if (!rive1 || !rive2 || !rive3 || !rive4) return;
+    (event: any) => {
+      if (!animationRefs.current) return;
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
@@ -241,10 +275,15 @@ const Home = () => {
         if (idxSection === 0) {
           animationsHeight = [section1ArtBoards[0].getHeight(height)];
         } else {
-          animationsHeight = getAnimationsPositions();
+          const animationsHeightsArray = [
+            animationRefs.current.getHeight1(),
+            animationRefs.current.getHeight2(),
+            animationRefs.current.getHeight3(),
+          ];
+          animationsHeight = getAnimationsPositions(animationsHeightsArray);
         }
 
-        const { maxAnimation, minAnimation, idxAnimation } = animationsHeight.reduce(
+        const { /* maxAnimation, minAnimation, */ idxAnimation } = animationsHeight.reduce(
           (acu, cur, idx) => {
             if (acu.maxAnimation > currentScrollPosition) return acu;
             return { maxAnimation: acu.maxAnimation + cur, minAnimation: acu.maxAnimation, idxAnimation: idx };
@@ -260,54 +299,56 @@ const Home = () => {
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
 
-        let showLandingOptions = false;
+        // let showLandingOptions = false;
 
-        if (idxAnimation < 0) return;
+        // if (idxAnimation < 0) return;
 
-        if (idxSection === 0) {
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
-          setIdxRiveComponent(0);
+        // if (idxSection === 0) {
+        //   const lowerAnimationLimit = minAnimation;
+        //   const upperAnimationLimit = maxAnimation;
+        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
+        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
+        //   setIdxRiveComponent(0);
 
-          if (percentageFrame < 5) {
-            showLandingOptions = true;
-          }
-        }
+        //   if (percentageFrame < 5) {
+        //     showLandingOptions = true;
+        //   }
+        // }
 
-        if (idxSection === SECTION_WITH_ANIMATION) {
-          // console.log("section with aniomation");
-          setIdxRiveComponent(idxAnimation + 1);
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
+        // if (idxSection === SECTION_WITH_ANIMATION) {
+        //   // console.log("section with aniomation");
+        //   setIdxRiveComponent(idxAnimation + 1);
+        //   const lowerAnimationLimit = minAnimation;
+        //   const upperAnimationLimit = maxAnimation;
+        //   const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
+        //   const positionFrame = currentScrollPosition - lowerAnimationLimit;
+        //   const percentageFrame = (positionFrame * 100) / rangeFrames;
 
-          const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
-          timeInSecondsRef.current = timeInSeconds;
+        //   const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
+        //   timeInSecondsRef.current = timeInSeconds;
 
-          if (idxAnimation === 0) {
-            advanceAnimationTo(rive2, timeInSeconds, theme);
-          }
-          if (idxAnimation === 1) {
-            advanceAnimationTo(rive3, timeInSeconds, theme);
-          }
-          if (idxAnimation === 2) {
-            advanceAnimationTo(rive4, timeInSeconds, theme);
-          }
-        }
-        setShowLandingOptions(showLandingOptions);
+        //   if (idxAnimation === 0) {
+        //     advanceAnimationTo(rive2, timeInSeconds, theme);
+        //   }
+        //   if (idxAnimation === 1) {
+        //     advanceAnimationTo(rive3, timeInSeconds, theme);
+        //   }
+        //   if (idxAnimation === 2) {
+        //     advanceAnimationTo(rive4, timeInSeconds, theme);
+        //   }
       }
+      // setShowLandingOptions(showLandingOptions);
+      // }
     },
-    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions]
   );
 
   const switchSection = useCallback(
-    (sectionIdx: number, animationIndex = 0) => {
-      if (!rive2 || !rive3 || !rive4) return;
+    (sectionIdx: number, animationIndex = -1) => {
+      console.log("switch", animationRefs);
+      if (!animationRefs.current) return;
+      // if (!rive2 || !rive3 || !rive4) return;
 
       setNotSectionSwitching(false);
       const sectionsHeight = getSectionHeights();
@@ -318,10 +359,20 @@ const Home = () => {
 
       let cumulativeAnimationHeight = 0;
 
-      const animationsHeight = getAnimationsHeight();
+      const animationsHeights = [
+        animationRefs.current.getHeight1(),
+        animationRefs.current.getHeight2(),
+        animationRefs.current.getHeight3(),
+        // animationRefs.current.getHeight4(),
+        // animationRefs.current.getHeight5(),
+      ];
+      const animationsHeight = getAnimationsHeight(animationsHeights);
       if (animationsHeight) {
-        const previousAnimationHeight = animationsHeight.slice(0, animationIndex + 1);
-        cumulativeAnimationHeight = previousAnimationHeight.reduce((a, c) => a + c);
+        if (animationIndex >= 0) {
+          const animationSectionTitleHeight = 121;
+          const previousAnimationHeight = animationsHeight.slice(0, animationIndex + 1);
+          cumulativeAnimationHeight = previousAnimationHeight.reduce((a, c) => a + c, animationSectionTitleHeight);
+        }
       }
       const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
       scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
@@ -330,19 +381,19 @@ const Home = () => {
         setShowLandingOptions(true);
         setIdxRiveComponent(animationIndex);
       }
-      if (sectionIdx === SECTION_WITH_ANIMATION) {
-        setIdxRiveComponent(animationIndex + 1);
-        // reset animation when jump through sections
-        if (animationIndex === 0) {
-          rive2.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 1) {
-          rive3.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 2) {
-          rive4.scrub("Timeline 1", 0);
-        }
-      }
+      // if (sectionIdx === SECTION_WITH_ANIMATION) {
+      //   setIdxRiveComponent(animationIndex + 1);
+      //   // reset animation when jump through sections
+      //   if (animationIndex === 0) {
+      //     rive2.scrub("Timeline 1", 0);
+      //   }
+      //   if (animationIndex === 1) {
+      //     rive3.scrub("Timeline 1", 0);
+      //   }
+      //   if (animationIndex === 2) {
+      //     rive4.scrub("Timeline 1", 0);
+      //   }
+      // }
 
       setSelectedSection(sectionIdx);
       setSelectedAnimation(animationIndex);
@@ -351,17 +402,43 @@ const Home = () => {
         setNotSectionSwitching(true);
       }, 1000);
     },
-    [getAnimationsHeight, getSectionHeights, rive2, rive3, rive4]
+    [getAnimationsHeight, getSectionHeights]
   );
+
+  const scrollAnimationMemoized = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={footerInView ? "hide" : "undefined"}
+      >
+        <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveComponentMemoized
+            src="rive/scroll.riv"
+            animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
+            artboard={"New Artboard"}
+            autoplay={true}
+          />
+        </Box>
+      </Box>
+    );
+  }, [footerInView, homeInView, isMobile, theme.palette.mode]);
 
   return (
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4 })}
+      onScroll={e => detectScrollPosition(e)}
       sx={{
         height: "100vh",
         overflowY: "auto",
-        overflowX: "auto",
+        overflowX: "hidden",
         position: "relative",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
@@ -382,7 +459,7 @@ const Home = () => {
           direction={"row"}
           justifyContent={"space-between"}
           alignItems={"center"}
-          spacing={isMovil ? "20px" : "30px"}
+          spacing={isMobile ? "20px" : "30px"}
           sx={{
             width: "100%",
             maxWidth: "1200px",
@@ -402,46 +479,24 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[1].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(1)}
-                  >
-                    {sectionsOrder[1].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[2].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(2)}
-                  >
-                    {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
-                    {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
+                {sectionsOrder.slice(1).map((cur, idx) => (
+                  <Tooltip key={cur.id} title={cur.title}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        borderBottom: theme =>
+                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                      }}
+                      onClick={() => switchSection(idx + 1)}
+                    >
+                      {sectionsOrder[idx + 1].label}
+                    </Typography>
+                  </Tooltip>
+                ))}
               </>
             )}
           </Stack>
-          {!isMovil && (
+          {!isMobile && (
             <AppHeaderSearchBar
               searcherUrl={"search"}
               sx={{
@@ -451,7 +506,7 @@ const Home = () => {
             />
           )}
           <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "10px"}>
-            {isMovil && (
+            {isMobile && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
                   <SearchIcon />
@@ -466,8 +521,8 @@ const Home = () => {
               <Button
                 variant="outlined"
                 color="secondary"
-                onClick={() => setOpen(true)}
-                size={isMovil ? "small" : "medium"}
+                onClick={() => setOpenForm(true)}
+                size={isMobile ? "small" : "medium"}
                 sx={{
                   fontSize: 16,
                   ml: 2.5,
@@ -499,7 +554,7 @@ const Home = () => {
         </Box>
 
         <Stack
-          ref={HomeSectionRef}
+          ref={homeSectionRef}
           spacing={width < 900 ? "10px" : "20px"}
           direction={"column"}
           alignItems={"center"}
@@ -507,36 +562,20 @@ const Home = () => {
           sx={{
             height: "calc(100vh - 70px)",
             width: "100%",
-            position: "absolute",
-            top: 0,
             backgroundColor: "#1d1102",
-            backgroundImage: `url(${
-              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
-            })`,
+            backgroundImage: `url(${backgroundImageDarkMode.src})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: "0px",
-              right: "0px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography color="white">Scroll</Typography>
-            <Box sx={{ width: isMovil ? "70px" : "100px", height: isMovil ? "70px" : "100px" }}>
-              <RiveScrollActionComponent className={`rive-canvas`} />
-            </Box>
+          <Box sx={{ width: heroCanvasDimensions, height: heroCanvasDimensions }}>
+            <RiveComponent1 className={`rive-canvas`} />
           </Box>
           <Typography
             color="white"
             variant="h5"
-            sx={{ textAlign: "center", pb: "30px", width: isMovil ? "300px" : "auto" }}
+            sx={{ textAlign: "center", pb: "100px", width: isMobile ? "300px" : "auto" }}
             className={showLandingOptions ? "show-blurred-text" : "hide-content"}
           >
             HELPS YOU OPTIMIZE YOUR LIFE.
@@ -545,18 +584,22 @@ const Home = () => {
 
         <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
           <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
-            <HowItWorks
-              section={sectionSelected}
-              // ref={sectionAnimationControllerRef}
-              artboards={[...section1ArtBoards, ...artboards]}
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
             >
-              <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
+              {sectionsOrder[1].title}
+            </CustomTypography>
+            <HowItWorks ref={animationRefs} artboards={artboards} />
+            {/* <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
                 <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
                 <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
-              </Box>
-            </HowItWorks>
+              </Box> */}
           </Box>
 
           <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
@@ -587,12 +630,11 @@ const Home = () => {
                   </Grid>
                 }
               >
-                <Values />
+                <ValuesMemoized />
               </Suspense>
             )}
           </Box>
-
-          <Box id={sectionsOrder[3].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder[3].id} ref={whichSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -601,6 +643,50 @@ const Home = () => {
               sx={{ pb: 10, fontWeight: 700 }}
             >
               {sectionsOrder[3].title}
+            </CustomTypography>
+            {!whichInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <Which />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder[4].id} ref={whoSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder[4].title}
             </CustomTypography>
             {!whoInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
@@ -638,52 +724,76 @@ const Home = () => {
         </Box>
       </Box>
       <Modal
-        open={open}
-        onClose={() => setOpen(false)}
+        open={openForm}
+        onClose={() => setOpenForm(false)}
         // aria-labelledby="modal-modal-title"
         // aria-describedby="modal-modal-description"
-        sx={{ bgcolor: "#3131316e", backdropFilter: "blur(4px)" }}
+        sx={
+          {
+            // backdropFilter: "blur(4px)",
+          }
+        }
       >
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
+            width: "100%",
+            height: "100%",
+            bgcolor: theme => (theme.palette.mode === "dark" ? "#28282ad3" : "#f8f8f8e3"),
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: width < 600 ? "flex-start" : "center",
           }}
         >
-          <IconButton
-            onClick={() => setOpen(false)}
-            sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
-          >
-            <CloseIcon />
-          </IconButton>
           <Box
             sx={{
-              maxWidth: "500px",
-              p: "20px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              position: "relative",
+              maxWidth: "900px",
+              overflowY: "auto",
+
+              // position: "absolute",
+              // top: "0px",
+              // left: "0px",
+              // right:"0px",
+              // bottom:"0px",
+              // transform: "translate(-50%, -50%)",
             }}
           >
-            <img src="assistant/robot.png" alt="" srcSet="" />
-            <Typography /* id="modal-modal-title" */ variant="h6" component="h2">
-              Coming Soon...
-            </Typography>
+            <IconButton onClick={() => setOpenForm(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+              <CloseIcon />
+            </IconButton>
+            <Stack spacing={"20px"} /* direction={width < 1200 ? "column" : "row"} */ sx={{ p: "20px" }}>
+              {/* <Box
+              sx={{
+                maxWidth: "500px",
+                p: "20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img src="assistant/robot.png" alt="" srcSet="" />
+            </Box> */}
+              <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
+            </Stack>
           </Box>
         </Box>
       </Modal>
 
-      <AppFooter
-        sx={{
-          px: isDesktop ? "0px" : "10px",
-          background: theme =>
-            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
-        }}
-      />
-      {openSearch && isMovil && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+      <Box ref={footerSectionRef}>
+        <AppFooter
+          sx={{
+            px: isDesktop ? "0px" : "10px",
+            background: theme =>
+              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+          }}
+        />
+      </Box>
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+      {scrollAnimationMemoized}
 
       <style>{`
           body{
@@ -695,21 +805,21 @@ const Home = () => {
   );
 };
 
-Home.getLayout = (page: ReactNode) => {
-  return <PublicLayout>{page}</PublicLayout>;
-};
+// Home.getLayout = (page: ReactNode) => {
+//   return <PublicLayout>{page}</PublicLayout>;
+// };
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
-  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+// const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+//   rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
 
-  //@ts-ignore
-  if (!rive?.animator?.animations[0]) return;
-  //@ts-ignore
-  const Animator = rive.animator.animations[0];
-  Animator.instance.time = 0;
-  Animator.instance.advance(timeInSeconds);
-  Animator.instance.apply(1);
-  rive.startRendering();
-};
+//   //@ts-ignore
+//   if (!rive?.animator?.animations[0]) return;
+//   //@ts-ignore
+//   const Animator = rive.animator.animations[0];
+//   Animator.instance.time = 0;
+//   Animator.instance.advance(timeInSeconds);
+//   Animator.instance.apply(1);
+//   rive.startRendering();
+// };

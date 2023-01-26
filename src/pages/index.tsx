@@ -20,11 +20,11 @@ const UniversitiesMap = dynamic(() => import("../components/home/components/Univ
   ssr: false,
 });
 const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
+const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Rive, useRive } from "rive-react";
+import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -32,16 +32,17 @@ import { useInView } from "@/hooks/useObserver";
 import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
-import backgroundImageLightMode from "../../public/LibraryBackgroundLighter.jpg";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
+import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
-import { sectionsOrder } from "../components/home/sectionsOrder";
+import { sectionsOrder1Cademy } from "../components/home/sectionsOrder";
+import { HeroMemoized } from "../components/home/views/Hero";
 import HowItWorks from "../components/home/views/HowItWorks";
 import PublicLayout from "../components/layouts/PublicLayout";
+import { StatsSchema } from "../knowledgeTypes";
 
 /**
  * animations builded with: https://rive.app/
@@ -55,11 +56,46 @@ export const gray03 = "#AAAAAA";
 const section1ArtBoards = [
   { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
 ];
+
 const artboards = [
-  { name: "Summarizing", durationMs: 7000, getHeight: (vh: number) => 6 * vh, color: "#f33636" },
-  { name: "Linking", durationMs: 24000, getHeight: (vh: number) => 8 * vh, color: "#f38b36" },
-  { name: "Evaluating", durationMs: 4000, getHeight: (vh: number) => 5 * vh, color: "#e6f336" },
-  { name: "Improving", durationMs: 14000, getHeight: (vh: number) => 8 * vh, color: "#62f336" },
+  {
+    name: "Summarizing",
+    artoboard: "artboard-3",
+    getHeight: (isMobile: boolean) => (isMobile ? 900 : 600),
+    color: "#f33636",
+    description: `We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept. \nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics. \nThrough this process, we aim to improve the notes semester by semester, making the learning experience more efficient for all. This way, students can spend less time on note-taking and gain the most benefit from the notes.`,
+  },
+  {
+    name: "Linking",
+    artoboard: "artboard-4",
+    getHeight: (isMobile: boolean) => (isMobile ? 900 : 600),
+    color: "#f38b36",
+    description: `Our notes, which are organized in granular pieces, can be transformed into a knowledge graph that visually illustrates the hierarchical relationships between concepts. The linking of concepts is beneficial as it helps us understand how concepts relate to one another and their place in broader topics, fields, or disciplines. All concepts are linked in a logical and ordered manner, starting with the broadest concepts and progressing to the most specific. \nThis step-by-step approach allows us to take a concept we don't understand and trace it back to its prerequisite concepts until we have the necessary knowledge to comprehend it. Additionally, once we understand a concept, we can follow links to more specific concepts to deepen our understanding. These step-by-step learning pathways provide the necessary context when we don't understand something and allow us to delve deeper if we want to learn more.
+    `,
+  },
+  {
+    name: "Voting",
+    artoboard: "artboard-5",
+    getHeight: (isMobile: boolean) => (isMobile ? 900 : 600),
+    color: "#e6f336",
+    description: `To ensure the quality of the knowledge graph on 1Cademy, we have implemented a peer-review process. Each individual concept, represented as a node, can be voted on by members of the community, and the score of the node will determine its level of modification or the possibility of deletion. \nNodes that receive a significant number of negative votes will be removed as unhelpful. Additionally, 1Cademy uses a reputation system to incentivize high-quality contributions and discourage unhelpful or idle behavior. Users who contribute helpful content and whose nodes receive positive votes will see their reputation increase. \nConversely, users who post unhelpful content or are inactive will see their reputation decrease. This system encourages the development of a high-quality knowledge graph that can benefit a large number of learners and researchers.`,
+  },
+  {
+    name: "Improving",
+    artoboard: "artboard-6",
+    getHeight: (isMobile: boolean) => (isMobile ? 900 : 600),
+    color: "#62f336",
+    description: `We work together to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people. \nThe community can then vote on each proposed version. Voting allows the community to disapprove of changes that are unhelpful or to approve of changes that would improve the existing version of the node. \nUsers can upvote or downvote the proposed version of a node, which is then compared to the votes received by the existing version of the node. If a proposal receives enough positive votes in comparison to the votes of the existing node, it will be accepted and the node will be updated. In this way, the community collaborates and perpetually improves the knowledge available.`,
+  },
+  {
+    name: "Magnitude",
+    artoboard: "artboard-7",
+    getHeight: (isMobile: boolean) => (isMobile ? 900 : 600),
+    color: "#36f3c4",
+    description: `Over the past two years, [1,529] students and researchers from [183] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [44,665] nodes and [235,674] prerequisite links between them, which have been proposed through [88,167] proposals. \nAs a result of this collaboration, [49] research and learning communities have formed, covering a wide range of subjects such as psychology, machine learning, and virology. This collaborative effort has allowed for the sharing of knowledge and resources among students and researchers from different institutions, promoting the advancement of knowledge in various fields. \nFurthermore, it has facilitated the formation of communities of learners and researchers who can learn from each other, exchange ideas and support one another in their learning journey. This collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics, and that they can improve semester by semester. Through this process, students can spend less time on note-taking and gain the most benefit from the notes.`,
+    getDescription: ({ users, institutions, nodes, links, proposals, communities }: StatsSchema) =>
+      `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals. \nAs a result of this collaboration, [${communities}] research and learning communities have formed, covering a wide range of subjects such as psychology, machine learning, and virology. This collaborative effort has allowed for the sharing of knowledge and resources among students and researchers from different institutions, promoting the advancement of knowledge in various fields. \nFurthermore, it has facilitated the formation of communities of learners and researchers who can learn from each other, exchange ideas and support one another in their learning journey. This collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics, and that they can improve semester by semester. Through this process, students can spend less time on note-taking and gain the most benefit from the notes.`,
+  },
 ];
 export const SECTION_WITH_ANIMATION = 1;
 
@@ -72,111 +108,54 @@ const sectionsTmp = [
     children: [
       { id: "animation1", title: "Summarizing", simpleTitle: "Summarizing" },
       { id: "animation2", title: "Linking", simpleTitle: "Linking" },
-      { id: "animation3", title: "Evaluating", simpleTitle: "Evaluating" },
+      { id: "animation3", title: "Voting", simpleTitle: "Voting" },
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
+      { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
   },
   { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
   { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
+  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
   { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
   { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
 ];
 
+const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
+
 const Home = () => {
-  // const [section, setSection] = useState(0);
   const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
-  const [idxRiveComponent, setIdxRiveComponent] = useState(0);
-  const isLargeDesktop = useMediaQuery("(min-width:1350px)");
-  const isDesktop = useMediaQuery("(min-width:1200px)");
-  const isMovil = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:900px)");
-  const [showLandingOptions, setShowLandingOptions] = useState(true);
-  const [showAnimationOptions, setShowAnimationOptions] = useState(false);
+  const isDesktop = useMediaQuery("(min-width:1200px)");
+  const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [handleThemeSwitch] = useThemeChange();
   const [openSearch, setOpenSearch] = useState(false);
-
   const router = useRouter();
 
+  const { entry: homeEntry, inView: homeInView, ref: HomeSectionRef } = useInView();
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
   const { entry: whatEntry, inViewOnce: whatInViewOnce, ref: whatSectionRef } = useInView();
   const { entry: whereEntry, inViewOnce: whereInViewOnce, ref: whereSectionRef } = useInView();
   const { entry: whoEntry, inViewOnce: whoInViewOnce, ref: whoSectionRef } = useInView();
+  const { entry: whichEntry, inViewOnce: whichInViewOnce, ref: whichSectionRef } = useInView();
+  const { inView: footerInView, ref: footerSectionRef } = useInView({ options: footerOptions });
+  const { inViewOnce: tableOfContentInViewOnce, ref: TableOfContentRef } = useInView();
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
-  const HomeSectionRef = useRef<HTMLDivElement | null>(null);
   const howSectionRef = useRef<HTMLDivElement | null>(null);
-  const timeInSecondsRef = useRef<number>(0);
 
-  const { rive: rive1, RiveComponent: RiveComponent1 } = useRive({
-    src: "rive/artboard-1.riv",
-    artboard: "artboard-1",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
+  const animationRefs = useRef<any | null>(null);
 
-  const { rive: rive2, RiveComponent: RiveComponent2 } = useRive({
-    src: "rive/artboard-2.riv",
-    artboard: "artboard-2",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
-
-  const { rive: rive3, RiveComponent: RiveComponent3 } = useRive({
-    src: "rive/artboard-3.riv",
-    artboard: "artboard-3",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
-
-  const { rive: rive4, RiveComponent: RiveComponent4 } = useRive({
-    src: "rive/artboard-4.riv",
-    artboard: "artboard-4",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
-
-  const { rive: rive5, RiveComponent: RiveComponent5 } = useRive({
-    src: "rive/artboard-5.riv",
-    artboard: "artboard-5",
-    animations: ["Timeline 1", "dark", "light"],
-    autoplay: false,
-  });
-
-  const { rive: rive6, RiveComponent: RiveComponent6 } = useRive({
-    src: "rive/artboard-6.riv",
-    animations: ["Timeline 1", "dark", "light"],
-    artboard: "artboard-6",
-    autoplay: false,
-  });
-
-  const { RiveComponent: RiveScrollActionComponent } = useRive({
-    src: "rive/scroll.riv",
-    animations: ["Timeline 1", "dark"],
-    artboard: "New Artboard",
-    autoplay: true,
-  });
-
-  useEffect(() => {
-    if (!rive1) return;
-    rive1.reset({ artboard: "artboard-1" });
-    rive1.scrub("Timeline 1", 0);
-    rive1.play();
-  }, [rive1]);
-
-  useEffect(() => {
-    if (!rive6 || !rive1 || !rive2 || !rive3 || !rive4 || !rive5) return;
-
-    advanceAnimationTo(rive1, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive2, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive3, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive4, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive5, timeInSecondsRef.current, theme);
-    advanceAnimationTo(rive6, timeInSecondsRef.current, theme);
-  }, [rive1, rive2, rive3, rive4, rive5, rive6, theme]);
+  // const heroCanvasDimensions = useMemo(() => {
+  //   const min = width > height ? height : width;
+  //   if (width < 600) return min - 20;
+  //   if (width < 900) return min - 40;
+  //   return min - 100;
+  // }, [width, height]);
 
   useEffect(() => {
     const hash = window?.location?.hash;
@@ -189,52 +168,53 @@ const Home = () => {
   }, []);
 
   const getSectionHeights = useCallback(() => {
-    if (!HomeSectionRef?.current) return null;
+    if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whatEntry) return null;
+    if (!whichEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
 
     return [
-      { id: HomeSectionRef.current.id, height: 0 },
-      { id: howSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
-      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight },
+      { id: homeEntry.target.id, height: 0 },
+      { id: howSectionRef.current.id, height: homeEntry.target.clientHeight },
+      { id: whyEntry.target.id, height: howSectionRef.current.clientHeight },
       { id: whatEntry.target.id, height: whyEntry.target.clientHeight },
-      { id: whereEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whereEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whereEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+  }, [homeEntry, whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
   const getSectionPositions = useCallback(() => {
-    if (!HomeSectionRef?.current) return null;
+    if (!homeEntry) return null;
     if (!howSectionRef?.current) return null;
     if (!whyEntry) return null;
     if (!whatEntry) return null;
     if (!whereEntry) return null;
     if (!whoEntry) return null;
+    if (!whichEntry) return null;
 
     return [
-      { id: HomeSectionRef.current.id, height: HomeSectionRef.current.clientHeight },
-      {
-        id: howSectionRef.current.id,
-        height: howSectionRef.current.clientHeight - HomeSectionRef.current.clientHeight,
-      },
+      { id: homeEntry.target.id, height: homeEntry.target.clientHeight },
+      { id: howSectionRef.current.id, height: howSectionRef.current.clientHeight },
       { id: whyEntry.target.id, height: whyEntry.target.clientHeight },
       { id: whatEntry.target.id, height: whatEntry.target.clientHeight },
+      { id: whichEntry.target.id, height: whichEntry.target.clientHeight },
       { id: whereEntry.target.id, height: whereEntry.target.clientHeight },
       { id: whoEntry.target.id, height: whoEntry.target.clientHeight },
     ];
-  }, [whatEntry, whereEntry, whoEntry, whyEntry]);
+  }, [homeEntry, whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
-  const getAnimationsHeight = useCallback(() => {
-    const res = artboards.map(artboard => artboard.getHeight(height));
-    return [0, ...res.splice(0, res.length - 1)];
-  }, [height]);
+  const getAnimationsHeight = useCallback((heights: number[]) => {
+    // const res = artboards.map(artboard => artboard.getHeight(isMobile));
+    return [0, ...heights.splice(0, heights.length - 1)];
+  }, []);
 
-  const getAnimationsPositions = useCallback(() => {
-    return artboards.map(artboard => artboard.getHeight(height));
-  }, [height]);
+  const getAnimationsPositions = useCallback((heights: number[]) => {
+    return heights;
+  }, []);
 
   const scrollToSection = ({ height, sectionSelected }: { height: number; sectionSelected: any }) => {
     if (typeof window === "undefined") return;
@@ -247,25 +227,8 @@ const Home = () => {
   };
 
   const detectScrollPosition = useCallback(
-    (
-      event: any,
-      {
-        rive1,
-        rive2,
-        rive3,
-        rive4,
-        rive5,
-        rive6,
-      }: {
-        rive1: Rive | null;
-        rive2: Rive | null;
-        rive3: Rive | null;
-        rive4: Rive | null;
-        rive5: Rive | null;
-        rive6: Rive | null;
-      }
-    ) => {
-      if (!rive1 || !rive2 || !rive3 || !rive4 || !rive5 || !rive6) return;
+    (event: any) => {
+      if (!animationRefs.current) return;
       if (notSectionSwitching) {
         const currentScrollPosition = event.target.scrollTop;
         const sectionsHeight = getSectionPositions();
@@ -285,10 +248,17 @@ const Home = () => {
         if (idxSection === 0) {
           animationsHeight = [section1ArtBoards[0].getHeight(height)];
         } else {
-          animationsHeight = getAnimationsPositions();
+          const animationsHeightsArray = [
+            animationRefs.current.getHeight1(),
+            animationRefs.current.getHeight2(),
+            animationRefs.current.getHeight3(),
+            animationRefs.current.getHeight4(),
+            animationRefs.current.getHeight5(),
+          ];
+          animationsHeight = getAnimationsPositions(animationsHeightsArray);
         }
 
-        const { maxAnimation, minAnimation, idxAnimation } = animationsHeight.reduce(
+        const { /* maxAnimation, minAnimation, */ idxAnimation } = animationsHeight.reduce(
           (acu, cur, idx) => {
             if (acu.maxAnimation > currentScrollPosition) return acu;
             return { maxAnimation: acu.maxAnimation + cur, minAnimation: acu.maxAnimation, idxAnimation: idx };
@@ -303,75 +273,14 @@ const Home = () => {
         }
         setSelectedSection(idxSection);
         setSelectedAnimation(idxAnimation);
-
-        let showLandingOptions = false;
-        let showEndAnimationOptions = false;
-
-        if (idxAnimation < 0) return;
-
-        if (idxSection === 0) {
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
-          if (percentageFrame < 50) {
-            setIdxRiveComponent(0);
-          } else {
-            const newLowerAnimationLimit = lowerAnimationLimit + rangeFrames / 2;
-            const newPositionFrame = currentScrollPosition - newLowerAnimationLimit;
-            const newPercentageFrame = (newPositionFrame * 100) / rangeFrames;
-            const timeInSeconds = ((1000 / 1000) * newPercentageFrame) / 100;
-            timeInSecondsRef.current = timeInSeconds;
-            advanceAnimationTo(rive2, timeInSeconds, theme);
-
-            setIdxRiveComponent(1);
-          }
-
-          if (percentageFrame < 5) {
-            showLandingOptions = true;
-          }
-        }
-
-        if (idxSection === SECTION_WITH_ANIMATION) {
-          setIdxRiveComponent(idxAnimation + 2);
-          const lowerAnimationLimit = minAnimation;
-          const upperAnimationLimit = maxAnimation;
-          const rangeFrames = upperAnimationLimit - lowerAnimationLimit;
-          const positionFrame = currentScrollPosition - lowerAnimationLimit;
-          const percentageFrame = (positionFrame * 100) / rangeFrames;
-
-          const timeInSeconds = (artboards[idxAnimation].durationMs * percentageFrame) / (1000 * 100);
-          timeInSecondsRef.current = timeInSeconds;
-
-          if (idxAnimation === 0) {
-            advanceAnimationTo(rive3, timeInSeconds, theme);
-          }
-          if (idxAnimation === 1) {
-            advanceAnimationTo(rive4, timeInSeconds, theme);
-          }
-          if (idxAnimation === 2) {
-            advanceAnimationTo(rive5, timeInSeconds, theme);
-          }
-          if (idxAnimation === 3) {
-            advanceAnimationTo(rive6, timeInSeconds, theme);
-            if (percentageFrame > 50) {
-              showEndAnimationOptions = true;
-            }
-          }
-        }
-
-        // update options display
-        setShowLandingOptions(showLandingOptions);
-        setShowAnimationOptions(showEndAnimationOptions);
       }
     },
-    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions, theme]
+    [notSectionSwitching, getSectionPositions, height, getAnimationsPositions]
   );
 
   const switchSection = useCallback(
-    (sectionIdx: number, animationIndex = 0) => {
-      if (!rive3 || !rive4 || !rive5 || !rive6) return;
+    (sectionIdx: number, animationIndex = -1) => {
+      if (!animationRefs.current) return;
 
       setNotSectionSwitching(false);
       const sectionsHeight = getSectionHeights();
@@ -382,34 +291,25 @@ const Home = () => {
 
       let cumulativeAnimationHeight = 0;
 
-      const animationsHeight = getAnimationsHeight();
+      // const animationsHeights = [animationRefs.current.getHeight1()];
+      const animationsHeights = [
+        animationRefs.current.getHeight1(),
+        animationRefs.current.getHeight2(),
+        animationRefs.current.getHeight3(),
+        animationRefs.current.getHeight4(),
+        animationRefs.current.getHeight5(),
+      ];
+      const animationsHeight = getAnimationsHeight(animationsHeights);
+
       if (animationsHeight) {
-        const previousAnimationHeight = animationsHeight.slice(0, animationIndex + 1);
-        cumulativeAnimationHeight = previousAnimationHeight.reduce((a, c) => a + c);
+        if (animationIndex >= 0) {
+          const animationSectionTitleHeight = 121;
+          const previousAnimationHeight = animationsHeight.slice(0, animationIndex + 1);
+          cumulativeAnimationHeight = previousAnimationHeight.reduce((a, c) => a + c, animationSectionTitleHeight);
+        }
       }
       const cumulativeHeight = sectionResult.height + cumulativeAnimationHeight;
-      scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder[sectionIdx] });
-
-      if (sectionIdx === 0) {
-        setShowLandingOptions(true);
-        setIdxRiveComponent(animationIndex);
-      }
-      if (sectionIdx === SECTION_WITH_ANIMATION) {
-        setIdxRiveComponent(animationIndex + 2);
-        // reset animation when jump through sections
-        if (animationIndex === 0) {
-          rive3.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 1) {
-          rive4.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 2) {
-          rive5.scrub("Timeline 1", 0);
-        }
-        if (animationIndex === 3) {
-          rive6.scrub("Timeline 1", 0);
-        }
-      }
+      scrollToSection({ height: cumulativeHeight, sectionSelected: sectionsOrder1Cademy[sectionIdx] });
 
       setSelectedSection(sectionIdx);
       setSelectedAnimation(animationIndex);
@@ -418,29 +318,54 @@ const Home = () => {
         setNotSectionSwitching(true);
       }, 1000);
     },
-    [getAnimationsHeight, getSectionHeights, rive3, rive4, rive5, rive6]
+    [getAnimationsHeight, getSectionHeights]
   );
 
   const signUpHandler = () => {
     router.push("/signin");
   };
 
+  const scrollAnimationMemoized = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+          right: "0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={footerInView ? "hide" : "undefined"}
+      >
+        <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
+        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+          <RiveComponentMemoized
+            src="rive/scroll.riv"
+            animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
+            artboard={"New Artboard"}
+            autoplay={true}
+          />
+        </Box>
+      </Box>
+    );
+  }, [footerInView, homeInView, isMobile, theme.palette.mode]);
+
   return (
     <Box
       id="ScrollableContainer"
-      onScroll={e => detectScrollPosition(e, { rive1, rive2, rive3, rive4, rive5, rive6 })}
+      onScroll={e => detectScrollPosition(e)}
       sx={{
         height: "100vh",
         overflowY: "auto",
-        overflowX: "auto",
+        overflowX: "hidden",
         position: "relative",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
-        // zIndex: -3
       }}
     >
       <Box
         component={"header"}
-        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
+        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 20, display: "flex", justifyContent: "center" }}
       >
         <Box
           sx={{
@@ -474,70 +399,24 @@ const Home = () => {
 
             {isTablet && (
               <>
-                <Tooltip title={sectionsOrder[1].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(1)}
-                  >
-                    {sectionsOrder[1].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[2].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 2 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(2)}
-                  >
-                    {sectionsOrder[2].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[3].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 3 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(3)}
-                  >
-                    {sectionsOrder[3].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[4].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 4 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(4)}
-                  >
-                    {sectionsOrder[4].label}
-                  </Typography>
-                </Tooltip>
-                <Tooltip title={sectionsOrder[5].title}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      borderBottom: theme =>
-                        sectionSelected === 5 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                    }}
-                    onClick={() => switchSection(5)}
-                  >
-                    {sectionsOrder[5].label}
-                  </Typography>
-                </Tooltip>
+                {sectionsOrder1Cademy.slice(1).map((cur, idx) => (
+                  <Tooltip key={cur.id} title={cur.title}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        borderBottom: theme =>
+                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
+                      }}
+                      onClick={() => switchSection(idx + 1)}
+                    >
+                      {sectionsOrder1Cademy[idx + 1].label}
+                    </Typography>
+                  </Tooltip>
+                ))}
               </>
             )}
           </Stack>
-          {!isMovil && (
+          {!isMobile && (
             <AppHeaderSearchBar
               searcherUrl={"search"}
               sx={{
@@ -547,7 +426,7 @@ const Home = () => {
             />
           )}
           <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "8px"}>
-            {isMovil && (
+            {isMobile && (
               <Tooltip title="Open Searcher">
                 <IconButton onClick={() => setOpenSearch(true)}>
                   <SearchIcon />
@@ -562,13 +441,11 @@ const Home = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  // onClick={joinUsClick}
                   target="_blank"
                   href="https://1cademy.us/#JoinUsSection"
-                  size={isMovil ? "small" : "medium"}
+                  size={isMobile ? "small" : "medium"}
                   sx={{
                     fontSize: 16,
-                    // color: "common.white",
                     ml: 2.5,
                     borderRadius: 40,
                     textTransform: "uppercase",
@@ -583,7 +460,7 @@ const Home = () => {
                 variant="outlined"
                 color="secondary"
                 onClick={signUpHandler}
-                size={isMovil ? "small" : "medium"}
+                size={isMobile ? "small" : "medium"}
                 sx={{
                   fontSize: 16,
                   ml: 2.5,
@@ -598,11 +475,16 @@ const Home = () => {
           </Stack>
         </Stack>
       </Box>
-      <Box sx={{ position: "relative" }}>
+
+      <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
         >
-          <Box sx={{ position: "sticky", top: "100px", zIndex: 11 }}>
+          <Box
+            ref={TableOfContentRef}
+            sx={{ position: "sticky", top: "100px", zIndex: 11 }}
+            className={tableOfContentInViewOnce ? "slide-left-to-right" : "hide"}
+          >
             <MemoizedTableOfContent
               menuItems={sectionsTmp}
               viewType={isLargeDesktop ? "COMPLETE" : isDesktop ? "NORMAL" : "SIMPLE"}
@@ -614,70 +496,34 @@ const Home = () => {
           </Box>
         </Box>
 
-        <Stack
-          ref={HomeSectionRef}
-          spacing={width < 900 ? "10px" : "20px"}
-          direction={"column"}
-          alignItems={"center"}
-          justifyContent="flex-end"
+        <Box ref={HomeSectionRef} component="section">
+          <HeroMemoized />
+        </Box>
+
+        <Box
           sx={{
-            height: "calc(100vh - 70px)",
             width: "100%",
-            position: "absolute",
-            top: 0,
-            padding: width < 900 ? "10px" : "20px",
-            backgroundColor: "#1d1102",
-            backgroundImage: `url(${
-              theme.palette.mode === "dark" ? backgroundImageDarkMode.src : backgroundImageLightMode.src
-            })`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
+            maxWidth: "980px",
+            px: isDesktop ? "0px" : "10px",
+            margin: "auto",
+            /* border: "3px solid white", */
+            position: "relative",
           }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: " 0px",
-              right: "0px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography color="white">Scroll</Typography>
-            <Box sx={{ width: isMovil ? "70px" : "100px", height: isMovil ? "70px" : "100px" }}>
-              <RiveScrollActionComponent className={`rive-canvas`} />
-            </Box>
-          </Box>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
-            <Typography
-              color="white"
-              variant="h5"
-              sx={{ textAlign: "center", width: isMovil ? "300px" : "auto" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
+          <Box id={sectionsOrder1Cademy[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
             >
-              WHERE WE TAKE NOTES <b>TOGETHER</b>.
-            </Typography>
-            <Button
-              variant="contained"
-              size={width < 900 ? "small" : "large"}
-              component="a"
-              target="_blank"
-              href="https://1cademy.us/#JoinUsSection"
-              sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-              className={showLandingOptions ? "show-blurred-text" : "hide-content"}
-            >
-              Apply to Join Us!
-            </Button>
-          </Box>
-        </Stack>
-
-        <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-          <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+              {sectionsOrder1Cademy[1].title}
+            </CustomTypography>
             <HowItWorks
+              ref={animationRefs}
               section={sectionSelected}
-              artboards={[...section1ArtBoards, ...artboards]}
+              artboards={artboards}
               animationOptions={
                 <Button
                   variant="contained"
@@ -686,24 +532,14 @@ const Home = () => {
                   href="https://1cademy.us/#JoinUsSection"
                   target="_blank"
                   sx={{ minWidth: 200, textTransform: "uppercase" }}
-                  className={showAnimationOptions ? "show-blurred-text" : "hide-content"}
                 >
                   Apply to Join Us!
                 </Button>
               }
-            >
-              <Box sx={{ position: "relative", width: "inherit", height: "inherit" }}>
-                <RiveComponent1 className={`rive-canvas ${idxRiveComponent !== 0 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent2 className={`rive-canvas ${idxRiveComponent !== 1 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent3 className={`rive-canvas ${idxRiveComponent !== 2 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent4 className={`rive-canvas ${idxRiveComponent !== 3 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent5 className={`rive-canvas ${idxRiveComponent !== 4 ? "rive-canvas-hidden" : ""}`} />
-                <RiveComponent6 className={`rive-canvas ${idxRiveComponent !== 5 ? "rive-canvas-hidden" : ""}`} />
-              </Box>
-            </HowItWorks>
+            />
           </Box>
 
-          <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[2].id} ref={whySectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -711,7 +547,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[2].title}
+              {sectionsOrder1Cademy[2].title}
             </CustomTypography>
             {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
             {whyInViewOnce && (
@@ -736,7 +572,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -744,7 +580,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[3].title}
+              {sectionsOrder1Cademy[3].title}
             </CustomTypography>
             {!whatInViewOnce ? (
               <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
@@ -770,7 +606,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[4].id} ref={whereSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[4].id} ref={whichSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -778,7 +614,51 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[4].title}
+              {sectionsOrder1Cademy[4].title}
+            </CustomTypography>
+            {!whichInViewOnce ? (
+              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+            ) : (
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      pt: 7,
+                      pb: 10,
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Grid container spacing={2.5}>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                }
+              >
+                <Which />
+              </Suspense>
+            )}
+          </Box>
+
+          <Box id={sectionsOrder1Cademy[5].id} ref={whereSectionRef} sx={{ py: 10 }}>
+            <CustomTypography
+              component={"h2"}
+              variant="h1"
+              marked="center"
+              align="center"
+              sx={{ pb: 10, fontWeight: 700 }}
+            >
+              {sectionsOrder1Cademy[5].title}
             </CustomTypography>
             {!whereInViewOnce ? (
               <div style={{ height: 2 * height /* background: "green" */ }}></div>
@@ -791,7 +671,7 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder[5].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box id={sectionsOrder1Cademy[6].id} ref={whoSectionRef} sx={{ py: 10 }}>
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -799,7 +679,7 @@ const Home = () => {
               align="center"
               sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder[5].title}
+              {sectionsOrder1Cademy[6].title}
             </CustomTypography>
             {!whoInViewOnce ? (
               <div style={{ height: 2 * height /* background: "pink" */ }}></div>
@@ -837,14 +717,20 @@ const Home = () => {
         </Box>
       </Box>
 
-      <AppFooter
-        sx={{
-          px: isDesktop ? "0px" : "10px",
-          background: theme =>
-            theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
-        }}
-      />
-      {openSearch && isMovil && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+      <Box ref={footerSectionRef}>
+        <AppFooter
+          sx={{
+            px: isDesktop ? "0px" : "10px",
+            background: theme =>
+              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
+          }}
+        />
+      </Box>
+
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+
+      {/* scroll animation */}
+      {scrollAnimationMemoized}
 
       <style>{`
           body{
@@ -861,15 +747,15 @@ Home.getLayout = (page: ReactNode) => {
 
 export default Home;
 
-const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
-  rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
+// const advanceAnimationTo = (rive: Rive, timeInSeconds: number, theme?: any) => {
+//   rive.scrub(theme.palette.mode === "dark" ? "dark" : "light", 1);
 
-  //@ts-ignore
-  if (!rive?.animator?.animations[0]) return;
-  //@ts-ignore
-  const Animator = rive.animator.animations[0];
-  Animator.instance.time = 0;
-  Animator.instance.advance(timeInSeconds);
-  Animator.instance.apply(1);
-  rive.startRendering();
-};
+//   //@ts-ignore
+//   if (!rive?.animator?.animations[0]) return;
+//   //@ts-ignore
+//   const Animator = rive.animator.animations[0];
+//   Animator.instance.time = 0;
+//   Animator.instance.advance(timeInSeconds);
+//   Animator.instance.apply(1);
+//   rive.startRendering();
+// };

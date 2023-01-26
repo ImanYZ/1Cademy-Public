@@ -104,6 +104,8 @@ type NodeFooterProps = {
   contributors: any;
   institutions: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  proposeNodeImprovement: any;
+  setOperation: any;
 };
 
 const NodeFooter = ({
@@ -162,6 +164,8 @@ const NodeFooter = ({
   contributors,
   institutions,
   openUserInfoSidebar,
+  proposeNodeImprovement,
+  setOperation,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -220,28 +224,28 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-  const selectPendingProposals = useCallback(
-    (event: any) => {
-      // if (nodeBookState.selectedNode === identifier) {
-      //   console.log("this is selected");
-      // }
-      // TODO: remove openEditButton and nodeId global states
-      // openNodePart(event, "PendingProposals");
-      // if (nodeBookState.nodeId != identifier) {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: true, nodeId: identifier },
-      //   });
-      // } else {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
-      //   });
-      // }
-      selectNode(event, "Proposals"); // Pass correct data
-    },
-    [selectNode]
-  );
+  // const selectPendingProposals = useCallback(
+  //   (event: any) => {
+  //     // if (nodeBookState.selectedNode === identifier) {
+  //     //   console.log("this is selected");
+  //     // }
+  //     // TODO: remove openEditButton and nodeId global states
+  //     // openNodePart(event, "PendingProposals");
+  //     // if (nodeBookState.nodeId != identifier) {
+  //     //   nodeBookDispatch({
+  //     //     type: "setOpenEditButton",
+  //     //     payload: { status: true, nodeId: identifier },
+  //     //   });
+  //     // } else {
+  //     //   nodeBookDispatch({
+  //     //     type: "setOpenEditButton",
+  //     //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
+  //     //   });
+  //     // }
+  //     selectNode(event, "Proposals"); // Pass correct data
+  //   },
+  //   [selectNode]
+  // );
   const uploadNodeImageHandler = useCallback(
     (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
     [uploadNodeImage, isUploading]
@@ -370,6 +374,14 @@ const NodeFooter = ({
     }
   }, [nodeBookDispatch, nodeBookState.contributorsNodeId]);
 
+  const proposeNodeImprovementClick = useCallback(
+    (event: any) => {
+      setOperation("CancelProposals");
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+      proposeNodeImprovement(event, identifier);
+    },
+    [proposeNodeImprovement]
+  );
   return (
     <>
       <Box
@@ -438,6 +450,7 @@ const NodeFooter = ({
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
+
             {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
             {!locked &&
               (editable ? (
@@ -445,12 +458,31 @@ const NodeFooter = ({
               ) : (
                 <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
               ))}
-
+            <Tooltip
+              title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
+                new Date(changedAt)
+              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
+                dayjs(new Date(changedAt)).month() + 1
+              }/${dayjs(new Date(changedAt)).year()}`}
+              placement={"top"}
+            >
+              <span
+                style={{
+                  marginLeft: "10px",
+                  display: editable ? "none" : "block",
+                  lineHeight: "normal",
+                }}
+              >
+                {dayjs(new Date(changedAt)).fromNow().includes("NaN")
+                  ? "a few minutes ago"
+                  : `${dayjs(new Date(changedAt)).fromNow()}`}
+              </span>
+            </Tooltip>
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 {openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier ? (
                   <Box
-                    onClick={selectPendingProposals}
+                    onClick={proposeNodeImprovementClick}
                     className={"select-tab-button-node-footer"}
                     sx={{
                       "& > span": {
@@ -462,12 +494,11 @@ const NodeFooter = ({
                     }}
                   >
                     <CreateIcon sx={{ fontSize: "16px" }} />
-                    <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
                   </Box>
                 ) : (
                   <ContainedButton
                     title="Propose/evaluate versions of this node."
-                    onClick={selectPendingProposals}
+                    onClick={proposeNodeImprovementClick}
                     tooltipPosition="top"
                     sx={{
                       background: (theme: any) =>
@@ -483,11 +514,13 @@ const NodeFooter = ({
                             ? theme.palette.common.darkBackground2
                             : theme.palette.common.lightBackground2,
                       },
+                      padding: "7px 7px",
+                      minWidth: "30px",
+                      height: "30px",
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                       <CreateIcon sx={{ fontSize: "16px" }} />
-                      <span>{` ${dayjs(new Date(changedAt)).fromNow()}`}</span>
                     </Box>
                   </ContainedButton>
                 )}
@@ -727,59 +760,43 @@ const NodeFooter = ({
               )}
               {!editable && !unaccepted && nodeType === "Reference" ? (
                 <>
-                  {openSidebar === "CITATIONS" ? (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    <ContainedButton
+                      title="View nodes that have cited this node."
                       onClick={selectCitations}
-                      className={"select-tab-button-node-footer"}
+                      tooltipPosition="top"
                       sx={{
-                        background: theme =>
-                          theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <>
-                        <ArrowForwardIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                        <MenuBookIcon sx={{ fontSize: "16px", color: theme => theme.palette.common.orange }} />
-                      </>
-                    </Box>
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      <ContainedButton
-                        title="View nodes that have cited this node."
-                        onClick={selectCitations}
-                        tooltipPosition="top"
-                        sx={{
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground1
+                            : theme.palette.common.lightBackground1,
+                        color:
+                          openSidebar === "CITATIONS" && nodeBookState.selectedNode === identifier
+                            ? theme => theme.palette.common.orange
+                            : "inherit",
+                        fontWeight: 400,
+                        ":hover": {
+                          borderWidth: "0px",
                           background: (theme: any) =>
                             theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
-                          color: "inherit",
-                          fontWeight: 400,
-                          ":hover": {
-                            borderWidth: "0px",
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.darkBackground2
-                                : theme.palette.common.lightBackground2,
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
-                        >
-                          <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                          <MenuBookIcon sx={{ fontSize: "16px" }} />
-                        </Box>
-                      </ContainedButton>
-                    </Box>
-                  )}
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
+                        <ArrowForwardIcon sx={{ fontSize: "16px" }} />
+                        <MenuBookIcon sx={{ fontSize: "16px" }} />
+                      </Box>
+                    </ContainedButton>
+                  </Box>
 
                   {openPart === "Tags" ? (
                     <Box

@@ -4,6 +4,8 @@ import { Box } from "@mui/material";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import React, { Suspense, useEffect, useState } from "react";
 
+import { useInView } from "../../../../hooks/useObserver";
+
 // import { useRecoilValue } from "recoil";
 
 // import { firebaseOneState } from "../../../../../store/OneCademyAtoms";
@@ -15,6 +17,7 @@ const UniversitiesMap = (props: any) => {
   const db = getFirestore();
   // const firebase = useRecoilValue(firebaseOneState);
   const [institutions, setInstitutions] = useState<any[]>([]);
+  const { inViewOnce: universityMapInViewOnce, ref: universityMapRef } = useInView();
 
   useEffect(() => {
     if (!db) return;
@@ -41,7 +44,12 @@ const UniversitiesMap = (props: any) => {
   }, [db]);
 
   return (
-    <Box component="section" sx={{ minHeight: 400 }}>
+    <Box
+      ref={universityMapRef}
+      component="section"
+      sx={{ minHeight: 400 }}
+      className={universityMapInViewOnce ? "slide-bottom-top" : "hide"}
+    >
       <div className="UniversitiesAndColleges" ref={props.schoolsRef}>
         {/* <Typography
           variant="h4"
