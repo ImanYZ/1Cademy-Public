@@ -1,5 +1,4 @@
 import Container from "@mui/material/Container";
-import { ThemeProvider } from "@mui/system";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { ComponentType, useEffect, useRef, useState } from "react";
@@ -19,8 +18,6 @@ import {
 // import PublicLayout from "../components/layouts/PublicLayout";
 import { useOnScreen } from "../hooks/useOnScreen";
 import { FilterValue, NextPageWithLayout, SortTypeWindowOption, TimeWindowOption } from "../knowledgeTypes";
-import { brandingLightTheme } from "../lib/theme/brandingTheme";
-
 export const PagesNavbar: ComponentType<any> = dynamic(() => import("@/components/PagesNavbar").then(m => m.default), {
   ssr: false,
 });
@@ -152,41 +149,36 @@ const SearcherPage: NextPageWithLayout = () => {
   };
 
   return (
-    <ThemeProvider theme={brandingLightTheme}>
-      <PagesNavbar showSearch={!isIntersecting}>
-        <HomeSearch
-          sx={{ mt: "var(--navbar-height)" }}
-          onSearch={handleSearch}
-          ref={homeSearchRef}
-          setOpenAdvanceFilter={setOpenAdvanceFilter}
+    // <ThemeProvider theme={brandingLightTheme}>
+    <PagesNavbar showSearch={!isIntersecting}>
+      <HomeSearch onSearch={handleSearch} ref={homeSearchRef} setOpenAdvanceFilter={setOpenAdvanceFilter} />
+      <Container sx={{ py: 10 }}>
+        {openAdvanceFilter && (
+          <HomeFilter
+            onTagsChange={handleTagsChange}
+            onInstitutionsChange={handleInstitutionsChange}
+            onContributorsChange={handleContributorsChange}
+            onNodeTypesChange={handleNodeTypesChange}
+            onReferencesChange={handleReferencesChange}
+            ref={homeFilterRef}
+          ></HomeFilter>
+        )}
+        <SortByFilters
+          sortedByType={sortedByType}
+          handleByType={handleByType}
+          timeWindow={timeWindow}
+          onTimeWindowChanged={handleChangeTimeWindow}
         />
-        <Container sx={{ py: 10 }}>
-          {openAdvanceFilter && (
-            <HomeFilter
-              onTagsChange={handleTagsChange}
-              onInstitutionsChange={handleInstitutionsChange}
-              onContributorsChange={handleContributorsChange}
-              onNodeTypesChange={handleNodeTypesChange}
-              onReferencesChange={handleReferencesChange}
-              ref={homeFilterRef}
-            ></HomeFilter>
-          )}
-          <SortByFilters
-            sortedByType={sortedByType}
-            handleByType={handleByType}
-            timeWindow={timeWindow}
-            onTimeWindowChanged={handleChangeTimeWindow}
-          />
-          <MasonryNodes
-            nodes={data?.data || []}
-            page={page}
-            totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
-            onChangePage={handleChangePage}
-            isLoading={isLoading}
-          />
-        </Container>
-      </PagesNavbar>
-    </ThemeProvider>
+        <MasonryNodes
+          nodes={data?.data || []}
+          page={page}
+          totalPages={Math.ceil((data?.numResults || 0) / (data?.perPage || homePageSortByDefaults.perPage))}
+          onChangePage={handleChangePage}
+          isLoading={isLoading}
+        />
+      </Container>
+    </PagesNavbar>
+    // </ThemeProvider>
   );
 };
 

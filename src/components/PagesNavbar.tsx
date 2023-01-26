@@ -3,11 +3,13 @@ import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { ClickAwayListener, Fab, IconButton, styled, Tooltip, tooltipClasses, TooltipProps } from "@mui/material";
 import Box from "@mui/material/Box";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import React, { ComponentType, FC, ReactNode, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import SECTIONS from "@/lib/utils/navbarSections";
 
-import AppHeaderNavbar from "./AppHeaderNavbar";
+import AppHeader from "./AppHeader";
 import AppMenuMovil from "./AppMenuMovil";
 import FeedbackForm from "./FeedbackForm";
 import Head from "./Head";
@@ -23,12 +25,12 @@ export const AppFooter: ComponentType<any> = dynamic(() => import("./AppFooter")
   ssr: false,
 });
 
-const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) => {
+const PagesNavbar: FC<Props> = ({ children, title, description }) => {
+  const router = useRouter();
+
   const [showMobileFeedbackForm, setShowMobileFeedbackForm] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const onCloseMenu = () => setShowMenu(false);
-  const onShowMenu = () => setShowMenu(true);
   const [{ isAuthenticated }] = useAuth();
 
   const onSendFeedback = () => {
@@ -36,22 +38,26 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
     setShowMobileFeedbackForm(true);
   };
 
+  const switchSection = (idx: number) => {
+    SECTIONS[idx].label === "NODE" ? router.push(SECTIONS[idx].route) : open(SECTIONS[idx].route, "_blank");
+  };
+
   return (
     <>
       <Head title={title} description={description} />
-      <AppHeaderNavbar
+      {/* <AppHeaderNavbar
         showMenu={showMenu}
         onCloseMenu={onCloseMenu}
         onShowMenu={onShowMenu}
         showSearch={showSearch}
         isSignedIn={isAuthenticated}
-      />
+      /> */}
+      <AppHeader sections={SECTIONS} switchSection={switchSection} enableMenu={true} enableSearcher={true} />
       {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />}
       <Box
         component="main"
         sx={{
           position: "relative",
-          mt: "var(--navbar-height)",
           minHeight: "calc(100vh - var(--navbar-height) - var(--footer-height) )",
           backgroundColor: theme => theme.palette.background.default,
         }}

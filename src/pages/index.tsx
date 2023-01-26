@@ -1,17 +1,4 @@
-import SearchIcon from "@mui/icons-material/Search";
-import {
-  Box,
-  Button,
-  FormGroup,
-  Grid,
-  IconButton,
-  Skeleton,
-  Stack,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { Box, Button, Grid, Skeleton, Typography, useMediaQuery, useTheme } from "@mui/material";
 
 const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
 const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
@@ -23,18 +10,14 @@ const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { su
 const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import AppHeader, { HEADER_HEIGTH } from "@/components/AppHeader";
 import SearcherPupUp from "@/components/SearcherPupUp";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
-import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
-import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
@@ -48,7 +31,6 @@ import { StatsSchema } from "../knowledgeTypes";
  * animations builded with: https://rive.app/
  */
 
-const HEADER_HEIGTH = 70;
 export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
@@ -128,13 +110,10 @@ const Home = () => {
   const [sectionSelected, setSelectedSection] = useState(0);
   const [notSectionSwitching, setNotSectionSwitching] = useState(true);
   const isMobile = useMediaQuery("(max-width:600px)");
-  const isTablet = useMediaQuery("(min-width:900px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const [animationSelected, setSelectedAnimation] = useState(0);
-  const [handleThemeSwitch] = useThemeChange();
   const [openSearch, setOpenSearch] = useState(false);
-  const router = useRouter();
 
   const { entry: homeEntry, inView: homeInView, ref: HomeSectionRef } = useInView();
   const { entry: whyEntry, inViewOnce: whyInViewOnce, ref: whySectionRef } = useInView();
@@ -321,10 +300,6 @@ const Home = () => {
     [getAnimationsHeight, getSectionHeights]
   );
 
-  const signUpHandler = () => {
-    router.push("/signin");
-  };
-
   const scrollAnimationMemoized = useMemo(() => {
     return (
       <Box
@@ -363,7 +338,7 @@ const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
     >
-      <Box
+      {/* <Box
         component={"header"}
         sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 20, display: "flex", justifyContent: "center" }}
       >
@@ -474,8 +449,13 @@ const Home = () => {
             </Tooltip>
           </Stack>
         </Stack>
-      </Box>
-
+      </Box> */}
+      <AppHeader
+        sections={sectionsOrder1Cademy}
+        sectionSelected={sectionSelected}
+        switchSection={switchSection}
+        setOpenSearch={setOpenSearch}
+      />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}

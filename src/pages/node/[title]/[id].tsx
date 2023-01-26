@@ -96,35 +96,33 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
 
   const { parents, contributors, references, institutions, tags, children, siblings } = node || {};
   return (
-    <ThemeProvider theme={brandingLightTheme}>
-      <PagesNavbar title={`1Cademy - ${node.title}`} showSearch={false}>
-        <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
-          <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={12} md={3}>
-              {parents && parents?.length > 0 && <LinkedNodes data={parents || []} header="Learn Before" />}
-            </Grid>
-            <Grid item xs={12} sm={12} md={6}>
-              <NodeItemFull
-                nodeId={node.id}
-                node={node}
-                contributors={
-                  <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />
-                }
-                references={<ReferencesList references={references || []} sx={{ mt: 3 }} />}
-                tags={<TagsList tags={tags || []} sx={{ mt: 3 }} />}
-              />
-              {siblings && siblings.length > 0 && (
-                <LinkedNodes sx={{ mt: 3 }} data={siblings} header="Related"></LinkedNodes>
-              )}
-            </Grid>
-            <Grid item xs={12} sm={12} md={3}>
-              {children && children?.length > 0 && <LinkedNodes data={children || []} header="Learn After" />}
-            </Grid>
+    <PagesNavbar title={`1Cademy - ${node.title}`} showSearch={false}>
+      <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
+        <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={12} md={3}>
+            {parents && parents?.length > 0 && <LinkedNodes data={parents || []} header="Learn Before" />}
           </Grid>
-        </Box>
-      </PagesNavbar>
-    </ThemeProvider>
+          <Grid item xs={12} sm={12} md={6}>
+            <NodeItemFull
+              nodeId={node.id}
+              node={node}
+              contributors={
+                <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />
+              }
+              references={<ReferencesList references={references || []} sx={{ mt: 3 }} />}
+              tags={<TagsList tags={tags || []} sx={{ mt: 3 }} />}
+            />
+            {siblings && siblings.length > 0 && (
+              <LinkedNodes sx={{ mt: 3 }} data={siblings} header="Related"></LinkedNodes>
+            )}
+          </Grid>
+          <Grid item xs={12} sm={12} md={3}>
+            {children && children?.length > 0 && <LinkedNodes data={children || []} header="Learn After" />}
+          </Grid>
+        </Grid>
+      </Box>
+    </PagesNavbar>
   );
 };
 

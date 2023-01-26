@@ -20,7 +20,7 @@ const SearcherPupUp = ({ onClose }: SearcherPupUpProps) => {
         backdropFilter: "blur(5px)",
 
         p: "70px 16px",
-        zIndex: "12",
+        zIndex: "21",
       }}
     >
       <ClickAwayListener
