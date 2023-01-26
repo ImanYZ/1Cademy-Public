@@ -728,36 +728,41 @@ const Home = () => {
         onClose={() => setOpenForm(false)}
         // aria-labelledby="modal-modal-title"
         // aria-describedby="modal-modal-description"
-        sx={{
-          bgcolor: "#313131b2",
-          backdropFilter: "blur(4px)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: width < 600 ? "flex-start" : "center",
-        }}
+        sx={
+          {
+            // backdropFilter: "blur(4px)",
+          }
+        }
       >
         <Box
           sx={{
-            position: "relative",
-            maxWidth: "900px",
-            overflowY: "auto",
-
-            // position: "absolute",
-            // top: "0px",
-            // left: "0px",
-            // right:"0px",
-            // bottom:"0px",
-            // transform: "translate(-50%, -50%)",
+            width: "100%",
+            height: "100%",
+            bgcolor: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F8F8F8"),
+            display: "flex",
+            justifyContent: "center",
+            alignItems: width < 600 ? "flex-start" : "center",
           }}
         >
-          <IconButton
-            onClick={() => setOpenForm(false)}
-            sx={{ position: "absolute", top: "0px", right: "0px", color: "white" }}
+          <Box
+            sx={{
+              position: "relative",
+              maxWidth: "900px",
+              overflowY: "auto",
+
+              // position: "absolute",
+              // top: "0px",
+              // left: "0px",
+              // right:"0px",
+              // bottom:"0px",
+              // transform: "translate(-50%, -50%)",
+            }}
           >
-            <CloseIcon />
-          </IconButton>
-          <Stack spacing={"20px"} /* direction={width < 1200 ? "column" : "row"} */ sx={{ p: "20px" }}>
-            {/* <Box
+            <IconButton onClick={() => setOpenForm(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+              <CloseIcon />
+            </IconButton>
+            <Stack spacing={"20px"} /* direction={width < 1200 ? "column" : "row"} */ sx={{ p: "20px" }}>
+              {/* <Box
               sx={{
                 maxWidth: "500px",
                 p: "20px",
@@ -769,8 +774,9 @@ const Home = () => {
             >
               <img src="assistant/robot.png" alt="" srcSet="" />
             </Box> */}
-            <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
-          </Stack>
+              <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
+            </Stack>
+          </Box>
         </Box>
       </Modal>
 

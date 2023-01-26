@@ -106,7 +106,7 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
               variant="body1"
               component="p"
               textAlign="center"
-              sx={{ color: theme => theme.palette.common.white }}
+              // sx={{ color: theme => theme.palette.common.white }}
             >
               Our team will be in touch with you as soon as the 1Cademy Personal Assistant becomes available to use. We
               will email you with instructions on how to download and set up the assistant, as well as information about
@@ -127,18 +127,21 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
             If you are interested in using the 1Cademy AI Assistant, please follow these instructions to sign up and be
             notified when the service becomes available:
           </Typography>
-          <ol>
-            <li>
-              Fill out the form below with your personal information, including your name, email address, and phone
-              number.
-            </li>
-            <li>
-              In the "Interests" section, select the areas in which you would like to use the assistant, such as time
-              management, study habits, personal development, etc.
-            </li>
-            <li>Click the "Submit" button to complete the form.</li>
-          </ol>
-          <Typography component="p" sx={{ color: theme => theme.palette.common.white }}>
+          <Typography component="span">
+            <ol>
+              <li>
+                Fill out the form below with your personal information, including your name, email address, and phone
+                number.
+              </li>
+              <li>
+                In the "Interests" section, select the areas in which you would like to use the assistant, such as time
+                management, study habits, personal development, etc.
+              </li>
+              <li>Click the "Submit" button to complete the form.</li>
+            </ol>
+          </Typography>
+
+          <Typography component="p">
             Once you have filled out the form, our team will be in touch with you as soon as the 1Cademy Personal
             Assistant becomes available to use. We will email you with instructions on how to set up the assistant, as
             well as information about its features and capabilities.
@@ -210,7 +213,7 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
             </LoadingButton>
           </Stack>
 
-          <Typography component="p" sx={{ color: theme => theme.palette.common.white }}>
+          <Typography component="p">
             Please make sure to provide correct and accurate information, as we will use this to contact you and send
             you updates.
           </Typography>
