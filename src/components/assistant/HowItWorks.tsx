@@ -167,7 +167,7 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
         ref={refs[idx]}
         key={artboard.name}
         direction={"column"}
-        spacing={width < 900 ? "20px" : "40px"}
+        spacing={"20px"}
         alignItems={width < 900 ? "center" : "stretch"}
         sx={{ position: "relative", minHeight: "500px" /* , border: `2px dashed red` */ }}
       >
@@ -208,7 +208,7 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
             "& > *:not(:last-child)": {
               mb: "12px",
             },
-            pb: idx < src.length - 1 ? "100px" : "0px",
+            pb: idx < src.length - 1 ? "50px" : "0px",
           }}
         >
           {artboard.description.split("\n").map((paragraph: string, idx: number) => (
