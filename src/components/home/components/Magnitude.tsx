@@ -2,6 +2,8 @@ import { Box, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { useEffect, useState } from "react";
 
+import { useInView } from "@/hooks/useObserver";
+
 import { StatsSchema } from "../../../knowledgeTypes";
 
 type MagnitudeProps = {
@@ -12,6 +14,8 @@ type MagnitudeProps = {
 export const Magnitude = ({ stats, width }: MagnitudeProps) => {
   const [logoWidth, setLogoWidth] = useState(200);
   const [fontSize, setFontSize] = useState(24);
+
+  const { inViewOnce: MagnitueInViewOnce, ref: ManitudeRef } = useInView();
 
   useEffect(() => {
     let newWidth = width / 2;
@@ -38,12 +42,12 @@ export const Magnitude = ({ stats, width }: MagnitudeProps) => {
   }, [width]);
 
   return (
-    <Stack direction={"column"} gap={width > 900 ? "30px" : "4px"} alignItems={"center"}>
-      <Box sx={{ width: logoWidth }} className="magnitude-logo-scale">
+    <Stack direction={"column"} gap={width > 900 ? "30px" : "4px"} alignItems={"center"} ref={ManitudeRef}>
+      <Box sx={{ width: logoWidth }} className={MagnitueInViewOnce ? "magnitude-logo-scale" : ""}>
         <img src="DarkModeLogo_o.svg" alt="" />
       </Box>
 
-      <Typography fontSize={fontSize} className="magnitude-text-one">
+      <Typography fontSize={fontSize} className={MagnitueInViewOnce ? "magnitude-text-one" : ""}>
         <Typography fontSize={fontSize} component={"span"} color={"primary"} fontWeight={700}>
           {stats.nodes}{" "}
         </Typography>
@@ -54,7 +58,7 @@ export const Magnitude = ({ stats, width }: MagnitudeProps) => {
         links have been
       </Typography>
 
-      <Typography fontSize={fontSize} className="magnitude-text-two">
+      <Typography fontSize={fontSize} className={MagnitueInViewOnce ? "magnitude-text-two" : ""}>
         contributed through{" "}
         <Typography fontSize={fontSize} component={"span"} color={"primary"} fontWeight={700}>
           {stats.proposals}
@@ -62,7 +66,7 @@ export const Magnitude = ({ stats, width }: MagnitudeProps) => {
         proposals from{" "}
       </Typography>
 
-      <Typography fontSize={fontSize} className="magnitude-text-three">
+      <Typography fontSize={fontSize} className={MagnitueInViewOnce ? "magnitude-text-three" : ""}>
         <Typography fontSize={fontSize} component={"span"} color={"primary"} fontWeight={700}>
           {stats.users}{" "}
         </Typography>

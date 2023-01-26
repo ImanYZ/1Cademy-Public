@@ -95,10 +95,7 @@
 /* magnitude subsection animations */
 
 .magnitude-text-one {
-  animation-name: slideBottomToTopWaitOne;
-  animation-duration: 10s;
-  animation-fill-mode: both;
-  animation-iteration-count: infinite;
+  animation: slideBottomToTopWaitOne 10s 1;
 }
 
 @keyframes slideBottomToTopWaitOne {
@@ -119,16 +116,12 @@
     transform: translateY(0px);
   }
   100% {
-    opacity: 0;
     transform: translateY(0px);
   }
 }
 
 .magnitude-text-two {
-  animation-name: slideBottomToTopWaitTwo;
-  animation-duration: 10s;
-  animation-fill-mode: both;
-  animation-iteration-count: infinite;
+  animation: slideBottomToTopWaitTwo 10s 1;
 }
 
 @keyframes slideBottomToTopWaitTwo {
@@ -144,21 +137,14 @@
     opacity: 1;
     transform: translateY(0px);
   }
-  75% {
-    opacity: 1;
-    transform: translateY(0px);
-  }
+
   100% {
-    opacity: 0;
     transform: translateY(0px);
   }
 }
 
 .magnitude-text-three {
-  animation-name: slideBottomToTopWaitThree;
-  animation-duration: 10s;
-  animation-fill-mode: both;
-  animation-iteration-count: infinite;
+  animation: slideBottomToTopWaitThree 10s 1;
 }
 
 @keyframes slideBottomToTopWaitThree {
@@ -170,26 +156,18 @@
     opacity: 0;
     transform: translateY(100px);
   }
+
   55% {
     opacity: 1;
     transform: translateY(0px);
   }
-  85% {
-    opacity: 1;
-    transform: translateY(0px);
-  }
   100% {
-    opacity: 0;
     transform: translateY(0px);
   }
 }
 
 .magnitude-logo-scale {
-  animation-name: scale;
-  animation-duration: 10s;
-  animation-fill-mode: both;
-  animation-iteration-count: infinite;
-  transform-origin: center;
+  animation: scale 10s 1;
 }
 
 @keyframes scale {
@@ -206,6 +184,6 @@
     transform: scale(1);
   }
   100% {
-    opacity: 0;
+    opacity: 1;
   }
 }
