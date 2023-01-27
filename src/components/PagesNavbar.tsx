@@ -29,7 +29,7 @@ type Props = {
   description?: string;
   // showSearch: boolean;
   enableMenu: boolean;
-  onClickSearcher: () => void;
+  onClickSearcher?: () => void;
 };
 
 const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onClickSearcher }) => {

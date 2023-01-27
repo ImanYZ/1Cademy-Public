@@ -8,7 +8,7 @@ import PagesNavbar from "./PagesNavbar";
 
 const NodeItemFullSkeleton = () => {
   return (
-    <PagesNavbar title={`1Cademy`} showSearch={false}>
+    <PagesNavbar title={`1Cademy`} enableMenu={false}>
       <Box sx={{ height: "calc(100vh - var(--navbar-height) - var(--footer-height) )", p: { xs: 3, md: 10 } }}>
         <Grid container spacing={3} sx={{ height: "100%" }}>
           <Grid item xs={12} sm={12} md={3}>

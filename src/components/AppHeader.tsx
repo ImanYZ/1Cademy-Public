@@ -138,7 +138,6 @@ const AppHeader = ({
         {/* {((!isMobile && enableSearcher) || enableMenu) && ( */}
         {onClickSearcher && showRigthOptionsByDesktop && (
           <AppHeaderSearchBar
-            searcherUrl={"search"}
             sx={{
               color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
             }}
@@ -207,7 +206,7 @@ const AppHeader = ({
                   display: { xs: "flex", md: "none" },
                 }}
               >
-                <CloseIcon sx={{ color: theme => theme.palette.common.white, m: "auto" }} fontSize="large" />
+                <CloseIcon />
               </IconButton>
             </LightTooltip>
           )}
@@ -223,7 +222,7 @@ const AppHeader = ({
                   display: { xs: "flex", md: "none" },
                 }}
               >
-                <MenuIcon sx={{ color: theme => theme.palette.common.white }} fontSize="large" />
+                <MenuIcon />
               </IconButton>
             </LightTooltip>
           )}
