@@ -1,14 +1,23 @@
 import CloseIcon from "@mui/icons-material/Close";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import { ClickAwayListener, Fab, IconButton, styled, Tooltip, tooltipClasses, TooltipProps } from "@mui/material";
+import {
+  ClickAwayListener,
+  Fab,
+  IconButton,
+  styled,
+  Tooltip,
+  tooltipClasses,
+  TooltipProps,
+  useMediaQuery,
+} from "@mui/material";
 import Box from "@mui/material/Box";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { ComponentType, FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import SECTIONS from "@/lib/utils/navbarSections";
 
+import AppFooter from "./AppFooter2";
 import AppHeader from "./AppHeader";
 import AppMenuMovil from "./AppMenuMovil";
 import FeedbackForm from "./FeedbackForm";
@@ -23,13 +32,10 @@ type Props = {
   onClickSearcher: () => void;
 };
 
-export const AppFooter: ComponentType<any> = dynamic(() => import("./AppFooter").then(m => m.default), {
-  ssr: false,
-});
-
 const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onClickSearcher }) => {
   const router = useRouter();
 
+  const isDesktop = useMediaQuery("(min-width:1200px)");
   const [showMobileFeedbackForm, setShowMobileFeedbackForm] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -115,7 +121,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onCl
         )}
       </Box>
 
-      <AppFooter />
+      <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
 
       {/* pc feedback */}
 
