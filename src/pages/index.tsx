@@ -129,13 +129,6 @@ const Home = () => {
 
   const animationRefs = useRef<any | null>(null);
 
-  // const heroCanvasDimensions = useMemo(() => {
-  //   const min = width > height ? height : width;
-  //   if (width < 600) return min - 20;
-  //   if (width < 900) return min - 40;
-  //   return min - 100;
-  // }, [width, height]);
-
   useEffect(() => {
     const hash = window?.location?.hash;
     if (!hash) return;
@@ -187,7 +180,6 @@ const Home = () => {
   }, [homeEntry, whatEntry, whereEntry, whichEntry, whoEntry, whyEntry]);
 
   const getAnimationsHeight = useCallback((heights: number[]) => {
-    // const res = artboards.map(artboard => artboard.getHeight(isMobile));
     return [0, ...heights.splice(0, heights.length - 1)];
   }, []);
 
@@ -338,123 +330,11 @@ const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
     >
-      {/* <Box
-        component={"header"}
-        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 20, display: "flex", justifyContent: "center" }}
-      >
-        <Box
-          sx={{
-            height: HEADER_HEIGTH,
-            width: "100%",
-            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
-            backdropFilter: "saturate(180%) blur(20px)",
-          }}
-        />
-        <Stack
-          direction={"row"}
-          justifyContent={"space-between"}
-          alignItems={"center"}
-          spacing={isDesktop ? "30px" : "8px"}
-          sx={{
-            width: "100%",
-            maxWidth: "1200px",
-            height: HEADER_HEIGTH,
-            px: isDesktop ? "0px" : "10px",
-            position: "absolute",
-          }}
-        >
-          <Stack
-            spacing={isDesktop ? "30px" : "8px"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-            direction={"row"}
-            sx={{ color: "#f8f8f8" }}
-          >
-            <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
-
-            {isTablet && (
-              <>
-                {sectionsOrder1Cademy.slice(1).map((cur, idx) => (
-                  <Tooltip key={cur.id} title={cur.title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(idx + 1)}
-                    >
-                      {sectionsOrder1Cademy[idx + 1].label}
-                    </Typography>
-                  </Tooltip>
-                ))}
-              </>
-            )}
-          </Stack>
-          {!isMobile && (
-            <AppHeaderSearchBar
-              searcherUrl={"search"}
-              sx={{
-                color: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-              }}
-            />
-          )}
-          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "8px"}>
-            {isMobile && (
-              <Tooltip title="Open Searcher">
-                <IconButton onClick={() => setOpenSearch(true)}>
-                  <SearchIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            <FormGroup>
-              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
-            </FormGroup>
-            {
-              <Tooltip title="Apply to join 1Cademy">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  target="_blank"
-                  href="https://1cademy.us/#JoinUsSection"
-                  size={isMobile ? "small" : "medium"}
-                  sx={{
-                    fontSize: 16,
-                    ml: 2.5,
-                    borderRadius: 40,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Apply!
-                </Button>
-              </Tooltip>
-            }
-            <Tooltip title="SIGN IN/UP">
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={signUpHandler}
-                size={isMobile ? "small" : "medium"}
-                sx={{
-                  fontSize: 16,
-                  ml: 2.5,
-                  borderRadius: 40,
-                  wordBreak: "normal",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                SIGN IN/UP
-              </Button>
-            </Tooltip>
-          </Stack>
-        </Stack>
-      </Box> */}
       <AppHeader
         sections={sectionsOrder1Cademy}
         sectionSelected={sectionSelected}
         switchSection={switchSection}
-        onClickSearcher={setOpenSearch}
+        onClickSearcher={() => setOpenSearch}
       />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box

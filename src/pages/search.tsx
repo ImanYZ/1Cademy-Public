@@ -151,9 +151,6 @@ const SearcherPage: NextPageWithLayout = () => {
 
   const onClickSearcher = () => {
     if (!homeSearchRef?.current || !document) return;
-    // homeSearchRef.current.scroll;
-    // homeSearchRef.current.scrollTop = 0;
-    // homeSearchRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
     window.scrollTo({
       behavior: "smooth",
       left: 0,
@@ -161,13 +158,9 @@ const SearcherPage: NextPageWithLayout = () => {
     });
 
     homeSearchRef.current.setFocusOnInput();
-    // document.scrollingElement(homeSearchRef.current);
   };
 
   return (
-    // <ThemeProvider theme={brandingLightTheme}>
-    //   enableMenu: boolean;
-    // onClickSearcher: () => void;
     <PagesNavbar onClickSearcher={!isIntersecting ? onClickSearcher : undefined} enableMenu>
       <HomeSearch onSearch={handleSearch} ref={homeSearchRef} setOpenAdvanceFilter={setOpenAdvanceFilter} />
       <Container sx={{ py: 10 }}>
@@ -196,11 +189,7 @@ const SearcherPage: NextPageWithLayout = () => {
         />
       </Container>
     </PagesNavbar>
-    // </ThemeProvider>
   );
 };
 
-// HomePage.getLayout = (page: ReactNode) => {
-//   return <PublicLayout>{page}</PublicLayout>;
-// };
 export default SearcherPage;
