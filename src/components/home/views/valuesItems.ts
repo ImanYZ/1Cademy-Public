@@ -58,7 +58,7 @@ export default [
     name: "Balanced Perspectives",
     body: "These days, we see political, sexual, ethnic, or even scientific polarization everywhere on the Internet. Echo chambers are formed where a group of people only accept thoughts and ideas that are aligned with their perspectives, ignoring alternatives views. \n1Cademy provides us with a consensus-based collaboration mechanism where alternative or even competing perspectives are placed side-by-side so that one can easily compare and contrast them to learn and rationalize each topic in different contexts.",
     // image: "Balanced_Perspectives.png",
-    image: "Balanced_Perspectives.svg",
-    imageDark: "Balanced_Perspectives.svg",
+    image: "Balanced_Perspectives_Ligth.svg",
+    imageDark: "Balanced_Perspectives_Dark.svg",
   },
 ];
