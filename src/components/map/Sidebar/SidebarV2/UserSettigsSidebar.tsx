@@ -8,7 +8,17 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Autocomplete, FormControlLabel, FormGroup, LinearProgress, Switch, Tab, Tabs, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Button,
+  FormControlLabel,
+  FormGroup,
+  LinearProgress,
+  Switch,
+  Tab,
+  Tabs,
+  TextField,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import axios from "axios";
@@ -16,7 +26,18 @@ import { ICity, ICountry, IState } from "country-state-city";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from "firebase/auth";
-import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState } from "src/nodeBookTypes";
@@ -613,6 +634,20 @@ const UserSettigsSidebar = ({
     const filteredValues = userValues.filter(item => isInValues(item));
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
+
+  const removeAllNodes = async () => {
+    const batch = writeBatch(db);
+    const userNodesCol = collection(db, "userNodes");
+    const q = query(userNodesCol, where("user", "==", user.uname), where("visible", "==", true));
+    const visibleUserNodes = await getDocs(q);
+    for (const visibleUserNode of visibleUserNodes.docs) {
+      const userNodeRef = doc(db, "userNodes", visibleUserNode.id);
+      batch.update(userNodeRef, {
+        visible: false,
+      });
+    }
+    await batch.commit();
+  };
   const tabsItems = useMemo(() => {
     return [
       {
@@ -664,6 +699,21 @@ const UserSettigsSidebar = ({
                 />
               </FormGroup>
             )}
+            <Box
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              <Button
+                variant="outlined"
+                sx={{
+                  width: "50%",
+                }}
+                onClick={removeAllNodes}
+              >
+                Remove All Nodes
+              </Button>
+            </Box>
 
             <MemoizedInputSave
               identification="fNameInput"
