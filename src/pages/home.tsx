@@ -417,7 +417,6 @@ const Home = () => {
           </Stack>
           {!isMobile && (
             <AppHeaderSearchBar
-              searcherUrl={"search"}
               sx={{
                 color: theme =>
                   theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
@@ -717,13 +716,7 @@ const Home = () => {
       </Box>
 
       <Box ref={footerSectionRef}>
-        <AppFooter
-          sx={{
-            px: isDesktop ? "0px" : "10px",
-            background: theme =>
-              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
-          }}
-        />
+        <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
       </Box>
 
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}

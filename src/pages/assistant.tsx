@@ -1,9 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
-  FormGroup,
   Grid,
   IconButton,
   Modal,
@@ -23,17 +21,14 @@ import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRive } from "rive-react";
 
+import AppHeader from "@/components/AppHeader";
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import SearcherPupUp from "@/components/SearcherPupUp";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useInView } from "@/hooks/useObserver";
-import useThemeChange from "@/hooks/useThemeChange";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 import backgroundImageDarkMode from "../../public/darkModeLibraryBackground.jpg";
-import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
-import AppHeaderSearchBar from "../components/AppHeaderSearchBar";
 import AssistantForm from "../components/assistant/AssistantRegister";
 import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
@@ -112,10 +107,8 @@ const Home = () => {
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMobile = useMediaQuery("(max-width:600px)");
-  const isTablet = useMediaQuery("(min-width:900px)");
-  const [animationSelected, setSelectedAnimation] = useState(0);
-  const [handleThemeSwitch] = useThemeChange();
 
+  const [animationSelected, setSelectedAnimation] = useState(0);
   const [openForm, setOpenForm] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
@@ -335,7 +328,7 @@ const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
     >
-      <Box
+      {/* <Box
         component={"header"}
         sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
       >
@@ -428,7 +421,34 @@ const Home = () => {
             </Tooltip>
           </Stack>
         </Stack>
-      </Box>
+      </Box> */}
+      <AppHeader
+        sections={sectionsOrder}
+        sectionSelected={sectionSelected}
+        onClickSearcher={() => setOpenSearch(true)}
+        switchSection={switchSection}
+        enableApply={false}
+        enableSignInUp={false}
+        rightOptions={
+          <Tooltip title="SIGN IN/UP">
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setOpenForm(true)}
+              size={isMobile ? "small" : "medium"}
+              sx={{
+                fontSize: 16,
+                ml: 2.5,
+                borderRadius: 40,
+                wordBreak: "normal",
+                whiteSpace: "nowrap",
+              }}
+            >
+              SIGN IN/UP
+            </Button>
+          </Tooltip>
+        }
+      />
       <Box sx={{ position: "relative" }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
@@ -638,17 +658,11 @@ const Home = () => {
       </Modal>
 
       <Box ref={footerSectionRef}>
-        <AppFooter
-          sx={{
-            px: isDesktop ? "0px" : "10px",
-            background: theme =>
-              theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1,
-          }}
-        />
+        <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
       </Box>
-      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+
       {scrollAnimationMemoized}
 
       <style>{`

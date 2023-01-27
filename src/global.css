@@ -21,11 +21,14 @@
 
 .home-search-input::placeholder {
   font-size: 21px;
+  font-weight: 500;
+  color: red;
 }
 
 @media screen and (max-width: 600px) and (min-width: 10px) {
   .home-search-input::placeholder {
     font-size: 16px;
+    color: red;
   }
 }
 

@@ -8,7 +8,7 @@ import { loadHomeSearchBackground, toBase64 } from "@/lib/utils/utils";
 
 import heroImage from "../../public/darkModeLibraryBackground.jpg";
 import logoHero from "../../public/LogoExtended.svg";
-import SearchInput from "./SearchInput";
+import SearchInput, { SearchInputRef } from "./SearchInput";
 import Stats from "./Stats";
 
 type HomeSearchProps = {
@@ -20,24 +20,29 @@ type HomeSearchProps = {
 export type HomeSearchRef = {
   scroll: () => void;
   containerRef: MutableRefObject<HTMLDivElement | null>;
+  setFocusOnInput: () => void;
 };
 
 const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch, setOpenAdvanceFilter }, ref) => {
   const beginFiltersRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<SearchInputRef | null>(null);
 
   useImperativeHandle(ref, () => ({
     scroll: () => {
+      console.log("will scroll");
       const clientPosition = beginFiltersRef.current?.getBoundingClientRect();
       const yPosition = clientPosition ? clientPosition.y + clientPosition.height - 40 : 500;
       setTimeout(() => window.scrollBy({ top: yPosition, behavior: "smooth" }), 150);
     },
+    setFocusOnInput: () => inputRef.current && inputRef.current.setFocusOnInput(),
     containerRef,
   }));
 
   const handleOpenFilter = () => {
     setOpenAdvanceFilter(prev => !prev);
   };
+
   return (
     <Box
       ref={beginFiltersRef}
@@ -84,7 +89,7 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch, s
           ref={containerRef}
           sx={{ width: "100%", display: "flex", flexDirection: { xs: "column", md: "row" }, mt: { xs: 15, md: 5 } }}
         >
-          <SearchInput onSearch={onSearch}></SearchInput>
+          <SearchInput ref={inputRef} onSearch={onSearch}></SearchInput>
           <Button
             variant="contained"
             onClick={handleOpenFilter}

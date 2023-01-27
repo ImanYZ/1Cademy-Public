@@ -54,6 +54,7 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
 
     useImperativeHandle(ref, () => ({
       scroll: () => {
+        console.log("scroll mobile");
         const clientPosition = toScrollRef.current?.getBoundingClientRect();
         const yPosition = clientPosition ? clientPosition.y + clientPosition.height - 40 : 500;
         setTimeout(() => window.scrollBy({ top: yPosition, behavior: "smooth" }), 150);
