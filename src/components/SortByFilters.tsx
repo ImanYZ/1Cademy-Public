@@ -1,4 +1,13 @@
-import { Grid, MenuItem, Select, SelectChangeEvent, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
+import {
+  Grid,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 
@@ -50,7 +59,7 @@ const SortByFilters: FC<Props> = ({ sortedByType, handleByType, timeWindow, onTi
                 disableFocusListener={false}
                 disableTouchListener={true}
               >
-                <Box>{value}</Box>
+                <Typography>{value}</Typography>
               </Tooltip>
             )}
           >
