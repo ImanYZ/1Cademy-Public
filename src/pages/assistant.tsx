@@ -532,7 +532,7 @@ const Home = () => {
       <AppHeader
         sections={sectionsOrder}
         sectionSelected={sectionSelected}
-        onClickSearcher={setOpenSearch}
+        onClickSearcher={() => setOpenSearch(true)}
         switchSection={switchSection}
         enableApply={false}
         enableSignInUp={false}

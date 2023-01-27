@@ -417,7 +417,6 @@ const Home = () => {
           </Stack>
           {!isMobile && (
             <AppHeaderSearchBar
-              searcherUrl={"search"}
               sx={{
                 color: theme =>
                   theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
