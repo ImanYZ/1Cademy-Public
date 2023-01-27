@@ -7,11 +7,11 @@ import { useRouter } from "next/router";
 import React, { MouseEvent, useEffect, useState } from "react";
 
 type AppHeaderSearchBarProps = {
-  searcherUrl?: string;
+  // searcherUrl?: string;
   sx?: SxProps<Theme>;
 };
 
-const AppHeaderSearchBar = ({ searcherUrl, sx }: AppHeaderSearchBarProps) => {
+const AppHeaderSearchBar = ({ /* searcherUrl, */ sx }: AppHeaderSearchBarProps) => {
   const router = useRouter();
   const [searchText, setSearchText] = useState<string>((router.query.q as string) || "");
 
@@ -19,7 +19,7 @@ const AppHeaderSearchBar = ({ searcherUrl, sx }: AppHeaderSearchBarProps) => {
 
   const handleSearch = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    router.push({ pathname: searcherUrl ?? "/", query: { ...router.query, q: searchText, page: 1 } });
+    router.push({ pathname: "/search", query: { ...router.query, q: searchText, page: 1 } });
   };
 
   return (

@@ -454,7 +454,7 @@ const Home = () => {
         sections={sectionsOrder1Cademy}
         sectionSelected={sectionSelected}
         switchSection={switchSection}
-        setOpenSearch={setOpenSearch}
+        onClickSearcher={setOpenSearch}
       />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box

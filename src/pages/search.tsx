@@ -79,7 +79,8 @@ const SearcherPage: NextPageWithLayout = () => {
     const qq = router.query.q || "";
     const hasQueryValue = qq && qq !== "*";
     if (router.isReady && data?.data && hasQueryValue) {
-      document.body.clientWidth >= 900 ? homeSearchRef.current?.scroll() : homeFilterRef.current?.scroll();
+      // TODO: improve this adding reference in masonry, scroll margin
+      document.body.clientWidth >= 900 ? homeSearchRef.current?.scroll() : homeSearchRef.current?.scroll();
     }
   }, [router.isReady, data?.data, router.query.q]);
 
@@ -148,9 +149,26 @@ const SearcherPage: NextPageWithLayout = () => {
     router.push({ query: { ...router.query, reference: title, label, page: 1 } }, undefined, { scroll: false });
   };
 
+  const onClickSearcher = () => {
+    if (!homeSearchRef?.current || !document) return;
+    // homeSearchRef.current.scroll;
+    // homeSearchRef.current.scrollTop = 0;
+    // homeSearchRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+    window.scrollTo({
+      behavior: "smooth",
+      left: 0,
+      top: 0,
+    });
+
+    homeSearchRef.current.setFocusOnInput();
+    // document.scrollingElement(homeSearchRef.current);
+  };
+
   return (
     // <ThemeProvider theme={brandingLightTheme}>
-    <PagesNavbar showSearch={!isIntersecting}>
+    //   enableMenu: boolean;
+    // onClickSearcher: () => void;
+    <PagesNavbar onClickSearcher={!isIntersecting ? onClickSearcher : undefined} enableMenu>
       <HomeSearch onSearch={handleSearch} ref={homeSearchRef} setOpenAdvanceFilter={setOpenAdvanceFilter} />
       <Container sx={{ py: 10 }}>
         {openAdvanceFilter && (

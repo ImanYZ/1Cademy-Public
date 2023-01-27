@@ -30,8 +30,8 @@ type AppHeaderProps = {
   sections: any[];
   sectionSelected?: number;
   switchSection: (idxSection: number, idxAnimation?: number) => void;
-  setOpenSearch?: (newValue: boolean) => void;
-  enableSearcher?: boolean;
+  onClickSearcher?: () => void;
+  // enableSearcher?: boolean;
   enableSignInUp?: boolean;
   enableApply?: boolean;
   enableMenu?: boolean;
@@ -41,11 +41,11 @@ type AppHeaderProps = {
 const AppHeader = ({
   sections,
   switchSection,
-  setOpenSearch,
+  onClickSearcher,
   sectionSelected,
   rightOptions = null,
   enableApply = true,
-  enableSearcher = true,
+  // enableSearcher = true,
   enableSignInUp = true,
   enableMenu = false,
 }: AppHeaderProps) => {
@@ -106,7 +106,15 @@ const AppHeader = ({
           direction={"row"}
           sx={{ color: "#f8f8f8" }}
         >
-          <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
+          <Tooltip title={sections[0].title}>
+            <img
+              onClick={() => (switchSection ? switchSection(0) : () => {})}
+              src={LogoDarkMode.src}
+              alt="logo"
+              width="45px"
+              height={"45px"}
+            />
+          </Tooltip>
 
           {isTablet && (
             <>
@@ -127,7 +135,8 @@ const AppHeader = ({
             </>
           )}
         </Stack>
-        {((!isMobile && enableSearcher) || enableMenu) && (
+        {/* {((!isMobile && enableSearcher) || enableMenu) && ( */}
+        {onClickSearcher && showRigthOptionsByDesktop && (
           <AppHeaderSearchBar
             searcherUrl={"search"}
             sx={{
@@ -137,9 +146,10 @@ const AppHeader = ({
         )}
         <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "8px"}>
           {/* isMobile && enableSearcher && !enableMenu */}
-          {setOpenSearch && showRigthOptionInMobile && (
+          {onClickSearcher && isMobile && (
+            // {onClickSearcher && showRigthOptionInMobile && (
             <Tooltip title="Open Searcher">
-              <IconButton onClick={() => setOpenSearch(true)}>
+              <IconButton onClick={onClickSearcher}>
                 <SearchIcon />
               </IconButton>
             </Tooltip>

@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@mui/material";
+import { ThemeProvider, useMediaQuery } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import dayjs from "dayjs";
@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 import { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import LinkedNodes from "@/components/LinkedNodes";
 import { NodeHead } from "@/components/NodeHead";
@@ -20,6 +20,7 @@ import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServ
 import ROUTES from "@/lib/utils/routes";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
 
+import SearcherPupUp from "../../../components/SearcherPupUp";
 import { KnowledgeNode } from "../../../knowledgeTypes";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
 
@@ -74,6 +75,9 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 
 const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) => {
   const router = useRouter();
+  const [openSearch, setOpenSearch] = useState(false);
+  const isMobile = useMediaQuery("(max-width:600px)");
+
   useEffect(() => {
     const auth = getAuth();
     const userAuthObj = auth?.currentUser;
@@ -96,7 +100,12 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
 
   const { parents, contributors, references, institutions, tags, children, siblings } = node || {};
   return (
-    <PagesNavbar title={`1Cademy - ${node.title}`} showSearch={false}>
+    <PagesNavbar
+      title={`1Cademy - ${node.title}`}
+      // showSearch={false}
+      onClickSearcher={() => setOpenSearch(true)}
+      enableMenu
+    >
       <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
         <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
         <Grid container spacing={3}>
@@ -122,6 +131,8 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
           </Grid>
         </Grid>
       </Box>
+
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
     </PagesNavbar>
   );
 };

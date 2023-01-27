@@ -18,14 +18,16 @@ type Props = {
   children: ReactNode;
   title?: string;
   description?: string;
-  showSearch: boolean;
+  // showSearch: boolean;
+  enableMenu: boolean;
+  onClickSearcher: () => void;
 };
 
 export const AppFooter: ComponentType<any> = dynamic(() => import("./AppFooter").then(m => m.default), {
   ssr: false,
 });
 
-const PagesNavbar: FC<Props> = ({ children, title, description }) => {
+const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onClickSearcher }) => {
   const router = useRouter();
 
   const [showMobileFeedbackForm, setShowMobileFeedbackForm] = useState(false);
@@ -52,7 +54,13 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
         showSearch={showSearch}
         isSignedIn={isAuthenticated}
       /> */}
-      <AppHeader sections={SECTIONS} switchSection={switchSection} enableMenu={true} enableSearcher={true} />
+      {/* //onClickSearcher?: () => void; */}
+      <AppHeader
+        sections={SECTIONS}
+        switchSection={switchSection}
+        enableMenu={enableMenu}
+        onClickSearcher={onClickSearcher}
+      />
       {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />}
       <Box
         component="main"

@@ -532,7 +532,7 @@ const Home = () => {
       <AppHeader
         sections={sectionsOrder}
         sectionSelected={sectionSelected}
-        setOpenSearch={setOpenSearch}
+        onClickSearcher={setOpenSearch}
         switchSection={switchSection}
         enableApply={false}
         enableSignInUp={false}
@@ -809,9 +809,9 @@ const Home = () => {
           }}
         />
       </Box>
-      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+
       {scrollAnimationMemoized}
 
       <style>{`
