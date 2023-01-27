@@ -100,7 +100,7 @@ const AppHeader = ({
         }}
       >
         <Stack
-          spacing={isDesktop ? "30px" : "8px"}
+          spacing={isDesktop ? "30px" : "12px"}
           alignItems={"center"}
           justifyContent={"space-between"}
           direction={"row"}
