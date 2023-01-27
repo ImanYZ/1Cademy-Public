@@ -168,7 +168,7 @@ export const ToolbarSidebar = ({
             height: firstBoxHeight,
           }}
         >
-          <Box sx={{ marginTop: "20px" }}>
+          <Box sx={{ marginTop: "10px" }}>
             <MemoizedMetaButton>
               <Box sx={{ display: "grid", placeItems: "center" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
