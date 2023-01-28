@@ -19,7 +19,7 @@ const whichValues: { id: string; name: string; body: string; getBody?: (props: a
     id: "extentions",
     name: "1Cademy Chrome Extension",
     body: "The 1Cademy extension simplifies the use of OpenAI ChatGPT for researchers, instructors, and students by providing easy access to the model's capabilities through simple text selection and right-clicking, or by using keyboard shortcuts.\nThe extension not only improves writing style, grammar, dictation, coherency, and flow, but also provides clear explanations and helpful hints on the rules applied.\nIt also offers a range of features such as text summarization, clarification, paraphrasing, shortening, text analysis, literature review, multiple-choice question generation, and stepwise teaching to aid in learning and research. Additionally, it helps with fact-checking and learning about alternative viewpoints on topics discussed on the Web.\nThis extension streamlines the use of the OpenAI ChatGPT model and allows users to efficiently access and utilize its capabilities in their research and learning.",
-    link: "",
+    link: "https://chrome.google.com/webstore/detail/1cademy-assistant-helper/jdlbjglnnjcjigpodegggihmcaoikeob",
   },
 ];
 
