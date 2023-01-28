@@ -20,8 +20,8 @@ const whyItems = [
   {
     name: "Schedules your 1-to-1 and group meetings.",
     body: "Your assistant knows everybody’s schedules and shares a subset of their availability to allow them to easily coordinate meetings. It highly values privacy and does not share the details of everything in users’ schedules.",
-    image: "assistant/3-is-in-sync.svg",
-    imageDark: "assistant/3-is-in-sync.svg",
+    image: "assistant/3-schedules-your-1-to-1-and-group-meetings-light.svg",
+    imageDark: "assistant/3-schedules-your-1-to-1-and-group-meetings-dark.svg",
     padding: "4px 40px 0px 40px",
     width: "100%",
     height: "auto",
