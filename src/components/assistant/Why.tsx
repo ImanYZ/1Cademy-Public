@@ -105,8 +105,8 @@ const Values = () => {
           {idx === 2 ? (
             <Box
               sx={{
-                width: width > 600 && width < 900 ? "300px" : "450px",
-                height: width > 600 && width < 900 ? "200px" : "300px",
+                width: isMobile ? "100%" : width > 600 && width < 900 ? "300px" : "450px",
+                height: isMobile ? "200px" : width > 600 && width < 900 ? "200px" : "300px",
                 flex: 1,
               }}
             >
@@ -118,11 +118,14 @@ const Values = () => {
               />
             </Box>
           ) : (
-            <img
-              alt={value.name}
-              src={theme.palette.mode === "light" ? value.image : value.imageDark}
-              style={{ flex: 1 }}
-            />
+            <Box style={{ flex: 1 }}>
+              <img
+                alt={value.name}
+                src={theme.palette.mode === "light" ? value.image : value.imageDark}
+                width={value.width}
+                height={value.height}
+              />
+            </Box>
           )}
         </Box>
         <Box
