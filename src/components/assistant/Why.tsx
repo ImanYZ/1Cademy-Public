@@ -6,7 +6,6 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
 import { gray03 } from "../../pages/assistant";
-import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
 import valuesItems from "./whyItems";
 
 const observerOption: UseInViewProps = { options: { root: null, rootMargin: "0px", threshold: 0.5 } };
@@ -102,7 +101,15 @@ const Values = () => {
           }}
           className={inViewOnces[idx] ? (idx % 2 === 0 ? "slide-left-to-right" : "slide-right-to-left") : "hide"}
         >
-          {idx === 2 ? (
+          <Box style={{ flex: 1 }}>
+            <img
+              alt={value.name}
+              src={theme.palette.mode === "light" ? value.image : value.imageDark}
+              width={value.width}
+              height={value.height}
+            />
+          </Box>
+          {/* {idx === 2 ? (
             <Box
               sx={{
                 width: isMobile ? "100%" : width > 600 && width < 900 ? "300px" : "450px",
@@ -126,7 +133,7 @@ const Values = () => {
                 height={value.height}
               />
             </Box>
-          )}
+          )} */}
         </Box>
         <Box
           sx={{
