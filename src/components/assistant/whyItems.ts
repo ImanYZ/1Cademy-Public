@@ -1,9 +1,9 @@
-export default [
+const whyItems = [
   {
     name: "1Cademy AI assistant motivates the development of valuable habits.",
     body: "The 1Cademy AI assistant not only encourages the formation of beneficial habits, but also intelligently recognizes how these habits can improve your life and motivates you to invest more time in them.",
-    image: "assistant/1-climing-and-helping.svg",
-    imageDark: "assistant/1-climing-and-helping.svg",
+    image: "assistant/1-climing-and-helping-light.svg",
+    imageDark: "assistant/1-climing-and-helping-dark.svg",
     padding: "4px 40px 0px 40px",
   },
   {
@@ -84,3 +84,5 @@ export default [
     padding: "4px 40px 0px 40px",
   },
 ];
+
+export default whyItems;
