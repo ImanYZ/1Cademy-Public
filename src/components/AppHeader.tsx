@@ -66,6 +66,7 @@ const AppHeader = ({
 
   const showRigthOptionInMobile = isMobile && !enableMenu;
   const showRigthOptionsByDesktop = !isMobile;
+
   return (
     <Box
       component={"header"}
@@ -100,7 +101,8 @@ const AppHeader = ({
         }}
       >
         <Stack
-          spacing={isDesktop ? "30px" : "12px"}
+          // spacing={isDesktop ? "30px" : "12px"}
+          spacing={"20px"}
           alignItems={"center"}
           justifyContent={"space-between"}
           direction={"row"}
