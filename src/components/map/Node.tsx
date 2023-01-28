@@ -264,7 +264,7 @@ const Node = ({
   const [contentCopy, setContentCopy] = useState(content);
 
   const [isLoading, startTransition] = useTransition();
-  const [childNodesMargin, setChildNodesMargin] = useState(0);
+  const [childNodesMargin, setChildNodesMargin] = useState(500);
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -276,7 +276,7 @@ const Node = ({
         setChildNodesMargin(600);
       }, 1000);
     } else {
-      setChildNodesMargin(0);
+      setChildNodesMargin(500);
     }
   }, [editable]);
 
@@ -1145,7 +1145,7 @@ const Node = ({
           display: !isNew && editable ? "flex" : "none",
           flexDirection: "column",
           gap: "10px",
-          transition: "2s ease",
+          transition: "1s ease",
           position: "absolute",
           left: childNodesMargin + "px",
           top:
@@ -1153,6 +1153,7 @@ const Node = ({
               parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
               0.5 +
             "px",
+          zIndex: -999,
         }}
       >
         {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
