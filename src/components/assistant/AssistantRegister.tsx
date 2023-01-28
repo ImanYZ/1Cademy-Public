@@ -8,6 +8,8 @@ import { useFormik } from "formik";
 import React, { forwardRef, useState } from "react";
 import * as yup from "yup";
 
+import { useWindowSize } from "@/hooks/useWindowSize";
+
 interface FeedbackFormValues {
   firstName: string;
   lastName: string;
@@ -36,7 +38,7 @@ const validationSchema = yup.object({
 
 const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx }, ref) => {
   const db = getFirestore();
-
+  const { height } = useWindowSize();
   const [isLoading, setIsLoading] = useState(false);
   const [registerWasComplete, setRegisterWasComplete] = useState(false);
 
@@ -92,6 +94,9 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        maxHeight: height,
+        overflowY: "auto",
+        p: "20px",
         ...sx,
       }}
     >
@@ -147,7 +152,14 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
             well as information about its features and capabilities.
           </Typography>
 
-          <Stack component="form" onSubmit={formik.handleSubmit} direction="column" spacing={5} my={2}>
+          <Stack
+            component="form"
+            onSubmit={formik.handleSubmit}
+            direction="column"
+            spacing={5}
+            alignItems={"center"}
+            my={2}
+          >
             <TextField
               label="First Name"
               id="firstName"

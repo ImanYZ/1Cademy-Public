@@ -81,6 +81,7 @@ const What = () => {
   const { inViewOnce: whatItem06InViewOnce, ref: whatItem06Ref } = useInView(observerOption);
   const { inViewOnce: whatItem07InViewOnce, ref: whatItem07Ref } = useInView(observerOption);
   const { inViewOnce: whatItem08InViewOnce, ref: whatItem08Ref } = useInView(observerOption);
+  const { inViewOnce: whatItem09InViewOnce, ref: whatItem09Ref } = useInView(observerOption);
 
   const refs = [
     whatItem01Ref,
@@ -91,6 +92,7 @@ const What = () => {
     whatItem06Ref,
     whatItem07Ref,
     whatItem08Ref,
+    whatItem09Ref,
   ];
 
   const inViewOnces = [
@@ -102,6 +104,7 @@ const What = () => {
     whatItem06InViewOnce,
     whatItem07InViewOnce,
     whatItem08InViewOnce,
+    whatItem09InViewOnce,
   ];
 
   return (

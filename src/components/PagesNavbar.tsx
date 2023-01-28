@@ -1,13 +1,24 @@
 import CloseIcon from "@mui/icons-material/Close";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import { ClickAwayListener, Fab, IconButton, styled, Tooltip, tooltipClasses, TooltipProps } from "@mui/material";
+import {
+  ClickAwayListener,
+  Fab,
+  IconButton,
+  styled,
+  Tooltip,
+  tooltipClasses,
+  TooltipProps,
+  useMediaQuery,
+} from "@mui/material";
 import Box from "@mui/material/Box";
-import dynamic from "next/dynamic";
-import React, { ComponentType, FC, ReactNode, useState } from "react";
+import { useRouter } from "next/router";
+import React, { FC, ReactNode, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import SECTIONS from "@/lib/utils/navbarSections";
 
-import AppHeaderNavbar from "./AppHeaderNavbar";
+import AppFooter from "./AppFooter2";
+import AppHeader from "./AppHeader";
 import AppMenuMovil from "./AppMenuMovil";
 import FeedbackForm from "./FeedbackForm";
 import Head from "./Head";
@@ -16,19 +27,18 @@ type Props = {
   children: ReactNode;
   title?: string;
   description?: string;
-  showSearch: boolean;
+  // showSearch: boolean;
+  enableMenu: boolean;
+  onClickSearcher?: () => void;
 };
 
-export const AppFooter: ComponentType<any> = dynamic(() => import("./AppFooter").then(m => m.default), {
-  ssr: false,
-});
+const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onClickSearcher }) => {
+  const router = useRouter();
 
-const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) => {
+  const isDesktop = useMediaQuery("(min-width:1200px)");
   const [showMobileFeedbackForm, setShowMobileFeedbackForm] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const onCloseMenu = () => setShowMenu(false);
-  const onShowMenu = () => setShowMenu(true);
   const [{ isAuthenticated }] = useAuth();
 
   const onSendFeedback = () => {
@@ -36,22 +46,32 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
     setShowMobileFeedbackForm(true);
   };
 
+  const switchSection = (idx: number) => {
+    SECTIONS[idx].label === "NODE" ? router.push(SECTIONS[idx].route) : open(SECTIONS[idx].route, "_blank");
+  };
+
   return (
     <>
       <Head title={title} description={description} />
-      <AppHeaderNavbar
+      {/* <AppHeaderNavbar
         showMenu={showMenu}
         onCloseMenu={onCloseMenu}
         onShowMenu={onShowMenu}
         showSearch={showSearch}
         isSignedIn={isAuthenticated}
+      /> */}
+      {/* //onClickSearcher?: () => void; */}
+      <AppHeader
+        sections={SECTIONS}
+        switchSection={switchSection}
+        enableMenu={enableMenu}
+        onClickSearcher={onClickSearcher}
       />
       {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />}
       <Box
         component="main"
         sx={{
           position: "relative",
-          mt: "var(--navbar-height)",
           minHeight: "calc(100vh - var(--navbar-height) - var(--footer-height) )",
           backgroundColor: theme => theme.palette.background.default,
         }}
@@ -101,7 +121,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, showSearch }) =>
         )}
       </Box>
 
-      <AppFooter />
+      <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
 
       {/* pc feedback */}
 

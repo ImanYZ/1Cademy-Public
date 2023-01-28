@@ -1,4 +1,4 @@
-export default [
+const values = [
   {
     name: "Learning Like Researchers",
     body: "The traditional learning approach for students is to start with foundational concepts and gradually work towards more complex topics.\n On the other hand, researchers often prefer to begin with the advanced topics and work backwards to gain a deeper understanding of the underlying prerequisites. 1Cademy offers an innovative approach to learning by enabling students to emulate the research method and start with advanced topics, then delve into the prerequisites as needed. \nThis approach allows students to learn in a more targeted and efficient manner, similar to the way researchers approach learning.",
@@ -58,7 +58,9 @@ export default [
     name: "Balanced Perspectives",
     body: "These days, we see political, sexual, ethnic, or even scientific polarization everywhere on the Internet. Echo chambers are formed where a group of people only accept thoughts and ideas that are aligned with their perspectives, ignoring alternatives views. \n1Cademy provides us with a consensus-based collaboration mechanism where alternative or even competing perspectives are placed side-by-side so that one can easily compare and contrast them to learn and rationalize each topic in different contexts.",
     // image: "Balanced_Perspectives.png",
-    image: "Balanced_Perspectives.svg",
-    imageDark: "Balanced_Perspectives.svg",
+    image: "Balanced_Perspectives_Ligth.svg",
+    imageDark: "Balanced_Perspectives_Dark.svg",
   },
 ];
+
+export default values;

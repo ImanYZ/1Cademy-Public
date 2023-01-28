@@ -1,9 +1,15 @@
 import AddIcon from "@mui/icons-material/Add";
+import CodeIcon from "@mui/icons-material/Code";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Grid, InputLabel, Switch, TextField, Typography } from "@mui/material";
+import ShareIcon from "@mui/icons-material/Share";
+import { Box, Button, Fab, Grid, InputLabel, Switch, TextField, Tooltip, Typography } from "@mui/material";
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
@@ -16,13 +22,13 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
-import LeaderboardChip from "../LeaderboardChip";
-import NodeTypeIcon from "../NodeTypeIcon";
-import EditProposal from "./EditProposal";
+// import LeaderboardChip from "../LeaderboardChip";
+// import NodeTypeIcon from "../NodeTypeIcon";
+// import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
-import NewChildProposal from "./NewChildProposal";
-import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
+// import NewChildProposal from "./NewChildProposal";
+// import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -252,17 +258,27 @@ const Node = ({
   const [ableToPropose, setAbleToPropose] = useState(false);
   const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
   const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
-  const [openProposal, setOpenProposal] = useState(false);
+  const [openProposal, setOpenProposal] = useState<any>(false);
 
   const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
 
   const [isLoading, startTransition] = useTransition();
-
+  const [childNodesMargin, setChildNodesMargin] = useState(0);
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
   }, [title, content]);
+
+  useEffect(() => {
+    if (editable) {
+      setTimeout(() => {
+        setChildNodesMargin(600);
+      }, 1000);
+    } else {
+      setChildNodesMargin(0);
+    }
+  }, [editable]);
 
   useEffect(() => {
     setVideoUrl(videoUrl => {
@@ -933,13 +949,7 @@ const Node = ({
                   textAlign: "center",
                   display: "flex",
                   margin: "10px",
-                  ...(isNew
-                    ? {
-                        justifyContent: "space-between",
-                      }
-                    : {
-                        alignItems: "center",
-                      }),
+                  justifyContent: "space-between",
                 }}
               >
                 <Button
@@ -965,29 +975,29 @@ const Node = ({
                 >
                   Propose
                 </Button>
-                <div
-                  id="ProposalButtonsRow"
-                  style={{
-                    border: "solid 0px pink",
-                    display: !isNew && nodeType !== "Reference" ? "flex" : "none",
-                    justifyContent: "space-around",
-                  }}
-                >
-                  {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                    (childNodeType: ProposedChildTypesIcons) => {
-                      return (
-                        <NewChildProposal
-                          key={childNodeType}
-                          childNodeType={childNodeType}
-                          icon={proposedChildTypesIcons[childNodeType]}
-                          openProposal={openProposal}
-                          setOpenProposal={setOpenProposal}
-                          proposeNewChild={proposeNewChild}
-                        />
-                      );
-                    }
-                  )}
-                </div>
+                {/* <div
+                    id="ProposalButtonsRow"
+                    style={{
+                      border: "solid 0px pink",
+                      display: !isNew && nodeType !== "Reference" ? "flex" : "none",
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+                      (childNodeType: ProposedChildTypesIcons) => {
+                        return (
+                          <NewChildProposal
+                            key={childNodeType}
+                            childNodeType={childNodeType}
+                            icon={proposedChildTypesIcons[childNodeType]}
+                            openProposal={openProposal}
+                            setOpenProposal={setOpenProposal}
+                            proposeNewChild={proposeNewChild}
+                          />
+                        );
+                      }
+                    )}
+                  </div> */}
               </Box>
             </>
           )}
@@ -1127,7 +1137,63 @@ const Node = ({
             </Box>
           </Box>
         </>
+        
       ) : null} */}
+      <Box
+        id={identifier + "_" + "childNodes"}
+        sx={{
+          display: !isNew && editable ? "flex" : "none",
+          flexDirection: "column",
+          gap: "10px",
+          transition: "2s ease",
+          position: "absolute",
+          left: childNodesMargin + "px",
+          top:
+            (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
+              parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
+              0.5 +
+            "px",
+        }}
+      >
+        {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+          (childNodeType: ProposedChildTypesIcons, index: number) => {
+            return (
+              <Tooltip title={childNodeType} placement="right" key={index}>
+                <Fab
+                  color="primary"
+                  sx={{
+                    background: "#1F1F1F",
+                    ":hover": {
+                      background: "#525151",
+                    },
+                  }}
+                  aria-label="add"
+                  onClick={(event: any) => {
+                    return openProposal !== "ProposeNew" + childNodeType + "ChildNode"
+                      ? proposeNewChild(event, childNodeType, setOpenProposal)
+                      : undefined;
+                  }}
+                >
+                  <>
+                    {proposedChildTypesIcons[childNodeType] === "local_library" && (
+                      <LocalLibraryIcon sx={{ color: "white!important" }} />
+                    )}
+                    {proposedChildTypesIcons[childNodeType] === "help_outline" && (
+                      <HelpOutlineIcon sx={{ color: "#fff" }} />
+                    )}
+                    {proposedChildTypesIcons[childNodeType] === "code" && <CodeIcon sx={{ color: "#fff" }} />}
+                    {proposedChildTypesIcons[childNodeType] === "share" && <ShareIcon sx={{ color: "#fff" }} />}
+                    {proposedChildTypesIcons[childNodeType] === "menu_book" && <MenuBookIcon sx={{ color: "#fff" }} />}
+                    {proposedChildTypesIcons[childNodeType] === "emoji_objects" && (
+                      <EmojiObjectsIcon sx={{ color: "#fff" }} />
+                    )}
+                  </>
+                </Fab>
+              </Tooltip>
+            );
+          }
+        )}
+      </Box>
     </div>
   );
 };

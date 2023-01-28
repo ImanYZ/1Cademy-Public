@@ -18,9 +18,8 @@ const SearcherPupUp = ({ onClose }: SearcherPupUpProps) => {
         right: 0,
         background: theme => (theme.palette.mode === "dark" ? "#6464647e" : "#c9c9c985"),
         backdropFilter: "blur(5px)",
-
         p: "70px 16px",
-        zIndex: "12",
+        zIndex: "21",
       }}
     >
       <ClickAwayListener
@@ -31,7 +30,7 @@ const SearcherPupUp = ({ onClose }: SearcherPupUpProps) => {
       >
         <Box>
           <AppHeaderSearchBar
-            searcherUrl={"search"}
+            // searcherUrl={"search"}
             sx={{
               color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
             }}

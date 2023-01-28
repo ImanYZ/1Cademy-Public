@@ -27,7 +27,7 @@ export default function AppFooter({ sx }: AppFooterProps) {
         alignItems: "center",
         justifyContent: { xs: "center", md: "center" },
         color: theme => theme.palette.common.white,
-        background: theme => theme.palette.common.darkGrayBackground,
+        background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : theme.palette.common.darkBackground1),
         ...sx,
       }}
     >

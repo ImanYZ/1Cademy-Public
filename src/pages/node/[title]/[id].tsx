@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@mui/material";
+import { ThemeProvider, useMediaQuery } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import dayjs from "dayjs";
@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 import { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import LinkedNodes from "@/components/LinkedNodes";
 import { NodeHead } from "@/components/NodeHead";
@@ -20,6 +20,7 @@ import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServ
 import ROUTES from "@/lib/utils/routes";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
 
+import SearcherPupUp from "../../../components/SearcherPupUp";
 import { KnowledgeNode } from "../../../knowledgeTypes";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
 
@@ -74,6 +75,9 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 
 const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) => {
   const router = useRouter();
+  const [openSearch, setOpenSearch] = useState(false);
+  const isMobile = useMediaQuery("(max-width:600px)");
+
   useEffect(() => {
     const auth = getAuth();
     const userAuthObj = auth?.currentUser;
@@ -96,35 +100,40 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
 
   const { parents, contributors, references, institutions, tags, children, siblings } = node || {};
   return (
-    <ThemeProvider theme={brandingLightTheme}>
-      <PagesNavbar title={`1Cademy - ${node.title}`} showSearch={false}>
-        <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
-          <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={12} md={3}>
-              {parents && parents?.length > 0 && <LinkedNodes data={parents || []} header="Learn Before" />}
-            </Grid>
-            <Grid item xs={12} sm={12} md={6}>
-              <NodeItemFull
-                nodeId={node.id}
-                node={node}
-                contributors={
-                  <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />
-                }
-                references={<ReferencesList references={references || []} sx={{ mt: 3 }} />}
-                tags={<TagsList tags={tags || []} sx={{ mt: 3 }} />}
-              />
-              {siblings && siblings.length > 0 && (
-                <LinkedNodes sx={{ mt: 3 }} data={siblings} header="Related"></LinkedNodes>
-              )}
-            </Grid>
-            <Grid item xs={12} sm={12} md={3}>
-              {children && children?.length > 0 && <LinkedNodes data={children || []} header="Learn After" />}
-            </Grid>
+    <PagesNavbar
+      title={`1Cademy - ${node.title}`}
+      // showSearch={false}
+      onClickSearcher={() => setOpenSearch(true)}
+      enableMenu
+    >
+      <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
+        <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={12} md={3}>
+            {parents && parents?.length > 0 && <LinkedNodes data={parents || []} header="Learn Before" />}
           </Grid>
-        </Box>
-      </PagesNavbar>
-    </ThemeProvider>
+          <Grid item xs={12} sm={12} md={6}>
+            <NodeItemFull
+              nodeId={node.id}
+              node={node}
+              contributors={
+                <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />
+              }
+              references={<ReferencesList references={references || []} sx={{ mt: 3 }} />}
+              tags={<TagsList tags={tags || []} sx={{ mt: 3 }} />}
+            />
+            {siblings && siblings.length > 0 && (
+              <LinkedNodes sx={{ mt: 3 }} data={siblings} header="Related"></LinkedNodes>
+            )}
+          </Grid>
+          <Grid item xs={12} sm={12} md={3}>
+            {children && children?.length > 0 && <LinkedNodes data={children || []} header="Learn After" />}
+          </Grid>
+        </Grid>
+      </Box>
+
+      {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
+    </PagesNavbar>
   );
 };
 

@@ -47,12 +47,19 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
     <Card sx={{ ...sx }}>
       <CardHeader
         sx={{
-          backgroundColor: theme => theme.palette.common.darkGrayBackground,
-          color: theme => theme.palette.common.white,
+          backgroundColor: theme =>
+            theme.palette.mode === "light" ? theme.palette.common.darkGrayBackground : theme.palette.common.black,
+          // color: theme => theme.palette.common.white,
         }}
         title={
-          <Box sx={{ textAlign: "center" }}>
-            <TypographyUnderlined variant="h6" fontWeight="300" gutterBottom align="center">
+          <Box sx={{ textAlign: "center", color: "inherit" }}>
+            <TypographyUnderlined
+              variant="h6"
+              fontWeight="300"
+              gutterBottom
+              align="center"
+              sx={{ color: theme => theme.palette.common.white }}
+            >
               {header}
             </TypographyUnderlined>
           </Box>

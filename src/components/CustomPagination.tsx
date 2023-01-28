@@ -31,8 +31,15 @@ export const CustomPagination = ({ count, page, onChange }: CustomPaginationProp
                   height: "40px",
                   borderRadius: "40px",
                   fontWeight: "400",
-                  color: theme => theme.palette.common.black,
-                  background: selected ? theme => theme.palette.grey[200] : undefined,
+                  color: theme =>
+                    theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.lightBackground1,
+                  background: selected
+                    ? theme => (theme.palette.mode === "light" ? theme.palette.grey[200] : theme.palette.grey[800])
+                    : undefined,
+                  ":hover": {
+                    background: theme =>
+                      theme.palette.mode === "light" ? theme.palette.grey[300] : theme.palette.grey[700],
+                  },
                 }}
                 {...item}
               >
@@ -44,8 +51,13 @@ export const CustomPagination = ({ count, page, onChange }: CustomPaginationProp
               <Button
                 type="button"
                 sx={{
-                  color: theme => theme.palette.common.black,
+                  color: theme =>
+                    theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.lightBackground1,
                   fontWeight: "400",
+                  ":hover": {
+                    background: theme =>
+                      theme.palette.mode === "light" ? theme.palette.grey[300] : theme.palette.grey[700],
+                  },
                 }}
                 {...item}
               >
@@ -57,8 +69,13 @@ export const CustomPagination = ({ count, page, onChange }: CustomPaginationProp
               <Button
                 type="button"
                 sx={{
-                  color: theme => theme.palette.common.black,
+                  color: theme =>
+                    theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.lightBackground1,
                   fontWeight: "400",
+                  ":hover": {
+                    background: theme =>
+                      theme.palette.mode === "light" ? theme.palette.grey[300] : theme.palette.grey[700],
+                  },
                 }}
                 {...item}
               >

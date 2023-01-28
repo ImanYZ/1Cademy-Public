@@ -6,6 +6,7 @@ const TypographyUnderlined = styled(Typography)(() => ({
   paddingBottom: "7px",
   position: "relative",
   color: "inherit",
+  // color: "red",
   "&::before": {
     content: '""',
     position: "absolute",
