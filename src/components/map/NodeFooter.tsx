@@ -224,28 +224,28 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-  // const selectPendingProposals = useCallback(
-  //   (event: any) => {
-  //     // if (nodeBookState.selectedNode === identifier) {
-  //     //   console.log("this is selected");
-  //     // }
-  //     // TODO: remove openEditButton and nodeId global states
-  //     // openNodePart(event, "PendingProposals");
-  //     // if (nodeBookState.nodeId != identifier) {
-  //     //   nodeBookDispatch({
-  //     //     type: "setOpenEditButton",
-  //     //     payload: { status: true, nodeId: identifier },
-  //     //   });
-  //     // } else {
-  //     //   nodeBookDispatch({
-  //     //     type: "setOpenEditButton",
-  //     //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
-  //     //   });
-  //     // }
-  //     selectNode(event, "Proposals"); // Pass correct data
-  //   },
-  //   [selectNode]
-  // );
+  const selectPendingProposals = useCallback(
+    (event: any) => {
+      // if (nodeBookState.selectedNode === identifier) {
+      //   console.log("this is selected");
+      // }
+      // TODO: remove openEditButton and nodeId global states
+      // openNodePart(event, "PendingProposals");
+      // if (nodeBookState.nodeId != identifier) {
+      //   nodeBookDispatch({
+      //     type: "setOpenEditButton",
+      //     payload: { status: true, nodeId: identifier },
+      //   });
+      // } else {
+      //   nodeBookDispatch({
+      //     type: "setOpenEditButton",
+      //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
+      //   });
+      // }
+      selectNode(event, "Proposals"); // Pass correct data
+    },
+    [selectNode]
+  );
   const uploadNodeImageHandler = useCallback(
     (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
     [uploadNodeImage, isUploading]
@@ -376,6 +376,7 @@ const NodeFooter = ({
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
+      selectPendingProposals(event);
       setOperation("CancelProposals");
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
@@ -480,50 +481,33 @@ const NodeFooter = ({
             </Tooltip>
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
-                {openSidebar === "PROPOSALS" && nodeBookState.selectedNode === identifier ? (
-                  <Box
-                    onClick={proposeNodeImprovementClick}
-                    className={"select-tab-button-node-footer"}
-                    sx={{
-                      "& > span": {
-                        fontSize: 13,
-                      },
-                      background: theme =>
-                        theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <CreateIcon sx={{ fontSize: "16px" }} />
-                  </Box>
-                ) : (
-                  <ContainedButton
-                    title="Propose/evaluate versions of this node."
-                    onClick={proposeNodeImprovementClick}
-                    tooltipPosition="top"
-                    sx={{
+                <ContainedButton
+                  title="Propose/evaluate versions of this node."
+                  onClick={proposeNodeImprovementClick}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground1
+                        : theme.palette.common.lightBackground1,
+                    fontWeight: 400,
+                    color: "inherit",
+                    ":hover": {
+                      borderWidth: "0px",
                       background: (theme: any) =>
                         theme.palette.mode === "dark"
-                          ? theme.palette.common.darkBackground1
-                          : theme.palette.common.lightBackground1,
-                      fontWeight: 400,
-                      color: "inherit",
-                      ":hover": {
-                        borderWidth: "0px",
-                        background: (theme: any) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
-                      padding: "7px 7px",
-                      minWidth: "30px",
-                      height: "30px",
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                      <CreateIcon sx={{ fontSize: "16px" }} />
-                    </Box>
-                  </ContainedButton>
-                )}
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                    padding: "7px 7px",
+                    minWidth: "30px",
+                    height: "30px",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <CreateIcon sx={{ fontSize: "16px" }} />
+                  </Box>
+                </ContainedButton>
 
                 <Box
                   className="tab-double-button-node-footer"

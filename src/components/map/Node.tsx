@@ -1,3 +1,4 @@
+import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CodeIcon from "@mui/icons-material/Code";
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -262,23 +263,16 @@ const Node = ({
 
   const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
-
   const [isLoading, startTransition] = useTransition();
-  const [childNodesMargin, setChildNodesMargin] = useState(500);
+  const childNodeButtonsAnimation = keyframes({
+    from: { left: "500px", zIndex: -999 },
+    to: { left: "600px", zIndex: 0 },
+  });
+
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
   }, [title, content]);
-
-  useEffect(() => {
-    if (editable) {
-      setTimeout(() => {
-        setChildNodesMargin(600);
-      }, 1000);
-    } else {
-      setChildNodesMargin(500);
-    }
-  }, [editable]);
 
   useEffect(() => {
     setVideoUrl(videoUrl => {
@@ -653,7 +647,6 @@ const Node = ({
                 value={titleCopy}
                 setValue={onSetTitle}
                 onBlurCallback={onBlurNodeTitle}
-                focus
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
                 error={error ? true : false}
@@ -1145,15 +1138,13 @@ const Node = ({
           display: !isNew && editable ? "flex" : "none",
           flexDirection: "column",
           gap: "10px",
-          transition: "1s ease",
           position: "absolute",
-          left: childNodesMargin + "px",
           top:
             (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
               parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
               0.5 +
             "px",
-          zIndex: -999,
+          animation: `${childNodeButtonsAnimation} 1s forwards`,
         }}
       >
         {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
