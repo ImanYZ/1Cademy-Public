@@ -100,7 +100,7 @@ export const SidebarWrapper = ({
             maxWidth: { xs: width, sm: "50vw" },
             width: hoverWidth ? hoverWidth : undefined,
           },
-          transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
+          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
         },
       }}
     >
