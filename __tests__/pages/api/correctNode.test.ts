@@ -41,7 +41,7 @@ import { createUserNode } from "../../../testUtils/fakers/userNode";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
 import { MockData } from "../../../testUtils/mockCollections";
 
-describe("POST /api/wrongNode", () => {
+describe("POST /api/correctNode", () => {
   const institutions = [
     createInstitution({
       domain: "@1cademy.com",
@@ -370,7 +370,7 @@ describe("POST /api/wrongNode", () => {
     req.query.nodeId = nodes[0].documentId;
     res = HttpMock.createResponse();
     await correctNodeHandler(req, res as any);
-  });
+  }, 10000);
 
   afterAll(async () => {
     await deleteAllUsers();

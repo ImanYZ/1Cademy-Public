@@ -7,7 +7,7 @@ import { IUser } from "src/types/IUser";
 import { detach, isVersionApproved } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
-import { admin, db } from "../../lib/firestoreServer/admin";
+import { admin, db, MAX_TRANSACTION_WRITES } from "../../lib/firestoreServer/admin";
 import fbAuth from "../../middlewares/fbAuth";
 import {
   addToPendingPropsNumsExcludingVoters,
@@ -347,13 +347,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           tWriteOperations,
         });
       }
+
+      const _tWriteOperations = tWriteOperations.splice(0, MAX_TRANSACTION_WRITES);
+      for (const operation of _tWriteOperations) {
+        const { objRef, data, operationType } = operation;
+        switch (operationType) {
+          case "update":
+            t.update(objRef, data);
+            break;
+          case "set":
+            t.set(objRef, data);
+            break;
+          case "delete":
+            t.delete(objRef);
+            break;
+        }
+      }
     });
 
     const chunkedArray = arrayToChunks(tWriteOperations);
-
-    for (let chunk of chunkedArray) {
+    for (const chunk of chunkedArray) {
       await db.runTransaction(async t => {
-        for (let operation of chunk) {
+        for (const operation of chunk) {
           const { objRef, data, operationType } = operation;
           switch (operationType) {
             case "update":
