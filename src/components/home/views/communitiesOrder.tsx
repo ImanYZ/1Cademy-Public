@@ -481,70 +481,70 @@ const comunity = [
       `Co-author the final research paper to submit to reputable conferences/journals.`,
     ],
   },
-  {
-    id: "UI_Design",
-    tags: [
-      {
-        title: "Design Science",
-        node: "y1GorOIkFb255Oiqm9k3",
-      },
-      {
-        title: "User Interface Design",
-        node: "1wyXrpreH942fh2MfnEd",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/UI_Design.jpg",
-    title: "UI Design",
-    width: "34%",
-    leaders: [
-      {
-        name: "Ember Shan",
-        image: "Ember Shan.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/ember-shan-9b6156194/",
-          },
-        ],
-      },
-    ],
-    YouTube: "auTcD8jLHwU",
-    description: `The UI Design community works to improve the user interface of 1Cademy while simultaneously learning about relevant design concepts. We do this by collaborating with teammates on projects throughout the week, then sharing that progress with the entire team meeting every week to receive feedback. Interns learn how to apply important UI concepts to designs, collaborate on design creation, share and receive constructive feedback on designs, and create working prototypes using Figma.`,
-    accomplishments: `So far, we have designed and improved elements of 1Cademy such as:
-    sidebar navigation, tooltips, user profile, mobile view, lightmode, presentation Mode, and homepage.
-    We have summarized information from Google's Material Design Guidelines, and continued on to explore independent research articles. We allow interns to find specific topics that interest them and explore that area, accomplishing a flexible and personally rewarding environment.`,
-    gains: [
-      `Gain user interface prototyping/design experience.`,
-      `Gain experience collaborating with an interdisciplinary group of people.`,
-      `Gain experience creating/presenting mockups and clearly articulating important UI concepts to others in the community.`,
-      `Develop crucial skills in research and development (analysis, summarization, making connections, iterative development).`,
-      `Make a difference by identifying UI issues and proposing/applying innovative solutions to the 1Cademy platform.`,
-      `Collaborate with others to develop/improve various UI design features, and improve any currently used graphics or create new visually appealing graphics as needed.`,
-      `Successful interns would continue with taking leadership roles.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to carefully study Google's Material Design documentation and submit their most current resume, unofficial transcript, and online portfolio.`,
-    portfolio: true,
-    hasTest: true,
-    qualifications: [
-      `Knowledge and enthusiasm for topics related to UI research/design, technology, social/online communities, and cognitive psychology.`,
-      `Instinct and intuition for good UI design.`,
-      `Experience creating and prototyping UI designs (using Figma).`,
-      `Understanding of key graphic design principles.`,
-      `Experience in Adobe Photoshop, Illustrator, and InDesign (or other similar graphic design software).`,
-      `Experience and willingness to work in collaborative environments (need to share your opinion as well as listen to others).`,
-    ],
-    responsibilities: [
-      `Collaborate with others to develop and/or improve both the UI design and graphic design of the platform, share these prototypes/mockups with the community.`,
-      `Provide input on any/all UI designs/mockups.`,
-      `Gather knowledge from books and papers regarding best UI practices, summarize important ideas you find, and share/explain these findings with the community in weekly meetings for further discussion (using 1Cademy). This is our team's mechanism to better learn the current design of the platform and collaboratively improve our design knowledge.`,
-      `Must be prepared and excited to collaborate with our team of computer scientists, web developers, UX researchers, UI designers, graphic designers, data scientists, epidemiologists, and cognitive and behavioral scientists.`,
-      `Attend weekly meetings.`,
-      `All interactions, task fulfillment, and communications will be remote.`,
-    ],
-  },
+  // {
+  //   id: "UI_Design",
+  //   tags: [
+  //     {
+  //       title: "Design Science",
+  //       node: "y1GorOIkFb255Oiqm9k3",
+  //     },
+  //     {
+  //       title: "User Interface Design",
+  //       node: "1wyXrpreH942fh2MfnEd",
+  //     },
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/UI_Design.jpg",
+  //   title: "UI Design",
+  //   width: "34%",
+  //   leaders: [
+  //     {
+  //       name: "Ember Shan",
+  //       image: "Ember Shan.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/ember-shan-9b6156194/",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   YouTube: "auTcD8jLHwU",
+  //   description: `The UI Design community works to improve the user interface of 1Cademy while simultaneously learning about relevant design concepts. We do this by collaborating with teammates on projects throughout the week, then sharing that progress with the entire team meeting every week to receive feedback. Interns learn how to apply important UI concepts to designs, collaborate on design creation, share and receive constructive feedback on designs, and create working prototypes using Figma.`,
+  //   accomplishments: `So far, we have designed and improved elements of 1Cademy such as:
+  //   sidebar navigation, tooltips, user profile, mobile view, lightmode, presentation Mode, and homepage.
+  //   We have summarized information from Google's Material Design Guidelines, and continued on to explore independent research articles. We allow interns to find specific topics that interest them and explore that area, accomplishing a flexible and personally rewarding environment.`,
+  //   gains: [
+  //     `Gain user interface prototyping/design experience.`,
+  //     `Gain experience collaborating with an interdisciplinary group of people.`,
+  //     `Gain experience creating/presenting mockups and clearly articulating important UI concepts to others in the community.`,
+  //     `Develop crucial skills in research and development (analysis, summarization, making connections, iterative development).`,
+  //     `Make a difference by identifying UI issues and proposing/applying innovative solutions to the 1Cademy platform.`,
+  //     `Collaborate with others to develop/improve various UI design features, and improve any currently used graphics or create new visually appealing graphics as needed.`,
+  //     `Successful interns would continue with taking leadership roles.`,
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to carefully study Google's Material Design documentation and submit their most current resume, unofficial transcript, and online portfolio.`,
+  //   portfolio: true,
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Knowledge and enthusiasm for topics related to UI research/design, technology, social/online communities, and cognitive psychology.`,
+  //     `Instinct and intuition for good UI design.`,
+  //     `Experience creating and prototyping UI designs (using Figma).`,
+  //     `Understanding of key graphic design principles.`,
+  //     `Experience in Adobe Photoshop, Illustrator, and InDesign (or other similar graphic design software).`,
+  //     `Experience and willingness to work in collaborative environments (need to share your opinion as well as listen to others).`,
+  //   ],
+  //   responsibilities: [
+  //     `Collaborate with others to develop and/or improve both the UI design and graphic design of the platform, share these prototypes/mockups with the community.`,
+  //     `Provide input on any/all UI designs/mockups.`,
+  //     `Gather knowledge from books and papers regarding best UI practices, summarize important ideas you find, and share/explain these findings with the community in weekly meetings for further discussion (using 1Cademy). This is our team's mechanism to better learn the current design of the platform and collaboratively improve our design knowledge.`,
+  //     `Must be prepared and excited to collaborate with our team of computer scientists, web developers, UX researchers, UI designers, graphic designers, data scientists, epidemiologists, and cognitive and behavioral scientists.`,
+  //     `Attend weekly meetings.`,
+  //     `All interactions, task fulfillment, and communications will be remote.`,
+  //   ],
+  // },
   {
     id: "Deep_Learning",
     tags: [
@@ -565,7 +565,7 @@ const comunity = [
     weekly: [],
     url: "/static/Communities/Deep_Learning.jpg",
     title: "Natural Language Processing",
-    width: "33%",
+    width: "34%",
     leaders: [
       {
         name: "Ge Zhang",
@@ -667,7 +667,7 @@ const comunity = [
     weekly: [],
     url: "/static/Communities/Online_Communities.jpg",
     title: "UX Research in Online Communities",
-    width: "33%",
+    width: "50%",
     leaders: [
       {
         name: "Iman YeckehZaare",
@@ -751,7 +751,7 @@ const comunity = [
     weekly: [],
     url: "/LibraryBackground.jpg",
     title: "Liaison Librarians",
-    width: "34%",
+    width: "50%",
     leaders: [
       {
         name: "Ben Brown",
