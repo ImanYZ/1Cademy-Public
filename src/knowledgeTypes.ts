@@ -404,7 +404,7 @@ export type User = {
   // instit?: string; //CHECK: I commented this because we have deInstit
   fieldOfInterest: string;
   role: UserRole;
-  livelinessBar: string;
+  livelinessBar?: string;
 };
 
 export type UserSettings = {
