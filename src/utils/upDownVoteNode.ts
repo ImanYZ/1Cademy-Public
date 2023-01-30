@@ -1,6 +1,7 @@
-import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
 import { DocumentData, QueryDocumentSnapshot, WriteBatch } from "firebase-admin/firestore";
 import {
+  baseReputationObj,
   deleteTagCommunityAndTagsOfTags,
   getAllUserNodes,
   getNode,
@@ -14,7 +15,6 @@ import { detach, doNeedToDeleteNode, getNodeTypesFromNode, MIN_ACCEPTED_VERSION_
 import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
 import { IActionTrack } from "src/types/IActionTrack";
 import { IUser } from "src/types/IUser";
-import { INodeType } from "src/types/INodeType";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -65,7 +65,16 @@ export const setOrIncrementNotificationNums = async ({
 // - create userNodeLog (it stores all actions of Wrongs and Corrects)
 
 //  Up/down-votes nodes
-export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, actionType, chooseUname }: any) => {
+export const UpDownVoteNode = async ({
+  uname,
+  nodeId,
+  fullname,
+  imageUrl,
+  actionType,
+  chooseUname,
+  t,
+  tWriteOperations,
+}: any) => {
   let correct = false;
   let wrong = false;
   let deleteNode = false;
@@ -214,30 +223,31 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
           });
         }
       }
-      [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId, writeCounts });
+      [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId, writeCounts, t, tWriteOperations });
     }
 
-    // TODO: move these to queue
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
-      //  if such nodes exist, set isTag property to false
-      for (let tagId of nodeData.tagIds) {
-        const taggedNodeDocs = await db
-          .collection("nodes")
-          .where("tagIds", "array-contains", tagId)
-          .where("deleted", "==", false)
-          .get();
-        if (taggedNodeDocs.docs.length <= 1) {
-          [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId: tagId, writeCounts });
-          const tagNodeRef = db.collection("nodes").doc(tagId);
-          batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-        }
+    //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
+    //  if such nodes exist, set isTag property to false
+    for (let tagId of nodeData.tagIds) {
+      const taggedNodeDocs = await db
+        .collection("nodes")
+        .where("tagIds", "array-contains", tagId)
+        .where("deleted", "==", false)
+        .get();
+      if (taggedNodeDocs.docs.length <= 1) {
+        [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({
+          batch,
+          nodeId: tagId,
+          writeCounts,
+          t,
+          tWriteOperations,
+        });
+        const tagNodeRef = db.collection("nodes").doc(tagId);
+        batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
-      await commitBatch(batch);
-    });
+    }
+
     //  query all the nodes that are referencing current node with nodeId
     if (nodeData.nodeType === "Reference") {
       const citingNodesRefs = db.collection("nodes").where("referenceIds", "array-contains", nodeId);
@@ -444,74 +454,68 @@ export const UpDownVoteNode = async ({ uname, nodeId, fullname, imageUrl, action
     await commitBatch(batch);
   });
 
-  // TODO: move these to queue
-  await detach(async () => {
-    let batch = db.batch();
-    let writeCounts = 0;
-
-    for (let proposer in changedProposers) {
-      // Updating the proposer reputation points.
-      [batch, writeCounts] = await updateReputation({
-        batch,
-        uname: proposer,
-        imageUrl: changedProposers[proposer].imageUrl,
-        fullname: changedProposers[proposer].fullname,
-        chooseUname: changedProposers[proposer].chooseUname,
-        tagIds: nodeData.tagIds,
-        tags: nodeData.tags,
-        nodeType: nodeData.nodeType,
-        correctVal: changedProposers[proposer].correctVal,
-        wrongVal: changedProposers[proposer].wrongVal,
-        instVal: 0,
-        ltermVal: 0,
-        ltermDayVal: 0,
-        voter: uname,
-        writeCounts,
-      });
-      // Notifying the proposer about gaining or losing a point.
-      const notificationRef = db.collection("notifications").doc();
-      const notificationData = {
-        proposer,
-        uname,
-        imageUrl,
-        fullname,
-        chooseUname,
-        nodeId,
-        title: nodeData.title,
-        // Origin type
-        oType: "Node",
-        // Action type
-        aType: "",
-        checked: false,
-        createdAt: currentTimestamp,
-        updatedAt: currentTimestamp,
-      };
-      if (deleteNode) {
-        notificationData.aType = "Delete";
-      } else {
-        if (actionType === "Correct") {
-          if (correct) {
-            notificationData.aType = "CorrectRM";
-          } else {
-            notificationData.aType = "Correct";
-          }
-        } else if (actionType === "Wrong") {
-          if (wrong) {
-            notificationData.aType = "WrongRM";
-          } else {
-            notificationData.aType = "Wrong";
-          }
+  for (let proposer in changedProposers) {
+    // Updating the proposer reputation points.
+    [batch, writeCounts] = await updateReputation({
+      batch,
+      uname: proposer,
+      imageUrl: changedProposers[proposer].imageUrl,
+      fullname: changedProposers[proposer].fullname,
+      chooseUname: changedProposers[proposer].chooseUname,
+      tagIds: nodeData.tagIds,
+      tags: nodeData.tags,
+      nodeType: nodeData.nodeType,
+      correctVal: changedProposers[proposer].correctVal,
+      wrongVal: changedProposers[proposer].wrongVal,
+      instVal: 0,
+      ltermVal: 0,
+      ltermDayVal: 0,
+      voter: uname,
+      writeCounts,
+      t,
+      tWriteOperations,
+    });
+    // Notifying the proposer about gaining or losing a point.
+    const notificationRef = db.collection("notifications").doc();
+    const notificationData = {
+      proposer,
+      uname,
+      imageUrl,
+      fullname,
+      chooseUname,
+      nodeId,
+      title: nodeData.title,
+      // Origin type
+      oType: "Node",
+      // Action type
+      aType: "",
+      checked: false,
+      createdAt: currentTimestamp,
+      updatedAt: currentTimestamp,
+    };
+    if (deleteNode) {
+      notificationData.aType = "Delete";
+    } else {
+      if (actionType === "Correct") {
+        if (correct) {
+          notificationData.aType = "CorrectRM";
+        } else {
+          notificationData.aType = "Correct";
+        }
+      } else if (actionType === "Wrong") {
+        if (wrong) {
+          notificationData.aType = "WrongRM";
+        } else {
+          notificationData.aType = "Wrong";
         }
       }
-      if (notificationData.aType !== "") {
-        batch.set(notificationRef, notificationData);
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-        [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, writeCounts });
-      }
     }
-
-    await commitBatch(batch);
-  });
+    if (notificationData.aType !== "") {
+      batch.set(notificationRef, notificationData);
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, writeCounts });
+    }
+  }
 
   // Updating the node document accordingly.
   const nodeChanges: any = {
