@@ -35,6 +35,7 @@ const WhoWeAre = () => {
   const { inViewOnce: paper1ViewOnce, ref: paper1Ref } = useInView();
   const { inViewOnce: paper2ViewOnce, ref: paper2Ref } = useInView();
   const { inViewOnce: paper3ViewOnce, ref: paper3Ref } = useInView();
+
   const getGrayColorText = () => (theme.palette.mode === "dark" ? gray03 : theme.palette.common.darkBackground2);
 
   return (
