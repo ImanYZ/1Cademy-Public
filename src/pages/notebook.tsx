@@ -3494,7 +3494,7 @@ const Dashboard = ({}: DashboardProps) => {
               }}
             >
               <MemoizedToolbarSidebar
-                open={!openSidebar}
+                open={true}
                 onClose={() => setOpenSidebar(null)}
                 reloadPermanentGrpah={reloadPermanentGraph}
                 user={user}
