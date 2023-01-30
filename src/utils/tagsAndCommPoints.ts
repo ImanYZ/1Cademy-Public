@@ -14,7 +14,7 @@ const tagCommunityFunctionOrPromise = async ({ collectionName, tagRef, tagDoc, t
   if (typeof callBack.then === "function") {
     await callBack({ collectionName, tagRef, tagDoc, tagData });
   } else {
-    callBack({ collectionName, tagRef, tagDoc, tagData });
+    return callBack({ collectionName, tagRef, tagDoc, tagData });
   }
 };
 
