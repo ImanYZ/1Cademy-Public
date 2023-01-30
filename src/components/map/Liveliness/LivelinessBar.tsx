@@ -173,7 +173,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: "calc(100% - 240px)",
+          height: "calc(100% - 266px)",
         }}
       >
         <Box

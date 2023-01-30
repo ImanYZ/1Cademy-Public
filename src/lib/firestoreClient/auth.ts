@@ -104,6 +104,7 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
       occupation: userData.occupation,
       fieldOfInterest: userData.fieldOfInterest ?? "",
       role,
+      livelinessBar: userData.livelinessBar,
     };
 
     theme = userData.theme;
