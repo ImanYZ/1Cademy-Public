@@ -82,7 +82,13 @@ const artboards = [
 export const SECTION_WITH_ANIMATION = 1;
 
 const sectionsTmp = [
-  { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
+  {
+    id: "LandingSection",
+    title: "Home",
+    simpleTitle: "Home",
+    children: [],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3160px" },
+  },
   {
     id: "HowItWorksSection",
     title: "How We Work?",
@@ -94,12 +100,43 @@ const sectionsTmp = [
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
       { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3160px" },
   },
-  { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
-  { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
-  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
-  { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
-  { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
+  {
+    id: "ValuesSection",
+    title: "Why 1Cademy?",
+    simpleTitle: "Why?",
+    children: [],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3870px" },
+  },
+  {
+    id: "CommunitiesSection",
+    title: "What we study?",
+    simpleTitle: "What?",
+    children: [],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+  },
+  {
+    id: "WhichSection",
+    title: "Which systems?",
+    simpleTitle: "Which?",
+    children: [],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+  },
+  {
+    id: "SchoolsSection",
+    title: "Where Are We?",
+    simpleTitle: "Where?",
+    children: [],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+  },
+  {
+    id: "WhoWeAreSection",
+    title: "Who Is Behind 1Cademy?",
+    simpleTitle: "Who?",
+    children: [],
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+  },
 ];
 
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
@@ -112,6 +149,35 @@ const Home = () => {
   const isMobile = useMediaQuery("(max-width:600px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
+
+  const mediaQueryXs = theme.breakpoints.down("sm");
+  const mediaQuerySm = theme.breakpoints.between("sm", "md");
+  const mediaQueryMd = theme.breakpoints.between("md", "lg");
+  const mediaQueryLg = theme.breakpoints.between("lg", "xl");
+  const mediaQueryXl = theme.breakpoints.up("xl");
+
+  const isOnlyMobile = useMediaQuery(mediaQueryXs);
+  const isOnlyTablet = useMediaQuery(mediaQuerySm);
+  const isOnlyDesktop = useMediaQuery(mediaQueryMd);
+  const isOnlyBigDesktop = useMediaQuery(mediaQueryLg);
+  const isOnlyBigger = useMediaQuery(mediaQueryXl);
+
+  useMediaQuery;
+
+  useEffect(() => {
+    console.log({ isOnlyMobile, isOnlyTablet, isOnlyDesktop, isOnlyBigDesktop, isOnlyBigger });
+    const getScreenKey = () => {
+      // if (isOnlySmaller) return "xs";
+      if (isOnlyMobile) return "xs";
+      if (isOnlyTablet) return "sm";
+      if (isOnlyDesktop) return "md";
+      if (isOnlyBigDesktop) return "lg";
+      if (isOnlyBigger) return "xl";
+    };
+    const tt = getScreenKey();
+    console.log({ key: tt });
+  }, [isOnlyMobile, isOnlyTablet, isOnlyDesktop, isOnlyBigDesktop, isOnlyBigger]);
+
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [openSearch, setOpenSearch] = useState(false);
 
@@ -370,7 +436,22 @@ const Home = () => {
             position: "relative",
           }}
         >
-          <Box id={sectionsOrder1Cademy[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
+          <Box
+            id={sectionsOrder1Cademy[1].id}
+            ref={howSectionRef}
+            sx={{
+              pb: 10,
+              // minHeight: "3160px",
+              border: "solid 2px red",
+              // scrollMargin: "70px",
+              height: {
+                xs: sectionsTmp[1].height["xs"],
+                md: sectionsTmp[1].height["md"],
+                lg: sectionsTmp[1].height["lg"],
+                xl: sectionsTmp[1].height["xl"],
+              },
+            }}
+          >
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -399,7 +480,21 @@ const Home = () => {
             />
           </Box>
 
-          <Box id={sectionsOrder1Cademy[2].id} ref={whySectionRef} sx={{ py: 10 }}>
+          <Box
+            id={sectionsOrder1Cademy[2].id}
+            ref={whySectionRef}
+            sx={{
+              py: 10,
+              border: "solid 2px blue",
+              // scrollMargin: "70px",
+              height: {
+                xs: sectionsTmp[2].height["xs"],
+                md: sectionsTmp[2].height["md"],
+                lg: sectionsTmp[2].height["lg"],
+                xl: sectionsTmp[2].height["xl"],
+              },
+            }}
+          >
             <CustomTypography
               component={"h2"}
               variant="h1"
