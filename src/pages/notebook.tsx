@@ -178,14 +178,6 @@ const Dashboard = ({}: DashboardProps) => {
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
   const [reputationSignal, setReputationSignal] = useState<ReputationSignal[]>([]);
-  const [showLivelinessBar, setShowLivelinessBar] = useState<{
-    enabled: boolean;
-    type: "minimal" | "full";
-  }>({
-    enabled: false,
-    type: "minimal",
-  });
-
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mapRendered, setMapRendered] = useState(false);
@@ -304,25 +296,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
-    const _window: any = window;
-    const internalId = setInterval(() => {
-      if (_window.google_optimize !== undefined) {
-        if (user?.uname === "1man") {
-          setShowLivelinessBar({
-            enabled: true,
-            type: "full",
-          });
-        } else if (typeof _window.livelinessBar === "object" && _window.livelinessBar.enabled) {
-          setShowLivelinessBar({ ..._window.livelinessBar });
-        } else {
-          setShowLivelinessBar({
-            enabled: true,
-            type: "minimal",
-          });
-        }
-        clearInterval(internalId);
-      }
-    }, 500);
   }, [user?.uname]);
 
   const scrollToNode = useCallback(
@@ -3713,7 +3686,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {showLivelinessBar.enabled && showLivelinessBar.type === "full" && (
+          {user?.livelinessBar === "full" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
@@ -3722,7 +3695,7 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
 
-          {showLivelinessBar.enabled && showLivelinessBar.type === "minimal" && (
+          {user?.livelinessBar === "minimal" && (
             <MemoizedReputationlinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
