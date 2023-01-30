@@ -29,8 +29,8 @@ const whyItems = [
   {
     name: "Is in sync with your instructors.",
     body: "Your assistant knows the courses you’re taking, your assignment deadlines, classes, and exams. It motivates you to study  and finish your assignments on time. Also, it keeps an eye on your assignment/exam scores and prioritizes your future activities accordingly.",
-    image: "assistant/4-is-in-sync.svg",
-    imageDark: "assistant/4-is-in-sync.svg",
+    image: "assistant/4-is-in-sync-light.svg",
+    imageDark: "assistant/4-is-in-sync-dark.svg",
     padding: "4px 40px 0px 40px",
     width: "100%",
     height: "auto",
