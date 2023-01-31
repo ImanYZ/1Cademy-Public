@@ -59,8 +59,8 @@ const HowItWorks = (props: any, ref: any) => {
     let newWidth = width / 2;
     if (width >= 1536) newWidth = 700;
     else if (width >= 1200) newWidth = 500;
-    else if (width >= 900) newWidth = width / 2;
-    else if (width >= 600) newWidth = width - 60;
+    else if (width >= 900) newWidth = 450;
+    else if (width >= 600) newWidth = 540;
     else if (width >= 0) newWidth = width - 40;
 
     const newHeight = getHeight(newWidth);
