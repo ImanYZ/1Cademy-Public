@@ -3686,7 +3686,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {user?.livelinessBar === "full" && (
+          {user?.livelinessBar === "interaction" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
@@ -3695,7 +3695,7 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
 
-          {user?.livelinessBar === "minimal" && (
+          {user?.livelinessBar === "reputation" && (
             <MemoizedReputationlinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
