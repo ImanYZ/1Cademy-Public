@@ -151,19 +151,6 @@ const Home = () => {
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
 
   const isOnlyMobile = useMediaQuery("(min-width:375px) and (max-width:600px)");
-  console.log({ isOnlyMobile });
-  // const mediaQuerySm = theme.breakpoints.between("(min-width:375px)", "md");
-  // const mediaQueryXs = theme.breakpoints.down("sm");
-  // const mediaQuerySm = theme.breakpoints.between("sm", "md");
-  // const mediaQueryMd = theme.breakpoints.between("md", "lg");
-  // const mediaQueryLg = theme.breakpoints.between("lg", "xl");
-  // const mediaQueryXl = theme.breakpoints.up("xl");
-
-  // const isOnlyMobile = useMediaQuery(mediaQueryXs);
-  // const isOnlyTablet = useMediaQuery(mediaQuerySm);
-  // const isOnlyDesktop = useMediaQuery(mediaQueryMd);
-  // const isOnlyBigDesktop = useMediaQuery(mediaQueryLg);
-  // const isOnlyBigger = useMediaQuery(mediaQueryXl);
 
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [openSearch, setOpenSearch] = useState(false);
@@ -413,20 +400,12 @@ const Home = () => {
           <HeroMemoized />
         </Box>
 
-        {/* <Box
-          sx={{
-            width: "100%",
-            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
-            margin: "auto",
-            position: "relative",
-          }}
-        > */}
         <Box
           id={sectionsOrder1Cademy[1].id}
           ref={howSectionRef}
           sx={{
             pb: 10,
-            border: "dashed 2px red",
+            // border: "dashed 2px red",
             scrollMarginTop: "70px",
             height: {
               xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
@@ -527,7 +506,7 @@ const Home = () => {
           ref={whatSectionRef}
           sx={{
             py: 10,
-            border: "dashed 2px red",
+            // border: "dashed 2px red",
             scrollMarginTop: "70px",
             height: {
               xs: isOnlyMobile ? sectionsTmp[3].height["mb"] : sectionsTmp[3].height["xs"],
@@ -583,7 +562,7 @@ const Home = () => {
           ref={whichSectionRef}
           sx={{
             py: 10,
-            border: "dashed 2px blue",
+            // border: "dashed 2px blue",
             scrollMarginTop: "70px",
             height: {
               xs: isOnlyMobile ? sectionsTmp[4].height["mb"] : sectionsTmp[4].height["xs"],
@@ -646,7 +625,7 @@ const Home = () => {
           ref={whereSectionRef}
           sx={{
             py: 10,
-            border: "dashed 2px red",
+            // border: "dashed 2px red",
             scrollMarginTop: "70px",
             height: {
               xs: isOnlyMobile ? sectionsTmp[5].height["mb"] : sectionsTmp[5].height["xs"],
@@ -686,7 +665,7 @@ const Home = () => {
           ref={whoSectionRef}
           sx={{
             py: 10,
-            border: "dashed 2px blue",
+            // border: "dashed 2px blue",
             scrollMarginTop: "70px",
             height: {
               xs: isOnlyMobile ? sectionsTmp[6].height["mb"] : sectionsTmp[6].height["xs"],
@@ -743,7 +722,6 @@ const Home = () => {
             </Suspense>
           )}
         </Box>
-        {/* </Box> */}
       </Box>
 
       <Box ref={footerSectionRef}>
