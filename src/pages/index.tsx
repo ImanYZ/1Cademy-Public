@@ -100,42 +100,42 @@ const sectionsTmp = [
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
       { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3160px" },
+    height: { xs: "4352px", sm: "4304px", md: "3165px", lg: "3165px", xl: "3160px" },
   },
   {
     id: "ValuesSection",
     title: "Why 1Cademy?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3874px" },
+    height: { xs: "6920px", sm: "7490px", md: "3970px", lg: "3864px", xl: "3874px" },
   },
   {
     id: "CommunitiesSection",
     title: "What we study?",
     simpleTitle: "What?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "1381px" },
+    height: { xs: "2170px", sm: "1101px", md: "1382px", lg: "1381px", xl: "1381px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "2871px" },
+    height: { xs: "3007px", sm: "3010px", md: "2979px", lg: "2690px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
     title: "Where Are We?",
     simpleTitle: "Where?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "691px" },
+    height: { xs: "693px", sm: "693px", md: "693px", lg: "693px", xl: "691px" },
   },
   {
     id: "WhoWeAreSection",
     title: "Who Is Behind 1Cademy?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "1203px" },
+    height: { xs: "2483px", sm: "2430px", md: "1903px", lg: "1203px", xl: "1203px" },
   },
 ];
 
@@ -446,6 +446,7 @@ const Home = () => {
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[1].height["xs"],
+                sm: sectionsTmp[1].height["sm"],
                 md: sectionsTmp[1].height["md"],
                 lg: sectionsTmp[1].height["lg"],
                 xl: sectionsTmp[1].height["xl"],
@@ -490,6 +491,7 @@ const Home = () => {
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[2].height["xs"],
+                sm: sectionsTmp[2].height["sm"],
                 md: sectionsTmp[2].height["md"],
                 lg: sectionsTmp[2].height["lg"],
                 xl: sectionsTmp[2].height["xl"],
@@ -537,6 +539,7 @@ const Home = () => {
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[3].height["xs"],
+                sm: sectionsTmp[3].height["sm"],
                 md: sectionsTmp[3].height["md"],
                 lg: sectionsTmp[3].height["lg"],
                 xl: sectionsTmp[3].height["xl"],
@@ -586,12 +589,13 @@ const Home = () => {
               py: 10,
               border: "solid 2px blue",
               scrollMarginTop: "70px",
-              height: {
-                xs: sectionsTmp[4].height["xs"],
-                md: sectionsTmp[4].height["md"],
-                lg: sectionsTmp[4].height["lg"],
-                xl: sectionsTmp[4].height["xl"],
-              },
+              // height: {
+              //   xs: sectionsTmp[4].height["xs"],
+              //   sm: sectionsTmp[4].height["sm"],
+              //   md: sectionsTmp[4].height["md"],
+              //   lg: sectionsTmp[4].height["lg"],
+              //   xl: sectionsTmp[4].height["xl"],
+              // },
             }}
           >
             <CustomTypography
@@ -646,6 +650,7 @@ const Home = () => {
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[5].height["xs"],
+                sm: sectionsTmp[5].height["sm"],
                 md: sectionsTmp[5].height["md"],
                 lg: sectionsTmp[5].height["lg"],
                 xl: sectionsTmp[5].height["xl"],
@@ -681,6 +686,7 @@ const Home = () => {
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[6].height["xs"],
+                sm: sectionsTmp[6].height["sm"],
                 md: sectionsTmp[6].height["md"],
                 lg: sectionsTmp[6].height["lg"],
                 xl: sectionsTmp[6].height["xl"],
