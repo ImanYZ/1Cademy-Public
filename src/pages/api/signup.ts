@@ -188,6 +188,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form.",
       });
     }
+    let livebarTypes = ["interaction", "reputation"];
     const userRecord = await getAuth().createUser({
       email: data.email,
       displayName: data.uname,
@@ -231,6 +232,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       practicing: false,
       userId: userRecord.uid,
       consented: data.consented,
+      livelinessBar: livebarTypes[Math.floor(Math.random() * livebarTypes.length)],
     };
 
     // 25 hour logic in api

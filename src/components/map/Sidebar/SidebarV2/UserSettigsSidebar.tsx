@@ -636,17 +636,19 @@ const UserSettigsSidebar = ({
   };
 
   const removeAllNodes = async () => {
-    const batch = writeBatch(db);
-    const userNodesCol = collection(db, "userNodes");
-    const q = query(userNodesCol, where("user", "==", user.uname), where("visible", "==", true));
-    const visibleUserNodes = await getDocs(q);
-    for (const visibleUserNode of visibleUserNodes.docs) {
-      const userNodeRef = doc(db, "userNodes", visibleUserNode.id);
-      batch.update(userNodeRef, {
-        visible: false,
-      });
+    if (confirm("Are you sure to hide all the nodes")) {
+      const batch = writeBatch(db);
+      const userNodesCol = collection(db, "userNodes");
+      const q = query(userNodesCol, where("user", "==", user.uname), where("visible", "==", true));
+      const visibleUserNodes = await getDocs(q);
+      for (const visibleUserNode of visibleUserNodes.docs) {
+        const userNodeRef = doc(db, "userNodes", visibleUserNode.id);
+        batch.update(userNodeRef, {
+          visible: false,
+        });
+      }
+      await batch.commit();
     }
-    await batch.commit();
   };
   const tabsItems = useMemo(() => {
     return [
@@ -711,7 +713,7 @@ const UserSettigsSidebar = ({
                 }}
                 onClick={removeAllNodes}
               >
-                Remove All Nodes
+                Hide All Nodes
               </Button>
             </Box>
 
