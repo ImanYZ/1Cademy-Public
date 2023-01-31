@@ -87,7 +87,7 @@ const sectionsTmp = [
     title: "Home",
     simpleTitle: "Home",
     children: [],
-    height: { xs: "100px", mb: "100px", sm: "80px", md: "60px", lg: "60px", xl: "900px" },
+    height: { xs: "0px", mb: "0px", sm: "0px", md: "0px", lg: "0px", xl: "0px" },
   },
   {
     id: "HowItWorksSection",
