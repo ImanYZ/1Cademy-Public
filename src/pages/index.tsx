@@ -87,7 +87,7 @@ const sectionsTmp = [
     title: "Home",
     simpleTitle: "Home",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3160px" },
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "900px" },
   },
   {
     id: "HowItWorksSection",
@@ -107,35 +107,35 @@ const sectionsTmp = [
     title: "Why 1Cademy?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3870px" },
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "3874px" },
   },
   {
     id: "CommunitiesSection",
     title: "What we study?",
     simpleTitle: "What?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "1381px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
     title: "Where Are We?",
     simpleTitle: "Where?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "691px" },
   },
   {
     id: "WhoWeAreSection",
     title: "Who Is Behind 1Cademy?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "60px" },
+    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "1203px" },
   },
 ];
 
@@ -443,7 +443,7 @@ const Home = () => {
               pb: 10,
               // minHeight: "3160px",
               border: "solid 2px red",
-              // scrollMargin: "70px",
+              scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[1].height["xs"],
                 md: sectionsTmp[1].height["md"],
@@ -485,8 +485,9 @@ const Home = () => {
             ref={whySectionRef}
             sx={{
               py: 10,
-              border: "solid 2px blue",
               // scrollMargin: "70px",
+              border: "solid 2px blue",
+              scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[2].height["xs"],
                 md: sectionsTmp[2].height["md"],
@@ -527,13 +528,30 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder1Cademy[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
+          <Box
+            id={sectionsOrder1Cademy[3].id}
+            ref={whatSectionRef}
+            sx={{
+              py: 10,
+              border: "solid 2px red",
+              scrollMarginTop: "70px",
+              height: {
+                xs: sectionsTmp[3].height["xs"],
+                md: sectionsTmp[3].height["md"],
+                lg: sectionsTmp[3].height["lg"],
+                xl: sectionsTmp[3].height["xl"],
+              },
+            }}
+          >
             <CustomTypography
               component={"h2"}
               variant="h1"
               marked="center"
               align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
+              sx={{
+                pb: 10,
+                fontWeight: 700,
+              }}
             >
               {sectionsOrder1Cademy[3].title}
             </CustomTypography>
@@ -561,7 +579,21 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder1Cademy[4].id} ref={whichSectionRef} sx={{ py: 10 }}>
+          <Box
+            id={sectionsOrder1Cademy[4].id}
+            ref={whichSectionRef}
+            sx={{
+              py: 10,
+              border: "solid 2px blue",
+              scrollMarginTop: "70px",
+              height: {
+                xs: sectionsTmp[4].height["xs"],
+                md: sectionsTmp[4].height["md"],
+                lg: sectionsTmp[4].height["lg"],
+                xl: sectionsTmp[4].height["xl"],
+              },
+            }}
+          >
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -605,7 +637,21 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder1Cademy[5].id} ref={whereSectionRef} sx={{ py: 10 }}>
+          <Box
+            id={sectionsOrder1Cademy[5].id}
+            ref={whereSectionRef}
+            sx={{
+              py: 10,
+              border: "solid 2px red",
+              scrollMarginTop: "70px",
+              height: {
+                xs: sectionsTmp[5].height["xs"],
+                md: sectionsTmp[5].height["md"],
+                lg: sectionsTmp[5].height["lg"],
+                xl: sectionsTmp[5].height["xl"],
+              },
+            }}
+          >
             <CustomTypography
               component={"h2"}
               variant="h1"
@@ -626,7 +672,21 @@ const Home = () => {
             )}
           </Box>
 
-          <Box id={sectionsOrder1Cademy[6].id} ref={whoSectionRef} sx={{ py: 10 }}>
+          <Box
+            id={sectionsOrder1Cademy[6].id}
+            ref={whoSectionRef}
+            sx={{
+              py: 10,
+              border: "solid 2px blue",
+              scrollMarginTop: "70px",
+              height: {
+                xs: sectionsTmp[6].height["xs"],
+                md: sectionsTmp[6].height["md"],
+                lg: sectionsTmp[6].height["lg"],
+                xl: sectionsTmp[6].height["xl"],
+              },
+            }}
+          >
             <CustomTypography
               component={"h2"}
               variant="h1"
