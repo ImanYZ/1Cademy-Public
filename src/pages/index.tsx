@@ -100,7 +100,7 @@ const sectionsTmp = [
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
       { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
-    height: { xs: "4352px", sm: "4304px", md: "3165px", lg: "3165px", xl: "3160px" },
+    height: { xs: "4352px", sm: "4244px", md: "3165px", lg: "3165px", xl: "3160px" },
   },
   {
     id: "ValuesSection",
@@ -114,14 +114,14 @@ const sectionsTmp = [
     title: "What we study?",
     simpleTitle: "What?",
     children: [],
-    height: { xs: "2170px", sm: "1101px", md: "1382px", lg: "1381px", xl: "1381px" },
+    height: { xs: "2170px", sm: "1005px", md: "1386px", lg: "1381px", xl: "1381px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "3007px", sm: "3010px", md: "2515px", lg: "2690px", xl: "2871px" },
+    height: { xs: "3007px", sm: "2798px", md: "2537px", lg: "2690px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
@@ -135,7 +135,7 @@ const sectionsTmp = [
     title: "Who Is Behind 1Cademy?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "2483px", sm: "2430px", md: "1903px", lg: "1203px", xl: "1203px" },
+    height: { xs: "2483px", sm: "2436px", md: "1327px", lg: "1203px", xl: "1203px" },
   },
 ];
 
