@@ -38,7 +38,7 @@ if (!admin.apps.length) {
   app = initializeApp(initializationConfigs);
   getFirestore().settings({ ignoreUndefinedProperties: true });
 }
-const MAX_TRANSACTION_WRITES = 499;
+export const MAX_TRANSACTION_WRITES = 499;
 const db = getFirestore();
 
 const makeCommitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {

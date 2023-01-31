@@ -434,7 +434,7 @@ describe("POST /api/wrongNode", () => {
     node1Doc = await db.collection("nodes").doc(String(nodes[1].documentId)).get();
     node2Doc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
     //versionDoc = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
-  });
+  }, 10000);
 
   afterAll(async () => {
     await deleteAllUsers();

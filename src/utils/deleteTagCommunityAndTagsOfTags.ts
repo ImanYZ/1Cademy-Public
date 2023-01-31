@@ -3,15 +3,23 @@ import { tagsAndCommPoints } from ".";
 
 // A tag should be deleted. So, in addition to deleting the document from the tags collection,
 // we need to also delete its corresponding comPoints documents and tags of tags.
-export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCounts }: any) => {
+export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCounts, t, tWriteOperations }: any) => {
   let newBatch = batch;
   // Delete the corresponding tag document from the tags collection.
   await tagsAndCommPoints({
     nodeId,
     callBack: async ({ tagRef, tagDoc, tagData }: any) => {
       if (tagDoc && !tagData.deleted) {
-        newBatch.update(tagRef, { deleted: true });
-        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+        if (t) {
+          tWriteOperations.push({
+            objRef: tagRef,
+            data: { deleted: true },
+            operationType: "update",
+          });
+        } else {
+          newBatch.update(tagRef, { deleted: true });
+          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+        }
       }
     },
   });
@@ -26,8 +34,16 @@ export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCoun
     if (tagIdx !== -1) {
       linkedData.tagIds.splice(tagIdx, 1);
       linkedData.tags.splice(tagIdx, 1);
-      newBatch.update(linkedRef, { tagIds: linkedData.tagIds, tags: linkedData.tags });
-      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      if (t) {
+        tWriteOperations.push({
+          objRef: linkedRef,
+          data: { tagIds: linkedData.tagIds, tags: linkedData.tags },
+          operationType: "update",
+        });
+      } else {
+        newBatch.update(linkedRef, { tagIds: linkedData.tagIds, tags: linkedData.tags });
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      }
     }
   }
   return [newBatch, writeCounts];

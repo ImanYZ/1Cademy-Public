@@ -38,6 +38,15 @@ export const comPointTypes = [
   "comOthWeekPoints",
 ];
 
+export const repPointTypes = [
+  "reputations",
+  "monthlyReputations",
+  "weeklyReputations",
+  "othersReputations",
+  "othMonReputations",
+  "othWeekReputations",
+];
+
 export const schoolPointTypes = [
   "schoolPoints",
   "schoolMonthlyPoints",
