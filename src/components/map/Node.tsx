@@ -1150,7 +1150,7 @@ const Node = ({
         {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
           (childNodeType: ProposedChildTypesIcons, index: number) => {
             return (
-              <Tooltip title={childNodeType} placement="right" key={index}>
+              <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
                 <Fab
                   color="primary"
                   sx={{
