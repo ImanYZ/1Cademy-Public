@@ -99,28 +99,28 @@ const sectionsTmp = [
       { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
     ],
-    height: { xs: "0px", mb: "0px", sm: "3086px", md: "3244px", lg: "3325px", xl: "3625px" },
+    height: { xs: "0px", mb: "0px", sm: "3063px", md: "3244px", lg: "3325px", xl: "3625px" },
   },
   {
     id: "Why1CademyAssistant",
     title: "Why 1Cademy Assistant?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "0px", mb: "0px", sm: "6966px", md: "5559px", lg: "5216px", xl: "5216px" },
+    height: { xs: "0px", mb: "0px", sm: "7049px", md: "5559px", lg: "5216px", xl: "5216px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "0px", mb: "0px", sm: "2974px", md: "2510px", lg: "2690px", xl: "2870px" },
+    height: { xs: "0px", mb: "0px", sm: "2955px", md: "2510px", lg: "2690px", xl: "2870px" },
   },
   {
     id: "WhoIsBehind1CademyAssistant",
     title: "Who's Behind 1Cademy Assistant?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "0px", mb: "0px", sm: "2473px", md: "1303px", lg: "1203px", xl: "1203px" },
+    height: { xs: "0px", mb: "0px", sm: "2382px", md: "1303px", lg: "1203px", xl: "1203px" },
   },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };

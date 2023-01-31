@@ -14,7 +14,7 @@ const Values = () => {
   const theme = useTheme();
   const { width } = useWindowSize();
 
-  const isMobile = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:599px)");
   const isTablet = useMediaQuery("(min-width:900px)");
   const { ref: ref1, inViewOnce: inViewOnce1 } = useInView(observerOption);
   const { ref: ref2, inViewOnce: inViewOnce2 } = useInView(observerOption);
