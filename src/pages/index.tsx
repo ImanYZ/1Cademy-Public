@@ -107,7 +107,7 @@ const sectionsTmp = [
     title: "Why 1Cademy?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "6920px", sm: "7490px", md: "3970px", lg: "3864px", xl: "3874px" },
+    height: { xs: "6920px", sm: "6212px", md: "3970px", lg: "3864px", xl: "3874px" },
   },
   {
     id: "CommunitiesSection",
@@ -428,10 +428,11 @@ const Home = () => {
         <Box
           sx={{
             width: "100%",
-            maxWidth: "980px",
+            // maxWidth: { md: "650px", lg: "980px" },
+            maxWidth: { xs: "100%", sm: "650px", md: "920px", lg: "980px" },
             px: isDesktop ? "0px" : "10px",
             margin: "auto",
-            /* border: "3px solid white", */
+            border: "3px solid #ffffff6e",
             position: "relative",
           }}
         >
@@ -441,7 +442,7 @@ const Home = () => {
             sx={{
               pb: 10,
               // minHeight: "3160px",
-              border: "solid 2px red",
+              border: "dashed 2px red",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[1].height["xs"],
@@ -486,7 +487,7 @@ const Home = () => {
             sx={{
               py: 10,
               // scrollMargin: "70px",
-              border: "solid 2px blue",
+              border: "dashed 2px blue",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[2].height["xs"],
@@ -534,7 +535,7 @@ const Home = () => {
             ref={whatSectionRef}
             sx={{
               py: 10,
-              border: "solid 2px red",
+              border: "dashed 2px red",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[3].height["xs"],
@@ -586,7 +587,7 @@ const Home = () => {
             ref={whichSectionRef}
             sx={{
               py: 10,
-              border: "solid 2px blue",
+              border: "dashed 2px blue",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[4].height["xs"],
@@ -645,7 +646,7 @@ const Home = () => {
             ref={whereSectionRef}
             sx={{
               py: 10,
-              border: "solid 2px red",
+              border: "dashed 2px red",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[5].height["xs"],
@@ -681,7 +682,7 @@ const Home = () => {
             ref={whoSectionRef}
             sx={{
               py: 10,
-              border: "solid 2px blue",
+              border: "dashed 2px blue",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[6].height["xs"],
