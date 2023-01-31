@@ -114,7 +114,7 @@ const HowItWorks = (props: any, ref: any) => {
               </Box>
             )}
             {idx === src.length - 1 && (
-              <Box sx={{ width: `${canvasDimension.width}px`, height: `${canvasDimension.height}px` }}>
+              <Box sx={{ width: `${canvasDimension.width}px`, minHeight: `${canvasDimension.height}px` }}>
                 <Magnitude stats={stats ?? statsInit} width={canvasDimension.width} />
               </Box>
             )}

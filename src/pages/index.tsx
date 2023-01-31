@@ -100,42 +100,42 @@ const sectionsTmp = [
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
       { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
-    height: { xs: "4352px", mb: "4466px", sm: "4222", md: "3165px", lg: "3165px", xl: "3160px" },
+    height: { xs: "auto", mb: "4466px", sm: "4222", md: "3165px", lg: "3165px", xl: "3160px" },
   },
   {
     id: "ValuesSection",
     title: "Why 1Cademy?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "6920px", mb: "6677px", sm: "5790px", md: "3970px", lg: "3875px", xl: "3874px" },
+    height: { xs: "auto", mb: "6677px", sm: "5790px", md: "3970px", lg: "3875px", xl: "3874px" },
   },
   {
     id: "CommunitiesSection",
     title: "What we study?",
     simpleTitle: "What?",
     children: [],
-    height: { xs: "2170px", mb: "1005px", sm: "1005px", md: "1386px", lg: "1385px", xl: "1381px" },
+    height: { xs: "auto", mb: "1005px", sm: "1005px", md: "1386px", lg: "1385px", xl: "1381px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "3007px", mb: "3190px", sm: "2957px", md: "2560px", lg: "2695px", xl: "2871px" },
+    height: { xs: "auto", mb: "3190px", sm: "2957px", md: "2560px", lg: "2695px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
     title: "Where Are We?",
     simpleTitle: "Where?",
     children: [],
-    height: { xs: "693px", mb: "697px", sm: "697px", md: "697px", lg: "697px", xl: "691px" },
+    height: { xs: "auto", mb: "697px", sm: "697px", md: "697px", lg: "697px", xl: "691px" },
   },
   {
     id: "WhoWeAreSection",
     title: "Who Is Behind 1Cademy?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "2483px", mb: "2805px", sm: "2340", md: "1327px", lg: "1207px", xl: "1203px" },
+    height: { xs: "auto", mb: "2805px", sm: "2340", md: "1327px", lg: "1207px", xl: "1203px" },
   },
 ];
 
@@ -151,6 +151,7 @@ const Home = () => {
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
 
   const isOnlyMobile = useMediaQuery("(min-width:375px) and (max-width:600px)");
+  console.log({ isOnlyMobile });
   // const mediaQuerySm = theme.breakpoints.between("(min-width:375px)", "md");
   // const mediaQueryXs = theme.breakpoints.down("sm");
   // const mediaQuerySm = theme.breakpoints.between("sm", "md");
@@ -428,7 +429,7 @@ const Home = () => {
             border: "dashed 2px red",
             scrollMarginTop: "70px",
             height: {
-              xs: isMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
               sm: sectionsTmp[1].height["sm"],
               md: sectionsTmp[1].height["md"],
               lg: sectionsTmp[1].height["lg"],
@@ -477,7 +478,7 @@ const Home = () => {
             // border: "dashed 2px blue",
             scrollMarginTop: "70px",
             height: {
-              xs: isMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[2].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[2].height["xs"],
               sm: sectionsTmp[2].height["sm"],
               md: sectionsTmp[2].height["md"],
               lg: sectionsTmp[2].height["lg"],
@@ -529,7 +530,7 @@ const Home = () => {
             border: "dashed 2px red",
             scrollMarginTop: "70px",
             height: {
-              xs: isMobile ? sectionsTmp[3].height["mb"] : sectionsTmp[3].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[3].height["mb"] : sectionsTmp[3].height["xs"],
               sm: sectionsTmp[3].height["sm"],
               md: sectionsTmp[3].height["md"],
               lg: sectionsTmp[3].height["lg"],
@@ -585,7 +586,7 @@ const Home = () => {
             border: "dashed 2px blue",
             scrollMarginTop: "70px",
             height: {
-              xs: isMobile ? sectionsTmp[4].height["mb"] : sectionsTmp[4].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[4].height["mb"] : sectionsTmp[4].height["xs"],
               sm: sectionsTmp[4].height["sm"],
               md: sectionsTmp[4].height["md"],
               lg: sectionsTmp[4].height["lg"],
@@ -648,7 +649,7 @@ const Home = () => {
             border: "dashed 2px red",
             scrollMarginTop: "70px",
             height: {
-              xs: isMobile ? sectionsTmp[5].height["mb"] : sectionsTmp[5].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[5].height["mb"] : sectionsTmp[5].height["xs"],
               sm: sectionsTmp[5].height["sm"],
               md: sectionsTmp[5].height["md"],
               lg: sectionsTmp[5].height["lg"],
@@ -688,7 +689,7 @@ const Home = () => {
             border: "dashed 2px blue",
             scrollMarginTop: "70px",
             height: {
-              xs: isMobile ? sectionsTmp[6].height["mb"] : sectionsTmp[6].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[6].height["mb"] : sectionsTmp[6].height["xs"],
               sm: sectionsTmp[6].height["sm"],
               md: sectionsTmp[6].height["md"],
               lg: sectionsTmp[6].height["lg"],
