@@ -87,7 +87,7 @@ const sectionsTmp = [
     title: "Home",
     simpleTitle: "Home",
     children: [],
-    height: { xs: "100px", sm: "80px", md: "60px", lg: "60px", xl: "900px" },
+    height: { xs: "100px", mb: "100px", sm: "80px", md: "60px", lg: "60px", xl: "900px" },
   },
   {
     id: "HowItWorksSection",
@@ -100,42 +100,42 @@ const sectionsTmp = [
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
       { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
-    height: { xs: "4352px", sm: "4290px", md: "3165px", lg: "3165px", xl: "3160px" },
+    height: { xs: "4352px", mb: "4500px", sm: "4222", md: "3165px", lg: "3165px", xl: "3160px" },
   },
   {
     id: "ValuesSection",
     title: "Why 1Cademy?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "6920px", sm: "6302px", md: "3970px", lg: "3875px", xl: "3874px" },
+    height: { xs: "6920px", mb: "6695px", sm: "5790px", md: "3970px", lg: "3875px", xl: "3874px" },
   },
   {
     id: "CommunitiesSection",
     title: "What we study?",
     simpleTitle: "What?",
     children: [],
-    height: { xs: "2170px", sm: "1005px", md: "1386px", lg: "1385px", xl: "1381px" },
+    height: { xs: "2170px", mb: "1005px", sm: "1005px", md: "1386px", lg: "1385px", xl: "1381px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "3007px", sm: "2972px", md: "2560px", lg: "2695px", xl: "2871px" },
+    height: { xs: "3007px", mb: "3218px", sm: "2957px", md: "2560px", lg: "2695px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
     title: "Where Are We?",
     simpleTitle: "Where?",
     children: [],
-    height: { xs: "693px", sm: "697px", md: "697px", lg: "697px", xl: "691px" },
+    height: { xs: "693px", mb: "697px", sm: "697px", md: "697px", lg: "697px", xl: "691px" },
   },
   {
     id: "WhoWeAreSection",
     title: "Who Is Behind 1Cademy?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "2483px", sm: "2476px", md: "1327px", lg: "1207px", xl: "1203px" },
+    height: { xs: "2483px", mb: "2765px", sm: "2340", md: "1327px", lg: "1207px", xl: "1203px" },
   },
 ];
 
@@ -150,32 +150,19 @@ const Home = () => {
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
 
-  const mediaQueryXs = theme.breakpoints.down("sm");
-  const mediaQuerySm = theme.breakpoints.between("sm", "md");
-  const mediaQueryMd = theme.breakpoints.between("md", "lg");
-  const mediaQueryLg = theme.breakpoints.between("lg", "xl");
-  const mediaQueryXl = theme.breakpoints.up("xl");
+  const isOnlyMobile = useMediaQuery("(min-width:375px) and (max-width:600px)");
+  // const mediaQuerySm = theme.breakpoints.between("(min-width:375px)", "md");
+  // const mediaQueryXs = theme.breakpoints.down("sm");
+  // const mediaQuerySm = theme.breakpoints.between("sm", "md");
+  // const mediaQueryMd = theme.breakpoints.between("md", "lg");
+  // const mediaQueryLg = theme.breakpoints.between("lg", "xl");
+  // const mediaQueryXl = theme.breakpoints.up("xl");
 
-  const isOnlyMobile = useMediaQuery(mediaQueryXs);
-  const isOnlyTablet = useMediaQuery(mediaQuerySm);
-  const isOnlyDesktop = useMediaQuery(mediaQueryMd);
-  const isOnlyBigDesktop = useMediaQuery(mediaQueryLg);
-  const isOnlyBigger = useMediaQuery(mediaQueryXl);
-
-  useMediaQuery;
-
-  useEffect(() => {
-    const getScreenKey = () => {
-      // if (isOnlySmaller) return "xs";
-      if (isOnlyMobile) return "xs";
-      if (isOnlyTablet) return "sm";
-      if (isOnlyDesktop) return "md";
-      if (isOnlyBigDesktop) return "lg";
-      if (isOnlyBigger) return "xl";
-    };
-    const tt = getScreenKey();
-    console.log({ key: tt });
-  }, [isOnlyMobile, isOnlyTablet, isOnlyDesktop, isOnlyBigDesktop, isOnlyBigger]);
+  // const isOnlyMobile = useMediaQuery(mediaQueryXs);
+  // const isOnlyTablet = useMediaQuery(mediaQuerySm);
+  // const isOnlyDesktop = useMediaQuery(mediaQueryMd);
+  // const isOnlyBigDesktop = useMediaQuery(mediaQueryLg);
+  // const isOnlyBigger = useMediaQuery(mediaQueryXl);
 
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [openSearch, setOpenSearch] = useState(false);
@@ -429,7 +416,7 @@ const Home = () => {
           sx={{
             width: "100%",
             // maxWidth: { md: "650px", lg: "980px" },
-            maxWidth: { xs: "100%", sm: "580px", md: "920px", lg: "980px" },
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             // px: isMobile ? "10px" : "0px",
             margin: "auto",
             // border: "3px solid #ffffff6e",

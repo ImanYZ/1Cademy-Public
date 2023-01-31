@@ -61,7 +61,8 @@ const HowItWorks = (props: any, ref: any) => {
     else if (width >= 1200) newWidth = 500;
     else if (width >= 900) newWidth = 450;
     else if (width >= 600) newWidth = 540;
-    else if (width >= 0) newWidth = width - 40;
+    else if (width >= 375) newWidth = 370;
+    else if (width >= 0) newWidth = width - 20;
 
     const newHeight = getHeight(newWidth);
     setCanvasDimension({ width: newWidth, height: newHeight });
