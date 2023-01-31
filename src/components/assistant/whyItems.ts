@@ -57,7 +57,7 @@ const whyItems = [
     name: "Signals how close you are to each deadline.",
     body: "Your assistant color-codes your tasks/habits based on how close they are to their deadlines. This allows you to quickly depict your progress and assess your available time to finish each task, directly in your Google Calendar.",
     image: "assistant/7-signals-how-close.svg",
-    imageDark: "assistant/7-signals-how-close.svg",
+    imageDark: "assistant/7-signals-how-close-dark.svg",
     padding: "4px 40px 0px 40px",
     width: "100%",
     height: "auto",
