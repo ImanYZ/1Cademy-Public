@@ -99,28 +99,28 @@ const sectionsTmp = [
       { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
     ],
-    height: { xs: "0px", mb: "0px", sm: "3063px", md: "3244px", lg: "3325px", xl: "3625px" },
+    height: { xs: "auto", mb: "3079px", sm: "3063px", md: "3244px", lg: "3325px", xl: "3625px" },
   },
   {
     id: "Why1CademyAssistant",
     title: "Why 1Cademy Assistant?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "0px", mb: "0px", sm: "7049px", md: "5559px", lg: "5216px", xl: "5216px" },
+    height: { xs: "auto", mb: "6386px", sm: "5500px", md: "5559px", lg: "5216px", xl: "5216px" },
   },
   {
     id: "WhichSection",
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "0px", mb: "0px", sm: "2955px", md: "2510px", lg: "2690px", xl: "2870px" },
+    height: { xs: "auto", mb: "3190px", sm: "2955px", md: "2510px", lg: "2690px", xl: "2870px" },
   },
   {
     id: "WhoIsBehind1CademyAssistant",
     title: "Who's Behind 1Cademy Assistant?",
     simpleTitle: "Who?",
     children: [],
-    height: { xs: "0px", mb: "0px", sm: "2382px", md: "1303px", lg: "1203px", xl: "1203px" },
+    height: { xs: "auto", mb: "2847px", sm: "2382px", md: "1303px", lg: "1203px", xl: "1203px" },
   },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
@@ -439,7 +439,7 @@ const Home = () => {
               md: sectionsTmp[1].height["md"],
               lg: sectionsTmp[1].height["lg"],
               xl: sectionsTmp[1].height["xl"],
-              border: "solid 2px pink",
+              // border: "solid 2px pink",
             },
             width: "100%",
             maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
@@ -466,7 +466,7 @@ const Home = () => {
             py: 10,
             scrollMarginTop: "70px",
             height: {
-              xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[1].height["xs"],
               sm: sectionsTmp[2].height["sm"],
               md: sectionsTmp[2].height["md"],
               lg: sectionsTmp[2].height["lg"],
@@ -476,7 +476,7 @@ const Home = () => {
             maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             margin: "auto",
             position: "relative",
-            border: "solid 2px pink",
+            // border: "solid 2px pink",
           }}
         >
           <CustomTypography
@@ -517,7 +517,7 @@ const Home = () => {
             py: 10,
             scrollMarginTop: "70px",
             height: {
-              xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[3].height["mb"] : sectionsTmp[1].height["xs"],
               sm: sectionsTmp[3].height["sm"],
               md: sectionsTmp[3].height["md"],
               lg: sectionsTmp[3].height["lg"],
@@ -527,7 +527,7 @@ const Home = () => {
             maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             margin: "auto",
             position: "relative",
-            border: "solid 2px pink",
+            // border: "solid 2px pink",
           }}
         >
           <CustomTypography
@@ -580,13 +580,13 @@ const Home = () => {
             py: 10,
             scrollMarginTop: "70px",
             height: {
-              xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
+              xs: isOnlyMobile ? sectionsTmp[4].height["mb"] : sectionsTmp[1].height["xs"],
               sm: sectionsTmp[4].height["sm"],
               md: sectionsTmp[4].height["md"],
               lg: sectionsTmp[4].height["lg"],
               xl: sectionsTmp[4].height["xl"],
             },
-            border: "solid 2px pink",
+            // border: "solid 2px pink",
             width: "100%",
             maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             margin: "auto",
