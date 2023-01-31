@@ -121,7 +121,7 @@ const sectionsTmp = [
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "3007px", sm: "3010px", md: "2979px", lg: "2690px", xl: "2871px" },
+    height: { xs: "3007px", sm: "3010px", md: "2515px", lg: "2690px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
@@ -165,7 +165,6 @@ const Home = () => {
   useMediaQuery;
 
   useEffect(() => {
-    console.log({ isOnlyMobile, isOnlyTablet, isOnlyDesktop, isOnlyBigDesktop, isOnlyBigger });
     const getScreenKey = () => {
       // if (isOnlySmaller) return "xs";
       if (isOnlyMobile) return "xs";
@@ -589,13 +588,13 @@ const Home = () => {
               py: 10,
               border: "solid 2px blue",
               scrollMarginTop: "70px",
-              // height: {
-              //   xs: sectionsTmp[4].height["xs"],
-              //   sm: sectionsTmp[4].height["sm"],
-              //   md: sectionsTmp[4].height["md"],
-              //   lg: sectionsTmp[4].height["lg"],
-              //   xl: sectionsTmp[4].height["xl"],
-              // },
+              height: {
+                xs: sectionsTmp[4].height["xs"],
+                sm: sectionsTmp[4].height["sm"],
+                md: sectionsTmp[4].height["md"],
+                lg: sectionsTmp[4].height["lg"],
+                xl: sectionsTmp[4].height["xl"],
+              },
             }}
           >
             <CustomTypography
