@@ -107,7 +107,7 @@ const sectionsTmp = [
     title: "Why 1Cademy?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "6920px", sm: "6300px", md: "3970px", lg: "3875px", xl: "3874px" },
+    height: { xs: "6920px", sm: "6302px", md: "3970px", lg: "3875px", xl: "3874px" },
   },
   {
     id: "CommunitiesSection",
@@ -121,7 +121,7 @@ const sectionsTmp = [
     title: "Which systems?",
     simpleTitle: "Which?",
     children: [],
-    height: { xs: "3007px", sm: "2978px", md: "2560px", lg: "2695px", xl: "2871px" },
+    height: { xs: "3007px", sm: "2972px", md: "2560px", lg: "2695px", xl: "2871px" },
   },
   {
     id: "SchoolsSection",
@@ -429,10 +429,10 @@ const Home = () => {
           sx={{
             width: "100%",
             // maxWidth: { md: "650px", lg: "980px" },
-            maxWidth: { xs: "100%", sm: "650px", md: "920px", lg: "980px" },
-            px: isDesktop ? "0px" : "10px",
+            maxWidth: { xs: "100%", sm: "580px", md: "920px", lg: "980px" },
+            // px: isMobile ? "10px" : "0px",
             margin: "auto",
-            border: "3px solid #ffffff6e",
+            // border: "3px solid #ffffff6e",
             position: "relative",
           }}
         >
@@ -487,7 +487,7 @@ const Home = () => {
             sx={{
               py: 10,
               // scrollMargin: "70px",
-              border: "dashed 2px blue",
+              // border: "dashed 2px blue",
               scrollMarginTop: "70px",
               height: {
                 xs: sectionsTmp[2].height["xs"],
