@@ -3095,7 +3095,7 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, []);
 
-  const onMouseClick = useCallback(e => {
+  const onMouseClick = useCallback((e: any) => {
     if (e.button !== 1) return; // is not mouse well
 
     e.preventDefault();
