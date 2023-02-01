@@ -106,7 +106,7 @@ const sectionsTmp = [
     title: "Why 1Cademy Assistant?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "auto", mb: "6744px", sm: "5631px", md: "5824px", lg: "5634px", xl: "5634px" },
+    height: { xs: "auto", mb: "6744px", sm: "5661px", md: "5824px", lg: "5634px", xl: "5634px" },
   },
   {
     id: "WhichSection",
@@ -465,13 +465,13 @@ const Home = () => {
           sx={{
             py: 10,
             scrollMarginTop: "70px",
-            // height: {
-            //   xs: isOnlyMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[1].height["xs"],
-            //   sm: sectionsTmp[2].height["sm"],
-            //   md: sectionsTmp[2].height["md"],
-            //   lg: sectionsTmp[2].height["lg"],
-            //   xl: sectionsTmp[2].height["xl"],
-            // },
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[1].height["xs"],
+              sm: sectionsTmp[2].height["sm"],
+              md: sectionsTmp[2].height["md"],
+              lg: sectionsTmp[2].height["lg"],
+              xl: sectionsTmp[2].height["xl"],
+            },
             width: "100%",
             maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             margin: "auto",
