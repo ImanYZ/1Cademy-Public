@@ -3095,6 +3095,12 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, []);
 
+  const onMouseClick = useCallback(e => {
+    if (e.button !== 1) return; // is not mouse well
+
+    e.preventDefault();
+  }, []);
+
   const uploadNodeImage = useCallback(
     (
       event: any,
@@ -3722,6 +3728,7 @@ const Dashboard = ({}: DashboardProps) => {
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
               onTouchStart={mapContentMouseOver}
+              onMouseUp={onMouseClick}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}
