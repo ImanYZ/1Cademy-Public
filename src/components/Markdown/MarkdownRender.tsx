@@ -25,7 +25,11 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
         ),
         a: ({ ...props }) => {
           // console.log(props);
-          return <Link href={props.href}>{props.children}</Link>;
+          return (
+            <Link href={props.href} target="_blank" rel="noopener">
+              {props.children}
+            </Link>
+          );
         },
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
