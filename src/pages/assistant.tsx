@@ -324,7 +324,7 @@ const Home = () => {
         sx={{
           position: "fixed",
           bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-          right: "0px",
+          right: "20px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -332,7 +332,7 @@ const Home = () => {
         className={footerInView ? "hide" : "undefined"}
       >
         <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
-        <Box sx={{ width: isMobile ? "50px" : "80px", height: isMobile ? "70px" : "100px" }}>
+        <Box sx={{ width: "50px", height: isMobile ? "70px" : "100px" }}>
           <RiveComponentMemoized
             src="rive/scroll.riv"
             animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
