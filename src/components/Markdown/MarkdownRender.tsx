@@ -40,9 +40,12 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
           ) : (
             <Box
               className="scroll-styled"
+              component={"span"}
               sx={{
                 paddingBottom: "5px",
                 overflow: "overlay",
+                background: theme => (theme.palette.mode === "dark" ? "#363636" : "#d6d6d6"),
+                borderRadius: "6px",
               }}
             >
               <code {...props}>{children || ""}</code>
