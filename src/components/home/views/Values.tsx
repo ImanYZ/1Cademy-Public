@@ -10,7 +10,7 @@ const observerOption: UseInViewProps = { options: { root: null, rootMargin: "0px
 
 const Values = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:599px)");
   const isTablet = useMediaQuery("(min-width:900px)");
 
   const { ref: ref1, inViewOnce: inViewOnce1 } = useInView(observerOption);

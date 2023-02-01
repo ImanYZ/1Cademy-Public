@@ -82,7 +82,13 @@ const artboards = [
 export const SECTION_WITH_ANIMATION = 1;
 
 const sectionsTmp = [
-  { id: "LandingSection", title: "Home", simpleTitle: "Home", children: [] },
+  {
+    id: "LandingSection",
+    title: "Home",
+    simpleTitle: "Home",
+    children: [],
+    height: { xs: "0px", mb: "0px", sm: "0px", md: "0px", lg: "0px", xl: "0px" },
+  },
   {
     id: "HowItWorksSection",
     title: "How We Work?",
@@ -94,12 +100,43 @@ const sectionsTmp = [
       { id: "animation4", title: "Improving", simpleTitle: "Improving" },
       { id: "animation5", title: "Magnitude", simpleTitle: "Magnitude" },
     ],
+    height: { xs: "auto", mb: "4466px", sm: "4222", md: "3165px", lg: "3165px", xl: "3160px" },
   },
-  { id: "ValuesSection", title: "Why 1Cademy?", simpleTitle: "Why?", children: [] },
-  { id: "CommunitiesSection", title: "What we study?", simpleTitle: "What?", children: [] },
-  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
-  { id: "SchoolsSection", title: "Where Are We?", simpleTitle: "Where?", children: [] },
-  { id: "WhoWeAreSection", title: "Who Is Behind 1Cademy?", simpleTitle: "Who?", children: [] },
+  {
+    id: "ValuesSection",
+    title: "Why 1Cademy?",
+    simpleTitle: "Why?",
+    children: [],
+    height: { xs: "auto", mb: "6677px", sm: "5790px", md: "3970px", lg: "3875px", xl: "3874px" },
+  },
+  {
+    id: "CommunitiesSection",
+    title: "What we study?",
+    simpleTitle: "What?",
+    children: [],
+    height: { xs: "auto", mb: "1005px", sm: "1005px", md: "1386px", lg: "1385px", xl: "1381px" },
+  },
+  {
+    id: "WhichSection",
+    title: "Which systems?",
+    simpleTitle: "Which?",
+    children: [],
+    height: { xs: "auto", mb: "3190px", sm: "2957px", md: "2560px", lg: "2695px", xl: "2871px" },
+  },
+  {
+    id: "SchoolsSection",
+    title: "Where Are We?",
+    simpleTitle: "Where?",
+    children: [],
+    height: { xs: "auto", mb: "697px", sm: "697px", md: "697px", lg: "697px", xl: "691px" },
+  },
+  {
+    id: "WhoWeAreSection",
+    title: "Who Is Behind 1Cademy?",
+    simpleTitle: "Who?",
+    children: [],
+    height: { xs: "auto", mb: "2805px", sm: "2340", md: "1327px", lg: "1207px", xl: "1203px" },
+  },
 ];
 
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
@@ -112,6 +149,9 @@ const Home = () => {
   const isMobile = useMediaQuery("(max-width:600px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
+
+  const isOnlyMobile = useMediaQuery("(min-width:375px) and (max-width:600px)");
+
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [openSearch, setOpenSearch] = useState(false);
 
@@ -361,219 +401,326 @@ const Home = () => {
         </Box>
 
         <Box
+          id={sectionsOrder1Cademy[1].id}
+          ref={howSectionRef}
           sx={{
+            pb: 10,
+            // border: "dashed 2px red",
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
+              sm: sectionsTmp[1].height["sm"],
+              md: sectionsTmp[1].height["md"],
+              lg: sectionsTmp[1].height["lg"],
+              xl: sectionsTmp[1].height["xl"],
+            },
             width: "100%",
-            maxWidth: "980px",
-            px: isDesktop ? "0px" : "10px",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             margin: "auto",
-            /* border: "3px solid white", */
             position: "relative",
           }}
         >
-          <Box id={sectionsOrder1Cademy[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
-            >
-              {sectionsOrder1Cademy[1].title}
-            </CustomTypography>
-            <HowItWorks
-              ref={animationRefs}
-              section={sectionSelected}
-              artboards={artboards}
-              animationOptions={
-                <Button
-                  variant="contained"
-                  size={width < 900 ? "small" : "large"}
-                  component="a"
-                  href="https://1cademy.us/#JoinUsSection"
-                  target="_blank"
-                  sx={{ minWidth: 200, textTransform: "uppercase" }}
-                >
-                  Apply to Join Us!
-                </Button>
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
+          >
+            {sectionsOrder1Cademy[1].title}
+          </CustomTypography>
+          <HowItWorks
+            ref={animationRefs}
+            section={sectionSelected}
+            artboards={artboards}
+            animationOptions={
+              <Button
+                variant="contained"
+                size={width < 900 ? "small" : "large"}
+                component="a"
+                href="https://1cademy.us/#JoinUsSection"
+                target="_blank"
+                sx={{ minWidth: 200, textTransform: "uppercase" }}
+              >
+                Apply to Join Us!
+              </Button>
+            }
+          />
+        </Box>
+
+        <Box
+          id={sectionsOrder1Cademy[2].id}
+          ref={whySectionRef}
+          sx={{
+            py: 10,
+            // scrollMargin: "70px",
+            // border: "dashed 2px blue",
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[2].height["xs"],
+              sm: sectionsTmp[2].height["sm"],
+              md: sectionsTmp[2].height["md"],
+              lg: sectionsTmp[2].height["lg"],
+              xl: sectionsTmp[2].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder1Cademy[2].title}
+          </CustomTypography>
+          {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
+          {whyInViewOnce && (
+            <Suspense
+              fallback={
+                <Grid container spacing={2.5} alignItems="center">
+                  {new Array(8).fill(0).map((a, i) => (
+                    <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                      <Skeleton
+                        variant="rectangular"
+                        height={210}
+                        animation="wave"
+                        sx={{ background: "#72727263", maxWidth: 340 }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
               }
-            />
-          </Box>
-
-          <Box id={sectionsOrder1Cademy[2].id} ref={whySectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
             >
-              {sectionsOrder1Cademy[2].title}
-            </CustomTypography>
-            {!whyInViewOnce && <div style={{ height: 2 * height /* background: "red" */ }}></div>}
-            {whyInViewOnce && (
-              <Suspense
-                fallback={
-                  <Grid container spacing={2.5} alignItems="center">
-                    {new Array(8).fill(0).map((a, i) => (
-                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                        <Skeleton
-                          variant="rectangular"
-                          height={210}
-                          animation="wave"
-                          sx={{ background: "#72727263", maxWidth: 340 }}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                }
-              >
-                <Values />
-              </Suspense>
-            )}
-          </Box>
+              <Values />
+            </Suspense>
+          )}
+        </Box>
 
-          <Box id={sectionsOrder1Cademy[3].id} ref={whatSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder1Cademy[3].title}
-            </CustomTypography>
-            {!whatInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Grid container spacing={1}>
-                    {new Array(8).fill(0).map((a, i) => (
-                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                        <Skeleton
-                          variant="rectangular"
-                          height={210}
-                          animation="wave"
-                          sx={{ background: "#72727263", maxWidth: 340 }}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                }
-              >
-                <What />
-              </Suspense>
-            )}
-          </Box>
-
-          <Box id={sectionsOrder1Cademy[4].id} ref={whichSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder1Cademy[4].title}
-            </CustomTypography>
-            {!whichInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Box
-                    sx={{
-                      pt: 7,
-                      pb: 10,
-                      position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Grid container spacing={2.5}>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
+        <Box
+          id={sectionsOrder1Cademy[3].id}
+          ref={whatSectionRef}
+          sx={{
+            py: 10,
+            // border: "dashed 2px red",
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[3].height["mb"] : sectionsTmp[3].height["xs"],
+              sm: sectionsTmp[3].height["sm"],
+              md: sectionsTmp[3].height["md"],
+              lg: sectionsTmp[3].height["lg"],
+              xl: sectionsTmp[3].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{
+              pb: 10,
+              fontWeight: 700,
+            }}
+          >
+            {sectionsOrder1Cademy[3].title}
+          </CustomTypography>
+          {!whatInViewOnce ? (
+            <div style={{ height: 2 * height /* background: "yellow" */ }}></div>
+          ) : (
+            <Suspense
+              fallback={
+                <Grid container spacing={1}>
+                  {new Array(8).fill(0).map((a, i) => (
+                    <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                      <Skeleton
+                        variant="rectangular"
+                        height={210}
+                        animation="wave"
+                        sx={{ background: "#72727263", maxWidth: 340 }}
+                      />
                     </Grid>
-                  </Box>
-                }
-              >
-                <Which />
-              </Suspense>
-            )}
-          </Box>
-
-          <Box id={sectionsOrder1Cademy[5].id} ref={whereSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
+                  ))}
+                </Grid>
+              }
             >
-              {sectionsOrder1Cademy[5].title}
-            </CustomTypography>
-            {!whereInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "green" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
-              >
-                <UniversitiesMap theme={"Dark"} />
-              </Suspense>
-            )}
-          </Box>
+              <What />
+            </Suspense>
+          )}
+        </Box>
 
-          <Box id={sectionsOrder1Cademy[6].id} ref={whoSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder1Cademy[6].title}
-            </CustomTypography>
-            {!whoInViewOnce ? (
-              <div style={{ height: 2 * height /* background: "pink" */ }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Box
-                    sx={{
-                      pt: 7,
-                      pb: 10,
-                      position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Grid container spacing={2.5}>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
+        <Box
+          id={sectionsOrder1Cademy[4].id}
+          ref={whichSectionRef}
+          sx={{
+            py: 10,
+            // border: "dashed 2px blue",
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[4].height["mb"] : sectionsTmp[4].height["xs"],
+              sm: sectionsTmp[4].height["sm"],
+              md: sectionsTmp[4].height["md"],
+              lg: sectionsTmp[4].height["lg"],
+              xl: sectionsTmp[4].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder1Cademy[4].title}
+          </CustomTypography>
+          {!whichInViewOnce ? (
+            <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+          ) : (
+            <Suspense
+              fallback={
+                <Box
+                  sx={{
+                    pt: 7,
+                    pb: 10,
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Grid container spacing={2.5}>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
                     </Grid>
-                  </Box>
-                }
-              >
-                <WhoWeAre />
-              </Suspense>
-            )}
-          </Box>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              }
+            >
+              <Which />
+            </Suspense>
+          )}
+        </Box>
+
+        <Box
+          id={sectionsOrder1Cademy[5].id}
+          ref={whereSectionRef}
+          sx={{
+            py: 10,
+            // border: "dashed 2px red",
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[5].height["mb"] : sectionsTmp[5].height["xs"],
+              sm: sectionsTmp[5].height["sm"],
+              md: sectionsTmp[5].height["md"],
+              lg: sectionsTmp[5].height["lg"],
+              xl: sectionsTmp[5].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: "100%", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder1Cademy[5].title}
+          </CustomTypography>
+          {!whereInViewOnce ? (
+            <div style={{ height: 2 * height /* background: "green" */ }}></div>
+          ) : (
+            <Suspense
+              fallback={<Skeleton variant="rectangular" height={490} animation="wave" sx={{ background: gray02 }} />}
+            >
+              <UniversitiesMap theme={"Dark"} />
+            </Suspense>
+          )}
+        </Box>
+
+        <Box
+          id={sectionsOrder1Cademy[6].id}
+          ref={whoSectionRef}
+          sx={{
+            py: 10,
+            // border: "dashed 2px blue",
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[6].height["mb"] : sectionsTmp[6].height["xs"],
+              sm: sectionsTmp[6].height["sm"],
+              md: sectionsTmp[6].height["md"],
+              lg: sectionsTmp[6].height["lg"],
+              xl: sectionsTmp[6].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder1Cademy[6].title}
+          </CustomTypography>
+          {!whoInViewOnce ? (
+            <div style={{ height: 2 * height /* background: "pink" */ }}></div>
+          ) : (
+            <Suspense
+              fallback={
+                <Box
+                  sx={{
+                    pt: 7,
+                    pb: 10,
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Grid container spacing={2.5}>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              }
+            >
+              <WhoWeAre />
+            </Suspense>
+          )}
         </Box>
       </Box>
 

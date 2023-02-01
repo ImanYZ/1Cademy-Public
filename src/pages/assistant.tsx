@@ -83,7 +83,13 @@ const artboards = [
 export const SECTION_WITH_ANIMATION = 1;
 
 const sectionsTmp = [
-  { id: "Landing", title: "Home", simpleTitle: "Home", children: [] },
+  {
+    id: "Landing",
+    title: "Home",
+    simpleTitle: "Home",
+    children: [],
+    height: { xs: "0px", mb: "0px", sm: "0px", md: "0px", lg: "0px", xl: "0px" },
+  },
   {
     id: "How1CademyAssistantWorks",
     title: "How 1Cademy Assistant works?",
@@ -93,10 +99,29 @@ const sectionsTmp = [
       { id: "animation2", title: "Meetings", simpleTitle: "Meetings" },
       { id: "animation3", title: "Goals", simpleTitle: "Goals" },
     ],
+    height: { xs: "auto", mb: "3079px", sm: "3063px", md: "3244px", lg: "3325px", xl: "3625px" },
   },
-  { id: "Why1CademyAssistant", title: "Why 1Cademy Assistant?", simpleTitle: "Why?", children: [] },
-  { id: "WhichSection", title: "Which systems?", simpleTitle: "Which?", children: [] },
-  { id: "WhoIsBehind1CademyAssistant", title: "Who's Behind 1Cademy Assistant?", simpleTitle: "Who?", children: [] },
+  {
+    id: "Why1CademyAssistant",
+    title: "Why 1Cademy Assistant?",
+    simpleTitle: "Why?",
+    children: [],
+    height: { xs: "auto", mb: "6386px", sm: "5500px", md: "5559px", lg: "5216px", xl: "5216px" },
+  },
+  {
+    id: "WhichSection",
+    title: "Which systems?",
+    simpleTitle: "Which?",
+    children: [],
+    height: { xs: "auto", mb: "3190px", sm: "2955px", md: "2510px", lg: "2690px", xl: "2870px" },
+  },
+  {
+    id: "WhoIsBehind1CademyAssistant",
+    title: "Who's Behind 1Cademy Assistant?",
+    simpleTitle: "Who?",
+    children: [],
+    height: { xs: "auto", mb: "2847px", sm: "2382px", md: "1303px", lg: "1203px", xl: "1203px" },
+  },
 ];
 const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 
@@ -108,6 +133,8 @@ const Home = () => {
   const isLargeDesktop = useMediaQuery("(min-width:1350px)");
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const isMobile = useMediaQuery("(max-width:600px)");
+
+  const isOnlyMobile = useMediaQuery("(min-width:375px) and (max-width:600px)");
 
   const [animationSelected, setSelectedAnimation] = useState(0);
   const [openForm, setOpenForm] = useState(false);
@@ -329,100 +356,6 @@ const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
     >
-      {/* <Box
-        component={"header"}
-        sx={{ position: "sticky", width: "100%", top: "0px", zIndex: 12, display: "flex", justifyContent: "center" }}
-      >
-        <Box
-          sx={{
-            height: HEADER_HEIGTH,
-            width: "100%",
-            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
-            backdropFilter: "saturate(180%) blur(20px)",
-          }}
-        />
-        <Stack
-          direction={"row"}
-          justifyContent={"space-between"}
-          alignItems={"center"}
-          spacing={isMobile ? "20px" : "30px"}
-          sx={{
-            width: "100%",
-            maxWidth: "1200px",
-            height: HEADER_HEIGTH,
-            px: isDesktop ? "0px" : "10px",
-            position: "absolute",
-          }}
-        >
-          <Stack
-            spacing={isDesktop ? "30px" : "20px"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-            direction={"row"}
-            sx={{ color: "#f8f8f8" }}
-          >
-            <img src={LogoDarkMode.src} alt="logo" width="45px" height={"45px"} />
-
-            {isTablet && (
-              <>
-                {sectionsOrder.slice(1).map((cur, idx) => (
-                  <Tooltip key={cur.id} title={cur.title}>
-                    <Typography
-                      sx={{
-                        cursor: "pointer",
-                        borderBottom: theme =>
-                          sectionSelected === idx + 1 ? `solid 2px ${theme.palette.common.orange}` : undefined,
-                      }}
-                      onClick={() => switchSection(idx + 1)}
-                    >
-                      {sectionsOrder[idx + 1].label}
-                    </Typography>
-                  </Tooltip>
-                ))}
-              </>
-            )}
-          </Stack>
-          {!isMobile && (
-            <AppHeaderSearchBar
-              searcherUrl={"search"}
-              sx={{
-                color: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-              }}
-            />
-          )}
-          <Stack direction={"row"} alignItems="center" spacing={isDesktop ? "20px" : "10px"}>
-            {isMobile && (
-              <Tooltip title="Open Searcher">
-                <IconButton onClick={() => setOpenSearch(true)}>
-                  <SearchIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            <FormGroup>
-              <ThemeSwitcher onClick={e => handleThemeSwitch(e)} checked={theme.palette.mode === "dark"} />
-            </FormGroup>
-
-            <Tooltip title="SIGN IN/UP">
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={() => setOpenForm(true)}
-                size={isMobile ? "small" : "medium"}
-                sx={{
-                  fontSize: 16,
-                  ml: 2.5,
-                  borderRadius: 40,
-                  wordBreak: "normal",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                SIGN IN/UP
-              </Button>
-            </Tooltip>
-          </Stack>
-        </Stack>
-      </Box> */}
       <AppHeader
         sections={sectionsOrder}
         sectionSelected={sectionSelected}
@@ -494,139 +427,213 @@ const Home = () => {
           </Typography>
         </Stack>
 
-        <Box sx={{ width: "100%", maxWidth: "980px", px: isDesktop ? "0px" : "10px", margin: "auto" }}>
-          <Box id={sectionsOrder[1].id} ref={howSectionRef} sx={{ pb: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
-            >
-              {sectionsOrder[1].title}
-            </CustomTypography>
-            <HowItWorks ref={animationRefs} artboards={artboards} />
-          </Box>
+        <Box
+          id={sectionsOrder[1].id}
+          ref={howSectionRef}
+          sx={{
+            pb: 10,
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[1].height["mb"] : sectionsTmp[1].height["xs"],
+              sm: sectionsTmp[1].height["sm"],
+              md: sectionsTmp[1].height["md"],
+              lg: sectionsTmp[1].height["lg"],
+              xl: sectionsTmp[1].height["xl"],
+              // border: "solid 2px pink",
+            },
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, pt: "20px", fontWeight: 700 }}
+          >
+            {sectionsOrder[1].title}
+          </CustomTypography>
+          <HowItWorks ref={animationRefs} artboards={artboards} />
+        </Box>
 
-          <Box id={sectionsOrder[2].id} ref={whySectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
+        <Box
+          id={sectionsOrder[2].id}
+          ref={whySectionRef}
+          sx={{
+            py: 10,
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[2].height["mb"] : sectionsTmp[1].height["xs"],
+              sm: sectionsTmp[2].height["sm"],
+              md: sectionsTmp[2].height["md"],
+              lg: sectionsTmp[2].height["lg"],
+              xl: sectionsTmp[2].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+            // border: "solid 2px pink",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder[2].title}
+          </CustomTypography>
+          {!whyInViewOnce && <div style={{ height: 2 * height }}></div>}
+          {whyInViewOnce && (
+            <Suspense
+              fallback={
+                <Grid container spacing={2.5} alignItems="center">
+                  {new Array(8).fill(0).map((a, i) => (
+                    <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
+                      <Skeleton
+                        variant="rectangular"
+                        height={210}
+                        animation="wave"
+                        sx={{ background: "#72727263", maxWidth: 340 }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              }
             >
-              {sectionsOrder[2].title}
-            </CustomTypography>
-            {!whyInViewOnce && <div style={{ height: 2 * height }}></div>}
-            {whyInViewOnce && (
-              <Suspense
-                fallback={
-                  <Grid container spacing={2.5} alignItems="center">
-                    {new Array(8).fill(0).map((a, i) => (
-                      <Grid key={i} item xs={12} sm={6} md={4} lg={3}>
-                        <Skeleton
-                          variant="rectangular"
-                          height={210}
-                          animation="wave"
-                          sx={{ background: "#72727263", maxWidth: 340 }}
-                        />
-                      </Grid>
-                    ))}
+              <ValuesMemoized />
+            </Suspense>
+          )}
+        </Box>
+        <Box
+          id={sectionsOrder[3].id}
+          ref={whichSectionRef}
+          sx={{
+            py: 10,
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[3].height["mb"] : sectionsTmp[1].height["xs"],
+              sm: sectionsTmp[3].height["sm"],
+              md: sectionsTmp[3].height["md"],
+              lg: sectionsTmp[3].height["lg"],
+              xl: sectionsTmp[3].height["xl"],
+            },
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+            // border: "solid 2px pink",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder[3].title}
+          </CustomTypography>
+          {!whichInViewOnce ? (
+            <div style={{ height: 2 * height }}></div>
+          ) : (
+            <Suspense
+              fallback={
+                <Box
+                  sx={{
+                    pt: 7,
+                    pb: 10,
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Grid container spacing={2.5}>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
                   </Grid>
-                }
-              >
-                <ValuesMemoized />
-              </Suspense>
-            )}
-          </Box>
-          <Box id={sectionsOrder[3].id} ref={whichSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
+                </Box>
+              }
             >
-              {sectionsOrder[3].title}
-            </CustomTypography>
-            {!whichInViewOnce ? (
-              <div style={{ height: 2 * height }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Box
-                    sx={{
-                      pt: 7,
-                      pb: 10,
-                      position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Grid container spacing={2.5}>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                }
-              >
-                <Which />
-              </Suspense>
-            )}
-          </Box>
+              <Which />
+            </Suspense>
+          )}
+        </Box>
 
-          <Box id={sectionsOrder[4].id} ref={whoSectionRef} sx={{ py: 10 }}>
-            <CustomTypography
-              component={"h2"}
-              variant="h1"
-              marked="center"
-              align="center"
-              sx={{ pb: 10, fontWeight: 700 }}
-            >
-              {sectionsOrder[4].title}
-            </CustomTypography>
-            {!whoInViewOnce ? (
-              <div style={{ height: 2 * height }}></div>
-            ) : (
-              <Suspense
-                fallback={
-                  <Box
-                    sx={{
-                      pt: 7,
-                      pb: 10,
-                      position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Grid container spacing={2.5}>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
-                      </Grid>
+        <Box
+          id={sectionsOrder[4].id}
+          ref={whoSectionRef}
+          sx={{
+            py: 10,
+            scrollMarginTop: "70px",
+            height: {
+              xs: isOnlyMobile ? sectionsTmp[4].height["mb"] : sectionsTmp[1].height["xs"],
+              sm: sectionsTmp[4].height["sm"],
+              md: sectionsTmp[4].height["md"],
+              lg: sectionsTmp[4].height["lg"],
+              xl: sectionsTmp[4].height["xl"],
+            },
+            // border: "solid 2px pink",
+            width: "100%",
+            maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
+            margin: "auto",
+            position: "relative",
+          }}
+        >
+          <CustomTypography
+            component={"h2"}
+            variant="h1"
+            marked="center"
+            align="center"
+            sx={{ pb: 10, fontWeight: 700 }}
+          >
+            {sectionsOrder[4].title}
+          </CustomTypography>
+          {!whoInViewOnce ? (
+            <div style={{ height: 2 * height }}></div>
+          ) : (
+            <Suspense
+              fallback={
+                <Box
+                  sx={{
+                    pt: 7,
+                    pb: 10,
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Grid container spacing={2.5}>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
                     </Grid>
-                  </Box>
-                }
-              >
-                <WhoWeAre />
-              </Suspense>
-            )}
-          </Box>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Skeleton variant="rectangular" height={800} animation="wave" sx={{ background: gray02 }} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              }
+            >
+              <WhoWeAre />
+            </Suspense>
+          )}
         </Box>
       </Box>
       <Modal open={openForm} onClose={() => setOpenForm(false)}>
