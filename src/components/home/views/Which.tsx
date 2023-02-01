@@ -78,6 +78,10 @@ const Which = () => {
             )}
             {idx === 1 && (
               <Box
+                component={"a"}
+                href={whichItem.link}
+                target="_blank"
+                rel="noreferrer"
                 sx={{
                   width: width < 900 ? canvasDimension.width : GoalsAnimationWidth,
                   height: width < 900 ? canvasDimension.height : GoalsAnimationHeight,
@@ -92,7 +96,13 @@ const Which = () => {
               </Box>
             )}
             {idx === 2 && (
-              <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+              <Box
+                component={"a"}
+                href={whichItem.link}
+                target="_blank"
+                rel="noreferrer"
+                sx={{ width: canvasDimension.width, height: canvasDimension.height }}
+              >
                 <RiveComponentMemoized
                   src="rive/extension.riv"
                   artboard={"extension"}
