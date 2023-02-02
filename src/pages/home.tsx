@@ -2,6 +2,7 @@ import { Box /* useTheme */, Typography } from "@mui/material";
 import React from "react";
 
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
+import Mechanism from "../components/home/sections/Mechanism";
 import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
 // const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
 // const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
@@ -45,23 +46,27 @@ export const Home = () => {
             sx={{
               maxWidth: "1216px",
               margin: "auto",
-              border: `solid 2px ${idx % 2 === 0 ? "royalBlue" : "pink"}`,
+              // border: `solid 2px ${idx % 2 === 0 ? "royalBlue" : "pink"}`,
               textAlign: idx === 0 ? "center" : "left",
             }}
           >
-            <Typography sx={{ fontSize: "36px", mb: "20px" }}>{section.label}</Typography>
-            <Typography sx={{ fontSize: "20px" }}>
-              {section.getDescription
-                ? section.getDescription({
-                    institutions: "0",
-                    links: "0",
-                    nodes: "0",
-                    proposals: "0",
-                    users: "0",
-                    communities: "0",
-                  })
-                : section.description}
-            </Typography>
+            <Box sx={{ mb: idx === 0 ? "32px" : "64px" }}>
+              <Typography sx={{ fontSize: "36px", mb: "20px" }}>{section.label}</Typography>
+              <Typography sx={{ fontSize: "20px", maxWidth: idx !== 0 ? "768px" : undefined }}>
+                {section.getDescription
+                  ? section.getDescription({
+                      institutions: "0",
+                      links: "0",
+                      nodes: "0",
+                      proposals: "0",
+                      users: "0",
+                      communities: "0",
+                    })
+                  : section.description}
+              </Typography>
+            </Box>
+
+            {idx === 0 && <Mechanism />}
           </Box>
         </Box>
       ))}
