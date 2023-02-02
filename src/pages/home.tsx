@@ -2,6 +2,7 @@ import { Box /* useTheme */, Typography } from "@mui/material";
 import React from "react";
 
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
+import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism from "../components/home/sections/Mechanism";
 import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
 // const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
@@ -67,6 +68,7 @@ export const Home = () => {
             </Box>
 
             {idx === 0 && <Mechanism />}
+            {idx === 1 && <Magnitude />}
           </Box>
         </Box>
       ))}

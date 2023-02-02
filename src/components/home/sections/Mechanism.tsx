@@ -61,7 +61,6 @@ const Mechanism = () => {
     if (width >= 600) newWidth = 500;
     if (width >= 900) newWidth = 350;
     if (width >= 1200) newWidth = 550;
-    // if (width >= 1536) newWidth = 700;
 
     const newHeight = getHeight(newWidth);
     return { width: newWidth, height: newHeight };

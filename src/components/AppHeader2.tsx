@@ -229,8 +229,8 @@ const AppHeader = () => {
                 <IconButton onClick={handleProfileMenuOpen}>
                   <Box
                     sx={{
-                      width: "22px",
-                      height: "22px",
+                      width: "26px",
+                      height: "26px",
                       borderRadius: "30px",
                       color: theme => theme.palette.common.gray,
                     }}
@@ -242,8 +242,8 @@ const AppHeader = () => {
                     <Image
                       src={user.imageUrl || ""}
                       alt={user.fName}
-                      width="22px"
-                      height="22px"
+                      width="26px"
+                      height="26px"
                       quality={40}
                       objectFit="cover"
                       style={{
