@@ -10,6 +10,9 @@ import { Box /* useTheme */ } from "@mui/material";
 // import dynamic from "next/dynamic";
 import React from "react";
 
+import { HeroMemoized } from "@/components/home/views/Hero";
+import Topics from "@/components/home/views/Topics";
+
 import AppHeader from "../components/AppHeader2";
 
 export const gray01 = "#28282a";
@@ -36,7 +39,8 @@ export const Home = () => {
       }}
     >
       <AppHeader />
-
+      <HeroMemoized headerHeight={50} />
+      <Topics />
       <style>
         {`
           body{

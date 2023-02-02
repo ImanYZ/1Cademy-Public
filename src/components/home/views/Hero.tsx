@@ -28,6 +28,7 @@ const Hero = ({ headerHeight }: HeroProps) => {
       alignItems={"center"}
       justifyContent="flex-end"
       sx={{
+        position: "relative",
         height: `calc(100vh - ${headerHeight}px)`,
         width: "100%",
         padding: width < 900 ? "10px" : "20px",
@@ -60,7 +61,13 @@ const Hero = ({ headerHeight }: HeroProps) => {
           component="a"
           target="_blank"
           href="https://1cademy.us/#JoinUsSection"
-          sx={{ minWidth: 200, textTransform: "uppercase" }}
+          sx={{
+            minWidth: 200,
+            textTransform: "uppercase",
+            position: "absolute",
+            bottom: { xs: "30%", xl: "18%" },
+            transform: "translateY(50%)",
+          }}
         >
           Apply to Join Us!
         </Button>
