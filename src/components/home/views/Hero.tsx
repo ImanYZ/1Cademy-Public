@@ -7,7 +7,9 @@ import { useWindowSize } from "../../../hooks/useWindowSize";
 import Button from "../components/Button";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
-const Hero = () => {
+type HeroProps = { headerHeight: number };
+
+const Hero = ({ headerHeight }: HeroProps) => {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
@@ -26,7 +28,7 @@ const Hero = () => {
       alignItems={"center"}
       justifyContent="flex-end"
       sx={{
-        height: "calc(100vh - 70px)",
+        height: `calc(100vh - ${headerHeight}px)`,
         width: "100%",
         padding: width < 900 ? "10px" : "20px",
         backgroundColor: "#1d1102",

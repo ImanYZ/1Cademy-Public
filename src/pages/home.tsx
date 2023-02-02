@@ -12,12 +12,13 @@ const Which = dynamic(() => import("../components/home/views/Which"), { suspense
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import AppHeader, { HEADER_HEIGTH } from "@/components/AppHeader";
+// import AppHeader, { HEADER_HEIGTH } from "@/components/AppHeader";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { useInView } from "@/hooks/useObserver";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
+import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
@@ -35,7 +36,7 @@ export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 
 const section1ArtBoards = [
-  { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGTH, color: "#ff28c9" },
+  { name: "artboard-1", durationMs: 1000, getHeight: (vh: number) => vh - HEADER_HEIGHT, color: "#ff28c9" },
 ];
 
 const artboards = [
@@ -369,11 +370,19 @@ export const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
       }}
     >
-      <AppHeader
+      {/* <AppHeader
         sections={sectionsOrder1Cademy}
         sectionSelected={sectionSelected}
         switchSection={switchSection}
         onClickSearcher={() => setOpenSearch}
+      /> */}
+
+      <AppHeader
+        switchSection={() => console.log("swithc")}
+        homeClick={() => console.log("home chlick")}
+        joinUsClick={() => {
+          console.log("join");
+        }}
       />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
@@ -396,7 +405,7 @@ export const Home = () => {
         </Box>
 
         <Box ref={HomeSectionRef} component="section">
-          <HeroMemoized />
+          <HeroMemoized headerHeight={HEADER_HEIGHT} />
         </Box>
 
         <Box

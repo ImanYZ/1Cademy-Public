@@ -1,5 +1,7 @@
 const ROUTES = {
   home: "/",
+  publicHome: "/home",
+  assistant: "/assistant",
   node: "/node",
   proposal: "/proposal",
   signIn: "/signin",
