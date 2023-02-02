@@ -1,4 +1,8 @@
-import { Box /* useTheme */ } from "@mui/material";
+import { Box /* useTheme */, Typography } from "@mui/material";
+import React from "react";
+
+import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
+import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
 // const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
 // const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
 // const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
@@ -8,9 +12,7 @@ import { Box /* useTheme */ } from "@mui/material";
 // const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 // const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 // import dynamic from "next/dynamic";
-import React from "react";
-
-import AppHeader from "../components/AppHeader2";
+import { HeroMemoized } from "../components/home/views/Hero";
 
 export const gray01 = "#28282a";
 export const gray02 = "#202020";
@@ -36,6 +38,33 @@ export const Home = () => {
       }}
     >
       <AppHeader />
+      <HeroMemoized headerHeight={HEADER_HEIGHT} />
+      {ONE_CADEMY_SECTIONS.slice(1).map((section, idx) => (
+        <Box key={section.id} id={section.id} component={"section"} sx={{ py: "96px" }}>
+          <Box
+            sx={{
+              maxWidth: "1216px",
+              margin: "auto",
+              border: `solid 2px ${idx % 2 === 0 ? "royalBlue" : "pink"}`,
+              textAlign: idx === 0 ? "center" : "left",
+            }}
+          >
+            <Typography sx={{ fontSize: "36px", mb: "20px" }}>{section.label}</Typography>
+            <Typography sx={{ fontSize: "20px" }}>
+              {section.getDescription
+                ? section.getDescription({
+                    institutions: "0",
+                    links: "0",
+                    nodes: "0",
+                    proposals: "0",
+                    users: "0",
+                    communities: "0",
+                  })
+                : section.description}
+            </Typography>
+          </Box>
+        </Box>
+      ))}
 
       <style>
         {`
