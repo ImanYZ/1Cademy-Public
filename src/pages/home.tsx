@@ -2,6 +2,7 @@ import { Box /* useTheme */, Typography } from "@mui/material";
 import React from "react";
 
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
+import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism from "../components/home/sections/Mechanism";
 import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
@@ -36,7 +37,7 @@ export const Home = () => {
         overflowY: "auto",
         overflowX: "hidden",
         position: "relative",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
       <AppHeader />
@@ -69,6 +70,9 @@ export const Home = () => {
 
             {idx === 0 && <Mechanism />}
             {idx === 1 && <Magnitude />}
+            {idx === 1 && <UniversitiesMap theme={"Dark"} />}
+            {idx === 2 && <h1>benefits</h1>}
+            {idx === 2 && <h1>topics</h1>}
           </Box>
         </Box>
       ))}
