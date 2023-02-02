@@ -60,7 +60,7 @@ const Hero = ({ headerHeight }: HeroProps) => {
           component="a"
           target="_blank"
           href="https://1cademy.us/#JoinUsSection"
-          sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
+          sx={{ minWidth: 200, textTransform: "uppercase" }}
         >
           Apply to Join Us!
         </Button>

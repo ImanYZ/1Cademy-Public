@@ -38,23 +38,26 @@ const MenuBar = ({ items, switchSection }: MenuBarProps) => {
       direction={"column"}
       justifyContent={"space-between"}
       alignItems={"center"}
-      sx={{
-        position: "absolute",
-        top: "50px",
-        bottom: "0px",
-        left: "0px",
-        right: "0px",
-        background: "white",
-        zIndex: "12",
-      }}
+      sx={{ height: `calc(100vh - ${HEADER_HEIGHT}px)` }}
     >
-      <Stack flex={1} direction={"column"} alignItems={"center"} spacing="32px" padding={"16px"}>
+      <Stack
+        flex={1}
+        direction={"column"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        spacing="32px"
+        padding={"32px"}
+      >
         {items.map((cur, idx) => {
           return (
             <Tooltip key={cur.id} title={cur.title}>
               <Link
                 onClick={switchSection(idx + 1)}
-                sx={{ color: "common.black", cursor: "pointer", textDecoration: "none" }}
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
+                  cursor: "pointer",
+                  textDecoration: "none",
+                }}
               >
                 {cur.label}
               </Link>
@@ -125,7 +128,7 @@ const AppHeader = (props: AppHeaderProps) => {
           backdropFilter: "saturate(180%) blur(20px)",
           position: "sticky",
           top: "0",
-          zIndex: "10",
+          zIndex: "22",
         }}
       >
         <Stack
@@ -324,9 +327,8 @@ const AppHeader = (props: AppHeaderProps) => {
           </Stack>
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
+        {openMenu && <MenuBar items={ONE_CADEMY_SECTIONS.slice(1)} switchSection={props.switchSection} />}
       </Box>
-
-      {openMenu && <MenuBar items={ONE_CADEMY_SECTIONS.slice(1)} switchSection={props.switchSection} />}
     </>
   );
 };
