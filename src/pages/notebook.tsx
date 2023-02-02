@@ -2485,6 +2485,7 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
         isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+        isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
 
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
