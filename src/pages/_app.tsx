@@ -28,7 +28,7 @@ initFirebaseClientSDK();
     const auth = getAuth();
     auth.onAuthStateChanged(user => {
       if (user && chrome?.runtime?.sendMessage) {
-        chrome.runtime.sendMessage("onecademy-user-" + user?.displayName);
+        chrome.runtime.sendMessage(process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID, "onecademy-user-" + user?.displayName);
       }
     });
   }
