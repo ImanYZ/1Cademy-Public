@@ -17,7 +17,7 @@ import { detach } from "src/utils/helpers";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import { IInstitution } from "src/types/IInstitution";
-import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
+import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IActionTrack } from "src/types/IActionTrack";
@@ -119,6 +119,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
+
+    // adding missing tags/tagIds
+    let tagUpdates = {
+      tags: [],
+      tagIds: [],
+    };
+    const nodesMap: {
+      [nodeId: string]: INode;
+    } = {};
+    const visitedNodeIds: string[] = [];
+    await generateTagsOfTagsWithNodes({
+      nodeId: id,
+      tagIds,
+      nodeUpdates: tagUpdates,
+      nodes: nodesMap,
+      visitedNodeIds,
+    });
+
     const versionRef = versionsColl.doc();
     const versionData: INodeVersion = {
       node: id,
@@ -134,8 +152,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       referenceIds,
       referenceLabels,
       references: references,
-      tagIds,
-      tags,
+      tagIds: tagUpdates.tagIds,
+      tags: tagUpdates.tags,
       proposer: userData.uname,
       imageUrl: userData.imageUrl,
       fullname: userData.fullname,

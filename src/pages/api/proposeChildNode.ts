@@ -1,12 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { IActionTrack } from "src/types/IActionTrack";
+import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUser } from "src/types/IUser";
 import { detach } from "src/utils/helpers";
-import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
+import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import {
@@ -86,6 +87,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
     ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.parentId }));
     ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: req.body.data.parentId }));
+
+    // adding missing tags/tagIds
+    let tagUpdates = {
+      tags: [],
+      tagIds: [],
+    };
+    const nodesMap: {
+      [nodeId: string]: INode;
+    } = {};
+    const visitedNodeIds: string[] = [];
+    await generateTagsOfTagsWithNodes({
+      nodeId: "", // newer node don't have node id
+      tagIds: req.body.data.tagIds || [],
+      nodeUpdates: tagUpdates,
+      nodes: nodesMap,
+      visitedNodeIds,
+    });
+
     const newVersion: any = {
       awards: 0,
       children: req.body.data.children,
@@ -111,8 +130,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       summary: req.body.data.summary,
       newChild: true,
       subType: req.body.data.subType,
-      tagIds: req.body.data.tagIds,
-      tags: req.body.data.tags,
+      tagIds: tagUpdates.tagIds,
+      tags: tagUpdates.tags,
       updatedAt: currentTimestamp,
       viewers: 1,
       wrongs: 0,

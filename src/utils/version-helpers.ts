@@ -1,5 +1,6 @@
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import {
+  arrayToChunks,
   convertToTGet,
   getNode,
   getTypedCollections,
@@ -900,9 +901,85 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
 export const hasCycle = ({ tagsOfNodes, nodeId, path = [] }: any) =>
   path.includes(nodeId)
     ? true
-    : ((nodeId in tagsOfNodes && tagsOfNodes[nodeId].tagIds) || []).some((tagId: any) =>
+    : (tagsOfNodes?.[nodeId]?.tagIds || []).some((tagId: any) =>
         hasCycle({ tagsOfNodes, nodeId: tagId, path: [...path, nodeId] })
       );
+
+export const loadNodeByIds = async (
+  nodeIds: string[],
+  nodes: {
+    [nodeId: string]: INode;
+  }
+) => {
+  const _nodeIds = arrayToChunks(
+    nodeIds.filter(nodeId => !nodes[nodeId]),
+    10
+  );
+  for (const nodeIds of _nodeIds) {
+    const _nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+    for (const node of _nodes.docs) {
+      nodes[node.id] = node.data() as INode;
+    }
+  }
+};
+
+type TGenerateTagsOfTagsWithNodesParam = {
+  tagIds: string[];
+  nodeId: string;
+  nodes: {
+    [nodeId: string]: INode;
+  };
+  nodeUpdates: {
+    tagIds: string[];
+    tags: string[];
+  };
+  visitedNodeIds: string[];
+};
+export const generateTagsOfTagsWithNodes = async ({
+  nodeId,
+  tagIds,
+  nodes,
+  nodeUpdates,
+  visitedNodeIds,
+}: TGenerateTagsOfTagsWithNodesParam) => {
+  // push current node id as visited if not already present
+  if (!visitedNodeIds.includes(nodeId)) {
+    visitedNodeIds.push(nodeId);
+  }
+
+  // loading tagIds in nodes list
+  await loadNodeByIds(tagIds, nodes);
+
+  const _tagIds: string[] = [];
+  for (const tagId of tagIds) {
+    visitedNodeIds.push(tagId);
+    // if given tag is deleted we don't want it to be present in tag lists
+    if (nodes[tagId].deleted) {
+      continue;
+    }
+    // if given tag is already present in visited nodes that means its a cycle
+    if (nodes[tagId].tagIds.some(_tagId => visitedNodeIds.includes(_tagId))) {
+      continue;
+    }
+
+    // pushing in _tagIds to process them after loop for next recursion
+    _tagIds.push(tagId);
+
+    nodeUpdates.tagIds.push(tagId);
+    nodeUpdates.tags.push(nodes[tagId].title);
+  }
+
+  // loading more higher communities
+  for (const tagId of _tagIds) {
+    await generateTagsOfTagsWithNodes({
+      nodeId: tagId,
+      tagIds: nodes[tagId].tagIds,
+      nodes,
+      nodeUpdates,
+      visitedNodeIds,
+    });
+  }
+};
 
 //  recusively generate tags starting from a given node (top down)
 //  starting from a node, iterate through all of its tags and re-call the function for each node.
@@ -916,8 +993,8 @@ export const generateTagsOfTags = async ({ nodeId, tagIds, tags, nodeUpdates }: 
       const { tagData } = await getTagRefData(tagId);
       const generatedTags = await generateTagsOfTags({
         nodeId: tagId,
-        tagIds: tagData ? tagData.tagIds : [],
-        tags: tagData ? tagData.tags : [],
+        tagIds: tagData?.tagIds || [],
+        tags: tagData?.tags || [],
         nodeUpdates,
       });
       for (let gTagIdx = 0; gTagIdx < generatedTags.tagIds.length; gTagIdx++) {
