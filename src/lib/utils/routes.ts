@@ -12,6 +12,7 @@ const ROUTES = {
   instructorsSettings: "/instructors/settings",
   instructorsStudents: "/instructors/students",
   instructorsDashboardStudents: "/instructors/dashboard/[uname]",
+  apply: "https://1cademy.us/#JoinUsSection",
 };
 
 export default ROUTES;

@@ -4,7 +4,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link, useTheme } from "@mui/material";
+import { Link, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -22,6 +22,7 @@ import useThemeChange from "@/hooks/useThemeChange";
 import LogoDarkMode from "../../public/DarkModeLogoMini.png";
 import { useAuth } from "../context/AuthContext";
 import ROUTES from "../lib/utils/routes";
+import { capitalizeString } from "../lib/utils/string.utils";
 import AppHeaderSearchBar from "./AppHeaderSearchBar2";
 import { ONE_CADEMY_SECTIONS, OneCademySection } from "./home/SectionsItems";
 
@@ -29,10 +30,10 @@ export const HEADER_HEIGHT = 50;
 
 type MenuBarProps = {
   items: OneCademySection[];
-  switchSection: any;
+  onCloseMenu: () => void;
 };
 
-const MenuBar = ({ items, switchSection }: MenuBarProps) => {
+const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
   return (
     <Stack
       direction={"column"}
@@ -48,11 +49,12 @@ const MenuBar = ({ items, switchSection }: MenuBarProps) => {
         spacing="32px"
         padding={"32px"}
       >
-        {items.map((cur, idx) => {
+        {items.map(cur => {
           return (
             <Tooltip key={cur.id} title={cur.title}>
               <Link
-                onClick={switchSection(idx + 1)}
+                href={`#${cur.id}`}
+                onClick={onCloseMenu}
                 sx={{
                   color: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
                   cursor: "pointer",
@@ -74,7 +76,6 @@ const MenuBar = ({ items, switchSection }: MenuBarProps) => {
 type AppHeaderProps = {
   switchSection: any;
   homeClick: any;
-  joinUsClick: any;
 };
 
 const AppHeader = (props: AppHeaderProps) => {
@@ -102,16 +103,14 @@ const AppHeader = (props: AppHeaderProps) => {
   const renderProfileMenu = (
     <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
       {isAuthenticated && user && (
-        <MenuItem disabled sx={{ flexGrow: 3, color: "common.black", opacity: "1 !important" }}>
-          {user.fName}
-        </MenuItem>
+        <Typography sx={{ p: "6px 16px" }}>
+          {capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}
+        </Typography>
       )}
       {isAuthenticated && user && (
-        <>
-          <MenuItem sx={{ flexGrow: 3 }} onClick={signOut}>
-            <LogoutIcon /> <span id="LogoutText">Logout</span>
-          </MenuItem>
-        </>
+        <MenuItem sx={{ flexGrow: 3 }} onClick={signOut}>
+          <LogoutIcon /> <span id="LogoutText">Logout</span>
+        </MenuItem>
       )}
     </Menu>
   );
@@ -145,7 +144,7 @@ const AppHeader = (props: AppHeaderProps) => {
                 alt="logo"
                 width="30px"
                 style={{ cursor: "pointer" }}
-                onClick={props.homeClick}
+                onClick={() => router.push("/")}
               />
             </Tooltip>
             <Stack
@@ -161,11 +160,11 @@ const AppHeader = (props: AppHeaderProps) => {
                 },
               }}
             >
-              {ONE_CADEMY_SECTIONS.slice(1).map((cur, idx) => {
+              {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
                 return (
                   <Tooltip key={cur.id} title={cur.title}>
                     <Link
-                      onClick={props.switchSection(idx + 1)}
+                      href={`#${cur.id}`}
                       sx={{
                         whiteSpace: "nowrap",
                         color: theme =>
@@ -210,11 +209,9 @@ const AppHeader = (props: AppHeaderProps) => {
               <Tooltip title="Apply to join 1Cademy">
                 <Button
                   variant="contained"
-                  //   color="secondary"
-                  onClick={props.joinUsClick}
+                  onClick={() => window?.open(ROUTES.apply, "_blank")}
                   sx={{
                     fontSize: 14,
-                    // color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
                     borderRadius: 40,
                     height: "25px",
                     width: "60px",
@@ -227,8 +224,8 @@ const AppHeader = (props: AppHeaderProps) => {
             )}
 
             {isAuthenticated && user ? (
-              <Tooltip title={user.chooseUname ? user.uname : user.fName ?? ""}>
-                <IconButton>
+              <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
+                <IconButton onClick={handleProfileMenuOpen}>
                   <Box
                     sx={{
                       width: "22px",
@@ -240,7 +237,6 @@ const AppHeader = (props: AppHeaderProps) => {
                     aria-controls="lock-menu"
                     aria-label={`${user.fName}'s Account`}
                     aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                    onClick={handleProfileMenuOpen}
                   >
                     <Image
                       src={user.imageUrl || ""}
@@ -327,10 +323,18 @@ const AppHeader = (props: AppHeaderProps) => {
           </Stack>
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
-        {openMenu && <MenuBar items={ONE_CADEMY_SECTIONS.slice(1)} switchSection={props.switchSection} />}
+        {openMenu && (
+          <MenuBar
+            items={ONE_CADEMY_SECTIONS.slice(1)}
+            switchSection={props.switchSection}
+            onCloseMenu={() => setOpenMenu(false)}
+          />
+        )}
       </Box>
     </>
   );
 };
 
-export default AppHeader;
+export const AppHeaderMemoized = React.memo(AppHeader);
+
+export default AppHeaderMemoized;

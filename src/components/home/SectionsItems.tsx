@@ -6,19 +6,19 @@ export type OneCademySection = {
 };
 export const ONE_CADEMY_SECTIONS = [
   {
-    id: "LandingSection",
+    id: "landing",
     title: "1Cademy's Landing Page",
     label: "1Cademy's Landing Page",
     description: "",
   },
   {
-    id: "MechanismSection",
+    id: "mechanism",
     title: "Mechanism",
     label: "Mechanism",
     description: "We collaboratively summarize, link, evaluate, and improve science on 1Cademy.",
   },
   {
-    id: "Magnitude",
+    id: "magnitude",
     title: "Magnitude",
     label: "Magnitude",
     description:
@@ -27,24 +27,24 @@ export const ONE_CADEMY_SECTIONS = [
       `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals. \nAs a result of this collaboration, [${communities}] research and learning communities have formed, covering a wide range of subjects such as psychology, machine learning, and virology. This collaborative effort has allowed for the sharing of knowledge and resources among students and researchers from different institutions, promoting the advancement of knowledge in various fields. \nFurthermore, it has facilitated the formation of communities of learners and researchers who can learn from each other, exchange ideas and support one another in their learning journey. This collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics, and that they can improve semester by semester. Through this process, students can spend less time on note-taking and gain the most benefit from the notes.`,
   },
   {
-    id: "Benefits",
+    id: "benefits",
     title: "Benefits",
     label: "Benefits",
     description: "",
   },
   {
-    id: "Topics",
+    id: "topics",
     title: "Topics",
     label: "Topics",
     description:
       "1Cademy facilitated the formation of communities of learners and researchers who can learn from each other, exchange ideas and support one another in their learning journey.",
   },
   {
-    id: "Systems",
+    id: "systems",
     title: "Systems",
     label: "Systems",
     description:
       "1Cademy offers a comprehensive and integrated solution that enhances the educational and research experience through its three interconnected systems.",
   },
-  { id: "About Us", title: "About Us", label: "About Us", description: "" },
+  { id: "about-us", title: "About Us", label: "About Us", description: "" },
 ];

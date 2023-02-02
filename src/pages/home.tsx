@@ -377,13 +377,7 @@ export const Home = () => {
         onClickSearcher={() => setOpenSearch}
       /> */}
 
-      <AppHeader
-        switchSection={() => console.log("swithc")}
-        homeClick={() => console.log("home chlick")}
-        joinUsClick={() => {
-          console.log("join");
-        }}
-      />
+      <AppHeader switchSection={() => console.log("swithc")} homeClick={() => console.log("home chlick")} />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
