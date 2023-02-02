@@ -73,12 +73,12 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
   );
 };
 
-type AppHeaderProps = {
-  switchSection: any;
-  homeClick: any;
-};
+// type AppHeaderProps = {
+//   switchSection: any;
+//   homeClick: any;
+// };
 
-const AppHeader = (props: AppHeaderProps) => {
+const AppHeader = () => {
   const [profileMenuOpen, setProfileMenuOpen] = useState(null);
   const isProfileMenuOpen = Boolean(profileMenuOpen);
   const [openMenu, setOpenMenu] = useState(false);
@@ -143,6 +143,7 @@ const AppHeader = (props: AppHeaderProps) => {
                 src={LogoDarkMode.src}
                 alt="logo"
                 width="30px"
+                height="30px"
                 style={{ cursor: "pointer" }}
                 onClick={() => router.push("/")}
               />
@@ -323,13 +324,7 @@ const AppHeader = (props: AppHeaderProps) => {
           </Stack>
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
-        {openMenu && (
-          <MenuBar
-            items={ONE_CADEMY_SECTIONS.slice(1)}
-            switchSection={props.switchSection}
-            onCloseMenu={() => setOpenMenu(false)}
-          />
-        )}
+        {openMenu && <MenuBar items={ONE_CADEMY_SECTIONS.slice(1)} onCloseMenu={() => setOpenMenu(false)} />}
       </Box>
     </>
   );

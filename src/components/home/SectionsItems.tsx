@@ -1,3 +1,5 @@
+import { StatsSchema } from "../../knowledgeTypes";
+
 export type OneCademySection = {
   id: string;
   title: string;
