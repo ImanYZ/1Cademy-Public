@@ -3,12 +3,12 @@ import Box from "@mui/material/Box";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
-import { gray03 } from "@/pages/index";
-
+// import { gray03 } from "@/pages/index";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { StatsSchema } from "../../../knowledgeTypes";
 import { getStats } from "../../../lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
+import { gray03 } from "../../../pages/home";
 import { Magnitude } from "../components/Magnitude";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import Typography from "../components/Typography copy";

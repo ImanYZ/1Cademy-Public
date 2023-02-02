@@ -4,7 +4,8 @@ import React from "react";
 
 import { useInView, UseInViewProps } from "@/hooks/useObserver";
 
-import { gray03 } from "../../../pages";
+import { gray03 } from "../../../pages/home";
+// import { gray03 } from "../../../pages";
 import valuesItems from "./valuesItems";
 const observerOption: UseInViewProps = { options: { root: null, rootMargin: "0px", threshold: 0.5 } };
 

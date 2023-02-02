@@ -6,7 +6,8 @@ import { useQuery } from "react-query";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { getStats } from "../../../lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
-import { gray03 } from "../../../pages";
+import { gray03 } from "../../../pages/home";
+// import { gray03 } from "../../../pages";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import { wrapStringWithBoldTag } from "./HowItWorks";
 import whichItems from "./whichValues";
@@ -78,6 +79,10 @@ const Which = () => {
             )}
             {idx === 1 && (
               <Box
+                component={"a"}
+                href={whichItem.link}
+                target="_blank"
+                rel="noreferrer"
                 sx={{
                   width: width < 900 ? canvasDimension.width : GoalsAnimationWidth,
                   height: width < 900 ? canvasDimension.height : GoalsAnimationHeight,
@@ -92,7 +97,13 @@ const Which = () => {
               </Box>
             )}
             {idx === 2 && (
-              <Box sx={{ width: canvasDimension.width, height: canvasDimension.height }}>
+              <Box
+                component={"a"}
+                href={whichItem.link}
+                target="_blank"
+                rel="noreferrer"
+                sx={{ width: canvasDimension.width, height: canvasDimension.height }}
+              >
                 <RiveComponentMemoized
                   src="rive/extension.riv"
                   artboard={"extension"}

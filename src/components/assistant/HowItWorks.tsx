@@ -4,7 +4,8 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo
 
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-import { gray03 } from "../../pages";
+import { gray03 } from "../../pages/assistant";
+// import { gray03 } from "../../pages";
 import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
 
 // import { useWindowSize } from "../../hooks/useWindowSize";
