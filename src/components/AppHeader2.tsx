@@ -3,6 +3,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
 import { Link, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -178,12 +179,26 @@ const AppHeader = (props: AppHeaderProps) => {
             </Stack>
           </Stack>
 
-          <AppHeaderSearchBar />
+          <Box sx={{ width: "100%", display: { xs: isAuthenticated ? "block" : "none", sm: "block" } }}>
+            <AppHeaderSearchBar />
+          </Box>
           {/* <Box sx={{ flexGrow: 1 }}>
             </Box> */}
           <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-            <Tooltip title="Apply to join 1Cademy">
-              <IconButton onClick={handleThemeSwitch}>
+            {/* <Box > */}
+            <Tooltip title="Open Searcher">
+              <IconButton
+                onClick={() => console.log("onClickSearcher")}
+                sx={{ display: { xs: !isAuthenticated ? undefined : "none", sm: "none" } }}
+                size="small"
+              >
+                <SearchIcon />
+              </IconButton>
+            </Tooltip>
+            {/* </Box> */}
+
+            <Tooltip title="Change theme">
+              <IconButton onClick={handleThemeSwitch} size="small">
                 {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </Tooltip>
@@ -209,7 +224,7 @@ const AppHeader = (props: AppHeaderProps) => {
             )}
 
             {isAuthenticated && user ? (
-              <Tooltip title="Account">
+              <Tooltip title={user.chooseUname ? user.uname : user.fName ?? ""}>
                 <IconButton>
                   <Box
                     sx={{
@@ -299,15 +314,13 @@ const AppHeader = (props: AppHeaderProps) => {
               </Tooltip>
             )}
 
-            {
-              <IconButton
-                onClick={() => setOpenMenu(prev => !prev)}
-                sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
-                size="small"
-              >
-                {openMenu ? <CloseIcon /> : <MenuIcon />}
-              </IconButton>
-            }
+            <IconButton
+              onClick={() => setOpenMenu(prev => !prev)}
+              sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
+              size="small"
+            >
+              {openMenu ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
           </Stack>
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
