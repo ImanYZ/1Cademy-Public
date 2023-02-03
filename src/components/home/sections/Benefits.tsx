@@ -56,7 +56,7 @@ const Benefits = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `2px solid ${expanded === `Option${idx + 1}` ? "#ff6d00" : "#F8F8F8"}`,
+              borderLeft: `2px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
               "&:before": {
                 display: "none",
               },
