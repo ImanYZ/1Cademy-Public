@@ -5,6 +5,7 @@ export type OneCademySection = {
   title: string;
   label: string;
   description: string;
+  getDescription?: any;
 };
 export const ONE_CADEMY_SECTIONS = [
   {
@@ -23,6 +24,7 @@ export const ONE_CADEMY_SECTIONS = [
     id: "magnitude",
     title: "Magnitude",
     label: "Magnitude",
+    description: "",
     getDescription: ({ users, institutions, nodes, links, proposals }: StatsSchema) =>
       `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.`,
   },
