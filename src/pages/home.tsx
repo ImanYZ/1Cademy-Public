@@ -1,6 +1,8 @@
 import { Box /* useTheme */, Typography } from "@mui/material";
 import React from "react";
 
+import Benefits from "@/components/home/sections/Benefits";
+
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import Magnitude from "../components/home/sections/Magnitude";
@@ -73,7 +75,7 @@ export const Home = () => {
             {idx === 0 && <Mechanism />}
             {idx === 1 && <Magnitude />}
             {idx === 1 && <UniversitiesMap theme={"Dark"} />}
-            {idx === 2 && <h1>benefits</h1>}
+            {idx === 2 && <Benefits />}
             {idx === 3 && <Topics />}
             {idx === 4 && <h1>system</h1>}
             {idx === 5 && <h1>about us</h1>}
