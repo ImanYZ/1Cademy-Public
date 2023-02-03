@@ -5,6 +5,7 @@ import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism from "../components/home/sections/Mechanism";
+import Papers from "../components/home/sections/Papers";
 import Topics from "../components/home/sections/Topics";
 import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
 // const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
@@ -73,7 +74,10 @@ export const Home = () => {
             {idx === 1 && <Magnitude />}
             {idx === 1 && <UniversitiesMap theme={"Dark"} />}
             {idx === 2 && <h1>benefits</h1>}
-            {idx === 2 && <Topics />}
+            {idx === 3 && <Topics />}
+            {idx === 4 && <h1>system</h1>}
+            {idx === 5 && <h1>about us</h1>}
+            {idx === 5 && <Papers />}
           </Box>
         </Box>
       ))}
