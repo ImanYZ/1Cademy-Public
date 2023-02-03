@@ -101,7 +101,7 @@ const Systems = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `2px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
+              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
               "&:before": {
                 display: "none",
               },
@@ -110,7 +110,12 @@ const Systems = () => {
             onChange={handleChange(`Option${idx + 1}`, value.name)}
           >
             <AccordionSummary>
-              <Typography component={"h4"} variant={"h4"} sx={{ fontWeight: 400, p: "8px", cursor: "pointer" }}>
+              <Typography
+                component={"h4"}
+                variant={"h4"}
+                fontSize={20}
+                sx={{ fontWeight: 400, p: "8px", cursor: "pointer" }}
+              >
                 {value.name}
               </Typography>
               <Button
@@ -130,7 +135,7 @@ const Systems = () => {
                 .map((paragraph: string, idx: number) => (
                   <Typography
                     key={idx}
-                    fontSize={"14px"}
+                    fontSize={"16px"}
                     color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
                     sx={{ p: "8px", pt: "0" }}
                   >

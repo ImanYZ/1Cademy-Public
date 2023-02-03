@@ -56,7 +56,7 @@ const Benefits = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `2px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
+              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
               "&:before": {
                 display: "none",
               },
@@ -65,14 +65,18 @@ const Benefits = () => {
             onChange={handleChange(`Option${idx + 1}`, value.name)}
           >
             <AccordionSummary>
-              <Typography component={"h4"} variant={"h4"} sx={{ fontWeight: 400, p: "8px", cursor: "pointer" }}>
+              <Typography
+                component={"h4"}
+                variant={"h4"}
+                sx={{ fontSize: "20px", fontWeight: 400, p: "8px", cursor: "pointer" }}
+              >
                 {value.name}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography
                 sx={{ p: "8px", pt: "0" }}
-                fontSize={"14px"}
+                fontSize={"16px"}
                 color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
               >
                 {value.body}
