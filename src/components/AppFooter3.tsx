@@ -17,7 +17,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
       component={"footer"}
       sx={{
         color,
-        backgroundColor: "#0A0D14",
+        backgroundColor: "#000",
         p: "48px 16px",
 
         "& a": {
@@ -126,8 +126,8 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
         <br />
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={"8px"}>
           <span style={{ fontSize: "14px" }}>&copy; 1Cademy {new Date().getFullYear()}</span>
-          <Box>
-            <GitHubIcon fontSize="medium" />
+          <Stack direction={"row"} spacing="16px">
+            <GitHubIcon fontSize="medium" sx={{ color: "#98A2B3" }} />
             <Typography color="#D0D5DD" fontSize={"14px"} display={"inline-block"}>
               We're committed to OpenSource on{" "}
             </Typography>
@@ -139,7 +139,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
             >
               Github
             </Link>
-          </Box>
+          </Stack>
         </Stack>
       </Box>
     </Box>
