@@ -138,7 +138,11 @@ const Systems = () => {
                   </Typography>
                 ))}
 
-              {getAnimation(value, { display: { xs: "block", sm: "none" }, m: "0 auto" })}
+              {getAnimation(value, {
+                display: { xs: "block", sm: "none" },
+                m: "0 auto",
+                opacity: selectedValue?.id !== value.id ? "0" : "1",
+              })}
             </AccordionDetails>
           </Accordion>
         ))}
