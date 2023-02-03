@@ -29,6 +29,7 @@ const Hero = ({ headerHeight }: HeroProps) => {
       alignItems={"center"}
       justifyContent="flex-end"
       sx={{
+        position: "relative",
         height: `calc(100vh - ${headerHeight}px)`,
         width: "100%",
         padding: width < 900 ? "10px" : "20px",
