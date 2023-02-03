@@ -5,6 +5,7 @@ import Benefits from "@/components/home/sections/Benefits";
 
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
+import Join from "../components/home/sections/Join";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism from "../components/home/sections/Mechanism";
 import Papers from "../components/home/sections/Papers";
@@ -83,6 +84,10 @@ export const Home = () => {
           </Box>
         </Box>
       ))}
+
+      <Box sx={{ py: "96px", maxWidth: "1216px", m: "auto" }}>
+        <Join />
+      </Box>
 
       <style>
         {`
