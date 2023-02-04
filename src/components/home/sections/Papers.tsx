@@ -90,7 +90,6 @@ const Papers = () => {
                 p: "24px",
                 background: theme => (theme.palette.mode === "dark" ? "#000000" : "#F9FAFB"),
                 cursor: "pointer",
-
                 ":hover": {
                   background: theme => (theme.palette.mode === "dark" ? "#1d1d1d" : "#ebebeb"),
                 },

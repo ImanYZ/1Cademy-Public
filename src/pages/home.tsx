@@ -6,6 +6,8 @@ import Benefits from "@/components/home/sections/Benefits";
 
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
+import About from "../components/home/sections/About";
+import Join from "../components/home/sections/Join";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism from "../components/home/sections/Mechanism";
 import Papers from "../components/home/sections/Papers";
@@ -49,7 +51,7 @@ export const Home = () => {
       <AppHeader />
       <HeroMemoized headerHeight={HEADER_HEIGHT} />
       {ONE_CADEMY_SECTIONS.slice(1).map((section, idx) => (
-        <Box key={section.id} id={section.id} component={"section"} sx={{ py: "96px" }}>
+        <Box key={section.id} id={section.id} component={"section"} sx={{ py: { xs: "64px", sm: "96px" } }}>
           <Box
             sx={{
               maxWidth: "1216px",
@@ -80,11 +82,16 @@ export const Home = () => {
             {idx === 2 && <Benefits />}
             {idx === 4 && <Topics />}
             {idx === 3 && <Systems />}
-            {idx === 5 && <h1>about us</h1>}
+            {idx === 5 && <About />}
             {idx === 5 && <Papers />}
           </Box>
         </Box>
       ))}
+
+      <Box sx={{ py: "96px", maxWidth: "1216px", m: "auto" }}>
+        <Join />
+      </Box>
+
       <AppFooter3 />
       <style>
         {`
