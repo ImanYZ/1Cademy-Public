@@ -2,6 +2,8 @@ import { Stack, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useMemo } from "react";
 
+import { gray200, gray600 } from "@/pages/home";
+
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
@@ -82,7 +84,7 @@ const Mechanism = () => {
             <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600px", mb: "16px" }}>
               {cur.title}
             </Typography>
-            <Typography>{cur.description}</Typography>
+            <Typography sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600 }}>{cur.description}</Typography>
           </Box>
           <Box sx={{ width: canvasDimensions.width, height: canvasDimensions.height }}>
             <RiveComponentMemoized

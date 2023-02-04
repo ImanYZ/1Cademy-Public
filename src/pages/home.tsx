@@ -1,4 +1,4 @@
-import { Box /* useTheme */, Typography } from "@mui/material";
+import { Box /* useTheme */, Typography, useTheme } from "@mui/material";
 import React from "react";
 
 import AppFooter3 from "@/components/AppFooter3";
@@ -28,13 +28,15 @@ import { HeroMemoized } from "../components/home/views/Hero";
 export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
+export const gray600 = "#475467";
+export const gray200 = "#EAECF0";
 
 /**
  * animations builded with: https://rive.app/
  */
 
 export const Home = () => {
-  // const theme = useTheme();
+  const theme = useTheme();
 
   return (
     <Box
@@ -62,8 +64,16 @@ export const Home = () => {
             }}
           >
             <Box sx={{ mb: idx === 0 ? "32px" : "64px" }}>
-              <Typography sx={{ fontSize: "36px", mb: "20px" }}>{section.label}</Typography>
-              <Typography sx={{ fontSize: "20px", maxWidth: idx !== 0 ? "768px" : undefined }}>
+              <Typography sx={{ fontSize: "36px", mb: "20px", textTransform: "uppercase", fontWeight: 600 }}>
+                {section.label}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "20px",
+                  maxWidth: idx !== 0 ? "768px" : undefined,
+                  color: theme.palette.mode === "dark" ? gray200 : gray600,
+                }}
+              >
                 {section.getDescription
                   ? section.getDescription({
                       institutions: "0",

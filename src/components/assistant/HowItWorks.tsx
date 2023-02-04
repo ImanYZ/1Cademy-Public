@@ -173,7 +173,12 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
         alignItems={width < 900 ? "center" : "stretch"}
         sx={{ position: "relative", minHeight: "500px" /* , border: `2px dashed red` */ }}
       >
-        <Typography gutterBottom variant="h3" component="h3" sx={{ fontSize: "32px", textAlign: "center" }}>
+        <Typography
+          gutterBottom
+          variant="h3"
+          component="h3"
+          sx={{ fontSize: "32px", textAlign: "center", fontWeight: 600 }}
+        >
           {artboard.name}
         </Typography>
         <Box sx={{ position: "relative", alignSelf: "center" }}>

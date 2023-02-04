@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
+import { gray200, gray600 } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import { useAuth } from "../context/AuthContext";
@@ -57,7 +58,7 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
                 href={`#${cur.id}`}
                 onClick={onCloseMenu}
                 sx={{
-                  color: theme => (theme.palette.mode === "dark" ? "common.white" : "common.black"),
+                  color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
                   cursor: "pointer",
                   textDecoration: "none",
                 }}
@@ -174,8 +175,7 @@ const AppHeader = () => {
                       href={`#${cur.id}`}
                       sx={{
                         whiteSpace: "nowrap",
-                        color: theme =>
-                          theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                        color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
                         cursor: "pointer",
                         textDecoration: "none",
                         fontWeight: 600,
@@ -299,7 +299,7 @@ const AppHeader = () => {
                   aria-expanded={isProfileMenuOpen ? "true" : undefined}
                   onClick={handleProfileMenuOpen}
                   color="inherit"
-                > 
+                >
                 </IconButton> */}
               </Tooltip>
             ) : (
