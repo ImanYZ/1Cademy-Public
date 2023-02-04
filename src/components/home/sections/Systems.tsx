@@ -16,6 +16,7 @@ import { useQuery } from "react-query";
 
 import { getStats } from "@/lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "@/lib/utils/RE";
+import { orangeDark } from "@/pages/home";
 
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import { wrapStringWithBoldTag } from "../views/HowItWorks";
@@ -101,7 +102,7 @@ const Systems = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
+              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? orangeDark : "#F8F8F8"}`,
               "&:before": {
                 display: "none",
               },
@@ -124,9 +125,10 @@ const Systems = () => {
                 target="_blank"
                 rel="noreferrer"
                 onClick={e => e.stopPropagation()}
+                sx={{ color: orangeDark }}
               >
                 Visit
-                <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} />
+                <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
               </Button>
             </AccordionSummary>
             <AccordionDetails>

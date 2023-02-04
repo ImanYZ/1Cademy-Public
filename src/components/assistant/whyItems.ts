@@ -12,7 +12,7 @@ const whyItems = [
     name: "Auto-schedules your tasks.",
     body: "Your assistant checks your existing schedule to optimize time-allocation for your tasks. It also allows you to easily reschedule tasks to different times or days if you are unable to complete them.",
     image: "assistant/2-auto-schedule.svg",
-    imageDark: "assistant/2-auto-schedule.svg",
+    imageDark: "assistant/2-auto-schedule-dark.svg",
     padding: "4px 40px 0px 40px",
     width: "auto",
     height: "100%",

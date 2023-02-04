@@ -106,7 +106,7 @@ const sectionsTmp = [
     title: "Why 1Cademy Assistant?",
     simpleTitle: "Why?",
     children: [],
-    height: { xs: "auto", mb: "6744px", sm: "5661px", md: "5824px", lg: "5634px", xl: "5634px" },
+    height: { xs: "auto", mb: "6920px", sm: "5500", md: "5887px", lg: "5765px", xl: "5765px" },
   },
   {
     id: "WhichSection",
@@ -439,8 +439,8 @@ const Home = () => {
               md: sectionsTmp[1].height["md"],
               lg: sectionsTmp[1].height["lg"],
               xl: sectionsTmp[1].height["xl"],
-              // border: "solid 2px pink",
             },
+            // border: "solid 2px pink",
             width: "100%",
             maxWidth: { xs: isOnlyMobile ? "355px" : "100%", sm: "580px", md: "920px", lg: "980px" },
             margin: "auto",

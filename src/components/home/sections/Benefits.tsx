@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
+import { orangeDark } from "@/pages/home";
+
 import valuesItems, { WhyItem } from "../views/valuesItems";
 
 const Benefits = () => {
@@ -28,9 +30,9 @@ const Benefits = () => {
     return value ? (
       <Box
         sx={{
-          width: { xs: "300px", md: "400px" },
-          minWidth: { xs: "300px", md: "400px" },
-          height: { xs: "300px", md: "400px" },
+          width: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
+          minWidth: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
+          height: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
           alignSelf: "center",
           ...sx,
         }}
@@ -45,8 +47,8 @@ const Benefits = () => {
   };
 
   return (
-    <Stack direction={{ xs: "column-reverse", sm: "row" }} justifyContent={"space-between"} sx={{ margin: "auto" }}>
-      <Box sx={{ maxWidth: "500px" }}>
+    <Stack direction={{ xs: "column-reverse", md: "row" }} justifyContent={"space-between"} sx={{ margin: "auto" }}>
+      <Box sx={{ maxWidth: { xs: "none", md: "500px" } }}>
         {valuesItems.map((value, idx: number) => (
           <Accordion
             key={value.name}
@@ -56,7 +58,7 @@ const Benefits = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? "#FF6D00" : "#F8F8F8"}`,
+              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? orangeDark : "#F8F8F8"}`,
               "&:before": {
                 display: "none",
               },
@@ -82,13 +84,13 @@ const Benefits = () => {
                 {value.body}
               </Typography>
 
-              {getImage(value, { display: { xs: "block", sm: "none" }, m: "0 auto" })}
+              {getImage(value, { display: { xs: "block", md: "none" }, m: "0 auto" })}
             </AccordionDetails>
           </Accordion>
         ))}
       </Box>
 
-      {getImage(selectedValue, { display: { xs: "none", sm: "block" } })}
+      {getImage(selectedValue, { display: { xs: "none", md: "block" } })}
     </Stack>
   );
 };

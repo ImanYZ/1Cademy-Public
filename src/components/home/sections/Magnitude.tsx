@@ -1,26 +1,43 @@
 import { Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { useMemo } from "react";
+import { useQuery } from "react-query";
+import { StatsSchema } from "src/knowledgeTypes";
+
+import { getStats } from "@/lib/knowledgeApi";
+import { orangeDark } from "@/pages/home";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
 
-const MAGNITUDE_ITEMS = [
+export type TMagnitudeItem = {
+  id: keyof StatsSchema;
+  value: string;
+  title: string;
+  description: string;
+};
+
+const MAGNITUDE_ITEMS: TMagnitudeItem[] = [
   {
-    id: "students-and-researchers",
-    value: 1529,
+    id: "users",
+    value: "1529",
     title: "Students and Researchers",
     description: "Over the past two years joined 1Cademy.",
   },
   {
     id: "institutions",
-    value: 183,
+    value: "183",
     title: "Institutions",
     description: "Have participated in a large-scale collaboration effort through 1Cademy",
   },
-  { id: "nodes", value: 44_665, title: "Nodes", description: "Are generated through this large-scale collaboration." },
   {
-    id: "prerequisite-links",
-    value: 235_674,
+    id: "nodes",
+    value: "44_665",
+    title: "Nodes",
+    description: "Are generated through this large-scale collaboration.",
+  },
+  {
+    id: "links",
+    value: "235_674",
     title: "Prerequisite links",
     description: "Are connected between nodes.",
   },
@@ -28,6 +45,18 @@ const MAGNITUDE_ITEMS = [
 
 const Magnitude = () => {
   const { width } = useWindowSize();
+
+  const { data: stats } = useQuery("stats", getStats);
+
+  const MAGNITUDE_ITEMS_Memo = useMemo(() => {
+    if (!stats) return MAGNITUDE_ITEMS;
+
+    const x = MAGNITUDE_ITEMS.reduce((acc, item) => {
+      item.value = stats[item.id] ?? item.value;
+      return [...acc, item];
+    }, [] as TMagnitudeItem[]);
+    return x;
+  }, [stats]);
 
   const imageDimensions = useMemo(() => {
     let newWidth = width - 100;
@@ -49,9 +78,9 @@ const Magnitude = () => {
           rowGap: "88px",
         }}
       >
-        {MAGNITUDE_ITEMS.map(cur => (
+        {MAGNITUDE_ITEMS_Memo.map(cur => (
           <Box key={cur.id} sx={{ textAlign: "center", maxWidth: "264px" }}>
-            <Typography sx={{ fontSize: { xs: "48px", md: "60px" }, mb: "12px", color: "#FF6D00", fontWeight: 600 }}>
+            <Typography sx={{ fontSize: { xs: "48px", md: "60px" }, mb: "12px", color: orangeDark, fontWeight: 600 }}>
               {cur.value.toLocaleString()}
             </Typography>
             <Typography component={"h3"} sx={{ fontSize: "18px", fontWeight: 600 }}>
