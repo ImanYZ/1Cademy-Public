@@ -1,8 +1,12 @@
-import { Box /* useTheme */, Typography } from "@mui/material";
-import React from "react";
+import { Box /* useTheme */, Typography, useTheme } from "@mui/material";
+import React, { useCallback } from "react";
+import { useQuery } from "react-query";
 
 import AppFooter3 from "@/components/AppFooter3";
 import Benefits from "@/components/home/sections/Benefits";
+import { wrapStringWithBoldTag } from "@/components/home/views/HowItWorks";
+import { getStats } from "@/lib/knowledgeApi";
+import { RE_DETECT_NUMBERS_WITH_COMMAS } from "@/lib/utils/RE";
 
 import AppHeader, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
@@ -13,7 +17,7 @@ import Mechanism from "../components/home/sections/Mechanism";
 import Papers from "../components/home/sections/Papers";
 import Topics from "../components/home/sections/Systems";
 import Systems from "../components/home/sections/Topics";
-import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
+import { ONE_CADEMY_SECTIONS, OneCademySection } from "../components/home/SectionsItems";
 // const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
 // const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
 // const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
@@ -28,14 +32,27 @@ import { HeroMemoized } from "../components/home/views/Hero";
 export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
+export const gray600 = "#475467";
+export const gray200 = "#EAECF0";
 
 /**
  * animations builded with: https://rive.app/
  */
 
 export const Home = () => {
-  // const theme = useTheme();
+  const theme = useTheme();
+  const { data: stats } = useQuery("stats", getStats);
 
+  const getDescription = useCallback(
+    (section: OneCademySection): string => {
+      if (!section.getDescription) return section.description;
+      if (!stats) return section.description;
+
+      stats.communities = "49";
+      return section.getDescription(stats);
+    },
+    [stats]
+  );
   return (
     <Box
       id="ScrollableContainer"
@@ -45,6 +62,7 @@ export const Home = () => {
         overflowY: "auto",
         overflowX: "hidden",
         position: "relative",
+        scrollBehavior: "smooth",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
@@ -62,19 +80,21 @@ export const Home = () => {
             }}
           >
             <Box sx={{ mb: idx === 0 ? "32px" : "64px" }}>
-              <Typography sx={{ fontSize: "36px", mb: "20px" }}>{section.label}</Typography>
-              <Typography sx={{ fontSize: "20px", maxWidth: idx !== 0 ? "768px" : undefined }}>
-                {section.getDescription
-                  ? section.getDescription({
-                      institutions: "0",
-                      links: "0",
-                      nodes: "0",
-                      proposals: "0",
-                      users: "0",
-                      communities: "0",
-                    })
-                  : section.description}
+              <Typography sx={{ fontSize: "36px", mb: "20px", textTransform: "uppercase", fontWeight: 600 }}>
+                {section.label}
               </Typography>
+
+              {getDescription(section)
+                .split("\n")
+                .map((paragraph: string) => (
+                  <Typography
+                    key={paragraph}
+                    color={theme.palette.mode === "dark" ? gray200 : gray600}
+                    sx={{ fontSize: "20px", maxWidth: idx !== 0 ? "768px" : undefined }}
+                  >
+                    {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+                  </Typography>
+                ))}
             </Box>
 
             {idx === 0 && <Mechanism />}

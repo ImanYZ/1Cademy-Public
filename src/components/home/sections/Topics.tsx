@@ -6,23 +6,51 @@ const TOPICS_ITEMS = [
   {
     id: "ux-research-psychology",
     title: "UX Research in Congnitive Psychology of Learning",
-    link: "home/communities/01-ux-research-psychology-of-learning.jpg",
+    image: "home/communities/01-ux-research-psychology-of-learning.jpg",
+    link: "https://1cademy.us/community/Cognitive_Psychology",
   },
-  { id: "clinical-psychology", title: "Clinical Psychology", link: "home/communities/02-clinicalpsychology.jpg" },
-  { id: "health-psychology", title: "Health Psychology", link: "home/communities/03-health-psychology.jpg" },
-  { id: "disability-studies", title: "Disability Studies", link: "home/communities/04-disability-studies.jpg" },
-  { id: "social-psychology", title: "Social Psychology", link: "home/communities/05-social-psychology.jpg" },
+  {
+    id: "clinical-psychology",
+    title: "Clinical Psychology",
+    image: "home/communities/02-clinicalpsychology.jpg",
+    link: "https://1cademy.us/community/Clinical_Psychology",
+  },
+  {
+    id: "health-psychology",
+    title: "Health Psychology",
+    image: "home/communities/03-health-psychology.jpg",
+    link: "https://1cademy.us/community/Health_Psychology",
+  },
+  {
+    id: "disability-studies",
+    title: "Disability Studies",
+    image: "home/communities/04-disability-studies.jpg",
+    link: "https://1cademy.us/community/Disability_Studies",
+  },
+  {
+    id: "social-psychology",
+    title: "Social Psychology",
+    image: "home/communities/05-social-psychology.jpg",
+    link: "https://1cademy.us/community/Social_Psychology",
+  },
   {
     id: "natural-language-processing",
     title: "Natural Language Processing",
-    link: "home/communities/06-natural-language-processing.jpg",
+    image: "home/communities/06-natural-language-processing.jpg",
+    link: "https://1cademy.us/community/Deep_Learning",
   },
   {
     id: "ux-research-communities",
     title: "UX Research in Online Communities",
-    link: "home/communities/07-ux-research-communities.jpg",
+    image: "home/communities/07-ux-research-communities.jpg",
+    link: "https://1cademy.us/community/UX_Research_in_Online_Communities",
   },
-  { id: "liaison-librarians", title: "Liaison Librarians", link: "home/communities/08-liaisonlibrarians.jpg" },
+  {
+    id: "liaison-librarians",
+    title: "Liaison Librarians",
+    image: "home/communities/08-liaisonlibrarians.jpg",
+    link: "https://1cademy.us/community/Liaison_Librarians",
+  },
 ];
 
 const Topics = () => {
@@ -37,7 +65,7 @@ const Topics = () => {
             height: "310px",
             position: "relative",
             borderRadius: "12px",
-            backgroundImage: `url(${cur.link})`,
+            backgroundImage: `url(${cur.image})`,
             backgroundPosition: "center",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
