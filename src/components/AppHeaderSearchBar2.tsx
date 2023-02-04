@@ -25,7 +25,7 @@ const AppHeaderSearchBar = ({ /* searcherUrl, */ sx }: AppHeaderSearchBarProps) 
     <Box
       component="form"
       sx={{
-        p: "0px 4px",
+        p: "4px 7px 4px 14px",
         display: "flex",
         alignItems: "center",
         width: "100%",
