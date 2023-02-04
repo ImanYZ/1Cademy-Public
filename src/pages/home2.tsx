@@ -18,7 +18,7 @@ import { useInView } from "@/hooks/useObserver";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
-import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
+import AppHeader, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
 import { MemoizedTableOfContent } from "../components/home/components/TableOfContent";
 import { RiveComponentMemoized } from "../components/home/components/temporals/RiveComponentExtended";
 import CustomTypography from "../components/home/components/Typography";
@@ -399,7 +399,7 @@ export const Home = () => {
         </Box>
 
         <Box ref={HomeSectionRef} component="section">
-          <HeroMemoized headerHeight={HEADER_HEIGHT} />
+          <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
         </Box>
 
         <Box
