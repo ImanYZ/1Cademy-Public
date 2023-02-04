@@ -137,6 +137,7 @@ const AppHeader = () => {
           alignItems="center"
           spacing={"16px"}
           sx={{
+            px: { xs: "16px", sm: "32px" },
             maxWidth: "1280px",
             margin: "auto",
             height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },

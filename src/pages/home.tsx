@@ -54,10 +54,11 @@ export const Home = () => {
         <Box key={section.id} id={section.id} component={"section"} sx={{ py: { xs: "64px", sm: "96px" } }}>
           <Box
             sx={{
-              maxWidth: "1216px",
+              maxWidth: "1280px",
               margin: "auto",
               // border: `solid 2px ${idx % 2 === 0 ? "royalBlue" : "pink"}`,
               textAlign: idx === 0 ? "center" : "left",
+              px: { xs: "16px", sm: "32px" },
             }}
           >
             <Box sx={{ mb: idx === 0 ? "32px" : "64px" }}>

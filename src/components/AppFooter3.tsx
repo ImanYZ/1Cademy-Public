@@ -29,7 +29,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
         ...sx,
       }}
     >
-      <Box sx={{ maxWidth: "1216px", m: "auto" }}>
+      <Box sx={{ maxWidth: "1280px", m: "auto", px: { xs: "16px", sm: "32px" } }}>
         <Box
           sx={{
             display: "grid",

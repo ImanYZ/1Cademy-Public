@@ -34,7 +34,7 @@ const UniversitiesMap = (props: any) => {
     <Box
       ref={universityMapRef}
       component="section"
-      sx={{ minHeight: 400, mt: "64px" }}
+      sx={{ minHeight: 400, mt: "64px", background: theme => (theme.palette.mode === "dark" ? "#313131" : "#acacac") }}
       className={universityMapInViewOnce ? "slide-bottom-top" : "hide"}
     >
       <div className="UniversitiesAndColleges" ref={props.schoolsRef}>
