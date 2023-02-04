@@ -98,7 +98,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
             <Box gridColumn={"1 / span 2"} mb="16px">
               <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}>Contact Us</Typography>
 
-              <Stack direction={"row"} alignItems="center">
+              <Stack direction={"row"} alignItems="center" spacing={"8px"}>
                 <IconButton href="mailto:onecademy@umich.edu" aria-label="Mail us" sx={{ p: "0" }}>
                   <EmailIcon sx={{ color: "#98A2B3" }} fontSize="medium" />
                 </IconButton>
