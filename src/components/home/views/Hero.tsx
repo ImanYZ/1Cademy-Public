@@ -24,7 +24,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
 
   const getVirtualHeight = useMemo(() => {
     let pos = 0;
-    const percentage = 30.75;
+    const percentage = 27;
     const imageWidth = 1920;
     const imageHeight = 1450;
 
@@ -38,7 +38,8 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
       pos = (virtualHeight * percentage) / 100;
 
       const tt = pos - offset;
-      pos = tt;
+      const desplazamiento = (0.5 * virtualHeight) / 100;
+      pos = tt - desplazamiento - 36;
       console.log(tt);
     } else {
       pos = 80;
@@ -105,7 +106,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
         href="https://1cademy.us/#JoinUsSection"
         sx={{
           textTransform: "capitalize",
-          bottom: `${getVirtualHeight - 36}px`,
+          bottom: `${getVirtualHeight}px`,
           m: "0px",
         }}
       >
