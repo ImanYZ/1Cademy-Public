@@ -55,18 +55,20 @@ const Topics = () => {
               right: "0px",
               height: "70px",
               background: "#000000BD",
+              // background: theme => (theme.palette.mode === "dark" ? "#000000BD" : "rgba(255, 255, 255, 0.74)"),
               borderRadius: "0px 0px 12px 12px",
             }}
           >
             <Box sx={{ height: "inherit", p: "16px 13px 16px 30px", display: "flex", alignItems: "center" }}>
-              <Typography sx={{ flexGrow: "1" }}>{cur.title}</Typography>
+              <Typography sx={{ flexGrow: "1", color: "white" }}>{cur.title}</Typography>
+              {/* <Typography sx={{ flexGrow: "1" }}>{cur.title}</Typography> */}
             </Box>
             <Link
               href={cur.link}
               rel="noreferrer"
               target="_blank"
               sx={{
-                background: "white",
+                // background: theme => (theme.palette.mode === "dark" ? "#000000" : "#F9FAFB"),
                 minWidth: "70px",
                 width: "70px",
                 height: "70px",
