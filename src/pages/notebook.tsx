@@ -2485,6 +2485,7 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
         isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
         isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+        isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
 
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
@@ -3095,6 +3096,12 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, []);
 
+  const onMouseClick = useCallback((e: any) => {
+    if (e.button !== 1) return; // is not mouse well
+
+    e.preventDefault();
+  }, []);
+
   const uploadNodeImage = useCallback(
     (
       event: any,
@@ -3686,7 +3693,7 @@ const Dashboard = ({}: DashboardProps) => {
           )}
           {/* end Data from map */}
 
-          {user?.livelinessBar === "interaction" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
@@ -3695,7 +3702,7 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
 
-          {user?.livelinessBar === "reputation" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
             <MemoizedReputationlinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
@@ -3722,6 +3729,7 @@ const Dashboard = ({}: DashboardProps) => {
               className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
               onMouseOver={mapContentMouseOver}
               onTouchStart={mapContentMouseOver}
+              onMouseUp={onMouseClick}
             >
               <MapInteractionCSS
                 textIsHovered={mapHovered}

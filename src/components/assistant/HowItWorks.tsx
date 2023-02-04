@@ -4,7 +4,8 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo
 
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-import { gray03 } from "../../pages";
+import { gray03 } from "../../pages/assistant";
+// import { gray03 } from "../../pages";
 import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
 
 // import { useWindowSize } from "../../hooks/useWindowSize";
@@ -172,7 +173,12 @@ const HowItWorks = ({ artboards }: HowItWorksProps, ref: any) => {
         alignItems={width < 900 ? "center" : "stretch"}
         sx={{ position: "relative", minHeight: "500px" /* , border: `2px dashed red` */ }}
       >
-        <Typography gutterBottom variant="h3" component="h3" sx={{ fontSize: "32px", textAlign: "center" }}>
+        <Typography
+          gutterBottom
+          variant="h3"
+          component="h3"
+          sx={{ fontSize: "32px", textAlign: "center", fontWeight: 600 }}
+        >
           {artboard.name}
         </Typography>
         <Box sx={{ position: "relative", alignSelf: "center" }}>

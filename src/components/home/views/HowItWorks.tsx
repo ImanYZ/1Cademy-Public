@@ -3,12 +3,12 @@ import Box from "@mui/material/Box";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
-import { gray03 } from "@/pages/index";
-
+// import { gray03 } from "@/pages/index";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { StatsSchema } from "../../../knowledgeTypes";
 import { getStats } from "../../../lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
+import { gray03 } from "../../../pages/home";
 import { Magnitude } from "../components/Magnitude";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import Typography from "../components/Typography copy";
@@ -198,6 +198,35 @@ export const wrapStringWithBoldTag = (paragraph: string, RE: RegExp) => {
         {str.match(RE) ? <b>{`${str.substring(1, str.length - 1)} `}</b> : `${str} `}
       </React.Fragment>
     ));
+};
+
+type TagWrapper = "b" | "i";
+
+export const wrapStringWithTag = (paragraph: string, RE: RegExp, tag: TagWrapper = "b") => {
+  const SPACE_DELIMITER = "-----";
+  const wrapWithTag = (content: string, tag: TagWrapper) => {
+    if (tag === "i") return <Typography component="i">{content} </Typography>;
+    if (tag === "b")
+      return (
+        <Typography component="b" sx={{ fontWeight: 600 }}>
+          {content}{" "}
+        </Typography>
+      );
+    return <Typography component="span">{content}</Typography>;
+  };
+
+  const removeDelimiters = (content: string) => {
+    return content.substring(1, content.length - 1).replaceAll(SPACE_DELIMITER, " ");
+  };
+
+  const tt = paragraph
+    .replace(RE, e => e.replaceAll(" ", SPACE_DELIMITER))
+    .split(" ")
+    .map((str, idx) => (
+      <React.Fragment key={idx}>{str.match(RE) ? wrapWithTag(removeDelimiters(str), tag) : `${str} `}</React.Fragment>
+    ));
+
+  return tt;
 };
 
 const HowItWorksFordwarded = forwardRef(HowItWorks);
