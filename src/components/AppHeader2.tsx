@@ -19,14 +19,15 @@ import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
 
-import LogoDarkMode from "../../public/DarkModeLogoMini.png";
+import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import { useAuth } from "../context/AuthContext";
 import ROUTES from "../lib/utils/routes";
 import { capitalizeString } from "../lib/utils/string.utils";
 import AppHeaderSearchBar from "./AppHeaderSearchBar2";
 import { ONE_CADEMY_SECTIONS, OneCademySection } from "./home/SectionsItems";
 
-export const HEADER_HEIGHT = 50;
+export const HEADER_HEIGHT = 80;
+export const HEADER_HEIGHT_MOBILE = 72;
 
 type MenuBarProps = {
   items: OneCademySection[];
@@ -39,7 +40,7 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
       direction={"column"}
       justifyContent={"space-between"}
       alignItems={"center"}
-      sx={{ height: `calc(100vh - ${HEADER_HEIGHT}px)` }}
+      sx={{ height: { xs: `calc(100vh - ${HEADER_HEIGHT_MOBILE}px)`, md: `calc(100vh - ${HEADER_HEIGHT}px)` } }}
     >
       <Stack
         flex={1}
@@ -135,15 +136,20 @@ const AppHeader = () => {
           justifyContent="space-between"
           alignItems="center"
           spacing={"16px"}
-          sx={{ maxWidth: "1280px", margin: "auto", height: `${HEADER_HEIGHT}px` }}
+          sx={{
+            px: { xs: "16px", sm: "32px" },
+            maxWidth: "1280px",
+            margin: "auto",
+            height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
+          }}
         >
           <Stack direction={"row"} alignItems="center" spacing={"16px"}>
             <Tooltip title="1Cademy's Landing Page">
               <img
-                src={LogoDarkMode.src}
+                src={oneCademyLogo.src}
                 alt="logo"
-                width="30px"
-                height="30px"
+                width="60px"
+                height="64px"
                 style={{ cursor: "pointer" }}
                 onClick={() => router.push("/")}
               />
@@ -151,7 +157,7 @@ const AppHeader = () => {
             <Stack
               direction={"row"}
               aria-label="scrollable auto tabs navigation bar"
-              spacing={"16px"}
+              spacing={"24px"}
               alignItems={"center"}
               justifyContent={"space-between"}
               sx={{
@@ -172,6 +178,7 @@ const AppHeader = () => {
                           theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
                         cursor: "pointer",
                         textDecoration: "none",
+                        fontWeight: 600,
                       }}
                     >
                       {cur.label}
@@ -182,13 +189,19 @@ const AppHeader = () => {
             </Stack>
           </Stack>
 
-          <Box sx={{ width: "100%", display: { xs: isAuthenticated ? "block" : "none", sm: "block" } }}>
-            <AppHeaderSearchBar />
-          </Box>
           {/* <Box sx={{ flexGrow: 1 }}>
             </Box> */}
           <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-            {/* <Box > */}
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: "240px",
+                display: { xs: isAuthenticated ? "block" : "none", sm: "block" },
+              }}
+            >
+              <AppHeaderSearchBar />
+            </Box>
+
             <Tooltip title="Open Searcher">
               <IconButton
                 onClick={() => console.log("onClickSearcher")}
@@ -198,7 +211,6 @@ const AppHeader = () => {
                 <SearchIcon />
               </IconButton>
             </Tooltip>
-            {/* </Box> */}
 
             <Tooltip title="Change theme">
               <IconButton onClick={handleThemeSwitch} size="small">
@@ -212,7 +224,7 @@ const AppHeader = () => {
                   variant="contained"
                   onClick={() => window?.open(ROUTES.apply, "_blank")}
                   sx={{
-                    fontSize: 14,
+                    fontSize: 16,
                     borderRadius: 40,
                     height: "25px",
                     width: "60px",
@@ -298,7 +310,7 @@ const AppHeader = () => {
                   onClick={signUpHandler}
                   sx={{
                     minWidth: "100px",
-                    fontSize: 14,
+                    fontSize: 16,
                     backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
                     color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
                     borderRadius: 40,

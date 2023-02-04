@@ -4,7 +4,7 @@ import React from "react";
 import AppFooter3 from "@/components/AppFooter3";
 import Benefits from "@/components/home/sections/Benefits";
 
-import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
+import AppHeader, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import About from "../components/home/sections/About";
 import Join from "../components/home/sections/Join";
@@ -49,15 +49,16 @@ export const Home = () => {
       }}
     >
       <AppHeader />
-      <HeroMemoized headerHeight={HEADER_HEIGHT} />
+      <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
       {ONE_CADEMY_SECTIONS.slice(1).map((section, idx) => (
         <Box key={section.id} id={section.id} component={"section"} sx={{ py: { xs: "64px", sm: "96px" } }}>
           <Box
             sx={{
-              maxWidth: "1216px",
+              maxWidth: "1280px",
               margin: "auto",
               // border: `solid 2px ${idx % 2 === 0 ? "royalBlue" : "pink"}`,
               textAlign: idx === 0 ? "center" : "left",
+              px: { xs: "16px", sm: "32px" },
             }}
           >
             <Box sx={{ mb: idx === 0 ? "32px" : "64px" }}>

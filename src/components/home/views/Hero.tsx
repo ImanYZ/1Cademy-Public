@@ -7,9 +7,9 @@ import { useWindowSize } from "../../../hooks/useWindowSize";
 import Button from "../components/Button";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
-type HeroProps = { headerHeight: number };
+type HeroProps = { headerHeight: number; headerHeightMobile: number };
 
-const Hero = ({ headerHeight }: HeroProps) => {
+const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
   // const isMobile = useMediaQuery("(max-width:600px)");
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
@@ -55,7 +55,7 @@ const Hero = ({ headerHeight }: HeroProps) => {
       justifyContent="flex-end"
       sx={{
         position: "relative",
-        height: `calc(100vh - ${headerHeight}px)`,
+        height: { xs: `calc(100vh - ${headerHeightMobile}px)`, md: `calc(100vh - ${headerHeight}px)` },
         width: "100%",
         padding: width < 900 ? "10px" : "20px",
         backgroundColor: "#1d1102",
@@ -67,7 +67,7 @@ const Hero = ({ headerHeight }: HeroProps) => {
     >
       <Box
         sx={{
-          maxWidth: "730px",
+          maxWidth: { xs: "343px", sm: "730px" },
           margin: "auto",
           display: "flex",
           flexDirection: "column",
@@ -75,18 +75,22 @@ const Hero = ({ headerHeight }: HeroProps) => {
           pb: "20px",
         }}
       >
-        <Box sx={{ width: "128px", height: "128px", mb: "32px" }}>
+        <Box sx={{ width: "128px", height: "128px", mb: { xs: "64px", sm: "32px" } }}>
           <RiveComponentMemoized
-            src="rive/artboard-1.riv"
+            src="rive/logo.riv"
             animations={["Timeline 1", "dark", "light"]}
             artboard={"artboard-1"}
             autoplay={true}
           />
         </Box>
-        <Typography color="white" variant="h2" sx={{ textAlign: "center", fontSize: "60px", mb: "24px" }}>
+        <Typography
+          color="white"
+          variant="h2"
+          sx={{ textAlign: "center", fontSize: { xs: "36px", md: "60px" }, fontWeight: 600, mb: "24px" }}
+        >
           We Synthesize books & Research papers together
         </Typography>
-        <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: "20px" }}>
+        <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
           We are a large community of researchers, students, and instructors dedicated to enhancing the standards of
           research and education.
         </Typography>
