@@ -1,4 +1,11 @@
-const values = [
+export type WhyItem = {
+  name: string;
+  body: string;
+  imageDark: string;
+  image: string;
+  padding?: string;
+};
+const values: WhyItem[] = [
   {
     name: "Learning Like Researchers",
     body: "The traditional learning approach for students is to start with foundational concepts and gradually work towards more complex topics.\n On the other hand, researchers often prefer to begin with the advanced topics and work backwards to gain a deeper understanding of the underlying prerequisites. 1Cademy offers an innovative approach to learning by enabling students to emulate the research method and start with advanced topics, then delve into the prerequisites as needed. \nThis approach allows students to learn in a more targeted and efficient manner, similar to the way researchers approach learning.",
