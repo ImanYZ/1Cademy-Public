@@ -354,3 +354,7 @@ export const gtmEvent = (eventName: string, eventData: any): void => {
     });
   }
 };
+
+export const momentDateToSeconds = (moment: any) => {
+  return 60 * 60 * moment.hours() + 60 * moment.minutes() + moment.seconds();
+};
