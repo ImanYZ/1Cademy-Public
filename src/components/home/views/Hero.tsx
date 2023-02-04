@@ -94,7 +94,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           variant="h2"
           sx={{ textAlign: "center", fontSize: { xs: "36px", md: "60px" }, fontWeight: 600, mb: "24px" }}
         >
-          We Synthesize books & research papers together
+          We Synthesize Books & Research Papers Together
         </Typography>
         <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
           We are a large community of researchers, students, and instructors dedicated to enhancing the standards of
