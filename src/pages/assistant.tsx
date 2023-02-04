@@ -170,7 +170,7 @@ const Home = () => {
         sections={sectionsOrder}
         sectionSelected={sectionSelected}
         onClickSearcher={() => setOpenSearch(true)}
-        switchSection={switchSection}
+        switchSection={() => {}}
         enableApply={false}
         enableSignInUp={false}
         rightOptions={
