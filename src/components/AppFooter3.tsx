@@ -49,7 +49,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
                 1Cademy
               </Box>
             </Stack>
-            <Typography color={color}> We Synthesize books & Research papers together</Typography>
+            <Typography color={color}> We Synthesize Books & Research Papers Together</Typography>
           </Box>
           <Box>
             <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}> Navigation</Typography>

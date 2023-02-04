@@ -1,6 +1,8 @@
-import { Stack, Typography } from "@mui/material";
+import { Stack, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useMemo } from "react";
+
+import { orangeDark } from "@/pages/home";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
@@ -10,6 +12,7 @@ import { RiveComponentMemoized } from "../components/temporals/RiveComponentExte
 type HeroProps = { headerHeight: number; headerHeightMobile: number };
 
 const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
+  const theme = useTheme();
   // const isMobile = useMediaQuery("(max-width:600px)");
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
@@ -91,7 +94,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           variant="h2"
           sx={{ textAlign: "center", fontSize: { xs: "36px", md: "60px" }, fontWeight: 600, mb: "24px" }}
         >
-          We Synthesize books & Research papers together
+          We Synthesize Books & Research Papers Together
         </Typography>
         <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
           We are a large community of researchers, students, and instructors dedicated to enhancing the standards of
@@ -100,7 +103,6 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
       </Box>
       <Button
         variant="contained"
-        size={width < 900 ? "small" : "large"}
         component="a"
         target="_blank"
         href="https://1cademy.us/#JoinUsSection"
@@ -108,6 +110,15 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           textTransform: "capitalize",
           bottom: `${getVirtualHeight}px`,
           m: "0px",
+          width: { xs: "100%", md: "107px" },
+          maxWidth: { xs: "343px" },
+          height: "60px",
+          background: orangeDark,
+          fontSize: "18px",
+          borderRadius: "8px",
+          ":hover": {
+            background: theme.palette.common.orange,
+          },
         }}
       >
         Apply
