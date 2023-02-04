@@ -53,7 +53,7 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
       >
         {items.map(cur => {
           return (
-            <Tooltip key={cur.id} title={cur.title}>
+            <Tooltip key={cur.id} title={cur.title} placement={"right"}>
               <Link
                 href={`#${cur.id}`}
                 onClick={onCloseMenu}

@@ -47,6 +47,7 @@ export const Home = () => {
         overflowY: "auto",
         overflowX: "hidden",
         position: "relative",
+        scrollBehavior: "smooth",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
