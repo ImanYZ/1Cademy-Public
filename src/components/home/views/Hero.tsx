@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import React from "react";
+import React, { useMemo } from "react";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
@@ -12,7 +12,7 @@ type HeroProps = { headerHeight: number };
 const Hero = ({ headerHeight }: HeroProps) => {
   // const isMobile = useMediaQuery("(max-width:600px)");
 
-  const { width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
   // const heroCanvasDimensions = useMemo(() => {
   //   // const min = width > height ? height : width;
@@ -21,6 +21,31 @@ const Hero = ({ headerHeight }: HeroProps) => {
   //   // return min - 100;
   //   return 128;
   // }, [width, height]);
+
+  const getVirtualHeight = useMemo(() => {
+    let pos = 0;
+    const percentage = 30.75;
+    const imageWidth = 1920;
+    const imageHeight = 1450;
+
+    // const ratio = imageWidth / imageHeight;
+
+    if (width >= height) {
+      const virtualHeight = (width * imageHeight) / imageWidth;
+      console.log({ virtualHeight });
+      const offset = (virtualHeight - height) / 2;
+      console.log({ offset });
+      pos = (virtualHeight * percentage) / 100;
+
+      const tt = pos - offset;
+      pos = tt;
+      console.log(tt);
+    } else {
+      pos = 100;
+    }
+
+    return pos;
+  }, [height, width]);
 
   return (
     <Stack
@@ -65,17 +90,17 @@ const Hero = ({ headerHeight }: HeroProps) => {
           We are a large community of researchers, students, and instructors dedicated to enhancing the standards of
           research and education.
         </Typography>
-        <Button
-          variant="contained"
-          size={width < 900 ? "small" : "large"}
-          component="a"
-          target="_blank"
-          href="https://1cademy.us/#JoinUsSection"
-          sx={{ textTransform: "capitalize" }}
-        >
-          Apply
-        </Button>
       </Box>
+      <Button
+        variant="contained"
+        size={width < 900 ? "small" : "large"}
+        component="a"
+        target="_blank"
+        href="https://1cademy.us/#JoinUsSection"
+        sx={{ textTransform: "capitalize", position: "absolute", bottom: `${getVirtualHeight - 36}px`, m: "0px" }}
+      >
+        Apply
+      </Button>
     </Stack>
   );
 };
