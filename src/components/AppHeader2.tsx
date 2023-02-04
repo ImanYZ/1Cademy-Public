@@ -18,7 +18,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { gray200, gray600 } from "@/pages/home";
+import { gray200, gray600, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import { useAuth } from "../context/AuthContext";
@@ -224,11 +224,15 @@ const AppHeader = () => {
                   variant="contained"
                   onClick={() => window?.open(ROUTES.apply, "_blank")}
                   sx={{
+                    background: orangeDark,
                     fontSize: 16,
                     borderRadius: 40,
                     height: "25px",
                     width: "60px",
                     textTransform: "capitalize",
+                    ":hover": {
+                      background: theme => theme.palette.common.orange,
+                    },
                   }}
                 >
                   Apply
@@ -309,7 +313,7 @@ const AppHeader = () => {
                   color="secondary"
                   onClick={signUpHandler}
                   sx={{
-                    minWidth: "100px",
+                    minWidth: "120px",
                     fontSize: 16,
                     backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
                     color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,

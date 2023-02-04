@@ -2,7 +2,7 @@ import { Button, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
-import { gray200, gray600 } from "@/pages/home";
+import { gray200, gray600, orangeDark } from "@/pages/home";
 
 import ROUTES from "../../../lib/utils/routes";
 
@@ -33,7 +33,18 @@ const Join = () => {
         We are a large community of researchers, students, and instructors dedicated to enhancing the standards of
         research and education.
       </Typography>
-      <Button href={ROUTES.apply} target="_blank" rel="noopener" variant="contained">
+      <Button
+        href={ROUTES.apply}
+        target="_blank"
+        rel="noopener"
+        variant="contained"
+        sx={{
+          background: orangeDark,
+          ":hover": {
+            background: theme.palette.common.orange,
+          },
+        }}
+      >
         Apply to join
       </Button>
     </Box>

@@ -34,7 +34,8 @@ export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 export const gray600 = "#475467";
 export const gray200 = "#EAECF0";
-
+export const orangeDark = "#FF6D00";
+export const orangeLight = "#FF6D00";
 /**
  * animations builded with: https://rive.app/
  */

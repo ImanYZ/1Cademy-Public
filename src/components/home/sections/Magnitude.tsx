@@ -5,6 +5,7 @@ import { useQuery } from "react-query";
 import { StatsSchema } from "src/knowledgeTypes";
 
 import { getStats } from "@/lib/knowledgeApi";
+import { orangeDark } from "@/pages/home";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
 
@@ -79,7 +80,7 @@ const Magnitude = () => {
       >
         {MAGNITUDE_ITEMS_Memo.map(cur => (
           <Box key={cur.id} sx={{ textAlign: "center", maxWidth: "264px" }}>
-            <Typography sx={{ fontSize: { xs: "48px", md: "60px" }, mb: "12px", color: "#FF6D00", fontWeight: 600 }}>
+            <Typography sx={{ fontSize: { xs: "48px", md: "60px" }, mb: "12px", color: orangeDark, fontWeight: 600 }}>
               {cur.value.toLocaleString()}
             </Typography>
             <Typography component={"h3"} sx={{ fontSize: "18px", fontWeight: 600 }}>

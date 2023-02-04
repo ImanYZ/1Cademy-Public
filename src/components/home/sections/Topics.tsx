@@ -2,6 +2,8 @@ import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import { Box, Link, Typography } from "@mui/material";
 import React from "react";
 
+import { orangeDark } from "@/pages/home";
+
 const TOPICS_ITEMS = [
   {
     id: "ux-research-psychology",
@@ -102,14 +104,15 @@ const Topics = () => {
                 height: "70px",
                 borderRadius: "12px 0px 12px 0px",
                 display: "grid",
+                color: orangeDark,
                 placeItems: "center",
                 ":hover": {
-                  background: "#FF6D00",
+                  background: orangeDark,
                   color: "white",
                 },
               }}
             >
-              <ArrowOutwardIcon fontSize="large" />
+              <ArrowOutwardIcon fontSize="large" color="inherit" />
             </Link>
           </Box>
         </Box>
