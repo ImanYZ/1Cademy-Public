@@ -1,6 +1,7 @@
 import { Box /* useTheme */, Typography } from "@mui/material";
 import React from "react";
 
+import AppFooter3 from "@/components/AppFooter3";
 import Benefits from "@/components/home/sections/Benefits";
 
 import AppHeader, { HEADER_HEIGHT } from "../components/AppHeader2";
@@ -91,6 +92,7 @@ export const Home = () => {
         <Join />
       </Box>
 
+      <AppFooter3 />
       <style>
         {`
           body{
