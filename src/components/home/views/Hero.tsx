@@ -41,7 +41,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
       pos = tt;
       console.log(tt);
     } else {
-      pos = 100;
+      pos = 80;
     }
 
     return pos;
@@ -67,6 +67,8 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
     >
       <Box
         sx={{
+          position: "absolute",
+          top: { xs: "50px", lg: "70px", xl: "100px" },
           maxWidth: { xs: "343px", sm: "730px" },
           margin: "auto",
           display: "flex",
@@ -101,7 +103,11 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
         component="a"
         target="_blank"
         href="https://1cademy.us/#JoinUsSection"
-        sx={{ textTransform: "capitalize", position: "absolute", bottom: `${getVirtualHeight - 36}px`, m: "0px" }}
+        sx={{
+          textTransform: "capitalize",
+          bottom: `${getVirtualHeight - 36}px`,
+          m: "0px",
+        }}
       >
         Apply
       </Button>
