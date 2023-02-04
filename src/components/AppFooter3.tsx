@@ -24,8 +24,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
           whiteSpace: "nowrap",
           color,
           cursor: "pointer",
-          textDecoration: "none",
-          fontWeight: "bold",
+          fontWeight: 600,
         },
         ...sx,
       }}
@@ -57,8 +56,10 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
             <Stack spacing={"12px"}>
               {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
                 return (
-                  <Tooltip key={cur.id} title={cur.title}>
-                    <Link href={`#${cur.id}`}>{cur.label}</Link>
+                  <Tooltip key={cur.id} title={cur.title} placement="right">
+                    <Link href={`#${cur.id}`} sx={{ textDecoration: "none" }}>
+                      {cur.label}
+                    </Link>
                   </Tooltip>
                 );
               })}
@@ -128,17 +129,19 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
           <span style={{ fontSize: "14px" }}>&copy; 1Cademy {new Date().getFullYear()}</span>
           <Stack direction={"row"} spacing="16px">
             <GitHubIcon fontSize="medium" sx={{ color: "#98A2B3" }} />
-            <Typography color="#D0D5DD" fontSize={"14px"} display={"inline-block"}>
-              We're committed to OpenSource on{" "}
-            </Typography>
-            <Link
-              href="https://github.com/ImanYZ/1Cademy-Public/"
-              target="_blank"
-              rel="noreferrer"
-              sx={{ textDecoration: "underline" }}
-            >
-              Github
-            </Link>
+            <Box>
+              <Typography color="#D0D5DD" fontSize={"14px"} display={"inline-block"}>
+                We're committed to OpenSource on
+              </Typography>
+              <Link
+                href="https://github.com/ImanYZ/1Cademy-Public/"
+                target="_blank"
+                rel="noreferrer"
+                sx={{ textDecoration: "underline", ml: "4px" }}
+              >
+                Github
+              </Link>
+            </Box>
           </Stack>
         </Stack>
       </Box>
