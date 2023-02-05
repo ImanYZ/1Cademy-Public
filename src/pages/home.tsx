@@ -1,4 +1,4 @@
-import { Box /* useTheme */, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
 
@@ -33,8 +33,9 @@ export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
 export const gray100 = "#F2F4F7";
-export const gray600 = "#475467";
 export const gray200 = "#EAECF0";
+export const gray600 = "#475467";
+export const gray800 = "#1D2939";
 export const orangeDark = "#FF6D00";
 export const orangeLight = "#FF6D00";
 /**
@@ -43,6 +44,7 @@ export const orangeLight = "#FF6D00";
 
 export const Home = () => {
   const theme = useTheme();
+
   const { data: stats } = useQuery("stats", getStats);
 
   const getDescription = useCallback(

@@ -5,8 +5,8 @@ import { Box, Button, IconButton, Modal, Tooltip, Typography, useMediaQuery } fr
 // const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 import React, { useEffect, useState } from "react";
 
-import AppFooter3 from "@/components/AppFooter3";
 import AppHeader from "@/components/AppHeader";
+import AssistantFooter from "@/components/assistant/AssistantFooter";
 import Benefits from "@/components/assistant/Benefits";
 import { AssistantHeroMemoized } from "@/components/assistant/Hero";
 import { ONE_ASSISTANT_SECTIONS } from "@/components/assistant/sections";
@@ -248,7 +248,7 @@ const Home = () => {
         </Box>
       </Modal>
 
-      <AppFooter3 sx={{ px: isDesktop ? "0px" : "10px" }} />
+      <AssistantFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
 
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
