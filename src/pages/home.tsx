@@ -8,16 +8,16 @@ import { wrapStringWithBoldTag } from "@/components/home/views/HowItWorks";
 import { getStats } from "@/lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "@/lib/utils/RE";
 
-import AppHeader, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
+import { AppHeaderMemoized, HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import About from "../components/home/sections/About";
 import Join from "../components/home/sections/Join";
 import Magnitude from "../components/home/sections/Magnitude";
-import Mechanism from "../components/home/sections/Mechanism";
+import Mechanism, { MECHANISM_ITEMS } from "../components/home/sections/Mechanism";
 import Papers from "../components/home/sections/Papers";
 import Topics from "../components/home/sections/Systems";
 import Systems from "../components/home/sections/Topics";
-import { ONE_CADEMY_SECTIONS, OneCademySection } from "../components/home/SectionsItems";
+import { HomepageSection, ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
 // const Values = dynamic(() => import("../components/home/views/Values"), { suspense: true, ssr: false });
 // const What = dynamic(() => import("../components/home/views/What"), { suspense: true, ssr: false });
 // const UniversitiesMap = dynamic(() => import("../components/home/components/UniversitiesMap/UniversitiesMap"), {
@@ -48,7 +48,7 @@ export const Home = () => {
   const { data: stats } = useQuery("stats", getStats);
 
   const getDescription = useCallback(
-    (section: OneCademySection): string => {
+    (section: HomepageSection): string => {
       if (!section.getDescription) return section.description;
       if (!stats) return section.description;
 
@@ -70,7 +70,7 @@ export const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
-      <AppHeader />
+      <AppHeaderMemoized page="ONE_CADEMY" sections={ONE_CADEMY_SECTIONS} />
       <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
       {ONE_CADEMY_SECTIONS.slice(1).map((section, idx) => (
         <Box key={section.id} id={section.id} component={"section"} sx={{ py: { xs: "64px", sm: "96px" } }}>
@@ -101,7 +101,7 @@ export const Home = () => {
                 ))}
             </Box>
 
-            {idx === 0 && <Mechanism />}
+            {idx === 0 && <Mechanism mechanisms={MECHANISM_ITEMS} />}
             {idx === 1 && <Magnitude />}
             {idx === 1 && <UniversitiesMap theme={"Dark"} />}
             {idx === 2 && <Benefits />}
