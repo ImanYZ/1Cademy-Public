@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { orangeDark } from "@/pages/home";
+import { gray100, gray200, gray600, orangeDark } from "@/pages/home";
 
 import whyItems, { TWhyItem } from "./whyItems";
 const Benefits = () => {
@@ -57,7 +57,9 @@ const Benefits = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? orangeDark : "#F8F8F8"}`,
+              borderLeft: `4px solid ${
+                expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? "#181e2b" : gray100
+              }`,
               "&:before": {
                 display: "none",
               },
@@ -69,7 +71,7 @@ const Benefits = () => {
               <Typography
                 component={"h4"}
                 variant={"h4"}
-                sx={{ fontSize: "20px", fontWeight: 600, p: "8px", cursor: "pointer" }}
+                sx={{ fontSize: "20px", fontWeight: 400, p: "8px", cursor: "pointer" }}
               >
                 {value.name}
               </Typography>
@@ -78,7 +80,7 @@ const Benefits = () => {
               <Typography
                 sx={{ p: "8px", pt: "0" }}
                 fontSize={"16px"}
-                color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
+                color={theme.palette.mode === "light" ? gray600 : gray200}
               >
                 {value.body}
               </Typography>

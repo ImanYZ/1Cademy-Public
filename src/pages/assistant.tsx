@@ -1,20 +1,20 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, IconButton, Modal, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Button, IconButton, Modal, Tooltip, Typography, useMediaQuery } from "@mui/material";
 // const ValuesMemoized = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
 // const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 // const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
+import AppFooter3 from "@/components/AppFooter3";
 import AppHeader from "@/components/AppHeader";
 import Benefits from "@/components/assistant/Benefits";
 import { AssistantHeroMemoized } from "@/components/assistant/Hero";
 import { ONE_ASSISTANT_SECTIONS } from "@/components/assistant/sections";
-import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+import About from "@/components/home/sections/About";
+import Systems from "@/components/home/sections/Systems";
 import SearcherPupUp from "@/components/SearcherPupUp";
-import { useInView } from "@/hooks/useObserver";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
-import AppFooter from "../components/AppFooter2"; // TODO: load with lazy load and observer when is required
 import AssistantForm from "../components/assistant/AssistantRegister";
 import HowItWorks from "../components/assistant/HowItWorks";
 import { sectionsOrder } from "../components/assistant/sectionsOrder";
@@ -98,10 +98,10 @@ const sectionsTmp = [
     height: { xs: "auto", mb: "2847px", sm: "2382px", md: "1303px", lg: "1203px", xl: "1203px" },
   },
 ];
-const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
+// const footerOptions = { threshold: 0.5, root: null, rootMargin: "0px" };
 
 const Home = () => {
-  const theme = useTheme();
+  // const theme = useTheme();
 
   const [sectionSelected, setSelectedSection] = useState(0);
   const isDesktop = useMediaQuery("(min-width:1200px)");
@@ -110,11 +110,11 @@ const Home = () => {
   const [openForm, setOpenForm] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
-  const { inView: homeInView } = useInView();
+  // const { inView: homeInView } = useInView();
 
-  const { inView: footerInView, ref: footerSectionRef } = useInView({
-    options: footerOptions,
-  });
+  // const { inView: footerInView, ref: footerSectionRef } = useInView({
+  //   options: footerOptions,
+  // });
 
   const { width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
@@ -128,31 +128,31 @@ const Home = () => {
     setSelectedSection(selectedSectionByUrl);
   }, []);
 
-  const scrollAnimationMemoized = useMemo(() => {
-    return (
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: isMobile ? "0" : `calc(50vh - 50px)`,
-          right: "20px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-        className={footerInView ? "hide" : "undefined"}
-      >
-        <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
-        <Box sx={{ width: "50px", height: isMobile ? "70px" : "100px" }}>
-          <RiveComponentMemoized
-            src="rive/scroll.riv"
-            animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
-            artboard={"New Artboard"}
-            autoplay={true}
-          />
-        </Box>
-      </Box>
-    );
-  }, [footerInView, homeInView, isMobile, theme.palette.mode]);
+  // const scrollAnimationMemoized = useMemo(() => {
+  //   return (
+  //     <Box
+  //       sx={{
+  //         position: "fixed",
+  //         bottom: isMobile ? "0" : `calc(50vh - 50px)`,
+  //         right: "20px",
+  //         display: "flex",
+  //         flexDirection: "column",
+  //         alignItems: "center",
+  //       }}
+  //       className={footerInView ? "hide" : "undefined"}
+  //     >
+  //       <Typography color={homeInView ? "white" : undefined}>Scroll</Typography>
+  //       <Box sx={{ width: "50px", height: isMobile ? "70px" : "100px" }}>
+  //         <RiveComponentMemoized
+  //           src="rive/scroll.riv"
+  //           animations={["Timeline 1", homeInView ? "dark" : theme.palette.mode === "dark" ? "dark" : "light"]}
+  //           artboard={"New Artboard"}
+  //           autoplay={true}
+  //         />
+  //       </Box>
+  //     </Box>
+  //   );
+  // }, [footerInView, homeInView, isMobile, theme.palette.mode]);
 
   return (
     <Box
@@ -163,7 +163,8 @@ const Home = () => {
         overflowY: "auto",
         overflowX: "hidden",
         position: "relative",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#28282a" : theme.palette.common.white),
+        scrollBehavior: "smooth",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
       <AppHeader
@@ -213,10 +214,8 @@ const Home = () => {
 
             {idx === 0 && <HowItWorks artboards={artboards} />}
             {idx === 1 && <Benefits />}
-            {/* {idx === 4 && <Topics />}
-            {idx === 3 && <Systems />}
-            {idx === 5 && <About />}
-            {idx === 5 && <Papers />} */}
+            {idx === 2 && <Systems />}
+            {idx === 3 && <About />}
           </Box>
         </Box>
       ))}
@@ -249,13 +248,11 @@ const Home = () => {
         </Box>
       </Modal>
 
-      <Box ref={footerSectionRef}>
-        <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
-      </Box>
+      <AppFooter3 sx={{ px: isDesktop ? "0px" : "10px" }} />
 
       {openSearch && isMobile && <SearcherPupUp onClose={() => setOpenSearch(false)} />}
 
-      {scrollAnimationMemoized}
+      {/* {scrollAnimationMemoized} */}
 
       <style>{`
           body{

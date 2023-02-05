@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { orangeDark } from "@/pages/home";
+import { gray100, orangeDark } from "@/pages/home";
 
 import valuesItems, { WhyItem } from "../views/valuesItems";
 
@@ -58,7 +58,9 @@ const Benefits = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? orangeDark : "#F8F8F8"}`,
+              borderLeft: `4px solid ${
+                expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? "#181e2b" : gray100
+              }`,
               "&:before": {
                 display: "none",
               },

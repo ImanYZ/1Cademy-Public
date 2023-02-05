@@ -16,7 +16,7 @@ import { useQuery } from "react-query";
 
 import { getStats } from "@/lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "@/lib/utils/RE";
-import { orangeDark } from "@/pages/home";
+import { gray100, orangeDark } from "@/pages/home";
 
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import { wrapStringWithBoldTag } from "../views/HowItWorks";
@@ -102,7 +102,9 @@ const Systems = () => {
             sx={{
               background: "transparent",
               border: "none",
-              borderLeft: `4px solid ${expanded === `Option${idx + 1}` ? orangeDark : "#F8F8F8"}`,
+              borderLeft: `4px solid ${
+                expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? "#181e2b" : gray100
+              }`,
               "&:before": {
                 display: "none",
               },

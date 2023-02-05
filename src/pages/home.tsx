@@ -32,6 +32,7 @@ import { HeroMemoized } from "../components/home/views/Hero";
 export const gray01 = "#28282a";
 export const gray02 = "#202020";
 export const gray03 = "#AAAAAA";
+export const gray100 = "#F2F4F7";
 export const gray600 = "#475467";
 export const gray200 = "#EAECF0";
 export const orangeDark = "#FF6D00";
